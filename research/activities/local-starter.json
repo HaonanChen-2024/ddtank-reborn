@@ -1,0 +1,40 @@
+{
+  "owner": "ddtank-workshop/local-starter",
+  "version": 1,
+  "Active": {
+    "ActiveID": 100001,
+    "Title": "本地启程补给",
+    "Description": "本地冒险补给，每个角色可免费领取一次。",
+    "Content": "点击领取后，请到邮件中收取经验药水，再在背包中使用。升级和副本等级要求沿用原游戏规则。",
+    "AwardContent": "经验药水（10000经验）×1，通过邮件发放。",
+    "HasKey": 3,
+    "StartDate": "2026-01-01T00:00:00.000Z",
+    "EndDate": "2031-01-01T00:00:00.000Z",
+    "IsOnly": 1,
+    "Type": 0,
+    "ActionTimeContent": "2026-01-01 至 2031-01-01（UTC）",
+    "IsAdvance": false,
+    "GoodsExchangeTypes": "",
+    "GoodsExchangeNum": "",
+    "limitType": "",
+    "limitValue": "",
+    "IsShow": false,
+    "ActiveType": 0,
+    "IconID": 0,
+    "CanCreateCode": false
+  },
+  "Award": {
+    "ItemID": 11904,
+    "Count": 1,
+    "ValidDate": 0,
+    "StrengthenLevel": 0,
+    "AttackCompose": 0,
+    "DefendCompose": 0,
+    "LuckCompose": 0,
+    "AgilityCompose": 0,
+    "Gold": 0,
+    "Money": 0,
+    "Sex": 0,
+    "Mark": 0
+  }
+}

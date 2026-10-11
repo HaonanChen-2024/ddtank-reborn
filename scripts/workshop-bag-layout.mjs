@@ -12,6 +12,7 @@ import { crc32, deflateRawSync } from "node:zlib";
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const defaultRuntime = resolve(repo, "../../runtime");
 const defaultSource = join(repo, "apps/api/assets/flash/ui/vietnam/xml/xml.png");
+const sourceSha256 = "ff80654d2e4cac4369b9eba5c8854853621a0d9e766fce1dd39833d924f2579d";
 const entryName = "bagAndInfo.xml";
 const labelStyle = "personalInfoCheckBoxText";
 const checkStyles = ["personanHideGlassCheckBox", "personanHideHatCheckBox", "personanHideSuitCheckBox", "personanHideWingCheckBox"];
@@ -51,6 +52,23 @@ export function patchBagLayoutXml(bytes) {
   return Buffer.from(text);
 }
 
+export function patchGameoverTitleXml(bytes) {
+  const original = bytes.toString("utf8");
+  assert.deepEqual(Buffer.from(original), bytes, "layout is not lossless UTF-8");
+  const parents = [...original.matchAll(/<custom\b[^>]*\/>/g)].filter(([tag]) => tag.includes('stylename="takeoutCard.SmallCardViewPos"'));
+  assert.equal(parents.length, 1, "expected one original SmallCardView position");
+  assert.ok(/\bclassname="flash.geom.Point"/.test(parents[0][0]) && /\bx="500"/.test(parents[0][0]) && /\by="50"/.test(parents[0][0]), "SmallCardView position changed; preserved");
+  let found = 0;
+  const text = original.replace(/<bitmapData\b[^>]*\/>/g, tag => {
+    if (!tag.includes('resourceLink="asset.takeoutCard.TitleBitmap"')) return tag;
+    found++;
+    assert.ok(/\bx="250"/.test(tag) && /\by="-20"/.test(tag), "SmallCards title position changed; preserved");
+    return tag.replace(/\bx="250"/, 'x="180"');
+  });
+  assert.equal(found, 1, "expected one original SmallCards title bitmap");
+  return Buffer.from(text);
+}
+
 // JSZip handles decoding/CRC validation. Read only classic-ZIP framing to preserve untouched compressed bytes.
 export function zipRecords(bytes) {
   let end = bytes.length - 22;
@@ -80,13 +98,13 @@ export function zipRecords(bytes) {
   return { end, offset, records };
 }
 
-export async function patchBagLayoutArchive(bytes) {
+async function patchLayoutEntry(bytes, entryName, patchXml) {
   const zip = await JSZip.loadAsync(bytes, { checkCRC32: true });
   const original = zipRecords(bytes), target = original.records.find(record => record.name === entryName);
-  assert.ok(target, "original bagAndInfo.xml absent");
+  assert.ok(target, `original ${entryName} absent`);
   assert.equal(bytes.readUInt16LE(target.local + 6) & 9, 0, "encrypted/data-descriptor target unsupported");
   assert.equal(bytes.readUInt16LE(target.local + 8), 8, "expected original DEFLATE layout entry");
-  const sourceXml = await zip.file(entryName).async("nodebuffer"), patchedXml = patchBagLayoutXml(sourceXml);
+  const sourceXml = await zip.file(entryName).async("nodebuffer"), patchedXml = patchXml(sourceXml);
   const compressed = deflateRawSync(patchedXml, { level: 9 }), checksum = crc32(patchedXml) >>> 0;
   const delta = compressed.length - target.compressedSize;
   const data = Buffer.concat([bytes.subarray(0, target.data), compressed, bytes.subarray(target.data + target.compressedSize, original.offset)]);
@@ -116,8 +134,23 @@ export async function patchBagLayoutArchive(bytes) {
   }
   assert.deepEqual(await outputZip.file(entryName).async("nodebuffer"), patchedXml);
   return { output, summary: { sourceSha256: hash(bytes), sha256: hash(output), bytes: output.length, entry: entryName,
-    entries: original.records.length, preservedEntries: original.records.length - 1, preservedCompressedEntries: original.records.length - 1,
-    labelField: { width: 28, height: 18, autoSize: "left" }, columnX: [324, 374], rowY: [300, 324], renderingAccepted: false } };
+    entries: original.records.length, preservedEntries: original.records.length - 1, preservedCompressedEntries: original.records.length - 1 } };
+}
+
+function patchFlags(flags = {}) {
+  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => key === "gameoverTitle"), "unknown layout patch flag");
+  assert.ok(flags.gameoverTitle === undefined || typeof flags.gameoverTitle === "boolean", "invalid gameover title flag");
+  return { gameoverTitle: flags.gameoverTitle ?? false };
+}
+
+export async function patchBagLayoutArchive(bytes, flags = {}) {
+  const selected = patchFlags(flags), bag = await patchLayoutEntry(bytes, entryName, patchBagLayoutXml);
+  const summary = { ...bag.summary, labelField: { width: 28, height: 18, autoSize: "left" }, columnX: [324, 374], rowY: [300, 324], renderingAccepted: false };
+  if (!selected.gameoverTitle) return { output: bag.output, summary };
+  const title = await patchLayoutEntry(bag.output, "gameOver.xml", patchGameoverTitleXml);
+  return { output: title.output, summary: { ...summary, sha256: title.summary.sha256, bytes: title.output.length,
+    preservedEntries: summary.entries - 2, preservedCompressedEntries: summary.entries - 2,
+    patchFlags: selected, changedEntries: [entryName, "gameOver.xml"], gameoverTitle: { resourceLink: "asset.takeoutCard.TitleBitmap", x: 180, y: -20 } } };
 }
 
 function replace(target, bytes) {
@@ -127,43 +160,65 @@ function replace(target, bytes) {
   finally { if (existsSync(fresh)) unlinkSync(fresh); }
 }
 
-export async function runLayoutCommand(command, runtime = defaultRuntime, source = defaultSource) {
+export async function runLayoutCommand(command, runtime = defaultRuntime, source = defaultSource, options = {}) {
   assert.ok(["verify", "install", "rollback"].includes(command), "usage: workshop-bag-layout.mjs verify|install|rollback");
+  const requested = patchFlags(options);
+  assert.ok(options.gameoverTitle === undefined || requested.gameoverTitle, "gameover title option only enables the reviewed patch");
+  assert.ok(command !== "rollback" || options.gameoverTitle === undefined, "rollback does not take patch flags");
   const target = join(runtime, "client-overlay/ui/vietnam/xml/xml.png"), journalFile = join(runtime, "client-text-followup/layout-overlay.json");
   const backupRoot = resolve(runtime, "client-text-followup/layout-backups");
-  const previous = existsSync(journalFile) ? JSON.parse(readFileSync(journalFile, "utf8")) : null;
-  if (previous) {
-    assert.equal(previous.target, target, "layout journal target differs; preserved");
-    assert.ok(resolve(previous.backup).startsWith(backupRoot + sep), "layout backup outside owned directory");
-    assert.equal(hash(readFileSync(target)), previous.sha256, "layout overlay changed since install; preserved");
-    assert.equal(hash(readFileSync(previous.backup)), previous.sourceSha256, "layout backup changed; preserved");
-    assert.equal(hash(readFileSync(source)), previous.sourceSha256, "layout source changed since install; preserved");
-  } else assert.ok(!existsSync(target), "unowned/custom layout overlay preserved");
+  const previousJournal = existsSync(journalFile) ? readFileSync(journalFile) : null;
+  const previous = previousJournal ? JSON.parse(previousJournal.toString("utf8")) : null;
+  const previousFlags = patchFlags(previous?.patchFlags), sourceBytes = readFileSync(source);
+  const checkOwned = async () => {
+    if (previous) {
+      assert.equal(previous.target, target, "layout journal target differs; preserved");
+      assert.ok(resolve(previous.backup).startsWith(backupRoot + sep), "layout backup outside owned directory");
+      assert.deepEqual(readFileSync(journalFile), previousJournal, "layout journal changed during verification; preserved");
+      assert.equal(hash(readFileSync(target)), previous.sha256, "layout overlay changed since install; preserved");
+      const backup = readFileSync(previous.backup);
+      assert.equal(hash(backup), previous.sourceSha256, "layout backup changed; preserved");
+      assert.equal(hash(readFileSync(source)), previous.sourceSha256, "layout source changed since install; preserved");
+      const prior = await patchBagLayoutArchive(backup, previousFlags);
+      for (const [key, value] of Object.entries(prior.summary)) assert.deepEqual(previous[key], value, `previous layout summary changed: ${key}; preserved`);
+      assert.deepEqual(readFileSync(journalFile), previousJournal, "layout journal changed during verification; preserved");
+      assert.equal(hash(readFileSync(target)), previous.sha256, "layout overlay changed during verification; preserved");
+      assert.equal(hash(readFileSync(previous.backup)), previous.sourceSha256, "layout backup changed during verification; preserved");
+    } else assert.ok(!existsSync(target) && !existsSync(journalFile), "unowned/custom layout overlay preserved");
+    assert.equal(hash(readFileSync(source)), sourceSha256, "unreviewed layout source; preserved");
+  };
+  await checkOwned();
   if (command === "rollback") {
     assert.ok(previous, "no layout overlay journal");
     if (previous.hadOverlay) replace(target, readFileSync(previous.backup)); else unlinkSync(target);
     unlinkSync(journalFile);
     return { rolledBack: true, backupRetained: true, restartRequired: true };
   }
-  const sourceBytes = readFileSync(source), result = await patchBagLayoutArchive(sourceBytes);
-  if (previous) assert.equal(previous.sha256, result.summary.sha256, "source/layout patch changed; previous deployment preserved");
-  if (command === "install" && !previous) {
-    assert.ok(!existsSync(target) && !existsSync(journalFile), "layout overlay appeared during verification; preserved");
-    mkdirSync(backupRoot, { recursive: true });
-    const backup = join(backupRoot, `${Date.now()}-${randomUUID()}-xml.png`);
-    writeFileSync(backup, sourceBytes, { flag: "wx" });
+  const selected = options.gameoverTitle === undefined ? previousFlags : requested;
+  const result = await patchBagLayoutArchive(sourceBytes, selected), unchanged = Boolean(previous && previous.sha256 === result.summary.sha256);
+  if (command === "install" && !unchanged) {
+    await checkOwned();
+    const current = previous ? readFileSync(target) : null;
+    const backup = previous?.backup ?? join(backupRoot, `${Date.now()}-${randomUUID()}-xml.png`);
+    if (!previous) { mkdirSync(backupRoot, { recursive: true }); writeFileSync(backup, sourceBytes, { flag: "wx" }); }
+    const journal = Buffer.from(JSON.stringify({ ...result.summary, target, backup, hadOverlay: previous?.hadOverlay ?? false, installedAt: new Date().toISOString() }, null, 2) + "\n");
     try {
       replace(target, result.output);
       assert.equal(hash(readFileSync(target)), result.summary.sha256);
-      writeFileSync(journalFile, JSON.stringify({ ...result.summary, target, backup, hadOverlay: false, installedAt: new Date().toISOString() }, null, 2) + "\n", { flag: "wx" });
+      replace(journalFile, journal);
+      assert.deepEqual(readFileSync(journalFile), journal);
     } catch (error) {
-      if (existsSync(target) && hash(readFileSync(target)) === result.summary.sha256) unlinkSync(target);
+      if (existsSync(target) && hash(readFileSync(target)) === result.summary.sha256) { if (current) replace(target, current); else unlinkSync(target); }
+      if (previousJournal) { if (!existsSync(journalFile) || readFileSync(journalFile).equals(journal)) replace(journalFile, previousJournal); }
+      else if (existsSync(journalFile) && readFileSync(journalFile).equals(journal)) unlinkSync(journalFile);
       throw error;
     }
   }
-  return { ...result.summary, installed: Boolean(previous) || command === "install", unchanged: Boolean(previous), restartRequired: true };
+  return { ...result.summary, installed: command === "install" || unchanged, unchanged, restartRequired: true };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify")));
+  const flags = process.argv.slice(3);
+  assert.ok(flags.length <= 1 && flags.every(flag => flag === "--gameover-title"), "unknown or duplicate layout option");
+  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, flags.length ? { gameoverTitle: true } : {})));
 }

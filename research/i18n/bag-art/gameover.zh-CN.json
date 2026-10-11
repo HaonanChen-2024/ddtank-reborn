@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/gameover.swf",
+  "sourceAssetSha256": "274375856c11147bea4479dece9c411b49d5f035e45046fa4769592855e797f5",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only the verified SmallCards reward title and the three ExpLeftView table headings. Four DefineBitsLossless2 fmt5 images contain captions only. Preserve dimensions, symbols, animations, JPEG/PNG-alpha tags, rewards, card eligibility and every other SWF tag.",
+  "bitmaps": [
+    {
+      "id": 29,
+      "className": "asset.takeoutCard.TitleBitmap",
+      "width": 306,
+      "height": 48,
+      "sourcePixelsSha256": "9eea6442e5267b02c7a923db9c3b064de6aa72d92ff6063f3718d94e67777e8f",
+      "originalText": "Tabela de recompensas",
+      "ownerSource": { "path": "Source Flash/src/game/view/card/SmallCardsView.as", "line": 97 },
+      "regions": [{ "box": [0, 0, 306, 48], "text": "翻牌奖励", "transparent": true, "fontSize": 25, "inkMargin": 2, "fill": "#ff7808", "fillBottom": "#e95703", "stroke": "#fff8dc", "strokeWidth": 2, "outerStroke": "#8a430b", "outerStrokeWidth": 2.5, "preserveAlpha": false }]
+    },
+    {
+      "id": 30,
+      "className": "asset.experience.tabName",
+      "width": 80,
+      "height": 26,
+      "sourcePixelsSha256": "8aa4573a80eb5126fae6ad13cdbae9f1a11dcbfce3d7def3fa5f6d265819df64",
+      "originalText": "nhân vật",
+      "ownerSource": { "path": "Source Flash/src/game/view/experience/ExpLeftView.as", "line": 58 },
+      "regions": [{ "box": [0, 0, 80, 26], "text": "角色", "transparent": true, "fontSize": 16, "inkMargin": 1, "fill": "#ffdb71", "fillBottom": "#d5a344", "stroke": "#402d0d", "strokeWidth": 1, "outerStroke": "#170e00", "outerStrokeWidth": 1.6, "preserveAlpha": false }]
+    },
+    {
+      "id": 31,
+      "className": "asset.experience.tabExploit",
+      "width": 85,
+      "height": 27,
+      "sourcePixelsSha256": "f262bdd4d7f1a4047acd047da828dd0f2db0d2c81aa6f2d4ff155dddf3527e56",
+      "originalText": "Merito",
+      "ownerSource": { "path": "Source Flash/src/game/view/experience/ExpLeftView.as", "line": 60, "dataPath": "Source Flash/src/game/view/experience/ExpFriendItem.as", "dataLines": [45, 49, 53], "dataField": "GainOffer" },
+      "regions": [{ "box": [0, 0, 85, 27], "text": "功勋", "transparent": true, "fontSize": 16, "inkMargin": 1, "fill": "#ffdb71", "fillBottom": "#d5a344", "stroke": "#402d0d", "strokeWidth": 1, "outerStroke": "#170e00", "outerStrokeWidth": 1.6, "preserveAlpha": false }]
+    },
+    {
+      "id": 32,
+      "className": "asset.experience.tabExp",
+      "width": 60,
+      "height": 28,
+      "sourcePixelsSha256": "27db54350ce963adea5350a63f0e25066cc442f543f2c1215e76f999af60c833",
+      "originalText": "EXP",
+      "ownerSource": { "path": "Source Flash/src/game/view/experience/ExpLeftView.as", "line": 59, "dataPath": "Source Flash/src/game/view/experience/ExpFriendItem.as", "dataLine": 44, "dataField": "expObj.gainGP" },
+      "regions": [{ "box": [0, 0, 60, 28], "text": "经验", "transparent": true, "fontSize": 16, "inkMargin": 1, "fill": "#ffdb71", "fillBottom": "#d5a344", "stroke": "#402d0d", "strokeWidth": 1, "outerStroke": "#170e00", "outerStrokeWidth": 1.6, "preserveAlpha": false }]
+    }
+  ]
+}

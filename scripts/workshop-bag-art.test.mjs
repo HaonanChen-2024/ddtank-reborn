@@ -35,6 +35,22 @@ assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entr
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [[0, 0, 1, 1]] }] }] }, patch), /clear box outside reviewed region/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [] }] }] }, patch), /clear boxes require transparent replacement/);
 assert.equal(patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [[1, 0, 1, 1]] }] }] }, patch).unchangedTags, 3);
+const gameoverClasses = ['asset.takeoutCard.TitleBitmap', 'asset.experience.tabName', 'asset.experience.tabExploit', 'asset.experience.tabExp'];
+const gameoverEntries = gameoverClasses.map((className, index) => ({ ...entry, id: 29 + index, className }));
+const gameoverTags = gameoverEntries.map(e => { const p = Buffer.from(prefix); p.writeUInt16LE(e.id); return buildTag(36, Buffer.concat([p, deflateSync(pixels)])); });
+const gameoverSymbols = buildTag(76, Buffer.concat([Buffer.from([4, 0]), ...gameoverEntries.flatMap(e => [Buffer.from([e.id, 0]), Buffer.from(e.className + '\0')])]));
+const jpegAlphaTag = buildTag(35, Buffer.from([33, 0, 0, 0, 0, 0, 137, 80, 78, 71]));
+const gameoverBefore = compressSwf('CWS', 10, Buffer.concat([header, ...gameoverTags, jpegAlphaTag, gameoverSymbols, pristineTag, buildTag(0, Buffer.alloc(0))]));
+const gameoverResult = patchSwf(gameoverBefore, { bitmaps: gameoverEntries }, patch);
+assert.equal(gameoverResult.changed.length, 4); assert.equal(gameoverResult.unchangedTags, 4);
+const gameoverBody = decompressSwf(gameoverResult.out).body, gameoverAfterTags = parseTags(gameoverBody).tags;
+assert.deepEqual(gameoverAfterTags[4].raw, jpegAlphaTag, 'gameover caption patch must preserve unsupported PNG/JPEG-alpha result badges');
+assert.deepEqual(gameoverAfterTags[5].raw, gameoverSymbols); assert.deepEqual(gameoverAfterTags[6].raw, pristineTag);
+assert.throws(() => patchSwf(gameoverBefore, { bitmaps: [{ ...gameoverEntries[0], className: 'asset.wrong.TitleBitmap' }] }, patch), /bitmap class mismatch/);
+const wrongFormat = Buffer.from(payload); wrongFormat[2] = 3;
+assert.throws(() => decodeBitmap(wrongFormat), /32-bit DefineBitsLossless2/);
+const wrongTag = compressSwf('CWS', 10, Buffer.concat([header, buildTag(35, payload), buildTag(76, symbol), buildTag(0, Buffer.alloc(0))]));
+assert.throws(() => patchSwf(wrongTag, { bitmaps: [entry] }, patch), /missing or duplicate target bitmap/);
 const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
 const { PNG } = createRequire(join(depRoot, 'package.json'))('pngjs');
 const backgroundPng = PNG.sync.write({ width: 2, height: 2, data: Buffer.alloc(16, 255) });
@@ -69,4 +85,4 @@ assert.equal(duplicateResult.changed[0].drawnRegions, 0);
 assert.deepEqual(duplicateResult.changed[0].clearedRegions, [{ id: 16, text: '中', box: [1, 0, 1, 1], action: 'clear-background-duplicate' }]);
 // Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
 // Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing');
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing, four gameover captions and unsupported-tag preservation');

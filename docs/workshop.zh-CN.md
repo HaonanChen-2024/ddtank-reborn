@@ -20,7 +20,7 @@ node scripts/workshop.mjs start
 
 可选 `--activity-response` 修复旧 Calendar 活动领取回调：该消费者原来按大写 `True` 比较，而现有服务器成功值是小写 `true`。工具精确验证 `CalendarManager.__activityLoadComplete` 的身份、方法摘要和指令，只追加一个小写常量并改变该比较的一处 operand；共享大写签到常量、其余47个方法和2524个其他SWF标签保持。服务器XML格式、活动规则和奖励不变；另一个直接显示XML的 `ActiveSubContent` 路径未纳入修复。
 
-先运行 `node scripts/workshop-literals.mjs verify --activity-response` 查看候选；仅显式 `install --activity-response` 升级唯一现有覆盖账本，复用原备份并保留中文及RSA层。缺省命令会保留已启用效果；安装失败恢复当前文件和旧账本，完整 `rollback` 仍恢复该owner原备份。联合9项窄测试和真实配置离线verify通过，原活动页面领取/按钮禁用、邮件附件与重复拒绝尚待运行验收，不能把候选验证当作活动开放。
+先运行 `node scripts/workshop-literals.mjs verify --activity-response` 查看候选；仅显式 `install --activity-response` 升级唯一现有覆盖账本，复用原备份并保留中文及RSA层。缺省命令会保留已启用效果；安装失败恢复当前文件和旧账本，完整 `rollback` 仍恢复该owner原备份。联合9项窄测试和真实配置离线verify通过，覆盖已安装、正常重启及HTTP摘要回读；原活动页面领取/按钮禁用、邮件附件与重复拒绝尚待运行验收。
 
 网页游玩页的角度、距离、力度与三类加载错误已接入现有 PT/EN/中文语言字典，保留已保存的语言偏好。
 
@@ -62,7 +62,15 @@ node scripts/workshop.mjs start --lan=192.168.1.6
 
 商城编辑页补齐A/B/C三档的Price1..3/Value1..3；BuyType=0时Unit表示有效天数，非0表示数量，币种/兑换材料由Price指定。旧禁用档哨兵值及Shop数值型IsBind/IsVouch保持兼容。新商品还需在“商城展示”(`/shop-show`)填写ShopId=Shop.ID与原ShopType栏目；TempID自动生成，CanBuy不能替代展示记录。男女栏目分开，按已有同类商品参照，不将Type当作CategoryID或NeedSex。
 
-普通活动的 `ActivePullDown` 将领取记录/激活状态、全部附件与邮件放入同一现有事务，邮件通知在提交后发送。空池、无适用奖励、无效模板及不能按当前邮件能力交付的配置返回已有失败码，不消耗领取机会；同账号领取多个唯一激活码也会序列化核验。普通奖励按原MaxCount拆堆，每封最多五附件、币种仅首封，保留全部数量。现有接口、成功XML、返回码、币种映射及装备模板属性保持。当前不支持非零强化/合成奖励，明确拒绝，避免悄悄丢弃配置字段。最终34项内存测试及相同34项独立PostgreSQL/postgres.js测试已通过，包含跨封拆堆、真实约束/触发器导致的邮件中途失败与全量回滚；API类型检查及此前64项组合回归通过。尚未新增运营活动、修改运行库奖励配置或验收原客户端活动页面；不能据后端测试宣称活动菜单可用。
+普通活动的 `ActivePullDown` 将领取记录/激活状态、全部附件与邮件放入同一现有事务，邮件通知在提交后发送。空池、无适用奖励、无效模板及不能按当前邮件能力交付的配置返回已有失败码，不消耗领取机会；同账号领取多个唯一激活码也会序列化核验。普通奖励按原MaxCount拆堆，每封最多五附件、币种仅首封，保留全部数量。现有接口、成功XML、返回码、币种映射及装备模板属性保持。当前不支持非零强化/合成奖励，明确拒绝，避免悄悄丢弃配置字段。最终34项内存测试及相同34项独立PostgreSQL/postgres.js测试已通过，包含跨封拆堆、真实约束/触发器导致的邮件中途失败与全量回滚；API类型检查及此前64项组合回归通过。原客户端活动页面尚待验收。
+
+`research/activities/local-starter.json` 定义一项“本地启程补给”（100001）：每个角色免费领取一次，按原邮件流程发送现有11904经验药水一瓶，不直接升级、不改变副本门槛、装备属性或币种。`scripts/workshop-starter-activity.ts` 默认只读verify，显式install仅新增自有Active及Award两行；核对运行session/原生数据库绑定、原33/310行全列指纹和四表主键/冲突。重复安装保留已有领奖进度；配置、原行或自有行变化时拒绝覆盖。journal在事务提交前独占写入并同步；提交结果不确定且缺行时保留现场并拒绝续写，不自动补偿删除。12项隔离测试及运行库首次安装、重复零插入、正常重启后verify通过；一次重复CLI拒绝原因未确认，随后直接事务和CLI回读通过且数据保持。原列表、领取反馈、邮件附件和重登仍待原客户端运行验证。
+
+```powershell
+node --import tsx scripts/workshop-starter-activity.ts verify
+node --import tsx scripts/workshop-starter-activity.ts install
+# 新增后正常重启API缓存，并使用全新客户端连接
+```
 
 ## 官网目录与普通服饰导入
 
@@ -107,7 +115,7 @@ node scripts/workshop-language.mjs rollback
 
 安装配置中指定的字典键，保留 CRLF、BOM、重复键、顺序和格式占位符，原版客户端及原字典不变。回退校验账本，遇到用户另外编辑的覆盖文件会保留。新 Noto Sans SC 字体遵循 SIL OFL，许可在 `apps/web/public/fonts/OFL.txt`；来源固定为 [Noto CJK Sans2.004](https://github.com/notofonts/noto-cjk/tree/523d033d6cb47f4a80c58a35753646f5c3608a78)。字典不能翻译 SWF 内嵌位图按钮或数据库中的旧物品名称。
 
-背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML 只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
+背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML默认只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本，限定14张 fmt5 位图：12个建筑标题、频道与签到。原入口和动画继续使用；其余333个 SWF 标签以及文字矩形以外像素不变。农场、独立活动入口和工具栏的其他图片仍待处理，这批不代表整个大厅已中文化。
 
@@ -150,6 +158,15 @@ API 在启动时建立资源索引，新覆盖需要正常重启及全新客户�
 `--asset=hall-feature` 仅将原 `ddthallicon.swf` 的精彩玩法主入口标题改为中文（bitmap171），保留原魔方、符号、动画、点击区域与其他396个tag。它展开的是原有子玩法面板，不会启用尚未实现的活动。原标题描边与魔方边缘已经合成，候选保留该混合边界；低分辨率位图放大仍可见像素阶梯。离线对比、原件/字区外像素保护、五种已有模式输出一致性及部署通过；七个覆盖摘要和真实玩家保护已回读。主控实际查看男女原大厅整帧，当前标题可读且未见裁切，其他外文仍可见。点击/展开行为尚未验收，不能据此称全界面中文化。
 
 ## 单人游玩与等级
+
+结算页使用 `--asset=gameover` 汉化原fmt5位图29/30/31/32的“翻牌奖励、角色、功勋、经验”，其他149个tag原样。`workshop-bag-layout.mjs install --gameover-title` 在保留背包布局的基础上，仅把原gameOver.xml翻牌标题x250移到180，标题右边界986，原卡片位置和事件不变；相对已有部署仅该条目改变，其他100个压缩条目相同。旧账本迁移、失败恢复、外部漂移拒绝及六种旧模式一致性已验证，合计10项测试通过（Node24.14.1）；Node24.21.0测试进程曾出现原生cleanup_queue断言，保留环境失败。两项覆盖已部署且HTTP摘要回读，1x/4x深浅底离线预览已查看；尚无更新后的原结算整帧验收，胜负图片和其他战斗外文仍待处理。
+
+```powershell
+node scripts/workshop-bag-art.mjs verify --asset=gameover
+node scripts/workshop-bag-art.mjs install --asset=gameover
+node scripts/workshop-bag-layout.mjs verify --gameover-title
+node scripts/workshop-bag-layout.mjs install --gameover-title
+```
 
 保留原等级规则。可通过已有管理员邮件给自己的本地角色发经验药水，正常领取后在背包使用。现有 `11904` 每瓶10000经验；从1级、GP1正常使用两瓶可升到9级，基础副本原门槛8级，训练场原门槛15级。邮件内物品是否已领取、升级是否保存必须分别核验，不直接写角色等级或经验。
 
