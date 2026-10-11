@@ -117,6 +117,8 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
       assert.ok(x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.width && y + h <= image.height, 'caption outside bitmap');
       assert.ok(typeof region.text === 'string' && region.text.length > 0 && !/[\r\n]/.test(region.text));
       assert.ok(Number.isFinite(region.textOffsetY ?? 0) && Math.abs(region.textOffsetY ?? 0) <= h / 2, 'invalid caption vertical offset');
+      assert.ok(Number.isFinite(region.textOffsetX ?? 0) && Math.abs(region.textOffsetX ?? 0) <= w / 2, 'invalid caption horizontal offset');
+      if (region.textOffsetX) assert.ok(region.inkMargin >= 1, 'offset caption needs an ink margin');
       if (region.inkMargin !== undefined) assert.ok(Number.isInteger(region.inkMargin) && region.inkMargin >= 1 && region.inkMargin * 2 < Math.min(w, h), 'invalid caption ink margin');
       assert.equal(Boolean(region.sample), !region.transparent, 'caption needs a sampled texture or transparent background');
       if (region.clearBoxes !== undefined) {
@@ -237,16 +239,17 @@ async function main() {
       const scale = 3, canvas = createCanvas(w * scale, h * scale), ctx = canvas.getContext('2d');
       const lines = region.vertical ? [...region.text] : [region.text]; let size = region.fontSize;
       const stroke = region.strokeWidth ?? 0, outerStroke = region.outerStrokeWidth ?? 0, edge = Math.max(stroke, outerStroke);
-      while (size >= 7) { ctx.font = `bold ${size * scale}px "${config.fontFamily}"`; if (Math.max(...lines.map(line => ctx.measureText(line).width)) / scale + edge * 2 <= w - 2 && size * lines.length * 1.08 + edge * 2 <= h - 1) break; size -= .5; }
+      const textOffsetX = region.textOffsetX ?? 0, tx = (w / 2 + textOffsetX) * scale;
+      while (size >= 7) { ctx.font = `bold ${size * scale}px "${config.fontFamily}"`; if (Math.max(...lines.map(line => ctx.measureText(line).width)) / scale + edge * 2 <= w - 2 - 2 * Math.abs(textOffsetX) && size * lines.length * 1.08 + edge * 2 <= h - 1) break; size -= .5; }
       assert.ok(size >= 7, 'Chinese caption cannot fit: ' + entry.id + ' ' + region.text);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
       const lineHeight = size * 1.08, start = h / 2 - (lines.length - 1) * lineHeight / 2 + (region.textOffsetY ?? 0);
       lines.forEach((line, i) => { const ty = (start + i * lineHeight) * scale;
-        if (region.outerStroke && outerStroke > 0) { ctx.strokeStyle = region.outerStroke; ctx.lineWidth = outerStroke * 2 * scale; ctx.strokeText(line, w * scale / 2, ty); }
-        if (region.stroke && stroke > 0) { ctx.strokeStyle = region.stroke; ctx.lineWidth = stroke * 2 * scale; ctx.strokeText(line, w * scale / 2, ty); }
+        if (region.outerStroke && outerStroke > 0) { ctx.strokeStyle = region.outerStroke; ctx.lineWidth = outerStroke * 2 * scale; ctx.strokeText(line, tx, ty); }
+        if (region.stroke && stroke > 0) { ctx.strokeStyle = region.stroke; ctx.lineWidth = stroke * 2 * scale; ctx.strokeText(line, tx, ty); }
         if (region.fillBottom) { const gradient = ctx.createLinearGradient(0, 0, 0, h * scale); gradient.addColorStop(0, region.fill); gradient.addColorStop(1, region.fillBottom); ctx.fillStyle = gradient; }
         else ctx.fillStyle = region.fill;
-        ctx.fillText(line, w * scale / 2, ty);
+        ctx.fillText(line, tx, ty);
       });
       const small = createCanvas(w, h), sc = small.getContext('2d'); sc.drawImage(canvas, 0, 0, w, h);
       const ink = sc.getImageData(0, 0, w, h).data;
@@ -259,7 +262,7 @@ async function main() {
         rgba[p + 3] = region.preserveAlpha ? image.rgba[p + 3] : Math.round(outA * 255);
       }
       if (region.inkMargin !== undefined) assert.ok(right >= left && bottom >= top && left >= region.inkMargin && top >= region.inkMargin && right < w - region.inkMargin && bottom < h - region.inkMargin, 'Chinese caption ink touches reviewed boundary: ' + entry.id + ' ' + region.text);
-      fontFits.push({ id: entry.id, text: region.text, fontSize: size, box: region.box, textOffsetY: region.textOffsetY ?? 0,
+      fontFits.push({ id: entry.id, text: region.text, fontSize: size, box: region.box, textOffsetX, textOffsetY: region.textOffsetY ?? 0,
         inkBounds: right < 0 ? null : [x + left, y + top, x + right, y + bottom] });
     }
     const png = bytes => PNG.sync.write({ width: image.width, height: image.height, data: bytes });

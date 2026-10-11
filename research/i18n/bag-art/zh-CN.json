@@ -27,11 +27,14 @@
             154,
             22
           ],
-          "fontSize": 17,
+          "fontSize": 18,
           "fill": "#fff8e6",
           "stroke": "#292015",
-          "strokeWidth": 1.2,
-          "preserveAlpha": false
+          "strokeWidth": 0.7,
+          "preserveAlpha": false,
+          "textOffsetY": -0.5,
+          "textOffsetX": -38,
+          "inkMargin": 1
         },
         {
           "box": [
@@ -590,14 +593,14 @@
           "fontSize": 12,
           "fill": "#f7f1d6",
           "stroke": "#452912",
-          "strokeWidth": 0.8,
+          "strokeWidth": 0.6,
           "preserveAlpha": true
         },
         {
           "box": [
-            258,
+            251,
             370,
-            50,
+            57,
             17
           ],
           "text": "护甲",
@@ -610,14 +613,14 @@
           "fontSize": 12,
           "fill": "#f7f1d6",
           "stroke": "#452912",
-          "strokeWidth": 0.8,
+          "strokeWidth": 0.6,
           "preserveAlpha": true
         },
         {
           "box": [
-            277,
+            251,
             390,
-            31,
+            57,
             17
           ],
           "text": "生命",
@@ -630,14 +633,14 @@
           "fontSize": 12,
           "fill": "#f7f1d6",
           "stroke": "#452912",
-          "strokeWidth": 0.8,
+          "strokeWidth": 0.6,
           "preserveAlpha": true
         },
         {
           "box": [
-            263,
+            251,
             410,
-            45,
+            57,
             17
           ],
           "text": "体力",
@@ -650,7 +653,7 @@
           "fontSize": 12,
           "fill": "#f7f1d6",
           "stroke": "#452912",
-          "strokeWidth": 0.8,
+          "strokeWidth": 0.6,
           "preserveAlpha": true
         }
       ]
@@ -679,7 +682,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -709,7 +712,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -729,17 +732,17 @@
             68,
             29
           ],
-          "text": "个人信息",
+          "text": "个人资料",
           "sample": [
             36,
             3,
             65,
             2
           ],
-          "fontSize": 14,
+          "fontSize": 15,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.7,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -759,17 +762,17 @@
             67,
             30
           ],
-          "text": "个人信息",
+          "text": "个人资料",
           "sample": [
             36,
             3,
             65,
             2
           ],
-          "fontSize": 14,
+          "fontSize": 15,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.7,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -799,7 +802,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -829,7 +832,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -859,7 +862,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -889,7 +892,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -919,7 +922,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -949,7 +952,7 @@
           "fontSize": 18,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.8,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -979,7 +982,7 @@
           "fontSize": 14,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.6,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1009,7 +1012,7 @@
           "fontSize": 14,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.6,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1036,10 +1039,10 @@
             46,
             2
           ],
-          "fontSize": 14,
+          "fontSize": 12,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.5,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1066,10 +1069,10 @@
             96,
             2
           ],
-          "fontSize": 18,
+          "fontSize": 15,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.6,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1096,10 +1099,10 @@
             46,
             2
           ],
-          "fontSize": 18,
+          "fontSize": 12,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.5,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1159,7 +1162,7 @@
           "fontSize": 14,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.6,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1186,10 +1189,10 @@
             45,
             2
           ],
-          "fontSize": 18,
+          "fontSize": 12,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.5,
           "inpaint": true,
           "preserveAlpha": true
         }
@@ -1576,10 +1579,10 @@
             45,
             2
           ],
-          "fontSize": 13,
+          "fontSize": 12,
           "fill": "#f7edb0",
           "stroke": "#452912",
-          "strokeWidth": 1.2,
+          "strokeWidth": 0.5,
           "inpaint": true,
           "preserveAlpha": true
         }

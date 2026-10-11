@@ -31,6 +31,10 @@ assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entr
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [0, 0, 0], max: [255, 255, 256] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaintSeed: { min: [0, 0, 0], max: [255, 255, 255] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inkMargin: 0 }] }] }, patch), /invalid caption ink margin/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], textOffsetX: NaN }] }] }, patch), /horizontal offset/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], textOffsetX: 1 }] }] }, patch), /horizontal offset/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], textOffsetX: 0.25 }] }] }, patch), /needs an ink margin/);
+assert.deepEqual(patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], textOffsetX: 0 }] }] }, patch).out, result.out, 'default horizontal position must preserve existing output');
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inkMargin: 1 }] }] }, patch), /invalid caption ink margin/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [[0, 0, 1, 1]] }] }] }, patch), /clear box outside reviewed region/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [] }] }] }, patch), /clear boxes require transparent replacement/);

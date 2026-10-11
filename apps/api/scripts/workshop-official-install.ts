@@ -1,4 +1,4 @@
-/** Bounded official wardrobe import using existing authenticated admin endpoints.
+/** Bounded wardrobe import using existing authenticated admin endpoints.
  * Defaults to a saved dry-run. --apply uploads into unique overlay paths and creates
  * category-compatible local IDs; --exercise uses isolated player accounts and real
  * RSA/TCP/WS sessions. Originals and previous templates are never overwritten.
@@ -13,18 +13,19 @@ import { inflateSync } from "node:zlib";
 import { buildLoginPayload, bytesToBase64, GSPacket, parseDotNetRsaXml, rsaEncryptPkcs1, type RsaPrivateKey } from "@ddt/protocol";
 import { FakeClient, type Received } from "../../game/test/helpers.js";
 import type { WardrobeCheckResult } from "../src/lib/wardrobe.js";
+import { assertEquippedStyleFits, createAppearancePic } from "./workshop-appearance-identity.js";
 
 type Row = Record<string, any>;
 type Account = { username: string; password: string; nickname: string; sex: boolean };
 type Asset = { key: string; source: string; sha256: string; bytes: number; uploaded?: boolean };
-type Entry = { id: number; officialId: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; itemId?: number; mailId?: number };
+type Entry = { id: number; officialId?: number; referenceId?: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; itemId?: number; mailId?: number };
 type Fixture = { characterId: number; credentialsPath: string; baselineStyle: string; gold: number; money: number; style: string };
 type Receipt = { version: 1; batchId: string; phase: string; createdAt: string; templates: Entry[]; fixtures: Partial<Record<"m" | "f", Fixture>>; snapshots: Row[]; renderingAccepted: boolean; backup: string; error?: string };
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const runtime = resolve(repo, "../../runtime"), project = resolve(runtime, "..");
 const args = process.argv.slice(2);
 if (args.includes("--help")) {
-  console.log("node --import tsx apps/api/scripts/workshop-official-install.ts --backup=<backup.dump.json> [--acquisition=<official manifest.json>] [--journal=<new-runtime-file>] [--apply --exercise] [--only=<localID,...>]\nWithout --acquisition, uses the legacy verified catalog/map/incoming files; --catalog/--targets/--assets can override them for a new batch. Existing journals resume only; never reuse a journal for new source files. Dry-run is the default. Templates and uploads are retained; rendering must be accepted separately.");
+  console.log("node --import tsx apps/api/scripts/workshop-official-install.ts --backup=<backup.dump.json> [--acquisition=<official manifest.json> | --reference-acquisition=<visual-only manifest.json>] [--journal=<new-runtime-file>] [--apply --exercise] [--only=<localID,...>]\nWithout an acquisition, uses the legacy verified catalog/map/incoming files; --catalog/--targets/--assets can override them for a new batch. Reference catalogs allow only visual metadata and inherit local category/sex baseline stats. Existing journals resume only; never reuse a journal for new source files. Dry-run is the default. Templates and uploads are retained; rendering must be accepted separately.");
   process.exit(0);
 }
 const option = (key: string, fallback: string) => resolve(args.find(a => a.startsWith(`--${key}=`))?.slice(key.length + 3) ?? fallback);
@@ -32,15 +33,17 @@ const receiptPath = option("journal", resolve(runtime, "content-research/officia
 assert.ok(receiptPath.startsWith(runtime + sep), "journal must remain in private runtime");
 const catalogPath = option("catalog", resolve(runtime, "official-resource-reverse/diy-catalog.json"));
 const targetsPath = option("targets", resolve(project, "wardrobe/官方DIY物品映射.csv"));
-const acquisitionPath = args.find(a => a.startsWith("--acquisition="))?.slice(14);
+const referencePath = args.find(a => a.startsWith("--reference-acquisition="))?.slice("--reference-acquisition=".length);
+assert.ok(!referencePath || !args.some(a => a.startsWith("--acquisition=")), "choose one acquisition source");
+const acquisitionPath = referencePath ?? args.find(a => a.startsWith("--acquisition="))?.slice(14);
 if (acquisitionPath) assert.ok(!args.some(a => /^--(catalog|targets|assets)=/.test(a)), "acquisition manifest supplies its own catalog, targets and assets");
 const acquisition = acquisitionPath ? JSON.parse(readFileSync(resolve(acquisitionPath), "utf8")) : null;
-if (acquisition) assert.equal(acquisition.source, "https://diy-ddt.wan.com/");
+if (acquisition) assert.equal(acquisition.source, referencePath ? "http://yj.rzkj.top:521/" : "https://diy-ddt.wan.com/");
 const assetsRoot = acquisitionPath ? resolve(dirname(resolve(acquisitionPath)), "assets") : option("assets", resolve(project, "assets/incoming/official-diy-20261011"));
 assert.ok(assetsRoot.startsWith(project + sep), "source assets must remain in this project");
 const apply = args.includes("--apply"), exercise = args.includes("--exercise");
 assert.ok(!exercise || apply, "--exercise requires --apply");
-assert.ok(args.every(a => ["--apply", "--exercise"].includes(a) || /^--(journal|catalog|targets|assets|backup|only|acquisition)=.+$/.test(a)), "unknown option");
+assert.ok(args.every(a => ["--apply", "--exercise"].includes(a) || /^--(journal|catalog|targets|assets|backup|only|acquisition|reference-acquisition)=.+$/.test(a)), "unknown option");
 const only = args.find(a => a.startsWith("--only="))?.slice(7).split(",").map(Number);
 const base = "http://127.0.0.1:8080";
 process.env.TZ = "UTC";
@@ -107,6 +110,7 @@ async function quit(c: FakeClient, fixture: Fixture, expected: string) {
   assert.equal(row.Gold, fixture.gold); assert.equal(row.Money, fixture.money); fixture.style = expected; save();
 }
 async function move(live: Awaited<ReturnType<typeof enter>>, entry: Entry, from: number, to: number, equipped: boolean) {
+  if (equipped) assertEquippedStyleFits(live.style, to, entry.id, entry.pic);
   const mark = live.c.mark(); live.c.out(49, p => { p.writeByte(0); p.writeInt(from); p.writeByte(0); p.writeInt(to); p.writeInt(0); p.writeBoolean(false); });
   const inventoryUpdate = await live.c.waitFor(r => r.code === 64 && inventory(r).some(x => x.bag === 0 && x.ItemID === entry.itemId && (equipped ? x.slot === to : x.slot >= 31)), 4000, mark);
   const row = inventory(inventoryUpdate).find(x => x.ItemID === entry.itemId)!; assert.equal(row.UserID, live.id); assert.equal(row.TemplateID, entry.id); assert.equal(row.Pic, entry.pic);
@@ -117,14 +121,16 @@ async function prepare(): Promise<Receipt> {
   // The map is deliberately a narrow CSV with known columns; richer future targets
   // must first be resolved by workshop-official (which detects duplicate names).
   if (acquisition) assert.equal(acquisition.assetErrors.length, 0, "acquisition contains failed assets");
-  const ids = acquisition ? [...new Set<number>(acquisition.targets.filter((x: Row) => x.status === "matched").map((x: Row) => x.officialTemplateId))] : readFileSync(targetsPath, "utf8").replace(/^\uFEFF/, "").trim().split(/\r?\n/).slice(1).map(line => Number(line.split(",")[2]));
+  const identityKey = referencePath ? "sourceTemplateId" : "officialTemplateId";
+  const ids = acquisition ? [...new Set<number>(acquisition.targets.filter((x: Row) => x.status === "matched").map((x: Row) => x[identityKey]))] : readFileSync(targetsPath, "utf8").replace(/^\uFEFF/, "").trim().split(/\r?\n/).slice(1).map(line => Number(line.split(",")[2]));
   assert.ok(ids.length > 0 && ids.length <= 200 && ids.every(Number.isSafeInteger) && new Set(ids).size === ids.length, "invalid official map");
   const catalog: Row[] = JSON.parse(readFileSync(acquisitionPath ? resolve(dirname(resolve(acquisitionPath)), "catalog.json") : catalogPath, "utf8"));
   const plan: Entry[] = [], allocated: Record<number, number> = {}, batchId = randomBytes(4).toString("hex");
   for (const officialId of ids) {
     const matches = catalog.filter(x => x.templateId === officialId); assert.equal(matches.length, 1, "ambiguous official ID"); const item = matches[0]!;
     assert.ok([1, 2, 3, 4, 5, 6].includes(item.categoryId) && [1, 2].includes(item.needSex));
-    assert.equal(catalog.filter(x => x.name === item.name).length, 1, "ambiguous official name");
+    // Exact source IDs, rather than display names, identify newer catalog entries.
+    if (referencePath) assert.ok(Object.keys(item).every(key => ["templateId", "name", "categoryId", "needSex", "pic", "previewPic", "property8", "description"].includes(key)), "reference catalog must contain visual metadata only");
     const folder = ({ 1: "head", 2: "glass", 3: "hair", 4: "eff", 5: "cloth", 6: "face" } as Record<number, string>)[item.categoryId]!, sex = item.needSex === 1 ? "m" : "f";
     const match = new RegExp(`^/image/equip/${sex}/${folder}/([A-Za-z0-9_]+)/1/${item.categoryId === 3 ? "[ab]/" : ""}show\\.png$`).exec(item.pic); assert.ok(match, "invalid official resource path");
     assert.equal(item.previewPic, `/image/equip/${sex}/${folder}/${match[1]}/icon_1.png`);
@@ -132,22 +138,25 @@ async function prepare(): Promise<Receipt> {
     const sourceId = item.categoryId * 1000 + item.needSex * 100 + 1, source = await json(`/api/admin/items/${sourceId}`);
     assert.equal(source.CategoryID, item.categoryId); assert.equal(source.NeedSex, item.needSex); assert.equal(source.CanEquip, true);
     const id = await nextId(item.categoryId, allocated[item.categoryId] ?? item.categoryId * 1000000 + 999100); allocated[item.categoryId] = id + 1;
-    const pic = `ww_official_${officialId}_${batchId}`;
-    const row: Row = { ...source, TemplateID: id, Pic: pic, Name: item.name, Description: item.description, Remark: `Official DIY ${officialId}; local rules from ${sourceId}` };
-    for (const key of ["Attack", "Defence", "Agility", "Luck", "Quality", ...Array.from({ length: 8 }, (_, i) => `Property${i + 1}`)]) { const value = item[key[0]!.toLowerCase() + key.slice(1)]; assert.ok(Number.isSafeInteger(value), `invalid ${key}`); row[key] = value; }
+    // Style is a legacy varchar(200) containing all equipped IDs and Pic names.
+    // Keep source identity in the receipt, not in every serialized appearance path.
+    const pic = createAppearancePic(id, referencePath ? "reference" : "official");
+    const row: Row = { ...source, TemplateID: id, Pic: pic, Name: item.name, Description: item.description, Remark: `${referencePath ? "Reference visual" : "Official DIY"} ${officialId}; local rules from ${sourceId}` };
+    if (referencePath) row.Property8 = Number(layers);
+    else for (const key of ["Attack", "Defence", "Agility", "Luck", "Quality", ...Array.from({ length: 8 }, (_, i) => `Property${i + 1}`)]) { const value = item[key[0]!.toLowerCase() + key.slice(1)]; assert.ok(Number.isSafeInteger(value), `invalid ${key}`); row[key] = value; }
     const refs = ["icon_1.png"]; for (const layer of layers) for (const variant of item.categoryId === 3 ? ["a/", "b/"] : [""]) for (const kind of ["show", "game"]) refs.push(`${layer}/${variant}${kind}.png`);
     const assets: Asset[] = [];
     for (const suffix of refs) {
       const key = `image/equip/${sex}/${folder}/${pic}/${suffix}`, sourcePath = resolve(assetsRoot, `image/equip/${sex}/${folder}/${match[1]}/${suffix}`), bytes = readFileSync(sourcePath);
       assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
       if (acquisition) {
-        const proof = acquisition.assets.filter((x: Row) => x.officialTemplateId === officialId && x.resourcePath === `image/equip/${sex}/${folder}/${match[1]}/${suffix}`);
+        const proof = acquisition.assets.filter((x: Row) => x[identityKey] === officialId && x.resourcePath === `image/equip/${sex}/${folder}/${match[1]}/${suffix}`);
         assert.equal(proof.length, 1, "acquisition is missing an exact asset receipt"); assert.equal(sha(bytes), proof[0].sha256, "acquisition asset hash changed");
       }
       const r = await request("/resource/" + key); assert.equal(r.headers.get("x-placeholder"), "1", "resource path collision"); await r.arrayBuffer();
       assets.push({ key, source: sourcePath, sha256: sha(bytes), bytes: bytes.length });
     }
-    plan.push({ id, officialId, name: item.name, categoryId: item.categoryId, needSex: item.needSex, pic, sourceId, sourceHash: hash(source), row, assets });
+    plan.push({ id, ...(referencePath ? { referenceId: officialId } : { officialId }), name: item.name, categoryId: item.categoryId, needSex: item.needSex, pic, sourceId, sourceHash: hash(source), row, assets });
   }
   const backup = option("backup", ""); assert.ok(existsSync(backup) && backup.endsWith(".dump.json"), "supply --backup=<current project backup.dump.json>");
   const backupData = JSON.parse(readFileSync(backup, "utf8")), session = JSON.parse(readFileSync(resolve(runtime, "workshop-session.json"), "utf8"));
@@ -157,11 +166,11 @@ async function prepare(): Promise<Receipt> {
 async function main() {
   const gm = (JSON.parse(readFileSync(resolve(runtime, "credentials/smoke-accounts.json"), "utf8")) as (Account & { admin?: boolean })[]).findLast(x => x.admin === true)!; assert.ok(gm);
   const auth = await json("/api/auth/login", "POST", { username: gm.username, password: gm.password }); assert.equal(auth.user.role, "admin"); token = auth.token;
-  if (existsSync(receiptPath)) assert.ok(!args.some(a => /^--(catalog|targets|assets|backup|acquisition)=/.test(a)), "existing journal is for resume only; use --journal=<new-private-file> for a new source batch");
+  if (existsSync(receiptPath)) assert.ok(!args.some(a => /^--(catalog|targets|assets|backup|acquisition|reference-acquisition)=/.test(a)), "existing journal is for resume only; use --journal=<new-private-file> for a new source batch");
   receipt = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, "utf8")) : await prepare(); assert.equal(receipt!.version, 1);
   receipt!.batchId ??= sha(receipt!.createdAt).slice(0, 8); save();
   const selected = receipt!.templates.filter(e => !only || only.includes(e.id)); assert.ok(selected.length > 0); if (only) assert.equal(selected.length, only.length);
-  if (!apply) { console.log(JSON.stringify({ phase: receipt!.phase, templates: selected.map(e => ({ id: e.id, officialId: e.officialId, name: e.name })), assets: selected.reduce((n, e) => n + e.assets.length, 0), receiptPath })); return; }
+  if (!apply) { console.log(JSON.stringify({ phase: receipt!.phase, templates: selected.map(e => ({ id: e.id, officialId: e.officialId, referenceId: e.referenceId, name: e.name })), assets: selected.reduce((n, e) => n + e.assets.length, 0), receiptPath })); return; }
   for (const entry of selected) {
     assert.equal(hash(await json(`/api/admin/items/${entry.sourceId}`)), entry.sourceHash, "source template changed");
     for (const asset of entry.assets) {
@@ -177,7 +186,7 @@ async function main() {
     assert.equal(entry.check.assets.length, entry.assets.length); for (const a of entry.check.assets) assert.equal(a.sha256, entry.assets.find(x => x.key === a.path)?.sha256); save();
     if (!entry.installed) { await absent(`/api/admin/items/${entry.id}`); const created = await json("/api/admin/items", "POST", entry.row, 201); assert.equal(hash(created), hash(entry.row)); entry.installed = true; save(); }
     assert.equal(hash(await json(`/api/admin/items/${entry.id}`)), hash(entry.row), "installed template changed");
-    console.log(`installed ${entry.name}: local ${entry.id}, official ${entry.officialId}, ${entry.assets.length} original PNGs`);
+    console.log(`installed ${entry.name}: local ${entry.id}, ${entry.referenceId ? "reference " + entry.referenceId : "official " + entry.officialId}, ${entry.assets.length} original PNGs`);
   }
   await poll(xml, text => selected.every(e => text.includes(`TemplateID="${e.id}"`) && text.includes(`Pic="${e.pic}"`)), "generated template XML");
   await json("/api/admin/events/reload", "POST", {}); receipt!.phase = "installed"; save();

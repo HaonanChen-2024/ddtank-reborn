@@ -41,13 +41,13 @@ function component(text, style, attributes) {
   return result;
 }
 
-export function patchBagLayoutXml(bytes) {
+export function patchBagLayoutXml(bytes, { bagLabelAlignment = false } = {}) {
   const original = bytes.toString("utf8");
   assert.deepEqual(Buffer.from(original), bytes, "layout is not lossless UTF-8");
   // FilterFrameText defaults to autoSize=left. Keep it for the SNS style that inherits a checkbox.
   let text = component(original, labelStyle, { width: 28, height: 18, autoSize: "left" });
   for (let i = 0; i < checkStyles.length; i++) {
-    text = component(text, checkStyles[i], { width: 46, height: 18, x: i % 2 ? 374 : 324, y: i < 2 ? 300 : 324 });
+    text = component(text, checkStyles[i], { width: 46, height: 18, x: i % 2 ? 374 : 324, y: i < 2 ? 300 : 324, ...(bagLabelAlignment ? { fieldX: 18 } : {}) });
   }
   return Buffer.from(text);
 }
@@ -138,14 +138,16 @@ async function patchLayoutEntry(bytes, entryName, patchXml) {
 }
 
 function patchFlags(flags = {}) {
-  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => key === "gameoverTitle"), "unknown layout patch flag");
+  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment"].includes(key)), "unknown layout patch flag");
   assert.ok(flags.gameoverTitle === undefined || typeof flags.gameoverTitle === "boolean", "invalid gameover title flag");
-  return { gameoverTitle: flags.gameoverTitle ?? false };
+  assert.ok(flags.bagLabelAlignment === undefined || typeof flags.bagLabelAlignment === "boolean", "invalid bag label alignment flag");
+  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}) };
 }
 
 export async function patchBagLayoutArchive(bytes, flags = {}) {
-  const selected = patchFlags(flags), bag = await patchLayoutEntry(bytes, entryName, patchBagLayoutXml);
+  const selected = patchFlags(flags), bag = await patchLayoutEntry(bytes, entryName, source => patchBagLayoutXml(source, selected));
   const summary = { ...bag.summary, labelField: { width: 28, height: 18, autoSize: "left" }, columnX: [324, 374], rowY: [300, 324], renderingAccepted: false };
+  if (selected.bagLabelAlignment) { summary.patchFlags = selected; summary.checkboxFieldX = 18; }
   if (!selected.gameoverTitle) return { output: bag.output, summary };
   const title = await patchLayoutEntry(bag.output, "gameOver.xml", patchGameoverTitleXml);
   return { output: title.output, summary: { ...summary, sha256: title.summary.sha256, bytes: title.output.length,
@@ -164,7 +166,8 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
   assert.ok(["verify", "install", "rollback"].includes(command), "usage: workshop-bag-layout.mjs verify|install|rollback");
   const requested = patchFlags(options);
   assert.ok(options.gameoverTitle === undefined || requested.gameoverTitle, "gameover title option only enables the reviewed patch");
-  assert.ok(command !== "rollback" || options.gameoverTitle === undefined, "rollback does not take patch flags");
+  assert.ok(options.bagLabelAlignment === undefined || requested.bagLabelAlignment, "bag label option only enables the reviewed patch");
+  assert.ok(command !== "rollback" || Object.keys(options).length === 0, "rollback does not take patch flags");
   const target = join(runtime, "client-overlay/ui/vietnam/xml/xml.png"), journalFile = join(runtime, "client-text-followup/layout-overlay.json");
   const backupRoot = resolve(runtime, "client-text-followup/layout-backups");
   const previousJournal = existsSync(journalFile) ? readFileSync(journalFile) : null;
@@ -194,7 +197,7 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
     unlinkSync(journalFile);
     return { rolledBack: true, backupRetained: true, restartRequired: true };
   }
-  const selected = options.gameoverTitle === undefined ? previousFlags : requested;
+  const selected = patchFlags({ ...previousFlags, ...options });
   const result = await patchBagLayoutArchive(sourceBytes, selected), unchanged = Boolean(previous && previous.sha256 === result.summary.sha256);
   if (command === "install" && !unchanged) {
     await checkOwned();
@@ -219,6 +222,6 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const flags = process.argv.slice(3);
-  assert.ok(flags.length <= 1 && flags.every(flag => flag === "--gameover-title"), "unknown or duplicate layout option");
-  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, flags.length ? { gameoverTitle: true } : {})));
+  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment"].includes(flag)), "unknown or duplicate layout option");
+  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}) })));
 }

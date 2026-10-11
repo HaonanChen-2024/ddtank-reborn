@@ -69,6 +69,27 @@ function entryBytes(bytes, name) {
   const entry = zipRecords(bytes).records.find(record => record.name === name);
   return inflateRawSync(bytes.subarray(entry.data, entry.data + entry.compressedSize));
 }
+test("bag label alignment upgrades an owned legacy journal while retaining the gameover patch", async () => {
+  const { fixture, target } = fixtureRoot();
+  try {
+    const old = await runLayoutCommand("install", fixture, source, { gameoverTitle: true });
+    const before = readFileSync(target);
+    const next = await runLayoutCommand("install", fixture, source, { bagLabelAlignment: true });
+    assert.notEqual(next.sha256, old.sha256);
+    assert.deepEqual(next.patchFlags, { gameoverTitle: true, bagLabelAlignment: true });
+    assert.deepEqual(entryBytes(readFileSync(target), "gameOver.xml"), entryBytes(before, "gameOver.xml"));
+    const bag = entryBytes(readFileSync(target), "bagAndInfo.xml").toString();
+    for (const name of ["personanHideGlassCheckBox", "personanHideHatCheckBox", "personanHideSuitCheckBox", "personanHideWingCheckBox"]) {
+      const tag = [...bag.matchAll(/<component\b[^>]*\/>/g)].find(([tag]) => tag.includes(`stylename="${name}"`))[0];
+      assert.match(tag, /\bfieldX="18"/);
+      assert.match(tag, /\bfieldY="-1"/);
+    }
+    assert.equal((await runLayoutCommand("install", fixture, source)).unchanged, true);
+    assert.equal((await runLayoutCommand("verify", fixture, source)).sha256, next.sha256);
+    await runLayoutCommand("rollback", fixture, source);
+    assert.equal(existsSync(target), false);
+  } finally { rmSync(fixture, { recursive: true }); }
+});
 test("combined archive preserves bag effects and every unrelated compressed entry", async () => {
   const bag = await patchBagLayoutArchive(sourceBytes), combined = await patchBagLayoutArchive(sourceBytes, { gameoverTitle: true });
   assert.deepEqual(entryBytes(combined.output, "bagAndInfo.xml"), entryBytes(bag.output, "bagAndInfo.xml"));

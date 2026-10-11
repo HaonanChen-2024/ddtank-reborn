@@ -87,7 +87,7 @@ const only = arg("only", "").split(",").filter(Boolean).map(Number);
 const baseline = process.argv.includes("--baseline");
 assert.ok(only.every(id => Number.isSafeInteger(id) && id > 0), "only requires exact numeric template IDs");
 const templates = manifest.templates.filter(row => row.installed === true && (row.needSex === 0 || row.needSex === (sex === "m" ? 1 : 2)) && (!only.length || only.includes(row.id)))
-  .map(({ id, pic, categoryId, needSex, officialId, name, sourceId }) => ({ id, pic, categoryId, needSex, officialId, name, sourceId }));
+  .map(({ id, pic, categoryId, needSex, officialId, referenceId, name, sourceId }) => ({ id, pic, categoryId, needSex, officialId, referenceId, name, sourceId }));
 assert.ok(templates.length > 0, "no installed templates match the exact fixture");
 for (const row of templates) assert.ok(Number.isSafeInteger(row.id) && [1, 2, 3, 4, 5, 6].includes(row.categoryId) && /^[A-Za-z0-9_-]+$/.test(row.pic), "installed appearance mapping is invalid");
 if (only.length) assert.equal(templates.length, only.length, "one or more requested template IDs are not installed for this fixture");
