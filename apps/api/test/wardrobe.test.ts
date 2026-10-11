@@ -45,6 +45,15 @@ function suit(pic: string, sex: string, layers: number[], showHeight = 312, game
     file(resource, `${root}/${layer}/game1.png`, png(gameWidth, gameHeight));
   }
 }
+function wearable(category: string, pic: string, sex: string, layers: number[], showWidth = 250, showHeight = 312, hairTypes = [""]) {
+  const root = `image/equip/${sex}/${category}/${pic}`;
+  file(resource, `${root}/icon_1.png`, png(78, 78));
+  for (const layer of layers) for (const hairType of hairTypes) {
+    const folder = `${root}/${layer}${hairType ? "/" + hairType : ""}`;
+    file(resource, `${folder}/SHOW.PNG`, png(showWidth, showHeight));
+    file(resource, `${folder}/game.png`, png(1482, 285));
+  }
+}
 
 beforeAll(async () => {
   suit("draft", "m", [1, 2, 3]);
@@ -63,6 +72,14 @@ beforeAll(async () => {
   file(resource, "image/equip/m/suits/corrupt/icon_1.png", corrupt);
   suit("overlay", "m", [1]);
   file(uploads, "image/equip/m/suits/overlay/1/game.png", png(1280, 282));
+  wearable("cloth", "cloth664", "m", [1, 2, 3]);
+  wearable("head", "head956", "m", [1, 2], 250, 342);
+  wearable("glass", "glasses", "f", [1]);
+  wearable("eff", "decoration", "f", [1]);
+  wearable("hair", "hair458", "m", [1, 2], 250, 312, ["A", "B"]);
+  wearable("hair", "hair-missing-b", "f", [1], 250, 312, ["A"]);
+  wearable("face", "face417", "m", [1, 2, 3], 1000);
+  wearable("face", "face-two", "f", [1], 500);
   h = await createDb("pglite:memory");
   await migrateDb(h);
   await createDevAccounts(h);
@@ -86,13 +103,13 @@ async function check(payload: Record<string, unknown>): Promise<WardrobeCheckRes
   return response.json();
 }
 
-describe("read-only suit draft checks", () => {
+describe("read-only wearable draft checks", () => {
   it("uses existing admin authorization and rejects unsafe/unsupported drafts", async () => {
     const request = (headers: Record<string, string>, payload: Record<string, unknown>) => built.app.inject({ method: "POST", url: "/api/admin/items/wardrobe-check", headers, payload });
     expect((await request({}, draft("draft"))).statusCode).toBe(401);
     expect((await request(playerAuth, draft("draft"))).statusCode).toBe(403);
     for (const Pic of ["../secret", "nested/path", "nested\\path", "%2e%2e", ".", ".."]) expect((await request(auth, draft(Pic))).statusCode).toBe(400);
-    expect((await request(auth, { ...draft("draft"), CategoryID: 5 })).statusCode).toBe(400);
+    for (const CategoryID of [0, 7, 14]) expect((await request(auth, { ...draft("draft"), CategoryID })).statusCode).toBe(400);
     expect((await request(auth, draft("draft", 1, 102))).statusCode).toBe(400);
   });
 
@@ -117,6 +134,45 @@ describe("read-only suit draft checks", () => {
       expect(result).toMatchObject({ pathSex: "f", state: "ok" });
       expect(result.assets.every((asset) => asset.path.includes("/f/suits/neutral/"))).toBe(true);
     }
+  });
+
+  it("accepts ordinary single-image clothes, hats, glasses and decorations without suit-only game1", async () => {
+    for (const [CategoryID, Pic, NeedSex, Property8] of [[5, "cloth664", 1, 123], [1, "head956", 1, 12], [2, "glasses", 0, 1], [4, "decoration", 2, 1]] as const) {
+      const result = await check({ CategoryID, Pic, NeedSex, Property8 });
+      expect(result).toMatchObject({ state: "ok", readOnly: true, renderingAccepted: false, validationScope: "png-header-chunk-crc-and-frame-grid" });
+      expect(result.assets).toHaveLength(1 + String(Property8).length * 2);
+      expect(result.assets.some((asset) => asset.kind === "game1")).toBe(false);
+      expect(result.assets.find((asset) => asset.kind === "show")?.frames).toEqual([
+        { owner: "ShowCharacter", columns: 1, rows: 1, frameWidth: 250, frameHeight: 342, state: "ok" },
+        { owner: "RoomCharacter", columns: 1, rows: 1, frameWidth: 250, frameHeight: 342, state: "ok" },
+      ]);
+    }
+    const clothes = await check({ CategoryID: 5, Pic: "cloth664", NeedSex: 1, Property8: 123 });
+    // Fixtures have empty alpha, like unused dye masks. Static validation must not label these corrupt.
+    expect(clothes.assets.filter((asset) => asset.kind === "game").every((asset) => asset.state === "ok")).toBe(true);
+  });
+
+  it("requires both lowercase hair states per layer and reports the missing state precisely", async () => {
+    const result = await check({ CategoryID: 3, Pic: "HAIR458", NeedSex: 1, Property8: 12 });
+    expect(result.state).toBe("ok");
+    expect(result.assets).toHaveLength(9);
+    expect(result.assets[0]?.hairType).toBeUndefined();
+    expect(result.assets[1]).toMatchObject({ kind: "show", layer: 1, hairType: "a", path: "image/equip/m/hair/hair458/1/a/show.png", url: "http://api.test/resource/image/equip/m/hair/hair458/1/a/show.png" });
+    expect(result.assets.filter((asset) => asset.kind === "game").map((asset) => [asset.layer, asset.hairType])).toEqual([[1, "a"], [1, "b"], [2, "a"], [2, "b"]]);
+    const incomplete = await check({ CategoryID: 3, Pic: "hair-missing-b", NeedSex: 2, Property8: 1 });
+    expect(incomplete.state).toBe("incomplete");
+    expect(incomplete.assets.filter((asset) => asset.state === "missing").map((asset) => [asset.hairType, asset.kind])).toEqual([["b", "show"], ["b", "game"]]);
+  });
+
+  it("requires a four-image face strip without enumerating per-item emotion game1 files", async () => {
+    const result = await check({ CategoryID: 6, Pic: "face417", NeedSex: 1, Property8: 123 });
+    expect(result.state).toBe("ok");
+    expect(result.assets).toHaveLength(7);
+    expect(result.assets.filter((asset) => asset.kind === "show").every((asset) => asset.width === 1000 && asset.frames.every((frame) => frame.state === "ok"))).toBe(true);
+    const two = await check({ CategoryID: 6, Pic: "face-two", NeedSex: 2, Property8: 1 });
+    expect(two.state).toBe("incompatible");
+    expect(two.assets.find((asset) => asset.kind === "show")?.state).toBe("incompatible");
+    expect(two.assets.find((asset) => asset.kind === "game")?.state).toBe("ok");
   });
 
   it("distinguishes missing, placeholder and invalid PNG files", async () => {

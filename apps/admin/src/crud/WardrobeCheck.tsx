@@ -12,7 +12,7 @@ export function wardrobeDraft(values: Row) {
 
 function AssetPreview({ asset }: { asset: WardrobeAsset }) {
   const { t } = useI18n();
-  const [frameIndex, setFrameIndex] = useState(asset.kind === "show" ? 1 : 0);
+  const [frameIndex, setFrameIndex] = useState(asset.kind === "show" && asset.frames.length > 1 ? 1 : 0);
   const [imageError, setImageError] = useState(false);
   const frame = asset.frames[frameIndex];
   const canPreview = asset.state === "ok" || asset.state === "incompatible";
@@ -20,6 +20,7 @@ function AssetPreview({ asset }: { asset: WardrobeAsset }) {
   const height = Math.max(asset.height ?? 0, frame ? frame.rows * frame.frameHeight : 0);
   return (
     <div className="rounded-xl border border-line p-3">
+      <p className="text-sm">{t("wardrobe.layer", { layer: asset.layer })}{asset.hairType && ` · ${t("wardrobe.hairType", { type: asset.hairType.toUpperCase() })}`}</p>
       <p className="break-all font-mono text-xs">{asset.path}</p>
       <p className="my-1 text-sm text-muted">{t(`wardrobe.state.${asset.state}`)}{asset.width !== undefined && ` · ${asset.width}×${asset.height}px`}</p>
       {asset.warnings.filter((warning) => warning !== "pixel-decode-unchecked").map((warning) => <p key={warning} className="text-xs text-sun">{t(`wardrobe.warning.${warning}`)}</p>)}
@@ -42,6 +43,18 @@ function AssetPreview({ asset }: { asset: WardrobeAsset }) {
   );
 }
 
+export function WardrobeResult({ result }: { result: WardrobeCheckResult }) {
+  const { t } = useI18n();
+  const layers = [...new Set(result.assets.filter((asset) => asset.kind !== "icon").map((asset) => asset.layer))].sort((a, b) => a - b);
+  return (
+    <div className="mt-3 space-y-3">
+      <p className="text-sm">{t(`wardrobe.state.${result.state}`)} · {t("wardrobe.draft", { pic: result.draft.Pic, sex: result.draft.NeedSex, folder: result.pathSex })}</p>
+      <p className="text-sm">{t("wardrobe.layers", { layers: layers.join(", ") })}</p>
+      {result.assets.map((asset) => <AssetPreview key={`${asset.path}:${asset.sha256 ?? asset.state}`} asset={asset} />)}
+    </div>
+  );
+}
+
 export function WardrobeCheck({ getValues }: { getValues: () => Row }) {
   const { t } = useI18n();
   const [result, setResult] = useState<WardrobeCheckResult | null>(null);
@@ -51,7 +64,6 @@ export function WardrobeCheck({ getValues }: { getValues: () => Row }) {
     setError("");
     setResult(null);
     const draft = wardrobeDraft(getValues());
-    if (Number(draft.CategoryID) !== 13) { setError(t("wardrobe.unsupported")); return; }
     setPending(true);
     try { setResult(await api.post<WardrobeCheckResult>("/api/admin/items/wardrobe-check", draft)); }
     catch (failure) { setError(failure instanceof ApiError ? failure.message : t("common.error")); }
@@ -65,12 +77,7 @@ export function WardrobeCheck({ getValues }: { getValues: () => Row }) {
       </div>
       <p className="mt-2 text-xs text-muted">{t("wardrobe.scope")}</p>
       {error && <p role="alert" className="mt-2 text-sm text-coral">{error}</p>}
-      {result && (
-        <div className="mt-3 space-y-3">
-          <p className="text-sm">{t(`wardrobe.state.${result.state}`)} · {t("wardrobe.draft", { pic: result.draft.Pic, sex: result.draft.NeedSex, folder: result.pathSex })}</p>
-          {result.assets.map((asset) => <AssetPreview key={`${asset.path}:${asset.sha256 ?? asset.state}`} asset={asset} />)}
-        </div>
-      )}
+      {result && <WardrobeResult result={result} />}
     </section>
   );
 }

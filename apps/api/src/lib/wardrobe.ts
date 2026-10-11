@@ -1,5 +1,6 @@
-/** Read-only Category 13 checks. AS3 reference: DDTank41 commit 7fcb5529,
- * PathManager.solveGoodsPath, BaseLayer/GameLayer and Character.createFrames.
+/** Read-only wearable resource checks. AS3 reference: DDTank41 commit 7fcb5529,
+ * PathManager.solveGoodsPath, BaseLayer/GameLayer, ShowCharacterLoader/RoomCharaterLoader
+ * and Character.createFrames. Transparent dye layers are not invalid just because their alpha is empty.
  * File/grid checks do not prove pixel decoding, animation alignment or actual wearing. */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -8,8 +9,9 @@ import { z } from "zod";
 import type { ResourceIndex } from "./resources.js";
 import { safeKey } from "./storage.js";
 
+const categories: Record<number, string> = { 1: "head", 2: "glass", 3: "hair", 4: "eff", 5: "cloth", 6: "face", 13: "suits" };
 const draftSchema = z.object({
-  CategoryID: z.coerce.number().int().refine((n) => n === 13, "CategoryID 13 only"),
+  CategoryID: z.coerce.number().int().refine((n) => Object.hasOwn(categories, n), "CategoryID must be 1..6 or 13"),
   Pic: z.string().min(1).max(200).refine((s) => s === s.trim() && safeKey(s) === s && !s.includes("/") && s !== "." && s !== "..", "Pic must be one resource folder name"),
   NeedSex: z.coerce.number().int().min(0).max(2),
   Property8: z.coerce.number().int().min(1).max(999_999_999).refine((n) => !String(n).includes("0"), "Property8 must contain layer digits 1..9"),
@@ -27,6 +29,7 @@ export interface WardrobeFrames {
 export interface WardrobeAsset {
   kind: "icon" | "show" | "game" | "game1";
   layer: number;
+  hairType?: "a" | "b";
   path: string;
   url: string;
   state: WardrobeAssetState;
@@ -67,13 +70,18 @@ function pngSize(b: Buffer): { width: number; height: number } | undefined {
   return idat && ended ? { width, height } : undefined;
 }
 
-function frameChecks(kind: WardrobeAsset["kind"], width: number, height: number): WardrobeFrames[] {
+function frameChecks(category: number, kind: WardrobeAsset["kind"], width: number, height: number): WardrobeFrames[] {
   if (kind === "icon") return [];
+  // Ordinary clothes/head/hair/etc. are single images; the loaders repeat their composed content.
+  if (kind === "show" && category !== 6 && category !== 13) return (["ShowCharacter", "RoomCharacter"] as const).map((owner) => ({
+    owner, columns: 1, rows: 1, frameWidth: 250, frameHeight: 342,
+    state: width === 250 && (height === 312 || height === 342) ? "ok" : "incompatible",
+  }));
   // Known legacy show sheets are 312px high; copyPixels leaves the final 30px transparent.
   // Show consumes the first 2 frames, Room consumes 4; a 500px sheet is insufficient for Room.
   if (kind === "show") return (["ShowCharacter", "RoomCharacter"] as const).map((owner) => ({
     owner, columns: owner === "ShowCharacter" ? 2 : 4, rows: 1, frameWidth: 250, frameHeight: 342,
-    state: (height === 312 || height === 342) && (owner === "ShowCharacter" ? width === 500 || width === 1000 : width === 1000) ? "ok" : "incompatible",
+    state: (height === 312 || height === 342) && (category === 13 && owner === "ShowCharacter" ? width === 500 || width === 1000 : width === 1000) ? "ok" : "incompatible",
   }));
   // Unknown oversized sheets may still contain misaligned frames; only the verified standard is accepted here.
   return [{ owner: "GameCharacter", columns: 13, rows: 3, frameWidth: 114, frameHeight: 95, state: width === 1482 && height === 285 ? "ok" : "incompatible" }];
@@ -83,11 +91,13 @@ export function checkWardrobe(resources: ResourceIndex, body: unknown, publicUrl
   const draft = draftSchema.parse(body);
   // The original layers use template.NeedSex == 1, not the player's Sex. Neutral (0) uses f too.
   const pathSex = draft.NeedSex === 1 ? "m" : "f";
-  const root = `image/equip/${pathSex}/suits/${draft.Pic}`;
+  const root = `image/equip/${pathSex}/${categories[draft.CategoryID]}/${draft.CategoryID === 13 ? draft.Pic : draft.Pic.toLowerCase()}`;
   const layers = [...new Set([...String(draft.Property8)].map(Number))];
-  const wanted = [{ kind: "icon" as const, layer: 1, path: `${root}/icon_1.png` }, ...layers.flatMap((layer) => (["show", "game", "game1"] as const).map((kind) => ({ kind, layer, path: `${root}/${layer}/${kind}.png` })))];
-  const assets = wanted.map(({ kind, layer, path }): WardrobeAsset => {
-    const asset: WardrobeAsset = { kind, layer, path, url: publicUrl.replace(/\/+$/, "") + "/resource/" + path.split("/").map(encodeURIComponent).join("/"), state: "missing", warnings: [], frames: [] };
+  const kinds: WardrobeAsset["kind"][] = draft.CategoryID === 13 ? ["show", "game", "game1"] : ["show", "game"];
+  const hairTypes: ("a" | "b" | undefined)[] = draft.CategoryID === 3 ? ["a", "b"] : [undefined];
+  const wanted = [{ kind: "icon" as const, layer: 1, path: `${root}/icon_1.png`, hairType: undefined }, ...layers.flatMap((layer) => hairTypes.flatMap((hairType) => kinds.map((kind) => ({ kind, layer, hairType, path: `${root}/${layer}${hairType ? "/" + hairType : ""}/${kind}.png` }))))];
+  const assets = wanted.map(({ kind, layer, path, hairType }): WardrobeAsset => {
+    const asset: WardrobeAsset = { kind, layer, path, ...(hairType ? { hairType } : {}), url: publicUrl.replace(/\/+$/, "") + "/resource/" + path.split("/").map(encodeURIComponent).join("/"), state: "missing", warnings: [], frames: [] };
     const file = resources.resolve(path);
     if (!file) return asset;
     let data: Buffer;
@@ -98,7 +108,7 @@ export function checkWardrobe(resources: ResourceIndex, body: unknown, publicUrl
     if (!size) { asset.state = "invalid"; return asset; }
     Object.assign(asset, size);
     if (size.width === 1 && size.height === 1) { asset.state = "placeholder"; return asset; }
-    asset.frames = frameChecks(kind, size.width, size.height);
+    asset.frames = frameChecks(draft.CategoryID, kind, size.width, size.height);
     asset.state = asset.frames.some((frame) => frame.state === "incompatible") ? "incompatible" : "ok";
     if (kind === "icon" && (size.width !== 78 || size.height !== 78)) asset.warnings.push("icon-size");
     if (kind === "show" && size.height === 312) asset.warnings.push("show-padding");

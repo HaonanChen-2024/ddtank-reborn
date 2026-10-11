@@ -50,11 +50,44 @@ node scripts/workshop.mjs start --lan=192.168.1.6
 
 ## 内容管理
 
-后台物品新建补齐现有数据库必填默认值，复制保留完整模板并清除主键。套装编辑页可以读取当前草稿，检查素材路径、PNG chunk CRC、图标及 Show/Room/Game 帧网格，再预览原图。检查接口仅支持 CategoryID13，`renderingAccepted:false`：结构合格不能替代像素解码或游戏穿戴验收。
+后台物品新建补齐现有数据库必填默认值，复制保留完整模板并清除主键。物品编辑页可以读取当前草稿，检查素材路径、PNG chunk CRC、图标及 Show/Room/Game 帧网格，再预览原图。检查接口支持普通 CategoryID1..6 和套装13；头发检查 a/b 两种帽发状态，普通部件不要求套装的 game1.png。普通衣帽的250×312单图与表情的1000宽四格按原加载器区分；透明染色遮罩不因全透明而被判损坏。所有结果仍为 `renderingAccepted:false`：结构合格不能替代像素解码或游戏穿戴验收。
 
 素材上传继续使用原有覆盖机制；模板管理、邮件发放和商城入口沿用现有服务。导入时使用唯一 TemplateID/Pic，保存字节摘要、原状态和删除范围，避免覆盖底包硬链接。`apps/api/scripts/workshop-wardrobe-smoke.ts --apply --hold` 是隔离测试流程，会创建本机私有测试账号，不能替代普通玩家的操作入口；重复执行时保留未回退账本。`--rollback` 仅回退本次记录且摘要吻合的素材/模板。
 
 商城编辑页补齐A/B/C三档的Price1..3/Value1..3；BuyType=0时Unit表示有效天数，非0表示数量，币种/兑换材料由Price指定。旧禁用档哨兵值及Shop数值型IsBind/IsVouch保持兼容。新商品还需在“商城展示”(`/shop-show`)填写ShopId=Shop.ID与原ShopType栏目；TempID自动生成，CanBuy不能替代展示记录。男女栏目分开，按已有同类商品参照，不将Type当作CategoryID或NeedSex。
+
+## 官网目录与普通服饰导入
+
+`scripts/workshop-official.mjs` 从官网关联的匿名公开搭配站保存六类目录、原分页响应、请求摘要和新增/变更/移除差异。每次生成新快照；默认不下载图片。只有 `--targets=<目标时装.csv> --download-targets` 才获取唯一名称匹配目标的图标、Property8 分层 show/game，以及头发 a/b。同名歧义不自动选择；sourceTypeList=[0,1] 不证明正式服/怀旧服全量覆盖。目录更新时间不等于时装发布日期；HTTP200和PNG头也不等于完整解码或能穿戴。
+
+```powershell
+node scripts/workshop-official.mjs --previous=../../runtime/official-resource-reverse/diy-catalog.json --targets=../../wardrobe/目标时装.csv
+# 明确目标需要新图片时追加 --download-targets；输出独立快照目录
+node scripts/workshop-backup.mjs backup
+# 从新快照的manifest规划下一批，替换三个占位路径；默认只读API并保存计划
+node --import tsx apps/api/scripts/workshop-official-install.ts --acquisition=<snapshot/manifest.json> --journal=<runtime/new-batch.json> --backup=<current.dump.json>
+# 继续同一账本，仅写本批独立覆盖与新模板，不重指定来源文件
+node --import tsx apps/api/scripts/workshop-official-install.ts --journal=<runtime/new-batch.json> --apply --exercise
+```
+
+导入器复制实服同类别/性别模板的必填规则，覆盖官网明确给出的名称、属性、质量及图层；官网缺失的强化、等级和回收规则沿用本地源模板，不推断官方规则或价格。官网编号只保留为来源，旧客户端按编号首位选显示层，因此本地编号在对应类别的空闲范围分配；Pic和测试账号按批次隔离。原始PNG字节保留，上传后逐图HTTP摘要回读，先通过CRC/网格检查再创建可装备模板，随后等待XML和游戏缓存重载。
+
+`--exercise` 用独立角色完成真实邮件领取、穿脱、TCP/WS重登与保存。邮件尚未领取时可以按精确附件/角色归属继续；来源摘要、已占用路径或模板变化会拒绝覆盖。已有账本只用于续跑，追加来源参数会拒绝；新目标使用新账本。导入与测试素材保留供游玩，失败时保留完整账本；工具不自动删除未知库存或恢复整库覆盖新进度。
+
+新模板可在本机后台“物品”按中文名称搜索，在“玩家”向自己的本地角色永久邮件发放，游戏邮箱领取。普通商城全零价格会被既有购买逻辑拒绝，因此本批不伪造官网价格或修改购买规则。男女部件分别限制穿戴，女装领取进男性库存也不能直接穿戴。
+
+`research/client/WorkshopOfficialWardrobeProbe.as` 与 `scripts/workshop-official-render.mjs` 使用原客户端类、独立PlayerInfo和私有headless Chromium，读取ShowCharacter/RoomCharacter/GameCharacter、染色和头发a/b；不发送换装指令，不操作桌面或现有浏览器。生成原组件画面仍需检查实际截图、精确TemplateID/Pic及加载证据，不能称为自然实战、鼠标操作或用户接受验收。
+
+```powershell
+node scripts/workshop-official-render.mjs --journal=<runtime/new-batch.json> --sex=m
+node scripts/workshop-official-render.mjs --journal=<runtime/new-batch.json> --sex=f
+# 实际检查截图后，在私有账本记录 renderingAccepted=true 与明确的验收范围/证据
+node scripts/workshop-official-deliver.mjs --journal=<runtime/new-batch.json> --user=<自己的本地角色ID>
+```
+
+发放沿用GM永久绑定附件，每件独立邮件；邮件保留既有720小时有效期，请在期限内领取。成功账本重跑只报告alreadyDelivered，不重发，也不因用户随后换装或获得金币改写原成功记录。发送前保存pending和已有邮件ID；未知结果只核对唯一新邮件/精确附件，无法确定时保留账本并拒绝盲目重发。
+
+本批截至2026-10-11已实际安装14个官方部件、98张PNG，均通过真实穿脱/TCP和WS重登保存。原AS3的Show两帧、Room四帧、Game选定姿态、图标与2/3层染色已检查32张截图；完整自然战斗及动画未新增验收。全部14件已发到本地角色「1」的邮箱，7男/7女；原角色外观、金币和点券不变，女装仍受性别限制。其余13个目标未在公开目录命中，不能称为官方新衣服齐全。每次刷新保存独立目录与差异；本日最后一次全目录回读仍为4324条，新增/变更/移除均0。
 
 ## 中文客户端
 
