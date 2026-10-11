@@ -101,20 +101,26 @@ node scripts/workshop-language.mjs rollback
 
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML 只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
+大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本，限定14张 fmt5 位图：12个建筑标题、频道与签到。原入口和动画继续使用；其余333个 SWF 标签以及文字矩形以外像素不变。农场、独立活动入口和工具栏的其他图片仍待处理，这批不代表整个大厅已中文化。
+
 ```powershell
 # 先确认没有在线玩家或进行中的对局，再正常停止本项目
 node scripts/workshop.mjs stop
 node scripts/workshop-bag-art.mjs install
 node scripts/workshop-bag-art.mjs install --asset=hidden-controls
+node scripts/workshop-bag-art.mjs install --asset=hall
 node scripts/workshop-bag-layout.mjs install
 node scripts/workshop.mjs start
 node scripts/workshop-bag-art.mjs verify
 node scripts/workshop-bag-art.mjs verify --asset=hidden-controls
+node scripts/workshop-bag-art.mjs verify --asset=hall
 node scripts/workshop-bag-layout.mjs verify
 # 回退时同样停服，将对应 install 换成 rollback，随后启动
 ```
 
 API 在启动时建立资源索引，新覆盖需要正常重启及全新客户端连接才能核验。`node scripts/workshop-official-render.mjs --view=bag --sex=m`（或 `--sex=f`）使用账本指定的独立账号，调用原公开背包方法，保存完整背包画面、原控件边界及角色未变化证明；不模拟鼠标键盘、不修改背包。截图必须实际检查，不能把组件加载完成当成全部中文化或交互通过。帮助正文、奖励弹窗、项链培养及其他玩家页面仍有待办。
+
+`--view=hall` 使用同一独立账号和原大厅加载流程，保存整页画面与角色未变化证明。它不打开背包、不发送建房或战斗指令，也不验收点击入口或自然对局；仍需逐张检查实际画面。
 
 ## 单人游玩与等级
 

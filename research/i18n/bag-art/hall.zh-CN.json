@@ -1,0 +1,764 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/hall.swf",
+  "sourceAssetSha256": "29cde09a17aada82dbf09ce42d466fb9ccc38a3db53b70d4f38bde78c6a6744a",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only the 12 reviewed transparent building captions, channel label, and sign-in label. All other image formats, shapes, sprites, animation frames, and ABC tags remain unchanged. This is not an all-hall translation.",
+  "bitmaps": [
+    {
+      "id": 18,
+      "width": 92,
+      "height": 41,
+      "sourcePixelsSha256": "a69380fa0a60f6d27b3824c0b2af730977385058f768b0e1ee89cc5b4582ca5b",
+      "originalText": "Guild",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_consortia_mc",
+          "depth": 4
+        },
+        {
+          "sprite": 20,
+          "name": null,
+          "depth": 1
+        },
+        19,
+        18
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            92,
+            41
+          ],
+          "text": "公会",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "width": 191,
+      "height": 44,
+      "sourcePixelsSha256": "1291ae8319447a57e7c0d5982bc79900ebb8fe5613cf3850a8b96aea5a10d57b",
+      "originalText": "Termas",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_spa_mc",
+          "depth": 6
+        },
+        {
+          "sprite": 23,
+          "name": null,
+          "depth": 1
+        },
+        22,
+        21
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            191,
+            44
+          ],
+          "text": "温泉",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "width": 181,
+      "height": 40,
+      "sourcePixelsSha256": "59c1a78f242ef34d7a034e03a44b89619f0d3c32e4326f81050a70bae5e24702",
+      "originalText": "Hall da Fama",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_tofflist_mc",
+          "depth": 8
+        },
+        {
+          "sprite": 26,
+          "name": null,
+          "depth": 1
+        },
+        25,
+        24
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            181,
+            40
+          ],
+          "text": "竞技榜",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "width": 182,
+      "height": 47,
+      "sourcePixelsSha256": "cfba6c7600ddfcd530ea9972bd9fd4fe8f9c6295215276f950d7815b51d0ccb1",
+      "originalText": "Campo de Treino",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_campaignLab_mc",
+          "depth": 10
+        },
+        {
+          "sprite": 29,
+          "name": null,
+          "depth": 1
+        },
+        28,
+        27
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            182,
+            47
+          ],
+          "text": "训练馆",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "width": 122,
+      "height": 45,
+      "sourcePixelsSha256": "e452684c39de7a45112df48d05f4b076e78730f5e597ed58507436743c5abbc6",
+      "originalText": "Forja",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_store_mc",
+          "depth": 12
+        },
+        {
+          "sprite": 32,
+          "name": null,
+          "depth": 1
+        },
+        31,
+        30
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            122,
+            45
+          ],
+          "text": "铁匠铺",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "width": 105,
+      "height": 47,
+      "sourcePixelsSha256": "6f53e7dad0b0996af52c7c980fd653e514e6160b622512efe19388fbf4720336",
+      "originalText": "Amizades",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_civil_mc",
+          "depth": 14
+        },
+        {
+          "sprite": 35,
+          "name": null,
+          "depth": 1
+        },
+        34,
+        33
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            105,
+            47
+          ],
+          "text": "交友中心",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "width": 180,
+      "height": 43,
+      "sourcePixelsSha256": "1cfa5d12ba5f84e84b689cfd024144340dd7a8fcaf5cff4d92a05cd5eb0be867",
+      "originalText": "Academia",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_master_mc",
+          "depth": 16
+        },
+        {
+          "sprite": 38,
+          "name": null,
+          "depth": 1
+        },
+        37,
+        36
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            180,
+            43
+          ],
+          "text": "师徒系统",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "width": 187,
+      "height": 41,
+      "sourcePixelsSha256": "fb4f6810ba3395aa347e8a92d51619e939570f6e25853630fb7f67182a1ee51d",
+      "originalText": "Expedição",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_dungeon_mc",
+          "depth": 18
+        },
+        {
+          "sprite": 41,
+          "name": null,
+          "depth": 1
+        },
+        40,
+        39
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            187,
+            41
+          ],
+          "text": "副本远征",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "width": 116,
+      "height": 47,
+      "sourcePixelsSha256": "0827c4b969808d54606eebbb30ad28ac6b19d0742c39db549fab799b7ab85ea8",
+      "originalText": "Đấu giá",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_auction_mc",
+          "depth": 20
+        },
+        {
+          "sprite": 44,
+          "name": null,
+          "depth": 1
+        },
+        43,
+        42
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            116,
+            47
+          ],
+          "text": "拍卖行",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "width": 84,
+      "height": 39,
+      "sourcePixelsSha256": "dc3410ac59e2b574a09c279936dd65b223dc05859cc0f5a87ee6669d15f90801",
+      "originalText": "Shop",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_shop_mc",
+          "depth": 22
+        },
+        {
+          "sprite": 47,
+          "name": null,
+          "depth": 1
+        },
+        46,
+        45
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            84,
+            39
+          ],
+          "text": "商城",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "width": 199,
+      "height": 47,
+      "sourcePixelsSha256": "b819f97cbbd12148fade44efd8f040a4598f390f79014c53386352c21c969fd1",
+      "originalText": "Sala de Jogos",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_roomList_mc",
+          "depth": 24
+        },
+        {
+          "sprite": 50,
+          "name": null,
+          "depth": 1
+        },
+        49,
+        48
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            199,
+            47
+          ],
+          "text": "游戏大厅",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "width": 237,
+      "height": 45,
+      "sourcePixelsSha256": "89f16e78acc5927d6d230126be7cb7438a7481c8c6d56b9fba82ca0b73a8e170",
+      "originalText": "Igreja",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "createMainViewLine": 258,
+        "bindingArrayLines": [
+          203,
+          204
+        ],
+        "initialFrameLine": 260,
+        "initialFrame": 13
+      },
+      "referenceChain": [
+        {
+          "sprite": 245,
+          "name": "txt_church_mc",
+          "depth": 26
+        },
+        {
+          "sprite": 53,
+          "name": null,
+          "depth": 1
+        },
+        52,
+        51
+      ],
+      "ownerSymbolClass": {
+        "id": 245,
+        "name": "asset.hall.hallMainViewAsset"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            237,
+            45
+          ],
+          "text": "婚礼礼堂",
+          "transparent": true,
+          "fontSize": 27,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 2,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 3,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "width": 101,
+      "height": 48,
+      "sourcePixelsSha256": "160e9ed5d31797c276c5420d7c316208f4a0951800ccbeb393b400b74ed4205d",
+      "originalText": "Kênh",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/HallStateView.as",
+        "line": 285,
+        "createStyle": "serverlist.hall.ServerDropList"
+      },
+      "className": "asset.serverlist.hallBG",
+      "regions": [
+        {
+          "box": [
+            26,
+            0,
+            51,
+            21
+          ],
+          "text": "频道",
+          "transparent": true,
+          "fontSize": 14,
+          "fill": "#ff4833",
+          "fillBottom": "#e3140e",
+          "stroke": "#ffffff",
+          "strokeWidth": 1,
+          "outerStroke": "#282525",
+          "outerStrokeWidth": 2,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 267,
+      "width": 75,
+      "height": 75,
+      "sourcePixelsSha256": "989454e5d7069886656c3d96b33551cdf080f247621b0f5de40f0dd98f41e285",
+      "originalText": "Eventos",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/calendar/CalendarManager.as",
+        "createLines": [
+          169,
+          173
+        ],
+        "clickLines": [
+          176,
+          178
+        ],
+        "openLines": [
+          145,
+          162
+        ],
+        "titleLines": [
+          261,
+          263
+        ]
+      },
+      "referenceChain": [
+        276,
+        272,
+        {
+          "tagCode": 70,
+          "characterId": 269
+        },
+        269,
+        268,
+        267
+      ],
+      "ownerSymbolClass": {
+        "id": 276,
+        "name": "asset.sign.signBtnMc"
+      },
+      "regions": [
+        {
+          "box": [
+            9,
+            54,
+            57,
+            19
+          ],
+          "text": "签到",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#fff8b8",
+          "fillBottom": "#e6ac43",
+          "stroke": "#614103",
+          "strokeWidth": 1,
+          "outerStroke": "#fffce5",
+          "outerStrokeWidth": 1.5,
+          "preserveAlpha": false
+        }
+      ]
+    }
+  ]
+}

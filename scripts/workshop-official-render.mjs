@@ -14,8 +14,8 @@ const privateRoot = join(runtime, "content-research/official-probe");
 const arg = (name, fallback) => process.argv.find(value => value.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const sha256 = file => createHash("sha256").update(readFileSync(file)).digest("hex");
 const view = arg("view", "appearances");
-assert.ok(["appearances", "bag"].includes(view), "view must be appearances or bag");
-const probeName = view === "bag" ? "WorkshopBagViewProbe" : "WorkshopOfficialWardrobeProbe";
+assert.ok(["appearances", "bag", "hall"].includes(view), "view must be appearances, bag or hall");
+const probeName = view === "appearances" ? "WorkshopOfficialWardrobeProbe" : "WorkshopBagViewProbe";
 const probeSource = join(repo, `research/client/${probeName}.as`);
 const probeSwf = join(privateRoot, `${probeName}.swf`);
 assert.ok(existsSync(probeSource), "official probe source is unavailable");
@@ -53,7 +53,7 @@ assert.ok(templates.length > 0, "no installed templates match the exact fixture"
 for (const row of templates) assert.ok(Number.isSafeInteger(row.id) && [1, 2, 3, 4, 5, 6].includes(row.categoryId) && /^[A-Za-z0-9_-]+$/.test(row.pic), "installed appearance mapping is invalid");
 if (only.length) assert.equal(templates.length, only.length, "one or more requested template IDs are not installed for this fixture");
 if (baseline) assert.ok(templates.every(row => Number.isSafeInteger(row.sourceId) && row.sourceId > 0), "legacy baseline requires exact source template IDs");
-const expectedJobs = view === "bag" ? 1 : baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : 2), 0);
+const expectedJobs = view !== "appearances" ? 1 : baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : 2), 0);
 const session = JSON.parse(readFileSync(join(runtime, "workshop-session.json"), "utf8"));
 assert.equal(session.publicHost ?? "127.0.0.1", "127.0.0.1", "temporary client tickets require the loopback stack");
 const apiUrl = "http://127.0.0.1:8080", webUrl = "http://127.0.0.1:5173";
@@ -70,7 +70,7 @@ mkdirSync(output, { recursive: true });
 const publicFile = join(repo, "apps/web/public", `workshop-official-${runId}.html`);
 const probeFile = join(repo, "apps/web/public", `workshop-official-${runId}-Loading.swf`);
 const loadingFile = join(repo, "apps/web/public", `workshop-official-${runId}-DDT_Loading.swf`);
-const probeParameters = { probeUserId: fixture.characterId, probeTemplates: JSON.stringify(templates), probeBaseline: String(baseline), probeClient: game.swfUrl, probeGameModule: `${apiUrl}/flash/ui/vietnam/swf/game.swf` };
+const probeParameters = { probeView: view, probeUserId: fixture.characterId, probeTemplates: JSON.stringify(templates), probeBaseline: String(baseline), probeClient: game.swfUrl, probeGameModule: `${apiUrl}/flash/ui/vietnam/swf/game.swf` };
 const html = `<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#161822}#host{width:1000px;height:600px}</style><div id="host"></div><script>
 const config=${JSON.stringify(game)};window.workshopProbeEvidence=[];
 window.workshop_probe_report=value=>{window.workshopProbeEvidence.push(value);console.info('WORKSHOP_OFFICIAL',JSON.stringify(value));};

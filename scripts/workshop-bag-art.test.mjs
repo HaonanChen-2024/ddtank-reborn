@@ -18,4 +18,11 @@ assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, sourcePixelsSha256:
 assert.throws(() => patchSwf(before, { bitmaps: [entry] }, source => { const rgba = patch(source); rgba[0] = 42; return rgba; }), /unreviewed pixels/);
 assert.throws(() => patchSwf(before, { bitmaps: [entry, entry] }, patch), /duplicate configured/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], preserveAlpha: true }] }] }, patch), /protected alpha/);
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source protection');
+const ownerSymbol = Buffer.concat([Buffer.from([1, 0, 245, 0]), Buffer.from('test.owner\0')]);
+const ownerTag = buildTag(39, Buffer.from([245, 0, 1, 0, 0, 0]));
+const unlinked = compressSwf('CWS', 10, Buffer.concat([header, buildTag(36, payload), buildTag(76, ownerSymbol), ownerTag, pristineTag, buildTag(0, Buffer.alloc(0))]));
+const ownerEntry = { ...entry, className: undefined, ownerSymbolClass: { id: 245, name: 'test.owner' } };
+assert.equal(patchSwf(unlinked, { bitmaps: [ownerEntry] }, patch).unchangedTags, 4);
+assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolClass: { id: 245, name: 'wrong.owner' } }] }, patch), /owner class mismatch/);
+assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolClass: undefined }] }, patch), /needs its reviewed owner/);
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection');

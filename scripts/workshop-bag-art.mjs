@@ -81,7 +81,13 @@ export function patchSwf(bytes, config, render) {
     assert.ok(!ids.has(entry.id), 'duplicate configured bitmap'); ids.add(entry.id);
     const matches = parsed.tags.filter(tag => tag.code === 36 && decoded.body.readUInt16LE(tag.bodyStart) === entry.id);
     assert.equal(matches.length, 1, 'missing or duplicate target bitmap: ' + entry.id);
-    assert.equal(symbols.get(entry.id), entry.className, 'bitmap class mismatch');
+    if (entry.className !== undefined) assert.equal(symbols.get(entry.id), entry.className, 'bitmap class mismatch');
+    else {
+      const owner = entry.ownerSymbolClass;
+      assert.ok(owner && Number.isInteger(owner.id) && typeof owner.name === 'string', 'unlinked bitmap needs its reviewed owner');
+      assert.equal(symbols.get(owner.id), owner.name, 'bitmap owner class mismatch');
+      assert.equal(parsed.tags.filter(tag => tag.code === 39 && decoded.body.readUInt16LE(tag.bodyStart) === owner.id).length, 1, 'missing bitmap owner sprite');
+    }
     const tag = matches[0], image = decodeBitmap(decoded.body.subarray(tag.bodyStart, tag.bodyEnd));
     assert.equal(image.width, entry.width); assert.equal(image.height, entry.height);
     assert.equal(hash(image.raw), entry.sourcePixelsSha256, 'target bitmap changed; preserve newer work: ' + entry.id);
@@ -126,12 +132,13 @@ export function patchSwf(bytes, config, render) {
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3); assert.ok(flags.every(flag => flag === '--asset=hidden-controls'), 'unknown bag art option');
-  const hiddenControls = flags.includes('--asset=hidden-controls');
-  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
-  assert.equal(config.asset, `ui/vietnam/swf/${hiddenControls ? 'coreii' : 'bagandinfo'}.swf`);
+  const flags = process.argv.slice(3); assert.ok(flags.length <= 1 && flags.every(flag => ['--asset=hidden-controls', '--asset=hall'].includes(flag)), 'unknown bag art option');
+  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall');
+  const name = hall ? 'hall' : hiddenControls ? 'coreii' : 'bagandinfo';
+  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
+  assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
-  const ledgerFile = join(runtime, hiddenControls ? 'client-overlay-hidden-controls-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
+  const ledgerFile = join(runtime, hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
   const assetBytes = readFileSync(asset); assert.equal(hash(assetBytes), config.sourceAssetSha256, 'shipped asset changed; preserved');
   const replace = bytes => { mkdirSync(dirname(target), { recursive: true }); const fresh = target + `.bag-art-${process.pid}`; writeFileSync(fresh, bytes, { flag: 'wx' }); renameSync(fresh, target); };
   if (previous) {
@@ -145,11 +152,12 @@ async function main() {
   }
   if (command === 'install' && previous?.configSha256 === hash(configBytes)) { console.log(JSON.stringify({ installed: true, unchanged: true, sha256: previous.sha256 })); return; }
   const base = previous ? readFileSync(previous.backup) : existsSync(target) ? readFileSync(target) : assetBytes;
+  if (hall) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall overlay; preserved');
   const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
   const require = createRequire(join(depRoot, 'package.json')), { PNG } = require('pngjs'), { createCanvas, GlobalFonts, loadImage } = require('@napi-rs/canvas');
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
-  const reportDir = join(runtime, 'client-text-followup', `art-${hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
+  const reportDir = join(runtime, 'client-text-followup', `art-${hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
     const rgba = Buffer.from(image.rgba);
@@ -163,14 +171,17 @@ async function main() {
       }
       const scale = 3, canvas = createCanvas(w * scale, h * scale), ctx = canvas.getContext('2d');
       const lines = region.vertical ? [...region.text] : [region.text]; let size = region.fontSize;
-      const stroke = region.strokeWidth ?? 0;
-      while (size >= 7) { ctx.font = `bold ${size * scale}px "${config.fontFamily}"`; if (Math.max(...lines.map(line => ctx.measureText(line).width)) / scale + stroke * 2 <= w - 2 && size * lines.length * 1.08 + stroke * 2 <= h - 1) break; size -= .5; }
+      const stroke = region.strokeWidth ?? 0, outerStroke = region.outerStrokeWidth ?? 0, edge = Math.max(stroke, outerStroke);
+      while (size >= 7) { ctx.font = `bold ${size * scale}px "${config.fontFamily}"`; if (Math.max(...lines.map(line => ctx.measureText(line).width)) / scale + edge * 2 <= w - 2 && size * lines.length * 1.08 + edge * 2 <= h - 1) break; size -= .5; }
       assert.ok(size >= 7, 'Chinese caption cannot fit: ' + entry.id + ' ' + region.text);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
       const lineHeight = size * 1.08, start = h / 2 - (lines.length - 1) * lineHeight / 2 + (region.textOffsetY ?? 0);
       lines.forEach((line, i) => { const ty = (start + i * lineHeight) * scale;
+        if (region.outerStroke && outerStroke > 0) { ctx.strokeStyle = region.outerStroke; ctx.lineWidth = outerStroke * 2 * scale; ctx.strokeText(line, w * scale / 2, ty); }
         if (region.stroke && stroke > 0) { ctx.strokeStyle = region.stroke; ctx.lineWidth = stroke * 2 * scale; ctx.strokeText(line, w * scale / 2, ty); }
-        ctx.fillStyle = region.fill; ctx.fillText(line, w * scale / 2, ty);
+        if (region.fillBottom) { const gradient = ctx.createLinearGradient(0, 0, 0, h * scale); gradient.addColorStop(0, region.fill); gradient.addColorStop(1, region.fillBottom); ctx.fillStyle = gradient; }
+        else ctx.fillStyle = region.fill;
+        ctx.fillText(line, w * scale / 2, ty);
       });
       const small = createCanvas(w, h), sc = small.getContext('2d'); sc.drawImage(canvas, 0, 0, w, h);
       const ink = sc.getImageData(0, 0, w, h).data;
@@ -199,13 +210,13 @@ async function main() {
   cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width + 8, 18);
   cc.drawImage(await loadImage(main.before), 0, 26); cc.drawImage(await loadImage(main.after), main.width, 26); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
   for (const scale of hiddenControls ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
-  const buttons = rendered.filter(entry => entry !== main), rowHeight = 150, sheet = createCanvas(1200, Math.max(1, Math.ceil(buttons.length / 4)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
-  for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % 4 * 300, y = Math.floor(i / 4) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22); bc.drawImage(await loadImage(e.after), x + 150, y + 22); }
+  const buttons = rendered.filter(entry => entry !== main), rowHeight = 150, columns = hall ? 2 : 4, columnWidth = hall ? 520 : 300;
+  const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
+  for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22); }
   writeFileSync(join(reportDir, 'buttons-comparison.png'), sheet.toBuffer('image/png'));
   const summary = { installed: command === 'install', sourceSha256: hash(base), sha256: hash(result.out), sourceAssetSha256: hash(assetBytes), configSha256: hash(configBytes),
     target, reportDir, changed: result.changed, totalTags: result.totalTags, unchangedTags: result.unchangedTags,
     font, fontFits, rendered, renderingAccepted: false, outsideCaptionRegionsUnchanged: true, originalAssetUnchanged: true };
-  const name = hiddenControls ? 'coreii' : 'bagandinfo';
   writeFileSync(join(reportDir, `${name}.swf`), result.out); writeFileSync(join(reportDir, 'evidence.json'), JSON.stringify(summary, null, 2));
   if (command === 'install') {
     if (existsSync(target)) assert.equal(hash(readFileSync(target)), previous?.sha256 ?? summary.sourceSha256, 'overlay changed during preparation; preserved');
