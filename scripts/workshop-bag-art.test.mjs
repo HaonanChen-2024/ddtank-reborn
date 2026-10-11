@@ -25,4 +25,9 @@ const ownerEntry = { ...entry, className: undefined, ownerSymbolClass: { id: 245
 assert.equal(patchSwf(unlinked, { bitmaps: [ownerEntry] }, patch).unchangedTags, 4);
 assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolClass: { id: 245, name: 'wrong.owner' } }] }, patch), /owner class mismatch/);
 assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolClass: undefined }] }, patch), /needs its reviewed owner/);
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection');
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [255, 0, 0], max: [0, 255, 255] } }] }] }, patch), /invalid caption seed range/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [0, 0, 0], max: [255, 255, 256] } }] }] }, patch), /invalid caption seed range/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaintSeed: { min: [0, 0, 0], max: [255, 255, 255] } }] }] }, patch), /invalid caption seed range/);
+// Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
+// Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges');

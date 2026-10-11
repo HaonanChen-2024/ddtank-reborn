@@ -103,17 +103,21 @@ node scripts/workshop-language.mjs rollback
 
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本，限定14张 fmt5 位图：12个建筑标题、频道与签到。原入口和动画继续使用；其余333个 SWF 标签以及文字矩形以外像素不变。农场、独立活动入口和工具栏的其他图片仍待处理，这批不代表整个大厅已中文化。
 
+聊天使用 `chat.zh-CN.json` 和 `--asset=chat` 的独立账本，限定当前/公会/私聊六个普通与选中按钮皮肤、三个频道标签，共9张fmt5位图。窄按钮仅对审核字墨范围采样填补，保留原边框、皮肤及alpha；透明标签仅改审核区域字形。其他433个SWF标签、ABC、动画、命中层和原XML位置不变。默认bag/coreii/hall的字墨阈值与横向采样不变，未知覆盖仍拒绝覆盖。单元测试保持synthetic，不要求LFS水合；真实chat资源hash/owner/标签/像素保护由 `verify --asset=chat` 独立核验。
+
 ```powershell
 # 先确认没有在线玩家或进行中的对局，再正常停止本项目
 node scripts/workshop.mjs stop
 node scripts/workshop-bag-art.mjs install
 node scripts/workshop-bag-art.mjs install --asset=hidden-controls
 node scripts/workshop-bag-art.mjs install --asset=hall
+node scripts/workshop-bag-art.mjs install --asset=chat
 node scripts/workshop-bag-layout.mjs install
 node scripts/workshop.mjs start
 node scripts/workshop-bag-art.mjs verify
 node scripts/workshop-bag-art.mjs verify --asset=hidden-controls
 node scripts/workshop-bag-art.mjs verify --asset=hall
+node scripts/workshop-bag-art.mjs verify --asset=chat
 node scripts/workshop-bag-layout.mjs verify
 # 回退时同样停服，将对应 install 换成 rollback，随后启动
 ```
@@ -121,6 +125,8 @@ node scripts/workshop-bag-layout.mjs verify
 API 在启动时建立资源索引，新覆盖需要正常重启及全新客户端连接才能核验。`node scripts/workshop-official-render.mjs --view=bag --sex=m`（或 `--sex=f`）使用账本指定的独立账号，调用原公开背包方法，保存完整背包画面、原控件边界及角色未变化证明；不模拟鼠标键盘、不修改背包。截图必须实际检查，不能把组件加载完成当成全部中文化或交互通过。帮助正文、奖励弹窗、项链培养及其他玩家页面仍有待办。
 
 `--view=hall` 使用同一独立账号和原大厅加载流程，保存整页画面与角色未变化证明。它不打开背包、不发送建房或战斗指令，也不验收点击入口或自然对局；仍需逐张检查实际画面。
+
+2026-10-11聊天覆盖已安装并正常空闲重启，六个HTTP覆盖文件摘要和原件保护、真实角色基线保持均已核对。男女原大厅整帧已实际查看：当前选中按钮、公会/私聊普通按钮与当前频道文字可见，未观察到裁切/重叠。全部9张离线候选与433个原tag的独立回读通过；公会/私聊选中状态及其他聊天频道的原客户端点击/视觉验收仍待完成，不能据此称全部聊天或大厅中文化。
 
 ## 单人游玩与等级
 

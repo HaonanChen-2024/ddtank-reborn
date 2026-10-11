@@ -1,0 +1,379 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/chat.swf",
+  "sourceAssetSha256": "fbccdb8fe72cd75d6e6aebda0a15c5c2dd0d3c2a58c371715b3b0f25f25cd8ef",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only the reviewed Current/Consortia/Private tab skins and three channel-state captions. Selected/unselected borders, outside-caption pixels, other channel labels, sprites, hit layers, XML, and ABC remain unchanged. This is not an all-chat translation.",
+  "bitmaps": [
+    {
+      "id": 50,
+      "className": "asset.chat.CurrentBtn_01",
+      "width": 20,
+      "height": 39,
+      "sourcePixelsSha256": "cf461c52adfc9318152e29e1dca967a248fd8cf41fe1ac39a3d83260042ac258",
+      "originalText": "Hiện tại",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 72
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            16,
+            31
+          ],
+          "text": "当前",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              75,
+              60,
+              35
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            14,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#d8cc95",
+          "stroke": "#16130d",
+          "strokeWidth": 0.45,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "className": "asset.chat.CurrentBtn_02",
+      "width": 22,
+      "height": 39,
+      "sourcePixelsSha256": "8e3c16e31a37fa73fac4ae1f6eaebe4e37ad2b4126bf533ab72d71229539ab70",
+      "originalText": "Hiện tại",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 72
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            19,
+            31
+          ],
+          "text": "当前",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              0,
+              0,
+              0
+            ],
+            "max": [
+              110,
+              110,
+              110
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            16,
+            1
+          ],
+          "fontSize": 12.5,
+          "fill": "#fff7dd",
+          "stroke": "#3b3327",
+          "strokeWidth": 0.65,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "className": "asset.chat.ConsortiaBtn_01",
+      "width": 20,
+      "height": 39,
+      "sourcePixelsSha256": "ddd0fc42ce6dea8672d40ac635dc16313358ef2e53487a4885a70ef74638f791",
+      "originalText": "Guild",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 73
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            16,
+            31
+          ],
+          "text": "公会",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              75,
+              60,
+              35
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            14,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#d8cc95",
+          "stroke": "#16130d",
+          "strokeWidth": 0.45,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "className": "asset.chat.ConsortiaBtn_02",
+      "width": 22,
+      "height": 39,
+      "sourcePixelsSha256": "7c2e0c22e8209a066227c67adf33d74b64a2cbf6818029ccf54c2df9c3a49bb4",
+      "originalText": "Guild",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 73
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            19,
+            31
+          ],
+          "text": "公会",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              0,
+              0,
+              0
+            ],
+            "max": [
+              110,
+              110,
+              110
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            16,
+            1
+          ],
+          "fontSize": 12.5,
+          "fill": "#fff7dd",
+          "stroke": "#3b3327",
+          "strokeWidth": 0.65,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "className": "asset.chat.PrivateBtn_01",
+      "width": 20,
+      "height": 39,
+      "sourcePixelsSha256": "b7f93ab410755e561e0d277b3067bc61a713b84ca069f0f305649c472a51bbbe",
+      "originalText": "Chat mật",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 74
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            16,
+            31
+          ],
+          "text": "私聊",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              75,
+              60,
+              35
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            14,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#d8cc95",
+          "stroke": "#16130d",
+          "strokeWidth": 0.45,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "className": "asset.chat.PrivateBtn_02",
+      "width": 22,
+      "height": 39,
+      "sourcePixelsSha256": "bc360611042ea01613836f1e450574025c216bcbf36a4d858d8ae7ca069000d7",
+      "originalText": "Chat mật",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 74
+      },
+      "regions": [
+        {
+          "box": [
+            2,
+            4,
+            19,
+            31
+          ],
+          "text": "私聊",
+          "vertical": true,
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              0,
+              0,
+              0
+            ],
+            "max": [
+              110,
+              110,
+              110
+            ]
+          },
+          "sample": [
+            3,
+            3,
+            16,
+            1
+          ],
+          "fontSize": 12.5,
+          "fill": "#fff7dd",
+          "stroke": "#3b3327",
+          "strokeWidth": 0.65,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "className": "asset.chat.ChannelState_Current",
+      "width": 56,
+      "height": 22,
+      "sourcePixelsSha256": "8a1259c4aefbd45066b8824b4949d4bc6d98a602d03b3dcdfd933892f41297b9",
+      "originalText": "Hiện tại",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 81
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            56,
+            22
+          ],
+          "text": "当前",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#ffffff",
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "className": "asset.chat.ChannelState_Consortia",
+      "width": 56,
+      "height": 22,
+      "sourcePixelsSha256": "e49b8c9a2b589413e8b8e02f1075d300a4defc68d85df9618dcdcbc3fd0db59f",
+      "originalText": "Guild",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 81
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            56,
+            22
+          ],
+          "text": "公会",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#39b93f",
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "className": "asset.chat.ChannelState_Private",
+      "width": 56,
+      "height": 22,
+      "sourcePixelsSha256": "b2a678a78144623a4381e89067c028c6026378c37ca0c9cb9aec337047b95972",
+      "originalText": "Chat riêng",
+      "ownerXml": {
+        "entry": "chat.xml",
+        "line": 81
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            56,
+            22
+          ],
+          "text": "私聊",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#d068d4",
+          "preserveAlpha": false
+        }
+      ]
+    }
+  ]
+}

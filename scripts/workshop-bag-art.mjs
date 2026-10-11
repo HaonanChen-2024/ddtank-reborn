@@ -34,13 +34,15 @@ export function encodeBitmap(bitmap, rgba) {
   return Buffer.concat([bitmap.prefix, deflateSync(raw, { level: 9 })]);
 }
 function inside(x, y, [left, top, width, height]) { return x >= left && y >= top && x < left + width && y < top + height; }
-function inpaintCaption(image, rgba, box) {
+function inpaintCaption(image, rgba, box, seedRange) {
   const [left, top, width, height] = box, seed = new Set(), mask = new Set();
-  // The reviewed buttons use pale glyphs on coloured skins. Remove the glyph and its short dark outline,
+  const min = seedRange?.min ?? [185, 175, 120], max = seedRange?.max ?? [255, 255, 255];
+  // Default reviewed buttons use pale glyphs; chat supplies its reviewed gold/black seed range.
+  // Remove the glyph and its short dark outline,
   // while leaving the surrounding brick/grain pixels available for a local texture fill.
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) {
     const p = (y * image.width + x) * 4;
-    if (image.rgba[p + 3] >= 240 && image.rgba[p] >= 185 && image.rgba[p + 1] >= 175 && image.rgba[p + 2] >= 120) seed.add(y * image.width + x);
+    if (image.rgba[p + 3] >= 240 && min.every((v, c) => image.rgba[p + c] >= v && image.rgba[p + c] <= max[c])) seed.add(y * image.width + x);
   }
   for (const p of seed) {
     const x = p % image.width, y = Math.floor(p / image.width);
@@ -52,7 +54,15 @@ function inpaintCaption(image, rgba, box) {
   assert.ok(mask.size > 0, 'reviewed button caption has no pale glyphs');
   for (const p of mask) {
     const x = p % image.width, y = Math.floor(p / image.width), neighbours = [];
-    for (const step of [-1, 1]) {
+    // Narrow chat tabs have their gold frame immediately beside the glyphs; sample the reviewed
+    // interior above/below them instead of smearing the frame into the black or gold button skin.
+    if (seedRange) for (const step of [-1, 1]) {
+      for (let yy = y + step; yy >= top && yy < top + height; yy += step) {
+        const q = yy * image.width + x;
+        if (!mask.has(q) && image.rgba[q * 4 + 3] >= 240) { neighbours.push({ p: q * 4, distance: Math.abs(yy - y) }); break; }
+      }
+    }
+    else for (const step of [-1, 1]) {
       for (let xx = x + step; xx >= 0 && xx < image.width; xx += step) {
         const q = y * image.width + xx;
         if (!mask.has(q) && image.rgba[q * 4 + 3] >= 240) { neighbours.push({ p: q * 4, distance: Math.abs(xx - x) }); break; }
@@ -98,6 +108,10 @@ export function patchSwf(bytes, config, render) {
       assert.ok(Number.isFinite(region.textOffsetY ?? 0) && Math.abs(region.textOffsetY ?? 0) <= h / 2, 'invalid caption vertical offset');
       assert.equal(Boolean(region.sample), !region.transparent, 'caption needs a sampled texture or transparent background');
       if (region.sample) { const [sx, sy, sw, sh] = region.sample; assert.ok([sx, sy, sw, sh].every(Number.isInteger)); assert.ok(sx >= 0 && sy >= 0 && sw > 0 && sh > 0 && sx + sw <= image.width && sy + sh <= image.height); }
+      if (region.inpaintSeed) {
+        const { min, max } = region.inpaintSeed;
+        assert.ok(region.inpaint && Array.isArray(min) && Array.isArray(max) && min.length === 3 && max.length === 3 && min.every((v, c) => Number.isInteger(v) && Number.isInteger(max[c]) && v >= 0 && v <= max[c] && max[c] <= 255), 'invalid caption seed range');
+      }
     }
     const rgba = render(image, entry), patched = decodeBitmap(encodeBitmap(image, rgba));
     let changedPixels = 0, alphaChangedPixels = 0;
@@ -132,13 +146,13 @@ export function patchSwf(bytes, config, render) {
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3); assert.ok(flags.length <= 1 && flags.every(flag => ['--asset=hidden-controls', '--asset=hall'].includes(flag)), 'unknown bag art option');
-  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall');
-  const name = hall ? 'hall' : hiddenControls ? 'coreii' : 'bagandinfo';
-  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
+  const flags = process.argv.slice(3); assert.ok(flags.length <= 1 && flags.every(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat'].includes(flag)), 'unknown bag art option');
+  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat');
+  const name = chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : 'bagandinfo';
+  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
-  const ledgerFile = join(runtime, hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
+  const ledgerFile = join(runtime, chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
   const assetBytes = readFileSync(asset); assert.equal(hash(assetBytes), config.sourceAssetSha256, 'shipped asset changed; preserved');
   const replace = bytes => { mkdirSync(dirname(target), { recursive: true }); const fresh = target + `.bag-art-${process.pid}`; writeFileSync(fresh, bytes, { flag: 'wx' }); renameSync(fresh, target); };
   if (previous) {
@@ -153,17 +167,18 @@ async function main() {
   if (command === 'install' && previous?.configSha256 === hash(configBytes)) { console.log(JSON.stringify({ installed: true, unchanged: true, sha256: previous.sha256 })); return; }
   const base = previous ? readFileSync(previous.backup) : existsSync(target) ? readFileSync(target) : assetBytes;
   if (hall) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall overlay; preserved');
+  if (chat) assert.equal(hash(base), config.sourceAssetSha256, 'unknown chat overlay; preserved');
   const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
   const require = createRequire(join(depRoot, 'package.json')), { PNG } = require('pngjs'), { createCanvas, GlobalFonts, loadImage } = require('@napi-rs/canvas');
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
-  const reportDir = join(runtime, 'client-text-followup', `art-${hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
+  const reportDir = join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
     const rgba = Buffer.from(image.rgba);
     for (const region of entry.regions) {
       const [x, y, w, h] = region.box;
-      if (region.inpaint) inpaintCaption(image, rgba, region.box);
+      if (region.inpaint) inpaintCaption(image, rgba, region.box, region.inpaintSeed);
       else for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
         const p = ((y + yy) * image.width + x + xx) * 4;
         if (region.transparent) rgba.fill(0, p, p + 4);
@@ -206,13 +221,13 @@ async function main() {
     const tag = packedTags.tags.find(tag => tag.code === 36 && packaged.body.readUInt16LE(tag.bodyStart) === entry.id), image = decodeBitmap(packaged.body.subarray(tag.bodyStart, tag.bodyEnd));
     writeFileSync(entry.after, PNG.sync.write({ width: image.width, height: image.height, data: image.rgba }));
   }
-  const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparison = createCanvas(main.width * 2, main.height + 26), cc = comparison.getContext('2d');
-  cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width + 8, 18);
-  cc.drawImage(await loadImage(main.before), 0, 26); cc.drawImage(await loadImage(main.after), main.width, 26); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
-  for (const scale of hiddenControls ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
-  const buttons = rendered.filter(entry => entry !== main), rowHeight = 150, columns = hall ? 2 : 4, columnWidth = hall ? 520 : 300;
+  const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparisonScale = chat ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
+  cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width * comparisonScale + 8, 18);
+  cc.drawImage(await loadImage(main.before), 0, 26, main.width * comparisonScale, main.height * comparisonScale); cc.drawImage(await loadImage(main.after), main.width * comparisonScale, 26, main.width * comparisonScale, main.height * comparisonScale); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
+  for (const scale of hiddenControls || chat ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
+  const buttons = rendered.filter(entry => entry !== main), rowHeight = chat ? 190 : 150, columns = hall || chat ? 2 : 4, columnWidth = hall || chat ? 520 : 300;
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
-  for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22); }
+  for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }
   writeFileSync(join(reportDir, 'buttons-comparison.png'), sheet.toBuffer('image/png'));
   const summary = { installed: command === 'install', sourceSha256: hash(base), sha256: hash(result.out), sourceAssetSha256: hash(assetBytes), configSha256: hash(configBytes),
     target, reportDir, changed: result.changed, totalTags: result.totalTags, unchangedTags: result.unchangedTags,
