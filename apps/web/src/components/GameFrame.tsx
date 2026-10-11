@@ -32,7 +32,7 @@ declare global {
 
 const scriptCache = new Map<string, Promise<void>>();
 
-function loadScript(src: string): Promise<void> {
+function loadScript(src: string, errorMessage: string): Promise<void> {
   let p = scriptCache.get(src);
   if (!p) {
     p = new Promise<void>((resolve, reject) => {
@@ -42,7 +42,7 @@ function loadScript(src: string): Promise<void> {
       el.onload = () => resolve();
       el.onerror = () => {
         scriptCache.delete(src);
-        reject(new Error(`Falha ao carregar ${src}`));
+        reject(new Error(errorMessage));
       };
       document.head.appendChild(el);
     });
@@ -116,10 +116,10 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           player?.remove();
           player = null;
         };
-        await loadScript(rufflePath);
+        await loadScript(rufflePath, t("play.scriptError", { src: rufflePath }));
         if (cancelled) return;
         const ruffle = window.RufflePlayer?.newest?.();
-        if (!ruffle) throw new Error("Ruffle não encontrado em window.RufflePlayer");
+        if (!ruffle) throw new Error(t("play.ruffleMissing"));
 
         player = ruffle.createPlayer();
         player.style.width = "100%";
@@ -145,7 +145,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         };
         // Newer Ruffle exposes the API behind player.ruffle(); older builds expose load() directly.
         const target = typeof player.ruffle === "function" ? player.ruffle() : player;
-        if (!target.load) throw new Error("API de carregamento do Ruffle indisponível");
+        if (!target.load) throw new Error(t("play.ruffleLoadMissing"));
         await target.load(opts);
         markReady();
       } catch (e) {

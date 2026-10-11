@@ -1,22 +1,24 @@
 import type { AimTableRow } from "@/lib/api";
+import { useI18n } from "@/i18n";
 
 /** One "Âng. N: Distância | Força" card — two side-by-side column pairs (distances 1..10, then 11..20), like the
  *  DD Clássico reference (`remaster/00-site-pagina-jogar/inputs/referencia-ddclassico.png`). */
 export function AimTableCard({ row, distances }: { row: AimTableRow; distances: number[] }) {
+  const { t } = useI18n();
   const half = Math.ceil(distances.length / 2);
   const left = distances.slice(0, half);
   const right = distances.slice(half);
 
   return (
     <div className="aim-card">
-      <div className="aim-card-title">Âng. {row.angle}</div>
+      <div className="aim-card-title">{t("play.aim.angle", { angle: row.angle })}</div>
       <table className="aim-card-table">
         <thead>
           <tr>
-            <th>Dist.</th>
-            <th>Força</th>
-            <th>Dist.</th>
-            <th>Força</th>
+            <th>{t("play.aim.distance")}</th>
+            <th>{t("play.aim.power")}</th>
+            <th>{t("play.aim.distance")}</th>
+            <th>{t("play.aim.power")}</th>
           </tr>
         </thead>
         <tbody>

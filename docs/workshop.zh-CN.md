@@ -1,5 +1,25 @@
 # 本地 Workshop 运行与内容扩展
 
+## 继续修改中文文字
+
+客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理。本轮新增194条，累计355键/358行，覆盖装备类型、背包、商城、房间、副本、好友和邮件部分提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
+
+核心 SWF 的已知越南语/葡萄牙语常量另由 `research/i18n/zh-CN-literals.json` 与 `scripts/workshop-literals.mjs` 管理。工具沿用现有 ABC 字符串补丁器，仅写 `runtime/client-overlay`，保留当前部署的 RSA 公钥和其他字符串、方法代码及位图。当前三个文件共替换 42 个常量位置：`2.png` 34 个、`3.png` 5 个、`DDT_Loading.swf` 3 个；称号译名为本地语义翻译，不能用于推断官方时装名称或素材映射。
+
+安装或回退 SWF 覆盖后需重启服务以重建静态文件索引；在源码根目录依次执行：
+
+```text
+node scripts/workshop.mjs stop
+node scripts/workshop-literals.mjs install
+node scripts/workshop.mjs start
+```
+
+`node scripts/workshop-literals.mjs verify` 核对当前补丁与备份哈希。回退时将 `install` 换成 `rollback`；只恢复账本拥有的覆盖文件，原 vendor 与仓库中的二进制均不写入。自行修改过部署文件时工具拒绝覆盖；更新该批译文前先回退，保留其他自定义内容。
+
+网页游玩页的角度、距离、力度与三类加载错误已接入现有 PT/EN/中文语言字典，保留已保存的语言偏好。
+
+本轮实际核验：web构建、已有4项语言回归、1项SWF字节保留/重复补丁测试通过。安装、精确回退与重新安装均通过；当前三个SWF的全部ABC非字符串内容、其他字符串及位图与备份一致，正常HTTP字节匹配。新profile被动原版登录进入大厅，零JS错误；原版语言弹窗实际显示中文，未逐一验收全部新增界面。大厅存储提示图已定位并提取为588×339透明PNG；图像工具两次连接失败，没有安装替代图，嵌入图片文字仍有缺口。
+
 本次工作基于 DDTank 4.1 协议。真实原版 SWF/Ruffle 已显示大厅、商城装备页与海盗套装；套装原版背包、卸下后的混搭及穿回已核对。两个原版客户端已完成正常挑战、自然加载、实际发射/伤害、胜负、回大厅与重登保存。公开旧资源与模板不代表近年官方时装齐全。
 
 ## 独立本地栈

@@ -21,7 +21,8 @@
  * Usage: node patch.mjs <in.swf|in.png> <out.swf|out.png> [--translations path.json]
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { ByteReader, encodeU30, decompressSwf, parseTags, buildTag, compressSwf } from "./lib.mjs";
 
 function patchAbcStrings(abcBuf, translations) {
@@ -54,7 +55,7 @@ function patchAbcStrings(abcBuf, translations) {
   return { abc: Buffer.concat([prefix, ...chunks, suffix]), changed };
 }
 
-function patchSwfBuffer(buf, translations) {
+export function patchSwfBuffer(buf, translations) {
   const { error, body, sig, version } = decompressSwf(buf);
   if (error) throw new Error(error);
   const { headerPrefix, tags, trailing } = parseTags(body);
@@ -106,4 +107,4 @@ function main() {
   console.log(`${inPath}: patched ${totalChanged} ABC constant-pool string(s) -> ${outPath} (${out.length} bytes)`);
 }
 
-main();
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) main();
