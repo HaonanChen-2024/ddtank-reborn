@@ -186,15 +186,15 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=gameover'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
+  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=gameover', '--asset=email'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
   assert.ok(assetFlags.length <= 1 && backgroundFlags.length <= 1 && flags.length === assetFlags.length + backgroundFlags.length, 'unknown or duplicate bag art option');
-  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover');
+  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email');
   assert.ok(backgroundFlags.length === 0 || (hall && command !== 'rollback' && backgroundFlags[0].length > '--background='.length), 'background requires --asset=hall for verify or install');
-  const name = gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : 'bagandinfo';
-  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
+  const name = gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
+  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
-  const ledgerFile = join(runtime, gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
+  const ledgerFile = join(runtime, gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
   const assetBytes = readFileSync(asset); assert.equal(hash(assetBytes), config.sourceAssetSha256, 'shipped asset changed; preserved');
   const replace = bytes => { mkdirSync(dirname(target), { recursive: true }); const fresh = target + `.bag-art-${process.pid}`; writeFileSync(fresh, bytes, { flag: 'wx' }); renameSync(fresh, target); };
   if (previous) {
@@ -216,11 +216,12 @@ async function main() {
   if (chat) assert.equal(hash(base), config.sourceAssetSha256, 'unknown chat overlay; preserved');
   if (hallFeature) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall feature overlay; preserved');
   if (gameover) assert.equal(hash(base), config.sourceAssetSha256, 'unknown gameover overlay; preserved');
+  if (email) assert.equal(hash(base), config.sourceAssetSha256, 'unknown email overlay; preserved');
   const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
   const require = createRequire(join(depRoot, 'package.json')), { PNG } = require('pngjs'), { createCanvas, GlobalFonts, loadImage } = require('@napi-rs/canvas');
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
-  const reportDir = gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
+  const reportDir = gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
     const rgba = Buffer.from(image.rgba);
@@ -271,10 +272,10 @@ async function main() {
     const tag = packedTags.tags.find(tag => tag.code === 36 && packaged.body.readUInt16LE(tag.bodyStart) === entry.id), image = decodeBitmap(packaged.body.subarray(tag.bodyStart, tag.bodyEnd));
     writeFileSync(entry.after, PNG.sync.write({ width: image.width, height: image.height, data: image.rgba }));
   }
-  const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparisonScale = chat || hallFeature || gameover ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
+  const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparisonScale = chat || hallFeature || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
   cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width * comparisonScale + 8, 18);
   cc.drawImage(await loadImage(main.before), 0, 26, main.width * comparisonScale, main.height * comparisonScale); cc.drawImage(await loadImage(main.after), main.width * comparisonScale, 26, main.width * comparisonScale, main.height * comparisonScale); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
-  for (const scale of hiddenControls || chat || hallFeature || gameover ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
+  for (const scale of hiddenControls || chat || hallFeature || gameover || email ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
   const buttons = rendered.filter(entry => entry !== main), rowHeight = chat ? 190 : 150, columns = hall || chat || gameover ? 2 : 4, columnWidth = gameover ? 700 : hall || chat ? 520 : 300;
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
   for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }

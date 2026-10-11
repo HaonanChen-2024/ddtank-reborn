@@ -108,6 +108,14 @@ function cdpFailure(call, kind, error, redact) {
 function terminalFailure(diagnostic, collectorFailure) {
   return diagnostic ? new Error(`original facing diagnostic: ${diagnostic.reason}; same original turn observed with zero public shooting requests; no natural battle outcome or full gameplay acceptance`) : collectorFailure;
 }
+function aimStageSummary(report) {
+  if (report?.phase !== "solo-aim-stage" || !["ground-clone", "stone-clone", "ground-compare", "stone-compare", "first-euler-prediction"].includes(report.stage) ||
+      !["before", "after"].includes(report.boundary) || !Number.isSafeInteger(report.job) || report.job < 1 ||
+      !Number.isSafeInteger(report.attempt) || report.attempt < 0 || !Number.isSafeInteger(report.elapsedMs) || report.elapsedMs < 0 ||
+      !Number.isFinite(Date.parse(report.observedAt))) return null;
+  return { stage: report.stage, boundary: report.boundary, job: report.job, attempt: report.attempt, elapsedMs: report.elapsedMs, observedAt: report.observedAt,
+    scope: "last received private prediction boundary; null terrain paths may return without native clone/compare; does not identify the crashing instruction, prove later work was skipped, or accept battle completion" };
+}
 function offlineQuickAlphaEmpty(rect, alphaAt) {
   // The fixture supplies an already intersected rectangle; native Flash clipping/edge reads are not simulated.
   const empty = (x, y) => alphaAt(Math.trunc(x), Math.trunc(y)) <= 150;
@@ -173,7 +181,7 @@ async function run(config, compiler) {
   const evidence = { runId, started: new Date().toISOString(), phase: "preflight-ready", characterId: FIXTURE_ID, compiler,
     controllerSha256: sha256(readFileSync(fileURLToPath(import.meta.url))), processes: { controller: process.pid, browser: null }, roomType: 0, timeType: 3, selectedMapId: 0,
     originalPublicAPIs: true, simulatedInput: false, assistedRoomLoading: false, manualLoadingProgress: false,
-    gameplayDataMayChangeNormally: true, fullBattleAccepted: false, visualAccepted: false, gameplayAccepted: false, persistenceAccepted: false,
+    gameplayDataMayChangeNormally: true, fullBattleAccepted: false, visualAccepted: false, gameplayAccepted: false, persistenceAccepted: false, lastAimStage: null,
     battleMode: config.battle, diagnoseFacing: config.diagnoseFacing, scope: config.battle ? "bounded pure original Euler prediction over full current private terrain clones, at most 16 original public shooting requests with original multishot count preserved, natural settlement and return; prediction is not damage or visual/persistence acceptance" : "normal ordinary arena natural loading and original battle components; no fire, skip, settlement or UI-input acceptance", probe: [], requests: [], errors: [], cdpErrors: [], captures: [] };
   const checkpoint = () => { evidence.lastCheckpoint = new Date().toISOString(); writeFileSync(join(output, "evidence.json"), JSON.stringify(evidence, replacer, 2)); };
   let child, socket, browserError, diagnostics = "", interrupted = false;
@@ -256,7 +264,10 @@ const script=document.createElement('script');script.src=config.rufflePath;scrip
       else if (message.method === "Runtime.exceptionThrown") evidence.errors.push(redact(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text));
       else if (message.method === "Runtime.consoleAPICalled") {
         if (message.params.args[0]?.value === "WORKSHOP_SOLO") {
-          try { const value = JSON.parse(message.params.args[1].value); value.observedAt = new Date().toISOString(); evidence.probe.push(value); } catch { evidence.errors.push("solo probe report could not be decoded"); }
+          try {
+            const value = JSON.parse(message.params.args[1].value); value.observedAt = new Date().toISOString(); evidence.probe.push(value);
+            const stage = aimStageSummary(value); if (stage) evidence.lastAimStage = stage;
+          } catch { evidence.errors.push("solo probe report could not be decoded"); }
         } else if (message.params.type === "error" && evidence.errors.length < 500) evidence.errors.push(redact(message.params.args.map(value => value.value ?? value.description ?? "").join(" ")));
       }
     });
@@ -381,6 +392,12 @@ const script=document.createElement('script');script.src=config.rufflePath;scrip
 
 const config = options(process.argv.slice(2));
 if (config.mode === "--validate") {
+  const stageFixture = { phase: "solo-aim-stage", stage: "ground-clone", boundary: "before", job: 1, attempt: 0, elapsedMs: 1000, observedAt: "2026-10-11T17:20:00.000Z", actor: "omitted", key: "omitted" };
+  const stageSummary = aimStageSummary(stageFixture);
+  assert.equal(stageSummary.stage, "ground-clone"); assert.equal(stageSummary.boundary, "before");
+  assert.ok(!("actor" in stageSummary) && !("key" in stageSummary) && !("fullBattleAccepted" in stageSummary));
+  for (const change of [{ phase: "solo-observation" }, { stage: "unknown" }, { boundary: "error" }, { job: 0 }, { attempt: -1 }, { elapsedMs: NaN }, { observedAt: "invalid" }])
+    assert.equal(aimStageSummary({ ...stageFixture, ...change }), null);
   assert.throws(() => identity(6)); assert.throws(() => identity(12));
   assert.throws(() => options(["--assist-room-loading"])); assert.throws(() => options(["--run", "--compile-only"]));
   assert.throws(() => options(["--run", "--battle"])); assert.throws(() => options(["--run", "--seconds=720"]));

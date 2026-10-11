@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/email.swf",
+  "sourceAssetSha256": "5f90d36ec54859f5086a6add6c195dc5f997e0045e756cc329ec675747cabe54",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Offline candidate only: three list tabs, both source states. No permission, transaction, event, XML, script, or deployment changes. Not the whole email UI.",
+  "bitmaps": [
+    {
+      "id": 36,
+      "className": "asset.email.emialListButton1",
+      "width": 72,
+      "height": 24,
+      "sourcePixelsSha256": "08f2833d3038b703a9f490f46070e84cb4341aac8cd3d4a7d350488a1ba5751d",
+      "originalText": "Danh sách thư",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 25
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            15
+          ],
+          "text": "邮件列表",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              140,
+              125,
+              75
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "className": "asset.email.emialListButton2",
+      "width": 72,
+      "height": 26,
+      "sourcePixelsSha256": "bc8d2d6898936b0144b65cae5ceefaeb264dd7aa79e519244a94008412cf1299",
+      "originalText": "Danh sách thư",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 25
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            17
+          ],
+          "text": "邮件列表",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              215,
+              210,
+              190
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "className": "asset.email.noReadButton1",
+      "width": 72,
+      "height": 24,
+      "sourcePixelsSha256": "ca41d53aebdec1135848bc6f1abb17b1773f3ea5f5366faeba35824e3b7b84f7",
+      "originalText": "Thư chưa mở",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 26
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            15
+          ],
+          "text": "未读邮件",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              140,
+              125,
+              75
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "className": "asset.email.noReadButton2",
+      "width": 72,
+      "height": 26,
+      "sourcePixelsSha256": "8fce6423c195c12747c182a9d8bfb399d12950e291cdab999857555e2d921fd4",
+      "originalText": "Thư chưa mở",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 26
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            17
+          ],
+          "text": "未读邮件",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              215,
+              210,
+              190
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "className": "asset.email.sendedButton1",
+      "width": 72,
+      "height": 24,
+      "sourcePixelsSha256": "5ef30f95849cfff206aa27e12b296f07707c2d2a8590775974ce5a24f14ad7b7",
+      "originalText": "Thư đã gửi",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 27
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            15
+          ],
+          "text": "已发送",
+          "inpaint": false,
+          "sample": [
+            6,
+            5,
+            1,
+            15
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "className": "asset.email.sendedButton2",
+      "width": 72,
+      "height": 26,
+      "sourcePixelsSha256": "940319bb5bcb05e4f2ae475a7ead45e0f593929f7e3430a097a7a98190ed5475",
+      "originalText": "Enviados",
+      "ownerXml": {
+        "entry": "email.xml",
+        "line": 27
+      },
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            66,
+            17
+          ],
+          "text": "已发送",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              215,
+              210,
+              190
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    }
+  ]
+}

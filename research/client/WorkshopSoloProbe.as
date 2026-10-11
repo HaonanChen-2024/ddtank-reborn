@@ -76,6 +76,7 @@ package {
     private var activeShot:Object;
     private var lastAimBlock:String = "";
     private var predictionJob:Object;
+    private var predictionSequence:int = 0;
     private var usedAims:Object = {};
     private const PUBLIC_SHOOT_REQUEST_LIMIT:int = 16;
 
@@ -507,6 +508,15 @@ package {
       if (predictionJob.stone) BitmapData(predictionJob.stone).dispose();
       predictionJob = null;
     }
+    private function aimStage(stage:String, boundary:String):void {
+      observationContext = "prediction:" + stage + ":" + boundary;
+      if (!predictionJob) return;
+      var key:String = stage + ":" + boundary;
+      if (predictionJob.stageEvidence[key]) return;
+      predictionJob.stageEvidence[key] = true;
+      // Each private job emits at most ten boundaries; never per Euler step or terrain pixel.
+      report({phase:"solo-aim-stage", stage:stage, boundary:boundary, job:predictionJob.sequence, attempt:predictionJob.evaluations});
+    }
     private function aimKey(state:Object):String {
       var t:Object = state.target, p:Object = state.physics, b:Object = state.ball;
       return [state.currentBomb, state.gunAngle, state.maxForce, state.legalGunAngle.min, state.legalGunAngle.max,
@@ -520,12 +530,17 @@ package {
       if (!original) throw new Error("original full current terrain bitmapData unavailable");
       return original.clone();
     }
-    private function terrainUnchanged(ground:Object, copy:BitmapData):Boolean {
-      if (ground == null || copy == null) return ground == null && copy == null;
+    private function terrainUnchanged(ground:Object, copy:BitmapData, stage:String):Boolean {
+      aimStage(stage, "before");
+      if (ground == null || copy == null) { aimStage(stage, "after"); return ground == null && copy == null; }
       var original:BitmapData = ground.bitmapData as BitmapData;
       if (!original) throw new Error("original current terrain disappeared during prediction");
       var difference:Object = original.compare(copy);
-      if (difference is BitmapData) { BitmapData(difference).dispose(); return false; }
+      if (difference is BitmapData) {
+        observationContext = "prediction:" + stage + ":difference-dispose";
+        BitmapData(difference).dispose(); aimStage(stage, "after"); return false;
+      }
+      aimStage(stage, "after");
       return difference === 0;
     }
     private function alphaEmpty(bitmap:BitmapData, rect:Rectangle):Boolean {
@@ -596,17 +611,22 @@ package {
         if (angles.length == 0) return {blocked:"all actual legal network angles face away from target; no direction change invoked"};
         var bound:Rectangle = map.bound as Rectangle;
         if (!bound || !isFinite(bound.width) || !isFinite(bound.height) || bound.width <= 0 || bound.height <= 0) throw new Error("original map bound unavailable");
-        predictionJob = {turn:qualifiedTurn, map:map, key:key, state:state, angles:angles, angleIndex:0, iterations:0, evaluations:0,
+        predictionJob = {sequence:++predictionSequence, stageEvidence:{}, turn:qualifiedTurn, map:map, key:key, state:state, angles:angles, angleIndex:0, iterations:0, evaluations:0,
           low:1, high:int(state.maxForce), best:null, bound:bound.clone(), ground:null, stone:null};
-        predictionJob.ground = cloneTerrain(map.ground); predictionJob.stone = cloneTerrain(map.stone);
+        aimStage("ground-clone", "before"); predictionJob.ground = cloneTerrain(map.ground); aimStage("ground-clone", "after");
+        aimStage("stone-clone", "before"); predictionJob.stone = cloneTerrain(map.stone); aimStage("stone-clone", "after");
         if (!predictionJob.ground && !predictionJob.stone) throw new Error("no original full current terrain exists");
       }
       var job:Object = predictionJob;
       // At most two bounded pure trajectories per existing Timer callback; no stage/frame events or execution-limit changes.
       for (var work:int = 0; work < 2 && job.angleIndex < job.angles.length; ++work) {
         gun = job.angles[job.angleIndex];
-        var force:int = int((job.low + job.high) / 2), trial:Object = predictShot(job, gun, force);
+        var force:int = int((job.low + job.high) / 2);
+        observationContext = "prediction:EulerVector-trajectory";
+        if (job.evaluations == 0) aimStage("first-euler-prediction", "before");
+        var trial:Object = predictShot(job, gun, force);
         ++job.evaluations; ++job.iterations;
+        if (job.evaluations == 1) aimStage("first-euler-prediction", "after");
         var candidateKey:String = key + "|" + gun + "|" + force;
         if (!usedAims[candidateKey] && isFinite(trial.score) && (!job.best || (trial.predictedHit && !job.best.prediction.predictedHit) || trial.score < job.best.prediction.score))
           job.best = {gunAngle:gun, force:force, worldAngle:state.self.direction > 0 ? state.self.playerAngle - gun : state.self.playerAngle + gun - 180,
@@ -616,7 +636,7 @@ package {
         if (job.iterations >= 10 || job.low > job.high) { ++job.angleIndex; job.iterations = 0; job.low = 1; job.high = int(state.maxForce); }
       }
       if ((!job.best || !job.best.prediction.predictedHit) && job.angleIndex < job.angles.length) return {pending:true};
-      if (!terrainUnchanged(map.ground, job.ground) || !terrainUnchanged(map.stone, job.stone)) {
+      if (!terrainUnchanged(map.ground, job.ground, "ground-compare") || !terrainUnchanged(map.stone, job.stone, "stone-compare")) {
         clearPrediction(); report({phase:"solo-aim-prediction-discarded", reason:"full original current terrain changed; old prediction rejected"}); return {pending:true};
       }
       var result:Object = job.best;
