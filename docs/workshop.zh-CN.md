@@ -144,6 +144,19 @@ API 在启动时建立资源索引，新覆盖需要正常重启及全新客户�
 
 `workshop-peer-render.mjs` 运行两套原版SWF；AS3入口为 `research/client/WorkshopPeerProbe.as`，编译产物留在 `runtime/client-research/WorkshopPeerProbe.swf`。脚本使用 `node --import tsx`，`--validate` 只核对真实地图/协议导入。正常测试先等A的原RoomListView完成，再启动B；原版自由挑战要求发起者至少12级、目标至少4级，等级不足明确不通过。`--assist-room-loading` 只供隔离诊断，结果始终区分自然与辅助路径。已在纯测试角色临时合法等级下实际完成自然双客户端对局并还原等级；未修改默认Ruffle15秒执行限制。该Freedom对局验证金币保存，GP/Total/Win没有增量，不能据此宣称这些奖励通过。
 
+`workshop-solo-render.mjs` 与 `research/client/WorkshopSoloProbe.as` 单独核验普通竞技场：默认 `--validate` 离线检查身份及命令边界，`--compile-only` 只编译，只有 `--run` 才登录并建房。探针只接受现有私有经验药水账本的专用角色ID11，明确拒绝用户角色ID6，不自动建角色、升级或领取邮件。使用当前回环栈和独立Chrome profile；临时UUID页面沿用既有web Origin，创建后立即记录文件所有权，正常退出或捕获异常时删除本次临时票据/两级SWF。账号、密码、Flash key、token及URL编码值在日志中脱敏。强制终止进程可能跳过finally，需按精确UUID及最新进程证据清理，不能扩大删除范围。
+
+```powershell
+node scripts/workshop-solo-render.mjs --validate
+node scripts/workshop-solo-render.mjs --compile-only
+# 当前服务空闲、专用角色离线时才运行；Java使用现有WORKSHOP_JAVA或JAVA_HOME
+node scripts/workshop-solo-render.mjs --run --seconds=240
+```
+
+这条路径仅调用四个原公开方法：进入roomlist、创建type0/time3房间、设置原随机地图0、开始。它等待原房主状态与设置确认；开始后只观测，不发送加载进度、不强切战斗状态、不模拟鼠标键盘、不发射或跳过回合。START_LOAD先于原加载所有者初始化，因此此时仅记录事件，武器/弹种等深资源检查等待原PROGRESS_CHANGE自然达到100。加载视图的ADDED事件与真实显示树证据分别保存，必需type1/2资源严格要求完成，未观测值不作为通过。
+
+2026-10-11一次当前源码的实际运行exit0：原大厅/普通房间→约25秒AI匹配→原RoomLoadingView显示树→真实100%本地进度→GAME_START及fighting完成；地图1023、专用角色和负ID机器人双方人物/movie/弹种资源均完成。主控查看原战斗整帧，人物、地图、双头像、小地图及控制区可见。早期加载截图仍为过渡黑帧，只接受其显示树/自然进度证据，未验收稳定加载页画面。四次此前中断/探针失败分别保留，不能合并为成功。关闭测试客户端可能触发现有对局失败/扣经验，属于专用角色正常业务副作用，不回写用户角色。五个既有覆盖资产及真实用户角色基线再次核对保持。完整原客户端开火、伤害、结算、普通副本和点击操作仍未完成。
+
 ```powershell
 node scripts/workshop-backup.mjs backup
 node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
