@@ -4,7 +4,16 @@
   "sourceAssetSha256": "29cde09a17aada82dbf09ce42d466fb9ccc38a3db53b70d4f38bde78c6a6744a",
   "fontFamily": "Workshop CJK",
   "fontFile": "msyhbd.ttc",
-  "note": "Only the 12 reviewed transparent building captions, channel label, and sign-in label. All other image formats, shapes, sprites, animation frames, and ABC tags remain unchanged. This is not an all-hall translation.",
+  "background": {
+    "id": 12,
+    "tagCode": 21,
+    "width": 1000,
+    "height": 600,
+    "sourceTagSha256": "749380f41ef585a6f58f5f376d4b85a25f5e8b0d252486dcd168af6de282fb51",
+    "pngSha256": "eb5589d1b734188d19b3d4071dd482cf6432a37b918308e23b49c23efb50946a",
+    "referenceSwfSha256": "ff947a6002a598cb82ae07d6e030d1094cfcce97eefc9b33e011c211c14f315a"
+  },
+  "note": "Default: only the 14 reviewed captions (12 building captions, channel label and sign-in label). Optional --asset=hall --background=PNG replaces tag21/id12 and clears only bitmap3's reviewed channel caption region so the background's existing Chinese label remains visible (13 drawn captions, 1 cleared duplicate). Every other tag, including shapes, sprites, animation frames and ABC, remains unchanged. This is not an all-hall translation.",
   "bitmaps": [
     {
       "id": 18,
@@ -687,6 +696,7 @@
             21
           ],
           "text": "频道",
+          "hideWhenBackgroundEnabled": true,
           "transparent": true,
           "fontSize": 14,
           "fill": "#ff4833",

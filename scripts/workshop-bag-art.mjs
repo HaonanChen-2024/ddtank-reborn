@@ -79,10 +79,21 @@ function inpaintCaption(image, rgba, box, seedRange) {
     for (let c = 0; c < 3; c++) rgba[p * 4 + c] = Math.round(neighbours.reduce((n, q) => n + image.rgba[q.p + c] / q.distance, 0) / weight);
   }
 }
-export function patchSwf(bytes, config, render) {
+function validateBackground(bytes, entry) {
+  assert.ok(entry && entry.tagCode === 21 && Number.isInteger(entry.id), 'background needs reviewed tag21 metadata');
+  assert.ok(Buffer.isBuffer(bytes) && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), 'background must be encoded PNG');
+  assert.equal(hash(bytes), entry.pngSha256, 'background PNG hash mismatch');
+  const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
+  const { PNG } = createRequire(join(depRoot, 'package.json'))('pngjs'), image = PNG.sync.read(bytes);
+  assert.equal(image.width, entry.width, 'background width mismatch'); assert.equal(image.height, entry.height, 'background height mismatch');
+  return { enabled: true, id: entry.id, tagCode: entry.tagCode, width: image.width, height: image.height,
+    pngSha256: hash(bytes), sourceTagSha256: entry.sourceTagSha256, referenceSwfSha256: entry.referenceSwfSha256 };
+}
+export function patchSwf(bytes, config, render, backgroundBytes = null) {
   const decoded = decompressSwf(bytes); assert.equal(decoded.error, null);
   assert.equal(bytes.readUInt32LE(4), decoded.body.length + 8, 'SWF declared length mismatch');
   const parsed = parseTags(decoded.body), ids = new Set(), changed = [], replacements = new Map(), symbols = new Map();
+  const background = backgroundBytes === null ? { enabled: false } : validateBackground(backgroundBytes, config.background);
   for (const tag of parsed.tags.filter(tag => tag.code === 76)) {
     const r = new ByteReader(decoded.body.subarray(tag.bodyStart, tag.bodyEnd)), n = r.u16();
     for (let i = 0; i < n; i++) { const id = r.u16(); symbols.set(id, r.cstring()); }
@@ -107,13 +118,24 @@ export function patchSwf(bytes, config, render) {
       assert.ok(typeof region.text === 'string' && region.text.length > 0 && !/[\r\n]/.test(region.text));
       assert.ok(Number.isFinite(region.textOffsetY ?? 0) && Math.abs(region.textOffsetY ?? 0) <= h / 2, 'invalid caption vertical offset');
       assert.equal(Boolean(region.sample), !region.transparent, 'caption needs a sampled texture or transparent background');
+      if (region.hideWhenBackgroundEnabled !== undefined) {
+        assert.equal(typeof region.hideWhenBackgroundEnabled, 'boolean', 'invalid background caption option');
+        if (region.hideWhenBackgroundEnabled) assert.ok(region.transparent && !region.preserveAlpha && !region.inpaint, 'background duplicate caption must allow transparent clearing');
+      }
       if (region.sample) { const [sx, sy, sw, sh] = region.sample; assert.ok([sx, sy, sw, sh].every(Number.isInteger)); assert.ok(sx >= 0 && sy >= 0 && sw > 0 && sh > 0 && sx + sw <= image.width && sy + sh <= image.height); }
       if (region.inpaintSeed) {
         const { min, max } = region.inpaintSeed;
         assert.ok(region.inpaint && Array.isArray(min) && Array.isArray(max) && min.length === 3 && max.length === 3 && min.every((v, c) => Number.isInteger(v) && Number.isInteger(max[c]) && v >= 0 && v <= max[c] && max[c] <= 255), 'invalid caption seed range');
       }
     }
-    const rgba = render(image, entry), patched = decodeBitmap(encodeBitmap(image, rgba));
+    const hiddenRegions = background.enabled ? entry.regions.filter(region => region.hideWhenBackgroundEnabled) : [];
+    const drawnRegions = entry.regions.filter(region => !hiddenRegions.includes(region));
+    const rgba = render(image, hiddenRegions.length ? { ...entry, regions: drawnRegions } : entry);
+    for (const region of hiddenRegions) {
+      const [x, y, w, h] = region.box;
+      for (let yy = y; yy < y + h; yy++) rgba.fill(0, (yy * image.width + x) * 4, (yy * image.width + x + w) * 4);
+    }
+    const patched = decodeBitmap(encodeBitmap(image, rgba));
     let changedPixels = 0, alphaChangedPixels = 0;
     for (let y = 0; y < image.height; y++) for (let x = 0; x < image.width; x++) {
       const p = (y * image.width + x) * 4;
@@ -128,7 +150,16 @@ export function patchSwf(bytes, config, render) {
     replacements.set(tag, buildTag(36, encodeBitmap(image, rgba)));
     changed.push({ id: entry.id, className: entry.className, width: image.width, height: image.height,
       regions: entry.regions.length, changedPixels, alphaChangedPixels, outsideRegionsUnchanged: true,
+      drawnRegions: drawnRegions.length, clearedRegions: hiddenRegions.map(region => ({ id: entry.id, text: region.text, box: region.box, action: 'clear-background-duplicate' })),
       sourcePixelsSha256: hash(image.raw), pixelsSha256: hash(patched.raw) });
+  }
+  if (background.enabled) {
+    assert.ok(!ids.has(background.id), 'background conflicts with a caption bitmap');
+    const matches = parsed.tags.filter(tag => tag.code === 21 && decoded.body.readUInt16LE(tag.bodyStart) === background.id);
+    assert.equal(matches.length, 1, 'missing or duplicate background bitmap');
+    const tag = matches[0]; assert.equal(hash(tag.raw), background.sourceTagSha256, 'background source tag changed; preserve newer work');
+    replacements.set(tag, buildTag(21, Buffer.concat([decoded.body.subarray(tag.bodyStart, tag.bodyStart + 2), backgroundBytes])));
+    changed.push({ ...background, kind: 'background' });
   }
   const out = compressSwf(decoded.sig, decoded.version, Buffer.concat([parsed.headerPrefix, ...parsed.tags.map(tag => replacements.get(tag) ?? tag.raw), parsed.trailing]));
   const after = decompressSwf(out), afterTags = parseTags(after.body);
@@ -140,14 +171,20 @@ export function patchSwf(bytes, config, render) {
     assert.equal(afterTags.tags[i].code, parsed.tags[i].code);
     if (!replacements.has(parsed.tags[i])) { assert.deepEqual(afterTags.tags[i].raw, parsed.tags[i].raw); unchangedTags++; }
   }
-  return { out, changed, unchangedTags, totalTags: parsed.tags.length };
+  if (background.enabled) {
+    const tag = afterTags.tags.find(tag => tag.code === 21 && after.body.readUInt16LE(tag.bodyStart) === background.id);
+    assert.deepEqual(after.body.subarray(tag.bodyStart + 2, tag.bodyEnd), backgroundBytes, 'packaged background PNG changed');
+  }
+  return { out, changed, background, unchangedTags, totalTags: parsed.tags.length };
 }
 
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3); assert.ok(flags.length <= 1 && flags.every(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat'].includes(flag)), 'unknown bag art option');
+  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
+  assert.ok(assetFlags.length <= 1 && backgroundFlags.length <= 1 && flags.length === assetFlags.length + backgroundFlags.length, 'unknown or duplicate bag art option');
   const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat');
+  assert.ok(backgroundFlags.length === 0 || (hall && command !== 'rollback' && backgroundFlags[0].length > '--background='.length), 'background requires --asset=hall for verify or install');
   const name = chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : 'bagandinfo';
   const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
@@ -164,7 +201,11 @@ async function main() {
     if (previous.hadOverlay) replace(readFileSync(previous.backup)); else unlinkSync(target);
     unlinkSync(ledgerFile); console.log(JSON.stringify({ rolledBack: true, originalAssetUnchanged: true })); return;
   }
-  if (command === 'install' && previous?.configSha256 === hash(configBytes)) { console.log(JSON.stringify({ installed: true, unchanged: true, sha256: previous.sha256 })); return; }
+  const backgroundFile = backgroundFlags.length ? resolve(backgroundFlags[0].slice('--background='.length)) : null;
+  const backgroundBytes = backgroundFile ? readFileSync(backgroundFile) : null;
+  const background = backgroundBytes ? { ...validateBackground(backgroundBytes, config.background), sourceFile: backgroundFile } : { enabled: false };
+  const effectiveConfigSha256 = background.enabled ? hash(Buffer.concat([configBytes, Buffer.from(background.pngSha256, 'hex')])) : hash(configBytes);
+  if (command === 'install' && (previous?.effectiveConfigSha256 ?? previous?.configSha256) === effectiveConfigSha256) { console.log(JSON.stringify({ installed: true, unchanged: true, sha256: previous.sha256, background: previous.background ?? { enabled: false }, renderingAccepted: false })); return; }
   const base = previous ? readFileSync(previous.backup) : existsSync(target) ? readFileSync(target) : assetBytes;
   if (hall) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall overlay; preserved');
   if (chat) assert.equal(hash(base), config.sourceAssetSha256, 'unknown chat overlay; preserved');
@@ -214,7 +255,7 @@ async function main() {
     const png = bytes => PNG.sync.write({ width: image.width, height: image.height, data: bytes });
     const before = join(reportDir, `${entry.id}-before.png`), after = join(reportDir, `${entry.id}-after.png`);
     writeFileSync(before, png(image.rgba)); writeFileSync(after, png(rgba)); rendered.push({ id: entry.id, width: image.width, height: image.height, before, after }); return rgba;
-  });
+  }, backgroundBytes);
   // Export the packaged pixels again; these are the actual SWF result, not only the painter's input.
   const packaged = decompressSwf(result.out), packedTags = parseTags(packaged.body);
   for (const entry of rendered) {
@@ -229,9 +270,10 @@ async function main() {
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
   for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }
   writeFileSync(join(reportDir, 'buttons-comparison.png'), sheet.toBuffer('image/png'));
-  const summary = { installed: command === 'install', sourceSha256: hash(base), sha256: hash(result.out), sourceAssetSha256: hash(assetBytes), configSha256: hash(configBytes),
+  const summary = { installed: command === 'install', sourceSha256: hash(base), sha256: hash(result.out), sourceAssetSha256: hash(assetBytes), configSha256: hash(configBytes), effectiveConfigSha256, background,
     target, reportDir, changed: result.changed, totalTags: result.totalTags, unchangedTags: result.unchangedTags,
-    font, fontFits, rendered, renderingAccepted: false, outsideCaptionRegionsUnchanged: true, originalAssetUnchanged: true };
+    font, fontFits, drawnCaptionRegions: fontFits.length, clearedCaptionRegions: result.changed.flatMap(entry => entry.clearedRegions ?? []),
+    rendered, renderingAccepted: false, outsideCaptionRegionsUnchanged: !background.enabled, captionPixelsOutsideRegionsUnchanged: true, originalAssetUnchanged: true };
   writeFileSync(join(reportDir, `${name}.swf`), result.out); writeFileSync(join(reportDir, 'evidence.json'), JSON.stringify(summary, null, 2));
   if (command === 'install') {
     if (existsSync(target)) assert.equal(hash(readFileSync(target)), previous?.sha256 ?? summary.sourceSha256, 'overlay changed during preparation; preserved');
@@ -247,6 +289,6 @@ async function main() {
     }
   }
   assert.equal(hash(readFileSync(asset)), config.sourceAssetSha256, 'shipped asset changed during preparation');
-  console.log(JSON.stringify({ installed: summary.installed, bitmaps: result.changed.length, regions: fontFits.length, sha256: summary.sha256, reportDir, renderingAccepted: false }));
+  console.log(JSON.stringify({ installed: summary.installed, bitmaps: result.changed.length, regions: fontFits.length, clearedRegions: summary.clearedCaptionRegions.length, sha256: summary.sha256, reportDir, background, renderingAccepted: false }));
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

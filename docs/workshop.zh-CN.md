@@ -2,7 +2,9 @@
 
 ## 继续修改中文文字
 
-客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理，当前覆盖359键/362行，包括装备类型、背包、商城、房间、副本、好友和邮件部分提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
+客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理，当前覆盖2783键/2796行，包括装备类型、背包、商城、房间、副本、好友和邮件等提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
+
+本次保留全部359个既有中文键，新增2415个经过精确同键、占位符、数值、HTML和控制标记检查的中文条目，另按本地语义补译9键。参考候选中的19处VIP权益、货币绑定、宠物等级、活动状态等含义差异已排除，其中10键仍需核对真实调用或服务端行为；未导入参考服装备属性或奖励配置。该批静态审阅重点对照839个候选，不代表每个词条或全部页面已通过语义、布局及功能验收。
 
 核心 SWF 的已知越南语/葡萄牙语常量另由 `research/i18n/zh-CN-literals.json` 与 `scripts/workshop-literals.mjs` 管理。工具沿用现有 ABC 字符串补丁器，仅写 `runtime/client-overlay`，保留当前部署的 RSA 公钥和其他字符串、方法代码及位图。当前三个文件共替换 42 个常量位置：`2.png` 34 个、`3.png` 5 个、`DDT_Loading.swf` 3 个；称号译名为本地语义翻译，不能用于推断官方时装名称或素材映射。
 
@@ -102,6 +104,15 @@ node scripts/workshop-language.mjs rollback
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML 只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本，限定14张 fmt5 位图：12个建筑标题、频道与签到。原入口和动画继续使用；其余333个 SWF 标签以及文字矩形以外像素不变。农场、独立活动入口和工具栏的其他图片仍待处理，这批不代表整个大厅已中文化。
+
+大厅支持可选 `--background=<PNG路径>`，只接收配置中已审阅的1000×600背景摘要，并将图像内容写入原tag21/id12。夜景模式绘制13处标题、清空频道图片的一处重复文字，让底图已有的中文“频道”显示；频道框和命中对象保留。共改变15个图像标签，其余332个标签（包括ABC、SymbolClass、shape、sprite和动画）保持原字节。背景作为同一hall覆盖的配置身份参与幂等安装、备份与回退；不带此参数的默认命令仍生成原景14标题版本。单张背景图的适配不代表参考客户端整体兼容或其活动已实现。
+
+本批已实际核验字典2783键/2796行、六个HTTP覆盖及原件摘要，正常空闲重启和重复安装通过；真实玩家的等级、经验、外观及余额保持。男女原大厅与背包四张完整画面已查看，目标文字未观察到明显裁切或重叠；画面仍有农场、活动、反馈等外语图片，其他页面和点击行为未验收。一个女角色大厅尝试发生Ruffle WASM内存越界，保持相同部署的全新尝试通过，原因未确认，两次证据分别保留。已知weeklyinfo.xml与favicon 404也未计为修复。保存的AS3中15处译文竖线列表调用已静态核对，本批涉及13键；其他未覆盖的调用不能据此宣称全量契约通过。本次没有新增游戏操作、活动领奖、装备属性修改或在线回退验证。
+
+```text
+node scripts/workshop-bag-art.mjs verify --asset=hall --background=../../runtime/reference-server-research/hall-language-recon/hall-background-candidate.png
+node scripts/workshop-bag-art.mjs install --asset=hall --background=../../runtime/reference-server-research/hall-language-recon/hall-background-candidate.png
+```
 
 聊天使用 `chat.zh-CN.json` 和 `--asset=chat` 的独立账本，限定当前/公会/私聊六个普通与选中按钮皮肤、三个频道标签，共9张fmt5位图。窄按钮仅对审核字墨范围采样填补，保留原边框、皮肤及alpha；透明标签仅改审核区域字形。其他433个SWF标签、ABC、动画、命中层和原XML位置不变。默认bag/coreii/hall的字墨阈值与横向采样不变，未知覆盖仍拒绝覆盖。单元测试保持synthetic，不要求LFS水合；真实chat资源hash/owner/标签/像素保护由 `verify --asset=chat` 独立核验。
 

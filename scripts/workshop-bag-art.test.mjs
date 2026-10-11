@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { deflateSync } from 'node:zlib';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import { buildTag, compressSwf, decompressSwf, parseTags } from '../tools/i18n/abc-strings/lib.mjs';
 import { decodeBitmap, encodeBitmap, hash, patchSwf } from './workshop-bag-art.mjs';
 const header = Buffer.from([0, 0, 0, 1, 0]), pixels = Buffer.from([3, 1, 2, 3, 255, 100, 120, 150, 0, 0, 0, 0, 255, 80, 90, 100]);
@@ -28,6 +30,38 @@ assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolC
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [255, 0, 0], max: [0, 255, 255] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [0, 0, 0], max: [255, 255, 256] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaintSeed: { min: [0, 0, 0], max: [255, 255, 255] } }] }] }, patch), /invalid caption seed range/);
+const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
+const { PNG } = createRequire(join(depRoot, 'package.json'))('pngjs');
+const backgroundPng = PNG.sync.write({ width: 2, height: 2, data: Buffer.alloc(16, 255) });
+const backgroundTag = buildTag(21, Buffer.concat([Buffer.from([12, 0]), PNG.sync.write({ width: 2, height: 2, data: Buffer.alloc(16, 0) })]));
+const hallBefore = compressSwf('CWS', 15, Buffer.concat([header, backgroundTag, buildTag(36, payload), buildTag(76, symbol), ownerTag, pristineTag, buildTag(0, Buffer.alloc(0))]));
+const background = { id: 12, tagCode: 21, width: 2, height: 2, sourceTagSha256: hash(backgroundTag), pngSha256: hash(backgroundPng) };
+const hallDefault = patchSwf(hallBefore, { bitmaps: [entry], background }, patch);
+const hallResult = patchSwf(hallBefore, { bitmaps: [entry], background }, patch, backgroundPng);
+const hallDecoded = decompressSwf(hallResult.out), hallTags = parseTags(hallDecoded.body).tags;
+const defaultDecoded = decompressSwf(hallDefault.out), defaultTags = parseTags(defaultDecoded.body).tags;
+assert.equal(hallDecoded.body.readUInt16LE(hallTags[0].bodyStart), 12, 'background image ID must not change');
+assert.deepEqual(hallDecoded.body.subarray(hallTags[0].bodyStart + 2, hallTags[0].bodyEnd), backgroundPng);
+for (let index = 1; index < hallTags.length; index++) assert.deepEqual(hallTags[index].raw, defaultTags[index].raw, 'background option must preserve captions and every other tag');
+assert.equal(hallResult.changed.length, 2); assert.equal(hallResult.background.enabled, true); assert.equal(hallDefault.background.enabled, false);
+assert.throws(() => patchSwf(hallBefore, { bitmaps: [entry], background: { ...background, pngSha256: 'wrong' } }, patch, backgroundPng), /PNG hash mismatch/);
+assert.throws(() => patchSwf(hallBefore, { bitmaps: [entry], background: { ...background, width: 3 } }, patch, backgroundPng), /width mismatch/);
+assert.throws(() => patchSwf(hallBefore, { bitmaps: [entry], background: { ...background, sourceTagSha256: 'wrong' } }, patch, backgroundPng), /source tag changed/);
+assert.throws(() => patchSwf(hallBefore, { bitmaps: [entry], background }, patch, Buffer.from('not PNG')), /encoded PNG/);
+const duplicateEntry = { ...entry, regions: [{ ...entry.regions[0], hideWhenBackgroundEnabled: true }] };
+const duplicateDefault = patchSwf(hallBefore, { bitmaps: [duplicateEntry], background }, patch);
+assert.deepEqual(duplicateDefault.out, hallDefault.out, 'optional duplicate marker must preserve default captions');
+const duplicateResult = patchSwf(hallBefore, { bitmaps: [duplicateEntry], background }, (source, visibleEntry) => {
+  assert.equal(visibleEntry.regions.length, 0, 'background duplicate must not be drawn');
+  return Buffer.from(source.rgba);
+}, backgroundPng);
+const duplicateDecoded = decompressSwf(duplicateResult.out), duplicateTags = parseTags(duplicateDecoded.body).tags;
+const duplicateBitmap = decodeBitmap(duplicateDecoded.body.subarray(duplicateTags[1].bodyStart, duplicateTags[1].bodyEnd));
+assert.equal(duplicateBitmap.id, 16); assert.deepEqual(duplicateBitmap.raw.subarray(4, 8), Buffer.alloc(4), 'duplicate region must be fully transparent');
+assert.deepEqual(duplicateBitmap.raw.subarray(0, 4), pixels.subarray(0, 4)); assert.deepEqual(duplicateBitmap.raw.subarray(8), pixels.subarray(8));
+for (let index = 2; index < duplicateTags.length; index++) assert.deepEqual(duplicateTags[index].raw, hallTags[index].raw, 'duplicate clearing must preserve sprites, symbols and ABC');
+assert.equal(duplicateResult.changed[0].drawnRegions, 0);
+assert.deepEqual(duplicateResult.changed[0].clearedRegions, [{ id: 16, text: '中', box: [1, 0, 1, 1], action: 'clear-background-duplicate' }]);
 // Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
 // Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges');
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, optional background ID/hash/dimensions, bounded duplicate clearing');
