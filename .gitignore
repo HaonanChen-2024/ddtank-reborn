@@ -13,3 +13,7 @@ packages/protocol/csharp-oracle/original/
 remaster/*/inputs/
 remaster/*/outputs/
 remaster/_auto/
+apps/web/public/workshop-render-*.html
+apps/web/public/workshop-probe-*.swf
+apps/web/public/workshop-peer-*.html
+apps/web/public/workshop-peer-*.swf

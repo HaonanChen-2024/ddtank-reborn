@@ -15,7 +15,13 @@ const fixture = process.argv.find(arg => arg.startsWith("--fixture="))?.slice(10
 assert.ok(["smoke", "wardrobe"].includes(fixture), "unknown private fixture");
 const account = fixture === "wardrobe" ? JSON.parse(readFileSync(join(runtime, "credentials/wardrobe-fixture-account.json"), "utf8")) : JSON.parse(readFileSync(join(runtime, "credentials/smoke-accounts.json"), "utf8"))[0];
 const probe = process.argv.find(arg => arg.startsWith("--probe="))?.slice(8);
-const seconds = Number(process.argv.find(arg => arg.startsWith("--seconds="))?.slice(10) ?? 30);
+const wardrobeProbe = probe === "wardrobe";
+assert.ok(!wardrobeProbe || fixture === "wardrobe", "wardrobe writes require the private wardrobe fixture");
+const probeSource = resolve(process.argv.find(arg => arg.startsWith("--probe-file="))?.slice(13) ?? join(runtime,
+  wardrobeProbe ? "content-research/WorkshopWardrobeProbe.swf" : "client-research/WorkshopProbe.swf"));
+assert.ok(probeSource.startsWith(runtime + "/") || probeSource.startsWith(runtime + "\\"), "compiled test probe must stay in private runtime");
+assert.ok(probeSource.toLowerCase().endsWith(".swf"), "compiled test probe requires an SWF file");
+const seconds = Number(process.argv.find(arg => arg.startsWith("--seconds="))?.slice(10) ?? (wardrobeProbe ? 90 : 30));
 const session = JSON.parse(readFileSync(join(runtime, "workshop-session.json"), "utf8"));
 const host = session.publicHost ?? "127.0.0.1";
 assert.equal(host, "127.0.0.1", "private render fixtures require the loopback stack; temporary login tickets must not be served on LAN");
@@ -23,9 +29,24 @@ const apiUrl = `http://${host}:8080`;
 const webUrl = `http://${host}:5173`;
 assert.ok(Number.isInteger(seconds) && seconds >= 10 && seconds <= 120, "render duration must be 10..120 seconds");
 assert.ok(!probe || ["observe", "shop", "battle", "wardrobe", "language"].includes(probe), "unknown probe action");
+const probeParameters = {};
+if (fixture === "wardrobe" && probe) {
+  const journal = JSON.parse(readFileSync(join(runtime, "content-research/wardrobe-lifecycle.json"), "utf8"));
+  assert.equal(journal.phase, "awaiting-visual", "wardrobe fixture must be held and unrolled-back before rendering");
+  assert.equal(journal.fixture?.username, account.username, "wardrobe account differs from its journal");
+  for (const value of [journal.fixture?.characterId, journal.mail?.itemId, journal.template?.id])
+    assert.ok(Number.isSafeInteger(value) && value > 0, "missing exact wardrobe fixture identity");
+  assert.ok(typeof journal.template?.pic === "string" && /^[A-Za-z0-9_-]+$/.test(journal.template.pic), "invalid wardrobe fixture Pic");
+  Object.assign(probeParameters, { probeUserId: journal.fixture.characterId, probeItemId: journal.mail.itemId,
+    probeTemplateId: journal.template.id, probePic: journal.template.pic });
+}
 const response = await fetch(`${apiUrl}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: account.username, password: account.password }) });
 assert.equal(response.status, 200);
 const { game } = await response.json();
+const sensitiveValues = [...new Set([account.password, account.username, game.flashvars?.user, game.flashvars?.key]
+  .filter(value => typeof value === "string" && value.length > 0).flatMap(value => [value, encodeURIComponent(value)]))];
+const redactDiagnostics = value => sensitiveValues.reduce((output, secret) => output.replaceAll(secret, "[redacted]"), value);
+const diagnosticReplacer = (_key, value) => typeof value === "string" ? redactDiagnostics(value) : value;
 const id = randomUUID();
 const output = join(runtime, "client-render", id);
 mkdirSync(output, { recursive: true });
@@ -33,6 +54,7 @@ const publicFile = join(repo, "apps/web/public", `workshop-render-${id}.html`);
 const probeFile = join(repo, "apps/web/public", `workshop-probe-${id}-Loading.swf`);
 const probeLoadingFile = join(repo, "apps/web/public", `workshop-probe-${id}-DDT_Loading.swf`);
 const screenshot = join(output, "boot.png");
+let wardrobeRestored = !wardrobeProbe, wardrobeError = "";
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const html = `<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#161822;color:white}#host{width:1000px;height:600px}#status{font:14px sans-serif;padding:8px}</style><div id="host"></div><div id="status">Loading real client...</div><script>
 const config=${JSON.stringify(game)};
@@ -40,13 +62,13 @@ window.workshopProbeEvidence=[];window.workshop_probe_report=value=>{window.work
 window.RufflePlayer={config:{publicPath:config.rufflePath.slice(0,config.rufflePath.lastIndexOf('/')+1),autoplay:'on',unmuteOverlay:'hidden',splashScreen:false,allowScriptAccess:true,socketProxy:config.socketProxy,fontSources:['/fonts/NotoSans-Regular.ttf','/fonts/NotoSans-Bold.ttf','/fonts/NotoSansSC-Regular.otf','/fonts/NotoSansSC-Bold.otf'],defaultFonts:{sans:['Noto Sans SC','Noto Sans'],serif:['Noto Sans SC','Noto Sans'],typewriter:['Noto Sans SC','Noto Sans']}}};
 window.game_interruption=()=>document.getElementById('status').textContent='Game connection interrupted';
 const script=document.createElement('script');script.src=config.rufflePath;
-script.onload=async()=>{try{const p=window.RufflePlayer.newest().createPlayer();p.style.width='1000px';p.style.height='600px';document.getElementById('host').appendChild(p);await p.ruffle().load({url:${probe ? JSON.stringify(`${webUrl}/workshop-probe-${id}-Loading.swf`) : "config.swfUrl"},parameters:${probe ? `{...config.flashvars,probeClient:config.swfUrl,probeAction:${JSON.stringify(probe)}}` : "config.flashvars"},base:config.base,socketProxy:config.socketProxy});document.getElementById('status').textContent='Ruffle loaded; inspect captured game state separately';}catch(e){document.getElementById('status').textContent='Ruffle error: '+String(e);}};
+script.onload=async()=>{try{const p=window.RufflePlayer.newest().createPlayer();p.style.width='1000px';p.style.height='600px';document.getElementById('host').appendChild(p);await p.ruffle().load({url:${probe ? JSON.stringify(`${webUrl}/workshop-probe-${id}-Loading.swf`) : "config.swfUrl"},parameters:${probe ? `{...config.flashvars,...${JSON.stringify(probeParameters)},probeClient:config.swfUrl,probeAction:${JSON.stringify(probe)}}` : "config.flashvars"},base:config.base,socketProxy:config.socketProxy});document.getElementById('status').textContent='Ruffle loaded; inspect captured game state separately';}catch(e){document.getElementById('status').textContent='Ruffle error: '+String(e);}};
 document.head.appendChild(script);
 </script>`;
 try {
   writeFileSync(publicFile, html, { flag: "wx" });
   if (probe) {
-    writeFileSync(probeFile, readFileSync(join(runtime, "client-research/WorkshopProbe.swf")), { flag: "wx" });
+    writeFileSync(probeFile, readFileSync(probeSource), { flag: "wx" });
     // The original bootstrap replaces Loading.swf in the root URL to locate its next stage.
     const loading = await fetch(game.swfUrl.replace("Loading.swf", "DDT_Loading.swf"));
     assert.equal(loading.status, 200);
@@ -88,20 +110,35 @@ try {
     await command("Network.enable");
     await command("Runtime.enable");
     // Use elapsed real time. Virtual time skips the animation frames the real Ruffle player needs.
-    await delay(seconds * 1000);
+    let mixedCaptured = false;
+    for (let elapsed = 0; elapsed < seconds; elapsed++) {
+      await delay(1000);
+      if (!wardrobeProbe) continue;
+      if (!mixedCaptured && evidence.probe.some(event => event.phase === "original-mixed-observed")) {
+        const mixedCapture = await command("Page.captureScreenshot", { format: "png" });
+        writeFileSync(join(output, "mixed.png"), Buffer.from(mixedCapture.data, "base64"));
+        mixedCaptured = true;
+      }
+      wardrobeRestored = evidence.probe.some(event => event.phase === "original-mixed-restored");
+      const error = evidence.probe.find(event => event.phase === "wardrobe-probe-error" || event.phase === "wardrobe-load-error");
+      if (error) wardrobeError = redactDiagnostics(String(error.text));
+      if (wardrobeRestored || wardrobeError) break;
+    }
     const capture = await command("Page.captureScreenshot", { format: "png" });
     writeFileSync(screenshot, Buffer.from(capture.data, "base64"));
-    writeFileSync(join(output, "network.json"), JSON.stringify(evidence, null, 2));
+    writeFileSync(join(output, "network.json"), JSON.stringify(evidence, diagnosticReplacer, 2));
     await command("Browser.close");
     await Promise.race([exited, delay(3000)]);
   } finally {
     socket?.close();
     if (child.exitCode === null && child.signalCode === null) child.kill(); // Only this run's isolated browser.
-    writeFileSync(join(output, "network.json"), JSON.stringify(evidence, null, 2));
-    writeFileSync(join(output, "browser.log"), diagnostics);
+    writeFileSync(join(output, "network.json"), JSON.stringify(evidence, diagnosticReplacer, 2));
+    writeFileSync(join(output, "browser.log"), redactDiagnostics(diagnostics));
   }
   assert.ok(existsSync(screenshot), "missing screenshot");
-  console.log(JSON.stringify({ screenshot, renderCaptured: true, gameplayAccepted: false }));
+  assert.ok(wardrobeRestored && !wardrobeError,
+    `wardrobe restoration was not verified: ${wardrobeError || "deadline"}; read the exact journal and restore or roll back the fixture normally`);
+  console.log(JSON.stringify({ screenshot, renderCaptured: true, gameplayAccepted: false, ...(wardrobeProbe ? { wardrobeRestored: true } : {}) }));
 } finally {
   if (existsSync(publicFile)) unlinkSync(publicFile); // Only this run's uniquely named temporary HTML.
   if (existsSync(probeFile)) unlinkSync(probeFile);
