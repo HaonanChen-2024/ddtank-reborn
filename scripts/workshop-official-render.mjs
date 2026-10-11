@@ -13,8 +13,11 @@ const runtime = join(workshop, "runtime");
 const privateRoot = join(runtime, "content-research/official-probe");
 const arg = (name, fallback) => process.argv.find(value => value.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const sha256 = file => createHash("sha256").update(readFileSync(file)).digest("hex");
-const probeSource = join(repo, "research/client/WorkshopOfficialWardrobeProbe.as");
-const probeSwf = join(privateRoot, "WorkshopOfficialWardrobeProbe.swf");
+const view = arg("view", "appearances");
+assert.ok(["appearances", "bag"].includes(view), "view must be appearances or bag");
+const probeName = view === "bag" ? "WorkshopBagViewProbe" : "WorkshopOfficialWardrobeProbe";
+const probeSource = join(repo, `research/client/${probeName}.as`);
+const probeSwf = join(privateRoot, `${probeName}.swf`);
 assert.ok(existsSync(probeSource), "official probe source is unavailable");
 const compiler = join(runtime, "tools/flex-min/lib/mxmlc.jar");
 const playerGlobal = join(workshop, "downloads/flex/playerglobal32_0.swc");
@@ -50,7 +53,7 @@ assert.ok(templates.length > 0, "no installed templates match the exact fixture"
 for (const row of templates) assert.ok(Number.isSafeInteger(row.id) && [1, 2, 3, 4, 5, 6].includes(row.categoryId) && /^[A-Za-z0-9_-]+$/.test(row.pic), "installed appearance mapping is invalid");
 if (only.length) assert.equal(templates.length, only.length, "one or more requested template IDs are not installed for this fixture");
 if (baseline) assert.ok(templates.every(row => Number.isSafeInteger(row.sourceId) && row.sourceId > 0), "legacy baseline requires exact source template IDs");
-const expectedJobs = baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : 2), 0);
+const expectedJobs = view === "bag" ? 1 : baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : 2), 0);
 const session = JSON.parse(readFileSync(join(runtime, "workshop-session.json"), "utf8"));
 assert.equal(session.publicHost ?? "127.0.0.1", "127.0.0.1", "temporary client tickets require the loopback stack");
 const apiUrl = "http://127.0.0.1:8080", webUrl = "http://127.0.0.1:5173";
@@ -76,7 +79,7 @@ window.game_interruption=()=>console.error('original game connection interrupted
 const script=document.createElement('script');script.src=config.rufflePath;script.onload=async()=>{try{const p=window.RufflePlayer.newest().createPlayer();p.style.width='1000px';p.style.height='600px';document.getElementById('host').appendChild(p);await p.ruffle().load({url:${JSON.stringify(`${webUrl}/workshop-official-${runId}-Loading.swf`)},parameters:{...config.flashvars,...${JSON.stringify(probeParameters)}},base:config.base,socketProxy:config.socketProxy});}catch(e){console.error('official player load failed',String(e));}};document.head.appendChild(script);
 </script>`;
 const delay = ms => new Promise(resolveDelay => setTimeout(resolveDelay, ms));
-const evidence = { runId, sex, characterId: fixture.characterId, templates, expectedJobs, baseline, compiler: compilerEvidence, probe: [], requests: [], errors: [], captures: [], inventoryWrites: false, offlineImageComposition: false, gameplayAccepted: false };
+const evidence = { runId, view, sex, characterId: fixture.characterId, templates, expectedJobs, baseline, compiler: compilerEvidence, probe: [], requests: [], errors: [], captures: [], inventoryWrites: false, offlineImageComposition: false, gameplayAccepted: false };
 let child, socket, diagnostics = "";
 try {
   writeFileSync(publicFile, html, { flag: "wx" });
@@ -138,7 +141,7 @@ try {
   evidence.requiresVisualReview = true;
   await command("Browser.close"); await Promise.race([exited, delay(3000)]);
   assert.ok(evidence.originalClientRenderCompleted && evidence.allJobsCaptured && evidence.allLayersLoaded, "original component rendering is incomplete; inspect exact private evidence");
-  console.log(JSON.stringify({ output, sex, templates: templates.length, captures: evidence.captures.length, originalClientRenderCompleted: true, gameplayAccepted: false, requiresVisualReview: true }));
+  console.log(JSON.stringify({ output, view, sex, templates: templates.length, captures: evidence.captures.length, originalClientRenderCompleted: true, gameplayAccepted: false, requiresVisualReview: true }));
 } finally {
   socket?.close();
   if (child && child.exitCode === null && child.signalCode === null) child.kill();

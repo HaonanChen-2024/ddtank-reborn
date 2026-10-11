@@ -54,6 +54,13 @@ const ptBR = {
 
   "play.back": "Voltar ao site",
   "play.fullscreen": "Tela cheia",
+  "play.soloHelp": "Jogar solo",
+  "play.soloHelp.experience":
+    "Se receber poções de experiência pelo correio, retire-as e use-as na mochila. No nível 8, você pode entrar nas masmorras básicas.",
+  "play.soloHelp.arena":
+    "Servidor local: no salão, escolha Arena → Criar sala → Iniciar. Aguarde cerca de 25 segundos para a IA entrar automaticamente.",
+  "play.soloHelp.quickJoin":
+    "Entrada rápida só procura salas existentes. Se a lista estiver vazia ao jogar sozinho, escolha Criar sala.",
   "play.loading": "Carregando o cliente…",
   "play.loadingRuffle": "Carregando o emulador Flash (Ruffle)…",
   "play.error": "Não foi possível iniciar o jogo",
@@ -149,6 +156,13 @@ const en: Partial<Record<Key, string>> = {
   "auth.err.invalid": "Wrong username or password",
   "play.back": "Back to site",
   "play.fullscreen": "Fullscreen",
+  "play.soloHelp": "Play solo",
+  "play.soloHelp.experience":
+    "If you receive experience potions by mail, claim them and use them from your bag. At level 8, you can enter basic dungeons.",
+  "play.soloHelp.arena":
+    "Local server: in the lobby, choose Arena → Create room → Start. Wait about 25 seconds for an AI opponent to join automatically.",
+  "play.soloHelp.quickJoin":
+    "Quick join only looks for existing rooms. If the list is empty when playing alone, choose Create room.",
   "play.loading": "Loading the client…",
   "play.loadingRuffle": "Loading the Flash emulator (Ruffle)…",
   "play.error": "Couldn't start the game",
@@ -237,6 +251,10 @@ const zhCN: Record<Key, string> = {
   "auth.err.invalid": "用户名或密码错误",
   "play.back": "返回首页",
   "play.fullscreen": "全屏",
+  "play.soloHelp": "单人怎么玩",
+  "play.soloHelp.experience": "邮件中收到经验药水后，先领取，再在背包使用。升到 8 级可进入基础副本。",
+  "play.soloHelp.arena": "本地服务：大厅「竞技场」→「创建房间」→「开始」，等待约 25 秒，AI 会自动补位。",
+  "play.soloHelp.quickJoin": "「快速进入」只寻找已有房间；单机时列表为空，请选择「创建房间」。",
   "play.loading": "正在加载客户端…",
   "play.loadingRuffle": "正在加载 Flash 模拟器 Ruffle…",
   "play.error": "无法启动游戏",

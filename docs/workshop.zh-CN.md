@@ -2,7 +2,7 @@
 
 ## 继续修改中文文字
 
-客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理。本轮新增194条，累计355键/358行，覆盖装备类型、背包、商城、房间、副本、好友和邮件部分提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
+客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理，当前覆盖359键/362行，包括装备类型、背包、商城、房间、副本、好友和邮件部分提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
 
 核心 SWF 的已知越南语/葡萄牙语常量另由 `research/i18n/zh-CN-literals.json` 与 `scripts/workshop-literals.mjs` 管理。工具沿用现有 ABC 字符串补丁器，仅写 `runtime/client-overlay`，保留当前部署的 RSA 公钥和其他字符串、方法代码及位图。当前三个文件共替换 42 个常量位置：`2.png` 34 个、`3.png` 5 个、`DDT_Loading.swf` 3 个；称号译名为本地语义翻译，不能用于推断官方时装名称或素材映射。
 
@@ -97,7 +97,30 @@ node scripts/workshop-language.mjs install
 node scripts/workshop-language.mjs rollback
 ```
 
-安装161个主要字典键的部署覆盖，保留 CRLF、BOM、重复键、顺序和格式占位符，原版客户端及原字典不变。回退校验账本，遇到用户另外编辑的覆盖文件会保留。新 Noto Sans SC 字体遵循 SIL OFL，许可在 `apps/web/public/fonts/OFL.txt`；来源固定为 [Noto CJK Sans2.004](https://github.com/notofonts/noto-cjk/tree/523d033d6cb47f4a80c58a35753646f5c3608a78)。字典不能翻译 SWF 内嵌位图按钮或数据库中的旧物品名称。
+安装配置中指定的字典键，保留 CRLF、BOM、重复键、顺序和格式占位符，原版客户端及原字典不变。回退校验账本，遇到用户另外编辑的覆盖文件会保留。新 Noto Sans SC 字体遵循 SIL OFL，许可在 `apps/web/public/fonts/OFL.txt`；来源固定为 [Noto CJK Sans2.004](https://github.com/notofonts/noto-cjk/tree/523d033d6cb47f4a80c58a35753646f5c3608a78)。字典不能翻译 SWF 内嵌位图按钮或数据库中的旧物品名称。
+
+背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML 只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
+
+```powershell
+# 先确认没有在线玩家或进行中的对局，再正常停止本项目
+node scripts/workshop.mjs stop
+node scripts/workshop-bag-art.mjs install
+node scripts/workshop-bag-art.mjs install --asset=hidden-controls
+node scripts/workshop-bag-layout.mjs install
+node scripts/workshop.mjs start
+node scripts/workshop-bag-art.mjs verify
+node scripts/workshop-bag-art.mjs verify --asset=hidden-controls
+node scripts/workshop-bag-layout.mjs verify
+# 回退时同样停服，将对应 install 换成 rollback，随后启动
+```
+
+API 在启动时建立资源索引，新覆盖需要正常重启及全新客户端连接才能核验。`node scripts/workshop-official-render.mjs --view=bag --sex=m`（或 `--sex=f`）使用账本指定的独立账号，调用原公开背包方法，保存完整背包画面、原控件边界及角色未变化证明；不模拟鼠标键盘、不修改背包。截图必须实际检查，不能把组件加载完成当成全部中文化或交互通过。帮助正文、奖励弹窗、项链培养及其他玩家页面仍有待办。
+
+## 单人游玩与等级
+
+保留原等级规则。可通过已有管理员邮件给自己的本地角色发经验药水，正常领取后在背包使用。现有 `11904` 每瓶10000经验；从1级、GP1正常使用两瓶可升到9级，基础副本原门槛8级，训练场原门槛15级。邮件内物品是否已领取、升级是否保存必须分别核验，不直接写角色等级或经验。
+
+普通竞技场选择“创建房间 → 开始”，本地 Match 队列约25秒后补入AI；“快速进入”只查找已有房间，单机空列表应创建房间。网站游玩页新增默认折叠的“单人怎么玩”，并保留英语、葡语说明。独立1级账号已通过实际领取/使用升到9级和重登保存，再完成两场正常AI匹配、移动、发射、伤害、结算、返回与重复匹配。这里是实际协议和存档验证，原客户端完整副本/竞技场操作仍需独立验收。
 
 ## 验证与备份
 

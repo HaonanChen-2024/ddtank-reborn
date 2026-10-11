@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/coreii.swf",
+  "sourceAssetSha256": "1d2a8d5606995baa3e287608a55e18289b8d44070e137c8e35ee5ca4051e9b3f",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "owner": "bagAndInfo.info.PlayerInfoView._hiddenControlsBg uses asset.shop.HiddenControlsBg at x=321,y=285",
+  "note": "Only the reviewed embedded caption An is replaced. Original checkbox panel edges and pixels outside the caption remain unchanged. The caption extends above the opaque panel, so its glyph alpha changes inside the annotation.",
+  "bitmaps": [
+    {
+      "id": 38,
+      "className": "asset.shop.HiddenControlsBg",
+      "width": 98,
+      "height": 53,
+      "sourcePixelsSha256": "7e03f10e21d071df05944436f55cff4e89b3a9c783e3b859b81096ee15ec160c",
+      "regions": [
+        {
+          "box": [3, 0, 36, 22],
+          "text": "隐藏",
+          "sample": [42, 0, 36, 22],
+          "fontSize": 13,
+          "textOffsetY": -3,
+          "fill": "#ffff14",
+          "stroke": "#493c09",
+          "strokeWidth": 1.1,
+          "preserveAlpha": false
+        }
+      ]
+    }
+  ]
+}

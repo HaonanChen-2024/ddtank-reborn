@@ -1,0 +1,1823 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/bagandinfo.swf",
+  "sourceAssetSha256": "795d96b7f861e98309c641adc660fd678de09329bcd0f0cab35a66fa16432911",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only reviewed bitmap text regions are changed. Pale button glyphs are locally inpainted using surrounding texture; plain slot labels copy nearby original pixels. Transparent glyph alpha changes only inside annotated regions.",
+  "bitmaps": [
+    {
+      "id": 16,
+      "className": "bagAndInfo.info.personalInfoBgAsset",
+      "width": 437,
+      "height": 451,
+      "sourcePixelsSha256": "09647a59f615398bbf7f541fa7d5a21ad33c40211ccca6d4d132959a50f866b2",
+      "regions": [
+        {
+          "box": [
+            20,
+            4,
+            154,
+            22
+          ],
+          "text": "个人信息",
+          "sample": [
+            176,
+            4,
+            154,
+            22
+          ],
+          "fontSize": 17,
+          "fill": "#fff8e6",
+          "stroke": "#292015",
+          "strokeWidth": 1.2,
+          "preserveAlpha": false
+        },
+        {
+          "box": [
+            246,
+            40,
+            80,
+            22
+          ],
+          "text": "排名",
+          "sample": [
+            330,
+            40,
+            80,
+            22
+          ],
+          "fontSize": 14,
+          "fill": "#fff9e9",
+          "stroke": "#8e2820",
+          "strokeWidth": 1.2,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            38,
+            65,
+            55,
+            19
+          ],
+          "text": "公会",
+          "sample": [
+            97,
+            65,
+            55,
+            19
+          ],
+          "fontSize": 14,
+          "fill": "#17150c",
+          "stroke": "#fff8d3",
+          "strokeWidth": 1,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            31,
+            118,
+            40,
+            13
+          ],
+          "text": "帽子",
+          "sample": [
+            33,
+            106,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            82,
+            118,
+            39,
+            13
+          ],
+          "text": "眼镜",
+          "sample": [
+            84,
+            106,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            31,
+            170,
+            40,
+            14
+          ],
+          "text": "头发",
+          "sample": [
+            33,
+            158,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            82,
+            170,
+            39,
+            14
+          ],
+          "text": "脸饰",
+          "sample": [
+            84,
+            158,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            31,
+            221,
+            40,
+            14
+          ],
+          "text": "衣服",
+          "sample": [
+            33,
+            209,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            82,
+            221,
+            39,
+            14
+          ],
+          "text": "表情",
+          "sample": [
+            84,
+            209,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            31,
+            272,
+            40,
+            13
+          ],
+          "text": "套装",
+          "sample": [
+            33,
+            260,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            82,
+            272,
+            39,
+            13
+          ],
+          "text": "翅膀",
+          "sample": [
+            84,
+            260,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            316,
+            106,
+            41,
+            25
+          ],
+          "text": "手镯",
+          "sample": [
+            317,
+            99,
+            1,
+            26
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            368,
+            118,
+            40,
+            13
+          ],
+          "text": "戒指",
+          "sample": [
+            369,
+            106,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            316,
+            157,
+            41,
+            26
+          ],
+          "text": "手镯",
+          "sample": [
+            317,
+            150,
+            1,
+            26
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            368,
+            169,
+            40,
+            14
+          ],
+          "text": "戒指",
+          "sample": [
+            369,
+            157,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            316,
+            207,
+            41,
+            27
+          ],
+          "text": "项链",
+          "sample": [
+            317,
+            200,
+            1,
+            27
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            368,
+            207,
+            40,
+            27
+          ],
+          "text": "气泡",
+          "sample": [
+            369,
+            200,
+            1,
+            27
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            316,
+            251,
+            41,
+            33
+          ],
+          "text": "婚戒",
+          "sample": [
+            317,
+            243,
+            1,
+            33
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            368,
+            266,
+            40,
+            19
+          ],
+          "text": "辅助",
+          "sample": [
+            383,
+            246,
+            1,
+            19
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            138,
+            301,
+            41,
+            13
+          ],
+          "text": "武器",
+          "sample": [
+            139,
+            288,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            200,
+            301,
+            41,
+            13
+          ],
+          "text": "副手",
+          "sample": [
+            201,
+            288,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            261,
+            301,
+            40,
+            13
+          ],
+          "text": "徽章",
+          "sample": [
+            263,
+            288,
+            1,
+            14
+          ],
+          "fontSize": 12,
+          "fill": "#aaa28b",
+          "stroke": null,
+          "strokeWidth": 0,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            22,
+            319,
+            29,
+            18
+          ],
+          "text": "等级",
+          "sample": [
+            58,
+            319,
+            29,
+            18
+          ],
+          "fontSize": 12,
+          "fill": "#3d260d",
+          "stroke": "#fff2c5",
+          "strokeWidth": 0.7,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            181,
+            320,
+            60,
+            17
+          ],
+          "text": "战斗力",
+          "sample": [
+            119,
+            320,
+            60,
+            17
+          ],
+          "fontSize": 13,
+          "fill": "#bc302a",
+          "stroke": "#fff8e1",
+          "strokeWidth": 0.8,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            29,
+            350,
+            39,
+            36
+          ],
+          "text": "攻击",
+          "sample": [
+            29,
+            350,
+            1,
+            36
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            29,
+            393,
+            39,
+            36
+          ],
+          "text": "防御",
+          "sample": [
+            29,
+            393,
+            1,
+            36
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            136,
+            350,
+            44,
+            36
+          ],
+          "text": "敏捷",
+          "sample": [
+            135,
+            350,
+            1,
+            36
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            136,
+            394,
+            44,
+            35
+          ],
+          "text": "幸运",
+          "sample": [
+            135,
+            394,
+            1,
+            35
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            251,
+            349,
+            57,
+            17
+          ],
+          "text": "伤害",
+          "sample": [
+            251,
+            349,
+            1,
+            17
+          ],
+          "fontSize": 12,
+          "fill": "#f7f1d6",
+          "stroke": "#452912",
+          "strokeWidth": 0.8,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            258,
+            370,
+            50,
+            17
+          ],
+          "text": "护甲",
+          "sample": [
+            251,
+            370,
+            1,
+            17
+          ],
+          "fontSize": 12,
+          "fill": "#f7f1d6",
+          "stroke": "#452912",
+          "strokeWidth": 0.8,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            277,
+            390,
+            31,
+            17
+          ],
+          "text": "生命",
+          "sample": [
+            251,
+            390,
+            1,
+            17
+          ],
+          "fontSize": 12,
+          "fill": "#f7f1d6",
+          "stroke": "#452912",
+          "strokeWidth": 0.8,
+          "preserveAlpha": true
+        },
+        {
+          "box": [
+            263,
+            410,
+            45,
+            17
+          ],
+          "text": "体力",
+          "sample": [
+            251,
+            410,
+            1,
+            17
+          ],
+          "fontSize": 12,
+          "fill": "#f7f1d6",
+          "stroke": "#452912",
+          "strokeWidth": 0.8,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "className": "asset.texpBtn2",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "0fe01dec880c997c64ab670772ab1e47cce380c7916a43f6f01a9b4a3f166ff6",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            68,
+            26
+          ],
+          "text": "修炼",
+          "sample": [
+            34,
+            4,
+            67,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "className": "asset.texpBtn1",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "1f0da27839ec4cc843ede27552b3c045c76007fd0f97d85a1646aaa3a2823127",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            68,
+            26
+          ],
+          "text": "修炼",
+          "sample": [
+            34,
+            4,
+            67,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "className": "asset.infoBtn2",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "1b36dc5bcacc19ef1a18838173fc295535f1c1a4ad03da60c024a9f00f8f82cd",
+      "regions": [
+        {
+          "box": [
+            36,
+            5,
+            68,
+            29
+          ],
+          "text": "个人信息",
+          "sample": [
+            36,
+            3,
+            65,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "className": "asset.infoBtn1",
+      "width": 104,
+      "height": 38,
+      "sourcePixelsSha256": "b04b00a63a2e5b1eada0f08b028485826a59985f3a08b315981abfe1657a440f",
+      "regions": [
+        {
+          "box": [
+            34,
+            5,
+            67,
+            30
+          ],
+          "text": "个人信息",
+          "sample": [
+            36,
+            3,
+            65,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "className": "asset.giftBtn2",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "16aceda183a000a35852e3209857c518907a71dd9ff23294a0ba53ba13000df5",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            67,
+            27
+          ],
+          "text": "礼物",
+          "sample": [
+            35,
+            4,
+            64,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "className": "asset.giftBtn1",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "786b1fe9c2bdeb195aba25c964a7f3a46c691501f0429af2c1aa95be88eefe75",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            67,
+            27
+          ],
+          "text": "礼物",
+          "sample": [
+            35,
+            4,
+            64,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "className": "asset.petBtn1",
+      "width": 116,
+      "height": 35,
+      "sourcePixelsSha256": "ef9b11f963d5eedfbd890607bfad1b43c5fa845157d23144a2db793a02711f57",
+      "regions": [
+        {
+          "box": [
+            36,
+            7,
+            76,
+            25
+          ],
+          "text": "宠物",
+          "sample": [
+            38,
+            3,
+            73,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 81,
+      "className": "asset.petBtn2",
+      "width": 118,
+      "height": 38,
+      "sourcePixelsSha256": "62f7bf6a5ab03c2376ae933a7e6e894b9c835f41be58037dde2ace87e58af0ad",
+      "regions": [
+        {
+          "box": [
+            38,
+            9,
+            76,
+            25
+          ],
+          "text": "宠物",
+          "sample": [
+            40,
+            4,
+            72,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "className": "asset.totemInfoBtn1",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "224507e5d5511c9a24d80037436a58586f0343f8538ff94549a2f2751ae30da0",
+      "regions": [
+        {
+          "box": [
+            34,
+            8,
+            67,
+            26
+          ],
+          "text": "图腾",
+          "sample": [
+            35,
+            4,
+            65,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "className": "asset.totemInfoBtn",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "ec043e19b54556efc5ff5e0d176c4793a626a5d805a684c327da6c255eecf247",
+      "regions": [
+        {
+          "box": [
+            34,
+            8,
+            67,
+            26
+          ],
+          "text": "图腾",
+          "sample": [
+            35,
+            4,
+            65,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "className": "bagAndInfo.bag.settedPWDAsset",
+      "width": 109,
+      "height": 29,
+      "sourcePixelsSha256": "34ce31fec970cd360778c76962a6e1fd0cf0515a3a9671d052a228020b8579af",
+      "regions": [
+        {
+          "box": [
+            23,
+            6,
+            82,
+            19
+          ],
+          "text": "二级密码",
+          "sample": [
+            25,
+            3,
+            78,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "className": "bagAndInfo.bag.setPWDAsset",
+      "width": 109,
+      "height": 29,
+      "sourcePixelsSha256": "7c496639b2552851620bfd4a36103e6a530775a50d0dd92dcc4399234f735eef",
+      "regions": [
+        {
+          "box": [
+            23,
+            6,
+            82,
+            19
+          ],
+          "text": "二级密码",
+          "sample": [
+            25,
+            3,
+            78,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "className": "bagAndInfo.bag.keySetAsset",
+      "width": 54,
+      "height": 27,
+      "sourcePixelsSha256": "76e538187614fadf07ff2432014184dc680ed90255fbcd4492dfb0b14857f8ee",
+      "regions": [
+        {
+          "box": [
+            3,
+            6,
+            48,
+            16
+          ],
+          "text": "快捷键",
+          "sample": [
+            4,
+            3,
+            46,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "className": "bagAndInfo.bag.trieveBtnAsset",
+      "width": 105,
+      "height": 29,
+      "sourcePixelsSha256": "1a0bfd1ef90240ff5105962067a991ac8030d01a199a52a687d11d180e7e1980",
+      "regions": [
+        {
+          "box": [
+            29,
+            5,
+            72,
+            19
+          ],
+          "text": "精炼",
+          "sample": [
+            5,
+            3,
+            96,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "className": "bagAndInfo.bag.breakBtnAsset",
+      "width": 54,
+      "height": 27,
+      "sourcePixelsSha256": "e4215e90593d5760bd899eb243eef8667d2d2ebb7baa76d9699ca7739df36e3e",
+      "regions": [
+        {
+          "box": [
+            3,
+            5,
+            48,
+            18
+          ],
+          "text": "拆分",
+          "sample": [
+            4,
+            3,
+            46,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "className": "bagAndInfo.info.achvBtnAsset",
+      "width": 109,
+      "height": 34,
+      "sourcePixelsSha256": "fa33963fdc89d942e40f7120b7533704ae1ac90fe6eb47d9f99c306110050750",
+      "regions": [
+        {
+          "box": [
+            21,
+            6,
+            77,
+            23
+          ],
+          "text": "成就",
+          "sample": [
+            12,
+            4,
+            86,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "className": "bagAndInfo.bag.sortBagBtnAsset",
+      "width": 105,
+      "height": 29,
+      "sourcePixelsSha256": "aac65a6d0a5bdf213869d265793ddbac9e709aa8dbc1180ae7ad0873c8dc4d47",
+      "regions": [
+        {
+          "box": [
+            27,
+            6,
+            73,
+            18
+          ],
+          "text": "整理背包",
+          "sample": [
+            28,
+            3,
+            69,
+            2
+          ],
+          "fontSize": 14,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "className": "bagAndInfo.bag.sellGoodsAsset",
+      "width": 55,
+      "height": 28,
+      "sourcePixelsSha256": "a9a412a1de5e9a6ed62f42dd1236ab343d408a44ae227998535d01c565768d4b",
+      "regions": [
+        {
+          "box": [
+            4,
+            7,
+            46,
+            15
+          ],
+          "text": "出售",
+          "sample": [
+            4,
+            4,
+            45,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "className": "bagAndInfo.bag.propTabAsset2",
+      "width": 44,
+      "height": 131,
+      "sourcePixelsSha256": "d195c7d19661c583da829aa5bb79ac8a11d68afdd501122c93a2367a11f013a7",
+      "regions": [
+        {
+          "box": [
+            10,
+            64,
+            27,
+            61
+          ],
+          "text": "道具",
+          "sample": [
+            7,
+            66,
+            3,
+            60
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "className": "bagAndInfo.bag.propTabAsset1",
+      "width": 52,
+      "height": 132,
+      "sourcePixelsSha256": "4cae7b0bdbebfa7e4b0077971444df5df1be9910805f84599c8a911f0d2fafde",
+      "regions": [
+        {
+          "box": [
+            11,
+            61,
+            31,
+            66
+          ],
+          "text": "道具",
+          "sample": [
+            7,
+            63,
+            4,
+            65
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "className": "bagAndInfo.bag.equipTabAsset2",
+      "width": 44,
+      "height": 131,
+      "sourcePixelsSha256": "fc1cf9526eaa64cd88bf84bd7d56c5dc464d18489263ca887dbb74170dd39f64",
+      "regions": [
+        {
+          "box": [
+            9,
+            58,
+            28,
+            66
+          ],
+          "text": "装备",
+          "sample": [
+            4,
+            66,
+            4,
+            59
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "className": "bagAndInfo.bag.equipTabAsset1",
+      "width": 52,
+      "height": 132,
+      "sourcePixelsSha256": "1f621f7ff28fef0c8dd473ef9142a63055c1a92c588ad8a39480198aefbc0ee1",
+      "regions": [
+        {
+          "box": [
+            7,
+            58,
+            35,
+            68
+          ],
+          "text": "装备",
+          "sample": [
+            5,
+            61,
+            5,
+            64
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "className": "bagAndInfo.bag.cardTabAsset2",
+      "width": 44,
+      "height": 131,
+      "sourcePixelsSha256": "d1009c9f4dd5146fbd1aa86cf089315ab2429851bff920fc427104fe353c16c7",
+      "regions": [
+        {
+          "box": [
+            10,
+            59,
+            28,
+            66
+          ],
+          "text": "卡牌",
+          "sample": [
+            4,
+            67,
+            4,
+            61
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "className": "bagAndInfo.bag.cardTabAsset1",
+      "width": 52,
+      "height": 132,
+      "sourcePixelsSha256": "1205e16661d537dc5dff87a64c1276b4285089eeee03c062ac2c39d94b583fc3",
+      "regions": [
+        {
+          "box": [
+            10,
+            59,
+            33,
+            68
+          ],
+          "text": "卡牌",
+          "sample": [
+            6,
+            63,
+            4,
+            65
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "vertical": true,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "className": "bagAndInfo.bank.button",
+      "width": 50,
+      "height": 49,
+      "sourcePixelsSha256": "41938255b0cdaefa0a8268b4b2a667d64f11abc6ecdb066c8edab8fee879afe1",
+      "regions": [
+        {
+          "box": [
+            12,
+            32,
+            26,
+            12
+          ],
+          "text": "仓库",
+          "sample": [
+            11,
+            29,
+            28,
+            2
+          ],
+          "fontSize": 10,
+          "fill": "#fff8df",
+          "stroke": "#452912",
+          "strokeWidth": 0.8,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "className": "bagAndInfo.bag.bagTitle",
+      "width": 54,
+      "height": 22,
+      "sourcePixelsSha256": "ca6334f414fa79d44b7f21166156f870ee03aa735e98e9dd88a282494920de33",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            54,
+            22
+          ],
+          "text": "背包",
+          "transparent": true,
+          "fontSize": 17,
+          "fill": "#f7edb0",
+          "stroke": "#373329",
+          "strokeWidth": 2,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "className": "bagAndInfo.cellMenu.openAsset",
+      "width": 73,
+      "height": 20,
+      "sourcePixelsSha256": "ed73467d7c0d0a5180f01825f97e5049b984c890ac67ea6e6af6f0719afafa34",
+      "regions": [
+        {
+          "box": [
+            26,
+            0,
+            47,
+            20
+          ],
+          "text": "打开",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#101010",
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "className": "bagAndInfo.cellMenu.useAsset",
+      "width": 73,
+      "height": 19,
+      "sourcePixelsSha256": "1e05d7048fb9e5afb44a241aabd9d58794594bdc131cc108d0cac234d7f0174b",
+      "regions": [
+        {
+          "box": [
+            28,
+            0,
+            45,
+            19
+          ],
+          "text": "使用",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#101010",
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "className": "bagAndInfo.cellMenu.moveAsset",
+      "width": 74,
+      "height": 19,
+      "sourcePixelsSha256": "90d39795644fa01d68cdf859c9ed46505152312d0b6449ed848742209bf3ad3a",
+      "regions": [
+        {
+          "box": [
+            25,
+            0,
+            49,
+            19
+          ],
+          "text": "移动",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#101010",
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "className": "bagAndInfo.cellMenu.openBatchAsset",
+      "width": 72,
+      "height": 20,
+      "sourcePixelsSha256": "1d1966ff604da641667f94d57bf4ea6838e698c673613db9b5bf30cf9e9ce2b1",
+      "regions": [
+        {
+          "box": [
+            23,
+            0,
+            49,
+            20
+          ],
+          "text": "批量打开",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#101010",
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "className": "bagAndInfo.info.OfferLabel",
+      "width": 41,
+      "height": 20,
+      "sourcePixelsSha256": "40d3f988e6ac859e4fd3d51fe406846e5d7c00ded4c8799a328446172175e758",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            41,
+            20
+          ],
+          "text": "贡献",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#399dbc",
+          "stroke": "#eefaff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "className": "bagAndInfo.bag.continueGoodsAsset",
+      "width": 55,
+      "height": 28,
+      "sourcePixelsSha256": "38e357338baf84062bb64820181ce681ece2bc2bcaaa38dc16b791588cb2145c",
+      "regions": [
+        {
+          "box": [
+            4,
+            7,
+            46,
+            15
+          ],
+          "text": "续费",
+          "sample": [
+            4,
+            4,
+            45,
+            2
+          ],
+          "fontSize": 13,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "className": "asset.cardSystemBtn2",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "45622cb5e522527f126bc9c7c6d6caa3b207edebadd14b96cd40cdc973a8cc38",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            68,
+            26
+          ],
+          "text": "卡牌",
+          "sample": [
+            35,
+            4,
+            64,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "className": "asset.cardSystemBtn1",
+      "width": 105,
+      "height": 38,
+      "sourcePixelsSha256": "2c263b5c8529701724769ecc52578a63f520b92e92834f4e342b96f5ffe3282e",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            68,
+            26
+          ],
+          "text": "卡牌",
+          "sample": [
+            35,
+            4,
+            64,
+            2
+          ],
+          "fontSize": 18,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "className": "bagAndInfo.info.addFriendBtnAsset",
+      "width": 93,
+      "height": 36,
+      "sourcePixelsSha256": "b7733d1bee47b64f0fabd241565a5b8e825838a60b7983c2056d3db2121c9b09",
+      "regions": [
+        {
+          "box": [
+            25,
+            8,
+            64,
+            23
+          ],
+          "text": "加好友",
+          "sample": [
+            26,
+            5,
+            61,
+            2
+          ],
+          "fontSize": 15,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "className": "bagAndInfo.info.buyAvatarAsset",
+      "width": 90,
+      "height": 27,
+      "sourcePixelsSha256": "e7c897fa38ffe73a74872cff9bc23d6501247273b660d7fbda54deeca5d1a10d",
+      "regions": [
+        {
+          "box": [
+            3,
+            6,
+            83,
+            16
+          ],
+          "text": "购买同款",
+          "sample": [
+            4,
+            3,
+            80,
+            2
+          ],
+          "fontSize": 13,
+          "fill": "#f7edb0",
+          "stroke": "#452912",
+          "strokeWidth": 1.2,
+          "inpaint": true,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "className": "bagAndInfo.cellMenu.addPriceAsset",
+      "width": 76,
+      "height": 20,
+      "sourcePixelsSha256": "b4bed911a1dbb46251e12f646398dafc3a68c2f5c3f532e25710cd22d01ef8bd",
+      "regions": [
+        {
+          "box": [
+            25,
+            0,
+            51,
+            20
+          ],
+          "text": "续费",
+          "transparent": true,
+          "fontSize": 13,
+          "fill": "#101010",
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "className": "bagAndInfo.reworkname.check_up",
+      "width": 94,
+      "height": 22,
+      "sourcePixelsSha256": "a0d1f90e19e0d3519bf47b173e94cfc34e1e8c578aafa88ab023ac8fcbfbad2b",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            86,
+            16
+          ],
+          "text": "查询",
+          "sample": [
+            9,
+            3,
+            1,
+            16
+          ],
+          "fontSize": 14,
+          "fill": "#171400",
+          "stroke": null,
+          "strokeWidth": 0,
+          "inpaint": false,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "className": "bagAndInfo.reworkname.check_over",
+      "width": 94,
+      "height": 22,
+      "sourcePixelsSha256": "36d5e945914740a3170888c25d906fcc0fe376d58d89e319965260cb1a85850d",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            86,
+            16
+          ],
+          "text": "查询",
+          "sample": [
+            9,
+            3,
+            1,
+            16
+          ],
+          "fontSize": 14,
+          "fill": "#171400",
+          "stroke": null,
+          "strokeWidth": 0,
+          "inpaint": false,
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "className": "bagAndInfo.reworkname.check_down",
+      "width": 94,
+      "height": 22,
+      "sourcePixelsSha256": "9db6e3b4df225577fb21a3f4efdcf411f234eee1fefe8136ddafdecfa1b537af",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            86,
+            16
+          ],
+          "text": "查询",
+          "sample": [
+            9,
+            3,
+            1,
+            16
+          ],
+          "fontSize": 14,
+          "fill": "#171400",
+          "stroke": null,
+          "strokeWidth": 0,
+          "inpaint": false,
+          "preserveAlpha": true
+        }
+      ]
+    }
+  ]
+}

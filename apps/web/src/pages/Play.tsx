@@ -92,15 +92,34 @@ export function PlayPage() {
 
   return (
     <div ref={fullscreenRef} className="fixed inset-0 z-50 flex flex-col bg-night-deep">
-      <div className="relative z-10 flex h-10 shrink-0 items-center gap-2 border-b border-line/60 bg-night px-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/">
-            <ArrowLeft /> {t("play.back")}
+      <div className="relative z-10 flex h-10 shrink-0 items-center gap-1 border-b border-line/60 bg-night px-2 sm:gap-2">
+        <Button variant="ghost" size="sm" className="shrink-0 px-2 sm:px-3" asChild>
+          <Link to="/" aria-label={t("play.back")} title={t("play.back")}>
+            <ArrowLeft /> <span className="hidden sm:inline">{t("play.back")}</span>
           </Link>
         </Button>
-        <span className="font-display text-muted">{data?.serverName}</span>
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={fullscreen}>
-          <Maximize /> {t("play.fullscreen")}
+        <span className="hidden min-w-0 truncate font-display text-muted sm:block">{data?.serverName}</span>
+        <details className="ml-auto shrink-0">
+          <summary className="cursor-pointer rounded-lg px-2 py-1 font-display text-sm text-ink hover:bg-panel-2 focus-visible:outline-2 focus-visible:outline-sun">
+            {t("play.soloHelp")}
+          </summary>
+          <div className="absolute right-2 top-full mt-2 max-h-[calc(100dvh-3rem)] w-[calc(100%-1rem)] max-w-sm overflow-y-auto rounded-xl border border-line bg-night p-4 text-sm leading-relaxed text-ink shadow-lg">
+            <ol className="list-decimal space-y-2 pl-4">
+              <li>{t("play.soloHelp.experience")}</li>
+              <li>{t("play.soloHelp.arena")}</li>
+              <li>{t("play.soloHelp.quickJoin")}</li>
+            </ol>
+          </div>
+        </details>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 px-2 sm:px-3"
+          onClick={fullscreen}
+          aria-label={t("play.fullscreen")}
+          title={t("play.fullscreen")}
+        >
+          <Maximize /> <span className="hidden sm:inline">{t("play.fullscreen")}</span>
         </Button>
       </div>
 
