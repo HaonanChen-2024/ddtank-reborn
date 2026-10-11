@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/ddthallicon.swf",
+  "sourceAssetSha256": "6b0fa62c9af647e42d88fa825f7c47ce84a962ebcdcb3250c826d7feb68dcc5e",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only the existing wonderful-play panel icon's bottom caption. All pixels outside the reviewed caption, the original cube art above it, animation, hit layers, symbols, shapes, XML and ABC remain unchanged. This does not enable or implement any child feature.",
+  "bitmaps": [
+    {
+      "id": 171,
+      "width": 70,
+      "height": 70,
+      "sourcePixelsSha256": "37f459602bf9a85f66f825b09e0c8bda7ac6922e4c40952ecfddedffad898acc",
+      "originalText": "Destaques",
+      "ownerSymbolClass": {
+        "id": 176,
+        "name": "assets.hallIcon.wonderfulPlayIcon"
+      },
+      "referenceChain": [176, 172, 171],
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hallIcon/view/HallRightIconView.as",
+        "blob": "9ed46bcc27c54280a3e26b3dac347619dbea93a4",
+        "line": 153
+      },
+      "factorySource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hallIcon/view/HallIconPanel.as",
+        "blob": "e941c4ea376b68827a3e61f89653eef2e0fa572c",
+        "line": 74,
+        "clickLines": [364, 379],
+        "meaning": "The main icon expands or collapses the existing child-play icon panel when it contains children."
+      },
+      "regions": [
+        {
+          "box": [0, 50, 70, 20],
+          "clearBoxes": [[55, 52, 15, 1], [0, 53, 70, 17]],
+          "text": "精彩玩法",
+          "transparent": true,
+          "fontSize": 12.5,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "fill": "#fff57c",
+          "fillBottom": "#c78b06",
+          "stroke": "#633606",
+          "strokeWidth": 1,
+          "outerStroke": "#efe9d2",
+          "outerStrokeWidth": 1.75,
+          "preserveAlpha": false
+        }
+      ]
+    }
+  ]
+}

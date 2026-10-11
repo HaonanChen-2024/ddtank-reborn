@@ -30,6 +30,11 @@ assert.throws(() => patchSwf(unlinked, { bitmaps: [{ ...ownerEntry, ownerSymbolC
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [255, 0, 0], max: [0, 255, 255] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaint: true, inpaintSeed: { min: [0, 0, 0], max: [255, 255, 256] } }] }] }, patch), /invalid caption seed range/);
 assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inpaintSeed: { min: [0, 0, 0], max: [255, 255, 255] } }] }] }, patch), /invalid caption seed range/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inkMargin: 0 }] }] }, patch), /invalid caption ink margin/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], inkMargin: 1 }] }] }, patch), /invalid caption ink margin/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [[0, 0, 1, 1]] }] }] }, patch), /clear box outside reviewed region/);
+assert.throws(() => patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [] }] }] }, patch), /clear boxes require transparent replacement/);
+assert.equal(patchSwf(before, { bitmaps: [{ ...entry, regions: [{ ...entry.regions[0], clearBoxes: [[1, 0, 1, 1]] }] }] }, patch).unchangedTags, 3);
 const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
 const { PNG } = createRequire(join(depRoot, 'package.json'))('pngjs');
 const backgroundPng = PNG.sync.write({ width: 2, height: 2, data: Buffer.alloc(16, 255) });
@@ -64,4 +69,4 @@ assert.equal(duplicateResult.changed[0].drawnRegions, 0);
 assert.deepEqual(duplicateResult.changed[0].clearedRegions, [{ id: 16, text: '中', box: [1, 0, 1, 1], action: 'clear-background-duplicate' }]);
 // Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
 // Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, optional background ID/hash/dimensions, bounded duplicate clearing');
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing');

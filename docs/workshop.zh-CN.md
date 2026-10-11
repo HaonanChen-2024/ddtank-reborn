@@ -125,12 +125,14 @@ node scripts/workshop-bag-art.mjs install
 node scripts/workshop-bag-art.mjs install --asset=hidden-controls
 node scripts/workshop-bag-art.mjs install --asset=hall
 node scripts/workshop-bag-art.mjs install --asset=chat
+node scripts/workshop-bag-art.mjs install --asset=hall-feature
 node scripts/workshop-bag-layout.mjs install
 node scripts/workshop.mjs start
 node scripts/workshop-bag-art.mjs verify
 node scripts/workshop-bag-art.mjs verify --asset=hidden-controls
 node scripts/workshop-bag-art.mjs verify --asset=hall
 node scripts/workshop-bag-art.mjs verify --asset=chat
+node scripts/workshop-bag-art.mjs verify --asset=hall-feature
 node scripts/workshop-bag-layout.mjs verify
 # 回退时同样停服，将对应 install 换成 rollback，随后启动
 ```
@@ -140,6 +142,8 @@ API 在启动时建立资源索引，新覆盖需要正常重启及全新客户�
 `--view=hall` 使用同一独立账号和原大厅加载流程，保存整页画面与角色未变化证明。它不打开背包、不发送建房或战斗指令，也不验收点击入口或自然对局；仍需逐张检查实际画面。
 
 2026-10-11聊天覆盖已安装并正常空闲重启，六个HTTP覆盖文件摘要和原件保护、真实角色基线保持均已核对。男女原大厅整帧已实际查看：当前选中按钮、公会/私聊普通按钮与当前频道文字可见，未观察到裁切/重叠。全部9张离线候选与433个原tag的独立回读通过；公会/私聊选中状态及其他聊天频道的原客户端点击/视觉验收仍待完成，不能据此称全部聊天或大厅中文化。
+
+`--asset=hall-feature` 仅将原 `ddthallicon.swf` 的精彩玩法主入口标题改为中文（bitmap171），保留原魔方、符号、动画、点击区域与其他396个tag。它展开的是原有子玩法面板，不会启用尚未实现的活动。原标题描边与魔方边缘已经合成，候选保留该混合边界；低分辨率位图放大仍可见像素阶梯。离线对比、原件/字区外像素保护、五种已有模式输出一致性及部署通过；七个覆盖摘要和真实玩家保护已回读。主控实际查看男女原大厅整帧，当前标题可读且未见裁切，其他外文仍可见。点击/展开行为尚未验收，不能据此称全界面中文化。
 
 ## 单人游玩与等级
 
