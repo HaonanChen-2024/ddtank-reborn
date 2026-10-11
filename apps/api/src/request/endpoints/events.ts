@@ -17,16 +17,16 @@ import type { AppCtx } from "../../context.js";
 
 // PlayerBussiness.PullDown messages (ActiveBussiness.Msg0..Msg10)
 const MSG: Record<number, string> = {
-  0: "Recebido com sucesso, os itens foram enviados ao seu correio.",
-  1: "Erro desconhecido.",
-  2: "O usuário não existe.",
-  3: "Falha ao receber o item.",
-  4: "Este código não existe, verifique novamente.",
-  5: "Este código já foi resgatado e não pode ser usado de novo.",
-  6: "Você já recebeu esta recompensa",
-  7: "O evento ainda não começou.",
-  8: "O evento já terminou.",
-  10: "Você não tem permissão para receber esta recompensa.",
+  0: "领取成功，奖励已发送到您的邮箱。",
+  1: "未知错误。",
+  2: "用户不存在。",
+  3: "领取奖励失败。",
+  4: "兑换码不存在，请重新核对。",
+  5: "该兑换码已领取，不能重复使用。",
+  6: "您已经领取过该奖励。",
+  7: "活动尚未开始。",
+  8: "活动已结束。",
+  10: "您没有领取该奖励的权限。",
 };
 
 interface ActiveRow { ActiveID: number; Title: string; HasKey: number; IsOnly: number; StartDate: Date; EndDate: Date | null }
@@ -111,7 +111,7 @@ export async function pullDown(app: AppCtx, activeId: number, code: string, user
       let attachments: { templateId: number; count: number; validDays: number }[] = [];
       let firstMail = true;
       const sendBatch = async () => {
-        await sendMail(txApp, userId, u.NickName, a.Title || "Evento", `Prêmio do evento ${a.Title}`, { items: attachments, gold: firstMail ? gold : 0, money: firstMail ? money : 0 });
+        await sendMail(txApp, userId, u.NickName, a.Title || "活动奖励", `活动奖励：${a.Title}`, { items: attachments, gold: firstMail ? gold : 0, money: firstMail ? money : 0 });
         attachments = [];
         firstMail = false;
       };
@@ -136,7 +136,7 @@ export async function pullDown(app: AppCtx, activeId: number, code: string, user
 
 export const ActivePullDown = define("/ActivePullDown.ashx", async ({ app, int, p }) => {
   let value = false;
-  let message = "ActivePullDownHandler.Fail";
+  let message = "领取活动奖励失败，请稍后重试。";
   try {
     const raw = p("activeKey") ?? "";
     let code = "";

@@ -66,6 +66,8 @@ node scripts/workshop.mjs start --lan=192.168.1.6
 
 `research/activities/local-starter.json` 定义一项“本地启程补给”（100001）：每个角色免费领取一次，按原邮件流程发送现有11904经验药水一瓶，不直接升级、不改变副本门槛、装备属性或币种。`scripts/workshop-starter-activity.ts` 默认只读verify，显式install仅新增自有Active及Award两行；核对运行session/原生数据库绑定、原33/310行全列指纹和四表主键/冲突。重复安装保留已有领奖进度；配置、原行或自有行变化时拒绝覆盖。journal在事务提交前独占写入并同步；提交结果不确定且缺行时保留现场并拒绝续写，不自动补偿删除。12项隔离测试及运行库首次安装、重复零插入、正常重启后verify通过；一次重复CLI拒绝原因未确认，随后直接事务和CLI回读通过且数据保持。原列表、领取反馈、邮件附件和重登仍待原客户端运行验证。
 
+活动服务器反馈、异常提示及新发奖励邮件正文已改为简体中文，仅改展示字符串，成功/失败码、XML、RSA与原事务不变。复用34项事件测试补充中文成功/重复响应、真实邮件正文与故障回滚断言，34项及API类型检查通过。正常重启已加载该显示补丁；客户端原按钮点击/私有回调仍待验收，已有邮件不批量改写。
+
 ```powershell
 node --import tsx scripts/workshop-starter-activity.ts verify
 node --import tsx scripts/workshop-starter-activity.ts install

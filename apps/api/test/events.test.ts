@@ -158,11 +158,16 @@ describe("ActivePullDown atomic reward delivery", () => {
 
   it("rolls back attachments and a claim when the first real mail insert fails", async () => {
     await award();
+    await h.db.execute(sql`UPDATE game."Active" SET "Title"='' WHERE "ActiveID"=${activeId}`);
     await h.db.execute(sql`ALTER TABLE player."User_Messages" ADD CONSTRAINT test_reject_mail CHECK ("ReceiverID" <> 111)`);
     await expect(claim()).rejects.toThrow();
+    const failed = await built.app.inject({ method: "GET", url: `/Request/ActivePullDown.ashx?selfid=${userId}&activeID=${activeId}` });
+    expect(failed.statusCode).toBe(200);
+    expect(failed.body).toBe('<Result value="false" message="领取活动奖励失败，请稍后重试。" />');
     expect(await counts()).toEqual(empty);
     await h.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT test_reject_mail`);
     expect(await claim()).toBe(0);
+    expect(await q1(h, sql`SELECT "Title","Content" FROM player."User_Messages"`)).toEqual({ Title: "活动奖励", Content: "活动奖励：" });
   });
 
   it("rolls back the first mail and all six attachments when the second mail fails", async () => {
@@ -312,14 +317,16 @@ describe("ActivePullDown atomic reward delivery", () => {
 
   it("retains GET/POST parameters and uncompressed success/failure XML", async () => {
     await award();
+    await h.db.execute(sql`UPDATE game."Active" SET "Title"='本地启程补给' WHERE "ActiveID"=${activeId}`);
     const first = await built.app.inject({ method: "GET", url: `/Request/ActivePullDown.ashx?selfid=${userId}&activeID=${activeId}` });
     expect(first.statusCode).toBe(200);
     expect(first.headers["content-type"]).toContain("text/plain");
-    expect(first.body).toMatch(/^<Result value="true" message="[^\"]+" \/>$/);
+    expect(first.body).toBe('<Result value="true" message="领取成功，奖励已发送到您的邮箱。" />');
+    expect(await q1(h, sql`SELECT "Title","Content" FROM player."User_Messages"`)).toEqual({ Title: "本地启程补给", Content: "活动奖励：本地启程补给" });
     const repeat = await built.app.inject({ method: "POST", url: "/request/ActivePullDown.ashx", headers: { "content-type": "application/x-www-form-urlencoded" }, payload: `selfid=${userId}&activeID=${activeId}&activeKey=` });
     expect(repeat.statusCode).toBe(200);
     expect(repeat.body).toContain('value="false"');
-    expect(repeat.body).toContain("Você já recebeu esta recompensa");
+    expect(repeat.body).toContain('message="您已经领取过该奖励。"');
     expect(await counts()).toEqual({ claims: 1, items: 1, mails: 1, taken: 0 });
   });
 });
