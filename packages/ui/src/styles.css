@@ -29,9 +29,9 @@
   --color-chart-1: #2f8ee0;
   --color-chart-2: #24a882;
 
-  --font-display: "Lilita One", "Rubik Variable", system-ui, sans-serif;
-  --font-sans: "Rubik Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-display: "Lilita One", "Rubik Variable", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+  --font-sans: "Rubik Variable", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", ui-monospace, monospace;
 
   --radius-xl: 0.9rem;
   --radius-2xl: 1.25rem;

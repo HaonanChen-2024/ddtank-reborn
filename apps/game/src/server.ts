@@ -25,6 +25,7 @@ import type { FightEngine } from "./fight/types.js";
 import type { BotProvider, VirtualPlayer } from "./bots/bot.js";
 import { DbBotProvider } from "./bots/provider.js";
 import { ItemInfo } from "./game/item.js";
+import { grantRewards } from "./game/events.js";
 import { fightLabDrop, setFightLabPermission } from "./game/fightlab.js";
 import type { GamePlayer, RoomMember } from "./game/player.js";
 import { startPolicy, startTcp, startWs, type ConnectionGate } from "./net/transports.js";
@@ -57,17 +58,16 @@ export function parseRsaKey(text: string): RsaPrivateKey {
  * PVPGame.TakeCard drop: DropInventory.CardDrop(roomType) (eDropType.Cards = 1, Para1 = room type, Para2 = "0").
  * The original adds it to the TempBag and moves it to the bags after the game; here it goes straight to its bag.
  */
-function takeCardDrop(templates: Templates, m: RoomMember, roomType: number): { templateId: number; count: number } {
+export function takeCardDrop(templates: Templates, m: RoomMember, roomType: number): { templateId: number; count: number } {
   const dropId = templates.findDropCondition(1, String(roomType), "0");
   const d = dropId ? templates.dropOne(dropId) : null;
   const t = d ? templates.findItem(d.templateId) : undefined;
   if (!d || !t || m.isBot) return { templateId: 0, count: 0 };
   const p = m as GamePlayer;
-  const item = ItemInfo.createFromTemplate(t, d.count, 101);
-  item.IsBinds = d.isBind;
-  item.ValidDate = d.validDate;
-  const inv = p.getItemInventory?.(t);
-  if (!inv?.addTemplate(item, d.count)) p.tempBag?.addTemplate(item, d.count);
+  // Battle ShopMgr special ids use -300 for gift tokens; the shared activity helper uses -1100 for them.
+  const reward = d.templateId === -300 ? { ...d, templateId: -1100 } : d;
+  const { overflow } = grantRewards(p, [reward], id => templates.findItem(id), new Date());
+  for (const item of overflow) if (!p.tempBag.addTemplate(item, item.Count)) return { templateId: 0, count: 0 };
   return { templateId: d.templateId, count: d.count };
 }
 

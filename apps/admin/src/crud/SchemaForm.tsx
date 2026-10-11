@@ -14,8 +14,8 @@ export interface SchemaFormProps {
   submitLabel?: string;
   onSubmit: (payload: Row) => Promise<unknown> | void;
   onCancel?: () => void;
-  /** Extra content rendered next to the buttons. */
-  footer?: ReactNode;
+  /** Extra content rendered next to the buttons; getValues reads the current unsaved form. */
+  footer?: ReactNode | ((getValues: () => Row) => ReactNode);
   className?: string;
 }
 
@@ -31,7 +31,7 @@ export function SchemaForm({ fields, mode = "create", initial, submitLabel, onSu
   const schema = useMemo(() => buildSchema(fields, mode, t, text), [fields, mode, t, text]);
   const defaultValues = useMemo(() => toFormValues(fields, initial, mode), [fields, initial, mode]);
 
-  const { control, handleSubmit, formState } = useForm<Row>({
+  const { control, handleSubmit, formState, getValues } = useForm<Row>({
     resolver: zodResolver(schema) as unknown as Resolver<Row>,
     defaultValues,
     values: defaultValues,
@@ -92,7 +92,7 @@ export function SchemaForm({ fields, mode = "create", initial, submitLabel, onSu
         </fieldset>
       ))}
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {footer}
+        {typeof footer === "function" ? footer(getValues) : footer}
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel}>
             {t("crud.cancel")}

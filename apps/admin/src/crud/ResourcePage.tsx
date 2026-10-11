@@ -20,11 +20,13 @@ import {
   Tr,
   cn,
 } from "@ddtank/ui";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useI18n, useText } from "@/i18n";
 import { getQuery, listQuery, useResourceMutations } from "./api";
 import { Cell } from "./Cell";
 import { SchemaForm } from "./SchemaForm";
+import { WardrobeCheck } from "./WardrobeCheck";
+import { copyForCreate } from "./schema";
 import { caps, rowId, type ResourceDef, type Row, type RowAction } from "./types";
 
 function useDebounced<T>(value: T, ms = 300): T {
@@ -39,7 +41,7 @@ function useDebounced<T>(value: T, ms = 300): T {
 const errMsg = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 type DialogState =
-  | { kind: "create" }
+  | { kind: "create"; row?: Row }
   | { kind: "edit"; row: Row }
   | { kind: "delete"; row: Row }
   | { kind: "action"; row: Row; action: RowAction }
@@ -56,6 +58,7 @@ function EditDialogBody({ def, row, onDone }: { def: ResourceDef; row: Row; onDo
       fields={def.fields}
       mode="edit"
       initial={data ?? row}
+      footer={def.name === "items" ? (getValues) => <WardrobeCheck getValues={getValues} /> : undefined}
       onCancel={onDone}
       onSubmit={async (body) => {
         try {
@@ -106,7 +109,7 @@ export function ResourcePage({ def, embedded, headerActions }: ResourcePageProps
   const columns = useMemo(() => def.fields.filter((f) => f.list), [def]);
   const singular = text(def.singular);
   const rowTitle = (row: Row) => (def.titleField ? String(row[def.titleField] ?? "") : rowId(def, row));
-  const hasRowButtons = can.update || can.delete || (def.rowActions?.length ?? 0) > 0;
+  const hasRowButtons = can.update || can.delete || (can.create && !!def.copyLabel) || (def.rowActions?.length ?? 0) > 0;
 
   const toggleSort = (name: string) => {
     setSort((s) => (s === name ? `-${name}` : s === `-${name}` ? undefined : name));
@@ -219,6 +222,11 @@ export function ResourcePage({ def, embedded, headerActions }: ResourcePageProps
                     {hasRowButtons && (
                       <Td className="text-right">
                         <div className="inline-flex gap-1">
+                          {can.create && def.copyLabel && (
+                            <Button size="icon" variant="ghost" aria-label={text(def.copyLabel)} title={text(def.copyLabel)} onClick={() => setDialog({ kind: "create", row: copyForCreate(def, row) })}>
+                              <Copy />
+                            </Button>
+                          )}
                           {def.rowActions
                             ?.filter((a) => !a.visible || a.visible(row))
                             .map((a) => {
@@ -281,10 +289,12 @@ export function ResourcePage({ def, embedded, headerActions }: ResourcePageProps
             <SchemaForm
               fields={def.fields}
               mode="create"
+              initial={dialog.row}
+              footer={def.name === "items" ? (getValues) => <WardrobeCheck getValues={getValues} /> : undefined}
               onCancel={() => setDialog(null)}
               onSubmit={async (body) => {
                 try {
-                  await m.create.mutateAsync(body);
+                  await m.create.mutateAsync({ ...dialog.row, ...body });
                   toast.success(t("crud.created"));
                   setDialog(null);
                 } catch (e) {

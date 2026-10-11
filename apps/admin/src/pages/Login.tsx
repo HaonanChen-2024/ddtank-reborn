@@ -43,7 +43,7 @@ export function LoginPage() {
         <Card className="relative p-7">
           <div className="flex items-start justify-between gap-2">
             <h1 className="title-plate text-3xl">
-              DDTank <span className="text-sun">Admin</span>
+              {t("app.name")}
             </h1>
             <LocaleToggle locale={locale} onChange={setLocale} />
           </div>

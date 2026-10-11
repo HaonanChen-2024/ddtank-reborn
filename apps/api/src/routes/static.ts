@@ -85,9 +85,11 @@ function badPngCrc(b: Buffer): boolean {
     const len = b.readUInt32BE(o);
     if (o + 12 + len > b.length) return true;
     if ((crc32(b.subarray(o + 4, o + 8 + len)) >>> 0) !== b.readUInt32BE(o + 8 + len)) return true;
+    // Real donor files sometimes append non-image bytes. PNG decoding ends at a valid IEND.
+    if (b.toString("ascii", o + 4, o + 8) === "IEND") return len !== 0;
     o += 12 + len;
   }
-  return false;
+  return true;
 }
 
 function sendFile(req: FastifyRequest, reply: FastifyReply, file: string) {
@@ -120,13 +122,14 @@ const relOf = (req: FastifyRequest, prefix: RegExp) => {
 
 export async function staticRoutes(f: FastifyInstance, ctx: AppCtx) {
   const flash = new CiTree(ctx.cfg.FLASH_DIR);
+  const deploymentFlash = new CiTree(ctx.cfg.FLASH_OVERLAY_DIR);
   // apps/api/assets/flash: patched copies of client files (vendor stays read-only), e.g. ui/vietnam/xml/coreI.xml
   const flashFix = new CiTree(fileURLToPath(new URL("../../assets/flash", import.meta.url)));
   const ruffle = new CiTree(ctx.cfg.RUFFLE_DIR);
   ctx.log.info(`static: flash ${flash.size} files (${ctx.cfg.FLASH_DIR}), resource ${ctx.resources.trees.map((t) => t.size).join("+")} files`);
 
   const cfgTemplate = () => {
-    const f = flash.resolve("config.xml");
+    const f = deploymentFlash.resolve("config.xml") ?? flash.resolve("config.xml");
     return f && existsSync(f) ? readFileSync(f, "utf8") : "<root><config><REQUEST_PATH value=\"\"/></config></root>";
   };
 
@@ -140,7 +143,7 @@ export async function staticRoutes(f: FastifyInstance, ctx: AppCtx) {
       const low = rel.toLowerCase();
       if (low === "config.xml") return reply.type("text/xml; charset=utf-8").header("Cache-Control", "no-cache").send(buildConfigXml(ctx, cfgTemplate()));
       if (low === "crossdomain.xml") return reply.type("text/xml").send(CROSSDOMAIN);
-      const file = flashFix.resolve(rel) ?? flash.resolve(rel);
+      const file = deploymentFlash.resolve(rel) ?? flashFix.resolve(rel) ?? flash.resolve(rel);
       if (!file) return reply.code(404).send("not found");
       return sendFile(req, reply, file);
     },

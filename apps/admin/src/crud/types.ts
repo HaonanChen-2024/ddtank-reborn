@@ -101,6 +101,8 @@ export interface ResourceDef {
   defaultSort?: string;
   pageSize?: number;
   searchPlaceholder?: Text;
+  /** Enable copying a row into the create form; its primary key is cleared. */
+  copyLabel?: Text;
   capabilities?: { create?: boolean; update?: boolean; delete?: boolean };
   rowActions?: RowAction[];
 }

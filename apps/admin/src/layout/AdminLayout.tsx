@@ -39,7 +39,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const text = useText();
   const label = (l: NavItem["label"]) => (typeof l === "object" && "key" in l ? t(l.key) : text(l));
   return (
-    <nav className="flex flex-col gap-5 px-3 py-4" aria-label="Menu">
+    <nav className="flex flex-col gap-5 px-3 py-4" aria-label={t("nav.menu")}>
       {GROUPS.map((g) => {
         const items = NAV.filter((n) => n.group === g);
         if (!items.length) return null;
@@ -75,6 +75,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function Brand() {
+  const { t } = useI18n();
   return (
     <Link to="/" className="flex items-center gap-2 px-5 py-4">
       <svg viewBox="0 0 64 64" className="size-8" aria-hidden>
@@ -84,7 +85,7 @@ function Brand() {
         <rect x="6" y="46" width="16" height="10" rx="3" className="fill-mint" />
       </svg>
       <span className="title-plate text-xl">
-        DDTank <span className="text-sun">Admin</span>
+        {t("app.name")}
       </span>
     </Link>
   );
@@ -116,7 +117,7 @@ export function AdminLayout() {
           <aside className="absolute inset-y-0 left-0 w-72 overflow-y-auto border-r border-line bg-night-deep animate-pop">
             <div className="flex items-center justify-between pr-3">
               <Brand />
-              <Button variant="ghost" size="icon" aria-label="Fechar menu" onClick={() => setOpen(false)}>
+              <Button variant="ghost" size="icon" aria-label={t("nav.closeMenu")} onClick={() => setOpen(false)}>
                 <X />
               </Button>
             </div>
@@ -127,7 +128,7 @@ export function AdminLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-night/85 px-4 backdrop-blur">
-          <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menu" onClick={() => setOpen(true)}>
+          <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t("nav.openMenu")} onClick={() => setOpen(true)}>
             <Menu />
           </Button>
           <div className="ml-auto flex items-center gap-3">

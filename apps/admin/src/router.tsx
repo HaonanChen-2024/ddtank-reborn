@@ -11,6 +11,7 @@ import { AssetsPage } from "@/pages/Assets";
 import { MailPage } from "@/pages/Mail";
 import { ResourcePage } from "@/crud/ResourcePage";
 import { resourceByName } from "@/resources";
+import { useI18n } from "@/i18n";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -18,11 +19,10 @@ interface RouterContext {
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: Outlet,
-  notFoundComponent: () => (
-    <EmptyState title="Página não encontrada" className="m-8">
-      404
-    </EmptyState>
-  ),
+  notFoundComponent: function NotFoundPage() {
+    const { t } = useI18n();
+    return <EmptyState title={t("notFound.title")} className="m-8">404</EmptyState>;
+  },
 });
 
 const loginRoute = createRoute({

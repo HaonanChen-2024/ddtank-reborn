@@ -8,6 +8,7 @@ import type { AppCtx } from "../context.js";
 import { q } from "../lib/db.js";
 import { wallNow } from "../lib/flash-xml.js";
 import { safeKey } from "../lib/storage.js";
+import { checkWardrobe } from "../lib/wardrobe.js";
 import { RESOURCES, type ResourceDef } from "./admin-resources.js";
 import { requireAdmin, userOf } from "./auth.js";
 import { gameInternal, gameInternalPost, setting } from "./public.js";
@@ -133,6 +134,11 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   const actor = (req: FastifyRequest) => userOf(req)?.name ?? null;
 
   // ---- specific endpoints (registered before the generic :resource routes) ----
+  f.post("/api/admin/items/wardrobe-check", { preHandler: guard }, async (req, reply) => {
+    try { return checkWardrobe(ctx.resources, req.body, ctx.cfg.PUBLIC_URL); }
+    catch (error) { return reply.code(400).send({ message: error instanceof Error ? error.message : "Invalid wardrobe draft" }); }
+  });
+
   f.get("/api/admin/stats", { preHandler: guard }, async () => {
     const g = await gameInternal<Row>(ctx, "/stats");
     sampleProcess();

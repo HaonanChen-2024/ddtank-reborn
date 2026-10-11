@@ -1,10 +1,17 @@
 import { z } from "zod";
-import type { FieldDef, Row } from "./types";
+import { idFields, type FieldDef, type ResourceDef, type Row } from "./types";
 
 type Tr = (key: "field.required" | "field.min" | "field.max" | "field.maxLength" | "field.int" | "field.number" | "field.json" | "field.option" | "field.invalid", vars?: Record<string, string | number>) => string;
 type TextFn = (x: FieldDef["patternMessage"]) => string;
 
 export type FormMode = "create" | "edit";
+
+/** Preserve the template's other columns while requiring a new primary key. */
+export function copyForCreate(def: ResourceDef, row: Row): Row {
+  const copy = { ...row };
+  for (const key of idFields(def)) delete copy[key];
+  return copy;
+}
 
 export function fieldInForm(f: FieldDef, mode: FormMode): boolean {
   if (f.form === undefined || f.form === true) return true;

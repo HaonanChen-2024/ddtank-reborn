@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ApiError, Button, Card, Dialog, DialogContent, EmptyState, PageHeader, Skeleton, Spinner, cn } from "@ddtank/ui";
+import { ApiError, Button, Card, Dialog, DialogContent, EmptyState, Input, PageHeader, Skeleton, Spinner, cn } from "@ddtank/ui";
 import { Copy, FileIcon, Folder, Trash2, Upload } from "lucide-react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/i18n";
@@ -16,7 +16,7 @@ export interface Asset {
 }
 
 /** Storage folders the client/site read from. */
-export const ASSET_FOLDERS = ["images/items", "images/skins", "images/pve", "images/news", "ui", "sounds"];
+export const ASSET_FOLDERS = ["images/items", "images/skins", "images/pve", "images/news", "ui", "sounds", "image/equip"];
 
 const fmtSize = (n: number) => (n < 1024 ? `${n} B` : n < 1024 * 1024 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
 
@@ -95,6 +95,13 @@ export function AssetsPage() {
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
         <Card className="h-fit p-2">
           <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted">{t("assets.folder")}</p>
+          <Input
+            aria-label={t("assets.folder")}
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            placeholder="image/equip/m/cloth/custom/1"
+            className="mb-2 font-mono text-xs"
+          />
           <ul>
             {ASSET_FOLDERS.map((f) => (
               <li key={f}>

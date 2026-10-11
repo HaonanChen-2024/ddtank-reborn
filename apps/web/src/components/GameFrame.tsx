@@ -102,11 +102,10 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           allowScriptAccess: true,
           openUrlMode: "allow",
           socketProxy,
-          // Client UI text fields ask for device fonts (Arial / Arial Unicode MS / Verdana / 宋体 / 黑体); the
-          // original glyph sets don't cover pt-BR accents (ç, ã, õ...) reliably in Ruffle. Noto Sans does, for
-          // both the pt-BR and vi-VN text that still ships in the vendor SWFs (see research/i18n notes).
-          fontSources: ["/fonts/NotoSans-Regular.ttf", "/fonts/NotoSans-Bold.ttf"],
-          defaultFonts: { sans: ["Noto Sans"], serif: ["Noto Sans"], typewriter: ["Noto Sans"] },
+          // Deployment dictionaries can contain Chinese; keep Latin fallback for untranslated client text.
+          // Noto Sans SC (SIL OFL) adds the CJK glyphs the existing Noto Sans subset does not contain.
+          fontSources: ["/fonts/NotoSans-Regular.ttf", "/fonts/NotoSans-Bold.ttf", "/fonts/NotoSansSC-Regular.otf", "/fonts/NotoSansSC-Bold.otf"],
+          defaultFonts: { sans: ["Noto Sans SC", "Noto Sans"], serif: ["Noto Sans SC", "Noto Sans"], typewriter: ["Noto Sans SC", "Noto Sans"] },
         };
         // Kick (KIT_USER "logged in elsewhere", ban...) or lost socket: the client calls game_interruption.
         // Without this hook the old window stayed on screen looking connected (two "sessions" for one account).

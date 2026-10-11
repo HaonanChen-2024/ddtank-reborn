@@ -46,6 +46,8 @@ const schema = z.object({
 
   /** Compiled Flash client (Loading.swf, 2.png, ui/...). Served at /flash/. */
   FLASH_DIR: z.string().default(resolve(VENDOR, "Source Flash", "FlashSV1")),
+  /** Deployment-local client overrides (e.g. 2.png paired with this server's RSA key). Empty keeps the shipped overlay. */
+  FLASH_OVERLAY_DIR: z.string().default(""),
   /** Resource pack (image/, sound/, flash/characterdefine.xml). Served at /resource/. */
   RESOURCE_DIR: z.string().default(resolve(REPO_ROOT, "vendor", "_assets", "merged")),
   /** Snapshot XML shipped with DDTank41 (static-only files with no builder). */
@@ -93,7 +95,7 @@ export type Config = z.infer<typeof schema> & { rsaKeyText: string; rsaKeySource
 export function loadConfig(env: Record<string, string | undefined> = process.env, overrides: Partial<Config> = {}): Config {
   const parsed = schema.parse({ ...env, ...overrides });
   const c = { ...parsed, ...overrides } as Config;
-  for (const k of ["FLASH_DIR", "RESOURCE_DIR", "REQUEST_SNAPSHOT_DIR", "RUFFLE_DIR", "UPLOAD_DIR"] as const) {
+  for (const k of ["FLASH_DIR", "FLASH_OVERLAY_DIR", "RESOURCE_DIR", "REQUEST_SNAPSHOT_DIR", "RUFFLE_DIR", "UPLOAD_DIR"] as const) {
     const v = c[k];
     if (v && !isAbsolute(v)) c[k] = resolve(APP_ROOT, v);
   }
