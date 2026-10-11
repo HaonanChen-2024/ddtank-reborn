@@ -18,6 +18,10 @@ node scripts/workshop.mjs start
 
 `node scripts/workshop-literals.mjs verify` 核对当前补丁与备份哈希。回退时将 `install` 换成 `rollback`；只恢复账本拥有的覆盖文件，原 vendor 与仓库中的二进制均不写入。自行修改过部署文件时工具拒绝覆盖；更新该批译文前先回退，保留其他自定义内容。
 
+可选 `--activity-response` 修复旧 Calendar 活动领取回调：该消费者原来按大写 `True` 比较，而现有服务器成功值是小写 `true`。工具精确验证 `CalendarManager.__activityLoadComplete` 的身份、方法摘要和指令，只追加一个小写常量并改变该比较的一处 operand；共享大写签到常量、其余47个方法和2524个其他SWF标签保持。服务器XML格式、活动规则和奖励不变；另一个直接显示XML的 `ActiveSubContent` 路径未纳入修复。
+
+先运行 `node scripts/workshop-literals.mjs verify --activity-response` 查看候选；仅显式 `install --activity-response` 升级唯一现有覆盖账本，复用原备份并保留中文及RSA层。缺省命令会保留已启用效果；安装失败恢复当前文件和旧账本，完整 `rollback` 仍恢复该owner原备份。联合9项窄测试和真实配置离线verify通过，原活动页面领取/按钮禁用、邮件附件与重复拒绝尚待运行验收，不能把候选验证当作活动开放。
+
 网页游玩页的角度、距离、力度与三类加载错误已接入现有 PT/EN/中文语言字典，保留已保存的语言偏好。
 
 本轮实际核验：web构建、已有4项语言回归、1项SWF字节保留/重复补丁测试通过。安装、精确回退与重新安装均通过；当前三个SWF的全部ABC非字符串内容、其他字符串及位图与备份一致，正常HTTP字节匹配。新profile被动原版登录进入大厅，零JS错误；原版语言弹窗实际显示中文，未逐一验收全部新增界面。大厅存储提示图已定位并提取为588×339透明PNG；图像工具两次连接失败，没有安装替代图，嵌入图片文字仍有缺口。
