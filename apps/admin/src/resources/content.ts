@@ -1,40 +1,75 @@
 import { CalendarDays, Castle, Flag, ListChecks, Map, PackageOpen, ScrollText, ShoppingBag, Skull } from "lucide-react";
-import { defineResource } from "@/crud/types";
+import { defineResource, type FieldDef } from "@/crud/types";
 
 // Column names below are verbatim from packages/db/src/schema/game.ts so the API can expose the tables directly.
+
+// apps/game/src/handlers/items.ts:getItemPrice/setItemType; original ShopItemInfo.as:getItemPrice/buyTypeToString.
+const priceHint = {
+  "pt-BR": "-1 Money, -2 Gold, -3 Offer, -4 GiftToken, -6 Score, -8 petScore, -9 damageScores; positivo = TemplateID exigido na troca. 0 ignora este custo. Códigos antigos são preservados.",
+  "zh-CN": "-1 Money点券、-2 Gold金币、-3 Offer、-4 GiftToken、-6 Score、-8 petScore、-9 damageScores；正数为兑换所需物品的TemplateID，0忽略此项。其他旧码原样保留。",
+};
+const shopPrices: FieldDef[] = ["A", "B", "C"].flatMap((tier) => {
+  const section = { "pt-BR": `Preço / unidade ${tier}`, "zh-CN": `${tier}档价格与单位` };
+  return [
+    { name: `${tier}Unit`, label: `${tier}Unit`, type: "number", required: true, min: -1, default: 0, list: tier === "A", section, hint: { "pt-BR": "BuyType=0: dias, 0 permanente. Outros BuyType: quantidade. -1 desativa esta opção.", "zh-CN": "BuyType=0时填天数，0为永久；BuyType非0时填数量。-1禁用此档。" } },
+    ...[1, 2, 3].flatMap((cost): FieldDef[] => [
+      { name: `${tier}Price${cost}`, label: { "pt-BR": `Tipo de custo (${tier}Price${cost})`, "zh-CN": `费用类型 (${tier}Price${cost})` }, type: "number", required: true, default: -1, section, hint: priceHint },
+      { name: `${tier}Value${cost}`, label: { "pt-BR": `Valor / quantidade (${tier}Value${cost})`, "zh-CN": `金额 / 数量 (${tier}Value${cost})` }, type: "number", required: true, min: -1, default: 0, section, hint: { "pt-BR": "Custo normal inteiro ≥0; moeda é truncada após ×Beat. Troca usa esta quantidade sem desconto. -1 apenas preserva valores antigos de opções Unit=-1.", "zh-CN": "普通金额或兑换数量填非负整数；货币费用乘Beat后取整，兑换数量不乘折扣。-1仅保留旧Unit=-1禁用档的哨兵值。" } },
+    ]),
+  ];
+});
 
 export const shop = defineResource({
   name: "shop",
   table: 'game."Shop"',
   label: { "pt-BR": "Loja", en: "Shop" },
   singular: { "pt-BR": "oferta", en: "offer" },
-  description: "Ofertas da loja (Shop): item, tipo de compra, preços por validade e período.",
+  description: { "pt-BR": "Ofertas (Shop): item, unidade, custos e período. Registre o ID em Exibição da loja para aparecer no cliente.", "zh-CN": "商城商品 (Shop)：物品、单位、费用与销售时间。保存后在“商城展示”引用此商品ID，才能进入原客户端的展示列表。" },
   icon: ShoppingBag,
   group: "content",
   idField: "ID",
   titleField: "TemplateID",
   defaultSort: "-ID",
   fields: [
-    { name: "ID", label: "ID", type: "number", list: true, sortable: true, form: "create", required: true, min: 1 },
-    { name: "ShopID", label: "ShopID (aba)", type: "number", required: true, list: true, sortable: true },
+    { name: "ID", label: "ID", type: "number", list: true, sortable: true, form: "create", required: true, min: 1, hint: { "pt-BR": "ID único da oferta; não é o TemplateID. Use este ID em ShopGoodsShowList.ShopId.", "zh-CN": "唯一商品编号，不是TemplateID；商城展示的ShopId引用此ID。" } },
+    { name: "ShopID", label: "ShopID", type: "number", required: true, list: true, sortable: true, hint: { "pt-BR": "1 = loja comum. Não é o Type da lista de exibição.", "zh-CN": "1为普通商城；不是展示列表的Type。" } },
     { name: "GroupID", label: "GroupID", type: "number", default: 0 },
     { name: "TemplateID", label: "TemplateID do item", type: "number", required: true, min: 1, list: true, sortable: true },
-    { name: "BuyType", label: "BuyType", type: "number", default: 0, list: true, hint: "Tipo de moeda/compra, como no original" },
-    { name: "AUnit", label: "AUnit", type: "number", default: 0, list: true, section: "Preços / validade" },
-    { name: "BUnit", label: "BUnit", type: "number", default: 0, section: "Preços / validade" },
-    { name: "CUnit", label: "CUnit", type: "number", default: 0, section: "Preços / validade" },
+    { name: "BuyType", label: "BuyType", type: "number", default: 0, list: true, hint: { "pt-BR": "0 = Unit em dias (0 permanente); outros valores = Unit em quantidade. A moeda é definida em Price1..3.", "zh-CN": "0表示Unit按有效天数计（0为永久）；非0表示Unit为件数。币种由各档Price1..3指定。" } },
+    ...shopPrices,
     { name: "Beat", label: "Beat (desconto)", type: "number", int: false, default: 1, section: "Preços / validade" },
     { name: "Label", label: "Label", type: "number", default: 0, hint: "Etiqueta (novo/promo…)", section: "Exibição" },
     { name: "Sort", label: "Ordem", type: "number", default: 0, sortable: true, section: "Exibição" },
     { name: "LimitCount", label: "Limite de compras", type: "number", default: -1, section: "Exibição" },
     { name: "LimitGrade", label: "Nível mínimo", type: "number", default: 0, section: "Exibição" },
-    { name: "StartDate", label: "Início", type: "datetime", section: "Período" },
-    { name: "EndDate", label: "Fim", type: "datetime", section: "Período" },
+    { name: "StartDate", label: { "pt-BR": "Início", "zh-CN": "开始时间" }, type: "datetime", section: "Período", hint: { "pt-BR": "O cliente exige início ≤ agora < fim para exibir a oferta; preencha ambas as datas.", "zh-CN": "原客户端要求开始时间≤当前时间<结束时间才显示商品，请填写两项时间。" } },
+    { name: "EndDate", label: { "pt-BR": "Fim", "zh-CN": "结束时间" }, type: "datetime", section: "Período" },
     { name: "IsContinue", label: "Renovável", type: "boolean", section: "Período" },
-    { name: "IsBind", label: "Vinculado", type: "boolean", section: "Período" },
-    { name: "IsVouch", label: "Recomendado", type: "boolean", section: "Período" },
+    // Shop's original flag columns are numeric, unlike Shop_Goods.IsBind.
+    { name: "IsBind", label: { "pt-BR": "IsBind (código legado)", "zh-CN": "IsBind（底包数值标记）" }, type: "number", int: false, default: 0, section: "Período", hint: { "pt-BR": "Preserva o código original. O handler atual vincula toda compra, independentemente desta marca.", "zh-CN": "保留原数值；当前购买处理器会绑定所有购得物品，不由此标记改变。" } },
+    { name: "IsVouch", label: { "pt-BR": "IsVouch (código legado)", "zh-CN": "IsVouch（底包数值标记）" }, type: "number", int: false, default: 0, section: "Período" },
     { name: "IsCheap", label: "Promoção", type: "boolean", list: true, section: "Período" },
-    { name: "CanBuy", label: "À venda", type: "boolean", default: true, list: true, inlineToggle: true, section: "Período" },
+    { name: "CanBuy", label: { "pt-BR": "CanBuy (marca legada)", "zh-CN": "CanBuy（底包标记）" }, type: "boolean", default: true, list: true, inlineToggle: true, section: "Período", hint: { "pt-BR": "Esta marca não substitui ShopGoodsShowList; adicione o ID em Exibição da loja.", "zh-CN": "此标记不能替代ShopGoodsShowList上架记录，请在“商城展示”添加此商品ID。" } },
+  ],
+});
+
+// Fixed DDTank41 commit 7fcb55290e4c7aabd6887d3c1ccd2621b5080924: Source Flash/src/ddt/data/ShopType.as.
+// Type selects a client display category; ShopId references Shop.ID, not the item template or Shop.ShopID.
+export const shopShow = defineResource({
+  name: "shop-show",
+  table: 'game."ShopGoodsShowList"',
+  label: { "pt-BR": "Exibição da loja", en: "Shop display", "zh-CN": "商城展示" },
+  singular: { "pt-BR": "registro de exibição", en: "display entry", "zh-CN": "展示记录" },
+  description: { "pt-BR": "Referências de ofertas nos grupos ShopType do cliente. Para ambos os sexos, crie os dois grupos correspondentes; não altera a oferta ou o item.", "zh-CN": "将已有商城商品加入原客户端的ShopType栏目。男女栏目是独立记录；本页不修改商品、价格或物品模板。" },
+  icon: ShoppingBag,
+  group: "content",
+  idField: "TempID",
+  titleField: "ShopId",
+  defaultSort: "Type",
+  fields: [
+    { name: "TempID", label: { "pt-BR": "Registro (TempID)", "zh-CN": "记录编号 (TempID)" }, type: "number", readOnly: true, form: false, list: true, sortable: true },
+    { name: "ShopId", label: { "pt-BR": "ID da oferta (ShopId)", "zh-CN": "商品编号 (ShopId)" }, type: "number", required: true, min: 1, list: true, sortable: true, hint: { "pt-BR": "Referencia Shop.ID, não Shop.ShopID nem Shop_Goods.TemplateID. Cadastre a oferta primeiro.", "zh-CN": "引用商城商品的Shop.ID，不是Shop.ShopID或物品TemplateID；先在商城条目创建商品。" } },
+    { name: "Type", label: { "pt-BR": "Grupo do cliente (Type)", "zh-CN": "客户端栏目 (Type)" }, type: "number", required: true, min: 1, list: true, sortable: true, hint: { "pt-BR": "ShopType original: 15/16 = traje Money masculino/feminino; 25/26 = item funcional Money masculino/feminino. Não é CategoryID ou NeedSex. Outros grupos: use o ShopType original ou uma oferta equivalente existente.", "zh-CN": "原ShopType：15/16为男/女点券套装栏目，25/26为男/女点券功能道具栏目。不是CategoryID或NeedSex；其他栏目按原ShopType或既有同类商品记录填写。" } },
   ],
 });
 

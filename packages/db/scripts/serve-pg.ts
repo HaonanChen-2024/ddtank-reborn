@@ -5,6 +5,7 @@
  * First run initialises the cluster, creates DB "ddtank", migrates and seeds.
  */
 import EmbeddedPostgres from "embedded-postgres";
+import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -15,6 +16,10 @@ import { createDb, createDevAccounts, migrateDb, seedDatabase } from "../src/ind
 const dir = process.env.PG_DIR ?? fileURLToPath(new URL("../.data/pg", import.meta.url));
 const port = Number(process.env.PG_PORT ?? 5432);
 const fresh = !existsSync(dir);
+const databaseName = process.env.PG_DATABASE ?? "ddtank";
+assert.ok(databaseName === "ddtank" || /^workshop_restore_\d+_[a-f0-9]{6}$/.test(databaseName), "invalid Workshop database name");
+const restored = databaseName !== "ddtank";
+assert.ok(!restored || existsSync(resolve(dir, "PG_VERSION")), "restored database requires an existing Postgres cluster");
 const password = process.env.PG_PASSWORD ?? "postgres";
 const pg = new EmbeddedPostgres({ databaseDir: dir, user: "postgres", password, port, persistent: true, initdbFlags: ["--encoding=UTF8", "--locale=C"], postgresFlags: ["-c", "listen_addresses=127.0.0.1", "-c", "timezone=UTC", "-c", "log_timezone=UTC"] });
 let started = false;
@@ -36,7 +41,7 @@ if (process.platform === "win32") {
 if (fresh) await pg.initialise();
 await pg.start();
 started = true;
-const url = `postgres://postgres:${encodeURIComponent(password)}@127.0.0.1:${port}/ddtank`;
+const url = `postgres://postgres:${encodeURIComponent(password)}@127.0.0.1:${port}/${databaseName}`;
 if (fresh) {
   await pg.createDatabase("ddtank");
 }
@@ -49,15 +54,16 @@ process.on("SIGTERM", stop);
 let h;
 try {
   h = await createDb(url);
-  await migrateDb(h);
+  // A restored copy is inspected before any API/game writes, without reseeding or migrating it.
+  if (!restored) await migrateDb(h);
   if (fresh) {
     await seedDatabase(h);
     if (process.env.PG_SEED_DEV_ACCOUNTS !== "false") await createDevAccounts(h);
   }
   await h.close();
   h = undefined;
-  if (process.env.PG_READY_FILE) writeFileSync(process.env.PG_READY_FILE, JSON.stringify({ pid: process.pid, port }));
-  console.log(`Postgres ready: 127.0.0.1:${port}/ddtank${fresh ? " (new cluster: migrated, seeded)" : ""}`);
+  if (process.env.PG_READY_FILE) writeFileSync(process.env.PG_READY_FILE, JSON.stringify({ pid: process.pid, port, databaseName }));
+  console.log(`Postgres ready: 127.0.0.1:${port}/${databaseName}${fresh ? " (new cluster: migrated, seeded)" : ""}`);
 } catch (error) {
   await h?.close();
   await pg.stop();

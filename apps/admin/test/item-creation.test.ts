@@ -5,9 +5,12 @@ import { inflateSync } from "node:zlib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createDb, createDevAccounts, game, migrateDb, seedDatabase, type DbHandle } from "../../../packages/db/src/index.js";
 import { buildApp } from "../../api/src/app.js";
+import { Templates } from "../../game/src/db/templates.js";
+import { setItemType } from "../../game/src/handlers/items.js";
 import { items } from "../src/resources/items.js";
+import { resourceByName } from "../src/resources/index.js";
 import { buildSchema, copyForCreate, fromFormValues, toFormValues } from "../src/crud/schema.js";
-import type { Row } from "../src/crud/types.js";
+import type { ResourceDef, Row } from "../src/crud/types.js";
 
 const tmp = mkdtempSync(join(tmpdir(), "ddt-item-form-"));
 let h: DbHandle;
@@ -46,6 +49,12 @@ afterAll(async () => {
 function formPayload(initial: Row | undefined, changes: Row): Row {
   const values = schema.parse({ ...toFormValues(items.fields, initial, "create"), ...changes });
   return { ...initial, ...fromFormValues(items.fields, values, "create") };
+}
+
+function resourcePayload(def: ResourceDef, changes: Row, initial?: Row, mode: "create" | "edit" = "create"): Row {
+  const formSchema = buildSchema(def.fields, mode, key => key, text => typeof text === "string" ? text : text?.["zh-CN"] ?? "");
+  const parsed = formSchema.parse({ ...toFormValues(def.fields, initial, mode), ...changes });
+  return fromFormValues(def.fields, parsed, mode);
 }
 
 describe("item create form + API", () => {
@@ -94,5 +103,57 @@ describe("item create form + API", () => {
     const resource = await app.inject({ url: "/resource/IMAGE/EQUIP/M/CLOTH/WORKSHOP/1/SHOW.PNG" });
     expect(resource.rawPayload).toEqual(png);
     expect(resource.headers["x-placeholder"]).toBeUndefined();
+  });
+});
+
+describe("registered shop forms + existing API and game template owners", () => {
+  it("creates a normal item, preserves all three costs in Flash XML/game pricing, and registers its display entry", async () => {
+    const shop = resourceByName.get("shop")!, display = resourceByName.get("shop-show")!;
+    const item = await app.inject({ method: "POST", url: "/api/admin/items", headers: auth, payload: formPayload(undefined, { TemplateID: 990010, Name: "Workshop material", CategoryID: 11, Pic: "symbol3" }) });
+    expect(item.statusCode, item.body).toBe(201);
+    const payload = resourcePayload(shop, {
+      ID: "990011", ShopID: "1", TemplateID: "990010", BuyType: "1", AUnit: "1", BUnit: "-1", CUnit: "-1", Beat: "0.8",
+      APrice1: "-1", AValue1: "159", APrice2: "-4", AValue2: "8", APrice3: "11408", AValue3: "2",
+      StartDate: "2025-01-01T00:00", EndDate: "2050-01-01T00:00",
+    });
+    const created = await app.inject({ method: "POST", url: "/api/admin/shop", headers: auth, payload });
+    expect(created.statusCode, created.body).toBe(201);
+    const shopXml = await app.inject({ url: "/request/ShopItemList.xml" });
+    const text = inflateSync(shopXml.rawPayload).toString("utf8"), line = text.split("\n").find(value => value.includes('ID="990011"'))!;
+    expect(line).toContain('APrice1="-1" AValue1="159"');
+    expect(line).toContain('APrice2="-4" AValue2="8"');
+    expect(line).toContain('APrice3="11408" AValue3="2"');
+    const templates = await new Templates().load(h.db, 1);
+    expect(templates.findItem(990010)?.CategoryID).toBe(11);
+    expect(templates.isOnShop(990011)).toBe(false);
+    const totals = { gold: 0, money: 0, offer: 0, gifttoken: 0, petScore: 0, score: 0, dmgScore: 0 };
+    expect(setItemType(templates.shop.get(990011)!, 1, totals)).toEqual([11408, 2]);
+    expect(totals).toMatchObject({ money: 127, gifttoken: 6, gold: 0 });
+    const shown = await app.inject({ method: "POST", url: "/api/admin/shop-show", headers: auth, payload: resourcePayload(display, { Type: "25", ShopId: "990011" }) });
+    expect(shown.statusCode, shown.body).toBe(201);
+    expect(shown.json().TempID).toBeGreaterThan(0);
+    const displayXml = await app.inject({ url: "/request/ShopGoodsShowList.xml" });
+    expect(inflateSync(displayXml.rawPayload).toString("utf8")).toContain('Type="25" ShopId="990011"');
+    await templates.load(h.db, 1);
+    expect(templates.isOnShop(990011)).toBe(true);
+  }, 20_000);
+
+  it("edits prices while preserving the original disabled tier sentinels", async () => {
+    const shop = resourceByName.get("shop")!;
+    const created = await app.inject({ method: "POST", url: "/api/admin/shop", headers: auth, payload: resourcePayload(shop, { ID: 990012, ShopID: 1, TemplateID: source.TemplateID, AUnit: 7, AValue1: 159, CUnit: -1, CValue1: -1, IsBind: "1", IsVouch: "1" }) });
+    expect(created.statusCode, created.body).toBe(201);
+    const edited = await app.inject({ method: "PATCH", url: "/api/admin/shop/990012", headers: auth, payload: resourcePayload(shop, { AValue1: "100" }, created.json(), "edit") });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(edited.json()).toMatchObject({ APrice1: -1, AValue1: 100, CUnit: -1, CValue1: -1, IsBind: 1, IsVouch: 1 });
+  }, 20_000);
+
+  it("uses the existing form validation for integral costs and rejects malformed values", () => {
+    const shop = resourceByName.get("shop")!, display = resourceByName.get("shop-show")!;
+    const base = { ID: 990013, ShopID: 1, TemplateID: source.TemplateID };
+    expect(() => resourcePayload(shop, { ...base, AValue1: "not-a-number" })).toThrow();
+    expect(() => resourcePayload(shop, { ...base, AValue1: 1.5 })).toThrow();
+    expect(() => resourcePayload(shop, { ...base, AValue1: -2 })).toThrow();
+    expect(() => resourcePayload(shop, { ...base, APrice1: 11408.5 })).toThrow();
+    expect(() => resourcePayload(display, { Type: 25 })).toThrow();
   });
 });

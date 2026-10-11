@@ -1,6 +1,6 @@
 import type { ResourceDef } from "@/crud/types";
 import { items } from "./items";
-import { dungeons, events, maps, missions, npcs, questConditions, questGoods, quests, shop } from "./content";
+import { dungeons, events, maps, missions, npcs, questConditions, questGoods, quests, shop, shopShow } from "./content";
 import { dailyAward, eventAwards, eventCodes, scheduledEvents, timeBoxes } from "./event-systems";
 import { bots, players } from "./players";
 import { guildApplications, guildDuties, guildEvents, guildLevels, guildMembers, guilds, guildTasks } from "./guilds";
@@ -23,6 +23,7 @@ const zhNames: Record<string, [string, string]> = {
   bots: ["机器人", "机器人"],
   items: ["物品模板", "物品"],
   shop: ["商城条目", "商品"],
+  "shop-show": ["商城展示", "展示记录"],
   quests: ["任务", "任务"],
   "quest-conditions": ["任务条件", "条件"],
   "quest-goods": ["任务奖励", "奖励"],
@@ -56,6 +57,7 @@ export const resources: ResourceDef[] = [
   bots,
   items,
   shop,
+  shopShow,
   quests,
   questConditions,
   questGoods,
@@ -87,4 +89,4 @@ export const resources: ResourceDef[] = [
 
 export const resourceByName = new Map(resources.map((r) => [r.name, r]));
 export { guildApplications, guildDuties, guildEvents, guildLevels, guildMembers, guilds, guildTasks };
-export { adminUsers, bots, dungeons, edicts, events, items, logs, mailBroadcasts, maps, missions, news, npcs, players, questConditions, questGoods, quests, shop, texts };
+export { adminUsers, bots, dungeons, edicts, events, items, logs, mailBroadcasts, maps, missions, news, npcs, players, questConditions, questGoods, quests, shop, shopShow, texts };

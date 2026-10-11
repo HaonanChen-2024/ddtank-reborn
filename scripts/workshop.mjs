@@ -20,6 +20,8 @@ for (const key of ["FLASH_DIR", "FLASH_OVERLAY_DIR", "RESOURCE_DIR", "RUFFLE_DIR
 const ports = { db: 55432, api: 8080, game: 9200, ws: 9300, policy: 843, control: 9400, web: 5173, admin: 5174 };
 const lanArgument = process.argv.find(arg => arg === "--lan" || arg.startsWith("--lan="));
 let publicHost = "127.0.0.1";
+let databaseName = "ddtank";
+let restored;
 const lockFile = join(runtime, "workshop-session.json");
 const runId = randomUUID();
 const controlPipe = process.platform === "win32" ? `\\\\.\\pipe\\ddtank-workshop-${runId}` : join(runtime, `control-${runId}.sock`);
@@ -41,9 +43,18 @@ function readSession() {
   try { return JSON.parse(readFileSync(lockFile, "utf8")); } catch { return null; }
 }
 function saveSession() {
-  if (acquired) writeFileSync(lockFile, JSON.stringify({ runId, controlPipe, managerPid: process.pid, startedAt, publicHost, children: children.filter((c) => c.exitCode === null && c.signalCode === null).map((c) => ({ name: c.workshopName, pid: c.pid })), ports }, null, 2));
+  if (acquired) writeFileSync(lockFile, JSON.stringify({ runId, controlPipe, managerPid: process.pid, startedAt, publicHost, databaseName, children: children.filter((c) => c.exitCode === null && c.signalCode === null).map((c) => ({ name: c.workshopName, pid: c.pid })), ports }, null, 2));
 }
 const startedAt = new Date().toISOString();
+export async function selectRestoredBackup(args, dataDir) {
+  const options = args.filter(arg => arg === "--restored" || arg.startsWith("--restored="));
+  if (!options.length) return null;
+  if (options.length !== 1 || !options[0].startsWith("--restored=") || !options[0].slice(11)) throw new Error("使用 start --restored=完整的备份.dump.json路径");
+  // The optional mode must never initialise an empty cluster or create a substitute database.
+  if (!existsSync(join(dataDir, "PG_VERSION"))) throw new Error("恢复副本需要已有 PostgreSQL 存档；不会新建空库");
+  const { readRestoredBackup } = await import("./workshop-backup.mjs");
+  return readRestoredBackup(options[0].slice(11));
+}
 function acquireSession() {
   mkdirSync(runtime, { recursive: true });
   if (existsSync(lockFile)) {
@@ -160,6 +171,9 @@ async function stop() {
 
 async function start() {
   if (!existsSync(envFile)) throw new Error(`缺少本地配置：${envFile}`);
+  const data = join(runtime, "data", "postgres");
+  restored = await selectRestoredBackup(process.argv.slice(3), data);
+  databaseName = restored?.database ?? "ddtank";
   publicHost = lanArgument ? selectLanHost(lanArgument.startsWith("--lan=") ? lanArgument.slice(6) : undefined) : "127.0.0.1";
   await ensurePortsFree(ports, publicHost);
   for (const key of ["FLASH_DIR", "RESOURCE_DIR", "RUFFLE_DIR", "RSA_PRIVATE_KEY_FILE"]) {
@@ -171,11 +185,10 @@ async function start() {
   acquireSession();
   process.once("SIGINT", () => { void stop().then(result => process.exit(result.normal ? 0 : 1)); });
   process.once("SIGTERM", () => { void stop().then(result => process.exit(result.normal ? 0 : 1)); });
-  const data = join(runtime, "data", "postgres");
-  const databaseUrl = `postgres://postgres:${encodeURIComponent(settings.PG_PASSWORD)}@127.0.0.1:${ports.db}/ddtank`;
+  const databaseUrl = `postgres://postgres:${encodeURIComponent(settings.PG_PASSWORD)}@127.0.0.1:${ports.db}/${databaseName}`;
   const env = {
     ...process.env, ...settings, TZ: "UTC", NODE_ENV: "development",
-    DATABASE_URL: databaseUrl, PG_DIR: data, PG_PORT: String(ports.db), PG_SEED_DEV_ACCOUNTS: "false",
+    DATABASE_URL: databaseUrl, PG_DATABASE: databaseName, PG_DIR: data, PG_PORT: String(ports.db), PG_SEED_DEV_ACCOUNTS: "false",
     PG_READY_FILE: join(runtime, "postgres-ready.json"),
     HOST: publicHost, PORT: String(ports.api), PUBLIC_URL: `http://${publicHost}:${ports.api}`,
     SITE_URL: `http://${publicHost}:${ports.web}`, SERVER_ID: "4",
@@ -215,9 +228,19 @@ async function start() {
     await new Promise((res, rej) => control.once("error", rej).listen(controlPipe, res));
     const db = runEntry("db", "packages/db/scripts/serve-pg.ts", env);
     await waitReady("数据库初始化", () => existsSync(join(runtime, "postgres-ready.json")) && (() => {
-      try { return JSON.parse(readFileSync(join(runtime, "postgres-ready.json"), "utf8")).pid === db.pid; }
+      try {
+        const ready = JSON.parse(readFileSync(join(runtime, "postgres-ready.json"), "utf8"));
+        return ready.pid === db.pid && ready.databaseName === databaseName;
+      }
       catch { return false; }
     })());
+    if (restored) {
+      const { readRestoredBackup, confirmRestoredDatabase } = await import("./workshop-backup.mjs");
+      // Re-read the proof after DB startup; no game/API writes precede this confirmation.
+      const current = readRestoredBackup(restored.path);
+      if (current.database !== databaseName || current.restoreProofSha256 !== restored.restoreProofSha256) throw new Error("恢复证明在启动期间发生变化");
+      await confirmRestoredDatabase(current, data, join(runtime, "restored-databases", databaseName + ".json"));
+    }
     runEntry("api", "apps/api/src/index.ts", env);
     await waitReady("API", () => httpReady(`${env.PUBLIC_URL}/healthz`));
     runEntry("game", "apps/game/src/index.ts", env);
@@ -232,7 +255,7 @@ async function start() {
       `, env, join(repo, "apps", name));
       await waitReady(name, () => httpReady(`http://${host}:${ports[name]}`));
     }
-    console.log(`服务就绪：游戏 http://${publicHost}:${ports.web}  管理 http://127.0.0.1:${ports.admin}`);
+    console.log(`服务就绪：游戏 http://${publicHost}:${ports.web}  管理 http://127.0.0.1:${ports.admin}  存档 ${databaseName}`);
     console.log("Ctrl+C 正常保存并停止本次服务。");
     await failure;
   } finally { if (!(await stop()).normal) process.exitCode = 1; }
@@ -258,6 +281,7 @@ async function status() {
   const host = session?.publicHost ?? "127.0.0.1";
   console.log(JSON.stringify({
     manager: session ? { pid: session.managerPid, alive: alive(session.managerPid), startedAt: session.startedAt } : null,
+    databaseName: session?.databaseName ?? "ddtank",
     gameUrl: `http://${host}:${ports.web}`,
     children: session?.children?.map((c) => ({ ...c, alive: alive(c.pid) })) ?? [],
     listening: Object.fromEntries(await Promise.all(Object.entries(ports).map(async ([name, port]) => {
@@ -273,6 +297,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     if (command === "start") await start();
     else if (command === "status") await status();
     else if (command === "stop") await stopCurrent();
-    else throw new Error("usage: node scripts/workshop.mjs start [--lan[=IPv4]] | stop | status");
+    else throw new Error("usage: node scripts/workshop.mjs start [--lan[=IPv4]] [--restored=backup.dump.json] | stop | status");
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
