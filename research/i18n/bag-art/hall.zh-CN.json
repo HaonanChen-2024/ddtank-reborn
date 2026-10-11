@@ -13,7 +13,7 @@
     "pngSha256": "eb5589d1b734188d19b3d4071dd482cf6432a37b918308e23b49c23efb50946a",
     "referenceSwfSha256": "ff947a6002a598cb82ae07d6e030d1094cfcce97eefc9b33e011c211c14f315a"
   },
-  "note": "Default: only the 14 reviewed captions (12 building captions, channel label and sign-in label). Optional --asset=hall --background=PNG replaces tag21/id12 and clears only bitmap3's reviewed channel caption region so the background's existing Chinese label remains visible (13 drawn captions, 1 cleared duplicate). Every other tag, including shapes, sprites, animation frames and ABC, remains unchanged. This is not an all-hall translation.",
+  "note": "Default: the 14 reviewed hall captions plus the storage-help text in bitmap7 and the actual OK caption in bitmap10. Storage artwork preserves the original opt-in meaning; its right-side settings panel is only an illustration. Optional --asset=hall --background=PNG replaces tag21/id12 and clears only bitmap3's reviewed channel caption region so the background's existing Chinese label remains visible. Every pixel outside reviewed text rectangles and every other tag, including shapes, sprites, animation frames and ABC, remains unchanged. This is not an all-hall translation.",
   "bitmaps": [
     {
       "id": 18,
@@ -767,6 +767,121 @@
           "outerStroke": "#fffce5",
           "outerStrokeWidth": 1.5,
           "preserveAlpha": false
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "className": "asset.hallSaveFile.noviceBG",
+      "width": 588,
+      "height": 339,
+      "sourcePixelsSha256": "88f13e3b06af0dbf586caedc0c0233e56514c84530675aee75c4b4384442d99c",
+      "sourceTagSha256": "3651165e984d4bab4001cd7201ff33c1bd6d0f5f106e24588f94a950ae44974c",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/SaveFileWidow.as",
+        "createLines": [31, 36],
+        "xmlPath": "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/hall.xml",
+        "xmlLine": 83,
+        "contentPosition": [66, 52]
+      },
+      "note": "Only reviewed text rectangles are replaced. The original settings frame, folder icon, allow check and reject mark remain exact outside those rectangles. This image does not grant storage permission or prove saving succeeded.",
+      "regions": [
+        {
+          "box": [0, 26, 105, 33], "text": "本地存储", "transparent": true,
+          "fontSize": 22, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [0, 65, 530, 29], "text": "为减少重复下载并缩短资源加载时间，", "transparent": true,
+          "fontSize": 19, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [0, 94, 530, 27], "text": "游戏建议您启用本地存储功能。", "transparent": true,
+          "fontSize": 19, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [0, 132, 110, 25], "text": "优点：", "transparent": true,
+          "fontSize": 18, "textOffsetY": -1, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [14, 157, 307, 23], "text": "减少重复下载", "transparent": true,
+          "fontSize": 16, "textOffsetY": -1, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [14, 180, 307, 23], "text": "减少内存占用", "transparent": true,
+          "fontSize": 16, "textOffsetY": -1, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [14, 203, 307, 21], "text": "加快游戏运行", "transparent": true,
+          "fontSize": 14, "textOffsetY": -1, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [14, 224, 307, 21], "text": "缩短加载时间", "transparent": true,
+          "fontSize": 14, "textOffsetY": -1, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [14, 245, 307, 25], "text": "减少网络流量", "transparent": true,
+          "fontSize": 16, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1.4, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [2, 278, 321, 27], "text": "（右侧仅为示意，请按实际存储提示操作）", "transparent": true,
+          "fontSize": 12, "fill": "#ef323b", "stroke": "#ffffff", "strokeWidth": 1, "inkMargin": 2, "preserveAlpha": false
+        },
+        {
+          "box": [348, 131, 230, 18], "text": "本地存储设置（示意）", "sample": [570, 138, 1, 1],
+          "fontSize": 12, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [355, 156, 216, 20], "text": "本地存储", "sample": [562, 162, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [355, 178, 217, 17], "text": "游戏请求在本机保存数据", "sample": [560, 223, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [355, 195, 217, 18], "text": "请按实际提示选择允许或拒绝", "sample": [560, 223, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [355, 231, 217, 17], "text": "请求的存储空间：不限", "sample": [560, 223, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [355, 248, 217, 17], "text": "已用空间（示意）：0 KB", "sample": [560, 223, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [435, 277, 46, 17], "text": "允许", "sample": [461, 279, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        },
+        {
+          "box": [524, 277, 47, 17], "text": "拒绝", "sample": [552, 279, 1, 1],
+          "fontSize": 11, "fill": "#111111", "inkMargin": 1, "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "className": "asset.hallSaveFile.okBtn",
+      "width": 88,
+      "height": 28,
+      "sourcePixelsSha256": "4f87b317f1f7b9bb06275aa92d107dc3cdf5cef237c764a826300bfbac816c93",
+      "sourceTagSha256": "df37599e6f0e325a36e4c1d19634687b7a037280a1afb3c022c3318cd878aca6",
+      "originalText": "Ok",
+      "ownerSource": {
+        "path": "source/ddtank-reborn/vendor/DDTank41/Source Flash/src/hall/SaveFileWidow.as",
+        "createLines": [31, 36],
+        "clickLines": [61, 67],
+        "xmlPath": "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/hall.xml",
+        "xmlLine": 40,
+        "contentPosition": [307, 374]
+      },
+      "note": "Caption only. Original OK requests opt-in saving; CLOSE/ESC retain the original no branch. No permission or saved-state logic is replaced.",
+      "regions": [
+        {
+          "box": [22, 3, 45, 22], "text": "确定", "sample": [15, 5, 1, 1], "inpaint": true,
+          "fontSize": 14, "fill": "#f7edb0", "stroke": "#452912", "strokeWidth": 1,
+          "inkMargin": 1, "preserveAlpha": true
         }
       ]
     }

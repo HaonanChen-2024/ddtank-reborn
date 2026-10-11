@@ -14,11 +14,49 @@ const privateRoot = join(runtime, "content-research/official-probe");
 const arg = (name, fallback) => process.argv.find(value => value.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const sha256 = file => createHash("sha256").update(readFileSync(file)).digest("hex");
 const view = arg("view", "appearances");
-assert.ok(["appearances", "bag", "hall"].includes(view), "view must be appearances, bag or hall");
+assert.ok(["appearances", "bag", "hall", "storage"].includes(view), "view must be appearances, bag, hall or storage");
 const probeName = view === "appearances" ? "WorkshopOfficialWardrobeProbe" : "WorkshopBagViewProbe";
 const probeSource = join(repo, `research/client/${probeName}.as`);
 const probeSwf = join(privateRoot, `${probeName}.swf`);
 assert.ok(existsSync(probeSource), "official probe source is unavailable");
+const storageFixtureAllowed = id => Number.isSafeInteger(id) && id !== 6 && id !== 11 && [9, 10].includes(id);
+const storageSnapshotEligible = (row, id) => storageFixtureAllowed(id) && row?.phase === "storage-observation" &&
+  row.ready === true && row.state === "main" && row.playerID === id && row.selfUnchanged === true &&
+  typeof row.selfFingerprint === "string" && row.selfFingerprint.length > 0 && typeof row.cacheAble === "boolean" &&
+  row.cachePermissionUnchanged === true && Number.isSafeInteger(row.frameID) && row.frameID > 0 &&
+  typeof row.frameSignature === "string" && row.frameSignature.length > 0 && Number.isSafeInteger(row.tick) && row.tick > 0 &&
+  Number.isFinite(row.reportedAt) && row.reportedAt > 0;
+const sameStorageScene = (before, after, id) => storageSnapshotEligible(before, id) && storageSnapshotEligible(after, id) &&
+  after.tick > before.tick && after.reportedAt > before.reportedAt && before.frameID === after.frameID && before.frameSignature === after.frameSignature &&
+  before.selfFingerprint === after.selfFingerprint && before.cacheAble === after.cacheAble;
+const latestStorageSnapshot = rows => rows.filter(row => row.phase === "storage-observation").at(-1);
+const freshStorageSnapshot = row => [row?.receivedAt, row?.reportedAt].every(value => Number.isFinite(value) && Date.now() - value >= 0 && Date.now() - value <= 1500);
+const validateStorageGates = () => {
+  const before = { phase: "storage-observation", ready: true, state: "main", playerID: 9, selfUnchanged: true,
+    selfFingerprint: "fixture-9", cacheAble: false, cachePermissionUnchanged: true, frameID: 1, frameSignature: "frame-parts", tick: 20, reportedAt: 1000 };
+  const after = { ...before, tick: 21, reportedAt: 1001 };
+  assert.equal(sameStorageScene(before, after, 9), true);
+  assert.equal(sameStorageScene({ ...before, playerID: 10 }, { ...after, playerID: 10 }, 10), true);
+  assert.equal(sameStorageScene({ ...before, cacheAble: true }, { ...after, cacheAble: true }, 9), true);
+  for (const id of [0, 6, 11, 12, 9.5, "9"]) assert.equal(storageFixtureAllowed(id), false);
+  for (const change of [{ state: "room" }, { playerID: 10 }, { selfUnchanged: false }, { selfFingerprint: "changed" },
+    { selfFingerprint: undefined },
+    { cacheAble: true }, { cacheAble: null }, { cachePermissionUnchanged: false }, { frameID: 2 },
+    { frameID: null }, { frameSignature: "changed" }, { ready: false }, { tick: 20 }, { reportedAt: 1000 },
+    { reportedAt: undefined }]) assert.equal(sameStorageScene(before, { ...after, ...change }, 9), false);
+  const now = Date.now();
+  assert.equal(freshStorageSnapshot({ receivedAt: now, reportedAt: now }), true);
+  assert.equal(freshStorageSnapshot({ receivedAt: now - 5000, reportedAt: now - 5000 }), false);
+  assert.equal(freshStorageSnapshot({ receivedAt: now + 5000, reportedAt: now + 5000 }), false);
+  assert.equal(freshStorageSnapshot({}), false);
+};
+if (process.argv.includes("--validate")) {
+  validateStorageGates();
+  console.log(JSON.stringify({ validated: true, view, probeName, sourceSha256: sha256(probeSource),
+    scriptSha256: sha256(fileURLToPath(import.meta.url)), storageFixtureIds: [9, 10], excludedCharacterIds: [6, 11],
+    storageDriftFixturesPassed: true, runtimeExecuted: false }));
+  process.exit(0);
+}
 const compiler = join(runtime, "tools/flex-min/lib/mxmlc.jar");
 const playerGlobal = join(workshop, "downloads/flex/playerglobal32_0.swc");
 const java = process.env.WORKSHOP_JAVA ?? (process.env.JAVA_HOME ? join(process.env.JAVA_HOME, "bin/java.exe") : "java");
@@ -40,6 +78,7 @@ const manifest = JSON.parse(readFileSync(journal, "utf8"));
 assert.ok(["awaiting-visual", "verified", "read-only-repeat"].includes(manifest.phase), "official fixture must be installed and held for visual checks");
 const fixture = manifest.fixtures?.[sex];
 assert.ok(Number.isSafeInteger(fixture?.characterId) && fixture.characterId > 0, "exact private fixture character ID is missing");
+if (view === "storage") assert.ok(storageFixtureAllowed(fixture.characterId), "storage requires private fixture 9 or 10; users 6 and 11 are excluded");
 const credentialPath = resolve(fixture.credentialsPath);
 assert.ok(credentialPath.startsWith(join(runtime, "credentials") + sep), "private credentials must stay in their runtime directory");
 const account = JSON.parse(readFileSync(credentialPath, "utf8"));
@@ -73,13 +112,14 @@ const loadingFile = join(repo, "apps/web/public", `workshop-official-${runId}-DD
 const probeParameters = { probeView: view, probeUserId: fixture.characterId, probeTemplates: JSON.stringify(templates), probeBaseline: String(baseline), probeClient: game.swfUrl, probeGameModule: `${apiUrl}/flash/ui/vietnam/swf/game.swf` };
 const html = `<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#161822}#host{width:1000px;height:600px}</style><div id="host"></div><script>
 const config=${JSON.stringify(game)};window.workshopProbeEvidence=[];
-window.workshop_probe_report=value=>{window.workshopProbeEvidence.push(value);console.info('WORKSHOP_OFFICIAL',JSON.stringify(value));};
+window.workshop_probe_report=value=>{if(${JSON.stringify(view)}==='storage'&&value.phase==='storage-observation')value.reportedAt=Date.now();window.workshopProbeEvidence.push(value);console.info('WORKSHOP_OFFICIAL',JSON.stringify(value));};
 window.RufflePlayer={config:{publicPath:config.rufflePath.slice(0,config.rufflePath.lastIndexOf('/')+1),autoplay:'on',unmuteOverlay:'hidden',splashScreen:false,allowScriptAccess:true,socketProxy:config.socketProxy,fontSources:['/fonts/NotoSans-Regular.ttf','/fonts/NotoSans-Bold.ttf','/fonts/NotoSansSC-Regular.otf','/fonts/NotoSansSC-Bold.otf'],defaultFonts:{sans:['Noto Sans SC','Noto Sans'],serif:['Noto Sans SC','Noto Sans'],typewriter:['Noto Sans SC','Noto Sans']}}};
 window.game_interruption=()=>console.error('original game connection interrupted');
 const script=document.createElement('script');script.src=config.rufflePath;script.onload=async()=>{try{const p=window.RufflePlayer.newest().createPlayer();p.style.width='1000px';p.style.height='600px';document.getElementById('host').appendChild(p);await p.ruffle().load({url:${JSON.stringify(`${webUrl}/workshop-official-${runId}-Loading.swf`)},parameters:{...config.flashvars,...${JSON.stringify(probeParameters)}},base:config.base,socketProxy:config.socketProxy});}catch(e){console.error('official player load failed',String(e));}};document.head.appendChild(script);
 </script>`;
 const delay = ms => new Promise(resolveDelay => setTimeout(resolveDelay, ms));
 const evidence = { runId, view, sex, characterId: fixture.characterId, templates, expectedJobs, baseline, compiler: compilerEvidence, probe: [], requests: [], errors: [], captures: [], inventoryWrites: false, offlineImageComposition: false, gameplayAccepted: false };
+if (view === "storage") Object.assign(evidence, { storageCaptureChecks: [], storagePermissionAccepted: false, storageSaveAccepted: false });
 let child, socket, diagnostics = "";
 try {
   writeFileSync(publicFile, html, { flag: "wx" });
@@ -109,11 +149,16 @@ try {
     else if (message.method === "Network.responseReceived") evidence.requests.push({ path: new URL(message.params.response.url).pathname, status: message.params.response.status });
     else if (message.method === "Runtime.exceptionThrown") evidence.errors.push(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
     else if (message.method === "Runtime.consoleAPICalled") {
-      if (message.params.args[0]?.value === "WORKSHOP_OFFICIAL") { try { evidence.probe.push(JSON.parse(message.params.args[1].value)); } catch {} }
+      if (message.params.args[0]?.value === "WORKSHOP_OFFICIAL") { try {
+        const row = JSON.parse(message.params.args[1].value);
+        if (view === "storage" && row.phase === "storage-observation") row.receivedAt = Date.now();
+        evidence.probe.push(row);
+      } catch {} }
       else if (message.params.type === "error") evidence.errors.push(message.params.args.map(value => value.value ?? value.description ?? "").join(" "));
     }
   });
   const command = (method, params = {}) => new Promise((resolveCommand, reject) => {
+    assert.ok(["Network.enable", "Runtime.enable", "Page.enable", "Page.navigate", "Page.captureScreenshot", "Browser.close"].includes(method), "read-only render CDP method is not allowed");
     const id = ++seq;
     const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`render command deadline: ${method}`)); }, 30_000);
     pending.set(id, { resolve: result => { clearTimeout(timeout); resolveCommand(result); }, reject: error => { clearTimeout(timeout); reject(error); } });
@@ -122,26 +167,58 @@ try {
   await command("Network.enable"); await command("Runtime.enable"); await command("Page.enable");
   await command("Page.navigate", { url: `${webUrl}/workshop-official-${runId}.html` });
   const captured = new Set();
+  let storageCapturedPng;
   for (let elapsed = 0; elapsed < seconds; elapsed++) {
     await delay(1000);
     for (const ready of evidence.probe.filter(row => row.phase === "official-frame-ready" && !captured.has(row.job))) {
+      const before = view === "storage" ? latestStorageSnapshot(evidence.probe) : null;
+      if (view === "storage" && (!storageSnapshotEligible(before, fixture.characterId) || !freshStorageSnapshot(before) ||
+          !Number.isSafeInteger(ready.storageObservationTick) || before.tick < ready.storageObservationTick ||
+          evidence.errors.length || evidence.probe.some(row => row.phase === "official-probe-error"))) {
+        evidence.storageCaptureChecks.push({ accepted: false, phase: "before", reason: "storage scene is not freshly eligible", before });
+        throw new Error("storage screenshot precondition failed; capture refused");
+      }
       const image = await command("Page.captureScreenshot", { format: "png", clip: { x: 0, y: 0, width: 1000, height: 600, scale: 1 } });
-      const path = join(output, `${String(ready.job).padStart(2, "0")}-${ready.templateID}-${ready.dye ? "dyed" : "original"}-${ready.hair === 1 ? "B" : "A"}.png`);
+      if (view === "storage") {
+        const afterStart = evidence.probe.length;
+        const afterStartedAt = Date.now();
+        let after;
+        for (let attempt = 0; attempt < 20; ++attempt) {
+          await delay(100);
+          after = latestStorageSnapshot(evidence.probe.slice(afterStart));
+          if ((after?.reportedAt >= afterStartedAt) || evidence.errors.length || evidence.probe.some(row => row.phase === "official-probe-error")) break;
+        }
+        const accepted = sameStorageScene(before, after, fixture.characterId) && freshStorageSnapshot(after) &&
+          after.reportedAt >= afterStartedAt &&
+          evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error");
+        evidence.storageCaptureChecks.push({ accepted, phase: "after", reason: accepted ? "same original storage scene observed before and after capture" : "storage drift or missing fresh post-capture observation; screenshot skipped", before, after });
+        assert.ok(accepted, "storage screenshot drifted; screenshot skipped and refused");
+        storageCapturedPng = Buffer.from(image.data, "base64");
+      }
+      const path = join(output, view === "storage" ? "storage-frame.png" : `${String(ready.job).padStart(2, "0")}-${ready.templateID}-${ready.dye ? "dyed" : "original"}-${ready.hair === 1 ? "B" : "A"}.png`);
       writeFileSync(path, Buffer.from(image.data, "base64")); captured.add(ready.job);
       evidence.captures.push({ job: ready.job, templateID: ready.templateID, path, sha256: sha256(path) });
       writeFileSync(join(output, "evidence.json"), JSON.stringify(evidence, replacer, 2));
     }
-    if (evidence.probe.some(row => row.phase === "official-render-complete" || row.phase === "official-probe-error")) break;
+    if (evidence.probe.some(row => row.phase === "official-probe-error") ||
+        (view === "storage" ? captured.size === expectedJobs : evidence.probe.some(row => row.phase === "official-render-complete"))) break;
   }
-  const final = await command("Page.captureScreenshot", { format: "png" });
-  writeFileSync(join(output, "final.png"), Buffer.from(final.data, "base64"));
+  if (view === "storage") {
+    if (storageCapturedPng) writeFileSync(join(output, "final.png"), storageCapturedPng);
+  } else {
+    const final = await command("Page.captureScreenshot", { format: "png" });
+    writeFileSync(join(output, "final.png"), Buffer.from(final.data, "base64"));
+  }
   evidence.originalClientRenderCompleted = evidence.probe.some(row => row.phase === "official-render-complete" && row.jobs === expectedJobs && row.selfUnchanged);
   evidence.allJobsCaptured = captured.size === expectedJobs;
-  evidence.allLayersLoaded = evidence.probe.filter(row => row.phase === "official-frame-ready").length === expectedJobs && evidence.probe.filter(row => row.phase === "official-frame-ready").every(row => row.components.every(component => component.completed && component.allLayerLoadsSucceeded !== false));
+  evidence.allLayersLoaded = view === "storage" ? null : evidence.probe.filter(row => row.phase === "official-frame-ready").length === expectedJobs && evidence.probe.filter(row => row.phase === "official-frame-ready").every(row => row.components.every(component => component.completed && component.allLayerLoadsSucceeded !== false));
+  if (view === "storage") evidence.storageFrameObserved = evidence.storageCaptureChecks.some(row => row.phase === "after" && row.accepted);
   evidence.requiresVisualReview = true;
   await command("Browser.close"); await Promise.race([exited, delay(3000)]);
-  assert.ok(evidence.originalClientRenderCompleted && evidence.allJobsCaptured && evidence.allLayersLoaded, "original component rendering is incomplete; inspect exact private evidence");
-  console.log(JSON.stringify({ output, view, sex, templates: templates.length, captures: evidence.captures.length, originalClientRenderCompleted: true, gameplayAccepted: false, requiresVisualReview: true }));
+  assert.ok(evidence.originalClientRenderCompleted && evidence.allJobsCaptured &&
+    (view === "storage" ? evidence.storageFrameObserved && evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error") : evidence.allLayersLoaded), "original component rendering is incomplete; inspect exact private evidence");
+  console.log(JSON.stringify({ output, view, sex, templates: templates.length, captures: evidence.captures.length, originalClientRenderCompleted: true,
+    ...(view === "storage" ? { storageFrameObserved: true, storagePermissionAccepted: false, storageSaveAccepted: false } : {}), gameplayAccepted: false, requiresVisualReview: true }));
 } finally {
   socket?.close();
   if (child && child.exitCode === null && child.signalCode === null) child.kill();

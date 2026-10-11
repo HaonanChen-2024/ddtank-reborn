@@ -1,4 +1,5 @@
 package {
+  import flash.display.Bitmap;
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
   import flash.display.Loader;
@@ -17,7 +18,7 @@ package {
   import flash.utils.getQualifiedClassName;
   import flash.utils.Timer;
 
-  /** Original bag or passive hall view on an exact private fixture; no input or inventory commands. */
+  /** Original bag, hall or storage frame on an exact private fixture; no input or inventory commands. */
   [SWF(width="1000", height="600", frameRate="25", backgroundColor="#161822")]
   public class WorkshopBagViewProbe extends Sprite {
     private var client:Loader = new Loader();
@@ -28,6 +29,12 @@ package {
     private var ticks:int = 0;
     private var openedAt:int = 0;
     private var original:String;
+    private var storageWindow:DisplayObjectContainer;
+    private var storageCacheAble:Boolean;
+    private var storageSignature:String;
+    private var storageStableTicks:int = 0;
+    private var storageReadySent:Boolean = false;
+    private var storageMainAt:int = 0;
     public function WorkshopBagViewProbe() {
       if (stage) start(); else addEventListener(Event.ADDED_TO_STAGE, start);
     }
@@ -41,7 +48,11 @@ package {
       expectedUserID = int(loaderInfo.parameters.probeUserId);
       if (expectedUserID <= 0) throw new Error("exact private fixture required");
       if (loaderInfo.parameters.probeView) view = String(loaderInfo.parameters.probeView);
-      if (view != "bag" && view != "hall") throw new Error("probe view must be bag or hall");
+      if (view != "bag" && view != "hall" && view != "storage") throw new Error("probe view must be bag, hall or storage");
+      if (view == "storage" && (Number(loaderInfo.parameters.probeUserId) != expectedUserID ||
+          expectedUserID == 6 || expectedUserID == 11 || (expectedUserID != 9 && expectedUserID != 10))) {
+        throw new Error("storage requires exact private fixture 9 or 10; users 6 and 11 are excluded");
+      }
       var vars:URLVariables = new URLVariables();
       for each (var key:String in ["user", "key", "config"]) vars[key] = loaderInfo.parameters[key];
       client.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event):void {
@@ -124,10 +135,123 @@ package {
       }
       return "";
     }
+    private function storageWindows(container:DisplayObjectContainer, result:Array):void {
+      for (var i:int = 0; i < container.numChildren; ++i) {
+        var child:DisplayObject = container.getChildAt(i);
+        if (getQualifiedClassName(child) == "hall::SaveFileWidow") result.push(child);
+        else if (child is DisplayObjectContainer) storageWindows(child as DisplayObjectContainer, result);
+      }
+    }
+    private function storageParts(container:DisplayObjectContainer, result:Array, shown:Boolean = true):void {
+      for (var i:int = 0; i < container.numChildren; ++i) {
+        var child:DisplayObject = container.getChildAt(i);
+        var visible:Boolean = shown && child.visible && child.alpha > 0;
+        var kind:String = getQualifiedClassName(child);
+        var role:String = "";
+        if (child is Bitmap && Bitmap(child).bitmapData) {
+          var bitmap:Bitmap = child as Bitmap;
+          if (bitmap.bitmapData.width == 588 && bitmap.bitmapData.height == 339) role = "body";
+          if (bitmap.bitmapData.width == 88 && bitmap.bitmapData.height == 28) role = "ok-caption";
+        } else if (kind == "com.pickgliss.ui.image::Image") role = "npc";
+        if (role) {
+          var bounds:Rectangle = child.getBounds(stage);
+          result.push({role:role, kind:kind, completed:visible && bounds.width > 0 && bounds.height > 0,
+            x:bounds.x, y:bounds.y, width:bounds.width, height:bounds.height});
+        }
+        if (child is DisplayObjectContainer) storageParts(child as DisplayObjectContainer, result, visible);
+      }
+    }
+    private function observeStorage():void {
+      var states:Object = definition("ddt.manager.StateManager");
+      if (!states || String(states.currentStateType) != "main") {
+        if (openedAt) throw new Error("storage main state drifted");
+        storageMainAt = 0;
+        return;
+      }
+      if (!storageMainAt) storageMainAt = ticks;
+      var players:Object = definition("ddt.manager.PlayerManager");
+      var saves:Object = definition("com.pickgliss.loader.LoaderSavingManager");
+      var layers:Object = definition("com.pickgliss.ui.LayerManager");
+      var factory:Object = definition("com.pickgliss.ui.ComponentFactory");
+      if (!players || !saves || !layers || !factory || !definition("hall.SaveFileWidow")) {
+        throw new Error("original storage player/cache/layer/factory/window definition unavailable");
+      }
+      var self:Object = players.Instance.Self;
+      if (self.ID != expectedUserID || (self.ID != 9 && self.ID != 10) || self.ID == 6 || self.ID == 11) {
+        throw new Error("storage player differs from exact private fixture 9 or 10");
+      }
+      var cacheValue:* = saves.cacheAble;
+      if (!(cacheValue is Boolean)) throw new Error("original storage cacheAble getter is unreadable");
+      var top:DisplayObjectContainer = layers.Instance.getLayerByType(layers.GAME_TOP_LAYER) as DisplayObjectContainer;
+      if (!top) throw new Error("original storage top layer unavailable");
+      var windows:Array = [];
+      storageWindows(top, windows);
+      if (windows.length > 1) throw new Error("multiple original storage windows; refusing ambiguous capture");
+      if (!openedAt) {
+        // Allow the normal hall fadingComplete to create its own optional window before requesting another.
+        if (!windows.length && ticks - storageMainAt < 16) return;
+        original = fingerprint(self); storageCacheAble = Boolean(cacheValue); openedAt = ticks;
+        if (windows.length == 1) {
+          storageWindow = windows[0] as DisplayObjectContainer;
+          report({phase:"original-storage-reused", playerID:self.ID, publicMethods:[]});
+        } else {
+          // The original HallStateView uses this factory and public show(), including the original Frame styles.
+          storageWindow = factory.Instance.creatComponentByStylename("hall.SaveFileWidow") as DisplayObjectContainer;
+          if (!storageWindow) throw new Error("original storage factory returned no display container");
+          Object(storageWindow).show();
+          report({phase:"original-storage-requested", playerID:self.ID,
+            publicMethods:["ComponentFactory.creatComponentByStylename(hall.SaveFileWidow)", "SaveFileWidow.show"]});
+        }
+        return;
+      }
+      if (fingerprint(self) != original) throw new Error("Self changed during passive storage rendering");
+      if (Boolean(cacheValue) != storageCacheAble) throw new Error("original storage cacheAble drifted; no permission acceptance");
+      if (windows.length != 1 || windows[0] !== storageWindow || storageWindow.stage !== stage) {
+        throw new Error("original storage window disappeared or was replaced");
+      }
+      var components:Array = [];
+      var frameBounds:Rectangle = storageWindow.getBounds(stage);
+      var frameVisible:Boolean = true;
+      for (var ancestor:DisplayObject = storageWindow; ancestor; ancestor = ancestor.parent) {
+        if (!ancestor.visible || ancestor.alpha <= 0) frameVisible = false;
+      }
+      var frameID:Number = Number(Object(storageWindow).id);
+      if (!isFinite(frameID) || frameID <= 0 || frameID != int(frameID)) throw new Error("original storage public frame id unreadable");
+      components.push({role:"frame", kind:getQualifiedClassName(storageWindow),
+        completed:frameVisible && storageWindow.width == 702 && storageWindow.height == 439 &&
+          frameBounds.x >= 0 && frameBounds.y >= 0 && frameBounds.right <= stage.stageWidth && frameBounds.bottom <= stage.stageHeight,
+        x:frameBounds.x, y:frameBounds.y, width:frameBounds.width, height:frameBounds.height});
+      storageParts(storageWindow, components, frameVisible);
+      var roles:Object = {frame:0, body:0, npc:0, "ok-caption":0};
+      var complete:Boolean = true;
+      for each (var part:Object in components) {
+        roles[part.role] = int(roles[part.role]) + 1;
+        if (!part.completed) complete = false;
+      }
+      for each (var count:int in roles) if (count != 1) complete = false;
+      var signature:String = JSON.stringify(components);
+      if (storageReadySent && (!complete || signature != storageSignature)) throw new Error("original storage display geometry drifted after readiness");
+      storageStableTicks = complete && signature == storageSignature ? storageStableTicks + 1 : 0;
+      storageSignature = signature;
+      var ready:Boolean = complete && ticks - openedAt >= 16 && storageStableTicks >= 3;
+      var snapshot:Object = {phase:"storage-observation", tick:ticks, ready:ready, state:String(states.currentStateType),
+        playerID:self.ID, selfUnchanged:true, selfFingerprint:fingerprint(self), cacheAble:Boolean(cacheValue),
+        cachePermissionUnchanged:true, frameID:frameID, frameSignature:signature, components:components};
+      report(snapshot);
+      if (ready && !storageReadySent) {
+        storageReadySent = true;
+        report({phase:"official-frame-ready", job:0, templateID:0, dye:false, hair:0,
+          components:components, texts:[], checks:[], selfUnchanged:true, storageObservationTick:ticks,
+          scope:"original complete storage Frame display geometry; NPC pixels and Chinese text require visual review; no input, permission or save acceptance"});
+        report({phase:"official-render-complete", jobs:1, selfUnchanged:true});
+        // Keep passive snapshots running so the screenshot can require a fresh observation after capture.
+      }
+    }
     private function tick(event:TimerEvent):void {
       ++ticks;
       try {
         if (ticks > 240) throw new Error("original " + view + " rendering deadline");
+        if (view == "storage") { observeStorage(); return; }
         var states:Object = definition("ddt.manager.StateManager");
         if (!states || String(states.currentStateType) != "main") return;
         var players:Object = definition("ddt.manager.PlayerManager");
