@@ -1,12 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { sql } from "drizzle-orm";
-import { game } from "@ddt/db";
+import { eq, sql } from "drizzle-orm";
+import { game, player as playerSchema, seedDatabase } from "@ddt/db";
 import type { GameServer } from "../src/server.js";
 import type { ServerContext } from "../src/session/context.js";
 import { EventScheduler, nextStart, occurrenceAt, rateOf, windowsAt, type ScheduledEvent } from "../src/game/scheduler.js";
-import { claimOnce } from "../src/game/events.js";
+import { claimOnce, EventData } from "../src/game/events.js";
+import type { GamePlayer } from "../src/game/player.js";
 import { eventsRuntime, weeklyReset, worldBossDamage } from "../src/handlers/events.js";
-import { loggedIn, sharedDb, startServer } from "./helpers.js";
+import { quitPlayer } from "../src/session/login.js";
+import { createCharacter, FakeClient, loggedIn, sharedDb, startServer } from "./helpers.js";
 
 const ev = (o: Partial<ScheduledEvent>): ScheduledEvent => ({
   id: 1, kind: "worldboss", title: "", enabled: true, weekdays: "0,1,2,3,4,5,6", startTime: "12:00", durationMin: 30,
@@ -62,9 +64,11 @@ describe("EventScheduler windows", () => {
 let server: GameServer;
 let ctx: ServerContext;
 beforeAll(async () => {
+  // sharedDb is always pglite:memory; never seed or truncate a configured runtime database.
+  const h = await sharedDb();
+  await seedDatabase(h, { only: ["User_Box", "LoadUserBox", "Shop_Goods_Box"] });
   server = await startServer();
   ctx = (server as unknown as { ctx: ServerContext }).ctx;
-  const h = await sharedDb();
   await h.db.delete(game.Daily_Award);
   await h.db.insert(game.Daily_Award).values([
     { ID: 9001, Type: 1, TemplateID: -100, Count: 500, ValidDate: 0, IsBinds: true, Sex: 0, AwardDays: 3, GetWay: 0 },
@@ -139,33 +143,6 @@ describe("event claims (idempotency)", () => {
     c.close();
   });
 
-  it("53 time box: server-side online minutes, once per box", async () => {
-    const h = await sharedDb();
-    await h.db.insert(game.LoadUserBox).values({ ID: 99901, Type: 0, Level: 100, Condition: 15, TemplateID: 11023 } as never).onConflictDoNothing();
-    await eventsRuntime(ctx).reload();
-    const { c, ch: p } = await loggedIn(server, { grade: 10 });
-    const box = (m: number) => c.out(53, (o) => { o.writeInt(1); o.writeInt(0); void m; });
-    let m = c.mark();
-    box(0); // too early: 0 minutes online
-    let r = await c.code(53, undefined, m);
-    r.pkt.readInt(); r.pkt.readInt();
-    expect(r.pkt.readBoolean()).toBe(false);
-    const real = ctx.now;
-    ctx.now = () => new Date(Date.now() + 16 * 60_000);
-    try {
-      m = c.mark();
-      box(0);
-      r = await c.code(53, undefined, m);
-      r.pkt.readInt(); r.pkt.readInt();
-      expect(r.pkt.readBoolean()).toBe(true);
-      expect(r.pkt.readInt()).toBe(15);
-      expect(ctx.world.get(p.userId)!.info.BoxProgression).toBe(15);
-    } finally {
-      ctx.now = real;
-    }
-    c.close();
-  });
-
   it("weekly reset runs once per window; world boss ranking rewards once", async () => {
     const h = await sharedDb();
     expect(await weeklyReset(ctx, "test-week")).toBe(true);
@@ -187,5 +164,159 @@ describe("event claims (idempotency)", () => {
     expect(rt.boss.window).toBeNull();
     expect(gp.info.GiftToken - g0).toBe(50);
     c.close();
+  });
+});
+
+const onlineBoxes = [
+  { ID: 1, Condition: 15, TemplateID: 1120090, rewards: [11001, 11005, 11009, 11013] },
+  { ID: 2, Condition: 40, TemplateID: 1120091, rewards: [11002, 11006, 11010, 11014] },
+  { ID: 3, Condition: 60, TemplateID: 1120092, rewards: [11003, 11007, 11011, 11015] },
+  { ID: 4, Condition: 75, TemplateID: 1120093, rewards: [11233] },
+];
+const onlineRewardIds = new Set(onlineBoxes.flatMap((b) => b.rewards));
+const rewardSnapshot = (p: GamePlayer) => p.allBags().flatMap((b) => b.getItems()).filter((i) => onlineRewardIds.has(i.TemplateID))
+  .map((i) => ({ templateId: i.TemplateID, count: i.Count, bound: i.IsBinds, days: i.ValidDate, strengthen: i.StrengthenLevel,
+    compose: [i.AttackCompose, i.DefendCompose, i.AgilityCompose, i.LuckCompose] }))
+  .sort((a, b) => a.templateId - b.templateId);
+const expectedRewards = (tiers: number, count = 1) => onlineBoxes.slice(0, tiers).flatMap((b) => b.rewards)
+  .map((templateId) => ({ templateId, count, bound: true, days: 0, strengthen: 0, compose: [0, 0, 0, 0] }))
+  .sort((a, b) => a.templateId - b.templateId);
+
+async function requestOnlineBox(c: FakeClient) {
+  const from = c.mark();
+  c.out(53, (o) => { o.writeInt(1); o.writeInt(0); });
+  const r = await c.code(53, undefined, from);
+  expect(r.pkt.readInt()).toBe(1);
+  expect(r.pkt.readInt()).toBe(0);
+  return { ok: r.pkt.readBoolean(), progression: r.pkt.readInt() };
+}
+
+async function timeBoxLogin(grade: number) {
+  const h = await sharedDb(), ch = await createCharacter(h, { grade });
+  // The schema defaults ForbidDate to wall-clock now; fixed test clocks must explicitly start unbanned.
+  await h.db.update(playerSchema.Sys_Users_Detail).set({ ForbidDate: new Date("2000-01-01T00:00:00Z") }).where(eq(playerSchema.Sys_Users_Detail.UserID, ch.userId));
+  const c = FakeClient.memory(server);
+  c.login(ch.user, ch.pass); await c.code(95);
+  return { c, ch, player: () => ctx.world.get(ch.userId)! };
+}
+
+describe("online boxes from the committed User_Box seed", () => {
+  it("loads the four original online identities in ID order while preserving every level/VIP row", async () => {
+    const h = await sharedDb();
+    const legacy = (await h.db.select().from(game.LoadUserBox)).sort((a, b) => a.ID - b.ID);
+    const original = (await h.db.select().from(game.User_Box)).sort((a, b) => a.ID - b.ID);
+    expect(legacy.filter((b) => b.Type === 0).map((b) => b.Condition)).toEqual([15, 40, 60, 60]);
+    // Reinsert the actual seed rows backwards to exercise the loader's ordering, only in this memory DB.
+    const online = original.filter((b) => b.Type === 0);
+    await h.db.delete(game.User_Box).where(eq(game.User_Box.Type, 0));
+    await h.db.insert(game.User_Box).values([...online].reverse());
+    const data = await new EventData().load(h.db);
+    expect(data.userBox.filter((b) => b.Type === 0)).toEqual(onlineBoxes.map(({ ID, Condition, TemplateID }) => ({ ID, Type: 0, Level: 60, Condition, TemplateID })));
+    expect(data.userBox.filter((b) => b.Type !== 0)).toEqual(legacy.filter((b) => b.Type !== 0));
+    expect(data.userBox.map((b) => b.ID)).toEqual(data.userBox.map((b) => b.ID).sort((a, b) => a - b));
+    for (const box of onlineBoxes) {
+      const pool = ctx.templates.itemBoxes.get(box.TemplateID)!;
+      expect(pool.map((r) => r.TemplateId).sort((a, b) => a - b)).toEqual(box.rewards);
+      for (const row of pool) {
+        expect(ctx.templates.findItem(row.TemplateId)).toBeDefined();
+        expect([row.IsSelect, row.IsBind, row.ItemCount, row.ItemValid, row.StrengthenLevel]).toEqual([true, true, 1, 0, 0]);
+        expect([row.AttackCompose, row.DefendCompose, row.AgilityCompose, row.LuckCompose]).toEqual([0, 0, 0, 0]);
+      }
+    }
+    // Loading templates never rewrites either source table.
+    expect((await h.db.select().from(game.LoadUserBox)).sort((a, b) => a.ID - b.ID)).toEqual(legacy);
+    expect((await h.db.select().from(game.User_Box)).sort((a, b) => a.ID - b.ID)).toEqual(original);
+  });
+
+  it("rejects early reports, grants all four exact pools, rejects a fifth, saves across relogin and resets next day", async () => {
+    const realNow = ctx.now;
+    let now = new Date("2026-10-12T00:00:00Z");
+    ctx.now = () => new Date(now);
+    const logged = await timeBoxLogin(9);
+    let c = logged.c;
+    const player = () => ctx.world.get(logged.ch.userId)!;
+    const relogin = async () => {
+      await quitPlayer(ctx, player()); c.close();
+      c = FakeClient.memory(server); c.login(logged.ch.user, logged.ch.pass); await c.code(95);
+    };
+    try {
+      const money = [player().info.Gold, player().info.Money, player().info.GiftToken, player().info.GP];
+      c.out(53, (o) => { o.writeInt(0); o.writeInt(999999); }); // client minutes never earn a box
+      expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: 0 });
+      expect(rewardSnapshot(player())).toEqual([]);
+      for (const [index, box] of onlineBoxes.entries()) {
+        now = new Date(now.getTime() + (box.Condition - 1) * 60_000);
+        expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: index ? onlineBoxes[index - 1].Condition : 0 });
+        expect(rewardSnapshot(player())).toEqual(expectedRewards(index));
+        now = new Date(now.getTime() + 60_000);
+        expect(await requestOnlineBox(c)).toEqual({ ok: true, progression: box.Condition });
+        expect(rewardSnapshot(player())).toEqual(expectedRewards(index + 1));
+        expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: box.Condition });
+      }
+      // These are waits since login/last claim: 15+40+60+75 minutes, not cumulative 75 minutes.
+      expect(now.toISOString()).toBe("2026-10-12T03:10:00.000Z");
+      now = new Date(now.getTime() + 120 * 60_000);
+      expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: 75 });
+      const saved = rewardSnapshot(player());
+      await relogin();
+      expect(player().info.BoxProgression).toBe(75);
+      expect(rewardSnapshot(player())).toEqual(saved);
+      expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: 75 });
+      expect([player().info.Gold, player().info.Money, player().info.GiftToken, player().info.GP]).toEqual(money);
+      now = new Date("2026-10-13T00:00:00Z");
+      await relogin();
+      expect(player().info.BoxProgression).toBe(0);
+      expect(await requestOnlineBox(c)).toEqual({ ok: false, progression: 0 });
+      now = new Date(now.getTime() + 15 * 60_000);
+      expect(await requestOnlineBox(c)).toEqual({ ok: true, progression: 15 });
+      const expected = expectedRewards(4).map((r) => ({ ...r, count: onlineBoxes[0].rewards.includes(r.templateId) ? 2 : 1 }));
+      expect(rewardSnapshot(player())).toEqual(expected);
+    } finally {
+      if (ctx.world.get(logged.ch.userId)) await quitPlayer(ctx, player());
+      c.close(); ctx.now = realNow;
+    }
+  });
+
+  it("keeps characters independent and a burst of duplicate packets delivers the next tier only once", async () => {
+    const realNow = ctx.now;
+    let now = new Date("2026-10-14T00:00:00Z"); ctx.now = () => new Date(now);
+    const a = await timeBoxLogin(9), b = await timeBoxLogin(9);
+    try {
+      now = new Date(now.getTime() + 15 * 60_000);
+      expect(await requestOnlineBox(a.c)).toEqual({ ok: true, progression: 15 });
+      expect(rewardSnapshot(b.player())).toEqual([]);
+      expect(b.player().info.BoxProgression).toBe(0);
+      expect(await requestOnlineBox(b.c)).toEqual({ ok: true, progression: 15 });
+      expect(rewardSnapshot(b.player())).toEqual(expectedRewards(1));
+      now = new Date(now.getTime() + 40 * 60_000);
+      let from = a.c.mark();
+      for (let i = 0; i < 8; i++) a.c.out(53, (o) => { o.writeInt(1); o.writeInt(0); });
+      const accepted: boolean[] = [];
+      for (let i = 0; i < 8; i++) {
+        const r = await a.c.code(53, undefined, from); from = a.c.received.indexOf(r) + 1;
+        expect(r.pkt.readInt()).toBe(1); expect(r.pkt.readInt()).toBe(0);
+        accepted.push(r.pkt.readBoolean()); expect(r.pkt.readInt()).toBe(40);
+      }
+      expect(accepted.filter(Boolean)).toHaveLength(1);
+      expect(rewardSnapshot(a.player())).toEqual(expectedRewards(2));
+      expect(b.player().info.BoxProgression).toBe(15);
+      expect(rewardSnapshot(b.player())).toEqual(expectedRewards(1));
+    } finally {
+      for (const logged of [a, b]) { if (logged.player()) await quitPlayer(ctx, logged.player()); logged.c.close(); }
+      ctx.now = realNow;
+    }
+  });
+
+  it.each([1, 60, 61])("keeps the original online level boundary at grade %i", async (grade) => {
+    const realNow = ctx.now;
+    let now = new Date("2026-10-15T00:00:00Z"); ctx.now = () => new Date(now);
+    const logged = await timeBoxLogin(grade);
+    try {
+      now = new Date(now.getTime() + 15 * 60_000);
+      expect(await requestOnlineBox(logged.c)).toEqual({ ok: grade <= 60, progression: grade <= 60 ? 15 : 0 });
+      expect(rewardSnapshot(logged.player())).toEqual(expectedRewards(grade <= 60 ? 1 : 0));
+    } finally {
+      if (logged.player()) await quitPlayer(ctx, logged.player()); logged.c.close(); ctx.now = realNow;
+    }
   });
 });

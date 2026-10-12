@@ -1,0 +1,42 @@
+{
+  "owner": "ddtank-workshop/local-festival",
+  "version": 1,
+  "Active": {
+    "ActiveID": 100002,
+    "Title": "本地秋日庆典",
+    "Description": "本地秋日限时活动，每个角色在活动期内可免费领取一次。",
+    "Content": "点击领取后，请到邮件中收取经验药水，再在背包中使用。此活动与启程补给分别计次，升级和副本等级要求沿用原游戏规则。",
+    "AwardContent": "经验药水（10000经验）×1，通过邮件发放。",
+    "HasKey": 3,
+    "StartDate": "2026-10-11T16:00:00.000Z",
+    "EndDate": "2026-10-18T15:59:59.999Z",
+    "IsOnly": 1,
+    "Type": 0,
+    "ActionTimeContent": "2026-10-12 00:00 至 10-18 23:59（北京时间）",
+    "IsAdvance": false,
+    "GoodsExchangeTypes": "",
+    "GoodsExchangeNum": "",
+    "limitType": "",
+    "limitValue": "",
+    "IsShow": false,
+    "ActiveType": 0,
+    "IconID": 0,
+    "CanCreateCode": false
+  },
+  "Award": {
+    "ID": 100002,
+    "ActiveID": 100002,
+    "ItemID": 11904,
+    "Count": 1,
+    "ValidDate": 0,
+    "StrengthenLevel": 0,
+    "AttackCompose": 0,
+    "DefendCompose": 0,
+    "LuckCompose": 0,
+    "AgilityCompose": 0,
+    "Gold": 0,
+    "Money": 0,
+    "Sex": 0,
+    "Mark": 0
+  }
+}

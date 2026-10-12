@@ -9,6 +9,7 @@ import { gunzipSync } from "node:zlib";
 import { createDb, game, migrateDb, seedDatabase, type DbHandle } from "../packages/db/src/index.js";
 import { q, q1 } from "../apps/api/src/lib/db.js";
 import { readStarterConfig, readStarterSession, runStarterActivity, type StarterBinding } from "./workshop-starter-activity.js";
+import { runFestivalActivity } from "./workshop-festival-activity.js";
 
 const { sql } = createRequire(new URL("../packages/db/package.json", import.meta.url))("drizzle-orm") as typeof import("../packages/db/node_modules/drizzle-orm/index.js");
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), config = readStarterConfig();
@@ -86,6 +87,44 @@ test("two concurrent installers add one owned pair and the follower inserts noth
   const installed = await rows();
   assert.deepEqual(installed.active.filter(row => row.ActiveID !== 100001), before.active);
   assert.deepEqual(installed.awards.filter(row => row.ActiveID !== 100001), before.awards);
+});
+
+test("the exactly owned festival coexists before and after starter install without resetting claims", async t => {
+  const f = fixture(t), festivalJournal = join(f.path, `local-festival-${binding.databaseName}.json`);
+  await runFestivalActivity(h, { command: "install", binding, journalPath: festivalJournal });
+  assert.equal((await f.run()).installed, false);
+  assert.equal((await f.run("install")).insertedActive, 1);
+  await h.db.execute(sql`INSERT INTO app."EventClaims" ("UserID","Kind","Key") VALUES (2233,'active','100001'),(2233,'active','100002')`);
+  const before = await rows();
+  assert.equal((await f.run()).installed, true); assert.equal((await f.run("install")).insertedActive, 0);
+  assert.deepEqual(await rows(), before);
+});
+
+test("festival ownership requires the full matching journal and both exact rows", async t => {
+  const f = fixture(t), festivalJournal = join(f.path, `local-festival-${binding.databaseName}.json`);
+  await f.run("install");
+  await runFestivalActivity(h, { command: "install", binding, journalPath: festivalJournal });
+  assert.equal((await f.run()).installed, true);
+  const intent = readFileSync(festivalJournal), before = await rows();
+  writeFileSync(festivalJournal, JSON.stringify({ ...JSON.parse(intent.toString("utf8")), binding: { ...binding, databaseName: "another" } }));
+  await assert.rejects(() => f.run("install"), /festival ownership/); assert.deepEqual(await rows(), before);
+  writeFileSync(festivalJournal, intent);
+  await h.db.execute(sql`UPDATE game."Active_Award" SET "Count"=2 WHERE "ID"=100002`);
+  const changed = await rows(); await assert.rejects(() => f.run(), /festival reward differs/); assert.deepEqual(await rows(), changed);
+  await h.db.execute(sql`DELETE FROM game."Active_Award" WHERE "ID"=100002`);
+  const partial = await rows(); await assert.rejects(() => f.run(), /festival reward differs/); assert.deepEqual(await rows(), partial);
+});
+
+test("an identical festival with no journal and third-party edits alongside an owned festival stay rejected", async t => {
+  const f = fixture(t), journalPath = join(f.path, "unrecognized-journal.json");
+  await runFestivalActivity(h, { command: "install", binding, journalPath });
+  const before = await rows(); await assert.rejects(() => f.run(), /lacks its ownership journal/); assert.deepEqual(await rows(), before);
+  writeFileSync(join(f.path, `local-festival-${binding.databaseName}.json`), readFileSync(journalPath));
+  await h.db.execute(sql`UPDATE game."Active" SET "Content"='Third party edit' WHERE "ActiveID"=1`);
+  const changed = await rows(); await assert.rejects(() => f.run("install"), /original\/shared activity tables changed/); assert.deepEqual(await rows(), changed);
+  await h.db.execute(sql`UPDATE game."Active" SET "Content"=${before.active.find(row => row.ActiveID === 1)!.Content as string | null} WHERE "ActiveID"=1`);
+  await h.db.execute(sql`INSERT INTO game."Active" ("ActiveID","Title") VALUES (778899,'Third party event')`);
+  const extra = await rows(); await assert.rejects(() => f.run(), /original\/shared activity tables changed/); assert.deepEqual(await rows(), extra);
 });
 
 test("fresh installation refuses collisions in each of the four independent tables", async t => {

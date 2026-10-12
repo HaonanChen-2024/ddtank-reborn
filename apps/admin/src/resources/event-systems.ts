@@ -113,11 +113,33 @@ export const eventCodes = defineResource({
   ],
 });
 
+export const onlineBoxes = defineResource({
+  name: "online-box",
+  table: 'game."User_Box"',
+  label: { "zh-CN": "在线宝箱（只读）", "pt-BR": "Caixas online (somente leitura)", en: "Online boxes (read only)" },
+  singular: { "zh-CN": "在线宝箱", "pt-BR": "caixa", en: "box" },
+  description: "在线奖励读取 User_Box 的 Type 0。原客户端固定四档等待时间为 15/40/60/75 分钟，暂不支持管理页修改。",
+  icon: Timer,
+  group: "content",
+  hidden: true,
+  idField: "ID",
+  defaultSort: "ID",
+  capabilities: { create: false, update: false, delete: false },
+  fields: [
+    { name: "ID", label: "档位 ID", type: "number", list: true, sortable: true },
+    { name: "Type", label: "类型", type: "select", list: true, options: [{ value: 0, label: "在线宝箱" }] },
+    { name: "Level", label: "服务端等级上限", type: "number", list: true },
+    { name: "Condition", label: "本档等待时间（分钟）", type: "number", list: true, sortable: true },
+    { name: "TemplateID", label: "奖励箱 TemplateID", type: "number", list: true },
+  ],
+});
+
 export const timeBoxes = defineResource({
   name: "time-box",
   table: 'game."LoadUserBox"',
-  label: { "pt-BR": "Caixas de tempo/nível", en: "Time / level boxes" },
+  label: { "zh-CN": "等级/VIP与旧礼包数据", "pt-BR": "Caixas de nível/VIP e dados legados", en: "Level / VIP and legacy boxes" },
   singular: { "pt-BR": "caixa", en: "box" },
+  description: "LoadUserBox 继续提供等级和 VIP 礼包；其中旧 Type 0 数据保留兼容，但游戏在线宝箱已不再读取。",
   icon: Timer,
   group: "content",
   hidden: true,
@@ -125,7 +147,7 @@ export const timeBoxes = defineResource({
   defaultSort: "ID",
   fields: [
     { name: "ID", label: "ID", type: "number", required: true, list: true, form: "create" },
-    { name: "Type", label: "Tipo", type: "select", list: true, options: [{ value: 0, label: "Tempo online" }, { value: 1, label: "Nível" }, { value: 2, label: "VIP diário" }] },
+    { name: "Type", label: "类型", type: "select", list: true, options: [{ value: 0, label: "旧在线数据（游戏不读取）" }, { value: 1, label: "等级礼包" }, { value: 2, label: "VIP 每日礼包" }] },
     { name: "Level", label: "Nível (máx. / alvo / VIP)", type: "number", list: true },
     { name: "Condition", label: "Condição (min online / sexo)", type: "number", list: true },
     { name: "TemplateID", label: "Caixa (TemplateID)", type: "number", list: true },

@@ -3,7 +3,11 @@
  * through /api/admin/:resource. Composite keys are joined with "~" in URL ids.
  */
 import { app, game, player, Accounts } from "@ddt/db";
+import { and, asc, count, desc, eq, getTableColumns, or } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
+import type { FastifyInstance } from "fastify";
+import type { AppCtx } from "../context.js";
+import type { requireAdmin } from "./auth.js";
 
 export interface ResourceDef {
   table: PgTable;
@@ -44,6 +48,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
   "event-codes": { table: player.Active_Number, pk: ["AwardID"] },
   "login-award": { table: game.Login_Award_Item_Template, pk: ["ID"] },
   "time-box": { table: game.LoadUserBox, pk: ["ID"] },
+  "online-box": { table: game.User_Box, pk: ["ID"], readOnly: true },
   "event-awards": { table: game.Active_Award, pk: ["ID"] },
   "event-reward-info": { table: game.Event_Reward_Info, pk: ["ActivityType", "SubActivityType"] },
   "event-reward-goods": { table: game.Event_Reward_Goods, pk: ["ActivityType", "SubActivityType", "TemplateId"] },
@@ -67,3 +72,32 @@ export const RESOURCES: Record<string, ResourceDef> = {
   logs: { table: app.Logs, pk: ["id"], readOnly: true },
   "mail-broadcasts": { table: app.MailBroadcasts, pk: ["id"], readOnly: true },
 };
+
+/** Online rewards use User_Box Type 0; LoadUserBox remains the legacy writable resource. */
+export function registerOnlineBoxReadRoutes(f: FastifyInstance, ctx: AppCtx, guard: ReturnType<typeof requireAdmin>) {
+  const table = game.User_Box;
+  const columns = getTableColumns(table);
+  f.get<{ Querystring: { q?: string; page?: string; pageSize?: string; sort?: string } }>("/api/admin/online-box", { preHandler: guard }, async (req) => {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const pageSize = Math.min(500, Math.max(1, Number(req.query.pageSize) || 20));
+    const needle = (req.query.q ?? "").trim();
+    const search = /^-?\d+$/.test(needle) ? or(...Object.values(columns).map((column) => eq(column, Number(needle)))) : undefined;
+    const where = and(eq(table.Type, 0), search);
+    const sort = req.query.sort ?? "ID";
+    const field = sort.replace(/^-/, "");
+    const column = Object.hasOwn(columns, field) ? columns[field as keyof typeof columns] : table.ID;
+    const order = [sort.startsWith("-") ? desc(column) : asc(column)];
+    if (column !== table.ID) order.push(asc(table.ID));
+    const [total] = await ctx.h.db.select({ n: count() }).from(table).where(where);
+    const items = await ctx.h.db.select().from(table).where(where).orderBy(...order).limit(pageSize).offset((page - 1) * pageSize);
+    return { items, total: Number(total?.n ?? 0), page, pageSize };
+  });
+  f.get<{ Params: { id: string } }>("/api/admin/online-box/:id", { preHandler: guard }, async (req, reply) => {
+    const id = Number(req.params.id);
+    if (!/^-?\d+$/.test(req.params.id) || !Number.isSafeInteger(id) || id < -2147483648 || id > 2147483647) {
+      return reply.code(404).send({ message: "Not found" });
+    }
+    const [row] = await ctx.h.db.select().from(table).where(and(eq(table.Type, 0), eq(table.ID, id))).limit(1);
+    return row ?? reply.code(404).send({ message: "Not found" });
+  });
+}

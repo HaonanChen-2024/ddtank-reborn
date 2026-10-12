@@ -9,7 +9,7 @@ import { q } from "../lib/db.js";
 import { wallNow } from "../lib/flash-xml.js";
 import { safeKey } from "../lib/storage.js";
 import { checkWardrobe } from "../lib/wardrobe.js";
-import { RESOURCES, type ResourceDef } from "./admin-resources.js";
+import { registerOnlineBoxReadRoutes, RESOURCES, type ResourceDef } from "./admin-resources.js";
 import { requireAdmin, userOf } from "./auth.js";
 import { gameInternal, gameInternalPost, setting } from "./public.js";
 
@@ -131,6 +131,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   }
 
   const guard = requireAdmin(ctx);
+  registerOnlineBoxReadRoutes(f, ctx, guard);
   const actor = (req: FastifyRequest) => userOf(req)?.name ?? null;
 
   // ---- specific endpoints (registered before the generic :resource routes) ----

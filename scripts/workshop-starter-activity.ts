@@ -104,6 +104,21 @@ export async function runStarterActivity(h: DbHandle, options: {
     assert.equal(keys.length, 4); for (const key of keys) assert.deepEqual(key.columns, expectedKeys.get(key.table), "activity tables have unknown uniqueness constraints");
     const journal = readJournal(journalPath);
     const active = await q<Row>(th, sql`SELECT * FROM game."Active"`), awards = await q<Row>(th, sql`SELECT * FROM game."Active_Award"`);
+    // This one separately owned activity may coexist with the immutable seed baseline. Never accept
+    // arbitrary new rows, or a prepared journal alone: the config, binding and both full DB rows must match.
+    let ownedFestivalId: number | null = null;
+    if (active.some(row => row.ActiveID === 100002) || awards.some(row => row.ActiveID === 100002 || row.ID === 100002)) {
+      // Deferred to avoid a static cycle: the festival CLI reuses readStarterSession from this module.
+      const { readFestivalConfig, planFestivalActivity } = await import("./workshop-festival-activity.js");
+      const festival = planFestivalActivity(readFestivalConfig(join(options.repoRoot ?? repo, "research/activities/local-festival.json")));
+      const festivalJournalPath = join(dirname(journalPath), `local-festival-${binding.databaseName}.json`);
+      assert.ok(existsSync(festivalJournalPath), "coexisting festival lacks its ownership journal");
+      const festivalJournal = JSON.parse(readFileSync(festivalJournalPath, "utf8"));
+      assert.deepEqual(festivalJournal, { phase: "prepared", configSha256: festival.configSha256, binding, config: festival.config }, "coexisting festival ownership or configuration differs");
+      assert.deepEqual(active.filter(row => row.ActiveID === festival.activeId).map(dates), [festival.config.Active], "coexisting festival activity differs");
+      assert.deepEqual(awards.filter(row => row.ActiveID === festival.activeId || row.ID === festival.awardId), [festival.config.Award], "coexisting festival reward differs");
+      ownedFestivalId = festival.activeId;
+    }
     const claims = await q1<{ count: number }>(th, sql`SELECT count(*)::int AS count FROM app."EventClaims" WHERE "Kind"='active' AND "Key"=${String(activeId)}`);
     const codes = await q1<{ count: number }>(th, sql`SELECT count(*)::int AS count FROM player."Active_Number" WHERE "ActiveID"=${activeId}`);
     const existingActive = active.filter(row => row.ActiveID === activeId), existingAwards = awards.filter(row => row.ActiveID === activeId);
@@ -123,7 +138,8 @@ export async function runStarterActivity(h: DbHandle, options: {
       assert.equal(existingAwards.length, 0, "candidate ActiveID has unowned awards");
       assert.equal(claims?.count, 0, "candidate ActiveID has existing claims"); assert.equal(codes?.count, 0, "candidate ActiveID has existing activation codes");
     }
-    const actualBaseline = { Active: fingerprint(active.filter(row => row.ActiveID !== activeId)), Active_Award: fingerprint(awards.filter(row => row.ActiveID !== activeId)) };
+    const isBaseline = (row: Row) => row.ActiveID !== activeId && row.ActiveID !== ownedFestivalId;
+    const actualBaseline = { Active: fingerprint(active.filter(isBaseline)), Active_Award: fingerprint(awards.filter(isBaseline)) };
     assert.deepEqual(actualBaseline, baseline, "original/shared activity tables changed; preserve all rows");
     const template = await q1<Row>(th, sql`SELECT "CategoryID","Property1","Property2","MaxCount","NeedSex","NeedLevel","Level","Attack","Defence","Agility","Luck","CanUse","CanStrengthen","CanCompose" FROM game."Shop_Goods" WHERE "TemplateID"=11904`);
     assert.deepEqual(template, { CategoryID: 11, Property1: 21, Property2: 10000, MaxCount: 1, NeedSex: 0, NeedLevel: 1, Level: 1, Attack: 0, Defence: 0, Agility: 0, Luck: 0, CanUse: true, CanStrengthen: false, CanCompose: false }, "11904 must be the existing ordinary experience potion");
@@ -133,7 +149,7 @@ export async function runStarterActivity(h: DbHandle, options: {
     assert.ok(reward && Number.isSafeInteger(reward.ID) && reward.ID > 0);
     const newActive = await q<Row>(th, sql`SELECT * FROM game."Active"`), newAwards = await q<Row>(th, sql`SELECT * FROM game."Active_Award"`);
     assert.equal(newActive.length, active.length + 1); assert.equal(newAwards.length, awards.length + 1);
-    assert.deepEqual({ Active: fingerprint(newActive.filter(row => row.ActiveID !== activeId)), Active_Award: fingerprint(newAwards.filter(row => row.ActiveID !== activeId)) }, baseline, "source activities changed during insertion");
+    assert.deepEqual({ Active: fingerprint(newActive.filter(isBaseline)), Active_Award: fingerprint(newAwards.filter(isBaseline)) }, baseline, "source activities changed during insertion");
     const ownedActive = newActive.filter(row => row.ActiveID === activeId), ownedAwards = newAwards.filter(row => row.ActiveID === activeId);
     assert.equal(ownedActive.length, 1); assert.equal(ownedAwards.length, 1);
     assert.equal(digest(ownedActive[0]), digest(desiredActive)); assert.equal(digest(ownedAwards[0]), digest({ ID: reward.ID, ActiveID: activeId, ...config.Award }));

@@ -31,7 +31,7 @@ export class EventData {
   loginAward: LoginAwardRow[] = [];
 
   async load(db: Database): Promise<this> {
-    const [da, ub, ach, ac, ag, eg, la] = await Promise.all([
+    const [da, ub, ach, ac, ag, eg, la, online] = await Promise.all([
       db.select().from(game.Daily_Award),
       db.select().from(game.LoadUserBox),
       db.select().from(game.Achievement),
@@ -39,9 +39,11 @@ export class EventData {
       db.select().from(game.Achievement_Goods),
       db.select().from(game.Event_Reward_Goods),
       db.select().from(game.Login_Award_Item_Template),
+      db.select().from(game.User_Box).where(eq(game.User_Box.Type, 0)),
     ]);
     this.dailyAward = da;
-    this.userBox = [...ub].sort((a, b) => a.ID - b.ID);
+    // Online boxes share the original User_Box source with LoadUserBox.xml; level/VIP keep their existing source.
+    this.userBox = [...online, ...ub.filter((b) => b.Type !== 0)].sort((a, b) => a.ID - b.ID);
     this.achievements = new Map(ach.map((a) => [a.ID, a]));
     this.achConds = group(ac, (c) => c.AchievementID);
     this.achGoods = group(ag, (g) => g.AchievementID);

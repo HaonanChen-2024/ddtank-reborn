@@ -204,6 +204,14 @@ node scripts/workshop-bag-layout.mjs install --gameover-title
 
 `node --import tsx scripts/workshop-weapon.ts plan <package.json>` 离线检查一个完整类别7模板、四分支和1～4个完整Ball行；不补默认物理值。输入使用 `schemaVersion:1`、`mode:"local-compat"`、独立 `owner`、来源 `metadata` 及三表原字段。`verify` 绑定当前本机Workshop数据库只读核验；`install` 在同一事务只新增这些owned行。未知占用、部分安装或参数漂移拒绝覆盖；重复执行只有数据库、包和归属账本全部一致才无操作。账本 `prepared` 是写入意图，不能当作已提交收据，失败后须回读。安装器不发放物品、写资源、重启或宣称游戏验收。
 
+### 免费活动首批
+
+在线宝箱的游戏数据改从原 `User_Box.Type=0` 加载，与 `LoadUserBox.xml` 同源，恢复 15/40/60/75 分钟和 1120090/1120091/1120092/1120093 四档。每次领取后重新计时，不是累计75分钟全部领取。等级/VIP礼包仍从 `LoadUserBox` 读取；旧表和原管理API保持。新增受管理员鉴权的只读 `online-box` 列表/详情与中文页签，写请求返回405，避免修改旧表却误以为改了在线奖励。原客户端固定时间及20级显示上限与服务端60级上限的差异仍保留，签到/在线奖励的异常发奖原子性没有在本批重构。
+
+`research/activities/local-festival.json` 定义独立活动100002「本地秋日庆典」，北京时间2026-10-12至10-18，每角色一次普通11904经验药水，通过原活动日历和事务邮件领取。`node --import tsx scripts/workshop-festival-activity.ts` 默认离线plan；`install`仅新增独立活动/奖励两行，`verify`回读完整内容与数据库绑定，未知占用或漂移拒绝。它不会延长活动、发放物品或清除领取记录。旧starter核验只对经过完整配置、绑定、账本和两行回读的这项活动做共存排除，原33/310行基线继续保持。原客户端现有响应补丁支持成功领取；重登后按钮状态未接入个人领取记录，服务端会拒绝重复领取。
+
+相关隔离测试：在线游戏15项、只读管理6项、节日/starter共存27项通过。源码测试与本机实际部署证据分别记录；不代表参考服全部活动已实现。材料兑换、世界BOSS、衣橱与寻宝仍需逐项验证规则及原客户端流程。
+
 游戏服务可显式配置 `FIGHT_WEAPON_EXTENSION=<绝对路径/fight.json>`，启动时追加武器；默认关闭。该JSON使用 `schemaVersion:1`、`source:"local-compat"`、`items/ballConfigs/balls`，字段与 `@ddt/fight/node` 的 `LocalWeaponExtension` 对应。新武器必须有完整配置，既有item/config/ball不得覆盖，新增弹体必须被使用。挖坑弹体可显式引用现有本地shape，或在 `shapes` 中提供 `{ballId,source:"official-image-derived-local-mask",fileBase64}` 的原Tile二进制格式；后者严格检查base64、尺寸和长度，仍是本地派生形状。全部检查通过后才合并，新包失败不会静默退回旧武器。
 
 配置仅在启动加载，首次接入前须核对数据库XML、fight包及资源一致并确认无在线角色/房间。官方基础属性、原版视觉文件、本地弹道/延迟/形状各自记录来源；本地运行通过不代表官方战斗完全复刻。当前武器通道与隔离测试已实现，实际新增武器的原客户端效果、正常操作、保存和发放仍需独立验证，不据通道完成把新武器数量加一。

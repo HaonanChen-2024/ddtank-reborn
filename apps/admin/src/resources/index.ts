@@ -1,7 +1,7 @@
 import type { ResourceDef } from "@/crud/types";
 import { items } from "./items";
 import { dungeons, events, maps, missions, npcs, questConditions, questGoods, quests, shop, shopShow } from "./content";
-import { dailyAward, eventAwards, eventCodes, scheduledEvents, timeBoxes } from "./event-systems";
+import { dailyAward, eventAwards, eventCodes, onlineBoxes, scheduledEvents, timeBoxes } from "./event-systems";
 import { bots, players } from "./players";
 import { guildApplications, guildDuties, guildEvents, guildLevels, guildMembers, guilds, guildTasks } from "./guilds";
 import { adminUsers, edicts, logs, mailBroadcasts, news, texts } from "./system";
@@ -32,7 +32,8 @@ const zhNames: Record<string, [string, string]> = {
   "event-awards": ["活动奖励", "奖励"],
   "event-codes": ["活动兑换码", "兑换码"],
   "daily-award": ["每日签到", "签到奖励"],
-  "time-box": ["时间与等级礼包", "礼包"],
+  "online-box": ["在线宝箱（只读）", "在线宝箱"],
+  "time-box": ["等级/VIP与旧礼包数据", "礼包"],
   dungeons: ["副本", "副本"],
   missions: ["副本关卡", "关卡"],
   npcs: ["NPC 模板", "NPC"],
@@ -66,6 +67,7 @@ export const resources: ResourceDef[] = [
   eventAwards,
   eventCodes,
   dailyAward,
+  onlineBoxes,
   timeBoxes,
   dungeons,
   missions,

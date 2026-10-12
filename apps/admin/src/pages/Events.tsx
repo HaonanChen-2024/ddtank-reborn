@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { listQuery, useResourceMutations } from "@/crud/api";
 import { ResourcePage } from "@/crud/ResourcePage";
 import { events } from "@/resources/content";
-import { dailyAward, eventAwards, eventCodes, scheduledEvents, timeBoxes } from "@/resources/event-systems";
+import { dailyAward, eventAwards, eventCodes, onlineBoxes, scheduledEvents, timeBoxes } from "@/resources/event-systems";
 import { api } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
@@ -301,11 +301,12 @@ export function EventsPage() {
         <TabsList>
           <TabsTrigger value="calendar">{t("events.calendar")}</TabsTrigger>
           <TabsTrigger value="table">{t("events.table")}</TabsTrigger>
-          <TabsTrigger value="scheduled">Agendados</TabsTrigger>
-          <TabsTrigger value="awards">Prêmios</TabsTrigger>
-          <TabsTrigger value="codes">Códigos</TabsTrigger>
-          <TabsTrigger value="daily">Presença</TabsTrigger>
-          <TabsTrigger value="boxes">Caixas</TabsTrigger>
+          <TabsTrigger value="scheduled">定时活动</TabsTrigger>
+          <TabsTrigger value="awards">活动奖励</TabsTrigger>
+          <TabsTrigger value="codes">兑换码</TabsTrigger>
+          <TabsTrigger value="daily">签到奖励</TabsTrigger>
+          <TabsTrigger value="online-boxes">在线宝箱</TabsTrigger>
+          <TabsTrigger value="boxes">等级/VIP与旧数据</TabsTrigger>
         </TabsList>
         <TabsContent value="calendar">
           <Calendar />
@@ -327,7 +328,17 @@ export function EventsPage() {
         <TabsContent value="daily">
           <ResourcePage def={dailyAward} embedded />
         </TabsContent>
+        <TabsContent value="online-boxes">
+          <p className="mb-4 text-sm text-muted">
+            在线宝箱只读展示 User_Box 的 Type 0 配置。原客户端固定四档等待时间为 15/40/60/75 分钟，不能只改服务端配置；每领取一档后重新计时。
+            客户端还固定了 20 级限制，与当前服务端种子的 60 级上限不同，需要客户端单独验收。
+          </p>
+          <ResourcePage def={onlineBoxes} embedded />
+        </TabsContent>
         <TabsContent value="boxes">
+          <p className="mb-4 text-sm text-muted">
+            此处编辑 LoadUserBox 的等级（Type 1）和 VIP（Type 2）礼包。旧 Type 0 数据及接口保留兼容，修改它不会影响当前在线宝箱。
+          </p>
           <ResourcePage def={timeBoxes} embedded />
         </TabsContent>
       </Tabs>
