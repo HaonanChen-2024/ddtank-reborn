@@ -31,7 +31,7 @@ class Reader extends ByteReader {
 
 // Read the complete ABC so the target is identified by its class, private trait and method,
 // rather than a caller-supplied offset or a byte search that could match another method.
-function parseAbc(bytes) {
+export function parseActivityAbc(bytes) {
   const r = new Reader(bytes), u = () => r.u30(), b = () => r.byte();
   r.bytes(4);
   for (let pool = 0; pool < 2; pool++) { const count = u(); for (let i = 1; i < count; i++) r.varInt(15); }
@@ -39,10 +39,11 @@ function parseAbc(bytes) {
   const stringCountOffset = r.pos; count = u(); const stringDataOffset = r.pos;
   const strings = [""]; for (let i = 1; i < count; i++) strings.push(r.bytes(u()).toString("utf8"));
   const stringPoolEnd = r.pos;
-  count = u(); const namespaces = [null];
+  const namespaceCountOffset = r.pos; count = u(); const namespaceDataOffset = r.pos, namespaces = [null];
   for (let i = 1; i < count; i++) namespaces.push({ kind: b(), name: u() });
-  count = u(); for (let i = 1; i < count; i++) { const n = u(); for (let j = 0; j < n; j++) u(); }
-  count = u(); const names = [null];
+  const namespacePoolEnd = r.pos;
+  count = u(); const namespaceSets = [null]; for (let i = 1; i < count; i++) { const n = u(), values = []; for (let j = 0; j < n; j++) values.push(u()); namespaceSets.push(values); }
+  const nameCountOffset = r.pos; count = u(); const nameDataOffset = r.pos, names = [null];
   for (let i = 1; i < count; i++) {
     const kind = b(); let name = 0, ns = 0;
     switch (kind) {
@@ -56,7 +57,7 @@ function parseAbc(bytes) {
     }
     names.push({ kind, name, ns });
   }
-  const methods = []; count = u();
+  const namePoolEnd = r.pos, methods = []; count = u();
   for (let i = 0; i < count; i++) {
     const n = u(), returnType = u(), params = []; for (let j = 0; j < n; j++) params.push(u());
     const name = u(), flags = b();
@@ -65,9 +66,9 @@ function parseAbc(bytes) {
     methods.push({ name, flags, returnType, params });
   }
   count = u(); for (let i = 0; i < count; i++) { u(); const n = u(); for (let j = 0; j < n * 2; j++) u(); }
-  const methodTraits = [];
+  const methodTraits = [], traitBlocks = [];
   function traits(owner) {
-    const n = u();
+    const countOffset = r.pos, n = u(), dataOffset = r.pos;
     for (let i = 0; i < n; i++) {
       const name = u(), kind = b(); let method;
       switch (kind & 15) {
@@ -80,6 +81,7 @@ function parseAbc(bytes) {
       if (method !== undefined) methodTraits.push({ owner, name, method, kind });
       if (kind & 64) { const metadata = u(); for (let j = 0; j < metadata; j++) u(); }
     }
+    traitBlocks.push({ owner, count: n, countOffset, dataOffset, end: r.pos });
   }
   const classes = u();
   for (let i = 0; i < classes; i++) {
@@ -90,17 +92,19 @@ function parseAbc(bytes) {
   count = u(); for (let i = 0; i < count; i++) { u(); traits(null); }
   count = u(); const bodies = [];
   for (let i = 0; i < count; i++) {
-    const method = u(), maxStack = u(), localCount = u(), initialScope = u(), maxScope = u(), length = u();
+    const start = r.pos, method = u(), maxStack = u(), localCount = u(), initialScope = u(), maxScope = u(), length = u();
     const offset = r.pos, code = r.bytes(length), exceptions = u();
-    for (let j = 0; j < exceptions * 5; j++) u(); traits(null);
-    bodies.push({ method, maxStack, localCount, initialScope, maxScope, length, offset, code, exceptions });
+    const exceptionTable = []; for (let j = 0; j < exceptions; j++) exceptionTable.push({ from: u(), to: u(), target: u(), type: u(), name: u() });
+    const traitsOffset = r.pos; traits(null);
+    bodies.push({ method, maxStack, localCount, initialScope, maxScope, length, offset, code, exceptions, start, exceptionTable, traitsOffset, end: r.pos });
   }
   assert.equal(r.pos, bytes.length, "activity ABC has unparsed bytes");
-  return { strings, stringCountOffset, stringDataOffset, stringPoolEnd, namespaces, names, methods, methodTraits, bodies };
+  return { strings, stringCountOffset, stringDataOffset, stringPoolEnd, namespaces, namespaceSets, namespaceCountOffset, namespaceDataOffset, namespacePoolEnd,
+    names, nameCountOffset, nameDataOffset, namePoolEnd, methods, methodTraits, traitBlocks, bodies };
 }
 
 function inspectAbc(bytes) {
-  const p = parseAbc(bytes), text = index => p.strings[p.names[index]?.name];
+  const p = parseActivityAbc(bytes), text = index => p.strings[p.names[index]?.name];
   const targets = p.methodTraits.filter(t => text(t.owner) === "CalendarManager" && text(t.name) === "__activityLoadComplete");
   assert.equal(targets.length, 1, "expected one CalendarManager activity callback trait");
   const trait = targets[0], method = p.methods[trait.method], name = p.names[trait.name], owner = p.names[trait.owner];

@@ -7,6 +7,7 @@
  *   so screens degrade gracefully (see README "Endpoint status").
  */
 import * as events from "./endpoints/events.js";
+import { UserCalendar } from "./endpoints/activity-state.js";
 import Login from "./endpoints/Login.js";
 import LoginSelectList from "./endpoints/LoginSelectList.js";
 import NickNameCheck from "./endpoints/NickNameCheck.js";
@@ -62,6 +63,7 @@ const PORTED: Endpoint[] = [
   social.MailSenderList,
   social.DailyLogList,
   events.ActivePullDown,
+  UserCalendar,
 ];
 
 export const ENDPOINTS = new Map<string, Endpoint>();

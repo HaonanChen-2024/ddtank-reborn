@@ -355,20 +355,24 @@ export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number
 
 /** 13 type 5 (DailyAwardHandler case 5): marks today in DailyLogList; the original accepted any number of signs per day. */
 export async function signIn(ctx: ServerContext, p: GamePlayer): Promise<boolean> {
-  const db = ctx.db.db;
   const now = ctx.now();
-  if (!(await claimOnce(db, p.id, "sign", dayKey(now)))) return false;
-  const [row] = await db.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1);
-  const sameMonth = row && row.LastDate && monthKey(row.LastDate) === monthKey(now);
-  const days = sameMonth && row.DayLog ? row.DayLog.split(",") : [];
-  const d = now.getUTCDate();
-  while (days.length < d) days.push("False");
-  days[d - 1] = "True";
-  const signed = days.filter((x) => x === "True").length;
-  const values = { DayLog: days.join(","), UserAwardLog: signed, LastDate: now };
-  if (row) await db.update(P.DailyLogList).set(values).where(eq(P.DailyLogList.ID, row.ID));
-  else await db.insert(P.DailyLogList).values({ UserID: p.id, ...values });
-  return true;
+  return ctx.db.db.transaction(async (tx) => {
+    // The calendar row may not exist yet. Serialize on its owner, including requests across midnight.
+    const [owner] = await tx.select({ id: P.Sys_Users_Detail.UserID }).from(P.Sys_Users_Detail)
+      .where(eq(P.Sys_Users_Detail.UserID, p.id)).for("update");
+    if (!owner || !(await claimOnce(tx, p.id, "sign", dayKey(now)))) return false;
+    const [row] = await tx.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1);
+    const sameMonth = row && row.LastDate && monthKey(row.LastDate) === monthKey(now);
+    const days = sameMonth && row.DayLog ? row.DayLog.split(",") : [];
+    const d = now.getUTCDate();
+    while (days.length < d) days.push("False");
+    days[d - 1] = "True";
+    const signed = days.filter((x) => x === "True").length;
+    const values = { DayLog: days.join(","), UserAwardLog: signed, LastDate: now };
+    if (row) await tx.update(P.DailyLogList).set(values).where(eq(P.DailyLogList.ID, row.ID));
+    else await tx.insert(P.DailyLogList).values({ UserID: p.id, ...values });
+    return true;
+  });
 }
 
 /** 90 GET_SIGNAWARD (AwardMgr.AddSignAwards): tier must exist and be reached this month; once per month+tier. */
