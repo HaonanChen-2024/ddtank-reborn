@@ -6,7 +6,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { allAppearanceCapturesAccepted, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
+import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workshop = resolve(repo, "../..");
@@ -178,6 +178,7 @@ try {
       const before = view === "storage" ? latestStorageSnapshot(evidence.probe) : view === "appearances" ? latestAppearanceSnapshot(evidence.probe) : null;
       let appearanceCaptureCheckIndex;
       if (view === "appearances") {
+        assert.ok(appearanceHairBranchMatches(ready), "composite hair branch differs; standalone layer is not sufficient");
         const accepted = appearanceSnapshotEligible(before, ready) && freshAppearanceSnapshot(before) &&
           evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error");
         evidence.appearanceCaptureChecks.push({ accepted, phase: "before", job: ready.job, templateID: ready.templateID,

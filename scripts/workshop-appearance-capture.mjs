@@ -6,6 +6,10 @@ const validIdentity = row => Number.isSafeInteger(row?.job) && row.job >= 0 &&
 
 export const latestAppearanceSnapshot = rows => rows.filter(row => row.phase === "appearance-observation").at(-1);
 
+// Loading a standalone A/B layer does not prove the original composite selected it.
+export const appearanceHairBranchMatches = row => row?.categoryId !== 3 ||
+  ([0, 1].includes(row.hair) && row.componentHairType === (row.hair === 1 ? "B" : "A"));
+
 export const appearanceSnapshotEligible = (row, ready) => row?.phase === "appearance-observation" &&
   ready?.phase === "official-frame-ready" && validIdentity(row) && validIdentity(ready) &&
   row.ready === true && row.selfUnchanged === true && Number.isSafeInteger(row.tick) && row.tick > 0 &&

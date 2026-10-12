@@ -126,6 +126,10 @@ package {
       var suit:Boolean = int(job.part.categoryId) == 13;
       // Ordinary parts use ordinary layers; suits must exercise their original branch.
       if (!suit) copy.setPartStyle(13, sex, 13000 + sex * 100 + 1);
+      // Original getHairType reads the visible hat's Property1. Use the plain cap
+      // for A and transparent default for B so inherited hats cannot hide the hair.
+      var hairHeadID:int = 1000 + sex * 100 + (int(job.hair) == 1 ? 1 : 2);
+      if (int(job.part.categoryId) == 3) copy.setPartStyle(1, sex, hairHeadID);
       copy.setPartStyle(int(job.part.categoryId), sex, int(job.part.id));
       if (suit) {
         // Original setPartColor intentionally skips SUITS. This changes only the clone,
@@ -136,6 +140,11 @@ package {
         if (job.hidden) copy.Hide = 111111211;
       } else if (job.dye) copy.setPartColor(int(job.part.categoryId), dyeColors(job));
       copy.commitChanges();
+      if (int(job.part.categoryId) == 3) {
+        if (int(copy.getHairType()) != int(job.hair)) throw new Error("composite hair branch differs from requested layer");
+        if (int(String(copy.Style).split(",")[0].split("|")[0]) != hairHeadID) throw new Error("composite hair head baseline differs");
+        if (String(copy.Style).split(",")[2] != job.part.id + "|" + job.part.pic) throw new Error("composite hair identity differs");
+      }
       if (suit) {
         if (String(copy.getPrivateStyle()).split(",")[7] != job.part.id + "|" + job.part.pic) throw new Error("clone suit private identity differs");
         if (Boolean(copy.getShowSuits()) != !Boolean(job.hidden)) throw new Error("clone suit visibility differs");

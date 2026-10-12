@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { allAppearanceCapturesAccepted, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
+import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
 
 const ready = { phase: "official-frame-ready", job: 2, templateID: 13999100, dye: false, hidden: true, hair: 0, baseline: false };
 const before = { ...ready, phase: "appearance-observation", ready: true, tick: 100, selfUnchanged: true, reportedAt: 9000, receivedAt: 9001 };
 const after = { ...before, tick: 101, reportedAt: 10001, receivedAt: 10002 };
+
+test("rejects the observed hair B job whose standalone layer loaded but composite still used A", () => {
+  assert.equal(appearanceHairBranchMatches({ categoryId: 3, hair: 1, componentHairType: "A" }), false);
+  assert.equal(appearanceHairBranchMatches({ categoryId: 3, hair: 0, componentHairType: "B" }), false);
+  for (const hair of [0, 1]) assert.equal(appearanceHairBranchMatches({ categoryId: 3, hair, componentHairType: hair ? "B" : "A" }), true);
+  assert.equal(appearanceHairBranchMatches({ categoryId: 3, hair: 1 }), false);
+  assert.equal(appearanceHairBranchMatches({ categoryId: 13, hair: 0 }), true);
+});
 
 test("pairs a screenshot with a fresh newer observation of the exact appearance job", () => {
   assert.equal(appearanceSnapshotEligible(before, ready), true);
