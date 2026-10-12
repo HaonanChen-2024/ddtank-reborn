@@ -186,3 +186,135 @@ test("session changes after writes roll back every row and leave only prepared i
   assert.equal(checks, 2); assert.deepEqual(await rows(), before);
   assert.equal((await f.run()).status, "prepared");
 });
+
+function referenceConfig(): WeaponPackage {
+  const value = config();
+  value.schemaVersion = 2; value.Ball = []; value.BallReferences = [structuredClone(sourceBall)];
+  for (const key of ["Common", "CommonAddWound", "CommonMultiBall", "Special"]) value.BallConfig[key] = sourceBall.ID;
+  return value;
+}
+
+test("v2 separates owned Ball rows from exact read-only dependencies and rejects ambiguous declarations", () => {
+  const value = referenceConfig(), before = structuredClone(value), plan = planWeaponInstall(value);
+  assert.deepEqual(value, before); assert.deepEqual(plan.ballIds, []); assert.deepEqual(plan.referencedBallIds, [sourceBall.ID]);
+  assert.deepEqual(plan.counts, { Shop_Goods: 1, BallConfig: 1, Ball: 0 });
+  const changes: ((v: WeaponPackage) => void)[] = [
+    v => { delete v.BallReferences; }, v => { v.BallReferences = []; },
+    v => { v.BallReferences!.push(structuredClone(sourceBall)); },
+    v => { v.Ball.push(structuredClone(sourceBall)); },
+    v => { delete v.BallReferences![0].HasTunnel; },
+    v => { v.BallReferences![0].Amount = "3"; },
+    v => { v.BallReferences![0].unexpected = true; },
+    v => { v.BallReferences!.push({ ...sourceBall, ID: 107 }); },
+    v => { v.BallConfig.Special = 98765; },
+    v => { v.schemaVersion = 1; },
+  ];
+  for (const change of changes) { const modified = referenceConfig(); change(modified); assert.throws(() => validateWeaponPackage(modified)); }
+  const two = referenceConfig(); two.BallReferences!.push({ ...sourceBall, ID: 107 }); two.BallConfig.Special = 107;
+  const reversed = structuredClone(two); reversed.BallReferences!.reverse();
+  assert.equal(planWeaponInstall(two).packageSha256, planWeaponInstall(reversed).packageSha256);
+  const legacy = planWeaponInstall(config()); assert.equal(legacy.schemaVersion, 1);
+  assert.equal(Object.hasOwn(legacy.config, "BallReferences"), false); assert.equal(Object.hasOwn(legacy, "referencedBallIds"), false);
+});
+
+test("v2 verify and install reuse a Ball already referenced by an old weapon without owning or writing it", async t => {
+  const f = fixture(t), value = referenceConfig(), before = await rows();
+  const verified = await f.run("verify", { config: value });
+  assert.equal(verified.status, "ready"); assert.deepEqual(await rows(), before); assert.equal(existsSync(f.journalPath), false);
+  const first = await f.run("install", { config: value }), installed = await rows();
+  assert.deepEqual(first.inserted, { Shop_Goods: 1, BallConfig: 1, Ball: 0 });
+  assert.deepEqual(first.ballIds, []); assert.deepEqual(first.referencedBallIds, [sourceBall.ID]);
+  assert.deepEqual(installed.balls, before.balls); assert.deepEqual(originalOnly(installed), before);
+  const journal = readFileSync(f.journalPath), saved = JSON.parse(journal.toString("utf8"));
+  assert.equal(saved.schemaVersion, 1); assert.equal(saved.package.schemaVersion, 2);
+  assert.deepEqual(saved.package.Ball, []); assert.deepEqual(saved.package.BallReferences, [sourceBall]);
+  for (const command of ["verify", "install"] as const) {
+    const repeat = await f.run(command, { config: value });
+    assert.equal(repeat.status, "installed"); assert.deepEqual(repeat.inserted, { Shop_Goods: 0, BallConfig: 0, Ball: 0 });
+    assert.deepEqual(await rows(), installed); assert.deepEqual(readFileSync(f.journalPath), journal);
+  }
+});
+
+test("v2 checks every dependency column and missing rows before publishing a journal, including on repeat", async t => {
+  const f = fixture(t), value = referenceConfig();
+  for (const [key, original] of Object.entries(sourceBall)) {
+    if (key === "ID") continue;
+    const changed = typeof original === "number" ? original + 1 : typeof original === "boolean" ? !original : String(original) + "x";
+    await h.db.execute(sql`UPDATE game."Ball" SET ${sql.identifier(key)}=${changed} WHERE "ID"=${sourceBall.ID}`);
+    const drifted = await rows();
+    for (const command of ["verify", "install"] as const) await assert.rejects(() => f.run(command, { config: value }), /BallReferences missing or changed/);
+    assert.deepEqual(await rows(), drifted); assert.equal(existsSync(f.journalPath), false);
+    await h.db.execute(sql`UPDATE game."Ball" SET ${sql.identifier(key)}=${original} WHERE "ID"=${sourceBall.ID}`);
+  }
+  await h.db.execute(sql`DELETE FROM game."Ball" WHERE "ID"=${sourceBall.ID}`);
+  const missing = await rows(); await assert.rejects(() => f.run("install", { config: value }), /BallReferences missing or changed/);
+  assert.deepEqual(await rows(), missing); assert.equal(existsSync(f.journalPath), false);
+  await h.db.insert(game.Ball).values(sourceBall as typeof game.Ball.$inferInsert);
+  await f.run("install", { config: value });
+  await h.db.execute(sql`UPDATE game."Ball" SET "BombSound"='changed' WHERE "ID"=${sourceBall.ID}`);
+  const drifted = await rows();
+  await assert.rejects(() => f.run("install", { config: value }), /BallReferences missing or changed/);
+  assert.deepEqual(await rows(), drifted);
+});
+
+test("v2 mixed packages create only new balls, allow shared dependencies, and still reject referenced new IDs", async t => {
+  const f = fixture(t), value = referenceConfig(), newBall = config().Ball[0];
+  value.Ball = [newBall]; value.BallConfig.Special = newBall.ID;
+  await h.db.execute(sql`UPDATE game."BallConfig" SET "Special"=${newBall.ID} WHERE "TemplateID"=7001`);
+  const conflict = await rows(); await assert.rejects(() => f.run("install", { config: value }), /already referenced/);
+  assert.deepEqual(await rows(), conflict); assert.equal(existsSync(f.journalPath), false);
+  await h.db.execute(sql`UPDATE game."BallConfig" SET "Special"=${sourceBall.ID} WHERE "TemplateID"=7001`);
+  const before = await rows(), result = await f.run("install", { config: value }), installed = await rows();
+  assert.deepEqual(result.ballIds, [newBall.ID]); assert.deepEqual(result.referencedBallIds, [sourceBall.ID]);
+  assert.deepEqual(result.inserted, { Shop_Goods: 1, BallConfig: 1, Ball: 1 });
+  assert.deepEqual(originalOnly(installed), before);
+  assert.deepEqual((await f.run("install", { config: value })).inserted, { Shop_Goods: 0, BallConfig: 0, Ball: 0 });
+});
+
+test("v2 SQL failure preserves referenced rows and prepared retry revalidates dependencies", async t => {
+  const f = fixture(t), value = referenceConfig(), before = await rows();
+  await h.db.execute(sql`ALTER TABLE game."BallConfig" ADD CONSTRAINT reject_reference_weapon CHECK ("TemplateID"<>${sql.raw(String(templateId))})`);
+  try { await assert.rejects(() => f.run("install", { config: value })); }
+  finally { await h.db.execute(sql`ALTER TABLE game."BallConfig" DROP CONSTRAINT reject_reference_weapon`); }
+  assert.deepEqual(await rows(), before); const journal = readFileSync(f.journalPath);
+  assert.equal((await f.run("verify", { config: value })).status, "prepared");
+  await h.db.execute(sql`UPDATE game."Ball" SET "Delay"="Delay"+1 WHERE "ID"=${sourceBall.ID}`);
+  const drifted = await rows(); await assert.rejects(() => f.run("install", { config: value }), /BallReferences missing or changed/);
+  assert.deepEqual(await rows(), drifted);
+  await h.db.execute(sql`UPDATE game."Ball" SET "Delay"=${sourceBall.Delay} WHERE "ID"=${sourceBall.ID}`);
+  assert.deepEqual((await f.run("install", { config: value })).inserted, { Shop_Goods: 1, BallConfig: 1, Ball: 0 });
+  assert.deepEqual(readFileSync(f.journalPath), journal); assert.deepEqual((await rows()).balls, before.balls);
+});
+
+test("v2 insertion-trigger dependency drift is detected inside the transaction and fully rolled back", async t => {
+  const f = fixture(t), value = referenceConfig(), before = await rows();
+  await h.db.execute(sql`CREATE FUNCTION game.weapon_reference_test_trigger() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN UPDATE game."Ball" SET "Power"="Power"+1 WHERE "ID"=106; RETURN NEW; END $$`);
+  await h.db.execute(sql`CREATE TRIGGER weapon_reference_test_trigger AFTER INSERT ON game."BallConfig"
+    FOR EACH ROW EXECUTE FUNCTION game.weapon_reference_test_trigger()`);
+  try { await assert.rejects(() => f.run("install", { config: value }), /BallReferences missing or changed/); }
+  finally {
+    await h.db.execute(sql`DROP TRIGGER weapon_reference_test_trigger ON game."BallConfig"`);
+    await h.db.execute(sql`DROP FUNCTION game.weapon_reference_test_trigger()`);
+  }
+  assert.deepEqual(await rows(), before); assert.equal((await f.run("verify", { config: value })).status, "prepared");
+});
+
+test("v2 shared dependency supports two independent owners and identical concurrent retries", async t => {
+  const f = fixture(t), value = referenceConfig(), second = referenceConfig(), before = await rows();
+  second.owner = "ddtank-workshop/weapon/another-test"; second.Shop_Goods.TemplateID = templateId + 1; second.BallConfig.TemplateID = templateId + 1;
+  const result = await Promise.all([
+    f.run("install", { config: value }), f.run("install", { config: value }),
+    f.run("install", { config: second, journalPath: join(f.path, "second.json") }),
+  ]);
+  assert.deepEqual(result.map(x => x.inserted.Shop_Goods).sort(), [0, 1, 1]);
+  assert.ok(result.every(x => x.inserted.Ball === 0));
+  assert.deepEqual((await rows()).balls, before.balls);
+});
+
+test("v2 session failure after writes rolls back owned rows without changing dependencies", async t => {
+  const f = fixture(t), value = referenceConfig(), before = await rows(); let checks = 0;
+  await assert.rejects(() => f.run("install", { config: value, checkBinding: () => { if (++checks === 2) throw new Error("session changed"); } }), /session changed/);
+  assert.equal(checks, 2); assert.deepEqual(await rows(), before);
+  assert.equal((await f.run("verify", { config: value })).status, "prepared");
+});

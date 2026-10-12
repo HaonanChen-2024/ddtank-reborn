@@ -8,6 +8,7 @@ import { PlayerState, type RoomMember } from "../game/player.js";
 import type { FightEngine } from "../fight/types.js";
 import type { BotProvider, VirtualPlayer } from "../bots/bot.js";
 import { BaseRoom, RoomType } from "./room.js";
+import type { WorldBossRoomAccess } from "../game/world-boss-access.js";
 
 export interface RoomMgrOptions {
   maxRooms: number;
@@ -17,6 +18,7 @@ export interface RoomMgrOptions {
   /** Seconds before an unmatched Match room is paired with bots (if a provider exists). */
   botFallbackSec?: number;
   random?: () => number;
+  worldBossAccess?: WorldBossRoomAccess;
 }
 
 type Action = () => void;
@@ -172,6 +174,10 @@ export class RoomMgr {
   /** CreateRoomAction (Rooms/CreateRoomAction.cs). */
   createRoom(p: RoomMember, name: string, password: string, roomType: number, timeType: number): void {
     this.addRoomEntry(p, () => {
+      if (roomType === 14) {
+        const permit = this.o.worldBossAccess?.check([p]);
+        if (!permit || permit.error) { p.sendMessage(0, permit?.error ?? "世界 BOSS 当前不可挑战。"); return; }
+      }
       p.currentRoom?.removePlayer(p);
       let room: BaseRoom | null = null;
       let idx = Math.floor(this.rnd() * this.rooms.length);
@@ -277,7 +283,15 @@ export class RoomMgr {
 
   /** RoomSetupChangeAction (subset: map, type, password, name, time mode, hardness, level limit). */
   setupChange(room: BaseRoom, s: { mapId: number; roomType: number; password: string; name: string; timeMode: number; hardLevel: number; levelLimits: number; isCrosszone: boolean; isOpenBoss: boolean }): void {
+    const host = room.host;
     this.addAction(() => {
+      if (room.RoomType === 14 || s.roomType === 14) {
+        if (!room.IsUsing || !host || room.host !== host || host.currentRoom !== room || room.IsPlaying || room.game) return;
+        if (s.roomType === 14) {
+          const permit = this.o.worldBossAccess?.check(room.getPlayersFight(), s.mapId);
+          if (!permit || permit.error) { host.sendMessage(0, permit?.error ?? "世界 BOSS 当前不可挑战。"); return; }
+        }
+      }
       room.MapId = s.mapId;
       room.RoomType = s.roomType;
       room.Password = s.password;
@@ -295,7 +309,12 @@ export class RoomMgr {
 
   /** StartGameAction (Rooms/StartGameAction.cs). */
   startGame(room: BaseRoom): void {
+    const host = room.host;
+    const expected = room.getPlayersFight();
     this.addAction(() => {
+      if (room.RoomType === 14 && (!room.IsUsing || room.IsPlaying || room.game || !host || room.host !== host ||
+          host.currentRoom !== room || !expected.length || expected.length !== room.PlayerCount ||
+          room.getPlayersFight().some((p, i) => p !== expected[i] || p.currentRoom !== room))) return;
       if (!room.canStart()) return;
       const players = room.getPlayersFight();
       const awards = players.flatMap((p) => p.worldBossAwardPending ? [p.worldBossAwardPending] : []);
@@ -305,7 +324,7 @@ export class RoomMgr {
           void Promise.all(awards).then(() => {
             this.bossAwardStarts.delete(room);
             const current = room.getPlayersFight();
-            if (room.IsUsing && !room.IsPlaying && current.length > 0 && current.length === players.length &&
+            if (room.IsUsing && !room.IsPlaying && (room.RoomType !== 14 || room.host === host) && current.length > 0 && current.length === players.length &&
                 current.every((p, i) => p === players[i] && p.currentRoom === room)) this.startGame(room);
           });
         }
@@ -374,10 +393,35 @@ export class RoomMgr {
 
   /** StartGameAction PvE branch → GameMgr.StartPVEGame (Rooms/StartGameAction.cs:55-75). */
   private launchPve(room: BaseRoom, players: RoomMember[]): void {
+    const access = room.RoomType === 14 ? this.o.worldBossAccess : undefined;
+    const permit = room.RoomType === 14 ? access?.check(players, room.MapId) : undefined;
+    if (room.RoomType === 14 && (!permit || permit.error)) {
+      room.sendMessage(0, permit?.error ?? "世界 BOSS 当前不可挑战。");
+      room.sendCancelPickUp();
+      return;
+    }
+    const key = permit?.key;
+    let acceptedId: number | null = null;
+    let stoppedDuringStart = false;
+    const earlyFinished = new Set<number>();
+    const finish = (id: number) => {
+      if (!key || !players.some((p) => p.id === id)) return;
+      if (acceptedId === null) earlyFinished.add(id);
+      else access!.finished(key, id, acceptedId);
+    };
     const game = this.o.fight.startPve?.({
       roomId: room.RoomId, roomType: room.RoomType, gameType: room.GameType, timeType: room.TimeMode, pveId: room.MapId,
       hardLevel: room.HardLevel, levelLimits: room.LevelLimits, currentFloor: room.currentFloor, players,
-      onStopped: () => room.onGameStopped(),
+      onStopped: () => {
+        if (key) {
+          if (acceptedId === null) { stoppedDuringStart = true; return; }
+          for (const p of players) finish(p.id);
+          // An old room's late stop must not detach a replacement game.
+          if (room.game?.id !== acceptedId) return;
+        }
+        room.onGameStopped();
+      },
+      ...(key ? { onParticipantFinished: finish } : {}),
       // PlayerDetail.ResetRoom (GamePlayer.cs): a dungeon room goes back to "choose a dungeon"
       onFinished: () => {
         if (room.RoomType === RoomType.Dungeon) {
@@ -389,12 +433,18 @@ export class RoomMgr {
         }
       },
     }) ?? null;
-    if (!game) {
+    if (!game || stoppedDuringStart) {
+      game?.stop();
       room.IsPlaying = false;
       room.sendPlayerState();
       room.sendMessage(3, this.o.lang("StartGameAction.noBattleServe"));
       room.sendCancelPickUp();
       return;
+    }
+    if (key) {
+      acceptedId = game.id;
+      access!.started(key, players, game.id);
+      for (const id of earlyFinished) finish(id);
     }
     room.startGame(game);
   }

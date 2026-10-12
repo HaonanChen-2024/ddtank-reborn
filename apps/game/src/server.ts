@@ -208,7 +208,13 @@ export class GameServer {
     if (!bots && cfg.BOT_FALLBACK_SEC > 0) bots = await new DbBotProvider().load(db.db).catch((e) => (log.warn(`bots: ${e}`), new DbBotProvider()));
     const zoneId = templates.server?.ZoneId ?? 1;
     const zoneName = templates.server?.ZoneName ?? cfg.SERVER_NAME ?? "DDTank";
-    const rooms = new RoomMgr({ maxRooms: templates.server?.Room ?? cfg.MAX_ROOMS, fight, lang: (k, ...a) => lang.t(k, ...a), bots, botFallbackSec: cfg.BOT_FALLBACK_SEC });
+    const rooms = new RoomMgr({ maxRooms: templates.server?.Room ?? cfg.MAX_ROOMS, fight, lang: (k, ...a) => lang.t(k, ...a), bots, botFallbackSec: cfg.BOT_FALLBACK_SEC,
+      worldBossAccess: {
+        check: (players, pveId) => this.ctx ? eventsRuntime(this.ctx).bossAccess.check(players, pveId) : { error: "世界 BOSS 当前不可挑战。" },
+        started: (key, players, id) => eventsRuntime(this.ctx!).bossAccess.started(key, players, id),
+        finished: (key, userId, id) => eventsRuntime(this.ctx!).bossAccess.finished(key, userId, id),
+      },
+    });
     this.ctx = {
       cfg, db, templates, lang, log, rooms, fight, rsaKey, zoneId, zoneName,
       world: new World(),

@@ -9,6 +9,7 @@ import { GSPacket } from "@ddt/protocol";
 import { RoomType } from "../rooms/room.js";
 import { roomList } from "../packets/out.js";
 import { SubRouter, type HandlerRegistry } from "./registry.js";
+import { parseWorldBossSetup } from "./world-boss-setup.js";
 
 const NO_WEAPON = "Sem arma equipada, não é possível participar.";
 
@@ -27,8 +28,20 @@ const NO_WEAPON = "Sem arma equipada, não é possível participar.";
  */
 export function roomRouter(): SubRouter {
   return new SubRouter("int", "GAME_ROOM")
-    // Create.cs: byte roomType, byte timeType, str name, str password (world-boss rooms not ported).
+    // Create.cs: byte roomType, byte timeType, str name, str password. Boss access is checked in the queued action.
     .on(0, "GAME_ROOM_CREATE", (ctx, p, pkt) => {
+      const start = pkt.offset;
+      // Only type14 gets the narrow length guard; other modes keep their existing contract.
+      if (pkt.buffer[start] === 14) {
+        let at = start + 2;
+        for (let i = 0; i < 2; i++) {
+          if (at + 2 > pkt.length) return;
+          const n = (pkt.buffer[at]! << 8) | pkt.buffer[at + 1]!;
+          at += 2 + n;
+          if (at > pkt.length) return;
+        }
+        if (at !== pkt.length) return;
+      }
       const roomType = pkt.readByte();
       const timeType = pkt.readByte();
       const name = pkt.readString();
@@ -53,6 +66,13 @@ export function roomRouter(): SubRouter {
     .on(2, "GAME_ROOM_SETUP_CHANGE", (ctx, p, pkt) => {
       const room = p.currentRoom;
       if (!room || room.host !== p || room.IsPlaying) return;
+      if (room.RoomType === 14 && pkt.dataLeft < 5) return;
+      if (pkt.offset + 5 <= pkt.length && pkt.buffer[pkt.offset + 4] === 14) {
+        const setup = parseWorldBossSetup(pkt);
+        if (!setup) return p.sendMessage(0, "世界 BOSS 房间参数无效。");
+        ctx.rooms.setupChange(room, setup);
+        return;
+      }
       const mapId = pkt.readInt();
       const roomType = pkt.readByte();
       // GameSocketOut.enterUserGuide (freshman / quest "go" button) writes no isOpenBoss bool (GameSocketOut.as:1400)

@@ -21,6 +21,7 @@ import { exchangeActivity } from "../game/activity-exchange.js";
 import { claimOnlineBox, startOnlineBoxTimer } from "../game/online-box.js";
 import { worldBossRanks, type WorldBossAttempt, type WorldBossRank } from "../game/world-boss.js";
 import { awardWorldBoss } from "../game/world-boss-rewards.js";
+import { WorldBossAccess } from "../game/world-boss-access.js";
 
 // ------------------------------------------------------------------ runtime
 export interface BossPlayer { x: number; y: number; state: number }
@@ -41,6 +42,7 @@ export interface WorldBossState {
 export class EventsRuntime {
   data = new EventData();
   scheduler: EventScheduler;
+  readonly bossAccess: WorldBossAccess;
   boss: WorldBossState = { window: null, name: "boss", resourceId: "0", pveId: 0, maxBlood: 0, blood: 0, players: new Map(), rank: new Map(), results: new Set(), settlement: null };
   /** EliteGameController bitmask: 1 score 30-40, 2 champion 30-40, 4 score 41-50, 8 champion 41-50. 0 = closed. */
   eliteStatus = 0;
@@ -48,6 +50,10 @@ export class EventsRuntime {
   log: string[] = [];
 
   constructor(private readonly ctx: ServerContext) {
+    this.bossAccess = new WorldBossAccess(() => this.boss.window ? {
+      key: this.boss.window.key, pveId: this.boss.pveId, start: this.boss.window.start, end: this.boss.window.end,
+      blood: this.boss.blood, settling: !!this.boss.settlement,
+    } : null, () => +ctx.now(), (p) => ctx.world.get(p.id) === p && !(p as GamePlayer).quitting);
     this.scheduler = new EventScheduler(() => ctx.now(), { onStart: (w) => this.onStart(w), onEnd: (w) => this.onEnd(w) });
   }
 
@@ -84,6 +90,7 @@ export class EventsRuntime {
         b.rank.clear();
         b.results.clear();
         b.settlement = null;
+        this.bossAccess.clear();
         this.broadcast((p) => worldBossOpen(this, p));
         this.broadcast(Out.message(1, String(prm.notice ?? `Boss mundial ${b.name} apareceu! Entre pelo ícone no hall.`)));
         break;
@@ -162,7 +169,7 @@ export function worldBossOpen(rt: EventsRuntime, _p: GamePlayer): GSPacket {
   p.writeBoolean(!open || b.blood <= 0); // fightOver
   p.writeBoolean(!open); // roomClose
   p.writeInt(11573); p.writeInt(0); p.writeInt(15); p.writeInt(1000);
-  p.writeInt(1); p.writeInt(1); p.writeString("Aumentar Dano"); p.writeInt(30); p.writeString("Dano base aumenta em 200."); p.writeInt(-1);
+  p.writeInt(0); // No purchasable buffs until charging and the actual effect have one verified contract.
   p.writeBoolean(true); p.writeBoolean(false);
   return p;
 }
@@ -226,6 +233,7 @@ async function finishWorldBoss(ctx: ServerContext, rt: EventsRuntime, w: ActiveW
   // Freeze before the first await. Failed recipients retry this exact rank and reward snapshot.
   rt.boss.settlement ??= { key: w.key, rank: worldBossRanks(rt.boss.rank), awards: structuredClone(
     (Array.isArray(rt.boss.window.ev.params.rankAwards) ? rt.boss.window.ev.params.rankAwards : []) as { rank: number; giftToken?: number; gold?: number; items?: Reward[] }[]) };
+  rt.bossAccess.clear();
   const { awards, rank: list } = rt.boss.settlement;
   for (const [i, r] of list.entries()) {
     const tier = awards.filter((a) => i + 1 <= a.rank).sort((a, b) => a.rank - b.rank)[0];
@@ -618,16 +626,21 @@ function worldBossCmd(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
   const toRoom = (o: GSPacket) => { for (const id of b.players.keys()) ctx.world.get(id)?.send(o); };
   switch (sub) {
     case 32: { // EnterRoom
+      if (pkt.dataLeft !== 0) return;
       const o = new GSPacket(102);
-      o.writeByte(2); o.writeBoolean(!!b.window && !b.settlement); o.writeBoolean(false); o.writeInt(0); o.writeInt(0);
+      o.writeByte(2); o.writeBoolean(!!worldBossFightWindow(ctx, b.pveId)); o.writeBoolean(false);
+      o.writeInt(rt.bossAccess.remaining(p.id)); o.writeInt(0);
       p.send(o);
       return;
     }
     case 34: { // AddPlayer
+      if (pkt.dataLeft !== 8) return;
       const x = pkt.readInt();
       const y = pkt.readInt();
-      if (!b.window || b.settlement) return;
-      const bp: BossPlayer = { x: x || 265, y: y || 1030, state: 1 };
+      if (!worldBossFightWindow(ctx, b.pveId)) return;
+      // The reference returns from the fight room, without abandoning the world-boss scene.
+      if (p.currentRoom?.RoomType === 14) ctx.rooms.exitRoom(p.currentRoom, p);
+      const bp: BossPlayer = { x: x || 265, y: y || 1030, state: rt.bossAccess.remaining(p.id) > 0 ? 3 : 1 };
       const isNew = !b.players.has(p.id);
       b.players.set(p.id, bp);
       if (isNew) toRoom(enterPkt(p, bp));
@@ -656,9 +669,13 @@ function worldBossCmd(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
       return;
     }
     case 36: { // Status
-      const st = pkt.readByte();
+      if (pkt.dataLeft !== 1) return;
+      let st = pkt.readByte();
+      if (st < 1 || st > 3) return;
       const bp = b.players.get(p.id);
       if (!bp) return;
+      if (st === 3 && p.currentRoom?.RoomType === 14) ctx.rooms.exitRoom(p.currentRoom, p);
+      if (st === 1 && rt.bossAccess.remaining(p.id) > 0) st = 3;
       // WorldBoss/Handle/Status.cs: state 3 (dead/back from the fight) only leaves the fight room; the player stays in
       // the boss room (fixed: we removed them, so 37 REQUEST_REVIVE was refused with "not enough Xu")
       if (st !== 3 || bp.state !== 3) {
@@ -669,23 +686,15 @@ function worldBossCmd(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
       bp.state = st;
       return;
     }
-    case 37: { // RequestRevive: int type (1 revive / 2 refight), bool bind — ReviveMoney 1000 / ReFightMoney 1200
-      const type = pkt.readInt(); pkt.readBoolean();
-      const cost = type === 2 ? 1200 : 1000;
-      if (!b.window) return;
-      if (p.info.Money < cost) return p.sendMessage(0, ctx.lang.t("UserBuyItemHandler.NoMoney"));
-      p.info.Money -= cost; p.updateProperties();
-      const o = new GSPacket(102);
-      o.writeByte(11); o.writeInt(p.id);
-      toRoom(o);
+    case 37: { // Actual AS3 sends byte37 alone; the reference C# expects an incompatible five-byte tail.
+      p.sendMessage(0, "付费复活暂未开放，请等待免费冷却。");
       return;
     }
-    case 38: { // BuyBuff: 30 money, charged once (the original charged twice)
-      if (!b.players.has(p.id) || p.info.Money < 30) return p.sendMessage(0, ctx.lang.t("UserBuyItemHandler.NoMoney"));
-      p.info.Money -= 30; p.updateProperties();
+    case 38: { // No charge or fabricated success while the effect is unimplemented.
       const o = new GSPacket(102);
-      o.writeByte(12); o.writeBoolean(true); o.writeInt(1);
+      o.writeByte(12); o.writeBoolean(false); // WorldBossBuyBuffFrame.__getBuff stops here on false.
       p.send(o);
+      p.sendMessage(0, "世界 BOSS 付费增益暂未开放。");
       return;
     }
   }

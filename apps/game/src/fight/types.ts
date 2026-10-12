@@ -32,6 +32,8 @@ export interface StartPveOptions {
   onStopped(): void;
   /** PVEGame.Stop → PlayerDetail.ResetRoom(isWin, hasNextMission) */
   onFinished?(isWin: boolean): void;
+  /** Server-owned world-boss attempt: real final result, exit or stop, never a lobby status packet. */
+  onParticipantFinished?(userId: number): void;
 }
 
 export interface FightGame {

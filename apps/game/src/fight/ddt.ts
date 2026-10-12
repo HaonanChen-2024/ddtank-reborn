@@ -108,6 +108,7 @@ export class DdtFightEngine implements FightEngine {
       this.o.log?.(`pve: no Pve_Info for map ${s.pveId} / type ${s.roomType}`);
       return null;
     }
+    let starting: DdtGame | undefined;
     try {
       const id = gameIdSeq++;
       const boss = s.roomType === 14 ? this.o.worldBossWindow?.(s.pveId) : undefined;
@@ -123,11 +124,17 @@ export class DdtFightEngine implements FightEngine {
         ...gameHooks(this, s.roomType, members),
       });
       const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s, boss ? { windowKey: boss.key, fightId: id } : undefined);
+      starting = g;
       this.games.set(g.id, g);
       this.ensureLoop();
       g.tick(Date.now());
       return g;
     } catch (e) {
+      // A first-tick failure is not a successful boss admission. Do not leave an orphan engine game.
+      if (s.roomType === 14 && starting) {
+        this.games.delete(starting.id);
+        try { starting.stop(); } catch { /* Preserve the original startup error below. */ }
+      }
       this.o.log?.(`pve: cannot start game: ${(e as Error).stack}`);
       return null;
     }
@@ -248,6 +255,12 @@ class DdtGame implements FightGame {
   private readonly canTakeOut = new Map<number, number>();
 
   private readonly pve: StartPveOptions | null;
+  private readonly finishedParticipants = new Set<number>();
+  private finishParticipant(id: number): void {
+    if (this.s.roomType !== 14 || this.finishedParticipants.has(id)) return;
+    this.finishedParticipants.add(id);
+    this.pve?.onParticipantFinished?.(id);
+  }
   constructor(readonly id: number, readonly mapId: number, private readonly s: StartGameOptions, private readonly engine: DdtFightEngine, pveGame?: PveGame, pve?: StartPveOptions, private readonly bossAttempt?: WorldBossAttempt) {
     this.pve = pve ?? null;
     const specs: PlayerSpec[] = [];
@@ -334,6 +347,7 @@ class DdtGame implements FightGame {
     if (this.settlement.held) { void this.settlement.defer(() => this.removePlayer(p), `remove:${p.id}`).catch(this.settlementError); return; }
     if (this.stopped) return;
     const fled = this.game.removePlayer(p.id);
+    if (this.members.get(p.id) === p) this.finishParticipant(p.id);
     if (fled && !p.isBot && !this.pve) {
       try {
         this.engine.o.onPlayerFlee?.(p, { roomType: this.s.roomType, gameType: this.s.gameType });
@@ -375,6 +389,7 @@ class DdtGame implements FightGame {
     if (this.settlement.held) { void this.settlement.defer(() => this.stop(), "stop").catch(this.settlementError); return; }
     if (this.stopped) return;
     this.stopped = true;
+    for (const id of this.members.keys()) this.finishParticipant(id);
     // PVPGame.Stop: players that did not pick get an automatic card.
     for (const [uid, left] of this.canTakeOut) if (left > 0) this.takeCard(uid, -1, true);
     this.game.stop();
@@ -436,6 +451,7 @@ class DdtGame implements FightGame {
     for (const r of e.players) {
       const m = this.members.get(r.userId);
       if (!m || m.isBot) continue;
+      this.finishParticipant(r.userId);
       if (e.roomType === 14 && this.bossAttempt && r.totalHurt > 0) this.engine.o.onWorldBossHurt?.(m, r.totalHurt, this.bossAttempt);
       try {
         this.engine.o.onPlayerGameOver?.(m, { roomType: e.roomType, gameType: e.gameType, isWin: r.isWin, kills: r.totalKill, playerCount: e.players.length });

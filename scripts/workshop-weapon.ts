@@ -16,13 +16,15 @@ const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 type Row = Record<string, unknown>;
 type Table = typeof game.Shop_Goods | typeof game.BallConfig | typeof game.Ball;
 export interface WeaponPackage {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   mode: "local-compat";
   owner: string;
   metadata: Row;
   Shop_Goods: Row;
   BallConfig: Row;
   Ball: Row[];
+  /** Version 2 only: complete expected rows, read-only dependencies, never owned inserts. */
+  BallReferences?: Row[];
 }
 interface WeaponJournal {
   schemaVersion: 1;
@@ -83,8 +85,10 @@ function validateRow(value: unknown, table: Table, label: string): asserts value
 
 export function validateWeaponPackage(input: unknown): WeaponPackage {
   object(input, "weapon package");
-  assert.deepEqual(Object.keys(input).sort(), ["schemaVersion", "mode", "owner", "metadata", "Shop_Goods", "BallConfig", "Ball"].sort(), "unknown weapon package fields");
-  assert.equal(input.schemaVersion, 1); assert.equal(input.mode, "local-compat");
+  assert.ok(input.schemaVersion === 1 || input.schemaVersion === 2, "unsupported weapon package version");
+  const referenceMode = input.schemaVersion === 2;
+  assert.deepEqual(Object.keys(input).sort(), ["schemaVersion", "mode", "owner", "metadata", "Shop_Goods", "BallConfig", "Ball", ...(referenceMode ? ["BallReferences"] : [])].sort(), "unknown weapon package fields");
+  assert.equal(input.mode, "local-compat");
   assert.ok(typeof input.owner === "string" && /^ddtank-workshop\/weapon\/[a-z0-9][a-z0-9-]{0,63}$/.test(input.owner), "invalid weapon owner");
   object(input.metadata, "metadata"); assert.ok(Object.keys(input.metadata).length > 0, "source metadata is required"); jsonValue(input.metadata);
   validateRow(input.Shop_Goods, game.Shop_Goods, "Shop_Goods");
@@ -92,11 +96,16 @@ export function validateWeaponPackage(input: unknown): WeaponPackage {
   assert.equal(input.Shop_Goods.CategoryID, 7, "only weapon CategoryID 7 is supported");
   intId(input.Shop_Goods.TemplateID, "Shop_Goods.TemplateID");
   assert.equal(input.BallConfig.TemplateID, input.Shop_Goods.TemplateID, "BallConfig must target this weapon");
-  assert.ok(Array.isArray(input.Ball) && input.Ball.length > 0 && input.Ball.length <= 4, "Ball must contain 1 to 4 complete rows");
+  assert.ok(Array.isArray(input.Ball) && input.Ball.length >= (referenceMode ? 0 : 1) && input.Ball.length <= 4, "invalid number of new Ball rows");
+  const references = referenceMode ? input.BallReferences : [];
+  assert.ok(Array.isArray(references) && (!referenceMode || references.length > 0), "BallReferences must contain complete dependency rows");
+  assert.ok(input.Ball.length + references.length <= 4, "at most 4 Ball rows and references are supported");
   const ids = new Set<number>();
-  for (const ball of input.Ball) {
-    validateRow(ball, game.Ball, "Ball"); intId(ball.ID, "Ball.ID");
-    assert.ok(!ids.has(ball.ID), "duplicate Ball.ID"); ids.add(ball.ID);
+  for (const [label, rows] of [["Ball", input.Ball], ["BallReferences", references]] as const) {
+    for (const ball of rows) {
+      validateRow(ball, game.Ball, label); intId(ball.ID, label + ".ID");
+      assert.ok(!ids.has(ball.ID), "duplicate or overlapping Ball.ID"); ids.add(ball.ID);
+    }
   }
   const referenced = new Set<number>();
   for (const key of ["Common", "CommonAddWound", "CommonMultiBall", "Special"]) {
@@ -111,8 +120,10 @@ export function validateWeaponPackage(input: unknown): WeaponPackage {
 export function planWeaponInstall(input: unknown) {
   const config = validateWeaponPackage(input);
   config.Ball.sort((a, b) => Number(a.ID) - Number(b.ID));
-  return { schemaVersion: 1 as const, mode: config.mode, owner: config.owner, packageSha256: hash(config),
+  config.BallReferences?.sort((a, b) => Number(a.ID) - Number(b.ID));
+  return { schemaVersion: config.schemaVersion, mode: config.mode, owner: config.owner, packageSha256: hash(config),
     templateId: Number(config.Shop_Goods.TemplateID), ballIds: config.Ball.map(row => Number(row.ID)),
+    ...(config.schemaVersion === 2 ? { referencedBallIds: config.BallReferences!.map(row => Number(row.ID)) } : {}),
     counts: { Shop_Goods: 1, BallConfig: 1, Ball: config.Ball.length }, config,
     databaseConnected: false, installed: false, resourcesAccepted: false, fightAssetsLoaded: false };
 }
@@ -127,11 +138,18 @@ function publishJournal(path: string, journal: WeaponJournal): void {
   finally { closeSync(fd); if (!written) unlinkSync(path); }
 }
 
+async function verifyBallReferences(h: DbHandle, rows: Row[]): Promise<void> {
+  if (!rows.length) return;
+  const actual = await q<Row>(h, sql`SELECT * FROM game."Ball" WHERE "ID" IN (${sql.join(rows.map(row => sql`${row.ID}`), sql`,`)}) ORDER BY "ID"`);
+  assert.equal(canonical(actual), canonical(rows), "BallReferences missing or changed; shared rows preserved");
+}
+
 export async function runWeaponInstall(h: DbHandle, options: {
   command: "verify" | "install"; config: unknown; binding: StarterBinding; journalPath: string; checkBinding?: () => void;
 }) {
   assert.ok(options.command === "verify" || options.command === "install", "invalid weapon command");
   const plan = planWeaponInstall(options.config), { config, templateId, ballIds, packageSha256 } = plan;
+  const referenceRows = config.BallReferences ?? [];
   object(options.binding, "binding");
   assert.ok(typeof options.binding.databaseName === "string" && options.binding.databaseName.length > 0 && typeof options.binding.dataDirectory === "string" && options.binding.dataDirectory.length > 0, "database binding is required");
   const binding = { ...options.binding };
@@ -144,8 +162,9 @@ export async function runWeaponInstall(h: DbHandle, options: {
     const existing = {
       Shop_Goods: await q<Row>(th, sql`SELECT * FROM game."Shop_Goods" WHERE "TemplateID"=${templateId}`),
       BallConfig: await q<Row>(th, sql`SELECT * FROM game."BallConfig" WHERE "TemplateID"=${templateId}`),
-      Ball: await q<Row>(th, sql`SELECT * FROM game."Ball" WHERE "ID" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)}) ORDER BY "ID"`),
+      Ball: ballIds.length ? await q<Row>(th, sql`SELECT * FROM game."Ball" WHERE "ID" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)}) ORDER BY "ID"`) : [],
     };
+    await verifyBallReferences(th, referenceRows);
     const journal = readJournal(options.journalPath);
     if (journal) {
       assert.equal(journal.schemaVersion, 1); assert.equal(journal.phase, "prepared", "unknown weapon journal phase");
@@ -166,11 +185,11 @@ export async function runWeaponInstall(h: DbHandle, options: {
       return { status: "installed" as const, installed: true, inserted: { Shop_Goods: 0, BallConfig: 0, Ball: 0 } };
     }
     // An absent Ball row can still be referenced by another weapon; do not silently change that weapon.
-    const references = await q<Row>(th, sql`SELECT "TemplateID" FROM game."BallConfig" WHERE
+    const references = ballIds.length ? await q<Row>(th, sql`SELECT "TemplateID" FROM game."BallConfig" WHERE
       "Common" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)}) OR
       "CommonAddWound" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)}) OR
       "CommonMultiBall" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)}) OR
-      "Special" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)})`);
+      "Special" IN (${sql.join(ballIds.map(id => sql`${id}`), sql`,`)})`) : [];
     assert.equal(references.length, 0, "new Ball IDs are already referenced by another weapon");
     if (options.command === "verify") {
       options.checkBinding?.();
@@ -185,15 +204,18 @@ export async function runWeaponInstall(h: DbHandle, options: {
     const item = { ...config.Shop_Goods, AddTime: config.Shop_Goods.AddTime === null ? null : new Date(String(config.Shop_Goods.AddTime)) };
     const [createdItem] = await tx.insert(game.Shop_Goods).values(item as typeof game.Shop_Goods.$inferInsert).returning();
     const [createdConfig] = await tx.insert(game.BallConfig).values(config.BallConfig as typeof game.BallConfig.$inferInsert).returning();
-    const createdBalls = await tx.insert(game.Ball).values(config.Ball as (typeof game.Ball.$inferInsert)[]).returning();
+    const createdBalls = config.Ball.length ? await tx.insert(game.Ball).values(config.Ball as (typeof game.Ball.$inferInsert)[]).returning() : [];
     assert.equal(canonical(createdItem), canonical(config.Shop_Goods), "inserted Shop_Goods was changed");
     assert.equal(canonical(createdConfig), canonical(config.BallConfig), "inserted BallConfig was changed");
     createdBalls.sort((a, b) => a.ID - b.ID);
     assert.equal(canonical(createdBalls), canonical(config.Ball), "inserted Ball rows were changed");
+    // The table lock excludes concurrent writers; this also catches changes from insertion triggers.
+    await verifyBallReferences(th, referenceRows);
     options.checkBinding?.();
     return { status: "installed" as const, installed: true, inserted: { ...plan.counts } };
   });
   return { ...result, packageSha256, templateId, ballIds, journalPublished, originalRowsPreserved: true,
+    ...(config.schemaVersion === 2 ? { referencedBallIds: plan.referencedBallIds, referencedRowsPreserved: true } : {}),
     playerDataWritten: false, resourcesWritten: false, fightAssetsLoaded: false, cacheReloadRequired: result.inserted.Shop_Goods > 0,
     fightReloadRequired: result.inserted.Shop_Goods > 0, clientAccepted: false };
 }
