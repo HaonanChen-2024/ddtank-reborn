@@ -4,7 +4,9 @@
 
 `scripts/workshop-official.mjs --all --catalog=<catalog.json>` 可以为官网六类 DIY 快照建立完整清单；它不代表官网整个游戏的资源全集。下载需再指定 `--download-all --batch-size=12 --offset=0`，批次保留独立目录及失败回执。用固定快照推进 offset；`--resume=<旧批次目录>` 在新目录内仅复用路径、大小和 SHA256 校验成功的文件。清单按精确来源 ID 保留同名物品，已装和缺失、重复素材、当前不兼容分开统计。下载及 PNG 头检查均不等于实装或画面验收。
 
-`apps/api/scripts/workshop-official-install.ts` 继续通过已鉴权的本地管理接口工作，默认只做 dry-run；`--acquisition` 用于官网目录，`--reference-acquisition` 用于参考服纯视觉清单，两者互斥。参考清单只接受来源 ID、名称、类别、性别、路径、图层标志与描述，保留 `referenceId`，数值继承本地同类别同性别基础模板，不带入私服装备属性。资源需精确路径及哈希匹配，通过原有 wardrobe-check 后才建模板。仅支持类别 1–6，武器不走此导入器。
+`apps/api/scripts/workshop-official-install.ts` 继续通过已鉴权的本地管理接口工作，默认只做 dry-run；`--acquisition` 用于官网目录，`--reference-acquisition` 用于参考服纯视觉清单，两者互斥。参考清单只接受来源 ID、名称、类别、性别、路径、图层标志与描述，保留 `referenceId`，数值继承本地同类别同性别基础模板，不带入私服装备属性。资源需精确路径及哈希匹配，通过原有 wardrobe-check 后才建模板。支持类别 1–6 和套装13，武器不走此导入器。
+
+套装使用装备槽11、Style下标7，必须另有每层独立的 `game1.png`；不能套用 `CategoryID-1` 的普通衣帽槽位。中性套装保留 `NeedSex=0`，图片按原客户端取 `f/suits`，与角色性别无关。本地基础模板显式选择中性13100、男13841、女13842，并核对实时类别/性别及摘要。当前一条回执只拥有一组物品/邮件ID，中性套装的协议测试分派女角色并记录覆盖范围；男角色的无写入组件显示通过不能冒称男角色领取穿脱已验证。套装本地ID保持13前缀，短身份段最多15字符，整个Style仍限制200字符。
 
 新资源 Pic 使用短名称，来源 ID 留在私有账本中，避免同时穿戴后超过原 `Style varchar(200)`；发出穿戴协议前也检查组合长度。每批使用新账本，恢复只读该账本。正式交付前应完成男女隔离角色的领取、穿脱、TCP/WS 重登保存、原显示组件及战斗角色图层核验；用户邮件发放仍要求已完成视觉验收的账本。保留原件与旧资源，不修改角色等级或基础规则。
 
@@ -104,7 +106,9 @@ node --import tsx apps/api/scripts/workshop-official-install.ts --journal=<runti
 
 新模板可在本机后台“物品”按中文名称搜索，在“玩家”向自己的本地角色永久邮件发放，游戏邮箱领取。普通商城全零价格会被既有购买逻辑拒绝，因此本批不伪造官网价格或修改购买规则。男女部件分别限制穿戴，女装领取进男性库存也不能直接穿戴。
 
-`research/client/WorkshopOfficialWardrobeProbe.as` 与 `scripts/workshop-official-render.mjs` 使用原客户端类、独立PlayerInfo和私有headless Chromium，读取ShowCharacter/RoomCharacter/GameCharacter、染色和头发a/b；不发送换装指令，不操作桌面或现有浏览器。生成原组件画面仍需检查实际截图、精确TemplateID/Pic及加载证据，不能称为自然实战、鼠标操作或用户接受验收。
+`research/client/WorkshopOfficialWardrobeProbe.as` 与 `scripts/workshop-official-render.mjs` 使用原客户端类、独立PlayerInfo和私有headless Chromium，读取ShowCharacter/RoomCharacter/GameCharacter、染色和头发a/b；不发送换装指令，不操作桌面或现有浏览器。每张服饰组件截图前后必须取得新鲜、连续、同一job与物品/原色或染色/帽发/隐藏状态的观察；过期、换项或画面离开最上层时拒绝记为成功。计数和资源加载完成不能替代这道截图绑定检查及人工图像检查，也不能称为自然实战、鼠标操作或用户接受验收。
+
+套装额外显示原色、仅clone染色和隐藏后普通服饰恢复，每套3组画面；正常分支6及备用game1分支7各绘制39帧。分支7是手动原组件调用，不代表真实低血量事件会触发切换；clone的Colors第8段渲染也不代表游戏染色界面支持套装。完整对局、实际状态切换及动作连续性需另验，`gameplayAccepted` 保持false。
 
 ```powershell
 node scripts/workshop-official-render.mjs --journal=<runtime/new-batch.json> --sex=m

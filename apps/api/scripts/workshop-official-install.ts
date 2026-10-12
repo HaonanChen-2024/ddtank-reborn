@@ -13,12 +13,13 @@ import { inflateSync } from "node:zlib";
 import { buildLoginPayload, bytesToBase64, GSPacket, parseDotNetRsaXml, rsaEncryptPkcs1, type RsaPrivateKey } from "@ddt/protocol";
 import { FakeClient, type Received } from "../../game/test/helpers.js";
 import type { WardrobeCheckResult } from "../src/lib/wardrobe.js";
-import { assertEquippedStyleFits, createAppearancePic } from "./workshop-appearance-identity.js";
+import { appearanceEquipSlot, appearanceStyleIndex, assertEquippedStyleFits, createAppearancePic } from "./workshop-appearance-identity.js";
+import { appearanceFixtureSex, createAppearanceRow, planAppearance } from "./workshop-appearance-plan.js";
 
 type Row = Record<string, any>;
 type Account = { username: string; password: string; nickname: string; sex: boolean };
 type Asset = { key: string; source: string; sha256: string; bytes: number; uploaded?: boolean };
-type Entry = { id: number; officialId?: number; referenceId?: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; itemId?: number; mailId?: number };
+type Entry = { id: number; officialId?: number; referenceId?: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; protocolFixtureSex?: "m" | "f"; itemId?: number; mailId?: number };
 type Fixture = { characterId: number; credentialsPath: string; baselineStyle: string; gold: number; money: number; style: string };
 type Receipt = { version: 1; batchId: string; phase: string; createdAt: string; templates: Entry[]; fixtures: Partial<Record<"m" | "f", Fixture>>; snapshots: Row[]; renderingAccepted: boolean; backup: string; error?: string };
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -114,7 +115,7 @@ async function move(live: Awaited<ReturnType<typeof enter>>, entry: Entry, from:
   const mark = live.c.mark(); live.c.out(49, p => { p.writeByte(0); p.writeInt(from); p.writeByte(0); p.writeInt(to); p.writeInt(0); p.writeBoolean(false); });
   const inventoryUpdate = await live.c.waitFor(r => r.code === 64 && inventory(r).some(x => x.bag === 0 && x.ItemID === entry.itemId && (equipped ? x.slot === to : x.slot >= 31)), 4000, mark);
   const row = inventory(inventoryUpdate).find(x => x.ItemID === entry.itemId)!; assert.equal(row.UserID, live.id); assert.equal(row.TemplateID, entry.id); assert.equal(row.Pic, entry.pic);
-  const changed = await live.c.waitFor(r => r.code === 67 && style(r).includes(`${entry.id}|${entry.pic}`) === equipped, 4000, mark);
+  const changed = await live.c.waitFor(r => r.code === 67 && (style(r).split(",")[appearanceStyleIndex(entry.categoryId)] === `${entry.id}|${entry.pic}`) === equipped, 4000, mark);
   return style(changed);
 }
 async function prepare(): Promise<Receipt> {
@@ -128,29 +129,19 @@ async function prepare(): Promise<Receipt> {
   const plan: Entry[] = [], allocated: Record<number, number> = {}, batchId = randomBytes(4).toString("hex");
   for (const officialId of ids) {
     const matches = catalog.filter(x => x.templateId === officialId); assert.equal(matches.length, 1, "ambiguous official ID"); const item = matches[0]!;
-    assert.ok([1, 2, 3, 4, 5, 6].includes(item.categoryId) && [1, 2].includes(item.needSex));
     // Exact source IDs, rather than display names, identify newer catalog entries.
-    if (referencePath) assert.ok(Object.keys(item).every(key => ["templateId", "name", "categoryId", "needSex", "pic", "previewPic", "property8", "description"].includes(key)), "reference catalog must contain visual metadata only");
-    const folder = ({ 1: "head", 2: "glass", 3: "hair", 4: "eff", 5: "cloth", 6: "face" } as Record<number, string>)[item.categoryId]!, sex = item.needSex === 1 ? "m" : "f";
-    const match = new RegExp(`^/image/equip/${sex}/${folder}/([A-Za-z0-9_]+)/1/${item.categoryId === 3 ? "[ab]/" : ""}show\\.png$`).exec(item.pic); assert.ok(match, "invalid official resource path");
-    assert.equal(item.previewPic, `/image/equip/${sex}/${folder}/${match[1]}/icon_1.png`);
-    const layers = String(item.property8); assert.match(layers, /^[123]{1,3}$/); assert.equal(new Set(layers).size, layers.length);
-    const sourceId = item.categoryId * 1000 + item.needSex * 100 + 1, source = await json(`/api/admin/items/${sourceId}`);
-    assert.equal(source.CategoryID, item.categoryId); assert.equal(source.NeedSex, item.needSex); assert.equal(source.CanEquip, true);
+    const { folder, sex, sourcePic, sourceId, refs } = planAppearance(item, !!referencePath), source = await json(`/api/admin/items/${sourceId}`);
     const id = await nextId(item.categoryId, allocated[item.categoryId] ?? item.categoryId * 1000000 + 999100); allocated[item.categoryId] = id + 1;
     // Style is a legacy varchar(200) containing all equipped IDs and Pic names.
     // Keep source identity in the receipt, not in every serialized appearance path.
     const pic = createAppearancePic(id, referencePath ? "reference" : "official");
-    const row: Row = { ...source, TemplateID: id, Pic: pic, Name: item.name, Description: item.description, Remark: `${referencePath ? "Reference visual" : "Official DIY"} ${officialId}; local rules from ${sourceId}` };
-    if (referencePath) row.Property8 = Number(layers);
-    else for (const key of ["Attack", "Defence", "Agility", "Luck", "Quality", ...Array.from({ length: 8 }, (_, i) => `Property${i + 1}`)]) { const value = item[key[0]!.toLowerCase() + key.slice(1)]; assert.ok(Number.isSafeInteger(value), `invalid ${key}`); row[key] = value; }
-    const refs = ["icon_1.png"]; for (const layer of layers) for (const variant of item.categoryId === 3 ? ["a/", "b/"] : [""]) for (const kind of ["show", "game"]) refs.push(`${layer}/${variant}${kind}.png`);
+    const row = createAppearanceRow(item, source, id, pic, !!referencePath);
     const assets: Asset[] = [];
     for (const suffix of refs) {
-      const key = `image/equip/${sex}/${folder}/${pic}/${suffix}`, sourcePath = resolve(assetsRoot, `image/equip/${sex}/${folder}/${match[1]}/${suffix}`), bytes = readFileSync(sourcePath);
+      const key = `image/equip/${sex}/${folder}/${pic}/${suffix}`, sourcePath = resolve(assetsRoot, `image/equip/${sex}/${folder}/${sourcePic}/${suffix}`), bytes = readFileSync(sourcePath);
       assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
       if (acquisition) {
-        const proof = acquisition.assets.filter((x: Row) => x[identityKey] === officialId && x.resourcePath === `image/equip/${sex}/${folder}/${match[1]}/${suffix}`);
+        const proof = acquisition.assets.filter((x: Row) => x[identityKey] === officialId && x.resourcePath === `image/equip/${sex}/${folder}/${sourcePic}/${suffix}`);
         assert.equal(proof.length, 1, "acquisition is missing an exact asset receipt"); assert.equal(sha(bytes), proof[0].sha256, "acquisition asset hash changed");
       }
       const r = await request("/resource/" + key); assert.equal(r.headers.get("x-placeholder"), "1", "resource path collision"); await r.arrayBuffer();
@@ -191,7 +182,7 @@ async function main() {
   await poll(xml, text => selected.every(e => text.includes(`TemplateID="${e.id}"`) && text.includes(`Pic="${e.pic}"`)), "generated template XML");
   await json("/api/admin/events/reload", "POST", {}); receipt!.phase = "installed"; save();
   if (exercise) for (const sex of ["m", "f"] as const) {
-    const entries = selected.filter(e => e.needSex === (sex === "m" ? 1 : 2)); if (!entries.length) continue;
+    const entries = selected.filter(e => appearanceFixtureSex(e.needSex) === sex); if (!entries.length) continue;
     const credentialsPath = receipt!.fixtures[sex]?.credentialsPath ?? resolve(runtime, `credentials/official-fixture-${receipt!.batchId}-${sex}.json`); let account: Account;
     if (!receipt!.fixtures[sex]) {
       assert.ok(!existsSync(credentialsPath), "unowned fixture credentials already exist"); const tag = randomBytes(4).toString("hex"); account = { username: `official_${sex}_${tag}`, password: randomBytes(18).toString("hex"), nickname: `衣橱${sex}${tag}`, sex: sex === "m" };
@@ -213,12 +204,14 @@ async function main() {
         const mark = live.c.mark(); live.c.out(113, p => { p.writeInt(entry.mailId!); p.writeByte(1); }); const reply = await live.c.code(113, undefined, mark); assert.equal(reply.pkt.readInt(), entry.mailId); assert.equal(reply.pkt.readInt(), 1); assert.equal(reply.pkt.readInt(), 1);
       }
       const owned = await json(`/api/admin/player-items/${entry.itemId}`); assert.equal(owned.UserID, live.id); assert.equal(owned.TemplateID, entry.id);
-      let equipped = owned.Place === entry.categoryId - 1 ? live.style : await move(live, entry, owned.Place, entry.categoryId - 1, true); assert.ok(equipped.includes(`${entry.id}|${entry.pic}`));
-      await quit(live.c, fixture, equipped); assert.equal((await json(`/api/admin/player-items/${entry.itemId}`)).Place, entry.categoryId - 1);
+      const equipSlot = appearanceEquipSlot(entry.categoryId), styleIndex = appearanceStyleIndex(entry.categoryId);
+      let equipped = owned.Place === equipSlot ? live.style : await move(live, entry, owned.Place, equipSlot, true); assert.equal(equipped.split(",")[styleIndex], `${entry.id}|${entry.pic}`);
+      await quit(live.c, fixture, equipped); assert.equal((await json(`/api/admin/player-items/${entry.itemId}`)).Place, equipSlot);
       live = await enter(account!, "ws"); assert.equal(live.id, fixture.characterId); assert.equal(live.style, equipped);
-      const offStyle = await move(live, entry, entry.categoryId - 1, -1, false); await quit(live.c, fixture, offStyle); live = await enter(account!, "tcp"); assert.equal(live.style, offStyle);
-      const off = await json(`/api/admin/player-items/${entry.itemId}`); assert.ok(off.Place >= 31); equipped = await move(live, entry, off.Place, entry.categoryId - 1, true); await quit(live.c, fixture, equipped);
-      entry.protocolAccepted = true; receipt!.snapshots.push({ name: entry.name, templateId: entry.id, itemId: entry.itemId, characterId: fixture.characterId, stage: "TCP equip; WS relogin; unequip; TCP relogin; final equip saved", style: equipped }); save(); console.log(`protocol accepted ${entry.name}: equip, unequip, TCP/WS persistence, currencies unchanged`);
+      const offStyle = await move(live, entry, equipSlot, -1, false); await quit(live.c, fixture, offStyle); live = await enter(account!, "tcp"); assert.equal(live.style, offStyle);
+      const off = await json(`/api/admin/player-items/${entry.itemId}`); assert.ok(off.Place >= 31); equipped = await move(live, entry, off.Place, equipSlot, true); await quit(live.c, fixture, equipped);
+      entry.protocolAccepted = true; entry.protocolFixtureSex = sex;
+      receipt!.snapshots.push({ name: entry.name, templateId: entry.id, itemId: entry.itemId, characterId: fixture.characterId, needSex: entry.needSex, fixtureSex: sex, equipSlot, styleIndex, stage: "TCP equip; WS relogin; unequip; TCP relogin; final equip saved", style: equipped, ...(entry.needSex === 0 ? { coverage: "neutral template; female fixture only; male wearing not exercised" } : {}) }); save(); console.log(`protocol accepted ${entry.name}: ${sex} fixture, equip, unequip, TCP/WS persistence, currencies unchanged`);
     }
   }
   receipt!.phase = receipt!.templates.every(e => e.installed && e.protocolAccepted) ? "awaiting-visual" : "partially-installed"; delete receipt!.error; save();

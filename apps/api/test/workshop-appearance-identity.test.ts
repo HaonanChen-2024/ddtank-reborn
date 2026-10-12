@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertEquippedStyleFits, createAppearancePic } from "../scripts/workshop-appearance-identity.js";
+import { appearanceEquipSlot, appearanceStyleIndex, assertEquippedStyleFits, createAppearancePic } from "../scripts/workshop-appearance-identity.js";
 
 describe("workshop appearance identities", () => {
   it("makes deterministic, path-safe identities for all six local categories and both sources", () => {
@@ -17,12 +17,51 @@ describe("workshop appearance identities", () => {
     expect(createAppearancePic(6_999_999, "reference")).toBe(`r${(6_999_999).toString(36)}`);
   });
 
-  it("rejects IDs outside local categories 1-6 and unknown source kinds", () => {
-    for (const id of [0, -1, 999999, 7000000, 10000000, 1999100.5, NaN, Infinity, Number.MAX_SAFE_INTEGER]) {
-      expect(() => createAppearancePic(id)).toThrow(/seven-digit local ID/);
+  it("rejects IDs outside local categories 1-6 and 13, and unknown source kinds", () => {
+    for (const id of [0, -1, 999999, 7000000, 10000000, 12999999, 14000000, 1999100.5, NaN, Infinity, Number.MAX_SAFE_INTEGER]) {
+      expect(() => createAppearancePic(id)).toThrow(/local ID/);
     }
-    expect(() => createAppearancePic("1999100" as unknown as number)).toThrow(/seven-digit local ID/);
+    expect(() => createAppearancePic("1999100" as unknown as number)).toThrow(/local ID/);
     expect(() => createAppearancePic(1999100, "../reference" as "reference")).toThrow(/unknown appearance source/);
+  });
+
+  it("preserves the 13 suit prefix and fits an eight-digit ID in a 15-character segment", () => {
+    for (const id of [13000000, 13999100, 13999999]) for (const kind of ["official", "reference"] as const) {
+      const pic = createAppearancePic(id, kind);
+      expect(String(id).startsWith("13")).toBe(true);
+      expect(pic).toBe(`${kind === "reference" ? "r" : "o"}${id.toString(36)}`);
+      expect(`${id}|${pic}`).toHaveLength(15);
+    }
+  });
+
+  it("projects suit slot 11 into Style index 7 without overwriting the weapon or later slots", () => {
+    expect(appearanceEquipSlot(13)).toBe(11);
+    expect(appearanceStyleIndex(13)).toBe(7);
+    const id = 13999100, pic = createAppearancePic(id, "reference");
+    // Only replacing index 7 removes this overlong old suit. Replacing index 11 would fail.
+    const style = Array<string>(16).fill(""); style[6] = "7001|axe"; style[7] = "x".repeat(201); style[11] = "later-part";
+    expect(() => assertEquippedStyleFits(style.join(","), 11, id, pic)).not.toThrow();
+    expect(style[6]).toBe("7001|axe"); expect(style[7]).toHaveLength(201); expect(style[11]).toBe("later-part");
+    expect(() => assertEquippedStyleFits(style.join(","), 7, id, pic)).toThrow(/slot/);
+    expect(() => assertEquippedStyleFits(style.join(","), 12, id, pic)).toThrow(/slot/);
+    expect(() => assertEquippedStyleFits(style.join(","), 0, id, pic)).toThrow(/category does not match/);
+    expect(() => assertEquippedStyleFits(style.join(","), 11, 1999100, "r16ul0")).toThrow(/category does not match/);
+  });
+
+  it("keeps the 200-character whole-Style boundary when a suit and all ordinary slots coexist", () => {
+    const id = 13999100, pic = createAppearancePic(id), segment = `${id}|${pic}`;
+    const style = Array<string>(16).fill("");
+    for (let category = 1; category <= 6; category++) {
+      const part = category * 1000000 + 999100;
+      style[category - 1] = `${part}|${createAppearancePic(part)}`;
+    }
+    style[6] = "7001|axe";
+    style[7] = "13100|suits0";
+    const projected = [...style]; projected[7] = segment;
+    style[8] = "x".repeat(200 - projected.join(",").length);
+    expect(() => assertEquippedStyleFits(style.join(","), 11, id, pic)).not.toThrow();
+    style[8] += "x";
+    expect(() => assertEquippedStyleFits(style.join(","), 11, id, pic)).toThrow(/exceeds the legacy save field/);
   });
 
   it("fits the real full-equipment regression in 174 characters instead of the previous 204", () => {
@@ -58,7 +97,7 @@ describe("workshop appearance identities", () => {
       expect(() => assertEquippedStyleFits(style, slot, id, pic)).toThrow(/slot must be 0-5/);
     }
     expect(() => assertEquippedStyleFits(style, 1, id, pic)).toThrow(/category does not match/);
-    expect(() => assertEquippedStyleFits(style, 0, 7000000, pic)).toThrow(/seven-digit local ID/);
+    expect(() => assertEquippedStyleFits(style, 0, 7000000, pic)).toThrow(/local ID/);
     expect(() => assertEquippedStyleFits(null as unknown as string, 0, id, pic)).toThrow(/must be a string/);
     for (const invalid of ["", ".", "..", "../pic", "a/b", "a\\b", "a:b", "a,b", "a|b", "a\n", "a\0", "%2e%2e"]) {
       expect(() => assertEquippedStyleFits(style, 0, id, invalid)).toThrow(/safe path segment/);

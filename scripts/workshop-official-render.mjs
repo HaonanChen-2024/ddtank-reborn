@@ -6,6 +6,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { allAppearanceCapturesAccepted, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workshop = resolve(repo, "../..");
@@ -89,10 +90,10 @@ assert.ok(only.every(id => Number.isSafeInteger(id) && id > 0), "only requires e
 const templates = manifest.templates.filter(row => row.installed === true && (row.needSex === 0 || row.needSex === (sex === "m" ? 1 : 2)) && (!only.length || only.includes(row.id)))
   .map(({ id, pic, categoryId, needSex, officialId, referenceId, name, sourceId }) => ({ id, pic, categoryId, needSex, officialId, referenceId, name, sourceId }));
 assert.ok(templates.length > 0, "no installed templates match the exact fixture");
-for (const row of templates) assert.ok(Number.isSafeInteger(row.id) && [1, 2, 3, 4, 5, 6].includes(row.categoryId) && /^[A-Za-z0-9_-]+$/.test(row.pic), "installed appearance mapping is invalid");
+for (const row of templates) assert.ok(Number.isSafeInteger(row.id) && [1, 2, 3, 4, 5, 6, 13].includes(row.categoryId) && /^[A-Za-z0-9_-]+$/.test(row.pic), "installed appearance mapping is invalid");
 if (only.length) assert.equal(templates.length, only.length, "one or more requested template IDs are not installed for this fixture");
 if (baseline) assert.ok(templates.every(row => Number.isSafeInteger(row.sourceId) && row.sourceId > 0), "legacy baseline requires exact source template IDs");
-const expectedJobs = view !== "appearances" ? 1 : baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : 2), 0);
+const expectedJobs = view !== "appearances" ? 1 : baseline ? templates.length : templates.reduce((sum, row) => sum + (row.categoryId === 3 ? 4 : row.categoryId === 13 ? 3 : 2), 0);
 const session = JSON.parse(readFileSync(join(runtime, "workshop-session.json"), "utf8"));
 assert.equal(session.publicHost ?? "127.0.0.1", "127.0.0.1", "temporary client tickets require the loopback stack");
 const apiUrl = "http://127.0.0.1:8080", webUrl = "http://127.0.0.1:5173";
@@ -112,7 +113,7 @@ const loadingFile = join(repo, "apps/web/public", `workshop-official-${runId}-DD
 const probeParameters = { probeView: view, probeUserId: fixture.characterId, probeTemplates: JSON.stringify(templates), probeBaseline: String(baseline), probeClient: game.swfUrl, probeGameModule: `${apiUrl}/flash/ui/vietnam/swf/game.swf` };
 const html = `<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#161822}#host{width:1000px;height:600px}</style><div id="host"></div><script>
 const config=${JSON.stringify(game)};window.workshopProbeEvidence=[];
-window.workshop_probe_report=value=>{if(${JSON.stringify(view)}==='storage'&&value.phase==='storage-observation')value.reportedAt=Date.now();window.workshopProbeEvidence.push(value);console.info('WORKSHOP_OFFICIAL',JSON.stringify(value));};
+window.workshop_probe_report=value=>{if((${JSON.stringify(view)}==='storage'&&value.phase==='storage-observation')||(${JSON.stringify(view)}==='appearances'&&value.phase==='appearance-observation'))value.reportedAt=Date.now();window.workshopProbeEvidence.push(value);console.info('WORKSHOP_OFFICIAL',JSON.stringify(value));};
 window.RufflePlayer={config:{publicPath:config.rufflePath.slice(0,config.rufflePath.lastIndexOf('/')+1),autoplay:'on',unmuteOverlay:'hidden',splashScreen:false,allowScriptAccess:true,socketProxy:config.socketProxy,fontSources:['/fonts/NotoSans-Regular.ttf','/fonts/NotoSans-Bold.ttf','/fonts/NotoSansSC-Regular.otf','/fonts/NotoSansSC-Bold.otf'],defaultFonts:{sans:['Noto Sans SC','Noto Sans'],serif:['Noto Sans SC','Noto Sans'],typewriter:['Noto Sans SC','Noto Sans']}}};
 window.game_interruption=()=>console.error('original game connection interrupted');
 const script=document.createElement('script');script.src=config.rufflePath;script.onload=async()=>{try{const p=window.RufflePlayer.newest().createPlayer();p.style.width='1000px';p.style.height='600px';document.getElementById('host').appendChild(p);await p.ruffle().load({url:${JSON.stringify(`${webUrl}/workshop-official-${runId}-Loading.swf`)},parameters:{...config.flashvars,...${JSON.stringify(probeParameters)}},base:config.base,socketProxy:config.socketProxy});}catch(e){console.error('official player load failed',String(e));}};document.head.appendChild(script);
@@ -120,6 +121,8 @@ const script=document.createElement('script');script.src=config.rufflePath;scrip
 const delay = ms => new Promise(resolveDelay => setTimeout(resolveDelay, ms));
 const evidence = { runId, view, sex, characterId: fixture.characterId, templates, expectedJobs, baseline, compiler: compilerEvidence, probe: [], requests: [], errors: [], captures: [], inventoryWrites: false, offlineImageComposition: false, gameplayAccepted: false };
 if (view === "storage") Object.assign(evidence, { storageCaptureChecks: [], storagePermissionAccepted: false, storageSaveAccepted: false });
+if (view === "appearances") Object.assign(evidence, { appearanceCaptureChecks: [], allAppearanceCapturesAccepted: false,
+  appearanceCaptureGateSha256: sha256(join(repo, "scripts/workshop-appearance-capture.mjs")) });
 let child, socket, diagnostics = "";
 try {
   writeFileSync(publicFile, html, { flag: "wx" });
@@ -152,6 +155,7 @@ try {
       if (message.params.args[0]?.value === "WORKSHOP_OFFICIAL") { try {
         const row = JSON.parse(message.params.args[1].value);
         if (view === "storage" && row.phase === "storage-observation") row.receivedAt = Date.now();
+        if (view === "appearances" && row.phase === "appearance-observation") row.receivedAt = Date.now();
         evidence.probe.push(row);
       } catch {} }
       else if (message.params.type === "error") evidence.errors.push(message.params.args.map(value => value.value ?? value.description ?? "").join(" "));
@@ -167,11 +171,19 @@ try {
   await command("Network.enable"); await command("Runtime.enable"); await command("Page.enable");
   await command("Page.navigate", { url: `${webUrl}/workshop-official-${runId}.html` });
   const captured = new Set();
-  let storageCapturedPng;
+  let storageCapturedPng, appearanceCapturedPng;
   for (let elapsed = 0; elapsed < seconds; elapsed++) {
     await delay(1000);
     for (const ready of evidence.probe.filter(row => row.phase === "official-frame-ready" && !captured.has(row.job))) {
-      const before = view === "storage" ? latestStorageSnapshot(evidence.probe) : null;
+      const before = view === "storage" ? latestStorageSnapshot(evidence.probe) : view === "appearances" ? latestAppearanceSnapshot(evidence.probe) : null;
+      let appearanceCaptureCheckIndex;
+      if (view === "appearances") {
+        const accepted = appearanceSnapshotEligible(before, ready) && freshAppearanceSnapshot(before) &&
+          evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error");
+        evidence.appearanceCaptureChecks.push({ accepted, phase: "before", job: ready.job, templateID: ready.templateID,
+          reason: accepted ? "fresh exact appearance job observed" : "appearance job is stale, not ready or mismatched; capture refused", ready, before });
+        assert.ok(accepted, "appearance screenshot precondition failed; capture refused");
+      }
       if (view === "storage" && (!storageSnapshotEligible(before, fixture.characterId) || !freshStorageSnapshot(before) ||
           !Number.isSafeInteger(ready.storageObservationTick) || before.tick < ready.storageObservationTick ||
           evidence.errors.length || evidence.probe.some(row => row.phase === "official-probe-error"))) {
@@ -179,6 +191,23 @@ try {
         throw new Error("storage screenshot precondition failed; capture refused");
       }
       const image = await command("Page.captureScreenshot", { format: "png", clip: { x: 0, y: 0, width: 1000, height: 600, scale: 1 } });
+      if (view === "appearances") {
+        const afterStart = evidence.probe.length, afterStartedAt = Date.now();
+        let after;
+        for (let attempt = 0; attempt < 20; ++attempt) {
+          await delay(100);
+          after = latestAppearanceSnapshot(evidence.probe.slice(afterStart));
+          if (appearancePostCaptureDecision(after, ready, afterStartedAt) !== "wait" || evidence.errors.length || evidence.probe.some(row => row.phase === "official-probe-error")) break;
+        }
+        const accepted = sameAppearanceScene(before, after, ready, afterStartedAt) &&
+          evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error");
+        appearanceCaptureCheckIndex = evidence.appearanceCaptureChecks.length;
+        evidence.appearanceCaptureChecks.push({ accepted, phase: "after", job: ready.job, templateID: ready.templateID,
+          reason: accepted ? "same appearance job freshly observed before and after capture" : "appearance job drifted or lacks a fresh post-capture observation; screenshot skipped",
+          ready, before, after: after ?? null, afterStartedAt });
+        assert.ok(accepted, "appearance screenshot drifted; screenshot skipped and refused");
+        appearanceCapturedPng = Buffer.from(image.data, "base64");
+      }
       if (view === "storage") {
         const afterStart = evidence.probe.length;
         const afterStartedAt = Date.now();
@@ -195,9 +224,9 @@ try {
         assert.ok(accepted, "storage screenshot drifted; screenshot skipped and refused");
         storageCapturedPng = Buffer.from(image.data, "base64");
       }
-      const path = join(output, view === "storage" ? "storage-frame.png" : `${String(ready.job).padStart(2, "0")}-${ready.templateID}-${ready.dye ? "dyed" : "original"}-${ready.hair === 1 ? "B" : "A"}.png`);
+      const path = join(output, view === "storage" ? "storage-frame.png" : `${String(ready.job).padStart(2, "0")}-${ready.templateID}-${ready.hidden ? "hidden" : ready.dye ? "dyed" : "original"}-${ready.hair === 1 ? "B" : "A"}.png`);
       writeFileSync(path, Buffer.from(image.data, "base64")); captured.add(ready.job);
-      evidence.captures.push({ job: ready.job, templateID: ready.templateID, path, sha256: sha256(path) });
+      evidence.captures.push({ job: ready.job, templateID: ready.templateID, path, sha256: sha256(path), ...(view === "appearances" ? { appearanceCaptureCheckIndex } : {}) });
       writeFileSync(join(output, "evidence.json"), JSON.stringify(evidence, replacer, 2));
     }
     if (evidence.probe.some(row => row.phase === "official-probe-error") ||
@@ -205,6 +234,9 @@ try {
   }
   if (view === "storage") {
     if (storageCapturedPng) writeFileSync(join(output, "final.png"), storageCapturedPng);
+  } else if (view === "appearances") {
+    // A diagnostic final image must not reintroduce an unpaired screenshot after nextJob cleared the panel.
+    if (appearanceCapturedPng) writeFileSync(join(output, "final.png"), appearanceCapturedPng);
   } else {
     const final = await command("Page.captureScreenshot", { format: "png" });
     writeFileSync(join(output, "final.png"), Buffer.from(final.data, "base64"));
@@ -213,11 +245,13 @@ try {
   evidence.allJobsCaptured = captured.size === expectedJobs;
   evidence.allLayersLoaded = view === "storage" ? null : evidence.probe.filter(row => row.phase === "official-frame-ready").length === expectedJobs && evidence.probe.filter(row => row.phase === "official-frame-ready").every(row => row.components.every(component => component.completed && component.allLayerLoadsSucceeded !== false));
   if (view === "storage") evidence.storageFrameObserved = evidence.storageCaptureChecks.some(row => row.phase === "after" && row.accepted);
+  if (view === "appearances") evidence.allAppearanceCapturesAccepted = allAppearanceCapturesAccepted(evidence.captures, evidence.appearanceCaptureChecks, expectedJobs);
   evidence.requiresVisualReview = true;
   await command("Browser.close"); await Promise.race([exited, delay(3000)]);
-  assert.ok(evidence.originalClientRenderCompleted && evidence.allJobsCaptured &&
+  assert.ok(evidence.originalClientRenderCompleted && evidence.allJobsCaptured && (view !== "appearances" || evidence.allAppearanceCapturesAccepted) &&
     (view === "storage" ? evidence.storageFrameObserved && evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error") : evidence.allLayersLoaded), "original component rendering is incomplete; inspect exact private evidence");
   console.log(JSON.stringify({ output, view, sex, templates: templates.length, captures: evidence.captures.length, originalClientRenderCompleted: true,
+    ...(view === "appearances" ? { allAppearanceCapturesAccepted: evidence.allAppearanceCapturesAccepted } : {}),
     ...(view === "storage" ? { storageFrameObserved: true, storagePermissionAccepted: false, storageSaveAccepted: false } : {}), gameplayAccepted: false, requiresVisualReview: true }));
 } finally {
   socket?.close();

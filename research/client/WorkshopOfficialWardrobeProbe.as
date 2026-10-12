@@ -62,6 +62,7 @@ package {
         }
         jobs.push({part:part, dye:false, hair:0});
         jobs.push({part:part, dye:true, hair:0});
+        if (int(part.categoryId) == 13) jobs.push({part:part, dye:false, hair:0, hidden:true});
         if (int(part.categoryId) == 3) {
           jobs.push({part:part, dye:false, hair:1});
           jobs.push({part:part, dye:true, hair:1});
@@ -122,13 +123,30 @@ package {
       copy.commitChanges();
       var sex:int = copy.Sex ? 1 : 2;
       copy.beginChanges();
-      // Remove a suit only on the unattached clone, so ordinary component layers are used.
-      copy.setPartStyle(13, sex, 13000 + sex * 100 + 1);
+      var suit:Boolean = int(job.part.categoryId) == 13;
+      // Ordinary parts use ordinary layers; suits must exercise their original branch.
+      if (!suit) copy.setPartStyle(13, sex, 13000 + sex * 100 + 1);
       copy.setPartStyle(int(job.part.categoryId), sex, int(job.part.id));
-      if (job.dye) copy.setPartColor(int(job.part.categoryId), dyeColors(job));
+      if (suit) {
+        // Original setPartColor intentionally skips SUITS. This changes only the clone,
+        // and verifies BaseLayer rendering, not support in the game's dye UI.
+        var colors:Array = String(copy.Colors).split(",");
+        colors[7] = job.dye ? dyeColors(job) : "";
+        copy.Colors = colors.join(",");
+        if (job.hidden) copy.Hide = 111111211;
+      } else if (job.dye) copy.setPartColor(int(job.part.categoryId), dyeColors(job));
       copy.commitChanges();
-      if (copy.getShowSuits()) throw new Error("clone still selects full suit rendering");
-      if (String(copy.Style).split(",").indexOf(job.part.id + "|" + job.part.pic) < 0) throw new Error("clone did not select the exact installed part");
+      if (suit) {
+        if (String(copy.getPrivateStyle()).split(",")[7] != job.part.id + "|" + job.part.pic) throw new Error("clone suit private identity differs");
+        if (Boolean(copy.getShowSuits()) != !Boolean(job.hidden)) throw new Error("clone suit visibility differs");
+        if (job.hidden) {
+          if (int(String(copy.Style).split(",")[7].split("|")[0]) != 13000 + sex * 100 + 1) throw new Error("hidden suit did not restore ordinary layers");
+        } else if (String(copy.Style).split(",")[7] != job.part.id + "|" + job.part.pic) throw new Error("clone suit style index differs");
+        if (String(copy.Colors).split(",")[7] != (job.dye ? dyeColors(job) : "")) throw new Error("clone suit color differs");
+      } else {
+        if (copy.getShowSuits()) throw new Error("clone still selects full suit rendering");
+        if (String(copy.Style).split(",").indexOf(job.part.id + "|" + job.part.pic) < 0) throw new Error("clone did not select the exact installed part");
+      }
       return copy;
     }
     private function loadCharacter(info:Object, kind:String):Object {
@@ -147,7 +165,9 @@ package {
       var template:Object = items.Instance.getTemplateById(int(job.part.id));
       if (!template || int(template.CategoryID) != int(job.part.categoryId) || template.Pic != job.part.pic) throw new Error("exact installed template mapping differs");
       var factory:Object = definition("ddt.view.character.LayerFactory");
-      var layer:Object = factory.instance.createLayer(template, info.Sex, job.dye ? dyeColors(job) : "", kind, false, int(job.hair));
+      var layer:Object = kind == "game1"
+        ? factory.instance.createLayer(template, info.Sex, job.dye ? dyeColors(job) : "", "game", false, 1, null, "1")
+        : factory.instance.createLayer(template, info.Sex, job.dye ? dyeColors(job) : "", kind, false, int(job.hair));
       var member:Object = {kind:"layer-" + kind, object:layer, complete:false}; members.push(member);
       layer.load(function(loaded:Object):void { member.complete = true; });
     }
@@ -157,8 +177,15 @@ package {
       if (panel && panel.parent) panel.parent.removeChild(panel);
       panel = new Sprite(); panel.graphics.beginFill(0x202635); panel.graphics.drawRect(0, 0, 1000, 600); panel.graphics.endFill(); stage.addChild(panel);
     }
+    private function observe(ready:Boolean):void {
+      var job:Object = itemIndex >= 0 && itemIndex < jobs.length ? jobs[itemIndex] : null;
+      report({phase:"appearance-observation", job:itemIndex, templateID:job ? job.part.id : 0,
+        dye:job && job.dye == true, hidden:job && job.hidden == true, hair:job ? int(job.hair) : 0,
+        baseline:job && job.baseline == true, tick:ticks, selfUnchanged:true,
+        ready:ready && panel && panel.parent == stage && stage.getChildIndex(panel) == stage.numChildren - 1});
+    }
     private function nextJob():void {
-      invariant(); clear(); ++itemIndex;
+      invariant(); observe(false); clear(); ++itemIndex;
       if (itemIndex >= jobs.length) {
         report({phase:"official-render-complete", jobs:jobs.length, playerID:self.ID, selfUnchanged:true}); timer.stop(); return;
       }
@@ -171,13 +198,13 @@ package {
         job.resolved = true;
       }
       var info:Object = clonePlayer(job); jobInfo = info;
-      label(job.part.name + " | " + job.part.id + " | " + (job.dye ? "dyed" : "original") + (int(job.part.categoryId) == 3 ? " | layer hair " + (job.hair == 1 ? "B" : "A") : ""), 10, 5);
+      label(job.part.name + " | " + job.part.id + " | " + (job.hidden ? "hidden suit" : job.dye ? "clone dyed" : "original") + (int(job.part.categoryId) == 3 ? " | layer hair " + (job.hair == 1 ? "B" : "A") : ""), 10, 5);
       // Legacy LoaderQueue removes shared-loader listeners on completion. Warm and use
       // each original owner sequentially so duplicate cold requests cannot lose callbacks.
       loadLayer(info, "show", job);
       startedAt = ticks; awaitingCapture = false;
       report({phase:"official-render-requested", job:itemIndex, templateID:job.part.id, pic:job.part.pic,
-        categoryId:job.part.categoryId, dye:job.dye, hair:job.hair, baseline:job.baseline == true, componentHairType:int(info.getHairType()) == 1 ? "B" : "A", cloneStyle:info.Style, cloneColors:info.Colors});
+        categoryId:job.part.categoryId, dye:job.dye, hidden:job.hidden == true, hair:job.hair, baseline:job.baseline == true, componentHairType:int(info.getHairType()) == 1 ? "B" : "A", cloneStyle:info.Style, clonePrivateStyle:info.getPrivateStyle(), cloneColors:info.Colors, showSuits:info.getShowSuits()});
     }
     private function snapshot(object:DisplayObject, x:Number, y:Number, scale:Number = 1, size:Rectangle = null):Object {
       var bounds:Rectangle = size || object.getBounds(object);
@@ -193,6 +220,7 @@ package {
       invariant();
       stage.setChildIndex(panel, stage.numChildren - 1);
       var job:Object = jobs[itemIndex], evidence:Array = [], member:Object, character:Object;
+      var suit:Boolean = int(job.part.categoryId) == 13, visibleSuit:Boolean = suit && !job.hidden;
       for each (member in members) {
         character = member.object;
         var details:Object = {kind:member.kind, sourceClass:getQualifiedClassName(character), completed:member.complete, frames:[]};
@@ -204,30 +232,49 @@ package {
           details.frames[1].currentFrame = character.currentFrame; details.frames[1].currentAction = String(character.currentAction);
           label("Show: stand / win", 10, 380, 280);
         } else if (member.kind == "room") {
-          for (var r:int = 0; r < 4; r++) { character.drawFrame(r); details.frames.push(snapshot(character as DisplayObject, 260 + r * 115, 220, Math.min(110 / Math.max(character.width,1), 175 / Math.max(character.height,1)))); }
+          for (var r:int = 0; r < 4; r++) { character.drawFrame(r); details.frames.push(snapshot(character as DisplayObject, 260 + r * 115, suit ? 280 : 220, Math.min(110 / Math.max(character.width,1), (suit ? 100 : 175) / Math.max(character.height,1)))); }
           label("Room: 0 / 1 / 2 / 3", 260, 380, 480);
         } else if (member.kind == "game") {
           var frames:Array = [0,5,23,34,38];
           for (var i:int = 0; i < frames.length; i++) {
-            character.drawFrame(int(frames[i]), 1, true); character.drawFrame(int(frames[i]), 3, false); character.drawFrame(int(frames[i]), 4, false);
+            if (visibleSuit) character.drawFrame(int(frames[i]), 6, true);
+            else { character.drawFrame(int(frames[i]), 1, true); character.drawFrame(int(frames[i]), 3, false); character.drawFrame(int(frames[i]), 4, false); }
             details.frames.push(snapshot(character as DisplayObject, 405 + i * 116, 75, 1, new Rectangle(-62,-83,115,95)));
+            details.frames[details.frames.length-1].frame = int(frames[i]);
+            details.frames[details.frames.length-1].state = visibleSuit ? "normal-suit" : "ordinary";
+            if (visibleSuit) {
+              character.drawFrame(int(frames[i]), 7, true);
+              details.frames.push(snapshot(character as DisplayObject, 405 + i * 116, 175, 1, new Rectangle(-62,-83,115,95)));
+              details.frames[details.frames.length-1].frame = int(frames[i]);
+              details.frames[details.frames.length-1].state = "alternate-game1/manual-branch-7";
+            }
           }
-          label("Game: 0 / 5 / 23 / 34 / 38", 405, 174, 590);
+          label(visibleSuit ? "Game normal / alternate: 0 / 5 / 23 / 34 / 38" : "Game: 0 / 5 / 23 / 34 / 38", 405, visibleSuit ? 48 : 174, 590);
+          if (visibleSuit) {
+            label("All 39 normal frames", 5, 408, 490); label("All 39 alternate game1 frames", 505, 408, 490);
+            for (var kind:int = 6; kind <= 7; kind++) for (var frame:int = 0; frame < 39; frame++) {
+              character.drawFrame(frame, kind, true);
+              var record:Object = snapshot(character as DisplayObject, (kind - 6) * 500 + (frame % 13) * 38, 432 + int(frame / 13) * 31, 0.32, new Rectangle(-62,-83,115,95));
+              record.frame = frame; record.state = kind == 6 ? "normal-suit" : "alternate-game1/manual-branch-7"; record.fullGrid = true; details.frames.push(record);
+            }
+          }
         } else {
           details.allLayerLoadsSucceeded = character.isAllLoadSucceed;
           var layerContent:DisplayObject = character.getContent() as DisplayObject;
-          if (member.kind == "layer-icon") details.frames.push(snapshot(layerContent, 920, 320));
+          if (member.kind == "layer-icon") details.frames.push(snapshot(layerContent, 920, suit ? 350 : 320));
+          else if (suit && member.kind != "layer-show") details.frames.push(snapshot(layerContent, member.kind == "layer-game1" ? 500 : 0, 540, Math.min(490 / Math.max(layerContent.width,1), 55 / Math.max(layerContent.height,1))));
           else {
             var maxWidth:Number = member.kind == "layer-show" ? 225 : 1000;
-            details.frames.push(snapshot(layerContent, member.kind == "layer-show" ? 765 : 0, member.kind == "layer-show" ? 215 : 408, Math.min(maxWidth / Math.max(layerContent.width, 1), 185 / Math.max(layerContent.height, 1))));
+            details.frames.push(snapshot(layerContent, member.kind == "layer-show" ? 765 : 0, member.kind == "layer-show" ? (suit ? 275 : 215) : 408, Math.min(maxWidth / Math.max(layerContent.width, 1), (suit ? 70 : 185) / Math.max(layerContent.height, 1))));
           }
         }
         evidence.push(details);
       }
       report({phase:"official-frame-ready", job:itemIndex, templateID:job.part.id, officialId:job.part.officialId,
-        categoryId:job.part.categoryId, name:job.part.name, dye:job.dye, hair:job.hair, baseline:job.baseline == true, componentHairType:int(jobInfo.getHairType()) == 1 ? "B" : "A", components:evidence,
+        categoryId:job.part.categoryId, name:job.part.name, dye:job.dye, hidden:job.hidden == true, showSuits:jobInfo.getShowSuits(), dyeUiAccepted:false, hair:job.hair, baseline:job.baseline == true, componentHairType:int(jobInfo.getHairType()) == 1 ? "B" : "A", components:evidence,
         selfUnchanged:true, gameplayAccepted:false, scope:"original AS3 component and layer render; passive snapshot, not actual battle"});
       awaitingCapture = true; reportedAt = ticks;
+      observe(true);
     }
     private function tick(event:TimerEvent):void {
       ++ticks;
@@ -249,7 +296,7 @@ package {
           original = fingerprint(self); initialized = true; client.visible = false; nextJob(); return;
         }
         invariant();
-        if (awaitingCapture) { if (ticks - reportedAt >= 16) nextJob(); return; }
+        if (awaitingCapture) { if (ticks - reportedAt >= 16) nextJob(); else observe(true); return; }
         var complete:Boolean = members.length > 0;
         for each (var member:Object in members) if (!member.complete) complete = false;
         if (complete) {
@@ -258,6 +305,7 @@ package {
           else if (members.length == 3) loadCharacter(jobInfo, "show");
           else if (members.length == 4) loadCharacter(jobInfo, "room");
           else if (members.length == 5) loadCharacter(jobInfo, "game");
+          else if (members.length == 6 && int(jobs[itemIndex].part.categoryId) == 13) loadLayer(jobInfo, "game1", jobs[itemIndex]);
           else capture();
         }
         else if (ticks - startedAt > 240) {
