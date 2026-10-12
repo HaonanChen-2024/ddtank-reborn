@@ -37,12 +37,17 @@ export const UserCalendar = define("/UserCalendar.ashx", async (ctx) => {
     const rows = await q<Row>(scoped.app.h, sql`SELECT a.*, EXISTS (
       SELECT 1 FROM app."EventClaims" c
       WHERE c."UserID" = ${userId} AND c."Kind" = 'active' AND c."Key" = a."ActiveID"::text
-    ) AS "Attended" FROM game."Active" a ORDER BY a."ActiveID" DESC`);
+    ) AS "Attended", EXISTS (
+      SELECT 1 FROM app."EventClaims" c
+      WHERE c."UserID" = ${userId} AND c."Kind" = 'exchange' AND c."Key" = a."ActiveID"::text
+    ) AS "Exchanged" FROM game."Active" a ORDER BY a."ActiveID" DESC`);
     const fields = spec(SPECS.active);
     const activities = rows.map((row) => {
       const entry = item("Item", fields, row);
       // Other modes have different code/grant/repetition rules; leave their original unknown state alone.
-      if (Number(row.HasKey) === 3) entry.attr("isAttend", row.Attended === true);
+      if (Number(row.ActiveType) === 0 && Number(row.HasKey) === 3) entry.attr("isAttend", row.Attended === true);
+      else if (Number(row.ActiveType) === 1 && Number(row.HasKey) === 6 && Number(row.IsOnly) === 1)
+        entry.attr("isAttend", row.Exchanged === true);
       return entry;
     });
     // Keep the existing sign-in date and counters, including its monthly normalization, after identity validation.

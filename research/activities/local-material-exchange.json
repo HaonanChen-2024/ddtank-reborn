@@ -1,0 +1,55 @@
+{
+  "owner": "ddtank-workshop/local-material-exchange",
+  "version": 1,
+  "provenance": "local-workshop-recipe-v1",
+  "Active": {
+    "ActiveID": 100003,
+    "Title": "本地材料兑换",
+    "Description": "本地自定义配方：2颗朱雀石1级兑换1颗玄武石1级，每角色本期一次。",
+    "Content": "请把同一堆中的朱雀石1级（物品11001，至少2颗）放入材料槽后兑换，其他合成石不收取。可使用绑定或未绑定材料；成功后扣除2颗，绑定奖励通过邮件发放。本配方为本地玩法，不是官方兑换比例。",
+    "AwardContent": "玄武石1级×1，永久绑定，通过邮件发放。",
+    "HasKey": 6,
+    "StartDate": "2026-10-12T16:00:00.000Z",
+    "EndDate": "2026-10-19T15:59:59.999Z",
+    "IsOnly": 1,
+    "Type": 0,
+    "ActionTimeContent": "2026-10-13 00:00 至 10-19 23:59（北京时间）",
+    "IsAdvance": false,
+    "GoodsExchangeTypes": "11",
+    "GoodsExchangeNum": "2",
+    "limitType": "1",
+    "limitValue": "1",
+    "IsShow": false,
+    "ActiveType": 1,
+    "IconID": 0,
+    "CanCreateCode": false
+  },
+  "Award": {
+    "ID": 100003,
+    "ActiveID": 100003,
+    "ItemID": 11005,
+    "Count": 1,
+    "ValidDate": 0,
+    "StrengthenLevel": 0,
+    "AttackCompose": 0,
+    "DefendCompose": 0,
+    "LuckCompose": 0,
+    "AgilityCompose": 0,
+    "Gold": 0,
+    "Money": 0,
+    "Sex": 0,
+    "Mark": 0
+  },
+  "Materials": [
+    {
+      "ID": 100003,
+      "ActiveID": 100003,
+      "TemplateID": 11001,
+      "ItemType": 0,
+      "ItemCount": 2,
+      "LimitValue": -1,
+      "IsBind": true,
+      "ValidDate": 0
+    }
+  ]
+}

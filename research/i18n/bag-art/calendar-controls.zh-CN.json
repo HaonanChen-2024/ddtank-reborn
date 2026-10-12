@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/coreii.swf",
+  "sourceAssetSha256": "1d2a8d5606995baa3e287608a55e18289b8d44070e137c8e35ee5ca4051e9b3f",
+  "sourceBase": "overlay",
+  "sourceBaseSha256": "0f7f5aae5d469b209a40a78bd63317d4d8ed46b76274d8ce1f245247adf7c824",
+  "fontFamily": "Workshop Calendar CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Calendar GetButton uses shared asset.core.GetButton; preserve the current hidden-controls overlay and all other classes. Disabled appearance is still produced by the original control.",
+  "bitmaps": [
+    {
+      "id": 20,
+      "tagCode": 36,
+      "className": "asset.core.GetButton",
+      "width": 179,
+      "height": 58,
+      "sourcePixelsSha256": "20bdd97528cfceab0b21ad7662bf8c181014aa157afb0c67dfbfb71f42cd200b",
+      "regions": [
+        {
+          "box": [
+            18,
+            10,
+            144,
+            35
+          ],
+          "text": "领取奖励",
+          "fontSize": 25,
+          "fill": "#fff4c8",
+          "stroke": "#3c240d",
+          "strokeWidth": 1.3,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "inpaintRadius": 3
+        }
+      ]
+    }
+  ]
+}

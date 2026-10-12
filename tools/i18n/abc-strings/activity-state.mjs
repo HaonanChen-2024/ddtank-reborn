@@ -52,6 +52,19 @@ function assembler() {
   };
 }
 
+// Match UserCalendar's explicit state owners. Type is a different legacy field;
+// ActiveType distinguishes ordinary claims from one-time material exchanges.
+function eligibleState(a, local, names, skip, label, xml = false) {
+  const field = id => { a.op(0x62, local); a.op(0x66, id); if (xml) a.op(0x73); };
+  field(names.type); a.op(0x24, 0); a.branch(0x14, `${label}Exchange`);
+  field(names.key); a.op(0x24, 3); a.branch(0x14, skip); a.branch(0x10, `${label}Accepted`);
+  a.label(`${label}Exchange`);
+  field(names.type); a.op(0x24, 1); a.branch(0x14, skip);
+  field(names.key); a.op(0x24, 6); a.branch(0x14, skip);
+  field(names.only); a.op(0x24, 1); a.branch(0x14, skip);
+  a.label(`${label}Accepted`);
+}
+
 // request(): clear only this feature's previous account state BEFORE launching the personal request.
 // The original URLVariables already contain Self.ID, MD5(Account.Password), and rnd.
 export function calendarOwnerPrefix() {
@@ -61,13 +74,14 @@ export function calendarOwnerPrefix() {
   o(0xd0); o(0x66, 33); o(0x63, 4); o(0x62, 4); j(0x12, "owner"); o(0x24, 0); o(0x63, 5);
   a.label("loop", true); o(0x62, 5); o(0x62, 4); o(0x66, 140); j(0x18, "owner");
   o(0x62, 4); o(0x62, 5); o(0x66, 116); o(0x63, 6);
-  o(0x62, 6); o(0x66, 227); o(0x24, 3); j(0x14, "next"); o(0x62, 6); o(0x27); o(0x61, 178);
+  eligibleState(a, 6, { type: 229, key: 227, only: 230 }, "next", "ownerState");
+  o(0x62, 6); o(0x27); o(0x61, 178);
   a.label("next"); o(0xc2, 5); j(0x10, "loop");
   a.label("owner"); o(0xd0); o(0x62, 3); o(0x61, 226); a.label("done");
   return a.finish();
 }
 
-// analyze(): reject a response for another account, then merge only HasKey3 true values into the original objects.
+// analyze(): reject another account's response, then merge only supported claims' true values into original objects.
 // No replacement arrays, forced button state, claim requests, or downgrade of a successful same-session callback.
 export function calendarStatePrefix() {
   const a = assembler(), o = (...x) => a.op(...x), j = (...x) => a.branch(...x);
@@ -79,10 +93,12 @@ export function calendarStatePrefix() {
   o(0x65, 1); o(0x6c, 2); o(0x66, 50); o(0x63, 8); o(0x24, 0); o(0x63, 6);
   a.label("outer", true); o(0x62, 6); o(0x62, 5); o(0x66, 43); j(0x18, "done");
   o(0x62, 5); o(0x62, 6); o(0x66, 51); o(0x63, 7);
-  o(0x62, 7); o(0x66, 44); o(0x24, 3); j(0x14, "nextOuter"); o(0x24, 0); o(0x63, 9);
+  eligibleState(a, 7, { type: 59, key: 44, only: 60 }, "nextOuter", "objectState");
+  o(0x24, 0); o(0x63, 9);
   a.label("inner", true); o(0x62, 9); o(0x62, 8); o(0x46, 43, 0); j(0x18, "nextOuter");
   o(0x62, 8); o(0x62, 9); o(0x66, 51); o(0x63, 10);
-  o(0x62, 10); o(0x66, 47); o(0x73); o(0x24, 3); j(0x14, "nextInner");
+  eligibleState(a, 10, { type: 61, key: 47, only: 62 }, "nextInner", "xmlState", true);
+  o(0x62, 7); o(0x66, 59); o(0x62, 10); o(0x66, 61); o(0x73); j(0x14, "nextInner");
   o(0x62, 7); o(0x66, 45); o(0x62, 10); o(0x66, 48); o(0x73); j(0x14, "nextInner");
   o(0x62, 10); o(0x66, 49); o(0x85); o(0x2c, 27); j(0x14, "nextInner");
   o(0x62, 7); o(0x26); o(0x61, 46);
@@ -128,7 +144,7 @@ function managerPatch(bytes) {
   const p = parseActivityAbc(bytes), state = p.strings.includes(OWNER), original = !state;
   assert.equal(p.strings[167], original ? "DailyLogList.ashx" : "UserCalendar.ashx");
   assert.equal(p.strings[394], "true", "activity-state requires the existing lowercase response fix first");
-  assert.equal(p.strings.length, original ? 395 : 398); assert.equal(p.names.length, original ? 226 : 229);
+  assert.equal(p.strings.length, original ? 395 : 400); assert.equal(p.names.length, original ? 226 : 231);
   assert.equal(hash(p.bodies.find(x => x.method === 33).code), RESPONSE_SHA, "activity response callback must stay unchanged");
   const name = "calendar:CalendarManager/request", target = p.bodies.find(x => x.method === 21);
   assert.equal(p.strings[p.methods[21]?.name], name);
@@ -140,8 +156,8 @@ function managerPatch(bytes) {
   for (const [id, text] of [[36, "PlayerManager"], [8, "Instance"], [37, "Self"], [33, "_eventActives"], [71, "int"], [140, "length"], [178, "isAttend"]]) assert.equal(p.strings[p.names[id].name], text);
   const prefix = calendarOwnerPrefix();
   if (state) {
-    assert.deepEqual(p.strings.slice(395), [OWNER, "HasKey", "ID"]);
-    assert.deepEqual(p.names.slice(226), [395, 396, 397].map(name => ({ kind: 7, name, ns: 4 })));
+    assert.deepEqual(p.strings.slice(395), [OWNER, "HasKey", "ID", "ActiveType", "IsOnly"]);
+    assert.deepEqual(p.names.slice(226), [395, 396, 397, 398, 399].map(name => ({ kind: 7, name, ns: 4 })));
     const ownerSlot = cat(u(226), b(0), u(0), u(71), u(0));
     assert.deepEqual(bytes.subarray(block.end - ownerSlot.length, block.end), ownerSlot, "unknown calendar owner slot");
     assert.deepEqual(target.code.subarray(7, 7 + prefix.length), prefix);
@@ -151,11 +167,11 @@ function managerPatch(bytes) {
   }
   checkBody(p, 21, name, REQUEST_SHA);
   assert.deepEqual([target.maxStack, target.localCount, target.initialScope, target.maxScope, target.exceptions], [4, 3, 4, 5, 0]);
-  const strings = [...p.strings, OWNER, "HasKey", "ID"]; strings[167] = "UserCalendar.ashx";
+  const strings = [...p.strings, OWNER, "HasKey", "ID", "ActiveType", "IsOnly"]; strings[167] = "UserCalendar.ashx";
   const code = insertCode(target.code, 7, prefix);
   const out = edits(bytes, [
     { start: p.stringCountOffset, end: p.stringPoolEnd, bytes: stringPool(strings) },
-    { start: p.nameCountOffset, end: p.namePoolEnd, bytes: cat(u(229), bytes.subarray(p.nameDataOffset, p.namePoolEnd), qname(4, 395), qname(4, 396), qname(4, 397)) },
+    { start: p.nameCountOffset, end: p.namePoolEnd, bytes: cat(u(231), bytes.subarray(p.nameDataOffset, p.namePoolEnd), ...[395, 396, 397, 398, 399].map(name => qname(4, name))) },
     { start: block.countOffset, end: block.end, bytes: cat(u(block.count + 1), bytes.subarray(block.dataOffset, block.end), u(226), b(0), u(0), u(71), u(0)) },
     { start: target.start, end: target.end, bytes: modifiedBody(bytes, target, code, 7, 7, prefix.length) },
   ]);
@@ -164,15 +180,16 @@ function managerPatch(bytes) {
 
 function analyzerPatch(bytes) {
   const p = parseActivityAbc(bytes), state = p.strings.includes(OWNER);
-  assert.equal(p.strings.length, state ? 87 : 70); assert.equal(p.names.length, state ? 59 : 40);
+  assert.equal(p.strings.length, state ? 89 : 70); assert.equal(p.names.length, state ? 63 : 40);
   assert.equal(p.namespaces.length, state ? 15 : 13); assert.ok(p.namespaceSets[1].includes(2));
   assert.deepEqual(p.namespaces[11], { kind: 24, name: 26 }); assert.equal(p.strings[26], "com.pickgliss.loader:DataAnalyzer");
   assert.deepEqual(p.names[20], { kind: 7, name: 37, ns: 11 }); assert.equal(p.strings[37], "onAnalyzeComplete");
   const addedStrings = ["calendar", "CalendarManager", "getInstance", "eventActives", "length", "HasKey", "ActiveID", "isAttend", "Item", OWNER,
-    "ddt.manager", "PlayerManager", "Instance", "Self", "ID", "UserID", "_onCompleteCall"];
+    "ddt.manager", "PlayerManager", "Instance", "Self", "ID", "UserID", "_onCompleteCall", "ActiveType", "IsOnly"];
   const addedNames = [qname(13, 71), qname(2, 72), qname(2, 73), qname(2, 74), qname(2, 75), qname(2, 76), qname(2, 77),
     qname(2, 75, true), qname(2, 76, true), qname(2, 77, true), qname(2, 78), cat(b(27), u(1)), qname(2, 79),
-    qname(14, 81), qname(2, 82), qname(2, 83), qname(2, 84), qname(2, 85, true), qname(11, 86)];
+    qname(14, 81), qname(2, 82), qname(2, 83), qname(2, 84), qname(2, 85, true), qname(11, 86),
+    qname(2, 87), qname(2, 88), qname(2, 87, true), qname(2, 88, true)];
   const target = p.bodies.find(x => x.method === 7), prefix = calendarStatePrefix();
   assert.equal(p.strings[p.methods[7]?.name], "ddt.data.analyze:CalendarSignAnalyze/analyze");
   // Insert just after the success branch test, before date/sign data or callbacks become visible.
@@ -198,7 +215,7 @@ function analyzerPatch(bytes) {
   const out = edits(bytes, [
     { start: p.stringCountOffset, end: p.stringPoolEnd, bytes: stringPool([...p.strings, ...addedStrings]) },
     { start: p.namespaceCountOffset, end: p.namespacePoolEnd, bytes: cat(u(15), bytes.subarray(p.namespaceDataOffset, p.namespacePoolEnd), b(22), u(70), b(22), u(80)) },
-    { start: p.nameCountOffset, end: p.namePoolEnd, bytes: cat(u(59), bytes.subarray(p.nameDataOffset, p.namePoolEnd), ...addedNames) },
+    { start: p.nameCountOffset, end: p.namePoolEnd, bytes: cat(u(63), bytes.subarray(p.nameDataOffset, p.namePoolEnd), ...addedNames) },
     { start: target.start, end: target.end, bytes: modifiedBody(bytes, target, code, 12, at, prefix.length) },
   ]);
   analyzerPatch(out); return { out, changed: true };

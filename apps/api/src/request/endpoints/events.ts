@@ -27,9 +27,10 @@ const MSG: Record<number, string> = {
   7: "活动尚未开始。",
   8: "活动已结束。",
   10: "您没有领取该奖励的权限。",
+  11: "该活动不能直接领取，请通过对应活动界面操作。",
 };
 
-interface ActiveRow { ActiveID: number; Title: string; HasKey: number; IsOnly: number; StartDate: Date; EndDate: Date | null }
+interface ActiveRow { ActiveID: number; Title: string; HasKey: number; IsOnly: number; ActiveType: number; StartDate: Date; EndDate: Date | null }
 interface AwardRow {
   ItemID: number; Count: number; ValidDate: number; Gold: number; Money: number; MaxCount: number | null;
   StrengthenLevel: number; AttackCompose: number; DefendCompose: number; LuckCompose: number; AgilityCompose: number;
@@ -42,8 +43,10 @@ export async function pullDown(app: AppCtx, activeId: number, code: string, user
     outcome = await app.h.db.transaction(async (tx) => {
       const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
       const h = txApp.h;
-      const a = await q1<ActiveRow>(h, sql`SELECT "ActiveID","Title","HasKey","IsOnly","StartDate","EndDate" FROM game."Active" WHERE "ActiveID" = ${activeId}`);
+      const a = await q1<ActiveRow>(h, sql`SELECT "ActiveID","Title","HasKey","IsOnly","ActiveType","StartDate","EndDate" FROM game."Active" WHERE "ActiveID" = ${activeId}`);
       if (!a) return 1;
+      // Non-free activities must run their own checks (e.g. packet 31 consumes materials). HasKey alone is not authority.
+      if (Number(a.ActiveType) !== 0) return 11;
       const start = new Date(a.StartDate), end = a.EndDate === null ? new Date(NaN) : new Date(a.EndDate);
       if (![start, end, now].every((d) => Number.isFinite(d.getTime())) || start > end) return 3;
       if (now < start) return 7;

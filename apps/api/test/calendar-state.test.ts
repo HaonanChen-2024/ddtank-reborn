@@ -89,6 +89,25 @@ describe("authenticated Calendar claim snapshot", () => {
     expect(entry(personal, 103)).toContain('isAttend="false"');
   });
 
+  it("uses only the owner's exchange claim for a once-per-event material activity", async () => {
+    for (const [id, activeType, hasKey, isOnly] of [[105, 1, 6, 1], [106, 1, 6, 0], [107, 0, 6, 1], [108, 1, 3, 1]])
+      await h.db.insert(game.Active).values({ ActiveID: id!, Title: "材料兑换", ActiveType: activeType!, HasKey: hasKey!, IsOnly: isOnly!,
+        StartDate: new Date("2020-01-01Z"), EndDate: new Date("2100-01-01Z"), GoodsExchangeTypes: "11", GoodsExchangeNum: "2", limitType: "1", limitValue: "1" });
+    await h.db.execute(sql`INSERT INTO app."EventClaims" ("UserID","Kind","Key") VALUES (111, 'active', '105'), (112, 'exchange', '105')`);
+    expect(entry((await request()).text, 105)).toContain('isAttend="false"');
+    expect(entry((await request("112", md5("game-two"))).text, 105)).toContain('isAttend="true"');
+    await h.db.execute(sql`INSERT INTO app."EventClaims" ("UserID","Kind","Key") VALUES (111, 'exchange', '105')`);
+    const personal = await request(), before = await counts();
+    expect(entry(personal.text, 105)).toContain('isAttend="true"');
+    expect(entry(personal.text, 105)).toContain('GoodsExchangeNum="2"');
+    expect(personal.response.headers["cache-control"]).toBe("no-store");
+    for (const id of [106, 107, 108]) expect(entry(personal.text, id)).not.toContain("isAttend");
+    expect(await pullDown(built.ctx, 105, "", 111)).toBe(11); expect(await counts()).toEqual(before);
+    const def = TEMPLATES.find(x => x.endpoint === "/ActiveList.ashx")!; await built.ctx.cache.rebuild(def);
+    const shared = await built.app.inject({url: "/Request/ActiveList.xml"});
+    expect(inflateSync(shared.rawPayload).toString("utf8")).not.toContain("isAttend");
+  });
+
   it.each([["111", null], ["111", "bad"], ["111", "game-one"], ["111", md5("web-one")], ["111", md5("wrong")],
     ["111junk", md5("game-one")], ["0", md5("game-one")], ["2147483648", md5("game-one")], ["999", md5("game-one")]])
   ("rejects invalid identity %s without calendar or reward writes", async (uid, key) => {

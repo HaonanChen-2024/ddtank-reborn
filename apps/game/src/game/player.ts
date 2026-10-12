@@ -45,6 +45,8 @@ export interface RoomMember {
   readonly playerState: number;
   readonly info: PlayerInfo;
   onRoomLeft?(): void;
+  /** Real players defer a synchronous room entry while persistence is pending. */
+  runRoomEntry?(work: () => void): void | Promise<void>;
 }
 
 export class GamePlayer implements RoomMember {
@@ -381,8 +383,33 @@ export class GamePlayer implements RoomMember {
   }
 
   // -------------------------------------------------------------------- persistence
+  private persistenceTail: Promise<void> = Promise.resolve();
+  private persistencePending = 0;
+
+  /** Serialize autosave, explicit save and quit with committed inventory transactions.
+   * Take inventory snapshots inside this lock, never before waiting for an earlier save. */
+  withPersistenceLock<T>(work: () => Promise<T>): Promise<T> {
+    this.persistencePending++;
+    const result = this.persistenceTail.then(work);
+    this.persistenceTail = result.then(() => { this.persistencePending--; }, () => { this.persistencePending--; });
+    return result;
+  }
+
+  /** RoomMgr actions are synchronous, but may have been queued before packet 31.
+   * Keep idle entry synchronous; busy entry must finish after the transaction so
+   * the fight timer cannot mutate a bag during its COMMIT-to-memory window. */
+  runRoomEntry(work: () => void): void | Promise<void> {
+    const enter = () => { if (this.isActive && !this.quitting) work(); };
+    if (this.persistencePending === 0) return enter();
+    return this.withPersistenceLock(async () => enter());
+  }
+
   /** GamePlayer.SaveIntoDatabase (GamePlayer.cs:4450): player info + every saved bag's dirty/removed items. */
   async saveIntoDatabase(db: Database): Promise<void> {
+    return this.withPersistenceLock(() => this.saveUnlocked(db));
+  }
+
+  private async saveUnlocked(db: Database): Promise<void> {
     await savePlayerInfo(db, this.info, this.match);
     for (const bag of this.allBags()) {
       if (!bag.saveToDb) continue;

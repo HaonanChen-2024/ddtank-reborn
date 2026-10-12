@@ -1,0 +1,740 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/calendar.swf",
+  "sourceAssetSha256": "b8cef4fba70c09b357a1f3ff6575dde4cd5116576a62ab749120b1668aff2eb1",
+  "sourceBase": "shipped",
+  "sourceBaseSha256": "b8cef4fba70c09b357a1f3ff6575dde4cd5116576a62ab749120b1668aff2eb1",
+  "fontFamily": "Workshop Calendar CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Candidate only. Original bitmap bounds and noncaption pixels are preserved. Tag35 JPEG artwork is losslessly repackaged as PNG within the same tag code; no layout or behavior edits.",
+  "bitmaps": [
+    {
+      "id": 3,
+      "tagCode": 36,
+      "className": "Calendar.Grid.Title",
+      "width": 417,
+      "height": 99,
+      "sourcePixelsSha256": "909a49e6d9771abb657dc75cba1657ec5cdc762bcab9cc7aa311278500437506",
+      "tagSha256": "a612f7904e46fa32d6aeea23c4f612a0b74856073a7ee0501c2ae066d16d81fb",
+      "regions": [
+        {
+          "box": [
+            18,
+            74,
+            53,
+            22
+          ],
+          "text": "周日",
+          "fontSize": 12,
+          "fill": "#e54359",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            74,
+            74,
+            53,
+            22
+          ],
+          "text": "周一",
+          "fontSize": 12,
+          "fill": "#804d1b",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            130,
+            74,
+            53,
+            22
+          ],
+          "text": "周二",
+          "fontSize": 12,
+          "fill": "#804d1b",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            186,
+            74,
+            53,
+            22
+          ],
+          "text": "周三",
+          "fontSize": 12,
+          "fill": "#804d1b",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            242,
+            74,
+            53,
+            22
+          ],
+          "text": "周四",
+          "fontSize": 12,
+          "fill": "#804d1b",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            298,
+            74,
+            53,
+            22
+          ],
+          "text": "周五",
+          "fontSize": 12,
+          "fill": "#804d1b",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            354,
+            74,
+            53,
+            22
+          ],
+          "text": "周六",
+          "fontSize": 12,
+          "fill": "#ff7800",
+          "sample": [
+            409,
+            74,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            367,
+            49,
+            50,
+            19
+          ],
+          "text": "今天",
+          "fontSize": 12,
+          "fill": "#bf8b40",
+          "transparent": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "tagCode": 36,
+      "className": "Calendar.Activity.iconTime",
+      "width": 96,
+      "height": 27,
+      "sourcePixelsSha256": "a1b4d40f85906b391c2219fd6e942ef012bd05fe774d47520cb74753c1e975f6",
+      "tagSha256": "221926043c632543571809a5f4703d618da103741e344ee8edd92d56752879fb",
+      "regions": [
+        {
+          "box": [
+            30,
+            3,
+            66,
+            23
+          ],
+          "text": "时间：",
+          "fontSize": 16,
+          "fill": "#8c371e",
+          "transparent": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "tagCode": 36,
+      "className": "Calendar.Activity.BackBack",
+      "width": 68,
+      "height": 29,
+      "sourcePixelsSha256": "5489fe38404446da9ea1ec065a36697736cf8d89af7065be4bda5f14d4fe8037",
+      "tagSha256": "3ebf4fcc02331d47bb3ff5d687f9fca1e37b61f9441151959705301653d72056",
+      "regions": [
+        {
+          "box": [
+            17,
+            4,
+            37,
+            21
+          ],
+          "text": "返回",
+          "fontSize": 12,
+          "fill": "#fff4c8",
+          "stroke": "#393116",
+          "strokeWidth": 0.6,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "tagCode": 36,
+      "className": "Calendar.SignedAward.Title",
+      "width": 417,
+      "height": 44,
+      "sourcePixelsSha256": "6e133497705eb5220628016ff21e276ef0fac8ff4137a08048c8a8d87c3ca3f8",
+      "tagSha256": "c00e5cd9b5b74b9d07a2bd5eca49435d592e39b4f9cf674b7afa68565a037ac0",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            175,
+            26
+          ],
+          "text": "累计签到奖励：",
+          "fontSize": 16,
+          "fill": "#fff1b2",
+          "transparent": true,
+          "inkMargin": 1,
+          "stroke": "#252007",
+          "strokeWidth": 1.2
+        },
+        {
+          "box": [
+            269,
+            13,
+            100,
+            23
+          ],
+          "text": "累计次数：",
+          "fontSize": 14,
+          "fill": "#d1fc61",
+          "stroke": "#1b4103",
+          "strokeWidth": 1,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "inpaintSeed": {
+            "min": [
+              90,
+              110,
+              0
+            ],
+            "max": [
+              255,
+              255,
+              170
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "tagCode": 35,
+      "className": "Calendar.Activity.picc",
+      "width": 179,
+      "height": 58,
+      "sourcePixelsSha256": "1ebce6260eaa0fccd03b0275bc3a8c524fc13c9a988d058abd7ba8f8da68e61d",
+      "tagSha256": "15fa2eaede28c36d4b20feb216dfd5244ed44ec478b9f840f2603c1558ed24d2",
+      "regions": [
+        {
+          "box": [
+            28,
+            10,
+            125,
+            35
+          ],
+          "text": "充值",
+          "fontSize": 26,
+          "fill": "#fff4c8",
+          "stroke": "#393116",
+          "strokeWidth": 0.6,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "inpaintSeed": {
+            "min": [
+              170,
+              145,
+              85
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "tagCode": 36,
+      "className": "Calendar.Activity.openBag",
+      "width": 82,
+      "height": 27,
+      "sourcePixelsSha256": "893c73170dd41ec86285c6ebe5c298ee83d50b57224838f8a64ce0bd448df64f",
+      "tagSha256": "92742957b62ac0634bfd6960c6d3d326e04e3e707487b19687ed3adaf5dae0f5",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            74,
+            22
+          ],
+          "text": "打开背包",
+          "fontSize": 12,
+          "fill": "#fff4c8",
+          "stroke": "#393116",
+          "strokeWidth": 0.4,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "tagCode": 36,
+      "className": "Calendar.LuckyNum.Title",
+      "width": 240,
+      "height": 26,
+      "sourcePixelsSha256": "6e44a96e5dec4e2d1408877db9da7df68309b26d32da35e31d51203cf0dcac74",
+      "tagSha256": "36767877232da1fa5d679743a882764e4546bccf28ce0a70806793f44ddefc95",
+      "regions": [
+        {
+          "box": [
+            5,
+            5,
+            178,
+            19
+          ],
+          "text": "今日谁是幸运星？",
+          "fontSize": 13,
+          "fill": "#fdda09",
+          "sample": [
+            234,
+            5,
+            1,
+            19
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "stroke": "#191300",
+          "strokeWidth": 1
+        },
+        {
+          "box": [
+            183,
+            3,
+            48,
+            22
+          ],
+          "text": "新",
+          "fontSize": 15,
+          "fill": "#9afd05",
+          "sample": [
+            234,
+            3,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "stroke": "#183600",
+          "strokeWidth": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "tagCode": 36,
+      "className": "Calendar.LuckyNum.Grid",
+      "width": 224,
+      "height": 46,
+      "sourcePixelsSha256": "07122f261d54ce07d5fbf6ac33204f130de0bd2f96a4cfd0e1f370df96174d75",
+      "tagSha256": "9adb061028a0d5e326449627a73a1f31550104d20ca80b06196bb302be94541d",
+      "regions": [
+        {
+          "box": [
+            4,
+            2,
+            64,
+            22
+          ],
+          "text": "幸运数字",
+          "fontSize": 11,
+          "fill": "#fff0ce",
+          "sample": [
+            3,
+            2,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            73,
+            2,
+            65,
+            22
+          ],
+          "text": "我的数字",
+          "fontSize": 11,
+          "fill": "#fff0ce",
+          "sample": [
+            3,
+            2,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            144,
+            2,
+            76,
+            22
+          ],
+          "text": "明日预测",
+          "fontSize": 11,
+          "fill": "#fff0ce",
+          "sample": [
+            3,
+            2,
+            1,
+            22
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "tagCode": 35,
+      "className": "Calendar.SignedAward.Received",
+      "width": 97,
+      "height": 67,
+      "sourcePixelsSha256": "3807bc6a8eac97677da8da37106a61b0afcf9caa34c9f2c1e314d7a76e661e35",
+      "tagSha256": "aac538fa43c1e8fc53d72fb7ee88e06b29131b547e1e279045d36c8beea32c0a",
+      "regions": [
+        {
+          "box": [
+            42,
+            3,
+            54,
+            42
+          ],
+          "text": "已领取",
+          "fontSize": 11,
+          "fill": "#ffe195",
+          "sample": [
+            50,
+            7,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "clearPolygon": [
+            [
+              51,
+              5
+            ],
+            [
+              93,
+              27
+            ],
+            [
+              86,
+              42
+            ],
+            [
+              44,
+              20
+            ]
+          ],
+          "flatFill": [
+            197,
+            165,
+            121,
+            255
+          ],
+          "rotationDegrees": 29,
+          "stroke": "#b34e2c",
+          "strokeWidth": 0.7,
+          "textOffsetY": 0
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "tagCode": 36,
+      "className": "Calendar.Activity.iconGive",
+      "width": 97,
+      "height": 34,
+      "sourcePixelsSha256": "9ecea63093306022060ad09ee3440ec03e60b144264c6d976813c9a8ea05bf36",
+      "tagSha256": "ef5ec0e3f19cc7ad3637e15b65cf28491dc52a3bf07f68ce1767b8d7bc836a3c",
+      "regions": [
+        {
+          "box": [
+            33,
+            8,
+            64,
+            25
+          ],
+          "text": "奖励：",
+          "fontSize": 15,
+          "fill": "#8c371e",
+          "transparent": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "tagCode": 36,
+      "className": "Calendar.Grid.GetBack",
+      "width": 108,
+      "height": 37,
+      "sourcePixelsSha256": "ab499be3c87892f7e4bead22b2c240c30ab469246e0abb35219ee21ba8181d51",
+      "tagSha256": "36fdd27b81edb7e34ca902dc4ea1be9d70678840223abdec6da451467f4cb964",
+      "regions": [
+        {
+          "box": [
+            7,
+            6,
+            94,
+            26
+          ],
+          "text": "每日领取",
+          "fontSize": 15,
+          "fill": "#fff4c8",
+          "stroke": "#393116",
+          "strokeWidth": 0.8,
+          "inpaint": true,
+          "sample": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "tagCode": 35,
+      "className": "Calendar.Activity.iconContent",
+      "width": 94,
+      "height": 43,
+      "sourcePixelsSha256": "eb5215b3f5d3bf245aaa05668cf0d24cef96e3b0fbcdda2a2017d74dc60e1c22",
+      "tagSha256": "88710aafafdc2c75ad41a16049cdaae6574f24a93aa8d5b0b965d1684b42c5ec",
+      "regions": [
+        {
+          "box": [
+            29,
+            9,
+            65,
+            28
+          ],
+          "text": "内容：",
+          "fontSize": 15,
+          "fill": "#51442f",
+          "transparent": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "tagCode": 36,
+      "className": "Calendar.Activity.pwd",
+      "width": 69,
+      "height": 19,
+      "sourcePixelsSha256": "71672b7d0704b5d0ce3b0e6a09e6a198d8c66a525d835dea767648b0050674c4",
+      "tagSha256": "d8431602e54cd9baf1a76eed95e7de3480760f6ba0ee7782cdb6a6b41dfe1d98",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            69,
+            19
+          ],
+          "text": "兑换码：",
+          "fontSize": 12,
+          "fill": "#9aed35",
+          "transparent": true,
+          "inkMargin": 1,
+          "stroke": "#122100",
+          "strokeWidth": 1
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "tagCode": 36,
+      "className": "Calendar.Activity.iconNew",
+      "width": 42,
+      "height": 15,
+      "sourcePixelsSha256": "dd2122fbb59eac9959cedbc2afb8988783f2c5c7e91f4b5ad39ceda4fd41326b",
+      "tagSha256": "5bb154422dce2796e82bd6a7d67e42540c5e5ef75de74b115995a8576c562106",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            42,
+            15
+          ],
+          "text": "新活动",
+          "fontSize": 9,
+          "fill": "#a3ef05",
+          "transparent": true,
+          "inkMargin": 1,
+          "stroke": "#224000",
+          "strokeWidth": 1
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "tagCode": 36,
+      "className": "Calendar.Activity.iconHot",
+      "width": 59,
+      "height": 28,
+      "sourcePixelsSha256": "82ff4791fb4808e5f3ee85d30b55e93420d02210d89a7f17a0f4802323a35945",
+      "tagSha256": "1af8ebec727696a12b82ddafac03716a2fcda2621a01d630b8bb945b54f44db6",
+      "regions": [
+        {
+          "box": [
+            13,
+            7,
+            38,
+            18
+          ],
+          "text": "热门",
+          "fontSize": 10,
+          "fill": "#fff517",
+          "sample": [
+            25,
+            5,
+            1,
+            1
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "stroke": "#cd2000",
+          "strokeWidth": 0.6
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "tagCode": 35,
+      "className": "Calendar.List.Title",
+      "width": 269,
+      "height": 46,
+      "sourcePixelsSha256": "a34b7a3ce96325232a35767654000ad81ca6e1e396119b2bb7e73ce5ca3c1509",
+      "tagSha256": "4bbe54b480a38d3eee57dc667f8665d71aaab03e93b27fd4797a976872f086e1",
+      "regions": [
+        {
+          "box": [
+            37,
+            7,
+            192,
+            34
+          ],
+          "text": "活动与兑换",
+          "fontSize": 19,
+          "fill": "#ffce63",
+          "sample": [
+            227,
+            7,
+            1,
+            34
+          ],
+          "preserveAlpha": true,
+          "inkMargin": 1,
+          "stroke": "#43210e",
+          "strokeWidth": 1.4
+        }
+      ]
+    }
+  ]
+}

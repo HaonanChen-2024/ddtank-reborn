@@ -1,6 +1,7 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { inflateSync } from "node:zlib";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -69,6 +70,33 @@ async function counts() {
 const empty = { claims: 0, items: 0, mails: 0, taken: 0 };
 
 describe("ActivePullDown atomic reward delivery", () => {
+  it("serves configured material fields through the original compressed ActiveList route and keeps ordinary activities unchanged", async () => {
+    await h.db.execute(sql`UPDATE game."Active" SET "ActiveType"=1,"HasKey"=6,"GoodsExchangeTypes"='11',"GoodsExchangeNum"='2',"limitType"='1',"limitValue"='1' WHERE "ActiveID"=${activeId}`);
+    await h.db.insert(game.Active).values({ ActiveID: 102, Title: "Ordinary", HasKey: 3, StartDate: now, EndDate: now });
+    await built.ctx.cache.buildAll(d => d.endpoint === "/ActiveList.ashx");
+    const response = await built.app.inject({ method: "GET", url: "/Request/ActiveList.xml" });
+    expect(response.statusCode).toBe(200);
+    const text = inflateSync(response.rawPayload).toString("utf8");
+    const exchange = text.match(/<Item ActiveID="101"[^>]*\/>/)?.[0];
+    expect(exchange).toContain('ActiveType="1" IsAdvance="false" GoodsExchangeTypes="11" GoodsExchangeNum="2" limitType="1" limitValue="1"');
+    const ordinary = text.match(/<Item ActiveID="102"[^>]*\/>/)?.[0];
+    expect(ordinary).toContain('ActiveType="0" IsAdvance="false" GoodsExchangeTypes="" GoodsExchangeNum="" limitType="" limitValue=""');
+    expect(text).not.toContain("isAttend=");
+  });
+
+  it.each([1, 2, -1])("does not grant or consume a claim for non-free ActiveType %i even if HasKey allows it", async (activeType) => {
+    await award();
+    await h.db.execute(sql`UPDATE game."Active" SET "ActiveType"=${activeType} WHERE "ActiveID"=${activeId}`);
+    expect(await claim()).toBe(11);
+    const response = await built.app.inject({ method: "GET", url: `/Request/ActivePullDown.ashx?selfid=${userId}&activeID=${activeId}` });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe('<Result value="false" message="该活动不能直接领取，请通过对应活动界面操作。" />');
+    expect(await counts()).toEqual(empty);
+    await h.db.execute(sql`UPDATE game."Active" SET "ActiveType"=0 WHERE "ActiveID"=${activeId}`);
+    expect(await claim()).toBe(0);
+    expect(await counts()).toEqual({ claims: 1, items: 1, mails: 1, taken: 0 });
+  });
+
   it("delivers every attachment once, batches by five and preserves template/player properties", async () => {
     const templates = await q(h, sql`SELECT * FROM game."Shop_Goods" ORDER BY "TemplateID"`);
     const player = await q1(h, sql`SELECT * FROM player."Sys_Users_Detail" WHERE "UserID" = ${userId}`);

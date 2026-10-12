@@ -6,7 +6,7 @@
  *   (world boss open/close + rank rewards, league notice 42, elite state 162/1, weekly reset, double exp/gold).
  * Every claim goes through `claimOnce` (app."EventClaims") so a repeated packet never grants twice.
  */
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, notInArray, sql } from "drizzle-orm";
 import { GSPacket } from "@ddt/protocol";
 import { player as P } from "@ddt/db";
 import type { GamePlayer } from "../game/player.js";
@@ -17,6 +17,7 @@ import { createItemBox } from "./use.js";
 import { mailItems } from "./items.js";
 import * as Out from "../packets/out.js";
 import type { HandlerRegistry } from "./registry.js";
+import { exchangeActivity } from "../game/activity-exchange.js";
 
 // ------------------------------------------------------------------ runtime
 export interface BossPlayer { x: number; y: number; state: number }
@@ -205,17 +206,26 @@ async function finishWorldBoss(ctx: ServerContext, rt: EventsRuntime, w: ActiveW
   const list = rankList(rt);
   for (const [i, r] of list.entries()) {
     const tier = awards.filter((a) => i + 1 <= a.rank).sort((a, b) => a.rank - b.rank)[0];
-    if (!tier || !(await claimOnce(ctx.db.db, r.id, "worldboss", w.key.slice(0, 64)))) continue;
+    if (!tier) continue;
     const rewards: Reward[] = [...(tier.items ?? [])];
     if (tier.giftToken) rewards.push({ templateId: -1100, count: tier.giftToken });
     if (tier.gold) rewards.push({ templateId: -100, count: tier.gold });
-    const pl = ctx.world.get(r.id);
+    let pl = ctx.world.get(r.id);
+    // A quit already in progress owns the final save. Wait outside its lock,
+    // then resolve the current session again instead of rewarding a stale one.
+    while (pl?.quitting) { await pl.quitting; pl = ctx.world.get(r.id); }
     if (pl) {
-      const g = grantRewards(pl, rewards, ctx.templates.findItem, ctx.now());
-      if (g.overflow.length) await mailItems(ctx, pl, g.overflow, "Boss mundial", 12);
-      pl.sendMessage(0, `Boss mundial: ${i + 1}º lugar (${r.damage} de dano). Prêmio: ${g.summary.join(", ")}.`);
+      const recipient = pl;
+      // Queue before any claim await: a later quit/autosave must save these
+      // rewards after the exchange's COMMIT and in-memory deduction.
+      await recipient.withPersistenceLock(async () => {
+        if (!(await claimOnce(ctx.db.db, r.id, "worldboss", w.key.slice(0, 64)))) return;
+        const g = grantRewards(recipient, rewards, ctx.templates.findItem, ctx.now());
+        if (g.overflow.length) await mailItems(ctx, recipient, g.overflow, "Boss mundial", 12);
+        recipient.sendMessage(0, `Boss mundial: ${i + 1}º lugar (${r.damage} de dano). Prêmio: ${g.summary.join(", ")}.`);
+      });
     } else {
-      await offlineCurrency(ctx, r.id, rewards);
+      if (await claimOnce(ctx.db.db, r.id, "worldboss", w.key.slice(0, 64))) await offlineCurrency(ctx, r.id, rewards);
     }
   }
   const final = worldBossRanking(rt, true);
@@ -243,13 +253,45 @@ export async function weeklyReset(ctx: ServerContext, key: string): Promise<bool
   if (!(await claimOnce(db, 0, "weekly_reset", key.slice(0, 64)))) return false;
   // Last* are snapshots (SP_Sys_Update_Users_WeekList / _Consortia_WeekList); apps/api rank.ts computes Add* = now − snapshot.
   await db.execute(sql`UPDATE player."Consortia" SET "LastWeekRiches" = "LastWeekRiches" + "AddWeekRiches", "AddWeekRiches" = 0, "LastWeekHonor" = "Honor", "AddWeekHonor" = 0`);
-  await db.execute(sql`UPDATE player."Sys_Users_Detail" SET "LastWeekGP" = "GP", "AddWeekGP" = 0, "LastWeekOffer" = "Offer", "AddWeekOffer" = 0, "AddWeekLeagueScore" = 0`);
-  await db.execute(sql`UPDATE player."Sys_User_Match_Info" SET "weeklyScore" = 0, "weeklyGameCount" = 0, "WeeklyWinCount" = 0`);
-  for (const p of ctx.world.all()) {
-    const c = p.info as unknown as Record<string, number>;
-    c.LastWeekGP = c.GP ?? 0; c.AddWeekGP = 0; c.LastWeekOffer = c.Offer ?? 0; c.AddWeekOffer = 0; c.AddWeekLeagueScore = 0;
-    const m = p.match as unknown as Record<string, number>;
-    m.weeklyScore = 0; m.weeklyGameCount = 0; m.WeeklyWinCount = 0;
+  const online = ctx.world.all(), onlineIds = online.map((p) => p.id);
+  const matchReset = { weeklyScore: 0, weeklyGameCount: 0, WeeklyWinCount: 0 };
+  // An online exchange/save can hold an older full profile. Exclude it from the
+  // bulk SQL; update its DB fields and memory together under the same lock.
+  await db.update(P.Sys_Users_Detail).set({ LastWeekGP: sql`${P.Sys_Users_Detail.GP}`, AddWeekGP: 0,
+    LastWeekOffer: sql`${P.Sys_Users_Detail.Offer}`, AddWeekOffer: 0, AddWeekLeagueScore: 0 })
+    .where(onlineIds.length ? notInArray(P.Sys_Users_Detail.UserID, onlineIds) : undefined);
+  await db.update(P.Sys_User_Match_Info).set(matchReset)
+    .where(onlineIds.length ? notInArray(P.Sys_User_Match_Info.UserID, onlineIds) : undefined);
+  const pending = new Set(onlineIds), resetSessions = new Set<GamePlayer>();
+  for (;;) {
+    // SQL/lock awaits can admit a new login or replace an old session. Work by
+    // UserID, and include every current session rather than freezing the array.
+    for (const p of ctx.world.all()) if (!resetSessions.has(p)) pending.add(p.id);
+    const id = pending.values().next().value;
+    if (id === undefined) break;
+    pending.delete(id);
+    const p = ctx.world.get(id);
+    if (p?.quitting) { await p.quitting; pending.add(id); continue; } // Never wait for quit while holding its save lock.
+    if (!p) {
+      // This ID was excluded from bulk SQL but quit before its turn. Read the
+      // final saved GP/Offer in SQL; the abandoned object's fields are stale.
+      await db.update(P.Sys_Users_Detail).set({ LastWeekGP: sql`${P.Sys_Users_Detail.GP}`, AddWeekGP: 0,
+        LastWeekOffer: sql`${P.Sys_Users_Detail.Offer}`, AddWeekOffer: 0, AddWeekLeagueScore: 0 })
+        .where(eq(P.Sys_Users_Detail.UserID, id));
+      await db.update(P.Sys_User_Match_Info).set(matchReset).where(eq(P.Sys_User_Match_Info.UserID, id));
+      continue;
+    }
+    const applied = await p.withPersistenceLock(async () => {
+      if (ctx.world.get(id) !== p || p.quitting) return false;
+      const detailReset = { LastWeekGP: p.info.GP ?? 0, AddWeekGP: 0, LastWeekOffer: p.info.Offer ?? 0, AddWeekOffer: 0, AddWeekLeagueScore: 0 };
+      await db.update(P.Sys_Users_Detail).set(detailReset).where(eq(P.Sys_Users_Detail.UserID, p.id));
+      await db.update(P.Sys_User_Match_Info).set(matchReset).where(eq(P.Sys_User_Match_Info.UserID, p.id));
+      Object.assign(p.info, detailReset);
+      Object.assign(p.match, matchReset);
+      return true;
+    });
+    if (applied) resetSessions.add(p);
+    else pending.add(id);
   }
   return true;
 }
@@ -518,6 +560,7 @@ export async function firstRecharge(ctx: ServerContext, p: GamePlayer): Promise<
 }
 
 export function registerEvents(r: HandlerRegistry): void {
+  r.player(31, "GOODS_EXCHANGE", async (ctx, p, pkt) => { await exchangeActivity(ctx, p, pkt); });
   r.player(13, "DAILY_AWARD", (ctx, p, pkt) => {
     const type = pkt.readInt();
     if (throttled(p, 500)) return;

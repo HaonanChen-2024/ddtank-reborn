@@ -86,12 +86,13 @@ function execute(code, p, { selfId, manager, xml, thisObject, complete = () => {
 }
 const managerAbc = abc(state, "calendar/CalendarManager"), analyzerAbc = abc(state, "ddt/data/analyze/CalendarSignAnalyze");
 function model(owner = 111) {
-  const list = [1, 2, 3, 4].map(HasKey => ({ ActiveID: HasKey + 100, HasKey, isAttend: false }));
+  const list = [1, 2, 3, 4].map(HasKey => ({ ActiveID: HasKey + 100, ActiveType: 0, IsOnly: 0, HasKey, isAttend: false }));
   return { calendarStateUserId: owner, _eventActives: list, get eventActives() { return this._eventActives; } };
 }
 function snapshot(owner, values) { return { UserID: String(owner), Item: Object.assign({ length: () => values.length }, values) }; }
 function merge(manager, selfId, owner, rows) { return execute(calendarStatePrefix(), analyzerAbc, { manager, selfId, xml: snapshot(owner, rows) }); }
-const claim = (id = 103, HasKey = 3, isAttend = "true") => ({ ActiveID: String(id), HasKey: String(HasKey), isAttend });
+const claim = (id = 103, HasKey = 3, isAttend = "true", ActiveType = 0, IsOnly = 0) =>
+  ({ ActiveID: String(id), ActiveType: String(ActiveType), IsOnly: String(IsOnly), HasKey: String(HasKey), isAttend });
 
 test("AVM2 backward jumps require Label even when a non-label target is a valid instruction boundary", () => {
   // This passed the previous instruction-boundary-only check, but Ruffle rejects it with VerifyError #1021.
@@ -126,23 +127,66 @@ test("account switch clears only HasKey3 before request and rejects previous acc
   const wrongOwner = model(111); merge(wrongOwner, 112, 112, [claim()]); assert.equal(wrongOwner.eventActives[2].isAttend, false);
 });
 
+test("one-time exchange shares all three state gates; unsupported types, repeated exchange and mismatched modes stay untouched", () => {
+  const cases = [
+    { ActiveType: 0, HasKey: 3, IsOnly: 0, accepted: true },
+    { ActiveType: 0, HasKey: 3, IsOnly: 1, accepted: true },
+    { ActiveType: 1, HasKey: 6, IsOnly: 1, accepted: true },
+    { ActiveType: 1, HasKey: 6, IsOnly: 0, accepted: false },
+    { ActiveType: 1, HasKey: 6, IsOnly: 2, accepted: false },
+    { ActiveType: 0, HasKey: 6, IsOnly: 1, accepted: false },
+    { ActiveType: 1, HasKey: 3, IsOnly: 1, accepted: false },
+    { ActiveType: 2, HasKey: 3, IsOnly: 1, accepted: false },
+    { ActiveType: 2, HasKey: 6, IsOnly: 1, accepted: false },
+    ...[1, 2, 4].map(HasKey => ({ ActiveType: 0, HasKey, IsOnly: 1, accepted: false })),
+  ];
+  for (const objectMode of cases) for (const xmlMode of cases) {
+    const m = model(), item = { ...objectMode, ActiveID: 100003, Type: 99, isAttend: false };
+    m._eventActives = [item];
+    merge(m, 111, 111, [claim(100003, xmlMode.HasKey, "true", xmlMode.ActiveType, xmlMode.IsOnly)]);
+    assert.equal(item.isAttend, objectMode.accepted && xmlMode.accepted && objectMode.ActiveType === xmlMode.ActiveType,
+      JSON.stringify({ objectMode, xmlMode }));
+  }
+  for (const mode of cases) {
+    const m = model(), item = { ...mode, ActiveID: 100003, isAttend: true }; m._eventActives = [item];
+    execute(calendarOwnerPrefix(), managerAbc, { manager: m, selfId: 112 });
+    assert.equal(item.isAttend, !mode.accepted, JSON.stringify(mode));
+    assert.equal(m.calendarStateUserId, 112);
+  }
+});
+
+test("exchange true is monotonic only for the same owner; lowercase and identity guards remain", () => {
+  const m = model(), exchange = { ActiveID: 100003, ActiveType: 1, HasKey: 6, IsOnly: 1, isAttend: false };
+  m._eventActives.push(exchange); const list = m.eventActives;
+  for (const value of ["false", "True", "1"]) merge(m, 111, 111, [claim(100003, 6, value, 1, 1)]);
+  assert.equal(exchange.isAttend, false);
+  merge(m, 111, 111, [claim(100003, 6, "true", 1, 1)]);
+  assert.equal(exchange.isAttend, true); assert.equal(m.eventActives, list); assert.equal(m.eventActives[4], exchange);
+  merge(m, 111, 111, [claim(100003, 6, "false", 1, 1)]); assert.equal(exchange.isAttend, true);
+  execute(calendarOwnerPrefix(), managerAbc, { manager: m, selfId: 112 }); assert.equal(exchange.isAttend, false);
+  merge(m, 112, 111, [claim(100003, 6, "true", 1, 1)]); assert.equal(exchange.isAttend, false);
+  merge(m, 112, 112, [claim(100003, 6, "true", 1, 1)]); assert.equal(exchange.isAttend, true);
+});
+
 test("full patched analyze and original parent completion discard late response without altering current calendar or blocking loader", () => {
   const parent = abc(original, "com/pickgliss/loader/DataAnalyzer"), complete = parent.bodies.find(x => x.method === 3);
   const body = analyzerAbc.bodies.find(x => x.method === 7);
   for (const [selfId, owner, responseOwner, accepted] of [[112, 112, 111, false], [112, 111, 112, false], [112, 112, 112, true]]) {
     const m = model(owner), oldDay = { now: "current date", count: 9, dayLog: "current calendar" }, calendar = { ...oldDay };
+    const exchange = { ActiveID: 100003, ActiveType: 1, HasKey: 6, IsOnly: 1, isAttend: false }; m._eventActives.push(exchange);
     let loaderComplete = 0, businessComplete = 0, errors = 0;
     const analyzer = { _date: null, _signCount: 0, _dayLog: null,
       _onCompleteCall: a => { businessComplete++; calendar.now = a._date; calendar.count = a._signCount; calendar.dayLog = a._dayLog.split(","); },
       analyzeCompleteCall: () => { loaderComplete++; }, analyzeErrorCall: () => { errors++; },
       onAnalyzeComplete: () => execute(complete.code, parent, { thisObject: analyzer, full: true }),
       onAnalyzeError: () => { errors++; } };
-    const xml = { ...snapshot(responseOwner, [claim()]), value: "true", nowDate: "new date",
+    const xml = { ...snapshot(responseOwner, [claim(), claim(100003, 6, "true", 1, 1)]), value: "true", nowDate: "new date",
       DailyLogList: { UserAwardLog: 2, DayLog: "True,False" }, luckyNum: -1, myLuckyNum: -1 };
     execute(body.code, analyzerAbc, { manager: m, selfId, xml, thisObject: analyzer, full: true });
     assert.equal(loaderComplete, 1); assert.equal(businessComplete, accepted ? 1 : 0); assert.equal(errors, 0);
     assert.equal(analyzer._onCompleteCall, null); assert.equal(analyzer.analyzeCompleteCall, null);
     assert.equal(m.eventActives[2].isAttend, accepted);
+    assert.equal(exchange.isAttend, accepted);
     assert.deepEqual(calendar, accepted ? { now: "new date", count: 2, dayLog: ["True", "False"] } : oldDay);
   }
 });
@@ -181,7 +225,10 @@ test("two exact methods change; lowercase response, public startup list and ever
       const payload = Buffer.from(body.subarray(t.bodyStart, t.bodyEnd)), p = parseActivityAbc(payload.subarray(r.pos));
       if (target === "calendar/CalendarManager") {
         const block = p.traitBlocks.find(x => x.owner === 2); payload[r.pos + block.end - 2] = 0; // remove the int slot's type
-      } else payload[r.pos + p.namePoolEnd - 2] = 2; // replace inherited protected callback namespace with public
+      } else {
+        // Callback QName is followed by four new state-filter QNames. Still corrupt the inherited protected namespace.
+        payload[r.pos + p.namePoolEnd - 14] = 2;
+      }
       return buildTag(82, payload);
     });
     assert.throws(() => patchActivityState(compressSwf(sig, version, Buffer.concat([parsed.headerPrefix, ...corrupt, parsed.trailing]))), /unknown calendar (?:owner slot|state names)/);

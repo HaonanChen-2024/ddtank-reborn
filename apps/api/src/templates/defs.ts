@@ -115,7 +115,7 @@ const S = {
   ball: "ID Power Radii FlyingPartical BombPartical Crater AttackResponse IsSpin SpinV SpinVA Amount Wind DragIndex Weight Shake ShootSound BombSound ActionType Mass",
   ballConfig: "TemplateID Common CommonAddWound CommonMultiBall Special",
   active:
-    "ActiveID Description Content AwardContent HasKey EndDate:d IsOnly StartDate:d Title Type ActiveType='0' IsAdvance='false' GoodsExchangeTypes='' GoodsExchangeNum='' limitType='' limitValue='' ActionTimeContent",
+    "ActiveID Description Content AwardContent HasKey EndDate:d IsOnly StartDate:d Title Type ActiveType:0 IsAdvance='false' GoodsExchangeTypes GoodsExchangeNum limitType limitValue ActionTimeContent",
   activitySystem: "ActivityType Quality TemplateID ValidDate Count IsBind StrengthLevel AttackCompose DefendCompose AgilityCompose LuckCompose",
   achievement:
     "ID AchievementPoint AchievementType CanHide Detail EndDate:d IsActive IsOther IsShare NeedMaxLevel NeedMinLevel PicID PlaceID PreAchievementID StartDate:d Title",

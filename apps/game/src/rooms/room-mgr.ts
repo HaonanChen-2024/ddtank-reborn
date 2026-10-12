@@ -51,6 +51,14 @@ export class RoomMgr {
     this.queue.push(a);
   }
 
+  private addRoomEntry(p: RoomMember, action: Action): void {
+    this.addAction(() => {
+      if (!p.runRoomEntry) return action(); // Bots retain the synchronous path.
+      const pending = p.runRoomEntry(action);
+      pending?.catch((err) => console.error("RoomMgr entry action error", err));
+    });
+  }
+
   /** One RoomThread iteration (also used by tests). */
   tick(now = Date.now()): number {
     let n = 0;
@@ -162,7 +170,7 @@ export class RoomMgr {
 
   /** CreateRoomAction (Rooms/CreateRoomAction.cs). */
   createRoom(p: RoomMember, name: string, password: string, roomType: number, timeType: number): void {
-    this.addAction(() => {
+    this.addRoomEntry(p, () => {
       p.currentRoom?.removePlayer(p);
       let room: BaseRoom | null = null;
       let idx = Math.floor(this.rnd() * this.rooms.length);
@@ -195,7 +203,7 @@ export class RoomMgr {
 
   /** GameRoom/Handle/Login.cs (runs inline in the original, here queued to keep room ordering). */
   enterRoom(p: RoomMember, roomId: number, pwd: string, hallType: number): void {
-    this.addAction(() => {
+    this.addRoomEntry(p, () => {
       const fail = (key?: string) => {
         if (key) p.sendMessage(1, this.o.lang(key));
         p.send(Out.roomLoginResult(false));

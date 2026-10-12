@@ -104,7 +104,7 @@ export async function runStarterActivity(h: DbHandle, options: {
     assert.equal(keys.length, 4); for (const key of keys) assert.deepEqual(key.columns, expectedKeys.get(key.table), "activity tables have unknown uniqueness constraints");
     const journal = readJournal(journalPath);
     const active = await q<Row>(th, sql`SELECT * FROM game."Active"`), awards = await q<Row>(th, sql`SELECT * FROM game."Active_Award"`);
-    // This one separately owned activity may coexist with the immutable seed baseline. Never accept
+    // These separately owned activities may coexist with the immutable seed baseline. Never accept
     // arbitrary new rows, or a prepared journal alone: the config, binding and both full DB rows must match.
     let ownedFestivalId: number | null = null;
     if (active.some(row => row.ActiveID === 100002) || awards.some(row => row.ActiveID === 100002 || row.ID === 100002)) {
@@ -118,6 +118,15 @@ export async function runStarterActivity(h: DbHandle, options: {
       assert.deepEqual(active.filter(row => row.ActiveID === festival.activeId).map(dates), [festival.config.Active], "coexisting festival activity differs");
       assert.deepEqual(awards.filter(row => row.ActiveID === festival.activeId || row.ID === festival.awardId), [festival.config.Award], "coexisting festival reward differs");
       ownedFestivalId = festival.activeId;
+    }
+    let ownedExchangeId: number | null = null;
+    const exchangeMaterials = await q<Row>(th, sql`SELECT * FROM game."Active_Convert_Item" WHERE "ActiveID"=100003 OR "ID"=100003 ORDER BY "ID"`);
+    if (active.some(row => row.ActiveID === 100003) || awards.some(row => row.ActiveID === 100003 || row.ID === 100003) || exchangeMaterials.length) {
+      const { readExchangeConfig, assertOwnedExchange } = await import("./workshop-material-exchange.js");
+      const exchange = readExchangeConfig(join(options.repoRoot ?? repo, "research/activities/local-material-exchange.json"));
+      assertOwnedExchange(exchange, binding, join(dirname(journalPath), `local-material-exchange-${binding.databaseName}.json`),
+        active.filter(row => row.ActiveID === 100003), awards.filter(row => row.ActiveID === 100003 || row.ID === 100003), exchangeMaterials);
+      ownedExchangeId = 100003;
     }
     const claims = await q1<{ count: number }>(th, sql`SELECT count(*)::int AS count FROM app."EventClaims" WHERE "Kind"='active' AND "Key"=${String(activeId)}`);
     const codes = await q1<{ count: number }>(th, sql`SELECT count(*)::int AS count FROM player."Active_Number" WHERE "ActiveID"=${activeId}`);
@@ -138,7 +147,7 @@ export async function runStarterActivity(h: DbHandle, options: {
       assert.equal(existingAwards.length, 0, "candidate ActiveID has unowned awards");
       assert.equal(claims?.count, 0, "candidate ActiveID has existing claims"); assert.equal(codes?.count, 0, "candidate ActiveID has existing activation codes");
     }
-    const isBaseline = (row: Row) => row.ActiveID !== activeId && row.ActiveID !== ownedFestivalId;
+    const isBaseline = (row: Row) => row.ActiveID !== activeId && row.ActiveID !== ownedFestivalId && row.ActiveID !== ownedExchangeId;
     const actualBaseline = { Active: fingerprint(active.filter(isBaseline)), Active_Award: fingerprint(awards.filter(isBaseline)) };
     assert.deepEqual(actualBaseline, baseline, "original/shared activity tables changed; preserve all rows");
     const template = await q1<Row>(th, sql`SELECT "CategoryID","Property1","Property2","MaxCount","NeedSex","NeedLevel","Level","Attack","Defence","Agility","Luck","CanUse","CanStrengthen","CanCompose" FROM game."Shop_Goods" WHERE "TemplateID"=11904`);
