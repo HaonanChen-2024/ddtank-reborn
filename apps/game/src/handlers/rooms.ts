@@ -179,7 +179,7 @@ export function registerRooms(r: HandlerRegistry): SubRouter {
   // FightLab mission's PVEGame sits in SessionPrepared/GameOver forever past floor 1.
   r.player(82, "GAME_MISSION_START", (_ctx, p, pkt) => {
     const flag = pkt.readBoolean();
-    if (flag && p.currentRoom) p.currentRoom.game?.missionStart?.();
+    if (flag && p.currentRoom) return p.currentRoom.game?.missionStart?.();
   });
   // 86 host start shortcut.
   r.player(86, "QUEST_ONE_KEY_FINISH(start)", (ctx, p) => {

@@ -29,6 +29,7 @@ export class RoomMgr {
   private timer: NodeJS.Timeout | null = null;
   private lastClear = 0;
   private matchQueue: { room: BaseRoom; since: number }[] = [];
+  private bossAwardStarts = new Set<BaseRoom>();
   private readonly rnd: () => number;
 
   constructor(private readonly o: RoomMgrOptions) {
@@ -297,6 +298,19 @@ export class RoomMgr {
     this.addAction(() => {
       if (!room.canStart()) return;
       const players = room.getPlayersFight();
+      const awards = players.flatMap((p) => p.worldBossAwardPending ? [p.worldBossAwardPending] : []);
+      if (awards.length) {
+        if (!this.bossAwardStarts.has(room)) {
+          this.bossAwardStarts.add(room);
+          void Promise.all(awards).then(() => {
+            this.bossAwardStarts.delete(room);
+            const current = room.getPlayersFight();
+            if (room.IsUsing && !room.IsPlaying && current.length > 0 && current.length === players.length &&
+                current.every((p, i) => p === players[i] && p.currentRoom === room)) this.startGame(room);
+          });
+        }
+        return;
+      }
       if (room.RoomType === RoomType.Freedom) {
         const red = players.filter((p) => p.roomTeam === 1);
         const blue = players.filter((p) => p.roomTeam !== 1);
@@ -335,8 +349,9 @@ export class RoomMgr {
     this.matchQueue = this.matchQueue.filter((q) => q.room.matching && q.room.IsUsing && q.room.PlayerCount > 0);
     for (let i = 0; i < this.matchQueue.length; i++) {
       const a = this.matchQueue[i]!;
+      if (a.room.getPlayersFight().some((p) => p.worldBossAwardPending)) continue;
       // guild rooms (GameStyle 1) only meet another guild (Fighting.Server ProxyRoomMgr: same GuildId never matched)
-      const j = this.matchQueue.findIndex((b, k) => k > i && b.room.PlayerCount === a.room.PlayerCount && b.room.GameType === a.room.GameType && (a.room.GameStyle !== 1 || a.room.host?.info.ConsortiaID !== b.room.host?.info.ConsortiaID));
+      const j = this.matchQueue.findIndex((b, k) => k > i && !b.room.getPlayersFight().some((p) => p.worldBossAwardPending) && b.room.PlayerCount === a.room.PlayerCount && b.room.GameType === a.room.GameType && (a.room.GameStyle !== 1 || a.room.host?.info.ConsortiaID !== b.room.host?.info.ConsortiaID));
       if (j !== -1) {
         const b = this.matchQueue[j]!;
         this.matchQueue.splice(j, 1);

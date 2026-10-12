@@ -117,6 +117,13 @@ export class GameClient implements PacketSink {
     return this.chain;
   }
 
+  enqueueWorldBossAward<T>(work: () => Promise<T>): Promise<T> {
+    const result = this.chain.then(work);
+    // The scheduler observes the failure; it must not poison later packets.
+    this.chain = result.then(() => {}, () => {});
+    return result;
+  }
+
   send(pkt: GSPacket): void {
     if (this.closed) return;
     this.transport.write(encodeFrame(pkt, this.cipher));

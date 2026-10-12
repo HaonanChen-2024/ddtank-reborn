@@ -166,7 +166,15 @@ export class HotSpringMgr {
   startTimer(p: GamePlayer): void {
     const s = this.st(p);
     this.stopTimer(p);
-    s.timer = setInterval(() => this.tick(p), this.tickMs);
+    const room = s.room;
+    const timer = setInterval(() => {
+      // Timers run outside GameClient.chain. Wait for an in-flight reward/save,
+      // then reject a tick belonging to a departed room or replaced timer.
+      void p.withPersistenceLock(async () => {
+        if (s.timer === timer && s.room === room && !p.quitting && p.isActive) this.tick(p);
+      }).catch((error) => this.ctx.log.error("hot spring tick failed", error));
+    }, this.tickMs);
+    s.timer = timer;
     s.timer.unref?.();
   }
   stopTimer(p: GamePlayer): void {

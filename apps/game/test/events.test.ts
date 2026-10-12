@@ -156,7 +156,7 @@ describe("event claims (idempotency)", () => {
     expect(rt.boss.window).toBeTruthy();
     const gp = ctx.world.get(p.userId)!;
     const g0 = gp.info.GiftToken;
-    worldBossDamage(ctx, gp, 300);
+    worldBossDamage(ctx, gp, 300, { windowKey: rt.boss.window!.key, fightId: 1 });
     expect(rt.boss.blood).toBe(700);
     rt.scheduler.stop("worldboss");
     await rt.scheduler.tick();

@@ -30,7 +30,7 @@ import { fightLabDrop, setFightLabPermission } from "./game/fightlab.js";
 import type { GamePlayer, RoomMember } from "./game/player.js";
 import { startPolicy, startTcp, startWs, type ConnectionGate } from "./net/transports.js";
 import { startAdmin } from "./admin/http.js";
-import { eventsRuntime, pushRecords, worldBossDamage } from "./handlers/events.js";
+import { eventsRuntime, pushRecords, worldBossDamage, worldBossFightWindow } from "./handlers/events.js";
 import { scanExpiredAuctions } from "./handlers/auction.js";
 import * as Out from "./packets/out.js";
 import { LanguageMgr } from "./util/lang.js";
@@ -161,7 +161,8 @@ export class GameServer {
             pickMap,
             log: (m) => log.warn(m),
             gradeForGp: (gp) => templates.gradeForGp(gp),
-            onWorldBossHurt: (m, hurt) => { if (this.ctx) worldBossDamage(this.ctx, m as GamePlayer, hurt); },
+            onWorldBossHurt: (m, hurt, attempt) => { if (this.ctx) worldBossDamage(this.ctx, m as GamePlayer, hurt, attempt); },
+            worldBossWindow: (pveId) => this.ctx ? worldBossFightWindow(this.ctx, pveId) : null,
             expRate: () => (this.ctx ? eventsRuntime(this.ctx).scheduler.rate("double_exp") : 1),
             takeCard: (m, roomType) => takeCardDrop(templates, m, roomType),
             payTakeCard: (m) => payTakeCard(m),

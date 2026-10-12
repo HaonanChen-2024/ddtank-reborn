@@ -10,6 +10,8 @@ import { type GSPacket, PacketOut } from "@ddt/protocol";
 import * as Out from "../packets/out.js";
 import type { RoomMember } from "../game/player.js";
 import type { FightEngine, FightGame, StartGameOptions, StartPveOptions } from "./types.js";
+import type { WorldBossAttempt } from "../game/world-boss.js";
+import { WorldBossSettlementGate } from "./world-boss-settlement.js";
 
 export interface DdtFightOptions {
   assets?: FightAssets;
@@ -25,7 +27,9 @@ export interface DdtFightOptions {
   /** Double-exp window multiplier (EventScheduler "double_exp"); applied to the GP of PvP/PvE rewards. */
   expRate?: () => number;
   /** World boss (room type 14, BaseWorldBossRoom.ReduceBlood/UpdateRank): damage a player dealt in the fight. */
-  onWorldBossHurt?: (member: RoomMember, hurt: number) => void;
+  onWorldBossHurt?: (member: RoomMember, hurt: number, attempt: WorldBossAttempt) => void;
+  /** Capture the admitted window and its HP together at fight creation. Null refuses a closed window. */
+  worldBossWindow?: (pveId: number) => { key: string; blood: number } | null;
   /** PVPGame.TakeCard drop (DropInventory.CardDrop + AddTemplate TempBag); returns the card face shown to everyone */
   takeCard?: (member: RoomMember, roomType: number) => { templateId: number; count: number };
   /** PaymentTakeCardCommand.cs (GAME_CMD sub 114): charge for an extra card flip; false = too poor, nothing happens. */
@@ -106,17 +110,19 @@ export class DdtFightEngine implements FightEngine {
     }
     try {
       const id = gameIdSeq++;
+      const boss = s.roomType === 14 ? this.o.worldBossWindow?.(s.pveId) : undefined;
+      if (s.roomType === 14 && this.o.worldBossWindow && !boss) return null;
       const specs = s.players.map((m) => specOf(m as LobbyLike, 1, this.assets, this.o.petSkill));
       const members = new Map(s.players.map((m) => [m.id, m as LobbyLike]));
       const game = new PveGame({
         id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, assets: this.assets, players: specs, seed: this.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(),
         pveInfo: info, hardLevel: s.hardLevel, currentFloor: s.currentFloor, data: pv.data,
-        worldBossBlood: s.roomType === 14 ? this.o.worldBossBlood?.() : undefined,
+        worldBossBlood: s.roomType === 14 ? (boss?.blood ?? this.o.worldBossBlood?.()) : undefined,
         drops: { copyDrop: (mid, user) => pv.drop("copy", mid, user), npcDrop: (did) => pv.drop("npc", did) },
         log: (m) => this.o.log?.(m),
         ...gameHooks(this, s.roomType, members),
       });
-      const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s);
+      const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s, boss ? { windowKey: boss.key, fightId: id } : undefined);
       this.games.set(g.id, g);
       this.ensureLoop();
       g.tick(Date.now());
@@ -232,12 +238,17 @@ class DdtGame implements FightGame {
   private readonly members = new Map<number, LobbyLike>();
   private readonly teamOf = new Map<number, number>();
   private stopped = false;
+  private lastInputTime = 0;
+  private readonly settlement = new WorldBossSettlementGate();
+  holdWorldBossSettlement(): Promise<() => void> { return this.settlement.acquire(); }
+  waitWorldBossSettlement(): Promise<void> { return this.settlement.held ? this.settlement.defer(() => {}) : Promise.resolve(); }
+  private settlementError = (error: unknown): void => { this.engine.o.log?.(`fight ${this.id}: queued operation failed: ${String(error)}`); };
   /** PVPGame.Cards (9 for PvP) and Player.CanTakeOut per userId, filled at GAME_OVER */
   private readonly cards: number[] = new Array(9).fill(0);
   private readonly canTakeOut = new Map<number, number>();
 
   private readonly pve: StartPveOptions | null;
-  constructor(readonly id: number, readonly mapId: number, private readonly s: StartGameOptions, private readonly engine: DdtFightEngine, pveGame?: PveGame, pve?: StartPveOptions) {
+  constructor(readonly id: number, readonly mapId: number, private readonly s: StartGameOptions, private readonly engine: DdtFightEngine, pveGame?: PveGame, pve?: StartPveOptions, private readonly bossAttempt?: WorldBossAttempt) {
     this.pve = pve ?? null;
     const specs: PlayerSpec[] = [];
     for (const [team, list] of [[1, s.red], [2, s.blue]] as const)
@@ -255,13 +266,18 @@ class DdtGame implements FightGame {
   }
 
   tick(now: number): void {
+    if (this.settlement.held) { this.settlement.tick(now, (time) => this.tick(time), this.settlementError); return; }
     if (this.stopped) return;
+    now = this.lastInputTime = Math.max(now, this.lastInputTime);
     this.dispatch(this.game.update(now));
     this.dispatch(this.bots.update(now));
     if (this.game.state === GameState.Stopped) this.stop();
   }
 
-  processData(from: RoomMember, pkt: GSPacket): void {
+  processData(from: RoomMember, pkt: GSPacket, now = Date.now()): void | Promise<void> {
+    if (this.settlement.held) return this.settlement.defer(() => { this.processData(from, pkt, now); });
+    if (this.stopped) return;
+    now = this.lastInputTime = Math.max(now, this.lastInputTime);
     // TakeCardCommand (98) / BossTakeCardCommand (130): after GAME_OVER; index out of range (client sends 100 when
     // its countdown ends) = auto pick. Without an answer the client's card board never closes (stuck at "00").
     const at = pkt.offset;
@@ -270,7 +286,7 @@ class DdtGame implements FightGame {
       if (sub === 25 || sub === 99) return; // UpdatePlayStep / GeneralCommand: read and dropped (Cmd/UpdatePlayStep.cs)
       const c = parsePveCommand(sub, pkt);
       if (c) {
-        this.dispatch(this.game.handle(from.id, c, Date.now()));
+        this.dispatch(this.game.handle(from.id, c, now));
         return;
       }
     }
@@ -301,18 +317,22 @@ class DdtGame implements FightGame {
       this.engine.o.log?.(`fight ${this.id}: GAME_CMD sub ${sub} from ${from.id} ignored`);
       return;
     }
-    this.dispatch(this.game.handle(from.id, cmd, Date.now()));
+    this.dispatch(this.game.handle(from.id, cmd, now));
   }
 
   /** GameUserStartHandler (82): host forces every player Ready (PVEGame.MissionStart); no-op for PvP (AbstractGame
    * default). Reuses the DELIVER(137) semantics — set-only, no 116 echo — since GameUserStartHandler doesn't SendToAll. */
-  missionStart(): void {
+  missionStart(now = Date.now()): void | Promise<void> {
+    if (this.settlement.held) return this.settlement.defer(() => { this.missionStart(now); });
+    if (this.stopped) return;
     if (!this.pve) return;
-    const now = Date.now();
+    now = this.lastInputTime = Math.max(now, this.lastInputTime);
     for (const id of this.members.keys()) this.dispatch(this.game.handle(id, { cmd: "DELIVER", ready: true }, now));
   }
 
   removePlayer(p: RoomMember): void {
+    if (this.settlement.held) { void this.settlement.defer(() => this.removePlayer(p), `remove:${p.id}`).catch(this.settlementError); return; }
+    if (this.stopped) return;
     const fled = this.game.removePlayer(p.id);
     if (fled && !p.isBot && !this.pve) {
       try {
@@ -352,6 +372,7 @@ class DdtGame implements FightGame {
   }
 
   stop(): void {
+    if (this.settlement.held) { void this.settlement.defer(() => this.stop(), "stop").catch(this.settlementError); return; }
     if (this.stopped) return;
     this.stopped = true;
     // PVPGame.Stop: players that did not pick get an automatic card.
@@ -415,7 +436,7 @@ class DdtGame implements FightGame {
     for (const r of e.players) {
       const m = this.members.get(r.userId);
       if (!m || m.isBot) continue;
-      if (e.roomType === 14 && r.totalHurt > 0) this.engine.o.onWorldBossHurt?.(m, r.totalHurt);
+      if (e.roomType === 14 && this.bossAttempt && r.totalHurt > 0) this.engine.o.onWorldBossHurt?.(m, r.totalHurt, this.bossAttempt);
       try {
         this.engine.o.onPlayerGameOver?.(m, { roomType: e.roomType, gameType: e.gameType, isWin: r.isWin, kills: r.totalKill, playerCount: e.players.length });
       } catch (err) {

@@ -116,6 +116,7 @@ function finishBoss(f: Fixture, items = [{ templateId: 11001, count: 1 }], giftT
     ev: { id: f.activeId, kind: "worldboss", title: "test", enabled: true, weekdays: "", startTime: "00:00", durationMin: 1,
       startDate: null, endDate: null, params: { rankAwards: [{ rank: 1, items, giftToken }] } } };
   rt.boss.rank.set(f.p.id, { nick: f.p.info.NickName ?? "", damage: 100, honor: 0 });
+  rt.boss.window = window;
   return { end: () => rt.onEnd(window), key: window.key };
 }
 
@@ -438,7 +439,8 @@ describe("local-v1 packet 31 material exchange", () => {
       expect(rewarded).toBe(false);
       expect(f.material.Count).toBe(5);
     } finally { gate.release.resolve(); await Promise.all([exchanging, ending]); }
-    expect(f.material).toMatchObject({ Count: 4, isDirty: true });
+    expect(f.material).toMatchObject({ Count: 4, isDirty: false }); // The ranked award now commits its item atomically.
+    expect((await stored(f)).Count).toBe(4);
     await f.p.saveIntoDatabase(h.db);
     expect((await stored(f)).Count).toBe(4);
     expect(await exchangeActivity(f.ctx, f.p, packet(f.activeId))).toBe(false);

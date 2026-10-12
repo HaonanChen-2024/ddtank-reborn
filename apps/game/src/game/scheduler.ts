@@ -133,6 +133,9 @@ export class EventScheduler {
   private forced = new Map<string, ActiveWindow>();
   /** Occurrences closed early by `stop` (they reopen at their next scheduled start). */
   private suppressed = new Set<string>();
+  private ending = new Set<string>();
+  private starting = new Set<string>();
+  private ticking: Promise<{ started: ActiveWindow[]; ended: ActiveWindow[] }> | null = null;
 
   constructor(
     private readonly now: () => Date,
@@ -144,18 +147,37 @@ export class EventScheduler {
   }
 
   /** Recomputes the open windows and fires start/end hooks. Returns the transitions (tests). */
-  async tick(): Promise<{ started: ActiveWindow[]; ended: ActiveWindow[] }> {
+  tick(): Promise<{ started: ActiveWindow[]; ended: ActiveWindow[] }> {
+    // Timer, admin reload and stop can overlap while a reward transaction awaits.
+    // Share that transition pass; failed end hooks remain pending for the next tick.
+    if (!this.ticking) this.ticking = this.transition().finally(() => { this.ticking = null; });
+    return this.ticking;
+  }
+
+  private async transition(): Promise<{ started: ActiveWindow[]; ended: ActiveWindow[] }> {
     const now = this.now();
     for (const [k, w] of this.forced) if (now >= w.end) this.forced.delete(k);
     const cur = new Map(windowsAt(this.events, now).map((w) => [w.key, w]));
     for (const k of this.suppressed) if (!cur.has(k)) this.suppressed.delete(k);
     for (const k of this.suppressed) cur.delete(k);
     for (const w of this.forced.values()) cur.set(w.key, w);
-    const started = [...cur.values()].filter((w) => !this.open.has(w.key));
-    const ended = [...this.open.values()].filter((w) => !cur.has(w.key));
-    this.open = cur;
-    for (const w of ended) await this.hooks.onEnd?.(w);
-    for (const w of started) await this.hooks.onStart?.(w);
+    const started = [...cur.values()].filter((w) => !this.open.has(w.key) || this.starting.has(w.key));
+    const ended = [...this.open.values()].filter((w) => !cur.has(w.key) || this.ending.has(w.key));
+    for (const w of ended) {
+      this.ending.add(w.key);
+      await this.hooks.onEnd?.(w);
+      this.open.delete(w.key);
+      this.ending.delete(w.key);
+      this.starting.delete(w.key);
+    }
+    for (const w of started) {
+      // A hook can establish state before a notification fails. Keep that
+      // occurrence so crossing its end still closes it instead of orphaning it.
+      this.open.set(w.key, w);
+      this.starting.add(w.key);
+      await this.hooks.onStart?.(w);
+      this.starting.delete(w.key);
+    }
     return { started, ended };
   }
 
@@ -176,12 +198,12 @@ export class EventScheduler {
   }
 
   isOpen(kind: string): ActiveWindow | undefined {
-    for (const w of this.open.values()) if (w.ev.kind === kind) return w;
+    for (const w of this.open.values()) if (w.ev.kind === kind && !this.ending.has(w.key)) return w;
     return undefined;
   }
 
   rate(kind: "double_exp" | "double_gold"): number {
-    return rateOf([...this.open.values()], kind);
+    return rateOf([...this.open.values()].filter((w) => !this.ending.has(w.key)), kind);
   }
 
   start(tickMs = 30_000): void {
@@ -199,6 +221,8 @@ export class EventScheduler {
     const now = this.now();
     return {
       now: now.toISOString(),
+      pendingEnd: [...this.ending],
+      pendingStart: [...this.starting],
       open: [...this.open.values()].map((w) => ({ id: w.ev.id, kind: w.ev.kind, title: w.ev.title, start: w.start, end: w.end })),
       next: this.events.filter((e) => e.enabled).map((e) => ({ id: e.id, kind: e.kind, title: e.title, next: nextStart(e, now) })),
       rates: { exp: this.rate("double_exp"), gold: this.rate("double_gold") },

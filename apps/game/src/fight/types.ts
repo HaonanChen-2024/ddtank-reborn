@@ -38,12 +38,15 @@ export interface FightGame {
   readonly id: number;
   readonly mapId: number;
   /** Packet 91 from a member (GameDataHandler: Parameter1 = player's living id). */
-  processData(from: RoomMember, pkt: GSPacket): void;
+  processData(from: RoomMember, pkt: GSPacket): void | Promise<void>;
   /** Member left the room/disconnected (BaseGame.RemovePlayer). */
   removePlayer(p: RoomMember): void;
   stop(): void;
   /** GameUserStartHandler (82 GAME_MISSION_START): force every player Ready. PvE only; no-op/absent for PvP. */
-  missionStart?(): void;
+  missionStart?(): void | Promise<void>;
+  /** Temporary write barrier for ranked world-boss award commit + publication. */
+  holdWorldBossSettlement?(): Promise<() => void>;
+  waitWorldBossSettlement?(): Promise<void>;
 }
 
 export interface FightEngine {

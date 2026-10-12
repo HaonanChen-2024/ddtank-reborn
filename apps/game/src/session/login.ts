@@ -18,6 +18,7 @@ import { BagType } from "../game/item.js";
 import { checkVipExpire } from "../game/vip.js";
 import * as Out from "../packets/out.js";
 import { unixSeconds } from "../util/time.js";
+import { withWorldBossAdmission } from "../game/world-boss.js";
 import type { GameClient } from "./client.js";
 import type { ServerContext, TicketValidator } from "./context.js";
 import type { DbHandle } from "@ddt/db";
@@ -64,13 +65,17 @@ export async function handleLogin(ctx: ServerContext, client: GameClient): Promi
       await quitPlayer(ctx, old);
     }
     if (client.closed) return;
-    const player = await loadPlayer(ctx, client, ch.UserID);
+    const player = await withWorldBossAdmission(ctx.world, ch.UserID, () => loadPlayer(ctx, client, ch.UserID));
     if (!player) return kick(client, t("UserLoginHandler.Forbid"));
     if (client.closed) {
       await quitPlayer(ctx, player);
       return;
     }
     ctx.log.info(`login ${user} (${player.id}) from ${client.remoteAddress} via ${client.transport.kind}`);
+    // The final login packet must follow initialization and admission release.
+    // A client may immediately reconnect after receiving it.
+    ctx.world.loggingIn.delete(key);
+    player.send(Out.necklace(player.info));
   } catch (err) {
     ctx.log.error("login failed", err);
     kick(client, t("UserLoginHandler.ServerError"));
@@ -168,7 +173,6 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
   p.send(ev.boss.window ? worldBossOpen(ev, p) : Out.openWorldBoss());
   if (!ev.leagueOpen) p.send(Out.leagueNotice(p.id, match.restCount, 0, 2));
   p.send(Out.guildMemberWeek(p.id));
-  p.send(Out.necklace(info));
   // WorldMgr.OnPlayerOnline: friends see the online state (160/165).
   // ChangePlayerState also notifies the members of the same guild (online list of the guild screen)
   for (const f of ctx.world.all()) if (f !== p && (f.friends.has(p.id) || (info.ConsortiaID !== 0 && f.info.ConsortiaID === info.ConsortiaID))) f.send(Out.friendState(p.id, 1, info.typeVIP, info.VIPLevel));
@@ -182,6 +186,7 @@ export function quitPlayer(ctx: ServerContext, p: GamePlayer): Promise<void> {
 
 async function doQuit(ctx: ServerContext, p: GamePlayer): Promise<void> {
   p.isActive = false;
+  const leavingGame = p.currentRoom?.game;
   try {
     if (p.currentRoom) {
       const r = p.currentRoom;
@@ -194,6 +199,9 @@ async function doQuit(ctx: ServerContext, p: GamePlayer): Promise<void> {
   }
   p.info.State = 0;
   eventsOnQuit(ctx, p);
+  // A world-boss award may briefly queue remove/automatic card rewards for
+  // another member of the same fight. Those writes must precede this final save.
+  await leavingGame?.waitWorldBossSettlement?.();
   await hotSpringOnQuit(ctx, p).catch(() => {});
   try {
     await p.saveIntoDatabase(ctx.db.db);

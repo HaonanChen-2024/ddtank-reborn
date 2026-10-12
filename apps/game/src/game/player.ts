@@ -29,6 +29,8 @@ export interface PacketSink {
   readonly remoteAddress: string;
   /** Resolves when every packet already queued for this connection was handled (GameClient.idle). */
   idle?(): Promise<void>;
+  /** Timed world-boss awards join the same queue as ordinary inbound packets. */
+  enqueueWorldBossAward?<T>(work: () => Promise<T>): Promise<T>;
 }
 
 export interface RoomMember {
@@ -47,6 +49,7 @@ export interface RoomMember {
   onRoomLeft?(): void;
   /** Real players defer a synchronous room entry while persistence is pending. */
   runRoomEntry?(work: () => void): void | Promise<void>;
+  readonly worldBossAwardPending?: Promise<void> | null;
 }
 
 export class GamePlayer implements RoomMember {
@@ -385,6 +388,16 @@ export class GamePlayer implements RoomMember {
   // -------------------------------------------------------------------- persistence
   private persistenceTail: Promise<void> = Promise.resolve();
   private persistencePending = 0;
+  worldBossAwardPending: Promise<void> | null = null;
+
+  /** Room start observes this barrier even when no DdtGame exists yet. Only
+   * the timed award owner calls this after joining the client's packet queue. */
+  async withWorldBossAward<T>(work: () => Promise<T>): Promise<T> {
+    while (this.worldBossAwardPending) await this.worldBossAwardPending;
+    let release!: () => void;
+    this.worldBossAwardPending = new Promise<void>((resolve) => { release = resolve; });
+    try { return await work(); } finally { this.worldBossAwardPending = null; release(); }
+  }
 
   /** Serialize autosave, explicit save and quit with committed inventory transactions.
    * Take inventory snapshots inside this lock, never before waiting for an earlier save. */

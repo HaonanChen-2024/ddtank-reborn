@@ -19,6 +19,8 @@ import * as Out from "../packets/out.js";
 import type { HandlerRegistry } from "./registry.js";
 import { exchangeActivity } from "../game/activity-exchange.js";
 import { claimOnlineBox, startOnlineBoxTimer } from "../game/online-box.js";
+import { worldBossRanks, type WorldBossAttempt, type WorldBossRank } from "../game/world-boss.js";
+import { awardWorldBoss } from "../game/world-boss-rewards.js";
 
 // ------------------------------------------------------------------ runtime
 export interface BossPlayer { x: number; y: number; state: number }
@@ -32,12 +34,14 @@ export interface WorldBossState {
   players: Map<number, BossPlayer>;
   /** userId -> damage/honor this window (UpdateRank). */
   rank: Map<number, { nick: string; damage: number; honor: number }>;
+  results: Set<string>;
+  settlement: { key: string; rank: WorldBossRank[]; awards: { rank: number; giftToken?: number; gold?: number; items?: Reward[] }[] } | null;
 }
 
 export class EventsRuntime {
   data = new EventData();
   scheduler: EventScheduler;
-  boss: WorldBossState = { window: null, name: "boss", resourceId: "0", pveId: 0, maxBlood: 0, blood: 0, players: new Map(), rank: new Map() };
+  boss: WorldBossState = { window: null, name: "boss", resourceId: "0", pveId: 0, maxBlood: 0, blood: 0, players: new Map(), rank: new Map(), results: new Set(), settlement: null };
   /** EliteGameController bitmask: 1 score 30-40, 2 champion 30-40, 4 score 41-50, 8 champion 41-50. 0 = closed. */
   eliteStatus = 0;
   leagueOpen = false;
@@ -68,7 +72,9 @@ export class EventsRuntime {
     switch (w.ev.kind) {
       case "worldboss": {
         const b = this.boss;
-        b.window = w;
+        if (b.window?.key === w.key) return; // A failed start notification must not reset admitted damage.
+        if (b.window) throw new Error("World boss window is still active or awaiting settlement");
+        b.window = structuredClone(w); // Reward definitions cannot drift on a template reload.
         b.name = String(prm.name ?? "Dragão Divino");
         b.resourceId = String(prm.resourceId ?? "1");
         b.pveId = Number(prm.pveId ?? 1243);
@@ -76,6 +82,8 @@ export class EventsRuntime {
         b.blood = b.maxBlood;
         b.players.clear();
         b.rank.clear();
+        b.results.clear();
+        b.settlement = null;
         this.broadcast((p) => worldBossOpen(this, p));
         this.broadcast(Out.message(1, String(prm.notice ?? `Boss mundial ${b.name} apareceu! Entre pelo ícone no hall.`)));
         break;
@@ -139,7 +147,7 @@ export function eventsRuntime(ctx: ServerContext): EventsRuntime {
 /** 102/0 OPEN (AbstractPacketLib.SendOpenWorldBoss :2593) with the live window. */
 export function worldBossOpen(rt: EventsRuntime, _p: GamePlayer): GSPacket {
   const b = rt.boss;
-  const open = !!b.window;
+  const open = !!b.window && !b.settlement;
   const p = new GSPacket(102);
   p.writeByte(0);
   p.writeString(open ? b.resourceId : "0");
@@ -167,7 +175,14 @@ function eliteStatusPkt(status: number): GSPacket {
 }
 
 function rankList(rt: EventsRuntime): { id: number; nick: string; damage: number }[] {
-  return [...rt.boss.rank.entries()].map(([id, r]) => ({ id, nick: r.nick, damage: r.damage })).sort((a, b) => b.damage - a.damage);
+  return rt.boss.settlement?.rank ?? worldBossRanks(rt.boss.rank);
+}
+
+/** Fight launch and result use the same occurrence; an old fight cannot donate to a new window. */
+export function worldBossFightWindow(ctx: ServerContext, pveId: number): { key: string; blood: number } | null {
+  const b = eventsRuntime(ctx).boss, now = ctx.now();
+  return b.window && !b.settlement && b.blood > 0 && pveId === b.pveId && now >= b.window.start && now < b.window.end
+    ? { key: b.window.key, blood: b.blood } : null;
 }
 
 function worldBossRanking(rt: EventsRuntime, final: boolean): GSPacket {
@@ -181,10 +196,14 @@ function worldBossRanking(rt: EventsRuntime, final: boolean): GSPacket {
 }
 
 /** Called by the fight layer (or tests) with the damage a player dealt to the world boss (BaseWorldBossRoom.ReduceBlood + UpdateRank). */
-export function worldBossDamage(ctx: ServerContext, p: GamePlayer, damage: number): void {
+export function worldBossDamage(ctx: ServerContext, p: GamePlayer, damage: number, attempt: WorldBossAttempt): void {
   const rt = eventsRuntime(ctx);
   const b = rt.boss;
-  if (!b.window || damage <= 0 || b.blood <= 0) return;
+  if (!b.window || b.settlement || attempt.windowKey !== b.window.key || !Number.isSafeInteger(attempt.fightId) || attempt.fightId <= 0 ||
+      !Number.isSafeInteger(damage) || damage <= 0 || b.blood <= 0 || ctx.now() < b.window.start || ctx.now() >= b.window.end) return;
+  const resultKey = `${attempt.fightId}:${p.id}`;
+  if (b.results.has(resultKey)) return;
+  b.results.add(resultKey);
   const dealt = Math.min(damage, b.blood);
   b.blood -= dealt;
   const r = b.rank.get(p.id) ?? { nick: p.info.NickName ?? "", damage: 0, honor: 0 };
@@ -203,31 +222,18 @@ export function worldBossDamage(ctx: ServerContext, p: GamePlayer, damage: numbe
 
 /** World boss end: ranking rewards (params.rankAwards [{rank, giftToken?, gold?, items?}], claim per window) + 102/1 OVER. */
 async function finishWorldBoss(ctx: ServerContext, rt: EventsRuntime, w: ActiveWindow): Promise<void> {
-  const awards = (Array.isArray(w.ev.params.rankAwards) ? w.ev.params.rankAwards : []) as { rank: number; giftToken?: number; gold?: number; items?: Reward[] }[];
-  const list = rankList(rt);
+  if (!rt.boss.window || rt.boss.window.key !== w.key) return;
+  // Freeze before the first await. Failed recipients retry this exact rank and reward snapshot.
+  rt.boss.settlement ??= { key: w.key, rank: worldBossRanks(rt.boss.rank), awards: structuredClone(
+    (Array.isArray(rt.boss.window.ev.params.rankAwards) ? rt.boss.window.ev.params.rankAwards : []) as { rank: number; giftToken?: number; gold?: number; items?: Reward[] }[]) };
+  const { awards, rank: list } = rt.boss.settlement;
   for (const [i, r] of list.entries()) {
     const tier = awards.filter((a) => i + 1 <= a.rank).sort((a, b) => a.rank - b.rank)[0];
     if (!tier) continue;
     const rewards: Reward[] = [...(tier.items ?? [])];
     if (tier.giftToken) rewards.push({ templateId: -1100, count: tier.giftToken });
     if (tier.gold) rewards.push({ templateId: -100, count: tier.gold });
-    let pl = ctx.world.get(r.id);
-    // A quit already in progress owns the final save. Wait outside its lock,
-    // then resolve the current session again instead of rewarding a stale one.
-    while (pl?.quitting) { await pl.quitting; pl = ctx.world.get(r.id); }
-    if (pl) {
-      const recipient = pl;
-      // Queue before any claim await: a later quit/autosave must save these
-      // rewards after the exchange's COMMIT and in-memory deduction.
-      await recipient.withPersistenceLock(async () => {
-        if (!(await claimOnce(ctx.db.db, r.id, "worldboss", w.key.slice(0, 64)))) return;
-        const g = grantRewards(recipient, rewards, ctx.templates.findItem, ctx.now());
-        if (g.overflow.length) await mailItems(ctx, recipient, g.overflow, "Boss mundial", 12);
-        recipient.sendMessage(0, `Boss mundial: ${i + 1}º lugar (${r.damage} de dano). Prêmio: ${g.summary.join(", ")}.`);
-      });
-    } else {
-      if (await claimOnce(ctx.db.db, r.id, "worldboss", w.key.slice(0, 64))) await offlineCurrency(ctx, r.id, rewards);
-    }
+    await awardWorldBoss(ctx, r.id, w.key, rewards, `Boss mundial: ${i + 1}º lugar (${r.damage} de dano).`);
   }
   const final = worldBossRanking(rt, true);
   const over = new GSPacket(102);
@@ -235,13 +241,6 @@ async function finishWorldBoss(ctx: ServerContext, rt: EventsRuntime, w: ActiveW
   for (const pl of ctx.world.all()) { if (rt.boss.players.has(pl.id)) pl.send(final); pl.send(over); }
   rt.boss.window = null;
   rt.boss.players.clear();
-}
-
-/** Currency rewards for offline players (items are skipped: world-boss tiers default to gift tokens). */
-async function offlineCurrency(ctx: ServerContext, userId: number, rewards: Reward[]): Promise<void> {
-  const gt = rewards.filter((r) => r.templateId === -1100).reduce((s, r) => s + r.count, 0);
-  const gold = rewards.filter((r) => r.templateId === -100).reduce((s, r) => s + r.count, 0);
-  if (gt || gold) await ctx.db.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "GiftToken" = "GiftToken" + ${gt}, "Gold" = "Gold" + ${gold} WHERE "UserID" = ${userId}`);
 }
 
 /**
@@ -620,18 +619,17 @@ function worldBossCmd(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
   switch (sub) {
     case 32: { // EnterRoom
       const o = new GSPacket(102);
-      o.writeByte(2); o.writeBoolean(!!b.window); o.writeBoolean(false); o.writeInt(0); o.writeInt(0);
+      o.writeByte(2); o.writeBoolean(!!b.window && !b.settlement); o.writeBoolean(false); o.writeInt(0); o.writeInt(0);
       p.send(o);
       return;
     }
     case 34: { // AddPlayer
       const x = pkt.readInt();
       const y = pkt.readInt();
-      if (!b.window) return;
+      if (!b.window || b.settlement) return;
       const bp: BossPlayer = { x: x || 265, y: y || 1030, state: 1 };
       const isNew = !b.players.has(p.id);
       b.players.set(p.id, bp);
-      if (!b.rank.has(p.id)) b.rank.set(p.id, { nick: p.info.NickName ?? "", damage: 0, honor: 0 });
       if (isNew) toRoom(enterPkt(p, bp));
       for (const [id, o] of b.players) { const op = ctx.world.get(id); if (op && id !== p.id) p.send(enterPkt(op, o)); }
       const up = new GSPacket(102);
