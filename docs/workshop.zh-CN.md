@@ -151,6 +151,8 @@ node scripts/workshop-language.mjs rollback
 
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML默认只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
+服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。当前仅覆盖世界BOSS及蚁后共用的四条喊话，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
+
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本。原14张fmt5位图（12个建筑标题、频道与签到）基础上，新增原存储窗口正文id7及实际确定按钮id10的19处文字，默认共16张图片，其余331个SWF标签保持。存储正文保留原许可选择语义，右侧“允许/拒绝”明确为示意，不代表浏览器已授权。原入口、事件和动画继续使用，字区外像素不变；农场、独立活动入口和其他工具栏图片仍待处理。
 
 大厅支持可选 `--background=<PNG路径>`，只接收配置中已审阅的1000×600背景摘要，并将图像内容写入原tag21/id12。夜景模式绘制13处标题、清空频道图片的一处重复文字，让底图已有的中文“频道”显示；频道框和命中对象保留。含新增存储图片后共改变17个图像标签，其余330个标签（包括ABC、SymbolClass、shape、sprite和动画）保持原字节。与上一夜景覆盖比较只新增id7/id10变化。背景作为同一hall覆盖的配置身份参与幂等安装、备份与回退；不带此参数仍生成原景标题及存储文字版本。主控已看存储位图1x/4x并核对正常重启后的HTTP字节；完整原窗口视觉仍待验收。
