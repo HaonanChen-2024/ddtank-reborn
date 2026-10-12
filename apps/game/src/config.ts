@@ -22,6 +22,8 @@ export const ConfigSchema = z.object({
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error", "silent"]).default("info"),
   /** postgres://… (Neon pooled) | pglite:<dir> | pglite:memory | unset = packages/db/.data/pglite. */
   DATABASE_URL: z.string().optional(),
+  /** Optional additive weapon pack. Requires matching DB/XML and original client resources; read only at startup. */
+  FIGHT_WEAPON_EXTENSION: z.string().min(1).optional(),
 
   /** Row of player."Server_List" (Name/Room/Total/ZoneId/ZoneName are read from it, like GameServer.Start). */
   SERVER_ID: int(4),

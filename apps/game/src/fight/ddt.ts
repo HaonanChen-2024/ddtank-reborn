@@ -13,6 +13,8 @@ import type { FightEngine, FightGame, StartGameOptions, StartPveOptions } from "
 
 export interface DdtFightOptions {
   assets?: FightAssets;
+  /** Explicit local compatibility pack for new weapons; never overrides packed weapon data. */
+  weaponExtensionPath?: string;
   /** GameMgr/MapMgr.GetMapIndex — explicit map or a random open one */
   pickMap?: (mapId: number) => number;
   log?: (m: string) => void;
@@ -88,7 +90,8 @@ export class DdtFightEngine implements FightEngine {
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(readonly o: DdtFightOptions = {}) {
-    this.assets = o.assets ?? loadPackedAssets();
+    if (o.assets && o.weaponExtensionPath) throw new Error("Provide assets or weaponExtensionPath, not both");
+    this.assets = o.assets ?? loadPackedAssets(undefined, { weaponExtensionPath: o.weaponExtensionPath });
     if (o.pve?.translate) setTranslator(o.pve.translate);
   }
 

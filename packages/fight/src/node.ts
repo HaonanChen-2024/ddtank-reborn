@@ -1,8 +1,8 @@
 /**
  * Node-only asset loaders (`@ddt/fight/node`). The engine itself (`@ddt/fight`) never touches the file system.
  *
- * - `loadPackedAssets(dir?)` reads the compact files produced by `pnpm --filter @ddt/fight pack-assets`
- *   (default: this package's `data/`).
+ * - `loadPackedAssets(dir?, options?)` reads the compact files produced by `pnpm --filter @ddt/fight pack-assets`
+ *   (default: this package's `data/`). An explicit weaponExtensionPath can add local compatibility weapons.
  * - `loadVendorAssets(assetsDir, dataDir?)` reads the ORIGINAL `map/{id}/{fore,dead}.map` and `bomb/{id}.bomb` from a
  *   build output dir (e.g. `vendor/DDTank41/Fighting.Service/bin/Debug/net48`, or `$DDT_FIGHT_ASSETS`); template JSON
  *   still comes from `dataDir`.
@@ -12,8 +12,16 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inflateRawSync } from "node:zlib";
 import { FightAssets, decodeBombPack, decodeMapPack } from "./data/assets.js";
+import { mergeWeaponExtension } from "./data/weapon-extension.js";
 import type { MapInfo } from "./phy/map.js";
 import { Tile } from "./phy/tile.js";
+
+export type { LocalWeaponExtension } from "./data/weapon-extension.js";
+
+export interface PackedAssetOptions {
+  /** Optional JSON LocalWeaponExtension; never discovered or enabled automatically. */
+  weaponExtensionPath?: string;
+}
 
 export const PACKAGE_DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../data");
 export const DEFAULT_VENDOR_ASSETS = resolve(dirname(fileURLToPath(import.meta.url)), "../../../vendor/DDTank41/Fighting.Service/bin/Debug/net48");
@@ -23,10 +31,12 @@ function readTemplates(dataDir: string) {
   return { balls: j("balls.json"), ballConfigs: j("ballconfig.json"), items: j("items.json"), maps: j("maps.json") as MapInfo[] };
 }
 
-export function loadPackedAssets(dataDir: string = PACKAGE_DATA_DIR): FightAssets {
+export function loadPackedAssets(dataDir: string = PACKAGE_DATA_DIR, options: PackedAssetOptions = {}): FightAssets {
   const t = readTemplates(dataDir);
   const shapes = decodeBombPack(inflateRawSync(readFileSync(join(dataDir, "bombs.ddtb"))));
-  return new FightAssets({ ...t, shapes }, (id) => {
+  const init = options.weaponExtensionPath === undefined ? { ...t, shapes }
+    : mergeWeaponExtension(t, shapes, JSON.parse(readFileSync(options.weaponExtensionPath, "utf8")));
+  return new FightAssets(init, (id) => {
     const f = join(dataDir, "maps", `${id}.ddtm`);
     return existsSync(f) ? decodeMapPack(inflateRawSync(readFileSync(f))) : null;
   });

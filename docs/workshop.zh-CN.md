@@ -198,6 +198,16 @@ node scripts/workshop-bag-layout.mjs install --gameover-title
 
 ## 验证与备份
 
+### 新武器的本地兼容包
+
+时装导入不负责武器战斗配置。武器需同时具备数据库的 `Shop_Goods/BallConfig/Ball`、战斗引擎数据和原客户端资源；只新增数据库物品或调用 `reload-templates` 不会更新引擎已加载的武器。
+
+`node --import tsx scripts/workshop-weapon.ts plan <package.json>` 离线检查一个完整类别7模板、四分支和1～4个完整Ball行；不补默认物理值。输入使用 `schemaVersion:1`、`mode:"local-compat"`、独立 `owner`、来源 `metadata` 及三表原字段。`verify` 绑定当前本机Workshop数据库只读核验；`install` 在同一事务只新增这些owned行。未知占用、部分安装或参数漂移拒绝覆盖；重复执行只有数据库、包和归属账本全部一致才无操作。账本 `prepared` 是写入意图，不能当作已提交收据，失败后须回读。安装器不发放物品、写资源、重启或宣称游戏验收。
+
+游戏服务可显式配置 `FIGHT_WEAPON_EXTENSION=<绝对路径/fight.json>`，启动时追加武器；默认关闭。该JSON使用 `schemaVersion:1`、`source:"local-compat"`、`items/ballConfigs/balls`，字段与 `@ddt/fight/node` 的 `LocalWeaponExtension` 对应。新武器必须有完整配置，既有item/config/ball不得覆盖，新增弹体必须被使用。挖坑弹体可显式引用现有本地shape，或在 `shapes` 中提供 `{ballId,source:"official-image-derived-local-mask",fileBase64}` 的原Tile二进制格式；后者严格检查base64、尺寸和长度，仍是本地派生形状。全部检查通过后才合并，新包失败不会静默退回旧武器。
+
+配置仅在启动加载，首次接入前须核对数据库XML、fight包及资源一致并确认无在线角色/房间。官方基础属性、原版视觉文件、本地弹道/延迟/形状各自记录来源；本地运行通过不代表官方战斗完全复刻。当前武器通道与隔离测试已实现，实际新增武器的原客户端效果、正常操作、保存和发放仍需独立验证，不据通道完成把新武器数量加一。
+
 `workshop-smoke.ts` 走实际 REST→Flash RSA→TCP/WS 登录、大厅、双账号组房聊天及重连；`workshop-battle.ts` 走真实25秒机器人匹配、移动、开火、伤害、结算、翻牌、回大厅及存档重登。使用便携 Node24、`TZ=UTC`，不启用测试引擎或放宽票据。
 
 `node --import tsx apps/api/scripts/workshop-shop-smoke.ts --run` 用新的本地测试角色，通过正常HTTP/RSA/WS登录购买原商城1310201商品。实服XML核对后，分别检查44响应、38精确扣159点券、64新增一件绑定7天海盗套装，以及正常退出后的稳定ItemID和新连接读回。44响应本身不足以证明购买成功。已实际完成一次购买、保存与精确回退；这项协议业务验证的 `renderingAccepted` 始终为false，不能代替原客户端商城操作验收。

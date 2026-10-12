@@ -157,6 +157,7 @@ export class GameServer {
       (process.env.FIGHT_ENGINE === "stub"
         ? new StubFightEngine(pickMap, (m) => log.debug(m))
         : new DdtFightEngine({
+            weaponExtensionPath: cfg.FIGHT_WEAPON_EXTENSION,
             pickMap,
             log: (m) => log.warn(m),
             gradeForGp: (gp) => templates.gradeForGp(gp),
