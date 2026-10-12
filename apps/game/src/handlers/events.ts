@@ -18,6 +18,7 @@ import { mailItems } from "./items.js";
 import * as Out from "../packets/out.js";
 import type { HandlerRegistry } from "./registry.js";
 import { exchangeActivity } from "../game/activity-exchange.js";
+import { claimOnlineBox, startOnlineBoxTimer } from "../game/online-box.js";
 
 // ------------------------------------------------------------------ runtime
 export interface BossPlayer { x: number; y: number; state: number }
@@ -303,7 +304,7 @@ export async function eventsOnLogin(ctx: ServerContext, p: GamePlayer): Promise<
   const now = ctx.now();
   const c = p.info;
   // GamePlayer.Login: BoxBeginTime = now (the BoxGetDate daily reset is done by the login burst)
-  boxBegin.set(p, now.getTime());
+  startOnlineBoxTimer(p, now);
   // AccumulativeUpdate once per day (max 7)
   if ((c.accumulativeLoginDays ?? 0) < 7 && (await claimOnce(ctx.db.db, p.id, "acclogin", dayKey(now)))) c.accumulativeLoginDays = (c.accumulativeLoginDays ?? 0) + 1;
   updateRecords(p);
@@ -324,7 +325,6 @@ export function pushRecords(p: GamePlayer, add?: Map<number, number>): void {
   if (ch.length) p.send(Out.achievementRecords(229, p.id, ch));
 }
 
-const boxBegin = new WeakMap<GamePlayer, number>();
 const throttle = new WeakMap<GamePlayer, number>();
 function throttled(p: GamePlayer, ms: number): boolean {
   const now = Date.now();
@@ -453,7 +453,6 @@ export async function timeBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket):
   const rt = eventsRuntime(ctx);
   const mode = pkt.readInt();
   const c = p.info;
-  const now = ctx.now();
   if (mode === 0) {
     pkt.readInt();
     return;
@@ -462,27 +461,23 @@ export async function timeBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket):
   let ok = false;
   let box;
   if (boxType === 0) {
-    box = rt.data.findBox(0, c.Grade, c.BoxProgression ?? 0);
-    const minutes = Math.floor((now.getTime() - (boxBegin.get(p) ?? now.getTime())) / 60_000);
-    // server-side elapsed time since login / last box (the original also accepted the client's report)
-    if (box && minutes >= box.Condition && (await claimOnce(ctx.db.db, p.id, "timebox", `${dayKey(now)}:${box.Condition}`))) {
-      c.BoxProgression = box.Condition; c.BoxGetDate = now; c.AlreadyGetBox = 0; ok = true;
-    }
+    const result = await claimOnlineBox(ctx, p, rt.data);
+    ok = result.ok;
+    if (ok) {
+      const next = rt.data.findBox(0, c.Grade, c.BoxProgression ?? 0);
+      p.sendMessage(0, next ? `Presente do baú do tempo recebido. ${result.summary}` : `Você já recebeu tudo de hoje. ${result.summary}`);
+    } else p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
   } else {
     box = rt.data.findBox(1, c.GetBoxLevel ?? 0, c.Sex ? 1 : 0);
     if (box && c.Grade >= box.Level && (await claimOnce(ctx.db.db, p.id, "levelbox", String(box.Level)))) { c.GetBoxLevel = box.Level; ok = true; }
   }
   if (ok && box) {
     const s = await openBoxRewards(ctx, p, box.TemplateID, "Caixa de tempo");
-    if (boxType === 0) {
-      boxBegin.set(p, now.getTime());
-      const next = rt.data.findBox(0, c.Grade, c.BoxProgression ?? 0);
-      p.sendMessage(0, next ? `Presente do baú do tempo recebido. ${s}` : `Você já recebeu tudo de hoje. ${s}`);
-    } else p.sendMessage(0, `${ctx.lang.t("UserGetTimeBoxHandler.level")} ${s}`);
-  } else p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
+    p.sendMessage(0, `${ctx.lang.t("UserGetTimeBoxHandler.level")} ${s}`);
+  } else if (boxType !== 0) p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
   if (boxType === 0) {
     const out = new GSPacket(53, p.id);
-    out.writeInt(mode); out.writeInt(boxType);
+    // BossBoxManager._getTimeBox reads only bool + int; request prefixes are not echoed.
     out.writeBoolean(ok);
     out.writeInt(c.BoxProgression ?? 0);
     p.send(out);

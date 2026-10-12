@@ -186,9 +186,10 @@ async function requestOnlineBox(c: FakeClient) {
   const from = c.mark();
   c.out(53, (o) => { o.writeInt(1); o.writeInt(0); });
   const r = await c.code(53, undefined, from);
-  expect(r.pkt.readInt()).toBe(1);
-  expect(r.pkt.readInt()).toBe(0);
-  return { ok: r.pkt.readBoolean(), progression: r.pkt.readInt() };
+  expect(r.pkt.length).toBe(25); // 20-byte header + original AS3 bool/int response.
+  const result = { ok: r.pkt.readBoolean(), progression: r.pkt.readInt() };
+  expect(r.pkt.offset).toBe(r.pkt.length);
+  return result;
 }
 
 async function timeBoxLogin(grade: number) {
@@ -294,8 +295,9 @@ describe("online boxes from the committed User_Box seed", () => {
       const accepted: boolean[] = [];
       for (let i = 0; i < 8; i++) {
         const r = await a.c.code(53, undefined, from); from = a.c.received.indexOf(r) + 1;
-        expect(r.pkt.readInt()).toBe(1); expect(r.pkt.readInt()).toBe(0);
+        expect(r.pkt.length).toBe(25);
         accepted.push(r.pkt.readBoolean()); expect(r.pkt.readInt()).toBe(40);
+        expect(r.pkt.offset).toBe(r.pkt.length);
       }
       expect(accepted.filter(Boolean)).toHaveLength(1);
       expect(rewardSnapshot(a.player())).toEqual(expectedRewards(2));
