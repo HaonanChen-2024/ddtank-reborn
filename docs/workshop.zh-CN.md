@@ -108,6 +108,8 @@ node --import tsx apps/api/scripts/workshop-official-install.ts --journal=<runti
 
 `research/client/WorkshopOfficialWardrobeProbe.as` 与 `scripts/workshop-official-render.mjs` 使用原客户端类、独立PlayerInfo和私有headless Chromium，读取ShowCharacter/RoomCharacter/GameCharacter、染色和头发a/b；不发送换装指令，不操作桌面或现有浏览器。每张服饰组件截图前后必须取得新鲜、连续、同一job与物品/原色或染色/帽发/隐藏状态的观察；过期、换项或画面离开最上层时拒绝记为成功。计数和资源加载完成不能替代这道截图绑定检查及人工图像检查，也不能称为自然实战、鼠标操作或用户接受验收。
 
+截图前以本条 `official-frame-ready` 的事件位置为边界，最多等待1500ms取得其后的新观察；此前上一项的失效观察不用于判断新画面。边界之后的失效、错误或身份不符仍立即拒绝，不能被后续正常观察覆盖；原1500ms新鲜度及截图后检查保持。
+
 发型A/B的合成分支由原 `PlayerInfo.getHairType()` 读取可见帽子的 `Property1`，不是独立图层参数。Category3克隆在A任务使用原普通帽子1102/1202，在B任务使用透明默认帽子1101/1201，并断言头部基线、发型Style和真实分支一致；截图前再次核对 `componentHairType`。旧证据若只加载独立B层、合成仍为A，不能算完整A/B合成验收，须保留原记录并补测。
 
 套装额外显示原色、仅clone染色和隐藏后普通服饰恢复，每套3组画面；正常分支6及备用game1分支7各绘制39帧。分支7是手动原组件调用，不代表真实低血量事件会触发切换；clone的Colors第8段渲染也不代表游戏染色界面支持套装。完整对局、实际状态切换及动作连续性需另验，`gameplayAccepted` 保持false。

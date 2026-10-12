@@ -1,10 +1,56 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
+import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearancePreCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
 
 const ready = { phase: "official-frame-ready", job: 2, templateID: 13999100, dye: false, hidden: true, hair: 0, baseline: false };
 const before = { ...ready, phase: "appearance-observation", ready: true, tick: 100, selfUnchanged: true, reportedAt: 9000, receivedAt: 9001 };
 const after = { ...before, tick: 101, reportedAt: 10001, receivedAt: 10002 };
+
+test("waits across the observed old-job invalidation, new-ready, new-observation ordering", () => {
+  // render-m-41f45bb2: job 10 invalidated at tick 329, then job 11 ready;
+  // the renderer previously rejected immediately before job 11's first tick.
+  const invalidated = { ...before, job: 10, templateID: 13417, dye: true, hidden: false, ready: false, tick: 329,
+    reportedAt: 1791814914777, receivedAt: 1791814914778 };
+  const next = { ...ready, job: 11, templateID: 13417 };
+  const now = 1791814914900, deadline = now + 1500;
+  const rows = [invalidated, { phase: "official-render-requested", job: 11 }, next];
+  assert.equal(appearancePreCaptureDecision(rows, next, now, deadline).decision, "wait");
+  const current = { ...before, ...next, phase: "appearance-observation", tick: 330, reportedAt: now + 200, receivedAt: now + 201 };
+  rows.push(current);
+  const accepted = appearancePreCaptureDecision(rows, next, now + 202, deadline);
+  assert.equal(accepted.decision, "observed"); assert.equal(accepted.before, current);
+  assert.equal(accepted.readyIndex, 2); assert.equal(accepted.beforeIndex, 3);
+  assert.equal(appearanceSnapshotEligible(accepted.before, next), true);
+});
+
+test("pre-capture never falls back to observations before the exact ready event and times out", () => {
+  const rows = [before, ready];
+  assert.equal(appearancePreCaptureDecision(rows, ready, 10000, 11500).decision, "wait");
+  assert.equal(appearancePreCaptureDecision(rows, ready, 11499, 11500).decision, "wait");
+  assert.equal(appearancePreCaptureDecision(rows, ready, 11500, 11500).decision, "reject");
+  assert.equal(appearancePreCaptureDecision(rows, ready, 12000, 11500).decision, "reject");
+  assert.equal(appearancePreCaptureDecision(rows, { ...ready }, 10000, 11500).decision, "reject");
+});
+
+test("pre-capture rejects any explicit post-ready invalidation or mismatch, even followed by a good snapshot", () => {
+  for (const change of [{ job: 1 }, { templateID: 13999101 }, { dye: true }, { hidden: false }, { hair: 1 },
+    { baseline: true }, { ready: false }, { selfUnchanged: false }, { tick: 0 }]) {
+    const bad = { ...after, ...change };
+    for (const rows of [[ready, bad], [ready, bad, after], [ready, after, bad]]) {
+      assert.equal(appearancePreCaptureDecision(rows, ready, 10003, 11500).decision, "reject");
+    }
+  }
+  assert.equal(appearancePreCaptureDecision([ready, { phase: "official-probe-error" }, after], ready, 10003, 11500).decision, "reject");
+});
+
+test("pre-capture preserves the 1500ms freshness gate and the bounded wait", () => {
+  assert.equal(appearancePreCaptureDecision([ready, before], ready, 10500, 11500).decision, "observed");
+  for (const change of [{ reportedAt: 8999 }, { receivedAt: 8999 }, { reportedAt: 10501 }, { receivedAt: 10501 },
+    { reportedAt: undefined }, { receivedAt: undefined }]) {
+    assert.equal(appearancePreCaptureDecision([ready, { ...before, ...change }], ready, 10500, 11500).decision, "reject");
+  }
+  assert.equal(appearancePreCaptureDecision([ready, after], ready, 10003, 10003).decision, "reject");
+});
 
 test("rejects the observed hair B job whose standalone layer loaded but composite still used A", () => {
   assert.equal(appearanceHairBranchMatches({ categoryId: 3, hair: 1, componentHairType: "A" }), false);

@@ -6,7 +6,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
+import { allAppearanceCapturesAccepted, appearanceHairBranchMatches, appearancePostCaptureDecision, appearancePreCaptureDecision, appearanceSnapshotEligible, freshAppearanceSnapshot, latestAppearanceSnapshot, sameAppearanceScene } from "./workshop-appearance-capture.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workshop = resolve(repo, "../..");
@@ -175,14 +175,22 @@ try {
   for (let elapsed = 0; elapsed < seconds; elapsed++) {
     await delay(1000);
     for (const ready of evidence.probe.filter(row => row.phase === "official-frame-ready" && !captured.has(row.job))) {
-      const before = view === "storage" ? latestStorageSnapshot(evidence.probe) : view === "appearances" ? latestAppearanceSnapshot(evidence.probe) : null;
+      let before = view === "storage" ? latestStorageSnapshot(evidence.probe) : null;
       let appearanceCaptureCheckIndex;
       if (view === "appearances") {
         assert.ok(appearanceHairBranchMatches(ready), "composite hair branch differs; standalone layer is not sufficient");
-        const accepted = appearanceSnapshotEligible(before, ready) && freshAppearanceSnapshot(before) &&
+        const preCaptureStartedAt = Date.now(), preCaptureDeadline = preCaptureStartedAt + 1500;
+        let decision = appearancePreCaptureDecision(evidence.probe, ready, Date.now(), preCaptureDeadline);
+        while (decision.decision === "wait" && evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error")) {
+          await delay(Math.min(50, Math.max(1, preCaptureDeadline - Date.now())));
+          decision = appearancePreCaptureDecision(evidence.probe, ready, Date.now(), preCaptureDeadline);
+        }
+        before = decision.before;
+        const accepted = decision.decision === "observed" && appearanceSnapshotEligible(before, ready) && freshAppearanceSnapshot(before) &&
           evidence.errors.length === 0 && !evidence.probe.some(row => row.phase === "official-probe-error");
         evidence.appearanceCaptureChecks.push({ accepted, phase: "before", job: ready.job, templateID: ready.templateID,
-          reason: accepted ? "fresh exact appearance job observed" : "appearance job is stale, not ready or mismatched; capture refused", ready, before });
+          reason: decision.reason, ready, before: before ?? null, preCaptureStartedAt, preCaptureDeadline,
+          readyProbeIndex: decision.readyIndex, beforeProbeIndex: decision.beforeIndex ?? null });
         assert.ok(accepted, "appearance screenshot precondition failed; capture refused");
       }
       if (view === "storage" && (!storageSnapshotEligible(before, fixture.characterId) || !freshStorageSnapshot(before) ||
