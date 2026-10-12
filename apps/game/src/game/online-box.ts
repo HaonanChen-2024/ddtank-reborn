@@ -100,7 +100,8 @@ export async function claimOnlineBox(ctx: ServerContext, p: GamePlayer, data: Ev
           await saveItem(db, item);
         }
         await savePlayerInfo(db, staged.info, staged.match);
-        if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, staged, grant.overflow, "Caixa de tempo", 12);
+        if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, staged, grant.overflow,
+          ctx.lang.t("UserGetTimeBoxHandler.title"), 12, ctx.lang.t("UserGetTimeBoxHandler.mail"));
         const current = inventory(p);
         if (profile(p) !== plan.profileBefore || [...original].some(([item, old]) => snapshot(item) !== old.before || item.isDirty !== old.dirty) ||
             current.some((b, i) => b.capacity !== plan.bags[i]!.capacity || ["items", "removed", "dirty"].some((key) => {

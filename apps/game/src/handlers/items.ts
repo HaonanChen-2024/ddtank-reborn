@@ -159,7 +159,7 @@ export function changeItemPlace(ctx: ServerContext, p: GamePlayer, bagType: numb
  * - mail: linhas da carta (Annex1..5 = IDs dos itens, viram UserID 0 = "no correio").
  * - remark: texto da carta ("1、nome×qtd;..."). `it` = cada ItemInfo excedente.
  */
-export async function mailItems(ctx: ServerContext, p: GamePlayer, items: ItemInfo[], title?: string, type = 8): Promise<void> {
+export async function mailItems(ctx: ServerContext, p: GamePlayer, items: ItemInfo[], title?: string, type = 8, body?: string): Promise<void> {
   for (let i = 0; i < items.length; i += 5) {
     const chunk = items.slice(i, i + 5);
     const mail: Record<string, unknown> = {};
@@ -175,7 +175,7 @@ export async function mailItems(ctx: ServerContext, p: GamePlayer, items: ItemIn
     }
     const content = title ?? `${ctx.lang.t("UserBuyItemHandler.Title")}${chunk[0]!.template.Name ?? ""}]`;
     await sendMail(ctx.db.db, {
-      ...mail, AnnexRemark: remark, Content: content, Title: content, Gold: 0, Money: 0, Type: type,
+      ...mail, AnnexRemark: remark, Content: body ?? content, Title: content, Gold: 0, Money: 0, Type: type,
       Receiver: p.info.NickName, ReceiverID: p.id, Sender: p.info.NickName, SenderID: p.id,
     });
   }

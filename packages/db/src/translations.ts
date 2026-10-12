@@ -13,11 +13,28 @@
  * missing overlay row is normal (either the table hasn't been translated yet, or DEFAULT_LANG is the
  * source language), never an error.
  */
+import { readFile } from "node:fs/promises";
 import { and, eq } from "drizzle-orm";
 import type { Database } from "./client.js";
 import { Translations } from "./schema/app.js";
 
 export type TranslationOverlay = Map<string, Record<string, string>>;
+
+/** Optional local display names, shared by API and Game. Never contains gameplay columns or writes SQL. */
+export function parseItemNameOverrides(text: string): Record<string, string> {
+  const value: unknown = JSON.parse(text);
+  const object = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!object(value) || Object.keys(value).sort().join(",") !== "names,schemaVersion,table" ||
+      value.schemaVersion !== 1 || value.table !== "Shop_Goods" || !object(value.names)) {
+    throw new Error("ITEM_NAME_OVERRIDES_FILE must contain only schemaVersion:1, table:Shop_Goods and names");
+  }
+  for (const [id, name] of Object.entries(value.names)) {
+    if (!/^[1-9]\d*$/.test(id) || Number(id) > 2147483647 || typeof name !== "string" || !name.trim()) {
+      throw new Error(`Invalid ITEM_NAME_OVERRIDES_FILE name entry: ${id}`);
+    }
+  }
+  return value.names as Record<string, string>;
+}
 
 /** Loads every (column -> text) translation for one `game` table + lang into memory (small per-table: tens to low thousands of rows, fine to cache in the caller for the process lifetime). */
 export async function loadTranslations(db: Database, table: string, lang: string): Promise<TranslationOverlay> {
@@ -30,6 +47,12 @@ export async function loadTranslations(db: Database, table: string, lang: string
     let byCol = overlay.get(r.rowId);
     if (!byCol) overlay.set(r.rowId, (byCol = {}));
     byCol[r.column] = r.text;
+  }
+  // Explicit local override wins over the language-specific DB Name; other columns keep their old overlay.
+  const file = table === "Shop_Goods" ? process.env.ITEM_NAME_OVERRIDES_FILE : undefined;
+  if (file) {
+    const names = parseItemNameOverrides(await readFile(file, "utf8"));
+    for (const [id, Name] of Object.entries(names)) overlay.set(id, { ...overlay.get(id), Name });
   }
   return overlay;
 }

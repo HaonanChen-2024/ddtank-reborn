@@ -151,7 +151,11 @@ node scripts/workshop-language.mjs rollback
 
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML默认只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
-服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。当前仅覆盖世界BOSS及蚁后共用的四条喊话，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
+服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。配置保留世界BOSS及蚁后共用的四条喊话，并新增在线宝箱反馈、溢出邮件和附件前缀六键；新增六键已实现，尚待部署及原客户端验收，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
+
+道具显示名另有可选 `ITEM_NAME_OVERRIDES_FILE`，由 API 与 Game 共用模板翻译层读取。新配置 `research/i18n/zh-CN-item-names.json` 仅含四类1～3级石头及11233金币宝箱共13个名称；格式严格为 `{"schemaVersion":1,"table":"Shop_Goods","names":{"模板ID":"显示名"}}`。仅覆盖内存中的 `Shop_Goods.Name`，优先于原语言的数据库Name翻译，其他字段和既有翻译保持；不写数据库，不修改历史邮件。未设置或设为空时完全沿用旧加载行为；文件缺失或结构错误会报错，不能当作已应用。
+
+该名称配置已实现但尚未部署。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。物品描述、等级/VIP礼包文案及全界面中文仍不在本批验收范围。
 
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本。原14张fmt5位图（12个建筑标题、频道与签到）基础上，新增原存储窗口正文id7及实际确定按钮id10的19处文字，默认共16张图片，其余331个SWF标签保持。存储正文保留原许可选择语义，右侧“允许/拒绝”明确为示意，不代表浏览器已授权。原入口、事件和动画继续使用，字区外像素不变；农场、独立活动入口和其他工具栏图片仍待处理。
 

@@ -472,7 +472,7 @@ export async function timeBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket):
     ok = result.ok;
     if (ok) {
       const next = rt.data.findBox(0, c.Grade, c.BoxProgression ?? 0);
-      p.sendMessage(0, next ? `Presente do baú do tempo recebido. ${result.summary}` : `Você já recebeu tudo de hoje. ${result.summary}`);
+      p.sendMessage(0, `${ctx.lang.t(next ? "UserGetTimeBoxHandler.success" : "UserGetTimeBoxHandler.todayOver")} ${result.summary}`);
     } else p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
   } else {
     box = rt.data.findBox(1, c.GetBoxLevel ?? 0, c.Sex ? 1 : 0);

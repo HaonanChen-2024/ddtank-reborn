@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const script = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "workshop-language.mjs"));
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 function fixture(t) {
   const parent = resolve(tmpdir()), root = mkdtempSync(join(parent, "ddtank-language-"));
   t.after(() => { assert.ok(resolve(root).startsWith(parent + sep)); rmSync(root, { recursive: true, force: true }); });
@@ -28,6 +29,25 @@ test("server verification is read-only and includes duplicate rows and format pl
   assert.equal(result.keys, 1); assert.equal(result.translatedRows, 2); assert.equal(result.installed, false);
   assert.equal(existsSync(f.runtime), false);
   assert.equal(readFileSync(join(f.repo, "data/i18n/pt-BR/server-language.txt"), "utf8"), f.source);
+});
+
+test("the online-box Chinese keys install over the real server dictionary without changing other lines", t => {
+  const f = fixture(t);
+  // Git checkouts may use LF; the deployment fixture must match the original AS3 parser's CRLF contract.
+  const source = readFileSync(join(repoRoot, "data/i18n/pt-BR/server-language.txt"), "utf8").replace(/\r?\n/g, "\r\n");
+  const overridesText = readFileSync(join(repoRoot, "research/i18n/zh-CN-server-overrides.json"), "utf8");
+  const overrides = JSON.parse(overridesText);
+  const keys = ["success", "todayOver", "title", "mail", "fail"].map(key => `UserGetTimeBoxHandler.${key}`).concat("GoodsPresentHandler.AnnexRemark");
+  for (const key of keys) assert.equal(typeof overrides[key], "string");
+  f.put("data/i18n/pt-BR/server-language.txt", source);
+  f.put("research/i18n/zh-CN-server-overrides.json", overridesText);
+  f.ok("verify", "--server"); f.ok("install", "--server");
+  const expected = source.split("\r\n").map(line => {
+    const colon = line.indexOf(":"), key = line.slice(0, colon);
+    return colon >= 0 && Object.hasOwn(overrides, key) ? `${key}:${overrides[key]}` : line;
+  }).join("\r\n");
+  assert.equal(readFileSync(join(f.runtime, "server-language.txt"), "utf8"), expected);
+  assert.equal(readFileSync(join(f.repo, "data/i18n/pt-BR/server-language.txt"), "utf8"), source);
 });
 
 test("client and server installations use independent targets, journals and rollback", t => {

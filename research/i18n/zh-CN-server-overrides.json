@@ -2,5 +2,11 @@
   "GameServerScript.AI.NPC.SimpleQueenAntAi.msg4": "看我百发百中！",
   "GameServerScript.AI.NPC.SimpleQueenAntAi.msg5": "让你见识我的厉害！",
   "GameServerScript.AI.NPC.SimpleQueenAntAi.msg13": "姐妹们，别散开，让他们尝尝苦头！",
-  "GameServerScript.AI.NPC.SimpleQueenAntAi.msg14": "你以为这就结束了？！<br/>这可都是为了你好！"
+  "GameServerScript.AI.NPC.SimpleQueenAntAi.msg14": "你以为这就结束了？！<br/>这可都是为了你好！",
+  "UserGetTimeBoxHandler.success": "在线宝箱奖励领取成功。",
+  "UserGetTimeBoxHandler.todayOver": "今日在线宝箱奖励已全部领取。",
+  "UserGetTimeBoxHandler.title": "在线宝箱奖励",
+  "UserGetTimeBoxHandler.mail": "背包已满，在线宝箱奖励已通过邮件发送，请查收。",
+  "UserGetTimeBoxHandler.fail": "宝箱暂不可领取，请检查领取条件。",
+  "GoodsPresentHandler.AnnexRemark": "附件："
 }
