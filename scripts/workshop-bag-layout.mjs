@@ -69,6 +69,40 @@ export function patchGameoverTitleXml(bytes) {
   return Buffer.from(text);
 }
 
+// Only the matching single-slot ABC branch consumes these new styles. Original
+// calendar styles stay byte-for-byte intact, including the multi-slot layout.
+const calendarExchangePoints = [
+  ["Calendar.Activity.ExchangeDetailSize", 414, 236],
+  ["Calendar.Activity.ExchangeFixedPos", 57, 300],
+  ["CalendarGrid.GoodsExchangeView.CompactPos", 25, 0],
+  ["CalendarGrid.GoodsExchangeView.CompactTitleSize", 300, 22],
+  ["CalendarGrid.GoodsExchangeView.CompactExplainSize", 350, 28],
+];
+
+export function patchCalendarExchangeXml(bytes) {
+  const original = bytes.toString("utf8");
+  assert.deepEqual(Buffer.from(original), bytes, "layout is not lossless UTF-8");
+  const tags = [...original.matchAll(/<(?:component|custom)\b[^>]*\/>/g)].map(([tag]) => tag);
+  const named = style => tags.filter(tag => tag.includes(`stylename="${style}"`));
+  for (const [style, expected] of [
+    ["Calendar.ActivityDetailList", { width: "414", height: "368" }],
+    ["CalendarGrid.GoodsExchangeView.Pos", { x: "25", y: "25" }],
+    ["CalendarGrid.GoodsExchangeView.cellSize", { x: "63", y: "63" }],
+  ]) {
+    const matches = named(style);
+    assert.equal(matches.length, 1, `expected one original calendar style: ${style}`);
+    for (const [key, value] of Object.entries(expected)) assert.ok(matches[0].includes(`${key}="${value}"`), `original calendar style changed: ${style}.${key}; preserved`);
+  }
+  const additions = calendarExchangePoints.map(([style, x, y]) => `<custom classname="flash.geom.Point" stylename="${style}" x="${x}" y="${y}" />`);
+  const existing = calendarExchangePoints.map(([style]) => named(style));
+  if (existing.some(matches => matches.length)) {
+    for (let i = 0; i < existing.length; i++) assert.deepEqual(existing[i], [additions[i]], "partial or changed calendar exchange styles; preserved");
+    return bytes;
+  }
+  assert.equal(original.split("</customDisplay>").length, 2, "expected one calendar customDisplay section");
+  return Buffer.from(original.replace("</customDisplay>", additions.map(tag => `\t\t${tag}`).join("\r\n") + "\r\n\t</customDisplay>"));
+}
+
 // JSZip handles decoding/CRC validation. Read only classic-ZIP framing to preserve untouched compressed bytes.
 export function zipRecords(bytes) {
   let end = bytes.length - 22;
@@ -138,21 +172,34 @@ async function patchLayoutEntry(bytes, entryName, patchXml) {
 }
 
 function patchFlags(flags = {}) {
-  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment"].includes(key)), "unknown layout patch flag");
+  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment", "calendarExchangeLayout"].includes(key)), "unknown layout patch flag");
   assert.ok(flags.gameoverTitle === undefined || typeof flags.gameoverTitle === "boolean", "invalid gameover title flag");
   assert.ok(flags.bagLabelAlignment === undefined || typeof flags.bagLabelAlignment === "boolean", "invalid bag label alignment flag");
-  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}) };
+  assert.ok(flags.calendarExchangeLayout === undefined || typeof flags.calendarExchangeLayout === "boolean", "invalid calendar exchange layout flag");
+  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}), ...(flags.calendarExchangeLayout ? { calendarExchangeLayout: true } : {}) };
 }
 
 export async function patchBagLayoutArchive(bytes, flags = {}) {
   const selected = patchFlags(flags), bag = await patchLayoutEntry(bytes, entryName, source => patchBagLayoutXml(source, selected));
   const summary = { ...bag.summary, labelField: { width: 28, height: 18, autoSize: "left" }, columnX: [324, 374], rowY: [300, 324], renderingAccepted: false };
   if (selected.bagLabelAlignment) { summary.patchFlags = selected; summary.checkboxFieldX = 18; }
-  if (!selected.gameoverTitle) return { output: bag.output, summary };
-  const title = await patchLayoutEntry(bag.output, "gameOver.xml", patchGameoverTitleXml);
-  return { output: title.output, summary: { ...summary, sha256: title.summary.sha256, bytes: title.output.length,
-    preservedEntries: summary.entries - 2, preservedCompressedEntries: summary.entries - 2,
-    patchFlags: selected, changedEntries: [entryName, "gameOver.xml"], gameoverTitle: { resourceLink: "asset.takeoutCard.TitleBitmap", x: 180, y: -20 } } };
+  let output = bag.output;
+  if (selected.gameoverTitle) {
+    const title = await patchLayoutEntry(output, "gameOver.xml", patchGameoverTitleXml);
+    output = title.output;
+    Object.assign(summary, { sha256: title.summary.sha256, bytes: output.length,
+      preservedEntries: summary.entries - 2, preservedCompressedEntries: summary.entries - 2,
+      patchFlags: selected, changedEntries: [entryName, "gameOver.xml"], gameoverTitle: { resourceLink: "asset.takeoutCard.TitleBitmap", x: 180, y: -20 } });
+  }
+  if (selected.calendarExchangeLayout) {
+    const calendar = await patchLayoutEntry(output, "calendar.xml", patchCalendarExchangeXml);
+    output = calendar.output;
+    const changedEntries = [...(summary.changedEntries ?? [entryName]), "calendar.xml"];
+    Object.assign(summary, { sha256: calendar.summary.sha256, bytes: output.length,
+      preservedEntries: summary.entries - changedEntries.length, preservedCompressedEntries: summary.entries - changedEntries.length,
+      patchFlags: selected, changedEntries, calendarExchangeLayout: { scope: "ActiveType1-single-slot", addedStyles: calendarExchangePoints.map(([name]) => name), requiresMatchingAbc: true } });
+  }
+  return { output, summary };
 }
 
 function replace(target, bytes) {
@@ -167,6 +214,7 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
   const requested = patchFlags(options);
   assert.ok(options.gameoverTitle === undefined || requested.gameoverTitle, "gameover title option only enables the reviewed patch");
   assert.ok(options.bagLabelAlignment === undefined || requested.bagLabelAlignment, "bag label option only enables the reviewed patch");
+  assert.ok(options.calendarExchangeLayout === undefined || requested.calendarExchangeLayout, "calendar exchange layout option only enables the reviewed patch");
   assert.ok(command !== "rollback" || Object.keys(options).length === 0, "rollback does not take patch flags");
   const target = join(runtime, "client-overlay/ui/vietnam/xml/xml.png"), journalFile = join(runtime, "client-text-followup/layout-overlay.json");
   const backupRoot = resolve(runtime, "client-text-followup/layout-backups");
@@ -222,6 +270,6 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const flags = process.argv.slice(3);
-  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment"].includes(flag)), "unknown or duplicate layout option");
-  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}) })));
+  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment", "--calendar-exchange-layout"].includes(flag)), "unknown or duplicate layout option");
+  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}), ...(flags.includes("--calendar-exchange-layout") ? { calendarExchangeLayout: true } : {}) })));
 }

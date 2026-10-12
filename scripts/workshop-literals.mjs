@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { patchSwfBuffer } from "../tools/i18n/abc-strings/patch.mjs";
 import { patchActivityResponse } from "../tools/i18n/abc-strings/activity-response.mjs";
 import { patchActivityState } from "../tools/i18n/abc-strings/activity-state.mjs";
+import { patchExchangeState } from "../tools/i18n/abc-strings/exchange-state.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
@@ -15,28 +16,34 @@ const names = ["2.png", "3.png", "DDT_Loading.swf"];
 
 export function literalOptions(args) {
   const commands = args.filter(arg => ["verify", "install", "rollback"].includes(arg));
-  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state]");
+  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state]");
   assert.ok(args.filter(arg => arg === "--activity-response").length <= 1, "duplicate activity-response option");
   const command = commands[0] ?? "verify", activityResponse = args.includes("--activity-response");
   const activityState = args.includes("--activity-state");
+  const exchangeState = args.includes("--exchange-state");
   assert.ok(args.filter(arg => arg === "--activity-state").length <= 1, "duplicate activity-state option");
-  assert.ok(command !== "rollback" || !(activityResponse || activityState), "rollback restores the complete owned literal overlay");
-  return { command, activityResponse, ...(activityState ? { activityState } : {}) };
+  assert.ok(args.filter(arg => arg === "--exchange-state").length <= 1, "duplicate exchange-state option");
+  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState), "rollback restores the complete owned literal overlay");
+  return { command, activityResponse, ...(activityState ? { activityState } : {}), ...(exchangeState ? { exchangeState } : {}) };
 }
 
-export function runLiteralOverlay({ command = "verify", activityResponse = false, activityState = false, repoRoot = repo, runtimeRoot = resolve(repoRoot, "../../runtime") } = {}) {
+export function runLiteralOverlay({ command = "verify", activityResponse = false, activityState = false, exchangeState = false, repoRoot = repo, runtimeRoot = resolve(repoRoot, "../../runtime") } = {}) {
   assert.ok(["verify", "install", "rollback"].includes(command));
   assert.equal(typeof activityResponse, "boolean");
   assert.equal(typeof activityState, "boolean");
-  assert.ok(command !== "rollback" || !(activityResponse || activityState));
+  assert.equal(typeof exchangeState, "boolean");
+  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState));
   const overlay = join(runtimeRoot, "client-overlay"), ledger = join(runtimeRoot, "client-overlay-literals.json");
   const ledgerBytes = existsSync(ledger) ? readFileSync(ledger) : null;
   const previous = ledgerBytes ? JSON.parse(ledgerBytes.toString("utf8")) : null;
   assert.ok(!previous || previous.activityResponse === undefined || typeof previous.activityResponse === "boolean", "unknown activity-response journal flag");
   assert.ok(!previous || previous.activityState === undefined || typeof previous.activityState === "boolean", "unknown activity-state journal flag");
+  assert.ok(!previous || previous.exchangeState === undefined || typeof previous.exchangeState === "boolean", "unknown exchange-state journal flag");
   const oldEnabled = previous?.activityResponse ?? false;
-  const oldState = previous?.activityState ?? false, stateEnabled = oldState || activityState;
+  const oldExchange = previous?.exchangeState ?? false, exchangeEnabled = oldExchange || exchangeState;
+  const oldState = previous?.activityState ?? false, stateEnabled = oldState || activityState || exchangeEnabled;
   assert.ok(!oldState || oldEnabled, "calendar state journal requires its response fix");
+  assert.ok(!oldExchange || oldState, "exchange state journal requires its calendar state fix");
   // Omitting the option later preserves the recorded optional effect.
   const enabled = oldEnabled || activityResponse || stateEnabled;
   function checkOwned() {
@@ -85,8 +92,9 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     // Recompute the OLD semantic flag from its original backup before accepting an upgrade.
     let oldOut = oldEnabled && name === "2.png" ? patchActivityResponse(displayOut).out : displayOut;
     if (oldState && name === "2.png") oldOut = patchActivityState(oldOut).out;
+    if (oldExchange && name === "2.png") oldOut = patchExchangeState(oldOut).out;
     if (old) assert.equal(hash(oldOut), old.sha256, "recorded literal/consumer output changed; preserve the installed batch");
-    let out = displayOut, response, state;
+    let out = displayOut, response, state, exchange;
     if (enabled && name === "2.png") {
       const patched = patchActivityResponse(displayOut); out = patched.out;
       const again = patchActivityResponse(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
@@ -97,11 +105,16 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       const again = patchActivityState(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
       const { out: ignored, ...proof } = patched; state = proof;
     }
+    if (exchangeEnabled && name === "2.png") {
+      const patched = patchExchangeState(out); out = patched.out;
+      const again = patchExchangeState(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
+      const { out: ignored, ...proof } = patched; exchange = proof;
+    }
     return { name, sourceSha256: hash(bytes), sha256: hash(out), changedStrings: totalChanged, bytes: out.length,
       hadOverlay: old?.hadOverlay ?? existsSync(target), backup: old?.backup,
-      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
+      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
   });
-  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState;
+  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange;
   const journalFiles = () => files.map(({ out, sourceBytes, currentBytes, ...entry }) => entry);
   if (command === "install" && !unchanged) {
     if (!previous) {
@@ -109,7 +122,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       for (const entry of files) { entry.backup = join(backupDir, entry.name); writeFileSync(entry.backup, entry.sourceBytes, { flag: "wx" }); }
     }
     const nextLedger = Buffer.from(JSON.stringify({ ...(previous ?? {}), installedAt: previous?.installedAt ?? new Date().toISOString(),
-      ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), files: journalFiles() }, null, 2));
+      ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), ...(exchangeEnabled ? { exchangeState: true } : {}), files: journalFiles() }, null, 2));
     const checkLedger = () => ledgerBytes ? assert.deepEqual(readFileSync(ledger), ledgerBytes, "literal journal changed during preparation") : assert.equal(existsSync(ledger), false, "a literal journal appeared during preparation");
     checkLedger(); const installed = [];
     try {
@@ -135,7 +148,8 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   }
   return { installed: command === "install" || Boolean(previous), restartRequired: true, unchanged,
     activityResponse: enabled, activityResponseInstalled: enabled && (command === "install" || oldEnabled), activityState: stateEnabled,
-    activityStateInstalled: stateEnabled && (command === "install" || oldState), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState) && command !== "install", renderingAccepted: false,
+    activityStateInstalled: stateEnabled && (command === "install" || oldState), exchangeState: exchangeEnabled,
+    exchangeStateInstalled: exchangeEnabled && (command === "install" || oldExchange), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState || exchangeEnabled !== oldExchange) && command !== "install", renderingAccepted: false,
     files: journalFiles().map(({ backup, ...entry }) => entry) };
 }
 

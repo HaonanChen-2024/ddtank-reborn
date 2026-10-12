@@ -455,6 +455,7 @@
   "calendar.view.ActiveState.StartNot": "活动尚未开始",
   "calendar.view.ActiveState.TimeOut": "活动已经结束",
   "calendar.view.GoodsExchangeView.title": "请将兑换的物品放入下面方框内",
+  "calendar.view.GoodsExchangeView.explain": "兑换成功后，奖励将通过邮件发放，请前往邮箱查收。",
   "calendar.view.goodsExchange.BagFrame.Choose": " 请选择背包中的物品进行兑换",
   "calendar.view.goodsExchange.warning": "物品类型不符合",
   "calendar.view.goodsExchange.warningI": "强化等级不够",

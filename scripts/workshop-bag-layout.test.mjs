@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import { inflateRawSync } from "node:zlib";
-import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
+import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, patchCalendarExchangeXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), runtime = resolve(repo, "../../runtime");
 const source = join(repo, "apps/api/assets/flash/ui/vietnam/xml/xml.png"), sourceBytes = readFileSync(source);
@@ -69,6 +69,77 @@ function entryBytes(bytes, name) {
   const entry = zipRecords(bytes).records.find(record => record.name === name);
   return inflateRawSync(bytes.subarray(entry.data, entry.data + entry.compressedSize));
 }
+test("calendar exchange adds only isolated single-slot styles and rejects partial or changed owners", () => {
+  const original = entryBytes(sourceBytes, "calendar.xml"), patched = patchCalendarExchangeXml(original);
+  const beforeTags = [...original.toString().matchAll(/<(?:component|custom|set|bitmapData)\b[^>]*\/>/g)].map(([tag]) => tag);
+  const afterTags = [...patched.toString().matchAll(/<(?:component|custom|set|bitmapData)\b[^>]*\/>/g)].map(([tag]) => tag);
+  assert.equal(afterTags.length, beforeTags.length + 5);
+  for (const tag of beforeTags) assert.ok(afterTags.includes(tag), `existing calendar tag changed: ${tag}`);
+  for (const tag of [
+    'stylename="Calendar.Activity.ExchangeDetailSize" x="414" y="236"',
+    'stylename="Calendar.Activity.ExchangeFixedPos" x="57" y="300"',
+    'stylename="CalendarGrid.GoodsExchangeView.CompactPos" x="25" y="0"',
+    'stylename="CalendarGrid.GoodsExchangeView.CompactTitleSize" x="300" y="22"',
+    'stylename="CalendarGrid.GoodsExchangeView.CompactExplainSize" x="350" y="28"',
+  ]) assert.ok(patched.includes(Buffer.from(tag)));
+  assert.deepEqual(patchCalendarExchangeXml(patched), patched);
+  for (const changed of [
+    original.toString().replace('stylename="Calendar.ActivityDetailList"', 'stylename="unreviewed"'),
+    original.toString().replace('stylename="CalendarGrid.GoodsExchangeView.cellSize" x="63"', 'stylename="CalendarGrid.GoodsExchangeView.cellSize" x="60"'),
+    patched.toString().replace('stylename="Calendar.Activity.ExchangeFixedPos" x="57"', 'stylename="Calendar.Activity.ExchangeFixedPos" x="58"'),
+    patched.toString().replace(/<custom[^>]*stylename="CalendarGrid.GoodsExchangeView.CompactPos"[^>]*\/>/, ''),
+    patched.toString().replace('</customDisplay>', '<custom classname="flash.geom.Point" stylename="Calendar.Activity.ExchangeFixedPos" x="57" y="300" /></customDisplay>'),
+  ]) assert.throws(() => patchCalendarExchangeXml(Buffer.from(changed)), /expected one original calendar|original calendar style changed|partial or changed calendar/);
+});
+
+test("calendar opt-in preserves default outputs, both old flags and every other compressed entry", async () => {
+  for (const flags of [{}, { gameoverTitle: true }, { bagLabelAlignment: true }, { gameoverTitle: true, bagLabelAlignment: true }]) {
+    const baseline = await patchBagLayoutArchive(sourceBytes, flags);
+    assert.deepEqual(await patchBagLayoutArchive(sourceBytes, { ...flags, calendarExchangeLayout: false }), baseline);
+    const combined = await patchBagLayoutArchive(sourceBytes, { ...flags, calendarExchangeLayout: true });
+    assert.equal(combined.summary.patchFlags.calendarExchangeLayout, true);
+    assert.equal(combined.summary.calendarExchangeLayout.scope, "ActiveType1-single-slot");
+    assert.equal(combined.summary.calendarExchangeLayout.requiresMatchingAbc, true);
+    assert.equal(combined.summary.preservedCompressedEntries, flags.gameoverTitle ? 98 : 99);
+    assert.deepEqual(entryBytes(combined.output, "calendar.xml"), patchCalendarExchangeXml(entryBytes(sourceBytes, "calendar.xml")));
+    const before = zipRecords(baseline.output).records, after = zipRecords(combined.output).records;
+    assert.deepEqual(before.map(x => x.name), after.map(x => x.name));
+    for (let i = 0; i < before.length; i++) if (before[i].name !== "calendar.xml") {
+      assert.deepEqual(combined.output.subarray(after[i].local, after[i].data + after[i].compressedSize), baseline.output.subarray(before[i].local, before[i].data + before[i].compressedSize), before[i].name);
+    }
+  }
+  await assert.rejects(patchBagLayoutArchive(sourceBytes, { calendarExchangeLayout: "true" }), /invalid calendar exchange layout flag/);
+});
+
+test("calendar opt-in upgrades the owned two-flag ledger once and preserves read-only verify and rollback", async () => {
+  const { fixture, target, ledger } = fixtureRoot();
+  try {
+    await runLayoutCommand("install", fixture, source, { gameoverTitle: true, bagLabelAlignment: true });
+    const before = readFileSync(target), oldLedger = readFileSync(ledger), old = JSON.parse(oldLedger);
+    const preview = await runLayoutCommand("verify", fixture, source, { calendarExchangeLayout: true });
+    assert.equal(preview.installed, false); assert.equal(preview.unchanged, false);
+    assert.deepEqual(readFileSync(target), before); assert.deepEqual(readFileSync(ledger), oldLedger);
+    const installed = await runLayoutCommand("install", fixture, source, { calendarExchangeLayout: true });
+    assert.equal(installed.sha256, preview.sha256);
+    assert.deepEqual(installed.patchFlags, { gameoverTitle: true, bagLabelAlignment: true, calendarExchangeLayout: true });
+    const newLedger = readFileSync(ledger), newOverlay = readFileSync(target);
+    assert.equal(JSON.parse(newLedger).backup, old.backup); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+    for (const command of ["install", "verify"]) assert.equal((await runLayoutCommand(command, fixture, source)).unchanged, true);
+    await assert.rejects(runLayoutCommand("install", fixture, source, { calendarExchangeLayout: false }), /only enables/);
+    assert.deepEqual(readFileSync(ledger), newLedger); assert.deepEqual(readFileSync(target), newOverlay);
+    assert.equal((await runLayoutCommand("rollback", fixture, source)).backupRetained, true);
+    assert.equal(existsSync(target), false); assert.equal(existsSync(ledger), false); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+  } finally { rmSync(fixture, { recursive: true }); }
+});
+
+test("the existing exchange guidance key has an accurate Chinese destination without claiming success", () => {
+  const dictionary = readFileSync(join(repo, "apps/api/assets/flash/ui/vietnam/language.txt"), "utf8");
+  const overrides = JSON.parse(readFileSync(join(repo, "research/i18n/zh-CN-overrides.json"), "utf8"));
+  const key = "calendar.view.GoodsExchangeView.explain";
+  assert.ok(dictionary.split("\r\n").some(row => row.startsWith(key + ":")));
+  assert.equal(overrides[key], "兑换成功后，奖励将通过邮件发放，请前往邮箱查收。");
+});
+
 test("bag label alignment upgrades an owned legacy journal while retaining the gameover patch", async () => {
   const { fixture, target } = fixtureRoot();
   try {
