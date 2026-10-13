@@ -41,6 +41,25 @@ export function encodeBitmap(bitmap, rgba) {
   }
   return Buffer.concat([bitmap.prefix, deflateSync(raw, { level: 9 })]);
 }
+// The reviewed RoomList caption is PNG with internal alpha inside DefineBitsJPEG3.
+// Keep this separate from premultiplied Lossless2; JPEG/external-alpha inputs are not accepted.
+export function decodePngBitmap(bytes, decode) {
+  assert.ok(bytes.length >= 14, 'truncated PNG tag35 bitmap');
+  const id = bytes.readUInt16LE(0), length = bytes.readUInt32LE(2);
+  assert.ok(length >= 8 && length <= bytes.length - 6, 'invalid PNG tag35 alpha offset');
+  const encoded = bytes.subarray(6, 6 + length), auxiliary = bytes.subarray(6 + length);
+  assert.ok(encoded.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')), 'tag35 caption must contain PNG');
+  assert.equal(auxiliary.length ? inflateSync(auxiliary).length : 0, 0, 'PNG tag35 must use internal alpha');
+  const { width, height, data } = decode(encoded), rgba = Buffer.from(data);
+  assert.ok(width > 0 && height > 0 && rgba.length === width * height * 4, 'invalid PNG tag35 pixel count');
+  return { id, width, height, rgba, raw: rgba };
+}
+function encodePngBitmap(image, rgba, encode) {
+  assert.equal(rgba.length, image.width * image.height * 4);
+  const encoded = encode({ width: image.width, height: image.height, data: rgba }), prefix = Buffer.alloc(6);
+  prefix.writeUInt16LE(image.id); prefix.writeUInt32LE(encoded.length, 2);
+  return Buffer.concat([prefix, encoded, deflateSync(Buffer.alloc(0))]);
+}
 function inside(x, y, [left, top, width, height]) { return x >= left && y >= top && x < left + width && y < top + height; }
 function inpaintCaption(image, rgba, box, seedRange) {
   const [left, top, width, height] = box, seed = new Set(), mask = new Set();
@@ -97,7 +116,7 @@ function validateBackground(bytes, entry) {
   return { enabled: true, id: entry.id, tagCode: entry.tagCode, width: image.width, height: image.height,
     pngSha256: hash(bytes), sourceTagSha256: entry.sourceTagSha256, referenceSwfSha256: entry.referenceSwfSha256 };
 }
-export function patchSwf(bytes, config, render, backgroundBytes = null) {
+export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec = null) {
   const decoded = decompressSwf(bytes); assert.equal(decoded.error, null);
   assert.equal(bytes.readUInt32LE(4), decoded.body.length + 8, 'SWF declared length mismatch');
   const parsed = parseTags(decoded.body), ids = new Set(), changed = [], replacements = new Map(), symbols = new Map();
@@ -108,7 +127,15 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
   }
   for (const entry of config.bitmaps) {
     assert.ok(!ids.has(entry.id), 'duplicate configured bitmap'); ids.add(entry.id);
-    const matches = parsed.tags.filter(tag => tag.code === 36 && decoded.body.readUInt16LE(tag.bodyStart) === entry.id);
+    const tagCode = entry.tagCode ?? 36;
+    assert.ok(tagCode === 36 || tagCode === 35, 'unsupported caption bitmap tag');
+    if (tagCode === 35) {
+      assert.ok(entry.preparedImage && entry.className && pngCodec, 'PNG tag35 needs a reviewed prepared caption, class and codec');
+      assert.ok(decoded.version >= 8, 'PNG tag35 requires SWF8+');
+      assert.equal(hash(bytes), config.sourceAssetSha256, 'unknown PNG tag35 SWF input; preserved');
+      assert.match(config.expectedSwfSha256 ?? '', /^[a-f0-9]{64}$/, 'PNG tag35 needs a frozen output hash');
+    }
+    const matches = parsed.tags.filter(tag => tag.code === tagCode && decoded.body.readUInt16LE(tag.bodyStart) === entry.id);
     assert.equal(matches.length, 1, 'missing or duplicate target bitmap: ' + entry.id);
     if (entry.className !== undefined) assert.equal(symbols.get(entry.id), entry.className, 'bitmap class mismatch');
     else {
@@ -117,7 +144,9 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
       assert.equal(symbols.get(owner.id), owner.name, 'bitmap owner class mismatch');
       assert.equal(parsed.tags.filter(tag => tag.code === 39 && decoded.body.readUInt16LE(tag.bodyStart) === owner.id).length, 1, 'missing bitmap owner sprite');
     }
-    const tag = matches[0], image = decodeBitmap(decoded.body.subarray(tag.bodyStart, tag.bodyEnd));
+    const tag = matches[0], decode = tagCode === 35 ? body => decodePngBitmap(body, pngCodec.read) : decodeBitmap;
+    if (tagCode === 35) assert.equal(hash(tag.raw), entry.sourceTagSha256, 'target PNG tag35 changed; preserved');
+    const image = decode(decoded.body.subarray(tag.bodyStart, tag.bodyEnd));
     assert.equal(image.width, entry.width); assert.equal(image.height, entry.height);
     assert.equal(hash(image.raw), entry.sourcePixelsSha256, 'target bitmap changed; preserve newer work: ' + entry.id);
     for (const region of entry.regions) {
@@ -150,19 +179,20 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
       const [x, y, w, h] = region.box;
       for (let yy = y; yy < y + h; yy++) rgba.fill(0, (yy * image.width + x) * 4, (yy * image.width + x + w) * 4);
     }
-    const patched = decodeBitmap(encodeBitmap(image, rgba));
+    const encoded = tagCode === 35 ? encodePngBitmap(image, rgba, pngCodec.write) : encodeBitmap(image, rgba), patched = decode(encoded);
     let changedPixels = 0, alphaChangedPixels = 0;
     for (let y = 0; y < image.height; y++) for (let x = 0; x < image.width; x++) {
       const p = (y * image.width + x) * 4;
       if (!patched.raw.subarray(p, p + 4).equals(image.raw.subarray(p, p + 4))) {
         assert.ok(entry.regions.some(region => inside(x, y, region.box)), 'unreviewed pixels changed'); changedPixels++;
-        if (patched.raw[p] !== image.raw[p]) {
-          assert.ok(entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
+        const alpha = p + (tagCode === 35 ? 3 : 0);
+        if (patched.raw[alpha] !== image.raw[alpha]) {
+          assert.ok(tagCode !== 35 && entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
         }
       }
     }
     assert.ok(changedPixels > 0, 'caption patch was a no-op');
-    replacements.set(tag, buildTag(36, encodeBitmap(image, rgba)));
+    replacements.set(tag, buildTag(tagCode, encoded));
     changed.push({ id: entry.id, className: entry.className, width: image.width, height: image.height,
       regions: entry.regions.length, changedPixels, alphaChangedPixels, outsideRegionsUnchanged: true,
       drawnRegions: drawnRegions.length, clearedRegions: hiddenRegions.map(region => ({ id: entry.id, text: region.text, box: region.box, action: 'clear-background-duplicate' })),
@@ -177,6 +207,7 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
     changed.push({ ...background, kind: 'background' });
   }
   const out = compressSwf(decoded.sig, decoded.version, Buffer.concat([parsed.headerPrefix, ...parsed.tags.map(tag => replacements.get(tag) ?? tag.raw), parsed.trailing]));
+  if (config.expectedSwfSha256) assert.equal(hash(out), config.expectedSwfSha256, 'rebuilt SWF differs from frozen candidate');
   const after = decompressSwf(out), afterTags = parseTags(after.body);
   assert.equal(after.error, null); assert.equal(after.sig, decoded.sig); assert.equal(after.version, decoded.version);
   assert.deepEqual(afterTags.headerPrefix, parsed.headerPrefix); assert.deepEqual(afterTags.trailing, parsed.trailing);
@@ -196,16 +227,16 @@ export function patchSwf(bytes, config, render, backgroundBytes = null) {
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=gameover', '--asset=email'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
+  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=gameover', '--asset=email', '--roomlist'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
   assert.ok(assetFlags.length <= 1 && backgroundFlags.length <= 1 && flags.length === assetFlags.length + backgroundFlags.length, 'unknown or duplicate bag art option');
-  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email');
+  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email'), roomlist = flags.includes('--roomlist');
   assert.ok(backgroundFlags.length === 0 || (hall && command !== 'rollback' && backgroundFlags[0].length > '--background='.length), 'background requires --asset=hall for verify or install');
-  const name = gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
-  const configDirectory = join(repo, 'research/i18n/bag-art');
+  const name = roomlist ? 'roomlist' : gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
+  const configDirectory = join(repo, roomlist ? 'research/i18n/roomlist-art' : 'research/i18n/bag-art');
   const configBytes = readFileSync(join(configDirectory, gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
-  const ledgerFile = join(runtime, gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
+  const ledgerFile = join(runtime, roomlist ? 'client-overlay-roomlist-art.json' : gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
   const assetBytes = readFileSync(asset); assert.equal(hash(assetBytes), config.sourceAssetSha256, 'shipped asset changed; preserved');
   const replace = bytes => { mkdirSync(dirname(target), { recursive: true }); const fresh = target + `.bag-art-${process.pid}`; writeFileSync(fresh, bytes, { flag: 'wx' }); renameSync(fresh, target); };
   if (previous) {
@@ -228,11 +259,12 @@ async function main() {
   if (hallFeature) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall feature overlay; preserved');
   if (gameover) assert.equal(hash(base), config.sourceAssetSha256, 'unknown gameover overlay; preserved');
   if (email) assert.equal(hash(base), config.sourceAssetSha256, 'unknown email overlay; preserved');
+  if (roomlist) assert.equal(hash(base), config.sourceAssetSha256, 'unknown roomlist overlay; preserved');
   const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
   const require = createRequire(join(depRoot, 'package.json')), { PNG } = require('pngjs'), { createCanvas, GlobalFonts, loadImage } = require('@napi-rs/canvas');
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
-  const reportDir = gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
+  const reportDir = roomlist ? join(runtime, 'client-text-followup', 'roomlist-candidate', String(Date.now())) : gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
     let rgba = Buffer.from(image.rgba);
@@ -283,11 +315,13 @@ async function main() {
     const png = bytes => PNG.sync.write({ width: image.width, height: image.height, data: bytes });
     const before = join(reportDir, `${entry.id}-before.png`), after = join(reportDir, `${entry.id}-after.png`);
     writeFileSync(before, png(image.rgba)); writeFileSync(after, png(rgba)); rendered.push({ id: entry.id, width: image.width, height: image.height, before, after }); return rgba;
-  }, backgroundBytes);
+  }, backgroundBytes, PNG.sync);
   // Export the packaged pixels again; these are the actual SWF result, not only the painter's input.
   const packaged = decompressSwf(result.out), packedTags = parseTags(packaged.body);
   for (const entry of rendered) {
-    const tag = packedTags.tags.find(tag => tag.code === 36 && packaged.body.readUInt16LE(tag.bodyStart) === entry.id), image = decodeBitmap(packaged.body.subarray(tag.bodyStart, tag.bodyEnd));
+    const tagCode = config.bitmaps.find(bitmap => bitmap.id === entry.id).tagCode ?? 36;
+    const tag = packedTags.tags.find(tag => tag.code === tagCode && packaged.body.readUInt16LE(tag.bodyStart) === entry.id), body = packaged.body.subarray(tag.bodyStart, tag.bodyEnd);
+    const image = tagCode === 35 ? decodePngBitmap(body, PNG.sync.read) : decodeBitmap(body);
     writeFileSync(entry.after, PNG.sync.write({ width: image.width, height: image.height, data: image.rgba }));
   }
   const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparisonScale = chat || hallFeature || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');

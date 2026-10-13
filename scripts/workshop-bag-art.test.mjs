@@ -3,7 +3,7 @@ import { deflateSync } from 'node:zlib';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { buildTag, compressSwf, decompressSwf, parseTags } from '../tools/i18n/abc-strings/lib.mjs';
-import { decodeBitmap, encodeBitmap, hash, patchSwf, preparedPixels } from './workshop-bag-art.mjs';
+import { decodeBitmap, decodePngBitmap, encodeBitmap, hash, patchSwf, preparedPixels } from './workshop-bag-art.mjs';
 const header = Buffer.from([0, 0, 0, 1, 0]), pixels = Buffer.from([3, 1, 2, 3, 255, 100, 120, 150, 0, 0, 0, 0, 255, 80, 90, 100]);
 const prefix = Buffer.from([16, 0, 5, 2, 0, 2, 0]), payload = Buffer.concat([prefix, deflateSync(pixels)]);
 const symbol = Buffer.concat([Buffer.from([1, 0, 16, 0]), Buffer.from('test.caption\0')]);
@@ -57,6 +57,49 @@ const wrongTag = compressSwf('CWS', 10, Buffer.concat([header, buildTag(35, payl
 assert.throws(() => patchSwf(wrongTag, { bitmaps: [entry] }, patch), /missing or duplicate target bitmap/);
 const depRoot = process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE ?? '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node');
 const { PNG } = createRequire(join(depRoot, 'package.json'))('pngjs');
+// PNG-in-tag35 is straight RGBA, including low-alpha and transparent RGB bytes.
+// The independently assembled expected SWF also pins default empty-alpha and outer compression.
+const pngPixels = Buffer.from([1, 2, 3, 3, 100, 120, 150, 255, 23, 45, 67, 0, 80, 90, 100, 255]);
+const pngTagBody = rgba => {
+  const png = PNG.sync.write({ width: 2, height: 2, data: rgba }), prefix = Buffer.alloc(6);
+  prefix.writeUInt16LE(16); prefix.writeUInt32LE(png.length, 2);
+  return Buffer.concat([prefix, png, deflateSync(Buffer.alloc(0))]);
+};
+const pngBeforeTag = buildTag(35, pngTagBody(pngPixels));
+const pngBefore = compressSwf('CWS', 15, Buffer.concat([header, pngBeforeTag, buildTag(76, symbol), pristineTag, buildTag(0, Buffer.alloc(0))]));
+const pngAfterPixels = Buffer.from(pngPixels); pngAfterPixels[4] = 200;
+const preparedPng = PNG.sync.write({ width: 2, height: 2, data: pngAfterPixels });
+const pngEntry = { ...entry, tagCode: 35, sourceTagSha256: hash(pngBeforeTag), sourcePixelsSha256: hash(pngPixels),
+  preparedImage: { path: '16.png', sha256: hash(preparedPng) }, regions: [{ ...entry.regions[0], preserveAlpha: true }] };
+const pngExpected = compressSwf('CWS', 15, Buffer.concat([header, buildTag(35, pngTagBody(pngAfterPixels)), buildTag(76, symbol), pristineTag, buildTag(0, Buffer.alloc(0))]));
+const pngConfig = { sourceAssetSha256: hash(pngBefore), expectedSwfSha256: hash(pngExpected), bitmaps: [pngEntry] };
+const pngPatch = () => preparedPixels(preparedPng, pngEntry, PNG.sync.read);
+const pngResult = patchSwf(pngBefore, pngConfig, pngPatch, null, PNG.sync);
+assert.deepEqual(pngResult.out, pngExpected);
+assert.equal(pngResult.changed[0].changedPixels, 1); assert.equal(pngResult.changed[0].alphaChangedPixels, 0); assert.equal(pngResult.unchangedTags, 3);
+const pngBody = decompressSwf(pngResult.out).body, pngTags = parseTags(pngBody).tags;
+assert.deepEqual(decodePngBitmap(pngBody.subarray(pngTags[0].bodyStart, pngTags[0].bodyEnd), PNG.sync.read).rgba, pngAfterPixels);
+assert.deepEqual(pngTags[2].raw, pristineTag);
+const pngWith = overrides => ({ ...pngConfig, bitmaps: [{ ...pngEntry, ...overrides }] });
+assert.throws(() => patchSwf(pngBefore, pngWith({ preparedImage: undefined }), pngPatch, null, PNG.sync), /reviewed prepared caption/);
+assert.throws(() => patchSwf(pngBefore, pngWith({ tagCode: 90 }), pngPatch, null, PNG.sync), /unsupported caption/);
+assert.throws(() => patchSwf(pngBefore, { ...pngConfig, expectedSwfSha256: undefined }, pngPatch, null, PNG.sync), /frozen output hash/);
+assert.throws(() => patchSwf(pngBefore, { ...pngConfig, expectedSwfSha256: '0'.repeat(64) }, pngPatch, null, PNG.sync), /differs from frozen/);
+assert.throws(() => patchSwf(pngBefore, { ...pngConfig, sourceAssetSha256: 'changed' }, pngPatch, null, PNG.sync), /unknown PNG tag35 SWF/);
+assert.throws(() => patchSwf(pngBefore, pngWith({ sourceTagSha256: 'changed' }), pngPatch, null, PNG.sync), /target PNG tag35 changed/);
+assert.throws(() => patchSwf(pngBefore, pngWith({ sourcePixelsSha256: 'changed' }), pngPatch, null, PNG.sync), /target bitmap changed/);
+assert.throws(() => patchSwf(pngBefore, pngWith({ className: 'wrong' }), pngPatch, null, PNG.sync), /bitmap class mismatch/);
+assert.throws(() => patchSwf(pngBefore, pngConfig, () => { const p = pngPatch(); p[0]++; return p; }, null, PNG.sync), /unreviewed pixels/);
+assert.throws(() => patchSwf(pngBefore, pngConfig, () => { const p = pngPatch(); p[7]--; return p; }, null, PNG.sync), /protected alpha/);
+const pngExternalAlpha = pngTagBody(pngPixels), pngOffset = pngExternalAlpha.readUInt32LE(2);
+assert.throws(() => decodePngBitmap(Buffer.concat([pngExternalAlpha.subarray(0, 6 + pngOffset), deflateSync(Buffer.from([255]))]), PNG.sync.read), /internal alpha/);
+const jpegInstead = Buffer.from(pngExternalAlpha); jpegInstead[6] = 255; jpegInstead[7] = 216;
+assert.throws(() => decodePngBitmap(jpegInstead, PNG.sync.read), /must contain PNG/);
+const invalidOffset = Buffer.from(pngExternalAlpha); invalidOffset.writeUInt32LE(0xffffffff, 2);
+assert.throws(() => decodePngBitmap(invalidOffset, PNG.sync.read), /invalid PNG tag35 alpha offset/);
+assert.throws(() => decodePngBitmap(Buffer.alloc(6), PNG.sync.read), /truncated PNG tag35/);
+const oldPngSwf = compressSwf('CWS', 7, Buffer.concat([header, pngBeforeTag, buildTag(76, symbol), buildTag(0, Buffer.alloc(0))]));
+assert.throws(() => patchSwf(oldPngSwf, pngConfig, pngPatch, null, PNG.sync), /SWF8/);
 const backgroundPng = PNG.sync.write({ width: 2, height: 2, data: Buffer.alloc(16, 255) });
 const preparedEntry = { ...entry, preparedImage: { path: 'bag-help/47.png', sha256: hash(backgroundPng) } };
 assert.deepEqual(preparedPixels(backgroundPng, preparedEntry, bytes => PNG.sync.read(bytes)), Buffer.alloc(16, 255));
@@ -96,4 +139,4 @@ assert.equal(duplicateResult.changed[0].drawnRegions, 0);
 assert.deepEqual(duplicateResult.changed[0].clearedRegions, [{ id: 16, text: '中', box: [1, 0, 1, 1], action: 'clear-background-duplicate' }]);
 // Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
 // Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
-console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing, four gameover captions and unsupported-tag preservation');
+console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing, four gameover captions, PNG tag35 prepared captions with exact frozen output and unsupported-tag preservation');

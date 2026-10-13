@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/roomlist.swf",
+  "sourceAssetSha256": "58fac028f6c484657748e18a1045f9bf658d823c49208369786a622a35c3930a",
+  "expectedSwfSha256": "39ac59a0318c01ed88d8ee8314ee04ea5189669a6181a3e05df32df83994b37f",
+  "fontFamily": "Workshop RoomList CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Single reviewed prepared bitmap: Dificuldade to 难度. The prepared PNG is authoritative; font/sample fields document the reviewed caption and are not executed by preparedImage. No list layout, ABC, sprites, events, or other captions change. Original component and hover/down behavior remain unverified.",
+  "bitmaps": [
+    {
+      "id": 58,
+      "className": "asset.DungeonList.hardLevel_PVE",
+      "width": 111,
+      "height": 29,
+      "sourceTagSha256": "da6673adc8fc77aced0d5882e56fa8609dc4d81ad7383a544de1024fc5462f27",
+      "sourcePixelsSha256": "aaa3701288319db8135790057a6c0b0b7f727ffc1c9673cb99788ae924d4eeb1",
+      "regions": [
+        {
+          "box": [
+            10,
+            3,
+            92,
+            18
+          ],
+          "text": "难度",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "fillBottom": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "preserveAlpha": true,
+          "sample": [
+            10,
+            3,
+            1,
+            1
+          ]
+        }
+      ],
+      "tagCode": 35,
+      "originalText": "Dificuldade",
+      "preparedImage": {
+        "path": "58.png",
+        "sha256": "51c173b1142a8b86cb40678e258617b19d5dbb2a740d2e4b7380f7f1ad52b7fd"
+      }
+    }
+  ]
+}
