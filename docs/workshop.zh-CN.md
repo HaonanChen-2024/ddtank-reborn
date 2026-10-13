@@ -171,6 +171,12 @@ node scripts/workshop-language.mjs rollback
 
 该名称配置已实现但尚未部署。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。物品描述、等级/VIP礼包文案及全界面中文仍不在本批验收范围。
 
+### 普通副本显示文字
+
+可选 `PVE_TEXT_OVERRIDES_FILE` 复用 API 与 Game 的模板翻译层，默认关闭。格式为 `{"schemaVersion":1,"entries":[{"table":"NPC_Info","id":2001,"text":{"Name":"先锋蚁"}}]}`；仅允许 `Pve_Info.Name/Description`、`Mission_Info.Name/Title/Description/Success/Failure` 和 `NPC_Info.Name`。未知字段、表、显示列、非法 ID、重复行或错误文件会明确失败。配置只覆盖内存中指定的显示列，未覆盖行、既有数据库翻译和 `ITEM_NAME_OVERRIDES_FILE` 保持；不会改写玩法数值、模板、库存或邮件。API 的 `LoadPVEItems` 也按原翻译层处理 `Pve_Info`，与 Game 保持一致。
+
+`research/i18n/zh-CN-pve-overrides.json` 提供魔蚁之巢、两关标题和四类怪物共7行中文；任务标题保留原 ASCII 逗号，说明保留原换行及 HTML 结构。将其绝对路径同时提供给 API/Game，在空闲时经原 Workshop 启动器正常重启，才能同步加载；回退时移除配置或恢复旧文件后正常重启。`workshop-language.mjs install --server` 另含10条先锋蚁对白键。本批源码和窄测试完成，实际页面部署/验收仍单独记录；怪物名称间距、其它副本、蚁后剩余对白和全界面中文尚未由此完成。
+
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本。原14张fmt5位图（12个建筑标题、频道与签到）基础上，新增原存储窗口正文id7及实际确定按钮id10的19处文字，默认共16张图片，其余331个SWF标签保持。存储正文保留原许可选择语义，右侧“允许/拒绝”明确为示意，不代表浏览器已授权。原入口、事件和动画继续使用，字区外像素不变；农场、独立活动入口和其他工具栏图片仍待处理。
 
 大厅支持可选 `--background=<PNG路径>`，只接收配置中已审阅的1000×600背景摘要，并将图像内容写入原tag21/id12。夜景模式绘制13处标题、清空频道图片的一处重复文字，让底图已有的中文“频道”显示；频道框和命中对象保留。含新增存储图片后共改变17个图像标签，其余330个标签（包括ABC、SymbolClass、shape、sprite和动画）保持原字节。与上一夜景覆盖比较只新增id7/id10变化。背景作为同一hall覆盖的配置身份参与幂等安装、备份与回退；不带此参数仍生成原景标题及存储文字版本。主控已看存储位图1x/4x并核对正常重启后的HTTP字节；完整原窗口视觉仍待验收。

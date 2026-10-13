@@ -20,6 +20,41 @@ import { Translations } from "./schema/app.js";
 
 export type TranslationOverlay = Map<string, Record<string, string>>;
 
+const PVE_TEXT_COLUMNS: Record<string, readonly string[]> = {
+  Pve_Info: ["Name", "Description"],
+  Mission_Info: ["Name", "Title", "Description", "Success", "Failure"],
+  NPC_Info: ["Name"],
+};
+type PveTextOverride = { table: string; id: number; text: Record<string, string> };
+
+/** Optional local PvE display text; separate from the Shop_Goods-only name contract. */
+export function parsePveTextOverrides(text: string): PveTextOverride[] {
+  const value: unknown = JSON.parse(text);
+  const object = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!object(value) || Object.keys(value).sort().join(",") !== "entries,schemaVersion" ||
+      value.schemaVersion !== 1 || !Array.isArray(value.entries)) {
+    throw new Error("PVE_TEXT_OVERRIDES_FILE must contain only schemaVersion:1 and entries");
+  }
+  const seen = new Set<string>();
+  for (const entry of value.entries) {
+    if (!object(entry) || Object.keys(entry).sort().join(",") !== "id,table,text" ||
+        typeof entry.table !== "string" || !Object.hasOwn(PVE_TEXT_COLUMNS, entry.table) ||
+        typeof entry.id !== "number" || !Number.isInteger(entry.id) || entry.id < 1 || entry.id > 2147483647 ||
+        !object(entry.text) || Object.keys(entry.text).length === 0) {
+      throw new Error("Invalid PVE_TEXT_OVERRIDES_FILE entry");
+    }
+    const key = `${entry.table}:${entry.id}`;
+    if (seen.has(key)) throw new Error(`Duplicate PVE_TEXT_OVERRIDES_FILE entry: ${key}`);
+    seen.add(key);
+    for (const [column, displayText] of Object.entries(entry.text)) {
+      if (!PVE_TEXT_COLUMNS[entry.table]!.includes(column) || typeof displayText !== "string" || !displayText.trim()) {
+        throw new Error(`Invalid PVE_TEXT_OVERRIDES_FILE display column: ${key}.${column}`);
+      }
+    }
+  }
+  return value.entries as PveTextOverride[];
+}
+
 /** Optional local display names, shared by API and Game. Never contains gameplay columns or writes SQL. */
 export function parseItemNameOverrides(text: string): Record<string, string> {
   const value: unknown = JSON.parse(text);
@@ -53,6 +88,15 @@ export async function loadTranslations(db: Database, table: string, lang: string
   if (file) {
     const names = parseItemNameOverrides(await readFile(file, "utf8"));
     for (const [id, Name] of Object.entries(names)) overlay.set(id, { ...overlay.get(id), Name });
+  }
+  const pveFile = Object.hasOwn(PVE_TEXT_COLUMNS, table) ? process.env.PVE_TEXT_OVERRIDES_FILE : undefined;
+  if (pveFile) {
+    for (const entry of parsePveTextOverrides(await readFile(pveFile, "utf8"))) {
+      if (entry.table === table) {
+        const id = String(entry.id);
+        overlay.set(id, { ...overlay.get(id), ...entry.text });
+      }
+    }
   }
   return overlay;
 }

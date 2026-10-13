@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "table": "Pve_Info",
+      "id": 2,
+      "text": {
+        "Name": "魔蚁之巢",
+        "Description": "魔蚁之巢　人数：2-4人 \r\n\r\n    远征关卡是连接各地的重要通道，世界各地的商人汇聚于此。最近，许多进入魔法森林的商人遭到黑暗势力抢劫，货物被洗劫一空。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2001,
+      "text": {
+        "Name": "魔蚁之巢·第一关",
+        "Title": "回合,击败敌人",
+        "Description": "击败敌人",
+        "Success": "击败全部蚂蚁。",
+        "Failure": "被敌人击败<br>回合数耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2002,
+      "text": {
+        "Name": "魔蚁之巢·第二关",
+        "Title": "回合,击败敌人",
+        "Description": "击败敌人",
+        "Success": "击败蚁后。",
+        "Failure": "被敌人击败<br>回合数耗尽"
+      }
+    },
+    { "table": "NPC_Info", "id": 2001, "text": { "Name": "先锋蚁" } },
+    { "table": "NPC_Info", "id": 2002, "text": { "Name": "侦察蚁" } },
+    { "table": "NPC_Info", "id": 2003, "text": { "Name": "蚁后" } },
+    { "table": "NPC_Info", "id": 2004, "text": { "Name": "卫兵蚁" } }
+  ]
+}
