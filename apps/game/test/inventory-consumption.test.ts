@@ -159,3 +159,73 @@ describe("temporary rewards transfer without deletion", () => {
     expect(mails[0]!.Annex1).toBe(String(reward.ItemID));
   });
 });
+
+describe("automatic return from FightBag", () => {
+  it("persists deletion of an already-saved source when auto-stacking", async () => {
+    const { p, ctx } = await fixture(), source = item(), target = item(2);
+    p.propBag.addItemTo(source, 13); p.propBag.addItemTo(target, 14); await p.saveIntoDatabase(h.db);
+    changeItemPlace(ctx, p, 1, 13, 3, 0, 1); await p.saveIntoDatabase(h.db);
+    expect(p.propBag.removed).toEqual([]);
+    expect((await rows(p.id)).find((r) => r.ItemID === source.ItemID)).toMatchObject({ IsExist: true, BagType: 3, Place: 0 });
+    const ids = [source.ItemID, target.ItemID];
+    changeItemPlace(ctx, p, 3, 0, 1, -1, 1); await p.saveIntoDatabase(h.db);
+    expect(p.fightBag.getItems()).toEqual([]);
+    const stored = await rows(p.id);
+    expect(stored.map((r) => r.ItemID).sort((a, b) => a - b)).toEqual(ids.sort((a, b) => a - b));
+    expect(stored.find((r) => r.ItemID === target.ItemID)).toMatchObject({ IsExist: true, BagType: 1, Place: 14, Count: 3 });
+    expect(stored.find((r) => r.ItemID === source.ItemID)).toMatchObject({ IsExist: false, BagType: -1, Place: -1, RemoveType: 26 });
+    expect(p.fightBag.removed).toEqual([]);
+  });
+
+  it("retries a failed merged-source update without incrementing the saved target twice", async () => {
+    const { p, ctx } = await fixture(), source = item(), target = item(2);
+    p.propBag.addItemTo(source, 13); p.propBag.addItemTo(target, 14); await p.saveIntoDatabase(h.db);
+    changeItemPlace(ctx, p, 1, 13, 3, 0, 1); await p.saveIntoDatabase(h.db);
+    changeItemPlace(ctx, p, 3, 0, 1, -1, 1);
+    await h.db.execute(sql`CREATE FUNCTION player.inventory_return_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."IsExist" = false THEN RAISE EXCEPTION 'test merged-source update failure'; END IF; RETURN NEW; END $$`);
+    await h.db.execute(sql`CREATE TRIGGER test_return_failure BEFORE UPDATE ON player."Sys_Users_Goods" FOR EACH ROW EXECUTE FUNCTION player.inventory_return_failure()`);
+    try {
+      await expect(p.saveIntoDatabase(h.db)).rejects.toThrow();
+      expect(p.fightBag.removed).toEqual([source]);
+      expect(source.isDirty).toBe(true);
+      expect((await rows(p.id)).find((r) => r.ItemID === target.ItemID)).toMatchObject({ IsExist: true, Count: 3 });
+      expect((await rows(p.id)).find((r) => r.ItemID === source.ItemID)).toMatchObject({ IsExist: true, BagType: 3, Place: 0, Count: 1 });
+    } finally {
+      await h.db.execute(sql`DROP TRIGGER test_return_failure ON player."Sys_Users_Goods"`);
+      await h.db.execute(sql`DROP FUNCTION player.inventory_return_failure()`);
+    }
+    const ids = [source.ItemID, target.ItemID]; await p.saveIntoDatabase(h.db);
+    const stored = await rows(p.id);
+    expect(stored.map((r) => r.ItemID).sort((a, b) => a - b)).toEqual(ids.sort((a, b) => a - b));
+    expect(stored.find((r) => r.ItemID === target.ItemID)).toMatchObject({ IsExist: true, Count: 3 });
+    expect(stored.find((r) => r.ItemID === source.ItemID)).toMatchObject({ IsExist: false, BagType: -1, Place: -1, RemoveType: 26 });
+    expect(p.fightBag.removed).toEqual([]);
+  });
+
+  it.each([false, true])("keeps the same live row when auto-return uses an empty slot; full peer=%s", async (fullPeer) => {
+    const { p, ctx } = await fixture(), source = item();
+    p.propBag.addItemTo(source, 13);
+    if (fullPeer) p.propBag.addItemTo(item(template.MaxCount), 14);
+    await p.saveIntoDatabase(h.db); const id = source.ItemID;
+    changeItemPlace(ctx, p, 1, 13, 3, 0, 1); await p.saveIntoDatabase(h.db);
+    const peersBefore = (await rows(p.id)).filter((r) => r.ItemID !== id);
+    changeItemPlace(ctx, p, 3, 0, 1, -1, 1); await p.saveIntoDatabase(h.db);
+    const stored = await rows(p.id);
+    expect(p.propBag.getItemAt(0)).toBe(source);
+    expect(p.fightBag.getItems()).toEqual([]);
+    expect(stored.find((r) => r.ItemID === id)).toMatchObject({ ItemID: id, IsExist: true, BagType: 1, Place: 0, Count: 1 });
+    expect(stored.filter((r) => r.ItemID !== id)).toEqual(peersBefore);
+    expect(stored).toHaveLength(fullPeer ? 2 : 1);
+    expect(p.fightBag.removed).toEqual([]);
+  });
+
+  it("does not insert an ID0 source that automatically merges into a saved stack", async () => {
+    const { p, ctx } = await fixture(), source = item(), target = item(2);
+    p.propBag.addItemTo(target, 14); await p.saveIntoDatabase(h.db);
+    p.fightBag.addItemTo(source, 0);
+    changeItemPlace(ctx, p, 3, 0, 1, -1, 1); await p.saveIntoDatabase(h.db);
+    expect(await rows(p.id)).toEqual([expect.objectContaining({ ItemID: target.ItemID, IsExist: true, BagType: 1, Place: 14, Count: 3 })]);
+    expect(source.ItemID).toBe(0); expect(source.IsExist).toBe(false);
+    expect(p.fightBag.getItems()).toEqual([]); expect(p.fightBag.removed).toEqual([]);
+  });
+});

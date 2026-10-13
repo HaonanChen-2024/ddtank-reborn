@@ -113,7 +113,8 @@ export function changeItemPlace(ctx: ServerContext, p: GamePlayer, bagType: numb
         let slot = toBag.findFirstEmptySlot(toBag.beginSlot);
         if (isAvatar(item.template)) slot = toBag.findFirstEmptySlot(81);
         if (!bag.moveItem(place, slot, count)) full = true;
-      } else if (toBag.stackItemToAnother(item) || toBag.addItem(item)) bag.takeOutItem(item);
+      } else if (toBag.stackItemToAnother(item)) bag.removeItem(item, 26);
+      else if (toBag.addItem(item)) bag.takeOutItem(item);
       else full = true;
       if (full) p.sendMessage(1, ctx.lang.t("UserChangeItemPlaceHandler.full"));
     } else if (bagType === toBagType) {
