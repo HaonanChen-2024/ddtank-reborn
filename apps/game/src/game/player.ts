@@ -299,6 +299,24 @@ export class GamePlayer implements RoomMember {
       this.onGradeUp?.(old);
     } else this.updateProperties();
   }
+  /** GamePlayer.RemoveGP (GamePlayer.cs:3876): cancel the whole deduction if it would lose a level. */
+  removeGP(v: number): number {
+    if (!Number.isFinite(v) || v <= 0) return 0;
+    this.info.GP = Math.max(1, this.info.GP - v);
+    const grade = this.gradeForGp(this.info.GP);
+    if (grade !== undefined && this.info.Grade > grade) this.info.GP += v;
+    // UpdateLevel also recalculates derived properties when the stored grade
+    // changes. Publish one consistent update, including for old mismatched saves.
+    const finalGrade = this.gradeForGp(this.info.GP);
+    if (finalGrade !== undefined && finalGrade !== this.info.Grade) {
+      const old = this.info.Grade;
+      this.info.Grade = finalGrade;
+      this.updatePlayerProperties();
+      this.questInv?.refresh();
+      if (finalGrade > old) this.onGradeUp?.(old);
+    } else this.updateProperties();
+    return v; // The original returns the requested penalty, including a cancelled one.
+  }
   /** GamePlayer.GPAddPlus: product of the active GP-multiplier buffs (type 13). */
   get gpAddPlus(): number {
     let m = 1;

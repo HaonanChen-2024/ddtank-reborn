@@ -189,11 +189,13 @@ export class GameServer {
             onPlayerFlee: (m, g) => {
               // PVPGame.RemovePlayer (PVPGame.cs:647): −grade×12 GP; Match: −5 offer (−15 guild war)
               const p = m as GamePlayer;
-              const gp = p.info.Grade * 12;
-              p.info.GP = Math.max(0, p.info.GP - gp);
+              p.removeGP(p.info.Grade * 12);
               const offer = g.roomType === 0 ? (g.gameType === 1 ? 15 : g.gameType === 0 ? 5 : 0) : 0;
-              if (offer) p.info.Offer = Math.max(0, p.info.Offer - offer);
-              p.updateProperties?.();
+              if (offer) {
+                p.info.Offer = Math.max(0, p.info.Offer - offer);
+                p.updateProperties();
+              }
+              const gp = p.info.Grade * 12; // PVPGame re-reads the grade after RemoveGP for its notice.
               p.sendMessage?.(3, offer ? lang.t("AbstractPacketLib.SendGamePlayerLeave.Msg6", gp, offer) : lang.t("AbstractPacketLib.SendGamePlayerLeave.Msg4", gp));
             },
             pve: {
