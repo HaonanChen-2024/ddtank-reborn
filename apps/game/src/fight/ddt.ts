@@ -12,6 +12,7 @@ import type { RoomMember } from "../game/player.js";
 import type { FightEngine, FightGame, StartGameOptions, StartPveOptions } from "./types.js";
 import type { WorldBossAttempt } from "../game/world-boss.js";
 import { WorldBossSettlementGate } from "./world-boss-settlement.js";
+import { unlockDungeonPvePermission } from "../game/pve-permissions.js";
 
 export interface DdtFightOptions {
   assets?: FightAssets;
@@ -419,6 +420,22 @@ class DdtGame implements FightGame {
         continue;
       }
       if (e.cmd === "PVE_STOPPED") {
+        // PVEGame.Stop: unlock only after the whole Dungeon, before ResetRoom/onFinished.
+        if (this.pve && this.game instanceof PveGame) {
+          for (const living of this.game.players) {
+            // Engine-side load timeouts can leave an inactive player in members; dead teammates remain eligible.
+            if (!living.isActive) continue;
+            const m = this.members.get(living.spec.userId);
+            if (!m || m.isBot) continue;
+            const permission = unlockDungeonPvePermission(m.info.PvePermission, this.game.info, {
+              roomType: this.s.roomType, isWin: e.isWin, hasNextMission: e.hasNextMission, hardLevel: this.pve.hardLevel,
+            });
+            if (permission !== m.info.PvePermission) {
+              m.info.PvePermission = permission;
+              m.updateProperties?.();
+            }
+          }
+        }
         this.engine.o.log?.(`pve ${this.id}: stopped, win=${e.isWin}`);
         this.pve?.onFinished?.(e.isWin);
         continue;
