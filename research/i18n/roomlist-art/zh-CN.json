@@ -2,10 +2,10 @@
   "version": 1,
   "asset": "ui/vietnam/swf/roomlist.swf",
   "sourceAssetSha256": "58fac028f6c484657748e18a1045f9bf658d823c49208369786a622a35c3930a",
-  "expectedSwfSha256": "39ac59a0318c01ed88d8ee8314ee04ea5189669a6181a3e05df32df83994b37f",
+  "expectedSwfSha256": "c84a10f48797aa409a172461c87add4e45cc4c075a050ea1506957970320a593",
   "fontFamily": "Workshop RoomList CJK",
   "fontFile": "msyhbd.ttc",
-  "note": "Single reviewed prepared bitmap: Dificuldade to 难度. The prepared PNG is authoritative; font/sample fields document the reviewed caption and are not executed by preparedImage. No list layout, ABC, sprites, events, or other captions change. Original component and hover/down behavior remain unverified.",
+  "note": "Current shipped source asset base plus the existing reviewed58 and four frozen v2 prepared captions. Prepared images authoritative; all alpha, frame/layout, ABC and other tags preserved. Vendor differences remain historical evidence only. 54 remains blocked.",
   "bitmaps": [
     {
       "id": 58,
@@ -45,6 +45,212 @@
         "path": "58.png",
         "sha256": "51c173b1142a8b86cb40678e258617b19d5dbb2a740d2e4b7380f7f1ad52b7fd"
       }
+    },
+    {
+      "id": 35,
+      "className": "asset.DungeonList.name_PVE",
+      "tagCode": 35,
+      "width": 257,
+      "height": 29,
+      "sourceTagSha256": "f94ec9af532452dacbec14c5cefc4958794ae8aeab23e3abb33efa82a20d5f6e",
+      "sourcePixelsSha256": "9a2998aa484504c3060448b0307d3430babf0d617d8f4c509492baa5ff4ff86c",
+      "sourceRgbaSha256": "9a2998aa484504c3060448b0307d3430babf0d617d8f4c509492baa5ff4ff86c",
+      "originalText": "Nome da sala",
+      "regions": [
+        {
+          "box": [
+            7,
+            3,
+            93,
+            19
+          ],
+          "text": "房间名称",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "fillBottom": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "preserveAlpha": true,
+          "sample": [
+            7,
+            3,
+            1,
+            1
+          ]
+        }
+      ],
+      "preparedTextureSource": {
+        "id": 35,
+        "box": [
+          112,
+          3,
+          93,
+          19
+        ],
+        "sourceRgbaSha256": "9a2998aa484504c3060448b0307d3430babf0d617d8f4c509492baa5ff4ff86c"
+      },
+      "preparedImage": {
+        "path": "prepared/35.png",
+        "sha256": "5b2b9b7a8cc43f505dff1b70fa8ccb601a5ced2902901807620a22b7434b7516"
+      }
+    },
+    {
+      "id": 44,
+      "className": "asset.DungeonList.map_PVE",
+      "tagCode": 35,
+      "width": 118,
+      "height": 29,
+      "sourceTagSha256": "b5a3db6472db7ffc727784a39f223ada503bfd262843f58b5aa993640b2f70da",
+      "sourcePixelsSha256": "244f82f40995159578f6ff226b6182ba417ddc89d81d65345feead55084dd83f",
+      "sourceRgbaSha256": "244f82f40995159578f6ff226b6182ba417ddc89d81d65345feead55084dd83f",
+      "originalText": "Mapa",
+      "regions": [
+        {
+          "box": [
+            26,
+            3,
+            47,
+            20
+          ],
+          "text": "地图",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "fillBottom": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "preserveAlpha": true,
+          "sample": [
+            26,
+            3,
+            1,
+            1
+          ]
+        }
+      ],
+      "preparedTextureSource": {
+        "id": 44,
+        "box": [
+          76,
+          3,
+          35,
+          20
+        ],
+        "sourceRgbaSha256": "244f82f40995159578f6ff226b6182ba417ddc89d81d65345feead55084dd83f"
+      },
+      "preparedImage": {
+        "path": "prepared/44.png",
+        "sha256": "7b95dedba99bc973f001f432e37c56af7db7d5c0b7d864661c20f9570ad57034"
+      }
+    },
+    {
+      "id": 27,
+      "className": "asset.DungeonList.placeCount_PVE",
+      "tagCode": 35,
+      "width": 73,
+      "height": 29,
+      "sourceTagSha256": "eb746080acaeadecb85df2df9072a9db3e38118ffca9ffa1bf88d8f07ca74c67",
+      "sourcePixelsSha256": "0210f467f3f4af6abfd20c5013eec16da88dadc038c898ec53aff765219342df",
+      "sourceRgbaSha256": "0210f467f3f4af6abfd20c5013eec16da88dadc038c898ec53aff765219342df",
+      "originalText": "Nº de pessoas",
+      "regions": [
+        {
+          "box": [
+            3,
+            4,
+            67,
+            18
+          ],
+          "text": "人数",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "fillBottom": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "preserveAlpha": true,
+          "sample": [
+            3,
+            4,
+            1,
+            1
+          ]
+        }
+      ],
+      "preparedTextureSource": {
+        "id": 35,
+        "box": [
+          112,
+          4,
+          67,
+          18
+        ],
+        "sourceRgbaSha256": "9a2998aa484504c3060448b0307d3430babf0d617d8f4c509492baa5ff4ff86c"
+      },
+      "preparedImage": {
+        "path": "prepared/27.png",
+        "sha256": "d8817bc7758c01cc99a5589b8fc2869628f0bf9e1b1907c32ae7eb7149316335"
+      }
+    },
+    {
+      "id": 20,
+      "className": "asset.DungeonList.pre_PVE",
+      "tagCode": 35,
+      "width": 106,
+      "height": 28,
+      "sourceTagSha256": "22abe6ad6ab014421413f04b3c9bcd269764443a5f73514890fed3fc3e556e58",
+      "sourcePixelsSha256": "50287bbba8e23bd666caab7406badf2f6979d2be6c88a562f810ebb2bee7852e",
+      "sourceRgbaSha256": "50287bbba8e23bd666caab7406badf2f6979d2be6c88a562f810ebb2bee7852e",
+      "originalText": "Anterior",
+      "regions": [
+        {
+          "box": [
+            38,
+            3,
+            60,
+            18
+          ],
+          "text": "上一页",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "fillBottom": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "textOffsetY": -1,
+          "inkMargin": 1,
+          "preserveAlpha": true,
+          "sample": [
+            38,
+            3,
+            1,
+            1
+          ]
+        }
+      ],
+      "preparedTextureSource": {
+        "id": 20,
+        "box": [
+          7,
+          3,
+          10,
+          18
+        ],
+        "sourceRgbaSha256": "50287bbba8e23bd666caab7406badf2f6979d2be6c88a562f810ebb2bee7852e"
+      },
+      "preparedImage": {
+        "path": "prepared/20.png",
+        "sha256": "36e0f566c8b68fcf6b526bd38f1434813e147d0ad735ee6c2b3d38281729757a"
+      }
+    }
+  ],
+  "pending": [
+    {
+      "id": 54,
+      "reason": "Original text silhouette is alpha; retaining all alpha clips Chinese and retains the English silhouette. Frame begins within lower caption rows; no alpha exception or frame editing authorized."
     }
   ]
 }
