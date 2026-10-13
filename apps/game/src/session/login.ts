@@ -5,6 +5,7 @@
 import { updateAwardApp } from "../handlers/academy.js";
 import { hotSpringOnQuit } from "../handlers/hotspring.js";
 import { initFightLabPermission } from "../game/fightlab.js";
+import { loadPvePermission } from "../game/pve-permissions.js";
 import { eventsOnLogin, eventsOnQuit, eventsRuntime, worldBossOpen } from "../handlers/events.js";
 import { loadUserCardBag, loadUserPets, loadEatPets } from "../db/pets-cards.js";
 import { validateGameLogin } from "@ddt/auth";
@@ -112,6 +113,8 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
   const now = ctx.now();
   p.timeCheckHack = unixSeconds(now);
   info.State = 1;
+  // GamePlayer.LoadFromDatabase: initialize/refresh PVE permissions before the login burst.
+  info.PvePermission = loadPvePermission(info.PvePermission, info.Grade, ctx.templates.pveInfos.values());
   // GamePlayer.LoadFromDatabase (GamePlayer.cs:3004): empty fight-lab permission -> "1" + 49 x "0"
   if (!info.FightLabPermission) info.FightLabPermission = initFightLabPermission();
   p.onGradeUp = (old) => { if (p.info.masterID) void updateAwardApp(ctx, p, old).catch((e) => ctx.log.warn(`academy award: ${e}`)); };
