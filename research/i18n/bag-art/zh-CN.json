@@ -1821,6 +1821,30 @@
           "preserveAlpha": true
         }
       ]
+    },
+    {
+      "id": 47,
+      "className": "equipretrieve.helpInfoBt",
+      "width": 85,
+      "height": 20,
+      "sourcePixelsSha256": "21be6bb47e3e0b34cd459139b737e4064163909e207e5ac096ac714d5927bfbf",
+      "preparedImage": {
+        "path": "bag-help/47.png",
+        "sha256": "7284b7ed73293e4d27c839f1bb71e99c1f435bbc0b28b7c64fe000d70e6392e3"
+      },
+      "regions": [{ "box": [20, 0, 65, 20], "text": "帮助", "transparent": true }]
+    },
+    {
+      "id": 48,
+      "className": "equipretrieve.helpInfoBg",
+      "width": 409,
+      "height": 338,
+      "sourcePixelsSha256": "b38a0725b84aebbbdb178db251b613f505307bcf8148cafc206194ce6c78d0fc",
+      "preparedImage": {
+        "path": "bag-help/48.png",
+        "sha256": "32d2eba3211e0ac61f745fcabbac9b4929bc5db0bb9a09947dd2704aa381a398"
+      },
+      "regions": [{ "box": [15, 8, 379, 292], "text": "当前状态与旧版规则", "sample": [30, 250, 340, 50] }]
     }
   ]
 }

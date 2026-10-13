@@ -4,12 +4,20 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inflateSync, deflateSync } from 'node:zlib';
 import { ByteReader, decompressSwf, parseTags, buildTag, compressSwf } from '../tools/i18n/abc-strings/lib.mjs';
 
 export const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+export function preparedPixels(bytes, entry, decode) {
+  assert.ok(Buffer.isBuffer(bytes) && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), 'prepared caption must be PNG');
+  assert.equal(hash(bytes), entry.preparedImage.sha256, 'prepared caption PNG hash mismatch');
+  const image = decode(bytes);
+  assert.equal(image.width, entry.width, 'prepared caption width mismatch'); assert.equal(image.height, entry.height, 'prepared caption height mismatch');
+  assert.equal(image.data.length, entry.width * entry.height * 4, 'prepared caption pixel count mismatch');
+  return Buffer.from(image.data);
+}
 export function decodeBitmap(bytes) {
   assert.ok(bytes.length >= 7 && bytes[2] === 5, 'requires 32-bit DefineBitsLossless2');
   const id = bytes.readUInt16LE(0), width = bytes.readUInt16LE(3), height = bytes.readUInt16LE(5);
@@ -193,7 +201,8 @@ async function main() {
   const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email');
   assert.ok(backgroundFlags.length === 0 || (hall && command !== 'rollback' && backgroundFlags[0].length > '--background='.length), 'background requires --asset=hall for verify or install');
   const name = gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
-  const configBytes = readFileSync(join(repo, 'research/i18n/bag-art', gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
+  const configDirectory = join(repo, 'research/i18n/bag-art');
+  const configBytes = readFileSync(join(configDirectory, gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
   const ledgerFile = join(runtime, gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
@@ -226,8 +235,14 @@ async function main() {
   const reportDir = gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
-    const rgba = Buffer.from(image.rgba);
-    for (const region of entry.regions) {
+    let rgba = Buffer.from(image.rgba);
+    if (entry.preparedImage) {
+      assert.ok(typeof entry.preparedImage.path === 'string' && !isAbsolute(entry.preparedImage.path), 'prepared caption needs a relative path');
+      const imagePath = resolve(configDirectory, entry.preparedImage.path);
+      assert.ok(imagePath.startsWith(configDirectory + sep), 'prepared caption path outside config directory');
+      rgba = preparedPixels(readFileSync(imagePath), entry, bytes => PNG.sync.read(bytes));
+    }
+    for (const region of entry.preparedImage ? [] : entry.regions) {
       const [x, y, w, h] = region.box;
       if (region.inpaint) inpaintCaption(image, rgba, region.box, region.inpaintSeed);
       else for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
@@ -286,7 +301,8 @@ async function main() {
   const summary = { installed: command === 'install', sourceSha256: hash(base), sha256: hash(result.out), sourceAssetSha256: hash(assetBytes), configSha256: hash(configBytes), effectiveConfigSha256, background,
     target, reportDir, changed: result.changed, totalTags: result.totalTags, unchangedTags: result.unchangedTags,
     font, fontFits, drawnCaptionRegions: fontFits.length, clearedCaptionRegions: result.changed.flatMap(entry => entry.clearedRegions ?? []),
-    rendered, renderingAccepted: false, outsideCaptionRegionsUnchanged: !background.enabled, captionPixelsOutsideRegionsUnchanged: true, originalAssetUnchanged: true };
+    rendered, preparedBitmaps: config.bitmaps.filter(entry => entry.preparedImage).map(entry => ({ id: entry.id, ...entry.preparedImage })),
+    renderingAccepted: false, outsideCaptionRegionsUnchanged: !background.enabled, captionPixelsOutsideRegionsUnchanged: true, originalAssetUnchanged: true };
   writeFileSync(join(reportDir, `${name}.swf`), result.out); writeFileSync(join(reportDir, 'evidence.json'), JSON.stringify(summary, null, 2));
   if (command === 'install') {
     if (existsSync(target)) assert.equal(hash(readFileSync(target)), previous?.sha256 ?? summary.sourceSha256, 'overlay changed during preparation; preserved');
