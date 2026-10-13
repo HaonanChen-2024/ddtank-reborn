@@ -425,8 +425,9 @@ export class GamePlayer implements RoomMember {
   private async saveUnlocked(db: Database): Promise<void> {
     await savePlayerInfo(db, this.info, this.match);
     for (const bag of this.allBags()) {
-      if (!bag.saveToDb) continue;
-      for (const it of bag.dirtyItems()) {
+      // FightBag/TempBag contents stay temporary, but consumption of an existing
+      // DB item must persist even after its source bag's earlier save.
+      for (const it of bag.saveToDb ? bag.dirtyItems() : bag.removed) {
         it.UserID = it.IsExist ? this.id : it.UserID;
         await saveItem(db, it);
       }

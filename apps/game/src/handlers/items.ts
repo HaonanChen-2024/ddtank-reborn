@@ -580,7 +580,7 @@ export function registerItems(r: HandlerRegistry): void {
     const place = pkt.readInt();
     const take = async (it: ItemInfo): Promise<boolean> => {
       const inv = p.getItemInventory(it.template);
-      if (inv?.addItem(it)) { p.tempBag.removeItem(it); return true; }
+      if (inv?.addItem(it)) { p.tempBag.takeOutItem(it); return true; }
       return false;
     };
     if (place !== -1) {
@@ -592,7 +592,7 @@ export function registerItems(r: HandlerRegistry): void {
     const left = p.tempBag.getItems();
     if (left.length) {
       await mailItems(ctx, p, left, "Mochila cheia! Itens devolvidos", 9);
-      for (const it of left) p.tempBag.removeItem(it);
+      for (const it of left) p.tempBag.takeOutItem(it);
       p.sendMessage(1, ctx.lang.t("GameTakeTempItemsHandler.Msg")); // eMessageType.BIGBUGLE_NOTICE
     }
   });

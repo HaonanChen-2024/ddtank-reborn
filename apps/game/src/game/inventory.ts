@@ -20,7 +20,7 @@ export class PlayerInventory {
   protected items: (ItemInfo | null)[];
   protected changedPlaces: number[] = [];
   protected changeCount = 0;
-  /** Removed / taken-out persisted items (written back on save, PlayerInventory.m_removedList). */
+  /** Removed / taken-out persisted items; unsaved bags retain tombstones for items moved in from saved bags. */
   readonly removed: ItemInfo[] = [];
   /** Owner player id (PlayerInventory.AddItemTo sets item.UserID). */
   ownerId = 0;
@@ -172,13 +172,16 @@ export class PlayerInventory {
       item.Place = -1;
       item.BagType = -1;
     }
+    // PlayerInventory.cs:223-243 marks deletion even in an unsaved FightBag;
+    // ItemInfo.IsExist's C# setter also marks the object dirty.
+    item.IsExist = false;
+    item.isDirty = true;
     if (this.saveToDb) {
-      item.IsExist = false;
       item.RemoveType = removeType;
       item.RemoveDate = new Date();
-      item.isDirty = true;
-      if (item.ItemID > 0) this.removed.push(item);
     }
+    // A source bag may already have flushed its taken-out list before use.
+    if (item.ItemID > 0) this.removed.push(item);
     return true;
   }
 

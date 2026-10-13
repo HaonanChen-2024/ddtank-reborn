@@ -187,7 +187,7 @@ export async function lotteryFinish(ctx: ServerContext, p: GamePlayer): Promise<
   const s = lottery(p);
   const overflow: ItemInfo[] = [];
   for (const it of [...p.caddyBag.getItems()]) {
-    p.caddyBag.removeItem(it);
+    p.caddyBag.takeOutItem(it);
     if (!p.addTemplateToBag(it, templateBagType(it.template), it.Count)) overflow.push(it);
   }
   if (s.lottery !== -1 && s.awards.length) {
