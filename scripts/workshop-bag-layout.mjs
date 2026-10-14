@@ -69,6 +69,21 @@ export function patchGameoverTitleXml(bytes) {
   return Buffer.from(text);
 }
 
+export function patchHallActivityLayoutXml(bytes) {
+  const original = bytes.toString("utf8");
+  assert.deepEqual(Buffer.from(original), bytes, "layout is not lossless UTF-8");
+  let found = 0;
+  const text = original.replace(/<custom\b[^>]*\/>/g, tag => {
+    if (!tag.includes('stylename="hallIcon.hallRightIconViewPos"')) return tag;
+    found++;
+    assert.ok(/\bclassname="flash.geom.Point"/.test(tag) && /\bx="850"/.test(tag) && /\by="10"/.test(tag), "hall activity parent position changed; preserved");
+    // Move the original parent anchor; its children and AS3 click handlers stay intact.
+    return tag.replace(/\bx="850"/, 'x="820"').replace(/\by="10"/, 'y="82"');
+  });
+  assert.equal(found, 1, "expected one original hall activity parent position");
+  return Buffer.from(text);
+}
+
 // Only the matching single-slot ABC branch consumes these new styles. Original
 // calendar styles stay byte-for-byte intact, including the multi-slot layout.
 const calendarExchangePoints = [
@@ -172,11 +187,12 @@ async function patchLayoutEntry(bytes, entryName, patchXml) {
 }
 
 function patchFlags(flags = {}) {
-  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment", "calendarExchangeLayout"].includes(key)), "unknown layout patch flag");
+  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment", "calendarExchangeLayout", "hallActivityLayout"].includes(key)), "unknown layout patch flag");
   assert.ok(flags.gameoverTitle === undefined || typeof flags.gameoverTitle === "boolean", "invalid gameover title flag");
   assert.ok(flags.bagLabelAlignment === undefined || typeof flags.bagLabelAlignment === "boolean", "invalid bag label alignment flag");
   assert.ok(flags.calendarExchangeLayout === undefined || typeof flags.calendarExchangeLayout === "boolean", "invalid calendar exchange layout flag");
-  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}), ...(flags.calendarExchangeLayout ? { calendarExchangeLayout: true } : {}) };
+  assert.ok(flags.hallActivityLayout === undefined || typeof flags.hallActivityLayout === "boolean", "invalid hall activity layout flag");
+  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}), ...(flags.calendarExchangeLayout ? { calendarExchangeLayout: true } : {}), ...(flags.hallActivityLayout ? { hallActivityLayout: true } : {}) };
 }
 
 export async function patchBagLayoutArchive(bytes, flags = {}) {
@@ -199,6 +215,14 @@ export async function patchBagLayoutArchive(bytes, flags = {}) {
       preservedEntries: summary.entries - changedEntries.length, preservedCompressedEntries: summary.entries - changedEntries.length,
       patchFlags: selected, changedEntries, calendarExchangeLayout: { scope: "ActiveType1-single-slot", addedStyles: calendarExchangePoints.map(([name]) => name), requiresMatchingAbc: true } });
   }
+  if (selected.hallActivityLayout) {
+    const hall = await patchLayoutEntry(output, "ddthallIcon.xml", patchHallActivityLayoutXml);
+    output = hall.output;
+    const changedEntries = [...(summary.changedEntries ?? [entryName]), "ddthallIcon.xml"];
+    Object.assign(summary, { sha256: hall.summary.sha256, bytes: output.length,
+      preservedEntries: summary.entries - changedEntries.length, preservedCompressedEntries: summary.entries - changedEntries.length,
+      patchFlags: selected, changedEntries, hallActivityLayout: { style: "hallIcon.hallRightIconViewPos", x: 820, y: 82 } });
+  }
   return { output, summary };
 }
 
@@ -215,6 +239,7 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
   assert.ok(options.gameoverTitle === undefined || requested.gameoverTitle, "gameover title option only enables the reviewed patch");
   assert.ok(options.bagLabelAlignment === undefined || requested.bagLabelAlignment, "bag label option only enables the reviewed patch");
   assert.ok(options.calendarExchangeLayout === undefined || requested.calendarExchangeLayout, "calendar exchange layout option only enables the reviewed patch");
+  assert.ok(options.hallActivityLayout === undefined || requested.hallActivityLayout, "hall activity layout option only enables the reviewed patch");
   assert.ok(command !== "rollback" || Object.keys(options).length === 0, "rollback does not take patch flags");
   const target = join(runtime, "client-overlay/ui/vietnam/xml/xml.png"), journalFile = join(runtime, "client-text-followup/layout-overlay.json");
   const backupRoot = resolve(runtime, "client-text-followup/layout-backups");
@@ -270,6 +295,6 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const flags = process.argv.slice(3);
-  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment", "--calendar-exchange-layout"].includes(flag)), "unknown or duplicate layout option");
-  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}), ...(flags.includes("--calendar-exchange-layout") ? { calendarExchangeLayout: true } : {}) })));
+  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment", "--calendar-exchange-layout", "--hall-activity-layout"].includes(flag)), "unknown or duplicate layout option");
+  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}), ...(flags.includes("--calendar-exchange-layout") ? { calendarExchangeLayout: true } : {}), ...(flags.includes("--hall-activity-layout") ? { hallActivityLayout: true } : {}) })));
 }

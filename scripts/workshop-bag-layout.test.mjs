@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import { inflateRawSync } from "node:zlib";
-import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, patchCalendarExchangeXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
+import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, patchCalendarExchangeXml, patchHallActivityLayoutXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), runtime = resolve(repo, "../../runtime");
 const source = join(repo, "apps/api/assets/flash/ui/vietnam/xml/xml.png"), sourceBytes = readFileSync(source);
@@ -69,6 +69,66 @@ function entryBytes(bytes, name) {
   const entry = zipRecords(bytes).records.find(record => record.name === name);
   return inflateRawSync(bytes.subarray(entry.data, entry.data + entry.compressedSize));
 }
+test("hall activity moves only the original parent Point and rejects changed or duplicate owners", () => {
+  const original = entryBytes(sourceBytes, "ddthallIcon.xml"), text = original.toString("utf8");
+  const owner = '<custom classname="flash.geom.Point" stylename="hallIcon.hallRightIconViewPos" x="850" y="10"/>';
+  assert.equal(text.split(owner).length, 2);
+  const expected = Buffer.from(text.replace(owner, owner.replace('x="850"', 'x="820"').replace('y="10"', 'y="82"')));
+  assert.deepEqual(patchHallActivityLayoutXml(original), expected);
+  const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+  assert.deepEqual(patchHallActivityLayoutXml(Buffer.concat([bom, original])), Buffer.concat([bom, expected]));
+  for (const changed of [
+    text.replace(owner, owner.replace('x="850"', 'x="849"')),
+    text.replace(owner, owner.replace('y="10"', 'y="11"')),
+    text.replace(owner, owner.replace('classname="flash.geom.Point"', 'classname="flash.geom.Rectangle"')),
+    text.replace(owner, ""), text + owner,
+  ]) assert.throws(() => patchHallActivityLayoutXml(Buffer.from(changed)), /hall activity parent position changed|expected one original hall activity parent/);
+  assert.throws(() => patchHallActivityLayoutXml(Buffer.from([0xff])), /not lossless UTF-8/);
+});
+
+test("hall opt-in retains every combination of old flags and all other compressed entries", async () => {
+  for (let mask = 0; mask < 8; mask++) {
+    const flags = { ...(mask & 1 ? { gameoverTitle: true } : {}), ...(mask & 2 ? { bagLabelAlignment: true } : {}), ...(mask & 4 ? { calendarExchangeLayout: true } : {}) };
+    const baseline = await patchBagLayoutArchive(sourceBytes, flags);
+    assert.deepEqual(await patchBagLayoutArchive(sourceBytes, { ...flags, hallActivityLayout: false }), baseline);
+    const combined = await patchBagLayoutArchive(sourceBytes, { ...flags, hallActivityLayout: true });
+    assert.deepEqual(combined.summary.patchFlags, { gameoverTitle: Boolean(mask & 1), ...(mask & 2 ? { bagLabelAlignment: true } : {}), ...(mask & 4 ? { calendarExchangeLayout: true } : {}), hallActivityLayout: true });
+    assert.deepEqual(combined.summary.hallActivityLayout, { style: "hallIcon.hallRightIconViewPos", x: 820, y: 82 });
+    assert.deepEqual(combined.summary.changedEntries, [...(baseline.summary.changedEntries ?? ["bagAndInfo.xml"]), "ddthallIcon.xml"]);
+    assert.equal(combined.summary.preservedCompressedEntries, baseline.summary.preservedCompressedEntries - 1);
+    assert.deepEqual(entryBytes(combined.output, "ddthallIcon.xml"), patchHallActivityLayoutXml(entryBytes(sourceBytes, "ddthallIcon.xml")));
+    const before = zipRecords(baseline.output).records, after = zipRecords(combined.output).records;
+    assert.deepEqual(before.map(x => x.name), after.map(x => x.name));
+    for (let i = 0; i < before.length; i++) if (before[i].name !== "ddthallIcon.xml") {
+      assert.deepEqual(combined.output.subarray(after[i].local, after[i].data + after[i].compressedSize), baseline.output.subarray(before[i].local, before[i].data + before[i].compressedSize), before[i].name);
+    }
+  }
+  await assert.rejects(patchBagLayoutArchive(sourceBytes, { hallActivityLayout: "true" }), /invalid hall activity layout flag/);
+});
+
+test("hall opt-in upgrades the current three-flag ledger and retains all patches and the original backup", async () => {
+  const { fixture, target, ledger } = fixtureRoot();
+  try {
+    await runLayoutCommand("install", fixture, source, { gameoverTitle: true, bagLabelAlignment: true, calendarExchangeLayout: true });
+    const before = readFileSync(target), oldLedger = readFileSync(ledger), old = JSON.parse(oldLedger);
+    const preview = await runLayoutCommand("verify", fixture, source, { hallActivityLayout: true });
+    assert.equal(preview.installed, false); assert.equal(preview.unchanged, false);
+    assert.deepEqual(readFileSync(target), before); assert.deepEqual(readFileSync(ledger), oldLedger);
+    const installed = await runLayoutCommand("install", fixture, source, { hallActivityLayout: true });
+    assert.equal(installed.sha256, preview.sha256);
+    assert.deepEqual(installed.patchFlags, { gameoverTitle: true, bagLabelAlignment: true, calendarExchangeLayout: true, hallActivityLayout: true });
+    const newLedger = readFileSync(ledger), newOverlay = readFileSync(target);
+    assert.equal(JSON.parse(newLedger).backup, old.backup); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+    for (const name of ["bagAndInfo.xml", "gameOver.xml", "calendar.xml"]) assert.deepEqual(entryBytes(newOverlay, name), entryBytes(before, name));
+    for (const command of ["install", "verify"]) assert.equal((await runLayoutCommand(command, fixture, source)).unchanged, true);
+    await assert.rejects(runLayoutCommand("install", fixture, source, { hallActivityLayout: false }), /only enables/);
+    await assert.rejects(runLayoutCommand("rollback", fixture, source, { hallActivityLayout: true }), /rollback does not take patch flags/);
+    assert.deepEqual(readFileSync(ledger), newLedger); assert.deepEqual(readFileSync(target), newOverlay);
+    assert.equal((await runLayoutCommand("rollback", fixture, source)).backupRetained, true);
+    assert.equal(existsSync(target), false); assert.equal(existsSync(ledger), false); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+  } finally { rmSync(fixture, { recursive: true }); }
+});
+
 test("calendar exchange adds only isolated single-slot styles and rejects partial or changed owners", () => {
   const original = entryBytes(sourceBytes, "calendar.xml"), patched = patchCalendarExchangeXml(original);
   const beforeTags = [...original.toString().matchAll(/<(?:component|custom|set|bitmapData)\b[^>]*\/>/g)].map(([tag]) => tag);
