@@ -23,7 +23,7 @@ export function literalOptions(args) {
   const nativeWardrobeManifest = nativeArgs[0]?.slice("--native-wardrobe=".length);
   args = args.filter(arg => !nativeArgs.includes(arg));
   const commands = args.filter(arg => ["verify", "install", "rollback"].includes(arg));
-  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--reference-activities]");
+  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--reference-activities] [--native-wardrobe=MANIFEST]");
   assert.ok(args.filter(arg => arg === "--activity-response").length <= 1, "duplicate activity-response option");
   const command = commands[0] ?? "verify", activityResponse = args.includes("--activity-response");
   const activityState = args.includes("--activity-state");
@@ -75,23 +75,58 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     }
     if (oldNative) for (const asset of native.assets) assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native wardrobe asset preserved");
   }
+  function writeExclusive(path, bytes) {
+    const fd = fs.openSync(path, "wx"); // Ownership begins here, before a possibly partial write.
+    try {
+      try { writeFileSync(fd, bytes); } finally { fs.closeSync(fd); }
+    } catch (error) {
+      try {
+        if (existsSync(path)) {
+          const partial = readFileSync(path);
+          assert.ok(partial.length <= bytes.length && partial.equals(bytes.subarray(0, partial.length)), "changed partial file preserved: " + path);
+          unlinkSync(path);
+        }
+      } catch (cleanupError) { throw new AggregateError([error, cleanupError], "exclusive write failed; cleanup incomplete: " + path); }
+      throw error;
+    }
+  }
   function replace(path, bytes) {
     mkdirSync(dirname(path), { recursive: true });
     const fresh = path + `.workshop-${process.pid}`;
     let created = false;
     try {
-      writeFileSync(fresh, bytes, { flag: "wx" }); created = true;
+      writeExclusive(fresh, bytes); created = true;
       fs.renameSync(fresh, path);
     } finally { if (created && existsSync(fresh)) unlinkSync(fresh); }
   }
   if (command === "rollback") {
     assert.ok(previous, "no literal overlay journal"); checkOwned();
-    for (const entry of previous.files) {
-      const target = join(overlay, entry.name);
-      if (entry.hadOverlay) replace(target, readFileSync(entry.backup)); else unlinkSync(target);
+    const originals = previous.files.map(entry => ({ target: join(overlay, entry.name),
+      current: readFileSync(join(overlay, entry.name)), restored: entry.hadOverlay ? readFileSync(entry.backup) : null }));
+    const touched = [], removed = [];
+    try {
+      for (const entry of originals) {
+        touched.push(entry);
+        if (entry.restored) replace(entry.target, entry.restored); else unlinkSync(entry.target);
+      }
+      if (oldNative) for (const asset of native.assets) { unlinkSync(asset.target); removed.push(asset); }
+      assert.deepEqual(readFileSync(ledger), ledgerBytes, "literal journal changed during rollback");
+      unlinkSync(ledger);
+    } catch (error) {
+      const failures = [], recover = fn => { try { fn(); } catch (failure) { failures.push(failure); } };
+      for (const asset of removed.reverse()) recover(() => {
+        if (existsSync(asset.target)) assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native asset preserved during recovery");
+        else writeExclusive(asset.target, asset.bytes);
+      });
+      for (const entry of touched.reverse()) recover(() => {
+        const current = existsSync(entry.target) ? readFileSync(entry.target) : null;
+        if (current?.equals(entry.current)) return;
+        assert.ok(entry.restored ? current?.equals(entry.restored) : !current, "changed core preserved during rollback recovery: " + entry.target);
+        replace(entry.target, entry.current);
+      });
+      if (failures.length) throw new AggregateError([error, ...failures], "rollback failed; recovery incomplete; preserve the journal and backups");
+      throw error;
     }
-    if (oldNative) for (const asset of native.assets) unlinkSync(asset.target);
-    unlinkSync(ledger);
     return { rolledBack: true, files: previous.files.length, restartRequired: true };
   }
   if (previous) checkOwned();
@@ -155,7 +190,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   if (command === "install" && !unchanged) {
     if (!previous) {
       const backupDir = join(runtimeRoot, "client-overlay-backups", `literals-${Date.now()}`); mkdirSync(backupDir, { recursive: true });
-      for (const entry of files) { entry.backup = join(backupDir, entry.name); writeFileSync(entry.backup, entry.sourceBytes, { flag: "wx" }); }
+      for (const entry of files) { entry.backup = join(backupDir, entry.name); writeExclusive(entry.backup, entry.sourceBytes); }
     }
     const nextLedger = Buffer.from(JSON.stringify({ ...(previous ?? {}), installedAt: previous?.installedAt ?? new Date().toISOString(),
       ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), ...(exchangeEnabled ? { exchangeState: true } : {}), ...(craterEnabled ? { craterMask: true } : {}), ...(activitiesEnabled ? { referenceActivities: true } : {}), ...(native ? { nativeWardrobe: native.receipt } : {}), files: journalFiles() }, null, 2));
@@ -166,7 +201,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
         for (const asset of native.assets) assert.equal(existsSync(asset.target), false, "existing native asset preserved: " + asset.target);
         for (const asset of native.assets) {
           mkdirSync(dirname(asset.target), { recursive: true });
-          writeFileSync(asset.target, asset.bytes, { flag: "wx" }); addedAssets.push(asset);
+          writeExclusive(asset.target, asset.bytes); addedAssets.push(asset);
           assert.equal(hash(readFileSync(asset.target)), asset.sha256);
         }
       }
@@ -180,14 +215,23 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       }
       checkLedger(); replace(ledger, nextLedger);
     } catch (error) {
-      for (const entry of installed.reverse()) {
+      const failures = [], recover = fn => { try { fn(); } catch (failure) { failures.push(failure); } };
+      for (const entry of installed.reverse()) recover(() => {
         const target = join(overlay, entry.name);
-        if (entry.currentBytes) replace(target, entry.currentBytes); else if (existsSync(target)) unlinkSync(target);
-      }
-      if (existsSync(ledger) && readFileSync(ledger).equals(nextLedger)) {
+        const current = existsSync(target) ? readFileSync(target) : null;
+        if (entry.currentBytes && current?.equals(entry.currentBytes)) return;
+        if (!entry.currentBytes && !current) return;
+        assert.ok(current?.equals(entry.out), "changed deployment preserved during install recovery: " + target);
+        if (entry.currentBytes) replace(target, entry.currentBytes); else unlinkSync(target);
+      });
+      recover(() => { if (existsSync(ledger) && readFileSync(ledger).equals(nextLedger)) {
         if (ledgerBytes) replace(ledger, ledgerBytes); else unlinkSync(ledger);
-      }
-      for (const asset of addedAssets.reverse()) if (existsSync(asset.target) && hash(readFileSync(asset.target)) === asset.sha256) unlinkSync(asset.target);
+      } });
+      for (const asset of addedAssets.reverse()) recover(() => { if (existsSync(asset.target)) {
+        assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native asset preserved during install recovery");
+        unlinkSync(asset.target);
+      } });
+      if (failures.length) throw new AggregateError([error, ...failures], "install failed; recovery incomplete; preserve the journal and backups");
       throw error;
     }
   }
