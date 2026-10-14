@@ -118,12 +118,14 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild() {
-      const root = path.resolve("memory-only-native-test/upgraded"), tag = Buffer.from("new shared bridge");
+    upgradedBuild(withMines = false) {
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "")), tag = Buffer.from(withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
           ...[88, 94, 188, 105, 93, 57, 56].map(id => `pair-shared-art-${id}.swf`)].map(file => ["pair", file])]
+        .concat(withMines ? ["WorkshopNativeMinesBootstrap.swf", "mines-original-library.swf", "boguadventure_v3_6_1_u1.swf",
+          "boguadventure_v3_6_1_u1.ui", "bogu-styles.xml", "bogu-player-game.png"].map(file => ["mines", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -131,11 +133,13 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
+        ...(withMines ? { variant: "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
     corePath: name => path.join(overlay, name),
     nativePath: name => path.join(overlay, "workshop-native/wardrobe", name),
+    minesPath: name => path.join(overlay, "workshop-native/mines", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
@@ -233,6 +237,59 @@ test("upgrade refuses foreign changes in an old resource or new destination befo
     f.put(oldTarget ? f.nativePath("WorkshopNativeWardrobeBootstrap.swf") : f.sharedPath, "foreign bytes");
     const before = f.snapshot();
     assert.throws(() => f.run("install", candidate), /changed native activity asset preserved|existing native asset preserved/);
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("old six and eighteen resources upgrade to the fixed twenty-four resource mines variant", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install");
+  f.run("install", f.upgradedBuild());
+  const mines = f.upgradedBuild(true);
+  assert.equal(f.run("verify", mines).nativeWardrobeInstalled, false);
+  assert.equal(f.run("install", mines).nativeWardrobe.assets.length, 24);
+  assert.equal(f.run("install", mines).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.minesPath("bogu-player-game.png")), true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial mines resource writes restore the previous eighteen-resource install for an exact retry", () => {
+  const f = fixture();
+  f.run("install"); f.run("install", f.upgradedBuild());
+  const before = f.snapshot(), mines = f.upgradedBuild(true);
+  f.arm("write", f.minesPath("WorkshopNativeMinesBootstrap.swf"));
+  assert.throws(() => f.run("install", mines), /ENOSPC/);
+  assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.openHandles, 0);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("install", mines).nativeWardrobe.assets.length, 24);
+});
+
+test("interrupted mines rollback compensates the full owned package before retry", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install", f.upgradedBuild(true));
+  const installed = f.snapshot();
+  f.arm("unlink", f.minesPath("bogu-player-game.png"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown native variants and foreign mines destinations are refused without replacing owned files", () => {
+  for (const reason of ["variant", "foreign"]) {
+    const f = fixture(); f.run("install");
+    const mines = f.upgradedBuild(true);
+    if (reason === "variant") {
+      const manifest = JSON.parse(f.fs.readFileSync(mines, "utf8"));
+      manifest.variant = "unknown";
+      f.put(mines, JSON.stringify(manifest));
+    } else f.put(f.minesPath("bogu-styles.xml"), "user owned");
+    const before = f.snapshot();
+    assert.throws(() => f.run("install", mines), /unknown native activity variant|existing native asset preserved/);
     assert.deepEqual(f.snapshot(), before);
   }
 });

@@ -4,6 +4,7 @@ import { Button, PowerGauge, cn } from "@ddtank/ui";
 import type { GameConfig } from "@/lib/api";
 import type { ActivityResponse } from "@/lib/activities";
 import { attachNativePairHost, type NativePairPlayer } from "@/lib/native-pair-host";
+import { attachNativeMinesHost, type NativeMinesPlayer } from "@/lib/native-mines-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -18,7 +19,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -29,6 +30,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer {
   workshopOpenPair?: (characterId: number, generation: string) => boolean;
   workshopStatusPair?: () => NativePairStatus;
   workshopClosePair?: () => unknown;
+  workshopOpenMines?: (characterId: number, generation: string) => boolean;
+  workshopStatusMines?: () => NativePairStatus;
+  workshopCloseMines?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -110,6 +114,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
     let pairHost: ReturnType<typeof attachNativePairHost> | null = null;
     let pairCharacterId = 0;
     let pairGeneration = "";
+    let minesRequest: { cancel: () => void } | null = null;
+    let minesHost: ReturnType<typeof attachNativeMinesHost> | null = null;
+    let minesCharacterId = 0;
+    let minesGeneration = "";
+    const detachMines = () => {
+      minesRequest?.cancel();
+      minesHost?.cancel();
+      minesHost = null;
+      minesCharacterId = 0;
+      minesGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -147,6 +162,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           setPhase("kicked");
           wardrobeRequest?.cancel();
           detachPair();
+          detachMines();
           player?.remove();
           player = null;
         };
@@ -269,6 +285,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (pairRequest === request) pairRequest = null;
           }
         };
+        window.workshopShowMines = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenMines || !owner.workshopStatusMines || !owner.workshopCloseMines) return false;
+          try {
+            const initial = owner.workshopStatusMines();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (minesHost && minesCharacterId !== characterId) return false;
+            if (!minesHost) {
+              minesCharacterId = characterId;
+              minesGeneration = crypto.randomUUID();
+              const generation = minesGeneration;
+              minesHost = attachNativeMinesHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || minesCharacterId !== characterId || minesGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusMines?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          minesRequest?.cancel();
+          const request = { cancel: () => {
+            if (minesRequest !== request) return;
+            minesRequest = null;
+            try { owner.workshopCloseMines?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          minesRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenMines(characterId, minesGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (minesRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusMines();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === minesGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (minesRequest === request) minesRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -287,6 +358,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         if (cancelled) return;
         const err = e instanceof Error ? e : new Error(String(e));
         detachPair();
+        detachMines();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -297,12 +369,14 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       cancelled = true;
       wardrobeRequest?.cancel();
       detachPair();
+      detachMines();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
       delete window.workshopShowSign;
       delete window.workshopShowWardrobe;
       delete window.workshopShowPair;
+      delete window.workshopShowMines;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

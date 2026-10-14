@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -35,5 +35,16 @@ describe("ActivityCenter native entry contract", () => {
     const html = render("wardrobe");
     expect(html).toContain("试用原版衣橱窗口");
     expect(html).not.toContain("试用原版32格翻牌");
+  });
+  it("offers the original 70-cell scene without replacing the older independent web save", () => {
+    const html = render("mines");
+    expect(html).toContain("网页玩法");
+    expect(html).toMatch(/<button[^>]*>试用原版70格扫雷<\/button>/);
+    expect(html).toContain("70格存档与网页36格独立");
+    expect(html).toContain("三档奖励手动领取");
+    expect(html).not.toContain("试用原版32格翻牌");
+  });
+  it("does not permit opening the mines scene for a different live game character", () => {
+    expect(render("mines", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版70格扫雷<\/button>/);
   });
 });

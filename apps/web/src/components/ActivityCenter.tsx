@@ -7,7 +7,8 @@ import {
   isActivityInFlight, subscribeActivityChanges,
   type ActivityAction, type ActivityCell, type ActivityRequest, type ActivityResponse,
 } from "@/lib/activities";
-import { retryNativePairRequest } from "@/lib/native-pair-host";
+import { retryNativeActivityRequest } from "@/lib/native-activity-host";
+import "@/lib/native-mines-host";
 import "./ActivityCenter.css";
 
 const activityKey = (characterId: number) => ["account", "activities", characterId] as const;
@@ -87,7 +88,7 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
       savePendingActivity(pending);
       setRetry(pending);
       await queryClient.cancelQueries({ queryKey: activityKey(pending.characterId) });
-      const next = await (retryNativePairRequest(pending) ?? performActivity(pending));
+      const next = await (retryNativeActivityRequest(pending) ?? performActivity(pending));
       queryClient.setQueryData<ActivityResponse>(activityKey(pending.characterId), (old) => !old || next.revision >= old.revision ? next : old);
       clearPendingActivity(pending);
       if (mountedRef.current && currentCharacterRef.current === pending.characterId) {
@@ -125,14 +126,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -254,6 +255,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   onClick={() => { void openNative("pair"); }}>试用原版32格翻牌</button>
                   <p className="activity-center__muted">原窗口仍在测试，牌局与网页配对独立。打开只读取进度；开始、翻牌及积分操作均由你确认。遇到未确认结果，请用上方按钮重试原操作；若原窗口无法恢复，核对后重新进入游戏。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版翻牌。</p>}</>}
+                {selected.id === "mines" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("mines"); }}>试用原版70格扫雷</button>
+                  <p className="activity-center__muted">原场景仍在测试，70格存档与网页36格独立。打开只读取进度；开始和积分操作需要确认，三档奖励手动领取后通过游戏邮件送达。具体费用和奖品采用本地规则。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版扫雷。</p>}</>}
                 <section className="activity-center__rules"><h4>玩法说明</h4><ul>{selected.rules.map((rule, index) => <li key={index}>{rule}</li>)}</ul></section>
               </> : <p className="activity-center__empty">当前没有开放的活动。</p>}
             </section>
