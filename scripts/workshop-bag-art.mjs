@@ -73,8 +73,9 @@ const ROOMLIST_JPEG = new Map([
 ]);
 function reviewedRoomlistJpeg(entry, config, tagCode) {
   if (entry.inputFormat === undefined) return false;
-  const expected = ROOMLIST_JPEG.get(entry.id);
-  assert.ok(config.asset === 'ui/vietnam/swf/roomlist.swf' && expected && tagCode === expected[0] && entry.className === expected[1] && entry.sourceTagSha256 === expected[2], 'unsupported reviewed RoomList JPEG owner');
+  const hallActivation = config.asset === 'ui/vietnam/swf/ddthallicon.swf' && entry.id === 24;
+  const expected = hallActivation ? [35, 'assets.hallIcon.chickActivationIcon', '40492a8e7e6304bd861b204fb9f2dc153d4cde39d03fb019db8aebf6ec706bdf'] : ROOMLIST_JPEG.get(entry.id);
+  assert.ok((config.asset === 'ui/vietnam/swf/roomlist.swf' || hallActivation) && expected && tagCode === expected[0] && entry.className === expected[1] && entry.sourceTagSha256 === expected[2], 'unsupported reviewed RoomList JPEG owner');
   assert.equal(entry.inputFormat, tagCode === 21 ? 'jpeg2' : 'jpeg3-external-alpha', 'invalid reviewed JPEG format');
   assert.ok(entry.preparedImage, 'reviewed JPEG needs a prepared PNG');
   return true;
@@ -259,7 +260,7 @@ export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec
         assert.ok(entry.regions.some(region => inside(x, y, region.box)), 'unreviewed pixels changed'); changedPixels++;
         const alpha = p + (tagCode === 35 || jpeg ? 3 : 0);
         if (patched.raw[alpha] !== image.raw[alpha]) {
-          assert.ok((tagCode === 36 || (jpeg && [1, 17, 45].includes(entry.id))) && entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
+          assert.ok((tagCode === 36 || (jpeg && ([1, 17, 45].includes(entry.id) || (config.asset === 'ui/vietnam/swf/ddthallicon.swf' && entry.id === 24)))) && entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
         }
       }
     }
@@ -299,16 +300,16 @@ export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec
 async function main() {
   const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..'), runtime = resolve(repo, '../../runtime');
   const command = process.argv[2] ?? 'verify'; assert.ok(['verify', 'install', 'rollback'].includes(command), 'usage: workshop-bag-art.mjs verify|install|rollback');
-  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=gameover', '--asset=email', '--roomlist', '--room'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
+  const flags = process.argv.slice(3), assetFlags = flags.filter(flag => ['--asset=hidden-controls', '--asset=hall', '--asset=chat', '--asset=hall-feature', '--asset=hall-activity', '--asset=gameover', '--asset=email', '--roomlist', '--room'].includes(flag)), backgroundFlags = flags.filter(flag => flag.startsWith('--background='));
   assert.ok(assetFlags.length <= 1 && backgroundFlags.length <= 1 && flags.length === assetFlags.length + backgroundFlags.length, 'unknown or duplicate bag art option');
-  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email'), roomlist = flags.includes('--roomlist'), room = flags.includes('--room');
+  const hiddenControls = flags.includes('--asset=hidden-controls'), hall = flags.includes('--asset=hall'), chat = flags.includes('--asset=chat'), hallFeature = flags.includes('--asset=hall-feature'), hallActivity = flags.includes('--asset=hall-activity'), gameover = flags.includes('--asset=gameover'), email = flags.includes('--asset=email'), roomlist = flags.includes('--roomlist'), room = flags.includes('--room');
   assert.ok(backgroundFlags.length === 0 || (hall && command !== 'rollback' && backgroundFlags[0].length > '--background='.length), 'background requires --asset=hall for verify or install');
-  const name = room ? 'room' : roomlist ? 'roomlist' : gameover ? 'gameover' : hallFeature ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
+  const name = room ? 'room' : roomlist ? 'roomlist' : gameover ? 'gameover' : hallFeature || hallActivity ? 'ddthallicon' : chat ? 'chat' : hall ? 'hall' : hiddenControls ? 'coreii' : email ? 'email' : 'bagandinfo';
   const configDirectory = join(repo, room ? 'research/i18n/room-art' : roomlist ? 'research/i18n/roomlist-art' : 'research/i18n/bag-art');
-  const configBytes = readFileSync(join(configDirectory, gameover ? 'gameover.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
+  const configBytes = readFileSync(join(configDirectory, gameover ? 'gameover.zh-CN.json' : hallActivity ? 'hall-activity.zh-CN.json' : hallFeature ? 'hall-feature.zh-CN.json' : chat ? 'chat.zh-CN.json' : hall ? 'hall.zh-CN.json' : hiddenControls ? 'hidden-controls.zh-CN.json' : email ? 'email.zh-CN.json' : 'zh-CN.json')), config = JSON.parse(configBytes.toString('utf8'));
   assert.equal(config.asset, `ui/vietnam/swf/${name}.swf`);
   const target = join(runtime, 'client-overlay', config.asset), asset = join(repo, 'apps/api/assets/flash', config.asset);
-  const ledgerFile = join(runtime, room ? 'client-overlay-room-art.json' : roomlist ? 'client-overlay-roomlist-art.json' : gameover ? 'client-overlay-gameover-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
+  const ledgerFile = join(runtime, room ? 'client-overlay-room-art.json' : roomlist ? 'client-overlay-roomlist-art.json' : gameover ? 'client-overlay-gameover-art.json' : hallActivity ? 'client-overlay-hall-activity-art.json' : hallFeature ? 'client-overlay-hall-feature-art.json' : chat ? 'client-overlay-chat-art.json' : hall ? 'client-overlay-hall-art.json' : hiddenControls ? 'client-overlay-hidden-controls-art.json' : email ? 'client-overlay-email-art.json' : 'client-overlay-bag-art.json'), previous = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, 'utf8')) : null;
   const assetBytes = readFileSync(asset); assert.equal(hash(assetBytes), config.sourceAssetSha256, 'shipped asset changed; preserved');
   const replace = bytes => { mkdirSync(dirname(target), { recursive: true }); const fresh = target + `.bag-art-${process.pid}`; writeFileSync(fresh, bytes, { flag: 'wx' }); renameSync(fresh, target); };
   if (previous) {
@@ -329,6 +330,8 @@ async function main() {
   if (hall) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall overlay; preserved');
   if (chat) assert.equal(hash(base), config.sourceAssetSha256, 'unknown chat overlay; preserved');
   if (hallFeature) assert.equal(hash(base), config.sourceAssetSha256, 'unknown hall feature overlay; preserved');
+  if (hallActivity) assert.equal(hash(base), config.sourceOverlaySha256, 'unknown activity caption base overlay; preserved');
+  const patchConfig = hallActivity ? { ...config, sourceAssetSha256: config.sourceOverlaySha256 } : config;
   if (gameover) assert.equal(hash(base), config.sourceAssetSha256, 'unknown gameover overlay; preserved');
   if (email) assert.equal(hash(base), config.sourceAssetSha256, 'unknown email overlay; preserved');
   if (roomlist) assert.equal(hash(base), config.sourceAssetSha256, 'unknown roomlist overlay; preserved');
@@ -338,9 +341,9 @@ async function main() {
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
   const reportDir = room ? join(runtime, 'client-text-followup', 'room-candidate', String(Date.now())) : roomlist ? join(runtime, 'client-text-followup', 'roomlist-candidate', String(Date.now())) : gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
-  const readJPEG = await preloadRoomlistJpeg(base, config, loadImage, createCanvas);
+  const readJPEG = await preloadRoomlistJpeg(base, patchConfig, loadImage, createCanvas);
   const rendered = [], fontFits = [];
-  const result = patchSwf(base, config, (image, entry) => {
+  const result = patchSwf(base, patchConfig, (image, entry) => {
     let rgba = Buffer.from(image.rgba);
     if (entry.preparedImage) {
       assert.ok(typeof entry.preparedImage.path === 'string' && !isAbsolute(entry.preparedImage.path), 'prepared caption needs a relative path');
@@ -398,10 +401,10 @@ async function main() {
     const image = tagCode === 21 ? decodePngTag21(body, PNG.sync.read) : tagCode === 35 ? decodePngBitmap(body, PNG.sync.read) : decodeBitmap(body);
     writeFileSync(entry.after, PNG.sync.write({ width: image.width, height: image.height, data: image.rgba }));
   }
-  const main = (roomlist ? rendered.find(entry => entry.id === 72) : rendered.find(entry => entry.id === 16)) ?? rendered[0], comparisonScale = chat || hallFeature || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
+  const main = (roomlist ? rendered.find(entry => entry.id === 72) : rendered.find(entry => entry.id === 16)) ?? rendered[0], comparisonScale = chat || hallFeature || hallActivity || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
   cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width * comparisonScale + 8, 18);
   cc.drawImage(await loadImage(main.before), 0, 26, main.width * comparisonScale, main.height * comparisonScale); cc.drawImage(await loadImage(main.after), main.width * comparisonScale, 26, main.width * comparisonScale, main.height * comparisonScale); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
-  for (const scale of hiddenControls || chat || hallFeature || gameover || email ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
+  for (const scale of hiddenControls || chat || hallFeature || hallActivity || gameover || email ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
   const buttons = rendered.filter(entry => entry !== main), rowHeight = room ? 240 : roomlist ? 580 : chat ? 190 : 150, columns = roomlist || hall || chat || gameover ? 2 : 4, columnWidth = room ? 360 : roomlist ? 600 : gameover ? 700 : hall || chat ? 520 : 300;
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
   for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }

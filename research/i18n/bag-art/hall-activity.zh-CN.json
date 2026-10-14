@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/ddthallicon.swf",
+  "sourceAssetSha256": "6b0fa62c9af647e42d88fa825f7c47ce84a962ebcdcb3250c826d7feb68dcc5e",
+  "sourceOverlaySha256": "d4bab1e3b4f576291d633ac61f533e5a41a5e01f6d0816bca18b78d3ccbfb42f",
+  "expectedSwfSha256": "4dedd0cda2d063776d6847e9cf682e96d919132876aa468fb7dfb3d9dac36cbe",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Only original CHICKACTIVATION icon caption. Layer on current overlay; preserve all earlier captions, sprites, hit regions and logic. Does not implement or enable activation rewards.",
+  "bitmaps": [
+    {
+      "id": 24,
+      "width": 70,
+      "height": 70,
+      "sourcePixelsSha256": "cb919b3409c4cf392b3442efe29edb90a76f61e39e1b920477292826ec5109a9",
+      "sourceTagSha256": "40492a8e7e6304bd861b204fb9f2dc153d4cde39d03fb019db8aebf6ec706bdf",
+      "sourceImageSha256": "cad9258c573820338b680930987c5ce225fd5d13819c61212f0cc6c92a504b0b",
+      "alphaSha256": "0b9aebbd376f8958c8a448aee6166220926c555f614d355fdbcaa5bf9dcaaa22",
+      "className": "assets.hallIcon.chickActivationIcon",
+      "tagCode": 35,
+      "inputFormat": "jpeg3-external-alpha",
+      "originalText": "Code Gà Hầm",
+      "preparedImage": {
+        "path": "hall-activity/24.png",
+        "sha256": "cfc88682f2f349e7aa3ff4d74ef7b4e86234ff8f56d9c8db555635a632640423"
+      },
+      "regions": [
+        {
+          "box": [
+            0,
+            53,
+            70,
+            17
+          ],
+          "text": "激活礼包",
+          "transparent": true,
+          "fontSize": 11,
+          "preserveAlpha": false
+        }
+      ]
+    }
+  ]
+}
