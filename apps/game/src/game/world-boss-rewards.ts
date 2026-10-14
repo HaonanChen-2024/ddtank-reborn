@@ -68,14 +68,18 @@ function validate(ctx: ServerContext, key: string, rewards: Reward[]): void {
   }
 }
 
-async function online(ctx: ServerContext, p: GamePlayer, key: string, rewards: Reward[]): Promise<string | null> {
+/** Caller owns the persistence lock (and any active fight lease). Only the
+ * supplied eligibility/claim and detached reward state run in this transaction.
+ * World-boss rules stay in its caller; packet 90 supplies its own monthly claim. */
+export async function grantClaimRewards(ctx: ServerContext, p: GamePlayer, rewards: Reward[], title: string,
+  claim: (db: Database, now: Date) => Promise<boolean>): Promise<string | null> {
   const now = ctx.now();
   const committed = await ctx.db.db.transaction(async (tx) => {
     const db = tx as unknown as Database;
     const [owner] = await tx.select({ id: player.Sys_Users_Detail.UserID }).from(player.Sys_Users_Detail)
       .where(eq(player.Sys_Users_Detail.UserID, p.id)).for("update");
     if (!owner) throw new Error("World boss recipient missing");
-    if (!(await claimOnce(db, p.id, "worldboss", key))) return null;
+    if (!(await claim(db, now))) return null;
     const plan = stage(ctx, p), { staged, original } = plan;
     const grant = grantRewards(staged, rewards, ctx.templates.findItem, now);
     const rewarded = new Set(staged.allBags().flatMap((b) => b.getItems()).filter((item) => {
@@ -96,7 +100,7 @@ async function online(ctx: ServerContext, p: GamePlayer, key: string, rewards: R
       await saveItem(db, item);
     }
     await savePlayerInfo(db, staged.info, staged.match);
-    if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, staged, grant.overflow, "Boss mundial", 12);
+    if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, staged, grant.overflow, title, 12);
     const current = inventory(p);
     if (profile(p) !== plan.profileBefore || [...original].some(([item, old]) => snapshot(item) !== old.before || item.isDirty !== old.dirty) ||
         current.some((b, i) => b.capacity !== plan.bags[i]!.capacity || ["items", "removed", "dirty"].some((key) => {
@@ -127,11 +131,22 @@ async function online(ctx: ServerContext, p: GamePlayer, key: string, rewards: R
   p.baseAttack = staged.baseAttack; p.baseDefence = staged.baseDefence;
   // Complete memory publication before any transport callback can fail.
   let notificationError: unknown;
+  // These hooks belong to the committed grade, not to successful delivery of
+  // a socket notification. Attempt each before a broken bag packet can skip it.
+  for (const old of committed.gradeUps) {
+    try { p.questInv?.refresh(); } catch (error) { notificationError ??= error; }
+    try { p.onGradeUp?.(old); } catch (error) { notificationError ??= error; }
+  }
   for (const bag of bags) { try { bag.commitChanges(); } catch (error) { notificationError ??= error; } }
   if (notificationError) throw notificationError;
+  if (committed.gradeUps.length && p.showPP) p.send(Out.playerProperty(p.id));
   p.updateProperties();
   if (committed.sent.some((pkt) => pkt.code === 117)) p.send(Out.mailResponse(p.id, 1));
   return committed.summary;
+}
+
+async function online(ctx: ServerContext, p: GamePlayer, key: string, rewards: Reward[]): Promise<string | null> {
+  return grantClaimRewards(ctx, p, rewards, "Boss mundial", (db) => claimOnce(db, p.id, "worldboss", key));
 }
 
 async function offline(ctx: ServerContext, id: number, key: string, rewards: Reward[]): Promise<void> {

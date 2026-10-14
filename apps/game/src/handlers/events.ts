@@ -20,7 +20,7 @@ import type { HandlerRegistry } from "./registry.js";
 import { exchangeActivity } from "../game/activity-exchange.js";
 import { claimOnlineBox, startOnlineBoxTimer } from "../game/online-box.js";
 import { worldBossRanks, type WorldBossAttempt, type WorldBossRank } from "../game/world-boss.js";
-import { awardWorldBoss } from "../game/world-boss-rewards.js";
+import { awardWorldBoss, grantClaimRewards } from "../game/world-boss-rewards.js";
 import { WorldBossAccess } from "../game/world-boss-access.js";
 
 // ------------------------------------------------------------------ runtime
@@ -427,18 +427,31 @@ export async function signIn(ctx: ServerContext, p: GamePlayer): Promise<boolean
 /** 90 GET_SIGNAWARD (AwardMgr.AddSignAwards): tier must exist and be reached this month; once per month+tier. */
 export async function signAward(ctx: ServerContext, p: GamePlayer, count: number): Promise<boolean> {
   const rt = eventsRuntime(ctx);
-  const db = ctx.db.db;
-  const now = ctx.now();
-  if (!rt.data.signTiers().includes(count)) return false;
-  const [row] = await db.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1);
-  const signed = row && row.LastDate && monthKey(row.LastDate) === monthKey(now) ? (row.DayLog ?? "").split(",").filter((x) => x === "True").length : 0;
-  if (signed < count) return false;
-  if (!(await claimOnce(db, p.id, "signaward", `${monthKey(now)}:${count}`))) return false;
-  const rewards: Reward[] = rt.data.dailyAward.filter((d) => d.AwardDays === count && (d.Type === 1 || d.Type === 7) && (d.Sex === 0 || d.Sex === (p.info.Sex ? 1 : 2)))
-    .map((d) => (d.Type === 7 ? { templateId: -1100, count: d.Count } : { templateId: d.TemplateID, count: d.Count, validDate: d.ValidDate, isBind: d.IsBinds }));
-  const s = await give(ctx, p, rewards, "Prêmio de presença");
-  p.sendMessage(0, `Presente de presença diária recebido com sucesso! ${s}`);
-  return true;
+  return p.withWorldBossAward(() => {
+    const afterLease = (release?: () => void) => p.withPersistenceLock(async () => {
+      try {
+        if (ctx.world.get(p.id) !== p || !p.isActive || p.quitting) return false;
+        // Capture one configuration/sex snapshot before the first SQL await.
+        const tiers = rt.data.signTiers();
+        const rewards: Reward[] = rt.data.dailyAward.filter((d) => d.AwardDays === count && (d.Type === 1 || d.Type === 7) && (d.Sex === 0 || d.Sex === (p.info.Sex ? 1 : 2)))
+          .map((d) => (d.Type === 7 ? { templateId: -1100, count: d.Count } : { templateId: d.TemplateID, count: d.Count, validDate: d.ValidDate, isBind: d.IsBinds }));
+        const s = await grantClaimRewards(ctx, p, rewards, "Prêmio de presença", async (db, now) => {
+          if (!tiers.includes(count)) return false;
+          // The shared owner row is locked before this read, as in signIn.
+          const [row] = await db.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1).for("update");
+          const signed = row && row.LastDate && monthKey(row.LastDate) === monthKey(now) ? (row.DayLog ?? "").split(",").filter((x) => x === "True").length : 0;
+          return signed >= count && claimOnce(db, p.id, "signaward", `${monthKey(now)}:${count}`);
+        });
+        if (s === null) return false;
+        p.sendMessage(0, `Presente de presença diária recebido com sucesso! ${s}`);
+        return true;
+      } finally { release?.(); }
+    }).finally(() => release?.());
+    // Keep room eligibility unchanged. Reuse the real fight's settlement lease
+    // so its ticks/card drops cannot mutate rewards during COMMIT-to-memory.
+    const game = p.currentRoom?.game;
+    return game?.holdWorldBossSettlement ? game.holdWorldBossSettlement().then(afterLease) : afterLease();
+  });
 }
 
 async function openBoxRewards(ctx: ServerContext, p: GamePlayer, boxTemplate: number, title: string): Promise<string> {
@@ -568,7 +581,7 @@ export function registerEvents(r: HandlerRegistry): void {
     if (throttled(p, 500)) return;
     return dailyAward(ctx, p, type);
   });
-  r.player(90, "GET_SIGNAWARD", (ctx, p, pkt) => void signAward(ctx, p, pkt.readInt()));
+  r.player(90, "GET_SIGNAWARD", async (ctx, p, pkt) => { await signAward(ctx, p, pkt.readInt()); });
   r.player(53, "GET_TIME_BOX", (ctx, p, pkt) => timeBox(ctx, p, pkt));
   r.player(230, "ACHIEVEMENT_FINISH", (ctx, p, pkt) => void achievementFinish(ctx, p, pkt.readInt()));
   r.player(338, "ACCUMULATIVELOGIN_AWARD", (ctx, p, pkt) => accumulativeLogin(ctx, p, pkt.readInt()));
