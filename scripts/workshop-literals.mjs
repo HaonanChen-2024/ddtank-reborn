@@ -267,7 +267,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
 function readNativeWardrobe(manifestPath, overlay) {
   const path = resolve(manifestPath), bytes = readFileSync(path), manifest = JSON.parse(bytes);
   assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
-  assert.ok(manifest.variant === undefined || manifest.module === "workshop-native-activities" && ["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure"].includes(manifest.variant), "unknown native activity variant");
+  assert.ok(manifest.variant === undefined || manifest.module === "workshop-native-activities" && ["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant), "unknown native activity variant");
   const root = dirname(path), within = file => {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
   };
@@ -276,23 +276,26 @@ function readNativeWardrobe(manifestPath, overlay) {
   if (manifest.module === "workshop-native-activities") expected.push("/flash/workshop-native/shared/native-shared-library.swf",
     ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
       ...[88, 94, 188, 105, 93, 57, 56].map(id => `pair-shared-art-${id}.swf`)].map(file => "/flash/workshop-native/pair/" + file));
-  if (["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure"].includes(manifest.variant)) expected.push(...[
+  if (["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant)) expected.push(...[
     "WorkshopNativeMinesBootstrap.swf", "mines-original-library.swf", "boguadventure_v3_6_1_u1.swf",
     "boguadventure_v3_6_1_u1.ui", "bogu-styles.xml", "bogu-player-game.png",
   ].map(file => "/flash/workshop-native/mines/" + file));
-  if (["wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure"].includes(manifest.variant)) expected.push(...[
+  if (["wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant)) expected.push(...[
     "WorkshopNativeDDPlayBootstrap.swf", "ddplay-original-library.swf", "ddplay_v3_6_1_u1.swf", "ddplay-styles.xml",
   ].map(file => "/flash/workshop-native/ddplay/" + file));
-  if (["wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure"].includes(manifest.variant)) expected.push(...[
+  if (["wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant)) expected.push(...[
     "WorkshopNativeGypsyBootstrap.swf", "gypsy-original-library.swf", "gypsyshop_v3_6_1_u1.swf", "gypsy-styles.xml",
   ].map(file => "/flash/workshop-native/gypsy/" + file));
-  if (["wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure"].includes(manifest.variant)) expected.push(...[
+  if (["wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant)) expected.push(...[
     "WorkshopNativeMoonlightBootstrap.swf", "moonlight-original-library.swf", "moonlighttreasure_v3_6_1_u1.swf", "moonlighttreasure_v3_6_1_u1.ui",
   ].map(file => "/flash/workshop-native/moonlight/" + file));
-  if (manifest.variant === "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure") expected.push(...[
+  if (["wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr"].includes(manifest.variant)) expected.push(...[
     "WorkshopNativeTreasureBootstrap.swf", "treasure-original-library.swf", "treasurehunting_v3_6_1_u1.swf",
     "treasurehunting_v3_6_1_u1.ui", "treasure-styles.xml",
   ].map(file => "/flash/workshop-native/treasure/" + file));
+  if (manifest.variant === "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr") expected.push(...[
+    "WorkshopNativePurrBootstrap.swf", "purr-original-library.swf", "purrturntable_v3_6_1_u1.swf", "purrturntable_v3_6_1_u1.ui",
+  ].map(file => "/flash/workshop-native/purr/" + file));
   assert.deepEqual(manifest.assets.map(a => a.urlPath).sort(), expected.sort());
   const assets = manifest.assets.map(asset => {
     assert.equal(asset.file, asset.urlPath.slice(asset.urlPath.lastIndexOf("/") + 1));

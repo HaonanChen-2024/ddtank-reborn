@@ -25,6 +25,8 @@ export interface ActivityResponse extends ActivitySnapshot {
   nativeDDPlayAction?: { requestId: string; effects: unknown[] };
   nativeMoonlight?: unknown;
   nativeMoonlightAction?: { requestId: string; effects: unknown[] };
+  nativeWheel?: unknown;
+  nativeWheelAction?: { requestId: string; effects: unknown[] };
   nativeTreasure?: unknown;
   nativeTreasureAction?: { requestId: string; effects: unknown[] };
   nativeGypsy?: unknown;

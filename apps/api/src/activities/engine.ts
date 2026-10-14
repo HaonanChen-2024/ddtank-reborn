@@ -9,6 +9,7 @@ import { advanceDDPlayNative, viewDDPlayNative } from "./ddplay-native.js";
 import { advanceGypsy, viewGypsyNative, type GypsyState } from "./gypsy-native.js";
 import { advanceMoonlight, viewMoonlightNative } from "./moonlight-native.js";
 import { advanceTreasure, viewTreasureNative } from "./treasure-native.js";
+import { advanceWheelNative, viewWheelNative } from "./wheel-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
@@ -71,6 +72,7 @@ function countsDailyAction(id: string, type: string): boolean {
   if (id === "pair-native" && type === "exchange") return false;
   if (id === "ddplay-native" && type === "exchange") return false;
   if (id === "mines-native" && type === "claim") return false;
+  if (id === "wheel-native" && ["take-chip", "take-item", "exchange"].includes(type)) return false;
   return true;
 }
 
@@ -86,13 +88,14 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let nativeGypsyEffects: ActivityTransition["nativeGypsyEffects"];
   let nativeMoonlightEffects: ActivityTransition["nativeMoonlightEffects"];
   let nativeTreasureEffects: ActivityTransition["nativeTreasureEffects"];
+  let nativeWheelEffects: ActivityTransition["nativeWheelEffects"];
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
   const count = (key: string, n = 1) => { s.daily[key] = (s.daily[key] ?? 0) + n; };
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
 
@@ -157,6 +160,11 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
         if (e.type === "won") { rewards.push(reward(3)); done(); message = "全部配对成功！奖励已寄往游戏邮箱。"; }
       }
     }
+  } else if (id === "wheel-native") {
+    const result = advanceWheelNative(s.games.wheelNativeV1, action, ctx, wallet, rng);
+    charge(result.cost); s.games.wheelNativeV1 = result.state; rewards.push(...result.rewards);
+    if (result.completed) done();
+    nativeWheelEffects = result.effects; message = result.message;
   } else if (chanceIds.includes(id as ChanceId)) {
     const result = advanceChanceGame(id as ChanceId, s.games[id], action, rng);
     charge(result.cost); earn(result.points); s.games[id] = result.state;
@@ -255,8 +263,8 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     }
   } else throw new ActivityError("请通过游戏内原签到窗口签到，活动中心会同步已保存的进度。");
   if (counted) count("actions");
-  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : id === "moonlight-native" ? "原生月光宝盒" : id === "treasure-native" ? "原生迷宫寻宝" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}) };
+  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : id === "moonlight-native" ? "原生月光宝盒" : id === "treasure-native" ? "原生迷宫寻宝" : id === "wheel-native" ? "原生啵咕大转盘" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}) };
 }
 
 const prizeName = (id: number) => PRIZES.find(p => p.templateId === id)?.name ?? `物品${id}`;
@@ -331,5 +339,6 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     nativeDDPlay: viewDDPlayNative(s.games.ddplay, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
     nativeGypsy: viewGypsyNative(s.games.gypsy, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
     nativeMoonlight: viewMoonlightNative(s.games.moon, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
-    nativeTreasure: viewTreasureNative(s.games.treasure, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions, s.history) };
+    nativeTreasure: viewTreasureNative(s.games.treasure, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions, s.history),
+    nativeWheel: viewWheelNative(s.games.wheelNativeV1, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions) };
 }

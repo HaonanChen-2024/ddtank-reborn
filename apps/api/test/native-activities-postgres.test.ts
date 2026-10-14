@@ -14,8 +14,9 @@ import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
 
 // No normal-suite DB connection. The dedicated runner creates a NEW template0 DB and ownership marker.
+const random = vi.hoisted(() => ({ fraction: 0.99 }));
 vi.mock("node:crypto", async original => ({ ...await original<typeof import("node:crypto")>(),
-  randomInt: (min: number, max?: number) => max === undefined ? Math.floor(0.99 * min) : min + Math.floor(0.99 * (max - min)) }));
+  randomInt: (min: number, max?: number) => max === undefined ? Math.floor(random.fraction * min) : min + Math.floor(random.fraction * (max - min)) }));
 const url = process.env.WORKSHOP_NATIVE_ACTIVITIES_URL, token = process.env.WORKSHOP_NATIVE_ACTIVITIES_TOKEN;
 const uid = 601, secret = "native-activity-pg-tests-only", name = "native-activity-pg-test";
 type App = Awaited<ReturnType<typeof buildApp>>;
@@ -42,9 +43,10 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
+const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});
 async function walk(count: number, start = 0) { for (let index = start; index < start + count; index++) await mines({ type: "walk", index }); }
 async function pairPaidReady() {
   await pair({ type: "start" }); await pair({ type: "flip-all" }); await action("tasks", { type: "claim", choice: "pair" });
@@ -81,7 +83,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -123,6 +125,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     appB = await buildApp({ db: b, logger: false, skipTemplates: true, env: {}, config });
   });
   beforeEach(async () => {
+    random.fraction = 0.99;
     expect(new Date().toISOString().slice(0,10)).toBe(day);
     await monitor.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT IF EXISTS native_test_mail_failure`);
     await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS native_test_receipt_failure`);
@@ -487,5 +490,110 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(final.receipts.length-recycleBefore.receipts.length).toBe(1); expect((await snapshot()).nativeTreasure.bag).toEqual([]);
     const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({replayed:true,points:344});
     expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await saved()).toEqual(final); passed++;
+  });
+  it("deduplicates native Wheel start, invalidates protected-failure tokens and preserves both slots under old/native wallet contention", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const id = randomUUID(), value = {type:"start",choice:(await snapshot()).nativeWheel.roundToken};
+    const same = await race("wheel-native-start-same-uuid",duplicates("wheel-native",value,id));
+    duplicateResults(same,"nativeWheelAction"); expect(await wallet()).toEqual({Points:980,Revision:1});
+    const first = await snapshot(); expect(first.nativeWheel).toMatchObject({round:1,spinCount:1,phase:"active",level:1,category:5,
+      roundMaterial:{templateId:11002},pending:{chipAmount:20,item:null},fragments:0});
+    const protectValue = {type:"protect",choice:first.nativeWheel.roundToken};
+    const protectedRace = await race("wheel-protected-failure-different-uuids",[
+      ()=>post(appA,"wheel-native",protectValue),()=>post(appB,"wheel-native",protectValue)]);
+    expect(protectedRace.map(response=>response.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:960,Revision:2});
+    expect(protectedRace.find(response=>response.statusCode===200)!.json()).toMatchObject({nativeWheelAction:{effects:[
+      {type:"rotated",action:"protect",spinCount:2,fromLevel:1,toLevel:1,category:5,templateId:11002,success:false,protectedFailure:true,cost:20,score:960}]}});
+    const protectedView = await snapshot(); expect(protectedView.nativeWheel).toMatchObject({level:1,spinCount:2,roundMaterial:{templateId:11002},pending:first.nativeWheel.pending});
+    expect(protectedView.nativeWheel.roundToken).not.toBe(first.nativeWheel.roundToken);
+    const unchanged = await saved(); expect((await post(appA,"wheel-native",protectValue)).statusCode).toBe(400); expect(await saved()).toEqual(unchanged);
+    expect((await post(appB,"wheel-native",{type:"continue",choice:value.choice},id)).statusCode).toBe(409); expect(await saved()).toEqual(unchanged);
+    random.fraction = 0.1;
+    const shared = await race("wheel-legacy-native-distinct-slots-shared-wallet",[
+      ()=>post(appA,"wheel",{type:"start"}),()=>post(appB,"wheel-native",{type:"continue",choice:protectedView.nativeWheel.roundToken})]);
+    expect(shared.map(response=>response.statusCode)).toEqual([200,200]); expect(shared[0].json()).not.toHaveProperty("nativeWheelAction");
+    expect(await wallet()).toEqual({Points:930,Revision:4});
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.games.wheel).toEqual({version:1,kind:"wheel",round:1,phase:"active",stars:1});
+    expect(state.games.wheelNativeV1).toMatchObject({kind:"wheel-native",category:5,materialIndex:3,level:2,spinCount:3});
+    random.fraction = 0.99; const failed = await wheel("continue"); expect(await wallet()).toEqual({Points:920,Revision:5});
+    expect(failed).toMatchObject({nativeWheel:{phase:"failed",level:0,spinCount:4,category:5,roundMaterial:{templateId:11002},pending:{chipAmount:20,item:null},canTakeItem:false},
+      nativeWheelAction:{effects:[{type:"rotated",action:"continue",fromLevel:2,toLevel:0,success:false,protectedFailure:false,phase:"failed",cost:10}]}});
+    const beforeBadTake = await saved(); expect((await post(appA,"wheel-native",{type:"take-item",choice:failed.nativeWheel.roundToken})).statusCode).toBe(400);
+    expect(await saved()).toEqual(beforeBadTake); await wheel("take-chip");
+    const after = await saved(), current = await snapshot(); expect(current.nativeWheel).toMatchObject({phase:"settled",level:0,pending:null,fragments:20});
+    expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
+    const finalState = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(finalState.games.wheel).toEqual(state.games.wheel);
+    const replay = await action("wheel-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true}); expect(replay).not.toHaveProperty("nativeWheelAction");
+    expect(await saved()).toEqual(after); passed++;
+  });
+  it("chooses one complete native Wheel reward under competing UUIDs and mails the seven-level material once as five plus two", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    await wheel("start"); random.fraction = 0.1; const ready = await wheel("continue");
+    expect(ready.nativeWheel.pending).toMatchObject({chipAmount:40,item:{templateId:11002,itemCount:2}});
+    const choice = ready.nativeWheel.roundToken;
+    const competing = await race("wheel-chip-item-exclusive-different-uuids",[
+      ()=>post(appA,"wheel-native",{type:"take-chip",choice}),()=>post(appB,"wheel-native",{type:"take-item",choice})]);
+    expect(competing.map(response=>response.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:970,Revision:3});
+    const tookChip = competing[0].statusCode===200, settled = await saved(), current = await snapshot();
+    expect(current.nativeWheel).toMatchObject({phase:"settled",pending:null,fragments:tookChip?40:0});
+    expect(settled.goods).toHaveLength(tookChip?0:1); expect(settled.mails).toHaveLength(tookChip?0:1);
+    if(!tookChip) expect(settled.goods[0]).toMatchObject({TemplateID:11002,Count:2});
+    expect((await post(appA,"wheel-native",{type:"take-chip",choice})).statusCode).toBe(400); expect(await saved()).toEqual(settled);
+    random.fraction = 0.99; await wheel("start"); random.fraction = 0.1;
+    for(let step=0;step<6;step++) await wheel("continue");
+    const seven = await snapshot(); expect(seven.nativeWheel).toMatchObject({level:7,category:5,roundMaterial:{templateId:11002},
+      canContinue:false,canProtect:false,pending:{chipAmount:140,item:{templateId:11002,itemCount:7}}});
+    const id = randomUUID(), value = {type:"take-item",choice:seven.nativeWheel.roundToken}, before = await saved();
+    const delivered = await race("wheel-seven-item-take-same-uuid",duplicates("wheel-native",value,id));
+    duplicateResults(delivered,"nativeWheelAction"); expect(await wallet()).toEqual({Points:890,Revision:11});
+    expect(delivered.find(response=>!response.json().replayed)!.json()).toMatchObject({mailedCount:1,
+      nativeWheelAction:{requestId:id,effects:[{type:"item-taken",round:2,templateId:11002,itemCount:7}]}});
+    const after = await saved(), items = after.goods.slice(before.goods.length), mails = after.mails.slice(before.mails.length);
+    expect(items.map(item=>item.Count)).toEqual([5,2]); expect(items.every(item=>item.TemplateID===11002&&item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(mails).toHaveLength(1); expect([mails[0].Annex1,mails[0].Annex2].map(Number)).toEqual(items.map(item=>item.ItemID)); expect(mails[0].Annex3).toBeNull();
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeWheel).toMatchObject({pending:null,fragments:tookChip?40:0});
+    const replay = await action("wheel-native",value,id,appB); expect(replay.replayed).toBe(true); expect(replay).not.toHaveProperty("nativeWheelAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("rolls back the native Wheel zero-level chip receipt without changing the legacy five-star save, then retries once without virtual goods", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    random.fraction = 0.1; await action("wheel",{type:"start"}); for(let step=0;step<4;step++) await action("wheel",{type:"continue"});
+    const legacyState = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State.games.wheel;
+    expect(legacyState).toEqual({version:1,kind:"wheel",round:1,phase:"active",stars:5});
+    const atFive = await saved(); expect((await post(appA,"wheel",{type:"continue"})).statusCode).toBe(400); expect((await post(appB,"wheel",{type:"protect"})).statusCode).toBe(400); expect(await saved()).toEqual(atFive);
+    random.fraction = 0.99; await wheel("start"); const zero = await wheel("continue"); expect(zero.nativeWheel).toMatchObject({level:0,phase:"failed",pending:{chipAmount:20,item:null}});
+    const id = randomUUID(), value = {type:"take-chip",choice:zero.nativeWheel.roundToken}, before = await saved();
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"wheel-native",value,id); expect(failed.statusCode,failed.body).toBe(500); expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retry = await race("wheel-chip-tail-failure-retry-same-uuid",duplicates("wheel-native",value,id)); duplicateResults(retry,"nativeWheelAction");
+    expect(await wallet()).toEqual({Points:910,Revision:8}); expect(retry.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeWheelAction:{requestId:id,effects:[{type:"chip-taken",round:1,chipAmount:20,fragments:20}]}});
+    const after = await saved(); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]); expect(after.receipts.length-before.receipts.length).toBe(1);
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.games.wheel).toEqual(legacyState); expect(state.games.wheelNativeV1).toMatchObject({phase:"settled",level:0,fragments:20,pending:null});
+    const replay = await action("wheel-native",value,id,appA); expect(replay.replayed).toBe(true); expect(replay).not.toHaveProperty("nativeWheelAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("rolls back native Wheel exchange mail stacks, chips and final receipt, then retries seven units once and keeps the remaining chips", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    await wheel("start"); await wheel("take-chip"); await wheel("start"); random.fraction = 0.1;
+    for(let step=0;step<6;step++) await wheel("continue"); await wheel("take-chip");
+    const ready = await snapshot(); expect(ready.nativeWheel.fragments).toBe(160);
+    const id = randomUUID(), value = {type:"exchange",index:0,count:7,choice:ready.nativeWheel.roundToken}, before = await saved();
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"wheel-native",value,id); expect(failed.statusCode,failed.body).toBe(500); expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retry = await race("wheel-exchange-mail-tail-failure-retry-same-uuid",duplicates("wheel-native",value,id)); duplicateResults(retry,"nativeWheelAction");
+    expect(await wallet()).toEqual({Points:900,Revision:11}); expect(retry.find(response=>!response.json().replayed)!.json()).toMatchObject({mailedCount:1,
+      nativeWheelAction:{requestId:id,effects:[{type:"exchanged",index:0,count:7,chipsSpent:140,fragments:20,templateId:11019,itemCount:7}]}});
+    const after = await saved(), items = after.goods.slice(before.goods.length), mails = after.mails.slice(before.mails.length);
+    expect(items.map(item=>item.Count)).toEqual([5,2]); expect(items.every(item=>item.TemplateID===11019&&item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(mails).toHaveLength(1); expect([mails[0].Annex1,mails[0].Annex2].map(Number)).toEqual(items.map(item=>item.ItemID)); expect(mails[0].Annex3).toBeNull();
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeWheel).toMatchObject({fragments:20,pending:null,phase:"settled"});
+    expect((await post(appA,"wheel-native",{...value,count:1},id)).statusCode).toBe(409);
+    expect((await post(appB,"wheel-native",{...value,count:1})).statusCode).toBe(400);
+    const replay = await action("wheel-native",value,id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1}); expect(replay).not.toHaveProperty("nativeWheelAction"); expect(await saved()).toEqual(after); passed++;
   });
 });

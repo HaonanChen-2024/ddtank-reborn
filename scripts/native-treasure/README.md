@@ -1,5 +1,7 @@
 # Original Treasure Hunting core candidate
 
+Current combined packaging: the Purr batch adds four fixed resources to the previous Treasure package, producing 45 assets/40 build-source pins with 24 common and 35 module callbacks. The earlier 41-resource A01 freeze below is retained as historical evidence. The real-SWF isolated 6→18→41→45 upgrade and complete owned rollback pass without changing 14 live inputs. No client runtime or deployment is implied.
+
 Experimental A01 core slice, built offline. This module keeps the reference `treasureHunting` main window, category cells, temporary bag, prize preview, RecordViewUI layout and reward animation. It does not start a service, access a player database, open the client or deploy resources. Original full/cross-server ranks, rank rewards, paid tickets and the other original categories remain pending; this is not completion of all A01 functionality.
 
 ## Reproducible inputs

@@ -128,14 +128,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -265,6 +265,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   onClick={() => { void openNative("ddplay"); }}>试用原版弹弹乐</button>
                   <p className="activity-center__muted">原转轴和兑换窗口仍在测试，与网页弹弹乐共用进度及活动积分。打开只读取；每次转动消耗10积分，结果由本地服务决定。每10积分可兑换1份普通材料，通过游戏邮件送达；不接真实付款。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版弹弹乐。</p>}</>}
+                {selected.id === "wheel" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("purr"); }}>试用原版啵咕大转盘</button>
+                  <p className="activity-center__muted">原双轮和领取、兑换窗口仍在测试。七级原窗与旧网页五星转盘分别存档，共用活动积分。打开只读取；开局20积分、普通追加10积分、保护追加20积分，本地追加成功率60%。0或1级可领20芯片，2至7级明确选择芯片或材料；每20芯片兑换1份普通材料，奖励寄邮件。原商城、付款和排行尚未接入。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版啵咕大转盘。</p>}</>}
                 {selected.id === "treasure" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("treasure"); }}>试用原版迷宫寻宝</button>
                   <p className="activity-center__muted">原窗口仍在测试，打开只读取。普通每次30积分、高级每次60积分，奖池为本地四种普通材料；连续选项为一次确认的5次有限批次。两边共用30格临时包，原窗单格取出会寄邮件并保留其余格；原券购买和全服排行尚未接入。</p>
