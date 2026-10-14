@@ -14,7 +14,7 @@ node scripts/native-shared/build-activities.mjs <不存在的runtime输出目录
 
 `buildNativeWardrobe({ outputDir, projectRoot, javaPath, sharedLibraries })` 只输出衣橱组件；组件manifest明确要求联合构建，不能独立安装。默认项目根为仓库上两层，Java 为当前用户的 `.jdks/openjdk-22.0.1/bin/java.exe`。`source-spec.json` 固定本地原件、原参考 core、编译器和 PlayerGlobal 哈希；输入不符或输出目录已存在时拒绝构建。旧完整92类包及旧生产manifest保留为已安装批次的恢复依赖。
 
-衣橱组件输出包含，当前联合manifest另汇集共享、翻牌、原70格扫雷、原弹弹乐与原吉普赛商人资源共32项，variant为 `wardrobe-pair-mines-ddplay-gypsy`；旧6/18/24/28项包保持兼容：
+衣橱组件输出包含，当前联合manifest另汇集共享、翻牌、原70格扫雷、原弹弹乐、原吉普赛商人与原月光宝盒资源共36项，variant为 `wardrobe-pair-mines-ddplay-gypsy-moonlight`；旧6/18/24/28/32项包保持兼容：
 
 - `flash/workshop-native/wardrobe/`：Bootstrap 和五份原业务/美术/布局/目录资源，共六文件。
 - `bridge/WorkshopNativeWardrobeBridge.doabc-tag.bin`：**含 SWF tag 头**的单个 tag 82，owner 为 `workshop/native/WorkshopNativeWardrobeBridge/v1`，flags 为 1。
@@ -22,7 +22,7 @@ node scripts/native-shared/build-activities.mjs <不存在的runtime输出目录
 - `manifest.json`：输入、输出及 ABC 哈希，公开 URL 路径和接口。
 - `build-logs/`：两次 Flex 编译输出。
 
-构建器检查两个独立类的方法签名、原92类拆分的字节完整性、10个衣橱类、共享接口、十五项共同桥回调名和输入不变。翻牌、扫雷、弹弹乐与吉普赛商人模块各自五项回调与共同桥不重名。Flex 的 ProductInfo 含编译时间，外层 SWF 哈希可能随构建改变；未重写该元数据。
+构建器检查两个独立类的方法签名、原92类拆分的字节完整性、10个衣橱类、共享接口、十八项共同桥回调名和输入不变。翻牌、扫雷、弹弹乐、吉普赛商人与月光宝盒模块各自五项回调与共同桥不重名。Flex 的 ProductInfo 含编译时间，外层 SWF 哈希可能随构建改变；未重写该元数据。
 
 ## 唯一桥接 owner 的插入
 
@@ -71,6 +71,6 @@ Bootstrap 不调用会改动整套舞台的 `App.init`，只设置真实舞台�
 
 安装器兼容旧 `--native-wardrobe`，联合manifest使用 `--native-activities`。升级先独立验证旧manifest/资源并用旧桥精确重建旧core，再组合新桥；旧六个路径必须保留。省略flag保持已登记批次。干跑新候选明确返回未安装，不把旧包存在视为新包部署证明。
 
-安装器以独占打开登记新文件所有权；部分写入失败会清理本次写出的匹配内容，既存或被改变的文件保留。升级与回滚中途失败会恢复本次改动的核心与模块资源，账本保持；补偿本身仍失败时报告 `AggregateError`，保留恢复依赖，不能当作成功回滚。备份目录加UUID，避免同毫秒失败重试碰撞。20项纯内存回归通过，包含旧6→18→24→28→32项升级、弹弹乐/吉普赛资源写入/回滚故障及未知variant/路径拒绝；实际SWF隔离结果另记录在活动检查点，未在现役执行。
+安装器以独占打开登记新文件所有权；部分写入失败会清理本次写出的匹配内容，既存或被改变的文件保留。升级与回滚中途失败会恢复本次改动的核心与模块资源，账本保持；补偿本身仍失败时报告 `AggregateError`，保留恢复依赖，不能当作成功回滚。备份目录加UUID，避免同毫秒失败重试碰撞。24项纯内存回归通过，覆盖旧6/18/24/28/32项包到36项、弹弹乐/吉普赛/月光资源写入及回滚故障、未知variant与路径拒绝；实际SWF隔离结果另记录在活动检查点，未在现役执行。
 
 构建模块自身只核验静态编译、接口和输入完整性。较早候选的分页、分类、部件窗口与开关证据保留；正式桥接的稳定连续翻页、错误后的恢复和重开仍待验，不能以构建成功或早期候选成功替代。

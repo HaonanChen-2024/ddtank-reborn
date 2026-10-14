@@ -128,14 +128,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -265,6 +265,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   onClick={() => { void openNative("ddplay"); }}>试用原版弹弹乐</button>
                   <p className="activity-center__muted">原转轴和兑换窗口仍在测试，与网页弹弹乐共用进度及活动积分。打开只读取；每次转动消耗10积分，结果由本地服务决定。每10积分可兑换1份普通材料，通过游戏邮件送达；不接真实付款。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版弹弹乐。</p>}</>}
+                {selected.id === "moon" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("moonlight"); }}>试用原版月光宝盒</button>
+                  <p className="activity-center__muted">原窗口仍在测试，打开只读取。三档本地开盒为1、3、5次，每次20活动积分；与网页共用临时背包，原窗可勾选材料及数量，领取通过游戏邮件送达，回收每单位得2积分。原商城和排行尚未接入。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版月光宝盒。</p>}</>}
                 {selected.id === "gypsy" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("gypsy"); }}>试用原版吉普赛商人</button>
                   <p className="activity-center__muted">原窗口仍在测试。原窗刷新8件、网页刷新3件，两边共用货架和售罄状态，打开只读取。每天首次刷新免费，此后5积分；每件商品按显示数量整包购买，奖励通过游戏邮件送达。顶部展示本地普通材料。</p>

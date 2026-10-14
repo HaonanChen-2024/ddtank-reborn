@@ -7,6 +7,7 @@ import { attachNativePairHost, type NativePairPlayer } from "@/lib/native-pair-h
 import { attachNativeMinesHost, type NativeMinesPlayer } from "@/lib/native-mines-host";
 import { attachNativeDDPlayHost, type NativeDDPlayPlayer } from "@/lib/native-ddplay-host";
 import { attachNativeGypsyHost, type NativeGypsyPlayer } from "@/lib/native-gypsy-host";
+import { attachNativeMoonlightHost, type NativeMoonlightPlayer } from "@/lib/native-moonlight-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -21,7 +22,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -41,6 +42,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenGypsy?: (characterId: number, generation: string) => boolean;
   workshopStatusGypsy?: () => NativePairStatus;
   workshopCloseGypsy?: () => unknown;
+  workshopOpenMoonlight?: (characterId: number, generation: string) => boolean;
+  workshopStatusMoonlight?: () => NativePairStatus;
+  workshopCloseMoonlight?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -155,6 +159,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       gypsyCharacterId = 0;
       gypsyGeneration = "";
     };
+    let moonlightRequest: { cancel: () => void } | null = null;
+    let moonlightHost: ReturnType<typeof attachNativeMoonlightHost> | null = null;
+    let moonlightCharacterId = 0;
+    let moonlightGeneration = "";
+    const detachMoonlight = () => {
+      moonlightRequest?.cancel();
+      moonlightHost?.cancel();
+      moonlightHost = null;
+      moonlightCharacterId = 0;
+      moonlightGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -196,6 +211,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
 
           detachDDPlay();
           detachGypsy();
+      detachMoonlight();
           player?.remove();
           player = null;
         };
@@ -483,6 +499,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (gypsyRequest === request) gypsyRequest = null;
           }
         };
+        window.workshopShowMoonlight = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenMoonlight || !owner.workshopStatusMoonlight || !owner.workshopCloseMoonlight) return false;
+          try {
+            const initial = owner.workshopStatusMoonlight();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (moonlightHost && moonlightCharacterId !== characterId) return false;
+            if (!moonlightHost) {
+              moonlightCharacterId = characterId;
+              moonlightGeneration = crypto.randomUUID();
+              const generation = moonlightGeneration;
+              moonlightHost = attachNativeMoonlightHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || moonlightCharacterId !== characterId || moonlightGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusMoonlight?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          moonlightRequest?.cancel();
+          const request = { cancel: () => {
+            if (moonlightRequest !== request) return;
+            moonlightRequest = null;
+            try { owner.workshopCloseMoonlight?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          moonlightRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenMoonlight(characterId, moonlightGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (moonlightRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusMoonlight();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === moonlightGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (moonlightRequest === request) moonlightRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -505,6 +576,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
 
         detachDDPlay();
         detachGypsy();
+      detachMoonlight();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -519,6 +591,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
 
       detachDDPlay();
       detachGypsy();
+      detachMoonlight();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -528,6 +601,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowMines;
       delete window.workshopShowDDPlay;
       delete window.workshopShowGypsy;
+      delete window.workshopShowMoonlight;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

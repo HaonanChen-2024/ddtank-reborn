@@ -2,7 +2,7 @@ import { api } from "./api";
 
 // Public JSON contract mirrored from apps/api/src/activities/types.ts.
 // Private game state, board layouts and RNG seeds never belong in this module.
-export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean }
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[] }
 export interface ActivityButton { label: string; action: ActivityAction; disabled?: boolean; help?: string }
 export interface ActivityCell { label: string; detail?: string; tone?: "hidden" | "success" | "danger" | "gold"; action?: ActivityAction; image?: string }
 export interface ActivityView {
@@ -23,6 +23,8 @@ export interface ActivityResponse extends ActivitySnapshot {
   nativeMinesAction?: { requestId: string; effects: unknown[] };
   nativeDDPlay?: unknown;
   nativeDDPlayAction?: { requestId: string; effects: unknown[] };
+  nativeMoonlight?: unknown;
+  nativeMoonlightAction?: { requestId: string; effects: unknown[] };
   nativeGypsy?: unknown;
   nativeGypsyAction?: { requestId: string; effects: unknown[] };
 }

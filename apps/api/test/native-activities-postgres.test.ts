@@ -42,7 +42,7 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 async function walk(count: number, start = 0) { for (let index = start; index < start + count; index++) await mines({ type: "walk", index }); }
@@ -81,7 +81,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -298,5 +298,90 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect((await snapshot()).nativeGypsy.offers[4]).toMatchObject({sold:false,canBuy:true});
     const replay = await action("gypsy-native",value,id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1,points:85});
     expect(replay).not.toHaveProperty("nativeGypsyAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("deduplicates native Moonlight three-box draws and serializes legacy/native draws into their shared bag", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const initial = await snapshot(), id = randomUUID(), value = {type:"draw",count:3,choice:initial.nativeMoonlight.bagToken};
+    const same = await race("moonlight-native-three-draws-same-uuid",duplicates("moonlight-native",value,id));
+    duplicateResults(same,"nativeMoonlightAction"); expect(await wallet()).toEqual({Points:940,Revision:1});
+    expect(same.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeMoonlight:{draws:3,bagSlotsUsed:3},
+      nativeMoonlightAction:{requestId:id,effects:[{type:"drawn",count:3,cost:60,score:940,draws:3,rewards:[{templateId:11002,itemCount:3}]}]}});
+    const first = await snapshot();
+    const raced = await race("moonlight-legacy-native-draws-different-uuids",[
+      ()=>post(appA,"moon",{type:"draw",count:2}),
+      ()=>post(appB,"moonlight-native",{type:"draw",count:1,choice:first.nativeMoonlight.bagToken})]);
+    expect(raced[0].statusCode,raced[0].body).toBe(200); expect([200,400]).toContain(raced[1].statusCode);
+    // Native must reject a stale quote if the unquoted legacy draw obtains the wallet lock first.
+    const nativeWon = raced[1].statusCode===200, draws = nativeWon?6:5, current = await snapshot(), after = await saved();
+    expect(raced[0].json()).not.toHaveProperty("nativeMoonlightAction");
+    if(nativeWon) expect(raced[1].json()).toHaveProperty("nativeMoonlightAction");
+    else expect(raced[1].json().message).toContain("临时包或日期已更新");
+    expect(await wallet()).toEqual({Points:nativeWon?880:900,Revision:nativeWon?3:2});
+    expect(current.nativeMoonlight).toMatchObject({draws,bagSlotsUsed:draws,bag:[{index:0,templateId:11002,itemCount:draws,recycleUnitPoints:2}]});
+    expect(after.receipts).toHaveLength(nativeWon?3:2); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.completed.moon).toBe(nativeWon?3:2); expect(state.games).not.toHaveProperty("moonlightNativeV1");
+    const replay = await action("moonlight-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true});
+    expect(replay).not.toHaveProperty("nativeMoonlightAction");
+    expect((await post(appA,"ddplay-native",{type:"spin"},id)).statusCode).toBe(409); expect(await saved()).toEqual(after); passed++;
+  });
+  it("settles only one competing Moonlight take/recycle selection and preserves the unselected shared bag", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const quote = (await snapshot()).nativeMoonlight.bagToken;
+    await action("moonlight-native",{type:"draw",count:3,choice:quote});
+    const ready = await action("moon",{type:"draw",count:2}), before = await saved();
+    const choice = ready.nativeMoonlight.bagToken, items = [{index:0,count:2}];
+    const competing = await race("moonlight-partial-take-recycle-different-uuids",[
+      ()=>post(appA,"moonlight-native",{type:"take",choice,items}),
+      ()=>post(appB,"moonlight-native",{type:"recycle",choice,items})]);
+    expect(competing.map(response=>response.statusCode).sort()).toEqual([200,400]);
+    const committed = competing.find(response=>response.statusCode===200)!.json<ActivityResult>(), took = committed.nativeMoonlightAction!.effects[0].type==="taken";
+    const after = await saved(), current = await snapshot(); expect(await wallet()).toEqual({Points:took?900:904,Revision:3});
+    expect(current.nativeMoonlight).toMatchObject({draws:5,bagSlotsUsed:3,bag:[{index:0,templateId:11002,itemCount:3}]});
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect(after.goods).toHaveLength(took?1:0); expect(after.mails).toHaveLength(took?1:0);
+    if(took) {
+      expect(committed.nativeMoonlightAction).toMatchObject({effects:[{type:"taken",itemCount:2,items:[{index:0,templateId:11002,itemCount:2}]}]});
+      expect(after.goods[0]).toMatchObject({Count:2,TemplateID:11002,IsBinds:true,UserID:0,Place:-1,ValidDate:0});
+      expect(Number(after.mails[0].Annex1)).toBe(after.goods[0].ItemID); expect(after.mails[0].Annex2).toBeNull();
+    } else expect(committed.nativeMoonlightAction).toMatchObject({effects:[{type:"recycled",pointsAwarded:4,score:904,items:[{index:0,templateId:11002,itemCount:2}]}]});
+    expect((await post(appA,"moonlight-native",{type:"take",choice,items})).statusCode).toBe(400);
+    const expired = `${new Date(Date.parse(`${day}T00:00:00Z`)-86400000).toISOString().slice(0,10)}:${current.nativeMoonlight.bagToken.split(":")[1]}`;
+    expect((await post(appB,"moonlight-native",{type:"draw",count:1,choice:expired})).statusCode).toBe(400);
+    expect(await saved()).toEqual(after); passed++;
+  });
+  it("rolls back Moonlight selected mail and recycled points on final receipt failures, then retries each UUID once without consuming the remainder", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const first = await action("moonlight-native",{type:"draw",count:5,choice:(await snapshot()).nativeMoonlight.bagToken});
+    const ready = await action("moonlight-native",{type:"draw",count:5,choice:first.nativeMoonlight.bagToken});
+    expect(ready.nativeMoonlight.bag).toMatchObject([{index:0,templateId:11002,itemCount:9},{index:1,templateId:11021,itemCount:2}]);
+    const id = randomUUID(), value = {type:"take",choice:ready.nativeMoonlight.bagToken,items:[{index:0,count:7},{index:1,count:1}]}, before = await saved();
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    // Fails after all selected stacks/mail, shared bag, wallet revision and state writes; MaxCount remains five.
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"moonlight-native",value,id); expect(failed.statusCode,failed.body).toBe(500);
+    expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retry = await race("moonlight-selected-mail-tail-failure-retry-same-uuid",duplicates("moonlight-native",value,id));
+    duplicateResults(retry,"nativeMoonlightAction"); expect(await wallet()).toEqual({Points:800,Revision:3});
+    const fresh = retry.find(response=>!response.json().replayed)!.json<ActivityResult>();
+    expect(fresh).toMatchObject({mailedCount:1,nativeMoonlightAction:{requestId:id,effects:[{type:"taken",itemCount:8,items:[
+      {index:0,templateId:11002,itemCount:7},{index:1,templateId:11021,itemCount:1}]}]}});
+    const delivered = await saved(); expect(delivered.goods.map(item=>[item.TemplateID,item.Count])).toEqual([[11002,5],[11002,2],[11021,1]]);
+    expect(delivered.goods.every(item=>item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(delivered.mails).toHaveLength(1); expect([delivered.mails[0].Annex1,delivered.mails[0].Annex2,delivered.mails[0].Annex3].map(Number)).toEqual(delivered.goods.map(item=>item.ItemID));
+    expect(delivered.mails[0].Annex4).toBeNull(); expect(delivered.receipts.length-before.receipts.length).toBe(1);
+    const remaining = await snapshot(); expect(remaining.nativeMoonlight).toMatchObject({bagSlotsUsed:3,bag:[{index:0,templateId:11002,itemCount:2},{index:1,templateId:11021,itemCount:1}]});
+    const recycleId = randomUUID(), recycle = {type:"recycle",choice:remaining.nativeMoonlight.bagToken,items:[{index:0,count:1}]};
+    assert.match(recycleId,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${recycleId}') NOT VALID`));
+    expect((await post(appA,"moonlight-native",recycle,recycleId)).statusCode).toBe(500); expect(await saved()).toEqual(delivered);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const recycled = await race("moonlight-selected-recycle-tail-failure-retry-same-uuid",duplicates("moonlight-native",recycle,recycleId));
+    duplicateResults(recycled,"nativeMoonlightAction"); expect(await wallet()).toEqual({Points:802,Revision:4});
+    expect(recycled.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeMoonlightAction:{requestId:recycleId,effects:[{type:"recycled",pointsAwarded:2,score:802}]}});
+    const final = await saved(); expect(final.goods).toEqual(delivered.goods); expect(final.mails).toEqual(delivered.mails);
+    expect(final.receipts.length-delivered.receipts.length).toBe(1); expect((await snapshot()).nativeMoonlight).toMatchObject({bagSlotsUsed:2,bag:[{index:0,itemCount:1},{index:1,itemCount:1}]});
+    const replay = await action("moonlight-native",value,id,appB); expect(replay).toMatchObject({replayed:true,mailedCount:1,points:802});
+    expect(replay).not.toHaveProperty("nativeMoonlightAction"); expect(await saved()).toEqual(final); passed++;
   });
 });

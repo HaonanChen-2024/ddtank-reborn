@@ -3,8 +3,9 @@ import type { PairNativeEffect, PairNativeView } from "./pair-native.js";
 import type { MinesNativeEffect, MinesNativeView } from "./mines-native.js";
 import type { DDPlayNativeEffect, DDPlayNativeView } from "./ddplay-native.js";
 import type { GypsyNativeEffect, GypsyNativeView } from "./gypsy-native.js";
+import type { MoonlightNativeEffect, MoonlightNativeView } from "./moonlight-native.js";
 
-export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean }
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[] }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
 export interface ActivityWallet { points: number; earned: number; revision: number }
 export interface ActivityContext {
@@ -40,6 +41,7 @@ export interface ActivitySnapshot {
   nativeMines: MinesNativeView;
   nativeDDPlay: DDPlayNativeView;
   nativeGypsy: GypsyNativeView;
+  nativeMoonlight: MoonlightNativeView;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;
@@ -49,6 +51,7 @@ export interface ActivityTransition {
   nativeMinesEffects?: MinesNativeEffect[];
   nativeDDPlayEffects?: DDPlayNativeEffect[];
   nativeGypsyEffects?: GypsyNativeEffect[];
+  nativeMoonlightEffects?: MoonlightNativeEffect[];
 }
 export class ActivityError extends Error {
   constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }

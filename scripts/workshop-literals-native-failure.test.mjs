@@ -118,11 +118,12 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "")),
-        tag = Buffer.from(withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withMoonlight || withGypsy);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "")),
+        tag = Buffer.from(withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -133,6 +134,8 @@ function fixture() {
           "ddplay-styles.xml"].map(file => ["ddplay", file]) : [])
         .concat(withGypsy ? ["WorkshopNativeGypsyBootstrap.swf", "gypsy-original-library.swf", "gypsyshop_v3_6_1_u1.swf",
           "gypsy-styles.xml"].map(file => ["gypsy", file]) : [])
+        .concat(withMoonlight ? ["WorkshopNativeMoonlightBootstrap.swf", "moonlight-original-library.swf", "moonlighttreasure_v3_6_1_u1.swf",
+          "moonlighttreasure_v3_6_1_u1.ui"].map(file => ["moonlight", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -140,7 +143,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -149,6 +152,7 @@ function fixture() {
     minesPath: name => path.join(overlay, "workshop-native/mines", name),
     ddplayPath: name => path.join(overlay, "workshop-native/ddplay", name),
     gypsyPath: name => path.join(overlay, "workshop-native/gypsy", name),
+    moonlightPath: name => path.join(overlay, "workshop-native/moonlight", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
@@ -391,6 +395,52 @@ test("unknown or shortened Gypsy manifests and foreign destinations are refused 
     if (reason === "foreign") f.put(f.gypsyPath("gypsy-styles.xml"), "user owned");
     else f.put(gypsy, JSON.stringify(manifest));
     const before = f.snapshot(); assert.throws(() => f.run("install", gypsy));
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("old6 through the previous variants upgrades to exact thirty-six assets and rolls back", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install"); f.run("install", f.upgradedBuild()); f.run("install", f.upgradedBuild(true));
+  f.run("install", f.upgradedBuild(true, true, true));
+  const moonlight = f.upgradedBuild(true, true, true, true);
+  assert.equal(f.run("verify", moonlight).nativeWardrobeInstalled, false);
+  assert.equal(f.run("install", moonlight).nativeWardrobe.assets.length, 36);
+  assert.equal(f.run("install", moonlight).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.moonlightPath("moonlighttreasure_v3_6_1_u1.ui")), true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial Moonlight resource writes restore the prior thirty-two asset receipt and allow retry", () => {
+  for (const file of ["WorkshopNativeMoonlightBootstrap.swf", "moonlighttreasure_v3_6_1_u1.ui"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true, true));
+    const before = f.snapshot(), moonlight = f.upgradedBuild(true, true, true, true);
+    f.arm("write", f.moonlightPath(file));
+    assert.throws(() => f.run("install", moonlight), /ENOSPC/);
+    assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", moonlight).nativeWardrobe.assets.length, 36);
+  }
+});
+
+test("Moonlight rollback failure compensates the full thirty-six asset receipt", () => {
+  const f = fixture(), original = f.snapshot(); f.run("install", f.upgradedBuild(true, true, true, true));
+  const installed = f.snapshot(); f.arm("unlink", f.moonlightPath("moonlighttreasure_v3_6_1_u1.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.deepEqual(f.snapshot(), installed); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or shortened Moonlight manifests and foreign destinations are refused before mutation", () => {
+  for (const reason of ["variant", "paths", "foreign"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true, true));
+    const moonlight = f.upgradedBuild(true, true, true, true), manifest = JSON.parse(f.fs.readFileSync(moonlight, "utf8"));
+    if (reason === "variant") manifest.variant = "wardrobe-pair-mines-ddplay-moonlight-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "foreign") f.put(f.moonlightPath("moonlighttreasure_v3_6_1_u1.ui"), "user owned");
+    else f.put(moonlight, JSON.stringify(manifest));
+    const before = f.snapshot(); assert.throws(() => f.run("install", moonlight));
     assert.deepEqual(f.snapshot(), before);
   }
 });
