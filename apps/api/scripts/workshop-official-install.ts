@@ -15,11 +15,12 @@ import { FakeClient, type Received } from "../../game/test/helpers.js";
 import type { WardrobeCheckResult } from "../src/lib/wardrobe.js";
 import { appearanceEquipSlot, appearanceStyleIndex, assertEquippedStyleFits, createAppearancePic } from "./workshop-appearance-identity.js";
 import { appearanceFixtureSex, createAppearanceRow, planAppearance } from "./workshop-appearance-plan.js";
+import { readPlayerMail, findPendingItemMail } from "./workshop-mail-read.js";
 
 type Row = Record<string, any>;
 type Account = { username: string; password: string; nickname: string; sex: boolean };
 type Asset = { key: string; source: string; sha256: string; bytes: number; uploaded?: boolean };
-type Entry = { id: number; officialId?: number; referenceId?: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; protocolFixtureSex?: "m" | "f"; itemId?: number; mailId?: number };
+type Entry = { id: number; officialId?: number; referenceId?: number; name: string; pic: string; categoryId: number; needSex: number; sourceId: number; sourceHash: string; row: Row; assets: Asset[]; installed?: boolean; check?: WardrobeCheckResult; protocolAccepted?: boolean; protocolFixtureSex?: "m" | "f"; itemId?: number; mailId?: number; pending?: { before: number[] } };
 type Fixture = { characterId: number; credentialsPath: string; baselineStyle: string; gold: number; money: number; style: string };
 type Receipt = { version: 1; batchId: string; phase: string; createdAt: string; templates: Entry[]; fixtures: Partial<Record<"m" | "f", Fixture>>; snapshots: Row[]; renderingAccepted: boolean; backup: string; error?: string };
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -194,9 +195,12 @@ async function main() {
     for (const entry of entries) {
       let live = await enter(account!, "tcp"); assert.equal(live.id, fixture.characterId);
       if (!entry.itemId) {
-        const mails = async () => (await json<{ items: Row[] }>(`/api/admin/player-mail?pageSize=500&q=${live.id}`)).items.filter(m => m.ReceiverID === live.id);
-        const before = new Set((await mails()).map(m => m.ID)); await json(`/api/admin/players/${live.id}/give-item`, "POST", { templateId: entry.id, count: 1, validDays: 0 });
-        const mail = await poll(async () => (await mails()).find(m => !before.has(m.ID) && Number(m.Annex1) > 0), m => !!m, "targeted mail"); entry.mailId = Number(mail!.ID); entry.itemId = Number(mail!.Annex1); save();
+        if (!entry.pending) {
+          entry.pending = { before: (await readPlayerMail(json, live.id)).map(m => m.ID) }; save();
+          await json(`/api/admin/players/${live.id}/give-item`, "POST", { templateId: entry.id, count: 1, validDays: 0 });
+        }
+        const mail = await poll(() => findPendingItemMail(json, live.id, entry.id, entry.pending!.before), m => !!m, "targeted mail");
+        entry.mailId = mail!.mailId; entry.itemId = mail!.itemId; delete entry.pending; save();
       }
       const pending = await json(`/api/admin/player-items/${entry.itemId}`);
       if (pending.UserID === 0) {

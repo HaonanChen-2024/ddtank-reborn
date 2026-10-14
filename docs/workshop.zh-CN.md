@@ -151,9 +151,17 @@ node scripts/workshop-official-deliver.mjs --journal=<runtime/new-batch.json> --
 
 发放沿用GM永久绑定附件，每件独立邮件；邮件保留既有720小时有效期，请在期限内领取。成功账本重跑只报告alreadyDelivered，不重发，也不因用户随后换装或获得金币改写原成功记录。发送前保存pending和已有邮件ID；未知结果只核对唯一新邮件/精确附件，无法确定时保留账本并拒绝盲目重发。
 
+协议安装测试与最终发放共用完整分页读取，再按收件人和附件模板精确核对。管理端通用 `q` 会匹配所有列，例如角色51也匹配邮件类型51，不能只读取第一页500封。分页总数变化、缺页、重复ID或多个匹配附件均停止；安装测试发送前也保存pending，恢复时核对已有发送，不重发。补丁前的未知发送没有pending基线，必须先以真实邮件/附件记录核实并绑定原账本。
+
 本批截至2026-10-11已实际安装14个官方部件、98张PNG，均通过真实穿脱/TCP和WS重登保存。原AS3的Show两帧、Room四帧、Game选定姿态、图标与2/3层染色已检查32张截图；完整自然战斗及动画未新增验收。全部14件已发到本地角色「1」的邮箱，7男/7女；原角色外观、金币和点券不变，女装仍受性别限制。其余13个目标未在公开目录命中，不能称为官方新衣服齐全。每次刷新保存独立目录与差异；本日最后一次全目录回读仍为4324条，新增/变更/移除均0。
 
 ## 中文客户端
+
+副本列表累计配置 `research/i18n/roomlist-art/zh-CN.json` 覆盖13张位图的18处固定文案，保留先前六处替换。新增12处包括副本远征、房间列表、个人信息及房间操作按钮；7个确切原JPEG标签通过已等待的解码转换为无损PNG，校验原SWF、标签、类名、像素和成品摘要，原帧、点击区、动态数值及字区外像素保持。`node scripts/workshop-bag-art.mjs verify --roomlist` 做离线核对；`install --roomlist` 使用原独立账本部署。标题底纹柔化与原图标遮挡处的文字清理需在原客户端复测，离线预览不能作为整页、按钮状态或副本游玩验收。
+
+列表底部滚动提示使用独立的 `research/i18n/zh-CN-moving-notifications.json`，包含34条完整中文提示。`node scripts/workshop-language.mjs verify --notifications` 只核对；`install --notifications` 写入 `runtime/client-overlay/ui/vietnam/movingnotification.txt` 和独立账本 `client-overlay-notifications.json`；`rollback --notifications` 回退该覆盖，保留两套字典。该模式与 `--server` 互斥，校验原文件 SHA，保留原 UTF-16LE BOM、CRLF 和末尾空项，原逐行解析及15秒轮播逻辑不变。更新时保存旧内容及账本，遇到外部改动拒绝覆盖；原客户端文件与 vendor 不写入。首次新增覆盖路径后须正常重启服务以更新静态索引，再核对完整 HTTP 响应及原客户端显示；CLI通过不等同于整页验收。
+
+普通客户端词典的安装与回退：
 
 ```powershell
 node scripts/workshop-language.mjs verify

@@ -9,11 +9,15 @@ import { fileURLToPath } from "node:url";
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const runtime = resolve(repo, "../../runtime");
 const server = process.argv.includes("--server");
-const target = join(runtime, server ? "server-language.txt" : "client-overlay/ui/vietnam/language.txt");
-const journalFile = join(runtime, server ? "server-language.json" : "client-overlay-language.json");
+const notifications = process.argv.includes("--notifications");
+assert.ok(!(server && notifications), "--server and --notifications are mutually exclusive");
+const ownedHistory = server || notifications;
+const backupDirectory = join(runtime, server ? "server-language-backups" : "client-overlay-backups");
+const target = join(runtime, server ? "server-language.txt" : notifications ? "client-overlay/ui/vietnam/movingnotification.txt" : "client-overlay/ui/vietnam/language.txt");
+const journalFile = join(runtime, server ? "server-language.json" : notifications ? "client-overlay-notifications.json" : "client-overlay-language.json");
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const command = process.argv[2] ?? "verify";
-assert.ok(["verify", "install", "rollback"].includes(command), "usage: workshop-language.mjs verify|install|rollback [--server]");
+assert.ok(["verify", "install", "rollback"].includes(command), "usage: workshop-language.mjs verify|install|rollback [--server|--notifications]");
 function replace(bytes) {
   mkdirSync(dirname(target), { recursive: true });
   const fresh = target + `.workshop-${process.pid}`;
@@ -25,27 +29,33 @@ if (command === "rollback") {
   const journal = JSON.parse(readFileSync(journalFile, "utf8"));
   assert.equal(hash(readFileSync(target)), journal.sha256, "overlay changed since install; preserved");
   let backup;
-  if (server) assert.equal(journal.target, target, "server language journal target differs; preserved");
+  if (ownedHistory) assert.equal(journal.target, target, "language journal target differs; preserved");
   if (journal.backup) {
-    if (server) assert.equal(dirname(resolve(journal.backup)), join(runtime, "server-language-backups"), "server language backup directory differs; preserved");
+    if (ownedHistory) assert.equal(dirname(resolve(journal.backup)), backupDirectory, "language backup directory differs; preserved");
     backup = readFileSync(journal.backup);
-    if (server) {
+    if (ownedHistory) {
       assert.equal(hash(backup), journal.backupSha256, "server language backup changed; preserved");
       assert.equal(journal.previousJournal?.target, target, "previous server language owner differs; preserved");
       assert.equal(journal.previousJournal?.sha256, journal.backupSha256, "previous server language receipt differs; preserved");
     }
   }
   if (backup) replace(backup); else unlinkSync(target);
-  if (server && backup) writeFileSync(journalFile, JSON.stringify(journal.previousJournal, null, 2));
+  if (ownedHistory && backup) writeFileSync(journalFile, JSON.stringify(journal.previousJournal, null, 2));
   else unlinkSync(journalFile);
-  console.log(`Chinese ${server ? "server" : "client"} dictionary overlay rolled back; shipped language retained`);
+  console.log(`Chinese ${server ? "server" : notifications ? "scroll-notice" : "client"} overlay rolled back; shipped language retained`);
 } else {
-  const source = readFileSync(join(repo, server ? "data/i18n/pt-BR/server-language.txt" : "apps/api/assets/flash/ui/vietnam/language.txt"));
-  const text = source.toString("utf8");
-  const overrides = JSON.parse(readFileSync(join(repo, server ? "research/i18n/zh-CN-server-overrides.json" : "research/i18n/zh-CN-overrides.json"), "utf8"));
+  const source = readFileSync(join(repo, server ? "data/i18n/pt-BR/server-language.txt" : notifications ? "apps/api/assets/flash/ui/vietnam/movingnotification.txt" : "apps/api/assets/flash/ui/vietnam/language.txt"));
+  if (notifications) assert.ok(source.subarray(0, 2).equals(Buffer.from([0xff, 0xfe])), "original scroll notices require UTF-16LE BOM");
+  const text = source.toString(notifications ? "utf16le" : "utf8");
+  const overrides = JSON.parse(readFileSync(join(repo, server ? "research/i18n/zh-CN-server-overrides.json" : notifications ? "research/i18n/zh-CN-moving-notifications.json" : "research/i18n/zh-CN-overrides.json"), "utf8"));
   assert.ok(text.includes("\r\n") && !/(?<!\r)\n/.test(text), "original AS3 parser requires CRLF");
+  if (notifications) {
+    assert.equal(hash(source), overrides.sourceSha256, "shipped scroll notices changed; preserved");
+    assert.ok(Array.isArray(overrides.lines) && overrides.lines.length > 0, "scroll notices need nonempty lines");
+    for (const line of overrides.lines) assert.ok(typeof line === "string" && line.trim() && !/[\r\n{}]/.test(line), "invalid plain scroll-notice line");
+  }
   const seen = new Set(); let changedRows = 0;
-  const output = text.split("\r\n").map(line => {
+  const output = notifications ? overrides.lines.join("\r\n") + "\r\n" : text.split("\r\n").map(line => {
     const boundary = line.indexOf(":");
     if (boundary < 1 || line.startsWith("##")) return line;
     const key = line.slice(0, boundary).replace(/^\uFEFF/, "");
@@ -58,25 +68,25 @@ if (command === "rollback") {
     seen.add(key); changedRows++;
     return line.slice(0, boundary + 1) + translated;
   }).join("\r\n");
-  assert.equal(seen.size, Object.keys(overrides).length, "translation keys missing from original dictionary");
-  const bytes = Buffer.from(output, "utf8");
-  const summary = { sourceSha256: hash(source), sha256: hash(bytes), keys: seen.size, translatedRows: changedRows, bytes: bytes.length, renderingAccepted: false };
+  if (!notifications) assert.equal(seen.size, Object.keys(overrides).length, "translation keys missing from original dictionary");
+  const bytes = notifications ? Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(output, "utf16le")]) : Buffer.from(output, "utf8");
+  const summary = { sourceSha256: hash(source), sha256: hash(bytes), ...(notifications ? { notifications: overrides.lines.length, encoding: "utf16le-bom" } : { keys: seen.size, translatedRows: changedRows }), bytes: bytes.length, renderingAccepted: false };
   if (command === "install") {
     const previous = existsSync(journalFile) ? JSON.parse(readFileSync(journalFile, "utf8")) : null;
     if (existsSync(target)) {
       assert.ok(previous && hash(readFileSync(target)) === previous.sha256, "unowned/custom language overlay preserved");
-      if (server) assert.equal(previous.target, target, "server language journal target differs; preserved");
+      if (ownedHistory) assert.equal(previous.target, target, "language journal target differs; preserved");
       if (previous.sha256 === summary.sha256) { console.log(JSON.stringify({ ...summary, installed: true, unchanged: true })); process.exit(0); }
     }
     let backup, backupSha256;
     if (existsSync(target)) {
-      backup = join(runtime, server ? "server-language-backups" : "client-overlay-backups", `language-${Date.now()}.txt`);
+      backup = join(backupDirectory, `${notifications ? "notifications" : "language"}-${Date.now()}.txt`);
       mkdirSync(dirname(backup), { recursive: true }); writeFileSync(backup, readFileSync(target), { flag: "wx" });
-      if (server) backupSha256 = hash(readFileSync(backup));
+      if (ownedHistory) backupSha256 = hash(readFileSync(backup));
     }
     replace(bytes);
     assert.equal(hash(readFileSync(target)), summary.sha256);
-    writeFileSync(journalFile, JSON.stringify({ ...summary, target, backup, ...(server ? { backupSha256, previousJournal: backup ? previous : undefined } : {}), installedAt: new Date().toISOString() }, null, 2));
+    writeFileSync(journalFile, JSON.stringify({ ...summary, target, backup, ...(ownedHistory ? { backupSha256, previousJournal: backup ? previous : undefined } : {}), installedAt: new Date().toISOString() }, null, 2));
   }
   console.log(JSON.stringify({ ...summary, installed: command === "install" }));
 }

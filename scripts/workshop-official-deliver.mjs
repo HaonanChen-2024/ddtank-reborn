@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readPlayerMail, findPendingItemMail } from "../apps/api/scripts/workshop-mail-read.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const runtime = resolve(repo, "../../runtime");
@@ -30,16 +31,11 @@ async function json(path, method = "GET", body) {
   assert.equal(r.status, 200, `${method} ${path} status`); return r.json();
 }
 async function mails() {
-  const list = await json(`/api/admin/player-mail?pageSize=500&q=${userId}`);
-  assert.ok(list.total <= 500, "mail page is incomplete; refuse ambiguous delivery"); return list.items.filter(m => m.ReceiverID === userId);
+  return readPlayerMail(json, userId);
 }
 async function findPending() {
-  const matches = [];
-  for (const mail of await mails()) if (!receipt.pending.before.includes(mail.ID) && Number(mail.Annex1) > 0) {
-    const item = await json(`/api/admin/player-items/${mail.Annex1}`);
-    if (item.TemplateID === receipt.pending.templateId && item.UserID === 0) matches.push({ mailId: mail.ID, itemId: item.ItemID, templateId: item.TemplateID });
-  }
-  assert.equal(matches.length, 1, "send outcome is unknown or ambiguous; inspect exact pending ledger, never resend blindly"); return matches[0];
+  const match = await findPendingItemMail(json, userId, receipt.pending.templateId, receipt.pending.before);
+  assert.ok(match, "send outcome is unknown; inspect exact pending ledger, never resend blindly"); return match;
 }
 async function main() {
   const gm = JSON.parse(readFileSync(join(runtime, "credentials/smoke-accounts.json"), "utf8")).findLast(a => a.admin === true); assert.ok(gm);

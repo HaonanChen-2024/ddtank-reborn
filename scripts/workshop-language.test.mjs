@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
@@ -88,6 +89,51 @@ test("invalid server key or formatted placeholder fails before any deployment wr
   for (const overrides of [{ "NPC.Line": "中文 {0}" }, { "Missing.Key": "中文" }, { "NPC.Line": "跨行\n{0:N0}" }]) {
     f.put("research/i18n/zh-CN-server-overrides.json", JSON.stringify(overrides));
     assert.notEqual(f.run("install", "--server").status, 0); assert.equal(existsSync(f.runtime), false);
+  }
+});
+
+function scrollFixture(t) {
+  const f = fixture(t), source = Buffer.from("\uFEFFOriginal notice\r\n", "utf16le");
+  f.put("apps/api/assets/flash/ui/vietnam/movingnotification.txt", source);
+  const config = { sourceSha256: createHash("sha256").update(source).digest("hex"), lines: ["中文提示", "下一条提示"] };
+  f.put("research/i18n/zh-CN-moving-notifications.json", JSON.stringify(config));
+  return { ...f, config, noticeSource: source, target: join(f.runtime, "client-overlay/ui/vietnam/movingnotification.txt"), journal: join(f.runtime, "client-overlay-notifications.json") };
+}
+
+test("scroll notices preserve original encoding and cyclic CRLF without touching either dictionary", t => {
+  const f = scrollFixture(t);
+  assert.equal(JSON.parse(f.ok("verify", "--notifications")).notifications, 2);
+  assert.equal(existsSync(f.runtime), false);
+  f.ok("install"); f.ok("install", "--server");
+  const client = join(f.runtime, "client-overlay-language.json"), server = join(f.runtime, "server-language.json"), oldClient = readFileSync(client), oldServer = readFileSync(server);
+  f.ok("install", "--notifications");
+  assert.deepEqual(readFileSync(f.target), Buffer.from("\uFEFF中文提示\r\n下一条提示\r\n", "utf16le"));
+  assert.equal(JSON.parse(f.ok("install", "--notifications")).unchanged, true);
+  f.ok("rollback", "--notifications");
+  assert.equal(existsSync(f.target), false); assert.equal(existsSync(f.journal), false);
+  assert.deepEqual(readFileSync(client), oldClient); assert.deepEqual(readFileSync(server), oldServer);
+  assert.deepEqual(readFileSync(join(f.repo, "apps/api/assets/flash/ui/vietnam/movingnotification.txt")), f.noticeSource);
+});
+
+test("scroll notice updates restore prior owned content and reject custom edits", t => {
+  const f = scrollFixture(t); f.ok("install", "--notifications");
+  const previous = readFileSync(f.target), previousJournal = readFileSync(f.journal);
+  f.config.lines = ["更新提示"]; f.put("research/i18n/zh-CN-moving-notifications.json", JSON.stringify(f.config));
+  f.ok("install", "--notifications"); f.ok("rollback", "--notifications");
+  assert.deepEqual(readFileSync(f.target), previous);
+  assert.deepEqual(JSON.parse(readFileSync(f.journal)), JSON.parse(previousJournal));
+  f.ok("install", "--notifications"); writeFileSync(f.target, "custom notices");
+  for (const command of ["install", "rollback"]) assert.notEqual(f.run(command, "--notifications").status, 0);
+  assert.equal(readFileSync(f.target, "utf8"), "custom notices");
+});
+
+test("invalid scroll notice inputs and mixed modes fail before writing", t => {
+  const f = scrollFixture(t);
+  assert.notEqual(f.run("install", "--notifications", "--server").status, 0);
+  for (const config of [{ ...f.config, sourceSha256: "bad" }, { ...f.config, lines: [] }, { ...f.config, lines: [""] }, { ...f.config, lines: ["跨\n行"] }, { ...f.config, lines: ["{不配对"] }]) {
+    f.put("research/i18n/zh-CN-moving-notifications.json", JSON.stringify(config));
+    assert.notEqual(f.run("install", "--notifications").status, 0);
+    assert.equal(existsSync(f.runtime), false);
   }
 });
 

@@ -3,7 +3,7 @@ import { deflateSync } from 'node:zlib';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { buildTag, compressSwf, decompressSwf, parseTags } from '../tools/i18n/abc-strings/lib.mjs';
-import { decodeBitmap, decodePngBitmap, encodeBitmap, hash, patchSwf, preparedPixels } from './workshop-bag-art.mjs';
+import { decodeBitmap, decodePngBitmap, decodePngTag21, jpegBitmapData, encodeBitmap, hash, patchSwf, preparedPixels } from './workshop-bag-art.mjs';
 const header = Buffer.from([0, 0, 0, 1, 0]), pixels = Buffer.from([3, 1, 2, 3, 255, 100, 120, 150, 0, 0, 0, 0, 255, 80, 90, 100]);
 const prefix = Buffer.from([16, 0, 5, 2, 0, 2, 0]), payload = Buffer.concat([prefix, deflateSync(pixels)]);
 const symbol = Buffer.concat([Buffer.from([1, 0, 16, 0]), Buffer.from('test.caption\0')]);
@@ -138,5 +138,22 @@ for (let index = 2; index < duplicateTags.length; index++) assert.deepEqual(dupl
 assert.equal(duplicateResult.changed[0].drawnRegions, 0);
 assert.deepEqual(duplicateResult.changed[0].clearedRegions, [{ id: 16, text: '中', box: [1, 0, 1, 1], action: 'clear-background-duplicate' }]);
 // Real shipped chat pixels/owners are integration-checked by verify --asset=chat.
+// JPEG framing and PNG tag21 remain testable without hydrated LFS resources.
+const jpegBytes = Buffer.from('ffd80102ffd9', 'hex'), jpeg2 = Buffer.concat([Buffer.from([72, 0]), jpegBytes]);
+assert.deepEqual(jpegBitmapData(jpeg2, 21), { id: 72, encoded: jpegBytes, auxiliary: null });
+const jpeg3Prefix = Buffer.alloc(6); jpeg3Prefix.writeUInt16LE(1); jpeg3Prefix.writeUInt32LE(jpegBytes.length, 2);
+const jpegAlpha = deflateSync(Buffer.from([255, 80]));
+assert.deepEqual(jpegBitmapData(Buffer.concat([jpeg3Prefix, jpegBytes, jpegAlpha]), 35), { id: 1, encoded: jpegBytes, auxiliary: jpegAlpha });
+assert.deepEqual(jpegBitmapData(Buffer.concat([Buffer.from([72, 0, 255, 217]), jpegBytes]), 21).encoded, jpegBytes, 'legacy EOI/SOI prefix is removed exactly once');
+assert.throws(() => jpegBitmapData(Buffer.alloc(6), 35), /truncated/);
+const jpegBadOffset = Buffer.from(jpeg3Prefix); jpegBadOffset.writeUInt32LE(0xffffffff, 2);
+assert.throws(() => jpegBitmapData(Buffer.concat([jpegBadOffset, jpegBytes]), 35), /alpha offset/);
+assert.throws(() => jpegBitmapData(Buffer.concat([Buffer.from([72, 0]), Buffer.alloc(4)]), 21), /must contain JPEG/);
+assert.throws(() => jpegBitmapData(jpeg2, 90), /unsupported/);
+const png21 = Buffer.concat([Buffer.from([72, 0]), PNG.sync.write({ width: 2, height: 2, data: pngPixels })]);
+assert.deepEqual(decodePngTag21(png21, PNG.sync.read).rgba, pngPixels);
+assert.equal(decodePngTag21(png21, PNG.sync.read).id, 72);
+assert.throws(() => decodePngTag21(jpeg2, PNG.sync.read), /must contain PNG/);
+assert.throws(() => patchSwf(before, { asset: 'ui/vietnam/swf/roomlist.swf', bitmaps: [{ ...entry, inputFormat: 'jpeg2', tagCode: 21 }] }, patch), /unsupported reviewed RoomList JPEG owner/, 'JPEG conversion cannot weaken unrelated bitmap guards');
 // Keep this unit fixture synthetic so it also runs without hydrated LFS assets.
 console.log('bag art checks passed: premultiplied bytes, bounded captions, unchanged SWF tags, source and owner protection, seed ranges, clear-box and ink-margin validation, optional background ID/hash/dimensions, bounded duplicate clearing, four gameover captions, PNG tag35 prepared captions with exact frozen output and unsupported-tag preservation');

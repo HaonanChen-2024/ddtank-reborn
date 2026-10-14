@@ -60,6 +60,71 @@ function encodePngBitmap(image, rgba, encode) {
   prefix.writeUInt16LE(image.id); prefix.writeUInt32LE(encoded.length, 2);
   return Buffer.concat([prefix, encoded, deflateSync(Buffer.alloc(0))]);
 }
+
+// Only these reviewed RoomList JPEG owners may use the prepared PNG conversion.
+const ROOMLIST_JPEG = new Map([
+  [1, [35, 'asset.roomList.Create', '0e5abf89df6b89660c00b729cc62e1c6499e2d54f0afbae17f39b47a105a3d47']],
+  [17, [35, 'asset.roomList.rivalship', 'de11b96102f86b992e6a606ca9ffc65ee0af9f186ee76ce41ccd70c94ab1aaeb']],
+  [23, [21, 'asset.roomList.playerListBg_02', '5757a5f27c489123abf95ebe6726ffba35cf7a2c48231d8d9a75ca5161daa822']],
+  [31, [35, 'asset.DungeonList.next_PVE', '99fcfb3e87789b899e5e0790aed1ac21d63a5c9300da7ea75ad1cb71b1ce8fd1']],
+  [36, [35, 'asset.DungeonList.model_PVE', '2cd9eff6f2ece5553baf5c5f05d2fcfb9fcc092d49a716d8328a54667cc724d9']],
+  [45, [35, 'asset.roomList.lookup', '4f5b7df314b491152292c1e1091c91aabf96dbbc61a45d5358199b0d86ce5a39']],
+  [72, [21, 'asset.DungeonList.DungeonListBG', 'a8fe209087621be8b58136ae322a6292b57c12d85550de1755693891645c4154']],
+]);
+function reviewedRoomlistJpeg(entry, config, tagCode) {
+  if (entry.inputFormat === undefined) return false;
+  const expected = ROOMLIST_JPEG.get(entry.id);
+  assert.ok(config.asset === 'ui/vietnam/swf/roomlist.swf' && expected && tagCode === expected[0] && entry.className === expected[1] && entry.sourceTagSha256 === expected[2], 'unsupported reviewed RoomList JPEG owner');
+  assert.equal(entry.inputFormat, tagCode === 21 ? 'jpeg2' : 'jpeg3-external-alpha', 'invalid reviewed JPEG format');
+  assert.ok(entry.preparedImage, 'reviewed JPEG needs a prepared PNG');
+  return true;
+}
+export function jpegBitmapData(body, tagCode) {
+  assert.ok(tagCode === 21 || tagCode === 35, 'unsupported JPEG tag');
+  assert.ok(body.length >= (tagCode === 35 ? 10 : 6), 'truncated JPEG bitmap');
+  const length = tagCode === 35 ? body.readUInt32LE(2) : body.length - 2, start = tagCode === 35 ? 6 : 2;
+  assert.ok(length >= 4 && start + length <= body.length, 'invalid JPEG alpha offset');
+  let encoded = body.subarray(start, start + length);
+  if (encoded.subarray(0, 4).equals(Buffer.from('ffd9ffd8', 'hex'))) encoded = encoded.subarray(2);
+  assert.ok(encoded.subarray(0, 2).equals(Buffer.from('ffd8', 'hex')) && encoded.subarray(-2).equals(Buffer.from('ffd9', 'hex')), 'reviewed input must contain JPEG');
+  return { id: body.readUInt16LE(0), encoded, auxiliary: tagCode === 35 ? body.subarray(start + length) : null };
+}
+function decodeReviewedJpeg(body, tagCode, readJPEG) {
+  const { id, encoded, auxiliary } = jpegBitmapData(body, tagCode), decoded = readJPEG(encoded), { width, height } = decoded;
+  const rgba = Buffer.from(decoded.data);
+  assert.ok(width > 0 && height > 0 && rgba.length === width * height * 4, 'invalid decoded JPEG pixels');
+  const alpha = auxiliary === null ? null : inflateSync(auxiliary);
+  if (alpha) assert.equal(alpha.length, width * height, 'invalid external JPEG alpha');
+  for (let p = 0; p < width * height; p++) rgba[p * 4 + 3] = alpha ? alpha[p] : 255;
+  return { id, width, height, raw: rgba, rgba };
+}
+export function decodePngTag21(body, decode) {
+  assert.ok(body.subarray(2, 10).equals(Buffer.from('89504e470d0a1a0a', 'hex')), 'tag21 caption must contain PNG');
+  const { width, height, data } = decode(body.subarray(2)), rgba = Buffer.from(data);
+  assert.ok(width > 0 && height > 0 && rgba.length === width * height * 4, 'invalid PNG tag21 pixels');
+  return { id: body.readUInt16LE(0), width, height, raw: rgba, rgba };
+}
+function encodePngTag21(image, rgba, encode) {
+  const prefix = Buffer.alloc(2); prefix.writeUInt16LE(image.id);
+  return Buffer.concat([prefix, encode({ width: image.width, height: image.height, data: rgba })]);
+}
+async function preloadRoomlistJpeg(bytes, config, loadImage, createCanvas) {
+  if (!config.bitmaps.some(entry => entry.inputFormat !== undefined)) return undefined;
+  const decoded = decompressSwf(bytes), parsed = parseTags(decoded.body), cache = new Map();
+  for (const entry of config.bitmaps) {
+    const tagCode = entry.tagCode ?? 36;
+    if (!reviewedRoomlistJpeg(entry, config, tagCode)) continue;
+    const tags = parsed.tags.filter(tag => tag.code === tagCode && decoded.body.readUInt16LE(tag.bodyStart) === entry.id);
+    assert.equal(tags.length, 1, 'missing reviewed JPEG target');
+    assert.equal(hash(tags[0].raw), entry.sourceTagSha256, 'reviewed JPEG tag changed; preserved');
+    const { encoded } = jpegBitmapData(decoded.body.subarray(tags[0].bodyStart, tags[0].bodyEnd), tagCode);
+    // loadImage is asynchronous; assigning Image.src and immediately drawing loses the JPEG pixels.
+    const image = await loadImage(encoded), canvas = createCanvas(image.width, image.height), ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0); cache.set(hash(encoded), { width: image.width, height: image.height, data: ctx.getImageData(0, 0, image.width, image.height).data });
+  }
+  return encoded => { const decoded = cache.get(hash(encoded)); assert.ok(decoded, 'JPEG was not preloaded'); return decoded; };
+}
+
 function inside(x, y, [left, top, width, height]) { return x >= left && y >= top && x < left + width && y < top + height; }
 function inpaintCaption(image, rgba, box, seedRange) {
   const [left, top, width, height] = box, seed = new Set(), mask = new Set();
@@ -128,7 +193,13 @@ export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec
   for (const entry of config.bitmaps) {
     assert.ok(!ids.has(entry.id), 'duplicate configured bitmap'); ids.add(entry.id);
     const tagCode = entry.tagCode ?? 36;
-    assert.ok(tagCode === 36 || tagCode === 35, 'unsupported caption bitmap tag');
+    const jpeg = reviewedRoomlistJpeg(entry, config, tagCode);
+    assert.ok(tagCode === 36 || tagCode === 35 || jpeg, 'unsupported caption bitmap tag');
+    if (jpeg) {
+      assert.ok(pngCodec?.readJPEG && decoded.version >= 8, 'reviewed JPEG conversion needs SWF8+ and awaited decoder');
+      assert.equal(hash(bytes), config.sourceAssetSha256, 'unknown reviewed JPEG SWF input; preserved');
+      assert.match(config.expectedSwfSha256 ?? '', /^[a-f0-9]{64}$/, 'reviewed JPEG needs a frozen output hash');
+    }
     if (tagCode === 35) {
       assert.ok(entry.preparedImage && entry.className && pngCodec, 'PNG tag35 needs a reviewed prepared caption, class and codec');
       assert.ok(decoded.version >= 8, 'PNG tag35 requires SWF8+');
@@ -144,8 +215,8 @@ export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec
       assert.equal(symbols.get(owner.id), owner.name, 'bitmap owner class mismatch');
       assert.equal(parsed.tags.filter(tag => tag.code === 39 && decoded.body.readUInt16LE(tag.bodyStart) === owner.id).length, 1, 'missing bitmap owner sprite');
     }
-    const tag = matches[0], decode = tagCode === 35 ? body => decodePngBitmap(body, pngCodec.read) : decodeBitmap;
-    if (tagCode === 35) assert.equal(hash(tag.raw), entry.sourceTagSha256, 'target PNG tag35 changed; preserved');
+    const tag = matches[0], decode = jpeg ? body => decodeReviewedJpeg(body, tagCode, pngCodec.readJPEG) : tagCode === 35 ? body => decodePngBitmap(body, pngCodec.read) : decodeBitmap;
+    if (tagCode === 35 || jpeg) assert.equal(hash(tag.raw), entry.sourceTagSha256, 'target PNG tag35 changed; preserved');
     const image = decode(decoded.body.subarray(tag.bodyStart, tag.bodyEnd));
     assert.equal(image.width, entry.width); assert.equal(image.height, entry.height);
     assert.equal(hash(image.raw), entry.sourcePixelsSha256, 'target bitmap changed; preserve newer work: ' + entry.id);
@@ -179,15 +250,16 @@ export function patchSwf(bytes, config, render, backgroundBytes = null, pngCodec
       const [x, y, w, h] = region.box;
       for (let yy = y; yy < y + h; yy++) rgba.fill(0, (yy * image.width + x) * 4, (yy * image.width + x + w) * 4);
     }
-    const encoded = tagCode === 35 ? encodePngBitmap(image, rgba, pngCodec.write) : encodeBitmap(image, rgba), patched = decode(encoded);
+    const encoded = tagCode === 21 ? encodePngTag21(image, rgba, pngCodec.write) : tagCode === 35 ? encodePngBitmap(image, rgba, pngCodec.write) : encodeBitmap(image, rgba);
+    const patched = jpeg ? (tagCode === 21 ? decodePngTag21(encoded, pngCodec.read) : decodePngBitmap(encoded, pngCodec.read)) : decode(encoded);
     let changedPixels = 0, alphaChangedPixels = 0;
     for (let y = 0; y < image.height; y++) for (let x = 0; x < image.width; x++) {
       const p = (y * image.width + x) * 4;
       if (!patched.raw.subarray(p, p + 4).equals(image.raw.subarray(p, p + 4))) {
         assert.ok(entry.regions.some(region => inside(x, y, region.box)), 'unreviewed pixels changed'); changedPixels++;
-        const alpha = p + (tagCode === 35 ? 3 : 0);
+        const alpha = p + (tagCode === 35 || jpeg ? 3 : 0);
         if (patched.raw[alpha] !== image.raw[alpha]) {
-          assert.ok(tagCode !== 35 && entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
+          assert.ok((tagCode === 36 || (jpeg && [1, 17, 45].includes(entry.id))) && entry.regions.some(region => inside(x, y, region.box) && !region.preserveAlpha), 'caption changed protected alpha'); alphaChangedPixels++;
         }
       }
     }
@@ -266,6 +338,7 @@ async function main() {
   const font = process.env.WORKSHOP_CJK_FONT ?? join(process.env.WINDIR ?? 'C:/Windows', 'Fonts', config.fontFile);
   assert.ok(existsSync(font), 'existing Chinese font unavailable: ' + font); assert.ok(GlobalFonts.registerFromPath(font, config.fontFamily), 'Chinese font registration failed');
   const reportDir = room ? join(runtime, 'client-text-followup', 'room-candidate', String(Date.now())) : roomlist ? join(runtime, 'client-text-followup', 'roomlist-candidate', String(Date.now())) : gameover ? join(runtime, 'client-text-followup', 'gameover-candidate', String(Date.now())) : hallFeature ? join(runtime, 'client-text-followup', 'ddthallicon-candidate', String(Date.now())) : email ? join(runtime, 'client-text-followup', 'email-candidate', String(Date.now())) : join(runtime, 'client-text-followup', `art-${chat ? 'chat-' : hall ? 'hall-' : hiddenControls ? 'hidden-controls-' : ''}${Date.now()}`); mkdirSync(reportDir, { recursive: true });
+  const readJPEG = await preloadRoomlistJpeg(base, config, loadImage, createCanvas);
   const rendered = [], fontFits = [];
   const result = patchSwf(base, config, (image, entry) => {
     let rgba = Buffer.from(image.rgba);
@@ -316,20 +389,20 @@ async function main() {
     const png = bytes => PNG.sync.write({ width: image.width, height: image.height, data: bytes });
     const before = join(reportDir, `${entry.id}-before.png`), after = join(reportDir, `${entry.id}-after.png`);
     writeFileSync(before, png(image.rgba)); writeFileSync(after, png(rgba)); rendered.push({ id: entry.id, width: image.width, height: image.height, before, after }); return rgba;
-  }, backgroundBytes, PNG.sync);
+  }, backgroundBytes, { ...PNG.sync, readJPEG });
   // Export the packaged pixels again; these are the actual SWF result, not only the painter's input.
   const packaged = decompressSwf(result.out), packedTags = parseTags(packaged.body);
   for (const entry of rendered) {
     const tagCode = config.bitmaps.find(bitmap => bitmap.id === entry.id).tagCode ?? 36;
     const tag = packedTags.tags.find(tag => tag.code === tagCode && packaged.body.readUInt16LE(tag.bodyStart) === entry.id), body = packaged.body.subarray(tag.bodyStart, tag.bodyEnd);
-    const image = tagCode === 35 ? decodePngBitmap(body, PNG.sync.read) : decodeBitmap(body);
+    const image = tagCode === 21 ? decodePngTag21(body, PNG.sync.read) : tagCode === 35 ? decodePngBitmap(body, PNG.sync.read) : decodeBitmap(body);
     writeFileSync(entry.after, PNG.sync.write({ width: image.width, height: image.height, data: image.rgba }));
   }
-  const main = rendered.find(entry => entry.id === 16) ?? rendered[0], comparisonScale = chat || hallFeature || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
+  const main = (roomlist ? rendered.find(entry => entry.id === 72) : rendered.find(entry => entry.id === 16)) ?? rendered[0], comparisonScale = chat || hallFeature || gameover || email ? 4 : 1, comparison = createCanvas(main.width * comparisonScale * 2, main.height * comparisonScale + 26), cc = comparison.getContext('2d');
   cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width * comparisonScale + 8, 18);
   cc.drawImage(await loadImage(main.before), 0, 26, main.width * comparisonScale, main.height * comparisonScale); cc.drawImage(await loadImage(main.after), main.width * comparisonScale, 26, main.width * comparisonScale, main.height * comparisonScale); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
   for (const scale of hiddenControls || chat || hallFeature || gameover || email ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
-  const buttons = rendered.filter(entry => entry !== main), rowHeight = room ? 240 : chat ? 190 : 150, columns = hall || chat || gameover ? 2 : 4, columnWidth = room ? 360 : gameover ? 700 : hall || chat ? 520 : 300;
+  const buttons = rendered.filter(entry => entry !== main), rowHeight = room ? 240 : roomlist ? 580 : chat ? 190 : 150, columns = roomlist || hall || chat || gameover ? 2 : 4, columnWidth = room ? 360 : roomlist ? 600 : gameover ? 700 : hall || chat ? 520 : 300;
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
   for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }
   writeFileSync(join(reportDir, 'buttons-comparison.png'), sheet.toBuffer('image/png'));
