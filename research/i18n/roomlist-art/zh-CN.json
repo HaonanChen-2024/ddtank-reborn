@@ -2,10 +2,10 @@
   "version": 1,
   "asset": "ui/vietnam/swf/roomlist.swf",
   "sourceAssetSha256": "58fac028f6c484657748e18a1045f9bf658d823c49208369786a622a35c3930a",
-  "expectedSwfSha256": "c84a10f48797aa409a172461c87add4e45cc4c075a050ea1506957970320a593",
+  "expectedSwfSha256": "3b7fd33c7f7f782c863dc9b33a7c7f98c62841281feb06ee905ec79c163ba3e1",
   "fontFamily": "Workshop RoomList CJK",
   "fontFile": "msyhbd.ttc",
-  "note": "Current shipped source asset base plus the existing reviewed58 and four frozen v2 prepared captions. Prepared images authoritative; all alpha, frame/layout, ABC and other tags preserved. Vendor differences remain historical evidence only. 54 remains blocked.",
+  "note": "Five previously reviewed captions plus Server to 服务器. Original tag36 permits alpha replacement inside the reviewed caption ROI; lower frame, corners, all other tags and current captions are preserved. Entire page interactions unverified.",
   "bitmaps": [
     {
       "id": 58,
@@ -245,12 +245,38 @@
         "path": "prepared/20.png",
         "sha256": "36e0f566c8b68fcf6b526bd38f1434813e147d0ad735ee6c2b3d38281729757a"
       }
-    }
-  ],
-  "pending": [
+    },
     {
       "id": 54,
-      "reason": "Original text silhouette is alpha; retaining all alpha clips Chinese and retains the English silhouette. Frame begins within lower caption rows; no alpha exception or frame editing authorized."
+      "className": "asset.roomList.svrname",
+      "tagCode": 36,
+      "width": 89,
+      "height": 45,
+      "sourceTagSha256": "f080f32972f6d9ce67b29922734af2632d5b538e7bf02a72ec782004bf9993e3",
+      "sourcePixelsSha256": "148e3ec00aa32e9f4adc8993028c8913dc30a8fc2bffc21c4c3b477b9b29d67a",
+      "originalText": "Server",
+      "regions": [
+        {
+          "box": [
+            3,
+            0,
+            59,
+            18
+          ],
+          "text": "服务器",
+          "fontSize": 15,
+          "fill": "#efe4c4",
+          "stroke": "#231d0e",
+          "strokeWidth": 0.25,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "54.png",
+        "sha256": "502ce87063a0f0af4221fa57f2440f4422aaa8c8f3b3f075b830ca54cb868ac1"
+      }
     }
-  ]
+  ],
+  "pending": []
 }
