@@ -5,6 +5,7 @@ import { actMinesweeper, createMinesweeper, viewMinesweeper, type MinesweeperAct
 import { actPairBox, createPairBox, viewPairBox, type PairBoxAction, type PairBoxState } from "./pair-box.js";
 import { advancePairNative, viewPairNative } from "./pair-native.js";
 import { advanceMinesNative, viewMinesNative } from "./mines-native.js";
+import { advanceDDPlayNative, viewDDPlayNative } from "./ddplay-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
@@ -66,6 +67,7 @@ function countsDailyAction(id: string, type: string): boolean {
   if (["wheel", "devil", "christmas"].includes(id) && type === "take") return false;
   if (id === "devil" && type === "giveup") return false;
   if (id === "pair-native" && type === "exchange") return false;
+  if (id === "ddplay-native" && type === "exchange") return false;
   if (id === "mines-native" && type === "claim") return false;
   return true;
 }
@@ -78,13 +80,14 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let pointsDelta = 0, earnedDelta = 0, message = "活动进度已保存。";
   let nativePairEffects: ActivityTransition["nativePairEffects"];
   let nativeMinesEffects: ActivityTransition["nativeMinesEffects"];
+  let nativeDDPlayEffects: ActivityTransition["nativeDDPlayEffects"];
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
   const count = (key: string, n = 1) => { s.daily[key] = (s.daily[key] ?? 0) + n; };
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
 
@@ -105,6 +108,12 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     for (const effect of result.effects) if (effect.type === "walked" && effect.newlyOpened) count("safe");
     if (result.completed) done();
     nativeMinesEffects = result.effects; message = result.message;
+  } else if (id === "ddplay-native") {
+    const result = advanceDDPlayNative(s.games.ddplay, action, wallet, rng);
+    charge(result.cost); earn(result.points); s.games.ddplay = result.state; rewards.push(...result.rewards);
+    // Spin is the same completed play whether initiated by the existing web view or the native window.
+    if (result.completed) s.completed.ddplay = (s.completed.ddplay ?? 0) + 1;
+    nativeDDPlayEffects = result.effects; message = result.message;
   } else if (id === "mines" || id === "pair") {
     if (id === "mines" && action.type === "mode") {
       need(action.choice === "open" || action.choice === "mark", "扫雷操作模式无效。");
@@ -241,8 +250,8 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     }
   } else throw new ActivityError("请通过游戏内原签到窗口签到，活动中心会同步已保存的进度。");
   if (counted) count("actions");
-  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}) };
+  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}) };
 }
 
 const prizeName = (id: number) => PRIZES.find(p => p.templateId === id)?.name ?? `物品${id}`;
@@ -313,5 +322,6 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     }
     return v;
   });
-  return { ...wallet, day: s.day, activities, tasks: taskList(s, ctx), history: s.history, nativePair: viewPairNative(s.games.pairNativeV1, ctx), nativeMines: viewMinesNative(s.games.minesNativeV1, ctx) };
+  return { ...wallet, day: s.day, activities, tasks: taskList(s, ctx), history: s.history, nativePair: viewPairNative(s.games.pairNativeV1, ctx), nativeMines: viewMinesNative(s.games.minesNativeV1, ctx),
+    nativeDDPlay: viewDDPlayNative(s.games.ddplay, wallet, (s.daily.actions ?? 0) < C.maxDailyActions) };
 }

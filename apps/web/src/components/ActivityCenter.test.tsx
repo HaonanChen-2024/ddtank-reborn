@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -46,5 +46,14 @@ describe("ActivityCenter native entry contract", () => {
   });
   it("does not permit opening the mines scene for a different live game character", () => {
     expect(render("mines", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版70格扫雷<\/button>/);
+  });
+  it("offers the original DDPlay without replacing shared progress or introducing a payment", () => {
+    const html = render("ddplay");
+    expect(html).toContain("网页玩法"); expect(html).toContain("试用原版弹弹乐");
+    expect(html).toContain("共用进度及活动积分"); expect(html).toContain("每次转动消耗10积分");
+    expect(html).toContain("通过游戏邮件送达"); expect(html).not.toContain("试用原版70格扫雷");
+  });
+  it("requires the actual game character for the DDPlay trial entry", () => {
+    expect(render("ddplay", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版弹弹乐<\/button>/);
   });
 });

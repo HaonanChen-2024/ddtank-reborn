@@ -118,14 +118,18 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false) {
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "")), tag = Buffer.from(withMines ? "new mines bridge" : "new shared bridge");
+    upgradedBuild(withMines = false, withDDPlay = false) {
+      assert.ok(!withDDPlay || withMines);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "")),
+        tag = Buffer.from(withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
           ...[88, 94, 188, 105, 93, 57, 56].map(id => `pair-shared-art-${id}.swf`)].map(file => ["pair", file])]
         .concat(withMines ? ["WorkshopNativeMinesBootstrap.swf", "mines-original-library.swf", "boguadventure_v3_6_1_u1.swf",
           "boguadventure_v3_6_1_u1.ui", "bogu-styles.xml", "bogu-player-game.png"].map(file => ["mines", file]) : [])
+        .concat(withDDPlay ? ["WorkshopNativeDDPlayBootstrap.swf", "ddplay-original-library.swf", "ddplay_v3_6_1_u1.swf",
+          "ddplay-styles.xml"].map(file => ["ddplay", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -133,13 +137,14 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
     corePath: name => path.join(overlay, name),
     nativePath: name => path.join(overlay, "workshop-native/wardrobe", name),
     minesPath: name => path.join(overlay, "workshop-native/mines", name),
+    ddplayPath: name => path.join(overlay, "workshop-native/ddplay", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
@@ -290,6 +295,52 @@ test("unknown native variants and foreign mines destinations are refused without
     } else f.put(f.minesPath("bogu-styles.xml"), "user owned");
     const before = f.snapshot();
     assert.throws(() => f.run("install", mines), /unknown native activity variant|existing native asset preserved/);
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("six, eighteen and twenty-four asset installs upgrade to fixed twenty-eight asset DDPlay", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install"); f.run("install", f.upgradedBuild()); f.run("install", f.upgradedBuild(true));
+  const ddplay = f.upgradedBuild(true, true);
+  assert.equal(f.run("verify", ddplay).nativeWardrobeInstalled, false);
+  assert.equal(f.run("install", ddplay).nativeWardrobe.assets.length, 28);
+  assert.equal(f.run("install", ddplay).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.ddplayPath("ddplay-styles.xml")), true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial DDPlay writes restore the owned twenty-four asset package before exact retry", () => {
+  for (const file of ["WorkshopNativeDDPlayBootstrap.swf", "ddplay-styles.xml"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true));
+    const before = f.snapshot(), ddplay = f.upgradedBuild(true, true);
+    f.arm("write", f.ddplayPath(file));
+    assert.throws(() => f.run("install", ddplay), /ENOSPC/);
+    assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", ddplay).nativeWardrobe.assets.length, 28);
+  }
+});
+
+test("DDPlay rollback failure compensates the full twenty-eight asset receipt", () => {
+  const f = fixture(), original = f.snapshot(); f.run("install", f.upgradedBuild(true, true));
+  const installed = f.snapshot(); f.arm("unlink", f.ddplayPath("ddplay_v3_6_1_u1.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.deepEqual(f.snapshot(), installed); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or shortened DDPlay manifests and foreign destinations are refused before mutation", () => {
+  for (const reason of ["variant", "paths", "foreign"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true));
+    const ddplay = f.upgradedBuild(true, true), manifest = JSON.parse(f.fs.readFileSync(ddplay, "utf8"));
+    if (reason === "variant") manifest.variant = "wardrobe-pair-mines-ddplay-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "foreign") f.put(f.ddplayPath("ddplay-styles.xml"), "user owned");
+    else f.put(ddplay, JSON.stringify(manifest));
+    const before = f.snapshot(); assert.throws(() => f.run("install", ddplay));
     assert.deepEqual(f.snapshot(), before);
   }
 });

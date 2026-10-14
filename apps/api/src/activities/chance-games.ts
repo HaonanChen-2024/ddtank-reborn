@@ -103,6 +103,13 @@ function multiplier(faces: number[]) {
   return unique === 1 ? TRIPLES[faces[0]] : unique === 2 ? 2 : 0;
 }
 
+/** Structured last result for the native window; never parse localized web labels. */
+export function viewDDPlayOutcome(value: unknown) {
+  const current = readState("ddplay", value) as DDPlayState;
+  if (Array.from(current.faces).some(face => !integer(face, 0, FACES.length - 1))) fail("弹弹乐状态无效。");
+  return { spins: current.spins, faces: [...current.faces], multiplier: multiplier(current.faces) };
+}
+
 /** Caller atomically checks funds/revision, persists state, and applies returned costs/rewards. */
 export function advanceChanceGame(id: ChanceGameId, state: unknown, action: ActivityAction, rng: Random): ChanceGameResult {
   const current = readState(id, state);

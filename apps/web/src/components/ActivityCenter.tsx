@@ -9,6 +9,7 @@ import {
 } from "@/lib/activities";
 import { retryNativeActivityRequest } from "@/lib/native-activity-host";
 import "@/lib/native-mines-host";
+import "@/lib/native-ddplay-host";
 import "./ActivityCenter.css";
 
 const activityKey = (characterId: number) => ["account", "activities", characterId] as const;
@@ -126,14 +127,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -259,6 +260,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   onClick={() => { void openNative("mines"); }}>试用原版70格扫雷</button>
                   <p className="activity-center__muted">原场景仍在测试，70格存档与网页36格独立。打开只读取进度；开始和积分操作需要确认，三档奖励手动领取后通过游戏邮件送达。具体费用和奖品采用本地规则。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版扫雷。</p>}</>}
+                {selected.id === "ddplay" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("ddplay"); }}>试用原版弹弹乐</button>
+                  <p className="activity-center__muted">原转轴和兑换窗口仍在测试，与网页弹弹乐共用进度及活动积分。打开只读取；每次转动消耗10积分，结果由本地服务决定。每10积分可兑换1份普通材料，通过游戏邮件送达；不接真实付款。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版弹弹乐。</p>}</>}
                 <section className="activity-center__rules"><h4>玩法说明</h4><ul>{selected.rules.map((rule, index) => <li key={index}>{rule}</li>)}</ul></section>
               </> : <p className="activity-center__empty">当前没有开放的活动。</p>}
             </section>

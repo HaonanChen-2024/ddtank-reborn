@@ -5,6 +5,7 @@ import type { GameConfig } from "@/lib/api";
 import type { ActivityResponse } from "@/lib/activities";
 import { attachNativePairHost, type NativePairPlayer } from "@/lib/native-pair-host";
 import { attachNativeMinesHost, type NativeMinesPlayer } from "@/lib/native-mines-host";
+import { attachNativeDDPlayHost, type NativeDDPlayPlayer } from "@/lib/native-ddplay-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -19,7 +20,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -33,6 +34,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenMines?: (characterId: number, generation: string) => boolean;
   workshopStatusMines?: () => NativePairStatus;
   workshopCloseMines?: () => unknown;
+  workshopOpenDDPlay?: (characterId: number, generation: string) => boolean;
+  workshopStatusDDPlay?: () => NativePairStatus;
+  workshopCloseDDPlay?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -125,6 +129,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       minesCharacterId = 0;
       minesGeneration = "";
     };
+    let ddplayRequest: { cancel: () => void } | null = null;
+    let ddplayHost: ReturnType<typeof attachNativeDDPlayHost> | null = null;
+    let ddplayCharacterId = 0;
+    let ddplayGeneration = "";
+    const detachDDPlay = () => {
+      ddplayRequest?.cancel();
+      ddplayHost?.cancel();
+      ddplayHost = null;
+      ddplayCharacterId = 0;
+      ddplayGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -163,6 +178,8 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           wardrobeRequest?.cancel();
           detachPair();
           detachMines();
+
+          detachDDPlay();
           player?.remove();
           player = null;
         };
@@ -340,6 +357,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (minesRequest === request) minesRequest = null;
           }
         };
+        window.workshopShowDDPlay = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenDDPlay || !owner.workshopStatusDDPlay || !owner.workshopCloseDDPlay) return false;
+          try {
+            const initial = owner.workshopStatusDDPlay();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (ddplayHost && ddplayCharacterId !== characterId) return false;
+            if (!ddplayHost) {
+              ddplayCharacterId = characterId;
+              ddplayGeneration = crypto.randomUUID();
+              const generation = ddplayGeneration;
+              ddplayHost = attachNativeDDPlayHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || ddplayCharacterId !== characterId || ddplayGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusDDPlay?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          ddplayRequest?.cancel();
+          const request = { cancel: () => {
+            if (ddplayRequest !== request) return;
+            ddplayRequest = null;
+            try { owner.workshopCloseDDPlay?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          ddplayRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenDDPlay(characterId, ddplayGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (ddplayRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusDDPlay();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === ddplayGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (ddplayRequest === request) ddplayRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -359,6 +431,8 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         const err = e instanceof Error ? e : new Error(String(e));
         detachPair();
         detachMines();
+
+        detachDDPlay();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -370,6 +444,8 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       wardrobeRequest?.cancel();
       detachPair();
       detachMines();
+
+      detachDDPlay();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -377,6 +453,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowWardrobe;
       delete window.workshopShowPair;
       delete window.workshopShowMines;
+      delete window.workshopShowDDPlay;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

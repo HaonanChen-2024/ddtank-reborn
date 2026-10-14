@@ -1,6 +1,7 @@
 /** Local reference activities. Never expose RootState, board layouts, or RNG seeds through HTTP. */
 import type { PairNativeEffect, PairNativeView } from "./pair-native.js";
 import type { MinesNativeEffect, MinesNativeView } from "./mines-native.js";
+import type { DDPlayNativeEffect, DDPlayNativeView } from "./ddplay-native.js";
 
 export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
@@ -36,6 +37,7 @@ export interface ActivitySnapshot {
   /** Additive native-window projection; the existing 17 activity views remain compatible. */
   nativePair: PairNativeView;
   nativeMines: MinesNativeView;
+  nativeDDPlay: DDPlayNativeView;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;
@@ -43,6 +45,7 @@ export interface ActivityTransition {
   /** Already revealed results only. Omitted for other games and never stored in replay receipts. */
   nativePairEffects?: PairNativeEffect[];
   nativeMinesEffects?: MinesNativeEffect[];
+  nativeDDPlayEffects?: DDPlayNativeEffect[];
 }
 export class ActivityError extends Error {
   constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }
