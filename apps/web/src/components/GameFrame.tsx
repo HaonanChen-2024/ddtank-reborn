@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button, PowerGauge, cn } from "@ddtank/ui";
 import type { GameConfig } from "@/lib/api";
+import type { ActivityResponse } from "@/lib/activities";
+import { attachNativePairHost, type NativePairPlayer } from "@/lib/native-pair-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -11,7 +14,11 @@ interface RuffleLoadOptions {
   base?: string;
   [key: string]: unknown;
 }
-interface RufflePlayerElement extends HTMLElement {
+interface NativePairStatus {
+  phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
+  expectedUserId?: number; generation?: string; errors?: unknown[];
+}
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -19,6 +26,9 @@ interface RufflePlayerElement extends HTMLElement {
   workshopOpenWardrobe?: (characterId: number) => boolean;
   workshopStatusWardrobe?: () => { phase?: string; visible?: boolean; actualUserId?: number; errors?: unknown[] };
   workshopCloseWardrobe?: () => unknown;
+  workshopOpenPair?: (characterId: number, generation: string) => boolean;
+  workshopStatusPair?: () => NativePairStatus;
+  workshopClosePair?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -80,6 +90,7 @@ export interface GameFrameProps extends GameConfig {
  */
 export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, className, onReady, onError }: GameFrameProps) {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const hostRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>("ruffle");
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +106,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
     let cancelled = false;
     let player: RufflePlayerElement | null = null;
     let wardrobeRequest: { cancel: () => void } | null = null;
+    let pairRequest: { cancel: () => void } | null = null;
+    let pairHost: ReturnType<typeof attachNativePairHost> | null = null;
+    let pairCharacterId = 0;
+    let pairGeneration = "";
+    const detachPair = () => {
+      pairRequest?.cancel();
+      pairHost?.cancel();
+      pairHost = null;
+      pairCharacterId = 0;
+      pairGeneration = "";
+    };
     setPhase("ruffle");
     setError(null);
 
@@ -124,6 +146,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           setError(String(msg ?? ""));
           setPhase("kicked");
           wardrobeRequest?.cancel();
+          detachPair();
           player?.remove();
           player = null;
         };
@@ -191,6 +214,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (wardrobeRequest === request) wardrobeRequest = null;
           }
         };
+        window.workshopShowPair = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenPair || !owner.workshopStatusPair || !owner.workshopClosePair) return false;
+          try {
+            const initial = owner.workshopStatusPair();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (pairHost && pairCharacterId !== characterId) return false;
+            if (!pairHost) {
+              pairCharacterId = characterId;
+              pairGeneration = crypto.randomUUID();
+              const generation = pairGeneration;
+              pairHost = attachNativePairHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || pairCharacterId !== characterId || pairGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusPair?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          pairRequest?.cancel();
+          const request = { cancel: () => {
+            if (pairRequest !== request) return;
+            pairRequest = null;
+            try { owner.workshopClosePair?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          pairRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenPair(characterId, pairGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (pairRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusPair();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === pairGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (pairRequest === request) pairRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -208,6 +286,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       } catch (e) {
         if (cancelled) return;
         const err = e instanceof Error ? e : new Error(String(e));
+        detachPair();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -217,11 +296,13 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
     return () => {
       cancelled = true;
       wardrobeRequest?.cancel();
+      detachPair();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
       delete window.workshopShowSign;
       delete window.workshopShowWardrobe;
+      delete window.workshopShowPair;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

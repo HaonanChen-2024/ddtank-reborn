@@ -8,6 +8,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {ByteReader,buildTag,decompressSwf,parseTags} from '../tools/i18n/abc-strings/lib.mjs';
 import {parseActivityAbc} from '../tools/i18n/abc-strings/activity-response.mjs';
+import {buildSharedLibraries} from './native-shared/build-library.mjs';
 
 const repo=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const sourceDir=resolve(repo,'scripts/native-wardrobe');
@@ -35,7 +36,7 @@ function requireMethods(abc,className,expected){
   }
 }
 
-export function buildNativeWardrobe({outputDir,projectRoot=resolve(repo,'../..'),javaPath=resolve(homedir(),'.jdks/openjdk-22.0.1/bin/java.exe')}={}){
+export function buildNativeWardrobe({outputDir,projectRoot=resolve(repo,'../..'),javaPath=resolve(homedir(),'.jdks/openjdk-22.0.1/bin/java.exe'),sharedLibraries}={}){
   assert(outputDir,'outputDir is required');
   const out=resolve(outputDir);assert(!existsSync(out),'output directory already exists; preserve prior artifacts');
   const spec=JSON.parse(readFileSync(specPath,'utf8'));
@@ -50,6 +51,12 @@ export function buildNativeWardrobe({outputDir,projectRoot=resolve(repo,'../..')
   for(const source of sources){source.sha256=sha(readFileSync(source.path));assert(!/127\.0\.0\.1|nativeUserId|workshop_native_report|expectedUserId\s*:\s*40/.test(readFileSync(source.path,'utf8')),'test-only settings in production source');}
   const assetDir=resolve(out,'flash/workshop-native/wardrobe'),bridgeDir=resolve(out,'bridge'),logs=resolve(out,'build-logs');
   for(const dir of [assetDir,bridgeDir,logs])mkdirSync(dir,{recursive:true});
+  const split=sharedLibraries??buildSharedLibraries({projectRoot,outputDir:resolve(out,'shared-split')});
+  const moduleLibrary=split.files.find(f=>f.file==='magicwardrobe-module-library.swf');assert.equal(moduleLibrary.abcCount,10);
+  const modulePath=resolve(split.outputDir,moduleLibrary.file);verified(modulePath,moduleLibrary.sha256);
+  const moduleAbcs=abcs(readFileSync(modulePath));assert.equal(moduleAbcs.length,10);assert(moduleAbcs.every(a=>a.name.startsWith('magicWardrobe/')));
+  const bridgeSource=readFileSync(sources.find(s=>s.name.endsWith('Bridge')).path,'utf8');
+  const sharedNames=JSON.parse(bridgeSource.match(/SHARED_CLASSES:Array\s*=\s*(\[[^;]+\]);/)?.[1]??'null');assert.deepEqual(sharedNames,split.SharedClassNames,'bridge exact shared inventory');
   const compiled=[];
   for(const source of sources){
     const path=resolve(source.name.endsWith('Bridge')?bridgeDir:assetDir,source.name+'.swf');
@@ -60,22 +67,24 @@ export function buildNativeWardrobe({outputDir,projectRoot=resolve(repo,'../..')
     compiled.push({name:source.name,path,bytes:bytes.length,sha256:sha(bytes),abcSha256:sha(owners[0].abc),abc:owners[0]});
   }
   const bootstrap=compiled.find(c=>c.name.endsWith('Bootstrap')),bridge=compiled.find(c=>c.name.endsWith('Bridge'));
-  requireMethods(bootstrap.abc,'WorkshopNativeWardrobeBootstrap',[['startNative',['::Object'],'::void'],['openNative',[],'::Object'],['statusNative',[],'::Object'],['closeNative',[],'::Object']]);
-  requireMethods(bridge.abc,spec.bridgeClass,[['init',[],'::void'],['openWardrobe',['::Number'],'::Boolean'],['statusWardrobe',[],'::Object'],['closeWardrobe',[],'::void']]);
+  requireMethods(bootstrap.abc,'WorkshopNativeWardrobeBootstrap',[['startNative',['::Object'],'::void'],['openNative',[],'::Object'],['statusNative',[],'::Object'],['closeNative',[],'::Object'],['abortNative',['::String'],'::void']]);
+  requireMethods(bridge.abc,spec.bridgeClass,[['init',[],'::void'],['openWardrobe',['::Number'],'::Boolean'],['statusWardrobe',[],'::Object'],['closeWardrobe',[],'::void'],['openPair',['::Number','::String'],'::Boolean'],['statusPair',[],'::Object'],['closePair',[],'::void']]);
   assert.deepEqual(bridge.abc.classes,['::WorkshopNativeWardrobeBridge']);
-  for(const callback of ['workshopOpenWardrobe','workshopStatusWardrobe','workshopCloseWardrobe'])assert(bridge.abc.p.strings.includes(callback));
+  for(const callback of ['workshopOpenWardrobe','workshopStatusWardrobe','workshopCloseWardrobe','workshopOpenPair','workshopStatusPair','workshopClosePair'])assert(bridge.abc.p.strings.includes(callback));
   const flags=Buffer.alloc(4);flags.writeUInt32LE(1);
   const bridgeTag=buildTag(82,Buffer.concat([flags,Buffer.from(spec.bridgeOwner+'\0'),bridge.abc.abc]));
   const bridgeTagPath=resolve(bridgeDir,'WorkshopNativeWardrobeBridge.doabc-tag.bin');writeFileSync(bridgeTagPath,bridgeTag,{flag:'wx'});
   const assets=inputs.map(input=>{
-    const path=resolve(assetDir,input.file);copyFileSync(input.path,path,constants.COPYFILE_EXCL);assert.equal(sha(readFileSync(path)),input.sha256);
-    return {file:input.file,urlPath:spec.publicBasePath+input.file,path,bytes:input.data.length,sha256:input.sha256,source:input.path};
+    const source=input.file==='magicwardrobe-original-library.swf'?modulePath:input.path;
+    const data=readFileSync(source),hash=input.file==='magicwardrobe-original-library.swf'?moduleLibrary.sha256:input.sha256;
+    const path=resolve(assetDir,input.file);copyFileSync(source,path,constants.COPYFILE_EXCL);assert.equal(sha(readFileSync(path)),hash);
+    return {file:input.file,urlPath:spec.publicBasePath+input.file,path,bytes:data.length,sha256:hash,source};
   });
   assets.push({file:'WorkshopNativeWardrobeBootstrap.swf',urlPath:spec.publicBasePath+'WorkshopNativeWardrobeBootstrap.swf',path:bootstrap.path,bytes:bootstrap.bytes,sha256:bootstrap.sha256,abcSha256:bootstrap.abcSha256});
   for(const source of sources)assert.equal(sha(readFileSync(source.path)),source.sha256);
   for(const input of inputs)verified(input.path,input.sha256);
-  const manifest={version:1,module:spec.module,builtAt:new Date().toISOString(),outputDir:out,sourceSpec:{path:specPath,sha256:sha(readFileSync(specPath))},sources,toolchain:{javaPath,compiler,compilerSha256:spec.compiler.sha256,playerGlobal,playerGlobalSha256:spec.playerGlobal.sha256},originalCore:spec.originalCore,assets,
-    bridge:{owner:spec.bridgeOwner,class:spec.bridgeClass,tagCode:82,tagPath:bridgeTagPath,tagBytes:bridgeTag.length,tagSha256:sha(bridgeTag),abcSha256:bridge.abcSha256,compiledSwf:bridge.path,compiledSwfSha256:bridge.sha256,initialize:'WorkshopNativeWardrobeBridge.init():void',initializationEffect:'Register three ExternalInterface callbacks only; no resource loading or window opening.',callbacks:{open:'workshopOpenWardrobe(expectedCharacterId:Number):Boolean',status:'workshopStatusWardrobe():Object',close:'workshopCloseWardrobe():void'},report:'workshopWardrobeReport(status:Object)',insertBefore:'chickActivation/ChickActivationManager setup caller; keep all existing activity/sign callback registration'},
+  const manifest={version:1,module:'workshop-native-wardrobe-component',requiresUnifiedManifest:true,builtAt:new Date().toISOString(),outputDir:out,sourceSpec:{path:specPath,sha256:sha(readFileSync(specPath))},sources,toolchain:{javaPath,compiler,compilerSha256:spec.compiler.sha256,playerGlobal,playerGlobalSha256:spec.playerGlobal.sha256},originalCore:spec.originalCore,assets,sharedSplitManifest:resolve(split.outputDir,'manifest.json'),
+    bridge:{owner:spec.bridgeOwner,class:spec.bridgeClass,tagCode:82,tagPath:bridgeTagPath,tagBytes:bridgeTag.length,tagSha256:sha(bridgeTag),abcSha256:bridge.abcSha256,compiledSwf:bridge.path,compiledSwfSha256:bridge.sha256,initialize:'WorkshopNativeWardrobeBridge.init():void',initializationEffect:'Register six ExternalInterface callbacks only; no resource loading or window opening.',callbacks:{open:'workshopOpenWardrobe(expectedCharacterId:Number):Boolean',status:'workshopStatusWardrobe():Object',close:'workshopCloseWardrobe():void',openPair:'workshopOpenPair(expectedCharacterId:Number,generation:String):Boolean',statusPair:'workshopStatusPair():Object',closePair:'workshopClosePair():void'},report:'workshopWardrobeReport(status:Object); workshopPairReport(status:Object)',insertBefore:'chickActivation/ChickActivationManager setup caller; keep all existing activity/sign callback registration'},
     reproducibility:'Imported assets and compiled ABC payloads are hash-addressed. Flex ProductInfo includes build time, so outer compiled SWF bytes can differ between identical-source builds; no metadata rewrite is performed.',installed:false,browserValidated:false};
   writeFileSync(resolve(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{flag:'wx'});
   return manifest;

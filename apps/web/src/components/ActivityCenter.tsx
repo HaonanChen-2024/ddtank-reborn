@@ -4,8 +4,10 @@ import { meQuery } from "@/lib/api";
 import { ACTIVITY_ICONS } from "@/lib/activity-icons";
 import {
   ActivityRequestError, clearPendingActivity, getActivities, performActivity, readPendingActivity, savePendingActivity,
+  isActivityInFlight, subscribeActivityChanges,
   type ActivityAction, type ActivityCell, type ActivityRequest, type ActivityResponse,
 } from "@/lib/activities";
+import { retryNativePairRequest } from "@/lib/native-pair-host";
 import "./ActivityCenter.css";
 
 const activityKey = (characterId: number) => ["account", "activities", characterId] as const;
@@ -33,7 +35,8 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
   const matchesGameCharacter = initialCharacterId ? characterId === initialCharacterId : characters.length === 1;
   const [selectedId, setSelectedId] = useState("");
   const [busy, setBusy] = useState(false);
-  const [openingNative, setOpeningNative] = useState(false);
+  const [openingNative, setOpeningNative] = useState("");
+  const [sharedBusy, setSharedBusy] = useState(false);
   const [retry, setRetry] = useState<ActivityRequest | null>(null);
   const [storageError, setStorageError] = useState("");
   const [notice, setNotice] = useState("");
@@ -45,7 +48,9 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
   });
   const snapshot = activities.data?.characterId === characterId ? activities.data : undefined;
   const selected = snapshot?.activities.find((activity) => activity.id === selectedId) ?? snapshot?.activities[0];
-  const locked = busy || openingNative || Boolean(retry) || Boolean(storageError) || activities.isFetching;
+  const locked = busy || sharedBusy || Boolean(openingNative) || Boolean(retry) || Boolean(storageError) || activities.isFetching;
+  const currentCharacterRef = useRef(characterId);
+  currentCharacterRef.current = characterId;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -63,35 +68,39 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
   useEffect(() => {
     nativeRequestRef.current?.abort();
     nativeRequestRef.current = null;
-    setOpeningNative(false);
+    setOpeningNative("");
     setNotice(""); setActionError(""); setMailedCount(0); setStorageError(""); setRetry(null);
-    if (!characterId) return;
-    try { setRetry(readPendingActivity(characterId)); }
-    catch (error) { setStorageError(errorMessage(error)); }
+    const sync = () => {
+      setSharedBusy(isActivityInFlight(characterId));
+      try { setRetry(characterId ? readPendingActivity(characterId) : null); setStorageError(""); }
+      catch (error) { setStorageError(errorMessage(error)); }
+    };
+    sync();
+    return subscribeActivityChanges((id) => { if (id === characterId) sync(); });
   }, [characterId]);
 
   const submit = async (pending: ActivityRequest) => {
-    if (busyRef.current) return;
+    if (busyRef.current || isActivityInFlight(pending.characterId)) return;
     busyRef.current = true;
     setBusy(true); setActionError(""); setNotice(""); setMailedCount(0);
     try {
       savePendingActivity(pending);
       setRetry(pending);
       await queryClient.cancelQueries({ queryKey: activityKey(pending.characterId) });
-      const next = await performActivity(pending);
+      const next = await (retryNativePairRequest(pending) ?? performActivity(pending));
       queryClient.setQueryData<ActivityResponse>(activityKey(pending.characterId), (old) => !old || next.revision >= old.revision ? next : old);
       clearPendingActivity(pending);
-      if (mountedRef.current) {
+      if (mountedRef.current && currentCharacterRef.current === pending.characterId) {
         setRetry(null);
         setNotice(next.message || "操作已完成。");
         setMailedCount(next.mailedCount ?? next.mailIds?.length ?? 0);
       }
     } catch (error) {
       if (error instanceof ActivityRequestError && !error.uncertain) {
-        try { clearPendingActivity(pending); if (mountedRef.current) setRetry(null); }
+        try { clearPendingActivity(pending); if (mountedRef.current && currentCharacterRef.current === pending.characterId) setRetry(null); }
         catch { /* Preserve the same request when its stored receipt cannot be cleared. */ }
       }
-      if (mountedRef.current) setActionError(errorMessage(error));
+      if (mountedRef.current && currentCharacterRef.current === pending.characterId) setActionError(errorMessage(error));
     } finally {
       busyRef.current = false;
       if (mountedRef.current) setBusy(false);
@@ -116,20 +125,24 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openWardrobe = async () => {
+  const openNative = async (kind: "wardrobe" | "pair") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    setOpeningNative(true); setActionError("");
+    const label = kind === "pair" ? "原版32格翻牌" : "魔法衣橱";
+    setOpeningNative(label); setActionError("");
     try {
-      const opened = await window.workshopShowWardrobe?.(characterId, request.signal);
+      const open = kind === "pair" ? window.workshopShowPair : window.workshopShowWardrobe;
+      const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
-      else setActionError("原衣橱窗口未能打开。请进入游戏大厅后重试；也可继续查看下方套装目录。");
+      else setActionError(`${label}窗口未能打开。请进入游戏大厅后重试；也可继续使用网页活动。`);
+    } catch (error) {
+      if (mountedRef.current && !request.signal.aborted) setActionError(errorMessage(error));
     } finally {
       if (nativeRequestRef.current === request) {
         nativeRequestRef.current = null;
-        if (mountedRef.current) setOpeningNative(false);
+        if (mountedRef.current) setOpeningNative("");
       }
     }
   };
@@ -140,7 +153,7 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
       <header className="activity-center__header">
         <div><span className="activity-center__eyebrow">怀旧时光 · 每日新趣</span><h2 id="activity-center-title">活动中心</h2></div>
         <div className="activity-center__account">
-          <label>当前角色<select value={characterId || ""} disabled={!characters.length || busy || openingNative}
+          <label>当前角色<select value={characterId || ""} disabled={!characters.length || busy || sharedBusy || Boolean(openingNative)}
             onChange={(event) => setChosenCharacter(Number(event.target.value))}>
             {!characters.length && <option value="">暂无角色</option>}
             {characters.map((character) => <option value={character.id} key={character.id}>{character.nickname} · {character.level}级</option>)}
@@ -164,12 +177,12 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
         {activities.error && <p className="activity-center__notice activity-center__notice--error" role="alert">{errorMessage(activities.error)} 可点击“刷新进度”重新读取。</p>}
         {storageError && <p className="activity-center__notice activity-center__notice--error" role="alert">{storageError}</p>}
         {(retry || actionError) && <div className="activity-center__notice activity-center__notice--error" role="alert">
-          <p>{actionError || (busy ? "正在提交，请稍候…" : "上一次操作的结果尚未确认。重试会核对同一笔操作，不会创建第二笔。")}</p>
-          {retry && !busy && <button type="button" className="activity-center__button" disabled={activities.isFetching}
+          <p>{actionError || (busy || sharedBusy ? "正在提交，请稍候…" : "上一次操作的结果尚未确认。重试会核对同一笔操作，不会创建第二笔。")}</p>
+          {retry && !busy && <button type="button" className="activity-center__button" disabled={sharedBusy || activities.isFetching}
             onClick={() => { void submit(retry); }}>重试上一次操作</button>}
         </div>}
         <div role="status" aria-live="polite" aria-atomic="true">
-          {openingNative && <p className="activity-center__notice">正在打开游戏内的魔法衣橱…</p>}
+          {openingNative && <p className="activity-center__notice">正在打开游戏内的{openingNative}…</p>}
           {notice && <p className="activity-center__notice">{notice}
             {mailedCount > 0 && <span className="activity-center__mail">已发出 {mailedCount} 封奖励邮件，请到游戏邮箱领取附件。</span>}
           </p>}
@@ -197,7 +210,7 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
               <div className="activity-center__tiles">
                 {snapshot.activities.map((activity, index) => <button type="button" key={activity.id}
                   className={`activity-center__tile${selected?.id === activity.id ? " is-selected" : ""}`}
-                  aria-pressed={selected?.id === activity.id} aria-controls="activity-detail" disabled={openingNative} onClick={() => selectActivity(activity.id)}>
+                  aria-pressed={selected?.id === activity.id} aria-controls="activity-detail" disabled={Boolean(openingNative)} onClick={() => selectActivity(activity.id)}>
                   {ACTIVITY_ICONS[activity.id] ? <span className="activity-center__original-icon" aria-hidden="true"><img src={ACTIVITY_ICONS[activity.id]} alt="" /></span>
                     : <span className={`activity-center__medallion activity-center__medallion--${index % 5}`} aria-hidden="true">{activity.title.slice(0, 1)}</span>}
                   <strong>{activity.title}</strong>
@@ -234,9 +247,13 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   else setActionError("签到窗口尚未就绪，请进入游戏大厅后再试。");
                 }}>打开游戏签到窗口</button>{!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开签到窗口。</p>}</>}
                 {selected.id === "wardrobe" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
-                  onClick={() => { void openWardrobe(); }}>试用原版衣橱窗口</button>
+                  onClick={() => { void openNative("wardrobe"); }}>试用原版衣橱窗口</button>
                   <p className="activity-center__muted">原窗口仍在测试，连续翻页可能中断游戏。下方套装目录可正常查看。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开衣橱窗口。</p>}</>}
+                {selected.id === "pair" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("pair"); }}>试用原版32格翻牌</button>
+                  <p className="activity-center__muted">原窗口仍在测试，牌局与网页配对独立。打开只读取进度；开始、翻牌及积分操作均由你确认。遇到未确认结果，请用上方按钮重试原操作；若原窗口无法恢复，核对后重新进入游戏。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版翻牌。</p>}</>}
                 <section className="activity-center__rules"><h4>玩法说明</h4><ul>{selected.rules.map((rule, index) => <li key={index}>{rule}</li>)}</ul></section>
               </> : <p className="activity-center__empty">当前没有开放的活动。</p>}
             </section>

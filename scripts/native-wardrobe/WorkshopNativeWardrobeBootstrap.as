@@ -26,6 +26,7 @@ package {
      */
     public class WorkshopNativeWardrobeBootstrap extends Sprite {
         private var _domain:ApplicationDomain;
+        private var _hostContext:LoaderContext;
         private var _baseUrl:String = "";
         private var _expectedUserId:int = 0;
         private var _actualUserId:int = 0;
@@ -60,6 +61,14 @@ package {
                 if (_baseUrl.charAt(_baseUrl.length - 1) != "/") _baseUrl += "/";
                 _expectedUserId = int(options.expectedUserId);
                 if (_expectedUserId <= 0) throw new Error("expectedUserId must identify the existing local role.");
+                if (options.sharedOwnerReady !== true) throw new Error("The unique shared owner must load App/Morn first.");
+                var DisplayClass:Class = requireClass("com.pickgliss.loader.DisplayLoader");
+                _hostContext = DisplayClass["Context"] as LoaderContext;
+                var actualDomain:ApplicationDomain = _hostContext ? _hostContext.applicationDomain : null;
+                if (!(options.sharedDomain is ApplicationDomain) || !_hostContext || options.sharedContext !== _hostContext || !actualDomain || !actualDomain.hasDefinition("WorkshopNativeWardrobeBootstrap") || actualDomain.getDefinition("WorkshopNativeWardrobeBootstrap") !== WorkshopNativeWardrobeBootstrap) throw new Error("Native module is not in the actual shared DisplayLoader domain.");
+                _domain=actualDomain;
+                for each(var sharedName:String in ["App","Config","morn.core.components.View"]) if(!_domain.hasDefinition(sharedName)||!options.sharedDomain.hasDefinition(sharedName)||_domain.getDefinition(sharedName)!==options.sharedDomain.getDefinition(sharedName))throw new Error("Shared classes differ from the unique owner.");
+                requireClass("App"); requireClass("Config"); requireClass("morn.core.components.View");
                 _autoOpen = options.autoOpen === true;
                 _startedAt = getTimer();
                 requireCurrentRole();
@@ -85,6 +94,10 @@ package {
         }
 
         private function requireCurrentRole():Object {
+            var displayClass:Class = requireClass("com.pickgliss.loader.DisplayLoader");
+            if (displayClass["Context"] !== _hostContext) throw new Error("Shared LoaderContext changed.");
+            var current:ApplicationDomain=_hostContext.applicationDomain;
+            for each(var name:String in ["WorkshopNativeWardrobeBootstrap","App","Config","morn.core.components.View"]) if(!current||!current.hasDefinition(name)||current.getDefinition(name)!==_domain.getDefinition(name))throw new Error("Shared class identity changed.");
             var stateManager:Class = requireClass("ddt.manager.StateManager");
             if (stateManager["currentStateType"] != "main") throw new Error("请返回游戏大厅后打开魔法衣橱。");
             var manager:Class = requireClass("ddt.manager.PlayerManager");
@@ -106,6 +119,8 @@ package {
         }
 
         private function loadSwf(file:String, phase:String, next:Function):void {
+            if (_phase == "error") return;
+            requireCurrentRole();
             _phase = phase;
             var loader:Loader = new Loader();
             _loaders.push(loader); // Keep shared-domain library and art definitions alive.
@@ -117,6 +132,7 @@ package {
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(event:Event):void {
                 if (_phase == "error") return;
                 try {
+                    requireCurrentRole();
                     report("loaded", file);
                     next();
                 } catch (error:Error) { fail(phase, error); }
@@ -126,6 +142,8 @@ package {
         }
 
         private function loadBytes(file:String, phase:String, next:Function):void {
+            if (_phase == "error") return;
+            requireCurrentRole();
             _phase = phase;
             var loader:URLLoader = new URLLoader();
             _urlLoader = loader;
@@ -135,6 +153,7 @@ package {
             loader.addEventListener(Event.COMPLETE, function(event:Event):void {
                 if (_phase == "error") return;
                 try {
+                    requireCurrentRole();
                     report("loaded", file);
                     next(loader.data as ByteArray);
                 } catch (error:Error) { fail(phase, error); }
@@ -222,6 +241,7 @@ package {
 
         public function openNative():Object {
             try {
+                if (_phase == "error") return statusNative();
                 if (!_ready) throw new Error("Original wardrobe is not ready; phase=" + _phase);
                 requireCurrentRole();
                 if (_view && _view["parent"]) { _phase = "open"; return statusNative(); }
@@ -258,6 +278,7 @@ package {
         }
 
         public function closeNative():Object {
+            _autoOpen = false;
             try {
                 // Its own close button already calls dispose; do not dispose that instance twice.
                 if (_view && _view["parent"]) _view["dispose"]();
@@ -266,6 +287,12 @@ package {
                 report("close", "Original view disposed; shared definitions kept for reopen.");
             } catch (error:Error) { fail("close", error); }
             return statusNative();
+        }
+
+        public function abortNative(reason:String):void {
+            _autoOpen = false;
+            closeNative();
+            fail("owner-abort", reason);
         }
 
         public function statusNative():Object {
@@ -342,11 +369,14 @@ package {
         private function onUncaught(event:UncaughtErrorEvent):void { fail(_phase, event.error); }
 
         private function fail(at:String, error:*):void {
+            if (_phase == "error") return;
             var message:String = error is Error ? Error(error).name + ": " + Error(error).message : String(error);
             var stack:String = error is Error ? Error(error).getStackTrace() : null;
             _errors.push({ at: at, phase: _phase, message: message, stack: stack });
             _phase = "error";
             _busy = false;
+            _ready = false;
+            _autoOpen = false;
             report("error", message);
         }
 

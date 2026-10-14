@@ -8,6 +8,7 @@ package {
   import flash.events.MouseEvent;
   import flash.events.IOErrorEvent;
   import flash.events.SecurityErrorEvent;
+  import flash.events.UncaughtErrorEvent;
   import flash.external.ExternalInterface;
   import flash.net.URLLoader;
   import flash.net.URLLoaderDataFormat;
@@ -21,6 +22,7 @@ package {
   public class WorkshopNativePairBootstrap extends Sprite {
     private static var active:WorkshopNativePairBootstrap;
     private var domain:ApplicationDomain = ApplicationDomain.currentDomain;
+    private var hostContext:LoaderContext;
     private var phase:String = "new";
     private var base:String;
     private var expectedId:int;
@@ -53,6 +55,11 @@ package {
     private function manager():Object { return cls("pairBox.PairBoxManager").instance; }
     private function model():Object { return manager().model; }
     private function role():void {
+      var context:LoaderContext=cls("com.pickgliss.loader.DisplayLoader").Context as LoaderContext;
+      if (!context || (hostContext && context !== hostContext)) throw new Error("共享 LoaderContext 已改变，请重新进入游戏。");
+      var current:ApplicationDomain=context.applicationDomain;
+      if (!current || !current.hasDefinition("WorkshopNativePairBootstrap") || current.getDefinition("WorkshopNativePairBootstrap") !== WorkshopNativePairBootstrap) throw new Error("原配对模块不在实际共享加载域。");
+      if (hostContext) for each(var name:String in ["App","Config","morn.core.components.View"]) if(!current.hasDefinition(name)||current.getDefinition(name)!==domain.getDefinition(name))throw new Error("共享组件身份已改变。");
       if (cls("ddt.manager.StateManager").currentStateType != "main") throw new Error("请先返回大厅。");
       if (int(cls("ddt.manager.PlayerManager").Instance.Self.ID) != expectedId) throw new Error("当前角色已改变。");
     }
@@ -64,6 +71,10 @@ package {
       role();
       if (!ExternalInterface.available) throw new Error("需要同一游戏页面的本地 API 桥接。");
       if (options.sharedOwnerReady !== true) throw new Error("请先由唯一共享载入器准备 App/Morn。");
+      hostContext=cls("com.pickgliss.loader.DisplayLoader").Context as LoaderContext;
+      if (!(options.sharedDomain is ApplicationDomain) || options.sharedContext !== hostContext) throw new Error("原活动缺少同一共享 owner 的加载上下文。");
+      domain=hostContext.applicationDomain;
+      for each(var sharedName:String in ["App","Config","morn.core.components.View"]) if(!domain.hasDefinition(sharedName)||!options.sharedDomain.hasDefinition(sharedName)||domain.getDefinition(sharedName)!==options.sharedDomain.getDefinition(sharedName))throw new Error("共享类身份与 owner 不一致。");
       for each (var required:String in ["App", "Config", "morn.core.components.View", "morn.editor.core.IComponent", "morn.editor.core.IBox", "morn.editor.core.IClip", "morn.editor.core.IContent"]) cls(required);
       active = this; phase = "loading";
       ExternalInterface.addCallback("workshopPairAcceptSnapshot", acceptSnapshot);
@@ -83,18 +94,24 @@ package {
       else loadSwf("pair-shared-art-"+skins[index][0]+".swf",function():void{loadSkin(index+1);});
     }
     private function loadSwf(file:String, next:Function):void {
+      if(phase=="failed")return;role();
       var loader:Loader = new Loader(); loaders.push(loader);
-      loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event):void { try { next(); } catch (error:Error) { fail(error.message); } });
+      loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event):void { if(phase=="failed")return;try { role();next(); } catch (error:Error) { fail(error.message); } });
       loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(e:Event):void { fail("资源载入失败：" + file); });
       loader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(e:Event):void { fail("资源访问被拒绝：" + file); });
+      loader.contentLoaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR,function(e:UncaughtErrorEvent):void {fail(String(e.error));});
       var context:LoaderContext = new LoaderContext(false, domain); context.allowCodeImport = true;
       loader.load(new URLRequest(base + file), context);
     }
     private function loadLayout():void {
+      if(phase=="failed")return;role();
       var loader:URLLoader = new URLLoader(); loaders.push(loader); loader.dataFormat = URLLoaderDataFormat.BINARY;
       loader.addEventListener(IOErrorEvent.IO_ERROR, function(e:Event):void { fail("原布局读取失败。"); });
+      loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,function(e:Event):void{fail("原布局访问被拒绝。");});
       loader.addEventListener(Event.COMPLETE, function(e:Event):void {
+        if(phase=="failed")return;
         try {
+          role();
           var bytes:ByteArray = loader.data as ByteArray; bytes.uncompress(); bytes.position = 0;
           var layouts:Object = bytes.readObject(); var App:Object = cls("App");
           if(bytes.bytesAvailable!=0)throw new Error("原布局含未读取数据。");
@@ -108,6 +125,8 @@ package {
     }
     public function openNative():Object {
       role(); if (phase != "ready") return statusNative();
+      // Explicit reopen may reuse the in-flight GET, but cannot reopen a pending action.
+      if (pending && pendingAction == null && !animating) { wantedOpen = true; message = "正在完成已有的只读请求。"; report(); return statusNative(); }
       if (pending || animating) { message = "当前操作尚未确认，请在页面处理原请求。"; report(); return statusNative(); }
       if (main) return statusNative(); wantedOpen = true;
       read(); return statusNative();
@@ -133,6 +152,7 @@ package {
     }
     /** Host must deliver asynchronously after its synchronous accepted/UUID acknowledgement. */
     public function acceptSnapshot(envelope:Object):Object {
+      if(phase=="failed")throw new Error("原活动已失败，不再应用迟到响应。");
       role();
       if (!pending || !envelope || envelope.generation !== generation || envelope.sequence !== sequence) throw new Error("丢弃旧代次响应。");
       var value:Object = envelope.snapshot;
@@ -190,9 +210,10 @@ package {
     private function show(o:Object):void { cls("com.pickgliss.ui.LayerManager").Instance.addToLayer(o,3,true,1); }
     private function say(s:String):void { message=s;try { cls("ddt.manager.MessageTipManager").getInstance().show(s); } catch(e:Error) {} report(); }
     private function report():void { try { ExternalInterface.call("workshopPairReport", statusNative()); } catch(e:Error) {} }
-    private function fail(s:String):void { phase="failed";message=s;report(); }
+    private function fail(s:String):void { if(phase=="failed")return;phase="failed";wantedOpen=false;message=s;report(); }
     public function statusNative():Object { return {phase:phase,characterId:expectedId,generation:generation,sequence:sequence,open:main!=null,pending:pending,requestId:pendingId,animating:animating,revision:lastRevision,message:message,experimental:true}; }
     public function closeNative():Object { wantedOpen=false;closeModal();var old:Object=main;main=null;cardView=null;shopView=null;animating=false;if(resetMovie&&resetListener)resetMovie.removeEventListener(Event.ENTER_FRAME,resetListener);resetListener=null;if(old)old.dispose();resetMovie=null;report();return statusNative(); }
+    public function abortNative(reason:String):void { closeNative();fail(reason); }
     private function closeModal():void { var old:Object=modal;modal=null;if(old)old.dispose(); }
     private function renderPool(list:Object, data:Array):void {
       list.renderHandler=handler(function(cell:Object,index:int):void { cell.visible=index<data.length;if(cell.visible)cell.setInfo(data[index]); }); list.array=data;

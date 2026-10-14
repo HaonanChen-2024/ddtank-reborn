@@ -1,0 +1,24 @@
+# Shared original activity candidate
+
+Experimental, build only. `build-activities.mjs` emits one `workshop-native-activities` version 1 manifest for the existing installer; it does not deploy, start services, open the game, or touch player data.
+
+```powershell
+& '..\..\runtime\tools\node-v24.21.0-win-x64\node.exe' scripts/native-shared/build-activities.mjs NEW_RUNTIME_OUTPUT_DIRECTORY
+& '..\..\runtime\tools\node-v24.21.0-win-x64\node.exe' scripts/native-shared/audit-host.mjs WORKSHOP_ROOT NEW_RUNTIME_OUTPUT_DIRECTORY
+```
+
+The first candidate is `runtime/reference-activities-completion-20261014/native-unified-candidate-20261015`. Inputs retain the pinned previous 92-ABC original wardrobe library. `build-library.mjs` preserves every selected ABC and complete DoABC tag byte for byte: 82 shared ABCs (82 public classes plus two private helpers) and 10 wardrobe ABCs. The Pair component keeps its 26 original/adapted ABCs. The component build's private shared-library copy is evidence only and is excluded from the 18 deployed assets.
+
+`WorkshopNativeWardrobeBridge.init()` remains the existing injected entry and registers callbacks only. The common owner binds the real `DisplayLoader.Context`, starts one shared Loader, and queues both modules behind it. The bootstraps receive `sharedOwnerReady:true`, the same context/domain, role and generation; neither imports a shared library. ApplicationDomain wrapper object identity is not used: actual class identities and the real LoaderContext slot are checked. All subsequent imports explicitly use the actual context's domain. Unknown pre-existing shared declarations, including a full unproven legacy load, require a fresh game session; only this owner's successful load can be reused. Error/timeout is terminal; imported classes are kept and never retried in another domain.
+
+Public entry ABI:
+
+- `workshopOpenWardrobe(characterId:Number):Boolean`, `workshopStatusWardrobe():Object`, `workshopCloseWardrobe():void` remain compatible.
+- `workshopOpenPair(characterId:Number,generation:String):Boolean`, `workshopStatusPair():Object`, `workshopClosePair():void` are added.
+- Status reads current `Self.ID` even before an open; missing identity stays zero. Open requires the current real role in `main` and synchronously binds expected ID/generation before module/host callbacks.
+- The page attaches its Pair host before open, keeps the same generation for this game instance, and owns action UUIDs. Closing cancels the requested window only, preserving generation and an in-flight request. A late response stays cached unless the user explicitly reopens. Explicit reopen during a pending GET reuses that GET; a pending POST stays locked and cannot trigger a late open.
+- Bootstrap callback names remain `workshopPairAcceptSnapshot`, `workshopPairRejectRequest`, `workshopPairOpenNative`, `workshopPairCloseNative`, `workshopPairStatusNative`; none conflicts with the six common-owner callbacks.
+
+The combined builder checks compiled class/ABI inventories, six callback-only init calls, the single shared Loader construction site, exact 18 resource paths, unchanged split ABCs, Pair's 99 adapted methods, and absence of legacy payment/network calls. `audit-host.mjs` checks the targeted current host files and writes their hashes and declaration intersections. The wardrobe component manifest is deliberately `workshop-native-wardrobe-component` with `requiresUnifiedManifest:true`; it must not be installed alone without the shared owner/resources.
+
+Not accepted as runtime complete: pair-first, wardrobe-first, concurrent first open, close/reopen while loading/GET/POST, role change, terminal error, original animations, and API/mail whole-cycle tests still require the real client. The production wardrobe paging Ruffle panic is unresolved. Compilation and static verification do not prove it fixed. Preserve the previous failed/candidate directories for that diagnosis.

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import * as path from "node:path";
 import { test } from "node:test";
@@ -107,18 +107,36 @@ function fixture() {
   put(manifestPath, JSON.stringify({ module: "workshop-native-wardrobe", version: 1,
     bridge: { tagPath: bridgePath, tagSha256: digest(bridge) }, assets }));
   const append = (bytes, suffix) => Buffer.concat([bytes, Buffer.from(suffix)]);
-  const context = vm.createContext({ assert, createHash, ...path, Buffer, process: { pid: 777 }, fs, ...fs,
+  const context = vm.createContext({ assert, createHash, randomUUID, ...path, Buffer, process: { pid: 777 }, fs, ...fs,
+    Date: class extends Date { static now() { return 12345; } }, // Failed installs may retry within the same millisecond.
     patchSwfBuffer: bytes => bytes.includes(Buffer.from("|Chinese")) ? { out: bytes, totalChanged: 0 }
       : { out: append(bytes, "|Chinese"), totalChanged: 1 },
     buildActivityEntry: bytes => ({ output: append(bytes, "|activities"), proof: {} }),
-    buildNativeWardrobeEntry: bytes => ({ output: append(bytes, "|native"), proof: {} }),
+    buildNativeWardrobeEntry: (bytes, tag) => ({ output: append(bytes, "|native:" + digest(tag)), proof: {} }),
   });
   vm.runInContext(installerSource, context, { filename: "workshop-literals.mjs (memory-fs)" });
   return {
-    run: command => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
-      ...(command === "install" ? { nativeWardrobeManifest: manifestPath } : {}) }),
+    run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
+      ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
+    upgradedBuild() {
+      const root = path.resolve("memory-only-native-test/upgraded"), tag = Buffer.from("new shared bridge");
+      const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
+      const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
+        ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
+          ...[88, 94, 188, 105, 93, 57, 56].map(id => `pair-shared-art-${id}.swf`)].map(file => ["pair", file])]
+        .map(([module, file]) => {
+          const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
+          put(source, bytes);
+          return { file, path: source, urlPath: `/flash/workshop-native/${module}/${file}`, bytes: bytes.length, sha256: digest(bytes) };
+        });
+      const nextPath = path.join(root, "manifest.json");
+      put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
+        bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
+      return nextPath;
+    },
     corePath: name => path.join(overlay, name),
     nativePath: name => path.join(overlay, "workshop-native/wardrobe", name),
+    sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
     get openHandles() { return handles.size; },
@@ -171,4 +189,50 @@ test("an existing native target is preserved when installation is refused", () =
   assert.throws(() => f.run("install"), /existing native asset preserved|EEXIST/);
   assert.deepEqual(f.snapshot(), before);
   assert.equal(f.openHandles, 0);
+});
+
+test("explicit native upgrade verifies the old bridge then preserves the new package on later commands", () => {
+  const f = fixture(); f.run("install");
+  const before = f.snapshot(), candidate = f.upgradedBuild();
+  assert.equal(f.run("verify", candidate).pendingTransition, true);
+  assert.equal(f.run("verify", candidate).nativeWardrobeInstalled, false);
+  assert.deepEqual(f.snapshot(), before, "dry upgrade changed files");
+  assert.equal(f.run("install", candidate).unchanged, false);
+  assert.equal(f.run("install", candidate).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.sharedPath), true);
+  assert.equal(JSON.parse(f.fs.readFileSync(f.ledger, "utf8")).nativeWardrobe.manifestPath, candidate);
+});
+
+test("partial owned native replacement during upgrade restores old resources and ledger", () => {
+  const f = fixture(); f.run("install");
+  const before = f.snapshot(), candidate = f.upgradedBuild();
+  f.arm("write", f.nativePath("WorkshopNativeWardrobeBootstrap.swf") + ".workshop-777");
+  assert.throws(() => f.run("install", candidate), /ENOSPC/);
+  assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0);
+  assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.run("install", candidate).nativeWardrobeInstalled, true);
+});
+
+test("core or ledger upgrade failure restores changed and newly added native assets", () => {
+  for (const ledgerFault of [false, true]) {
+    const f = fixture(); f.run("install");
+    const before = f.snapshot(), candidate = f.upgradedBuild();
+    f.arm("write", (ledgerFault ? f.ledger : f.corePath("2.png")) + ".workshop-777");
+    assert.throws(() => f.run("install", candidate), /ENOSPC/);
+    assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before, "failed upgrade left old ledger with new assets");
+    assert.equal(f.run("install", candidate).unchanged, false);
+  }
+});
+
+test("upgrade refuses foreign changes in an old resource or new destination before writes", () => {
+  for (const oldTarget of [false, true]) {
+    const f = fixture(); f.run("install");
+    const candidate = f.upgradedBuild();
+    f.put(oldTarget ? f.nativePath("WorkshopNativeWardrobeBootstrap.swf") : f.sharedPath, "foreign bytes");
+    const before = f.snapshot();
+    assert.throws(() => f.run("install", candidate), /changed native activity asset preserved|existing native asset preserved/);
+    assert.deepEqual(f.snapshot(), before);
+  }
 });

@@ -20,7 +20,7 @@ export function buildNativePair({outputDir,projectRoot=resolve(repo,'../..'),jav
   const source=resolve(repo,'scripts/native-pair/WorkshopNativePairBootstrap.as'),sourceHash=sha(readFileSync(source));
   const bootstrap=resolve(assetDir,'WorkshopNativePairBootstrap.swf');compile(source,bootstrap);
   const parsed=scan(readFileSync(bootstrap));assert.equal(parsed.abcs.length,1);
-  const required=['startNative','openNative','closeNative','statusNative','acceptSnapshot','rejectRequest','dispatch'];
+  const required=['startNative','openNative','closeNative','statusNative','acceptSnapshot','rejectRequest','dispatch','fillInventory','abortNative'];
   for(const name of required)assert(parsed.abcs[0].p.methodTraits.some(t=>q(parsed.abcs[0].p,t.name)==='::'+name));
   const libraries=buildLibraries({projectRoot,out:assetDir});
   const art=buildSharedArt({projectRoot,out:assetDir,compile});

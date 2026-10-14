@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // One owner for display strings and optional original-client compatibility fixes.
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import fs, { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -18,12 +18,12 @@ const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const names = ["2.png", "3.png", "DDT_Loading.swf"];
 
 export function literalOptions(args) {
-  const nativeArgs = args.filter(arg => arg.startsWith("--native-wardrobe="));
-  assert.ok(nativeArgs.length <= 1 && nativeArgs.every(arg => arg.length > "--native-wardrobe=".length), "provide one native wardrobe build manifest");
-  const nativeWardrobeManifest = nativeArgs[0]?.slice("--native-wardrobe=".length);
+  const nativeArgs = args.filter(arg => arg.startsWith("--native-wardrobe=") || arg.startsWith("--native-activities="));
+  assert.ok(nativeArgs.length <= 1 && nativeArgs.every(arg => arg.slice(arg.indexOf("=") + 1).length), "provide one native activity build manifest");
+  const nativeWardrobeManifest = nativeArgs[0]?.slice(nativeArgs[0].indexOf("=") + 1);
   args = args.filter(arg => !nativeArgs.includes(arg));
   const commands = args.filter(arg => ["verify", "install", "rollback"].includes(arg));
-  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--reference-activities] [--native-wardrobe=MANIFEST]");
+  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--reference-activities] [--native-activities=MANIFEST]");
   assert.ok(args.filter(arg => arg === "--activity-response").length <= 1, "duplicate activity-response option");
   const command = commands[0] ?? "verify", activityResponse = args.includes("--activity-response");
   const activityState = args.includes("--activity-state");
@@ -50,8 +50,12 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   const ledgerBytes = existsSync(ledger) ? readFileSync(ledger) : null;
   const previous = ledgerBytes ? JSON.parse(ledgerBytes.toString("utf8")) : null;
   const oldNative = previous?.nativeWardrobe;
+  const priorNative = oldNative ? readNativeWardrobe(oldNative.manifestPath, overlay) : null;
+  if (oldNative) assert.deepEqual(priorNative.receipt, oldNative, "recorded native activity build changed; preserve installed module");
   const native = nativeWardrobeManifest || oldNative ? readNativeWardrobe(nativeWardrobeManifest ?? oldNative.manifestPath, overlay) : null;
-  if (oldNative) assert.deepEqual(native.receipt, oldNative, "native wardrobe build changed; preserve installed module");
+  const nativeChanged = Boolean(native) && (!oldNative || JSON.stringify(native.receipt) !== JSON.stringify(oldNative));
+  if (priorNative) for (const asset of priorNative.assets)
+    assert.ok(native.assets.some(next => next.target === asset.target), "native upgrade would remove an installed resource; preserve it");
   assert.ok(!previous || previous.referenceActivities === undefined || typeof previous.referenceActivities === "boolean", "unknown reference-activities journal flag");
   const oldActivities = previous?.referenceActivities ?? false, activitiesEnabled = oldActivities || referenceActivities || Boolean(native);
   assert.ok(!previous || previous.activityResponse === undefined || typeof previous.activityResponse === "boolean", "unknown activity-response journal flag");
@@ -73,7 +77,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       assert.equal(hash(readFileSync(join(overlay, entry.name))), entry.sha256, "changed deployment preserved: " + entry.name);
       assert.equal(hash(readFileSync(entry.backup)), entry.sourceSha256, "backup changed: " + entry.name);
     }
-    if (oldNative) for (const asset of native.assets) assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native wardrobe asset preserved");
+    if (priorNative) for (const asset of priorNative.assets) assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native activity asset preserved");
   }
   function writeExclusive(path, bytes) {
     const fd = fs.openSync(path, "wx"); // Ownership begins here, before a possibly partial write.
@@ -152,7 +156,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     if (oldExchange && name === "2.png") oldOut = patchExchangeState(oldOut).out;
     if (oldCrater && name === "2.png") oldOut = patchCraterMask(oldOut).out;
     if (oldActivities && name === "2.png") oldOut = buildActivityEntry(oldOut).output;
-    if (oldNative && name === "2.png") oldOut = buildNativeWardrobeEntry(oldOut, native.bridge).output;
+    if (oldNative && name === "2.png") oldOut = buildNativeWardrobeEntry(oldOut, priorNative.bridge).output;
     if (old) assert.equal(hash(oldOut), old.sha256, "recorded literal/consumer output changed; preserve the installed batch");
     let out = displayOut, response, state, exchange, crater, activities, nativeEntry;
     if (enabled && name === "2.png") {
@@ -185,23 +189,33 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       hadOverlay: old?.hadOverlay ?? existsSync(target), backup: old?.backup,
       ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), ...(crater ? { craterMask: crater } : {}), ...(activities ? { referenceActivities: activities } : {}), ...(nativeEntry ? { nativeWardrobe: nativeEntry } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
   });
-  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange && craterEnabled === oldCrater && activitiesEnabled === oldActivities && Boolean(native) === Boolean(oldNative);
+  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange && craterEnabled === oldCrater && activitiesEnabled === oldActivities && !nativeChanged;
   const journalFiles = () => files.map(({ out, sourceBytes, currentBytes, ...entry }) => entry);
   if (command === "install" && !unchanged) {
     if (!previous) {
-      const backupDir = join(runtimeRoot, "client-overlay-backups", `literals-${Date.now()}`); mkdirSync(backupDir, { recursive: true });
+      const backupDir = join(runtimeRoot, "client-overlay-backups", `literals-${Date.now()}-${randomUUID()}`); mkdirSync(backupDir, { recursive: true });
       for (const entry of files) { entry.backup = join(backupDir, entry.name); writeExclusive(entry.backup, entry.sourceBytes); }
     }
     const nextLedger = Buffer.from(JSON.stringify({ ...(previous ?? {}), installedAt: previous?.installedAt ?? new Date().toISOString(),
       ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), ...(exchangeEnabled ? { exchangeState: true } : {}), ...(craterEnabled ? { craterMask: true } : {}), ...(activitiesEnabled ? { referenceActivities: true } : {}), ...(native ? { nativeWardrobe: native.receipt } : {}), files: journalFiles() }, null, 2));
     const checkLedger = () => ledgerBytes ? assert.deepEqual(readFileSync(ledger), ledgerBytes, "literal journal changed during preparation") : assert.equal(existsSync(ledger), false, "a literal journal appeared during preparation");
-    checkLedger(); const installed = [], addedAssets = [];
+    checkLedger(); const installed = [], addedAssets = [], updatedAssets = [];
     try {
-      if (native && !oldNative) {
-        for (const asset of native.assets) assert.equal(existsSync(asset.target), false, "existing native asset preserved: " + asset.target);
+      if (nativeChanged) {
         for (const asset of native.assets) {
+          const old = priorNative?.assets.find(entry => entry.target === asset.target);
+          if (old) assert.deepEqual(readFileSync(asset.target), old.bytes, "changed native activity asset preserved");
+          else assert.equal(existsSync(asset.target), false, "existing native asset preserved: " + asset.target);
+        }
+        for (const asset of native.assets) {
+          const old = priorNative?.assets.find(entry => entry.target === asset.target);
+          if (old?.bytes.equals(asset.bytes)) continue;
           mkdirSync(dirname(asset.target), { recursive: true });
-          writeExclusive(asset.target, asset.bytes); addedAssets.push(asset);
+          if (old) {
+            assert.deepEqual(readFileSync(asset.target), old.bytes, "native deployment changed during preparation");
+            updatedAssets.push({ ...asset, previousBytes: old.bytes }); replace(asset.target, asset.bytes);
+          }
+          else { writeExclusive(asset.target, asset.bytes); addedAssets.push(asset); }
           assert.equal(hash(readFileSync(asset.target)), asset.sha256);
         }
       }
@@ -227,6 +241,12 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       recover(() => { if (existsSync(ledger) && readFileSync(ledger).equals(nextLedger)) {
         if (ledgerBytes) replace(ledger, ledgerBytes); else unlinkSync(ledger);
       } });
+      for (const asset of updatedAssets.reverse()) recover(() => {
+        const current = readFileSync(asset.target);
+        if (current.equals(asset.previousBytes)) return;
+        assert.equal(hash(current), asset.sha256, "changed native asset preserved during upgrade recovery");
+        replace(asset.target, asset.previousBytes);
+      });
       for (const asset of addedAssets.reverse()) recover(() => { if (existsSync(asset.target)) {
         assert.equal(hash(readFileSync(asset.target)), asset.sha256, "changed native asset preserved during install recovery");
         unlinkSync(asset.target);
@@ -236,27 +256,30 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     }
   }
   return { installed: command === "install" || Boolean(previous), restartRequired: true, unchanged,
-    nativeWardrobe: native?.receipt ?? null, nativeWardrobeInstalled: Boolean(native) && (command === "install" || Boolean(oldNative)),
+    nativeWardrobe: native?.receipt ?? null, nativeWardrobeInstalled: Boolean(native) && (command === "install" || Boolean(oldNative) && !nativeChanged),
     referenceActivities: activitiesEnabled, referenceActivitiesInstalled: activitiesEnabled && (command === "install" || oldActivities),
     activityResponse: enabled, activityResponseInstalled: enabled && (command === "install" || oldEnabled), activityState: stateEnabled,
     activityStateInstalled: stateEnabled && (command === "install" || oldState), exchangeState: exchangeEnabled,
-    exchangeStateInstalled: exchangeEnabled && (command === "install" || oldExchange), craterMask: craterEnabled, craterMaskInstalled: craterEnabled && (command === "install" || oldCrater), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState || exchangeEnabled !== oldExchange || craterEnabled !== oldCrater || activitiesEnabled !== oldActivities || Boolean(native) !== Boolean(oldNative)) && command !== "install", renderingAccepted: false,
+    exchangeStateInstalled: exchangeEnabled && (command === "install" || oldExchange), craterMask: craterEnabled, craterMaskInstalled: craterEnabled && (command === "install" || oldCrater), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState || exchangeEnabled !== oldExchange || craterEnabled !== oldCrater || activitiesEnabled !== oldActivities || nativeChanged) && command !== "install", renderingAccepted: false,
     files: journalFiles().map(({ backup, ...entry }) => entry) };
 }
 
 function readNativeWardrobe(manifestPath, overlay) {
   const path = resolve(manifestPath), bytes = readFileSync(path), manifest = JSON.parse(bytes);
-  assert.equal(manifest.module, "workshop-native-wardrobe"); assert.equal(manifest.version, 1);
+  assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
   const root = dirname(path), within = file => {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
   };
   const bridge = readFileSync(within(manifest.bridge.tagPath)); assert.equal(hash(bridge), manifest.bridge.tagSha256);
-  const expected = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstrap.swf", "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf", "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"];
-  assert.deepEqual(manifest.assets.map(a => a.file).sort(), expected.sort());
+  const expected = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstrap.swf", "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf", "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"].map(file => "/flash/workshop-native/wardrobe/" + file);
+  if (manifest.module === "workshop-native-activities") expected.push("/flash/workshop-native/shared/native-shared-library.swf",
+    ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
+      ...[88, 94, 188, 105, 93, 57, 56].map(id => `pair-shared-art-${id}.swf`)].map(file => "/flash/workshop-native/pair/" + file));
+  assert.deepEqual(manifest.assets.map(a => a.urlPath).sort(), expected.sort());
   const assets = manifest.assets.map(asset => {
-    assert.equal(asset.urlPath, "/flash/workshop-native/wardrobe/" + asset.file);
+    assert.equal(asset.file, asset.urlPath.slice(asset.urlPath.lastIndexOf("/") + 1));
     const data = readFileSync(within(asset.path)); assert.equal(hash(data), asset.sha256); assert.equal(data.length, asset.bytes);
-    return { target: join(overlay, "workshop-native/wardrobe", asset.file), bytes: data, sha256: asset.sha256 };
+    return { target: join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
   });
   const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })) };
   return { bridge, assets, receipt };
