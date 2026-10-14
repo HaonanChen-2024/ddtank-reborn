@@ -5,6 +5,7 @@ import { Button, Spinner } from "@ddtank/ui";
 import { ArrowLeft, Maximize } from "lucide-react";
 import { GameFrame } from "@/components/GameFrame";
 import { AimSidePanel } from "@/components/AimTablePanel";
+import { ActivityCenter } from "@/components/ActivityCenter";
 import { aimTablesQuery, configQuery } from "@/lib/api";
 import { useI18n } from "@/i18n";
 import "./play.css";
@@ -73,6 +74,17 @@ function Ruler() {
  *  reference tables, distance ruler) hosting the real Ruffle client in an exact 1000x600 hole. Auth/config fetch
  *  and the fullscreen button are unchanged from before the redesign. */
 export function PlayPage() {
+  const [activitiesOpen, setActivitiesOpen] = useState(false);
+  const [activityCharacter, setActivityCharacter] = useState<number | undefined>();
+  useEffect(() => {
+    window.workshopOpenActivities = (characterId) => {
+      if (!Number.isSafeInteger(characterId) || characterId <= 0) return false;
+      setActivityCharacter(characterId);
+      setActivitiesOpen(true);
+      return true;
+    };
+    return () => { delete window.workshopOpenActivities; };
+  }, []);
   const { t } = useI18n();
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -99,6 +111,7 @@ export function PlayPage() {
           </Link>
         </Button>
         <span className="hidden min-w-0 truncate font-display text-muted sm:block">{data?.serverName}</span>
+        <Button size="sm" className="shrink-0" onClick={() => setActivitiesOpen(true)}>活动中心</Button>
         <details className="ml-auto shrink-0">
           <summary className="cursor-pointer rounded-lg px-2 py-1 font-display text-sm text-ink hover:bg-panel-2 focus-visible:outline-2 focus-visible:outline-sun">
             {t("play.soloHelp")}
@@ -123,6 +136,7 @@ export function PlayPage() {
         </Button>
       </div>
 
+      {activitiesOpen && <ActivityCenter initialCharacterId={activityCharacter} onClose={() => setActivitiesOpen(false)} />}
       <div className="play-page-bg relative flex-1">
         {isLoading && (
           <div className="absolute inset-0 grid place-items-center">

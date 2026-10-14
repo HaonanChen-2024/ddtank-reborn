@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: {
         "/api": { target: apiTarget, changeOrigin: true },
+        "/resource": { target: apiTarget, changeOrigin: true },
       },
     },
     preview: { port: 5173 },

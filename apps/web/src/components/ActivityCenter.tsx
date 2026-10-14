@@ -1,0 +1,223 @@
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { meQuery } from "@/lib/api";
+import { ACTIVITY_ICONS } from "@/lib/activity-icons";
+import {
+  ActivityRequestError, clearPendingActivity, getActivities, performActivity, readPendingActivity, savePendingActivity,
+  type ActivityAction, type ActivityCell, type ActivityRequest, type ActivityResponse,
+} from "@/lib/activities";
+import "./ActivityCenter.css";
+
+const activityKey = (characterId: number) => ["account", "activities", characterId] as const;
+const number = (value: number) => value.toLocaleString("zh-CN");
+const errorMessage = (error: unknown) => error instanceof Error ? error.message : "操作未完成，请稍后重试。";
+
+function CellImage({ cell }: { cell: ActivityCell }) {
+  const [failed, setFailed] = useState(false);
+  const path = cell.image?.startsWith("/") && !cell.image.startsWith("//") ? cell.image : undefined;
+  useEffect(() => setFailed(false), [path]);
+  return path && !failed ? <img src={path} alt="" loading="lazy" onError={() => setFailed(true)} /> : null;
+}
+
+export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () => void; initialCharacterId?: number }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const detailsRef = useRef<HTMLElement>(null);
+  const busyRef = useRef(false);
+  const mountedRef = useRef(true);
+  const me = useQuery(meQuery);
+  const queryClient = useQueryClient();
+  const [chosenCharacter, setChosenCharacter] = useState<number | null>(initialCharacterId ?? null);
+  const characters = me.data?.characters ?? [];
+  const characterId = characters.find((character) => character.id === chosenCharacter)?.id ?? characters[0]?.id ?? 0;
+  const matchesGameCharacter = initialCharacterId ? characterId === initialCharacterId : characters.length === 1;
+  const [selectedId, setSelectedId] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [retry, setRetry] = useState<ActivityRequest | null>(null);
+  const [storageError, setStorageError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [mailedCount, setMailedCount] = useState(0);
+  const activities = useQuery({
+    queryKey: activityKey(characterId), queryFn: () => getActivities(characterId), enabled: characterId > 0,
+    refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, staleTime: 0,
+  });
+  const snapshot = activities.data?.characterId === characterId ? activities.data : undefined;
+  const selected = snapshot?.activities.find((activity) => activity.id === selectedId) ?? snapshot?.activities[0];
+  const locked = busy || Boolean(retry) || Boolean(storageError) || activities.isFetching;
+
+  useEffect(() => {
+    mountedRef.current = true;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => {
+      mountedRef.current = false;
+      dialog?.close();
+      if (previous?.isConnected) previous.focus();
+    };
+  }, []);
+
+  useEffect(() => {
+    setNotice(""); setActionError(""); setMailedCount(0); setStorageError(""); setRetry(null);
+    if (!characterId) return;
+    try { setRetry(readPendingActivity(characterId)); }
+    catch (error) { setStorageError(errorMessage(error)); }
+  }, [characterId]);
+
+  const submit = async (pending: ActivityRequest) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true); setActionError(""); setNotice(""); setMailedCount(0);
+    try {
+      savePendingActivity(pending);
+      setRetry(pending);
+      await queryClient.cancelQueries({ queryKey: activityKey(pending.characterId) });
+      const next = await performActivity(pending);
+      queryClient.setQueryData<ActivityResponse>(activityKey(pending.characterId), (old) => !old || next.revision >= old.revision ? next : old);
+      clearPendingActivity(pending);
+      if (mountedRef.current) {
+        setRetry(null);
+        setNotice(next.message || "操作已完成。");
+        setMailedCount(next.mailedCount ?? next.mailIds?.length ?? 0);
+      }
+    } catch (error) {
+      if (error instanceof ActivityRequestError && !error.uncertain) {
+        try { clearPendingActivity(pending); if (mountedRef.current) setRetry(null); }
+        catch { /* Preserve the same request when its stored receipt cannot be cleared. */ }
+      }
+      if (mountedRef.current) setActionError(errorMessage(error));
+    } finally {
+      busyRef.current = false;
+      if (mountedRef.current) setBusy(false);
+    }
+  };
+
+  const act = (activityId: string, action: ActivityAction) => {
+    if (locked || !characterId || busyRef.current) return;
+    let pending: ActivityRequest;
+    try { pending = { characterId, activityId, action: { ...action }, requestId: crypto.randomUUID() }; }
+    catch { setActionError("浏览器无法创建操作编号，尚未提交。请在本机游戏地址打开。"); return; }
+    void submit(pending);
+  };
+
+  const selectActivity = (id: string) => {
+    setSelectedId(id);
+    detailsRef.current?.scrollTo({ top: 0 });
+    if (window.matchMedia("(max-width: 760px)").matches) {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
+      requestAnimationFrame(() => detailsRef.current?.scrollIntoView({ behavior, block: "start" }));
+    }
+  };
+
+  return (
+    <dialog ref={dialogRef} className="activity-center" aria-labelledby="activity-center-title"
+      onCancel={(event) => { event.preventDefault(); onClose(); }}>
+      <header className="activity-center__header">
+        <div><span className="activity-center__eyebrow">怀旧时光 · 每日新趣</span><h2 id="activity-center-title">活动中心</h2></div>
+        <div className="activity-center__account">
+          <label>当前角色<select value={characterId || ""} disabled={!characters.length || busy}
+            onChange={(event) => setChosenCharacter(Number(event.target.value))}>
+            {!characters.length && <option value="">暂无角色</option>}
+            {characters.map((character) => <option value={character.id} key={character.id}>{character.nickname} · {character.level}级</option>)}
+          </select></label>
+          <div className="activity-center__wallet"><span>活动积分</span><strong>{snapshot ? number(snapshot.points) : "—"}</strong></div>
+        </div>
+        <button type="button" className="activity-center__close" onClick={onClose} aria-label="关闭活动中心，返回游戏" autoFocus>×</button>
+      </header>
+
+      <div className="activity-center__body">
+        <div className="activity-center__toolbar">
+          <p>完成任务攒积分，奖励通过游戏邮件送达。</p>
+          <button type="button" className="activity-center__quiet" disabled={!characterId || busy || activities.isFetching}
+            onClick={() => { void activities.refetch(); }}>{activities.isFetching ? "读取中…" : "刷新进度"}</button>
+        </div>
+
+        {me.isPending && <p className="activity-center__empty" role="status">正在读取角色…</p>}
+        {!me.isPending && !me.data && <p className="activity-center__empty">请先登录游戏账号，再打开活动中心。</p>}
+        {me.data && !characters.length && <p className="activity-center__empty">这个账号还没有角色。请先进入游戏创建角色。</p>}
+        {characterId > 0 && activities.isPending && <p className="activity-center__empty" role="status">正在准备活动…</p>}
+        {activities.error && <p className="activity-center__notice activity-center__notice--error" role="alert">{errorMessage(activities.error)} 可点击“刷新进度”重新读取。</p>}
+        {storageError && <p className="activity-center__notice activity-center__notice--error" role="alert">{storageError}</p>}
+        {(retry || actionError) && <div className="activity-center__notice activity-center__notice--error" role="alert">
+          <p>{actionError || (busy ? "正在提交，请稍候…" : "上一次操作的结果尚未确认。重试会核对同一笔操作，不会创建第二笔。")}</p>
+          {retry && !busy && <button type="button" className="activity-center__button" disabled={activities.isFetching}
+            onClick={() => { void submit(retry); }}>重试上一次操作</button>}
+        </div>}
+        <div role="status" aria-live="polite" aria-atomic="true">
+          {notice && <p className="activity-center__notice">{notice}
+            {mailedCount > 0 && <span className="activity-center__mail">已发出 {mailedCount} 封奖励邮件，请到游戏邮箱领取附件。</span>}
+          </p>}
+        </div>
+
+        {snapshot && <>
+          <section className="activity-center__tasks" aria-labelledby="activity-tasks-title">
+            <div className="activity-center__section-title"><h3 id="activity-tasks-title">今日小目标</h3><span>{snapshot.day}</span></div>
+            <div className="activity-center__task-list">
+              {snapshot.tasks.map((task) => <article key={task.id} className="activity-center__task">
+                <div><strong>{task.title}</strong><span>+{number(task.points)} 积分</span></div>
+                <progress max={Math.max(1, task.target)} value={Math.min(task.current, task.target)} aria-label={`${task.title}进度`} />
+                <footer><span>{number(task.current)} / {number(task.target)}</span>
+                  <button type="button" className="activity-center__button" disabled={locked || task.claimed || task.current < task.target}
+                    onClick={() => act("tasks", { type: "claim", choice: task.id })}>{task.claimed ? "已领取" : "领取积分"}</button>
+                </footer>
+              </article>)}
+              {!snapshot.tasks.length && <p className="activity-center__muted">今日暂无任务。</p>}
+            </div>
+          </section>
+
+          <div className="activity-center__main">
+            <nav className="activity-center__catalog" aria-label="选择活动">
+              <div className="activity-center__section-title"><h3>活动一览</h3><span>{snapshot.activities.length} 项</span></div>
+              <div className="activity-center__tiles">
+                {snapshot.activities.map((activity, index) => <button type="button" key={activity.id}
+                  className={`activity-center__tile${selected?.id === activity.id ? " is-selected" : ""}`}
+                  aria-pressed={selected?.id === activity.id} aria-controls="activity-detail" onClick={() => selectActivity(activity.id)}>
+                  {ACTIVITY_ICONS[activity.id] ? <span className="activity-center__original-icon" aria-hidden="true"><img src={ACTIVITY_ICONS[activity.id]} alt="" /></span>
+                    : <span className={`activity-center__medallion activity-center__medallion--${index % 5}`} aria-hidden="true">{activity.title.slice(0, 1)}</span>}
+                  <strong>{activity.title}</strong>
+                </button>)}
+              </div>
+              <details className="activity-center__services"><summary>礼包服务</summary><p>已有礼包码在原游戏窗口使用。</p>
+                <button type="button" className="activity-center__button" disabled={locked} onClick={() => {
+                  if (window.workshopShowActivation?.()) onClose();
+                  else setActionError("礼包窗口尚未就绪，请进入大厅后再试。");
+                }}>打开激活礼包</button>
+              </details>
+            </nav>
+
+            <section ref={detailsRef} id="activity-detail" className="activity-center__detail" aria-label={selected?.title ?? "活动详情"} aria-busy={busy}>
+              {selected ? <>
+                <div className="activity-center__detail-heading"><span className="activity-center__eyebrow">正在参与</span><h3>{selected.title}</h3><p>{selected.subtitle}</p></div>
+                <dl className="activity-center__stats">{selected.stats.map((stat, index) => <div key={`${stat.label}-${index}`}><dt>{stat.label}</dt><dd>{typeof stat.value === "number" ? number(stat.value) : stat.value}</dd></div>)}</dl>
+                {Boolean(selected.cells?.length) && <div className="activity-center__cells" style={{ "--activity-columns": Math.max(1, Math.min(12, selected.columns ?? 4)) } as CSSProperties}>
+                  {selected.cells?.map((cell, index) => cell.action ? <button type="button" key={index}
+                    className={`activity-center__cell activity-center__cell--${cell.tone ?? "default"}`} disabled={locked}
+                    aria-label={`${cell.label}${cell.detail ? `，${cell.detail}` : ""}`} onClick={() => act(selected.id, cell.action!)}>
+                    <CellImage cell={cell} /><strong>{cell.label}</strong>{cell.detail && <span>{cell.detail}</span>}
+                  </button> : <div key={index} className={`activity-center__cell activity-center__cell--${cell.tone ?? "default"}`}>
+                    <CellImage cell={cell} /><strong>{cell.label}</strong>{cell.detail && <span>{cell.detail}</span>}
+                  </div>)}
+                </div>}
+                <div className="activity-center__actions">{selected.actions.map((button, index) => <div key={`${button.label}-${index}`}>
+                  <button type="button" className="activity-center__button" disabled={locked || button.disabled}
+                    aria-describedby={button.help ? `activity-help-${index}` : undefined} onClick={() => act(selected.id, button.action)}>{button.label}</button>
+                  {button.help && <p id={`activity-help-${index}`}>{button.help}</p>}
+                </div>)}</div>
+                {selected.id === "sign" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter} onClick={() => {
+                  if (window.workshopShowSign?.()) onClose();
+                  else setActionError("签到窗口尚未就绪，请进入游戏大厅后再试。");
+                }}>打开游戏签到窗口</button>{!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开签到窗口。</p>}</>}
+                <section className="activity-center__rules"><h4>玩法说明</h4><ul>{selected.rules.map((rule, index) => <li key={index}>{rule}</li>)}</ul></section>
+              </> : <p className="activity-center__empty">当前没有开放的活动。</p>}
+            </section>
+          </div>
+
+          <details className="activity-center__history"><summary>最近活动记录</summary>
+            {snapshot.history.length ? <ul>{snapshot.history.map((entry, index) => <li key={index}>{entry}</li>)}</ul> : <p>还没有活动记录。</p>}
+          </details>
+        </>}
+      </div>
+      <footer className="activity-center__footer"><span>本地活动 · 每日北京时间08:00刷新</span><span>{busy ? "提交中，重复点击已暂停" : "Esc 关闭 · 返回游戏邮箱查看奖励"}</span></footer>
+    </dialog>
+  );
+}

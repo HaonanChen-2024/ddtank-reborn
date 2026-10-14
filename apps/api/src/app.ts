@@ -12,6 +12,7 @@ import { CiTree, ResourceIndex } from "./lib/resources.js";
 import { createStorage } from "./lib/storage.js";
 import { adminRoutes, applyServerConfig, sampleProcess } from "./routes/admin.js";
 import { authRoutes } from "./routes/auth.js";
+import { activityRoutes } from "./routes/activities.js";
 import { publicRoutes } from "./routes/public.js";
 import { requestRoutes } from "./routes/request.js";
 import { staticRoutes } from "./routes/static.js";
@@ -85,6 +86,7 @@ export async function buildApp(o: BuildOptions = {}): Promise<{ app: FastifyInst
 
   f.get("/healthz", async () => ({ ok: true }));
   await authRoutes(f, ctx);
+  await activityRoutes(f, ctx);
   await publicRoutes(f, ctx);
   await adminRoutes(f, ctx);
   await requestRoutes(f, ctx);

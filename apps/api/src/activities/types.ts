@@ -1,0 +1,40 @@
+/** Local reference activities. Never expose RootState, board layouts, or RNG seeds through HTTP. */
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean }
+export interface ActivityReward { templateId: number; count: number; validDays?: number }
+export interface ActivityWallet { points: number; earned: number; revision: number }
+export interface ActivityContext {
+  now: Date;
+  /** Committed EventClaims sign/day keys, not a client-provided completion flag. */
+  signDays: string[];
+  ownedTemplateIds: number[];
+  wardrobeItems?: { templateId: number; name: string; category: number; icon?: string }[];
+}
+export interface ActivityState {
+  version: 1;
+  day: string;
+  daily: Record<string, number>;
+  games: Record<string, unknown>;
+  completed: Record<string, number>;
+  claims: string[];
+  history: string[];
+}
+export interface ActivityButton { label: string; action: ActivityAction; disabled?: boolean; help?: string }
+export interface ActivityCell { label: string; detail?: string; tone?: "hidden" | "success" | "danger" | "gold"; action?: ActivityAction; image?: string }
+export interface ActivityView {
+  id: string; title: string; subtitle: string; rules: string[];
+  stats: { label: string; value: string | number }[];
+  actions: ActivityButton[];
+  cells?: ActivityCell[]; columns?: number;
+}
+export interface ActivityTask { id: string; title: string; current: number; target: number; points: number; claimed: boolean }
+export interface ActivitySnapshot {
+  points: number; earned: number; revision: number; day: string;
+  activities: ActivityView[]; tasks: ActivityTask[]; history: string[];
+}
+export interface ActivityTransition {
+  state: ActivityState; pointsDelta: number; earnedDelta: number;
+  rewards: ActivityReward[]; message: string;
+}
+export class ActivityError extends Error {
+  constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }
+}

@@ -1,7 +1,7 @@
 // Hand-written (not generated). New tables for DDTank Reborn that have no equivalent in the original SQL Server DBs.
 // Owner: apps/api (written by the API/admin, read by apps/game). See apps/api/README.md "Login tickets".
 import { sql } from "drizzle-orm";
-import { bigint, boolean, index, integer, jsonb, pgSchema, primaryKey, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, index, integer, jsonb, pgSchema, primaryKey, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 /** Postgres schema for the new stack's own tables. */
 export const appSchema = pgSchema("app");
@@ -196,3 +196,27 @@ export const ScheduledEvents = appSchema.table("ScheduledEvents", {
   params: jsonb("params").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
   updatedAt: ts("updatedAt").notNull().defaultNow(),
 });
+
+/** Local activity points are independent of game currencies; serialized by the wallet row lock. */
+export const ActivityWallet = appSchema.table("ActivityWallet", {
+  UserID: integer("UserID").primaryKey(),
+  Points: integer("Points").notNull().default(0),
+  Earned: integer("Earned").notNull().default(0),
+  Revision: integer("Revision").notNull().default(0),
+}, (t) => [check("ActivityWallet_nonnegative", sql`${t.Points} >= 0 AND ${t.Earned} >= 0 AND ${t.Revision} >= 0`)]);
+
+/** Server-private boards and temporary prize bags, committed with points and reward mail. */
+export const ActivityStates = appSchema.table("ActivityStates", {
+  UserID: integer("UserID").notNull().references(() => ActivityWallet.UserID),
+  Activity: varchar("Activity", { length: 32 }).notNull(),
+  State: jsonb("State").notNull(),
+}, (t) => [primaryKey({ name: "ActivityStates_pkey", columns: [t.UserID, t.Activity] })]);
+
+/** A retry returns the committed result; reusing an id with a different payload is rejected. */
+export const ActivityActions = appSchema.table("ActivityActions", {
+  UserID: integer("UserID").notNull().references(() => ActivityWallet.UserID),
+  RequestID: varchar("RequestID", { length: 36 }).notNull(),
+  Signature: text("Signature").notNull(),
+  Result: jsonb("Result").notNull(),
+  CreatedAt: ts("CreatedAt").notNull().defaultNow(),
+}, (t) => [primaryKey({ name: "ActivityActions_pkey", columns: [t.UserID, t.RequestID] })]);

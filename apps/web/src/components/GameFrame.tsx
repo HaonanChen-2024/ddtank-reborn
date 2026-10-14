@@ -13,7 +13,9 @@ interface RuffleLoadOptions {
 }
 interface RufflePlayerElement extends HTMLElement {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
-  ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void> };
+  ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
+  workshopOpenActivation?: () => unknown;
+  workshopOpenSign?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -27,6 +29,9 @@ declare global {
     RufflePlayer?: RuffleGlobal;
     /** ExternalInterface hook the client calls on kick / socket close (LeavePageManager.forcedToLoginPath). */
     game_interruption?: (loginUrl: string, msg: string) => void;
+    workshopOpenActivities?: (characterId: number) => boolean;
+    workshopShowActivation?: () => boolean;
+    workshopShowSign?: () => boolean;
   }
 }
 
@@ -134,6 +139,19 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         };
         player.addEventListener("loadedmetadata", markReady);
         host.appendChild(player);
+        window.workshopShowActivation = () => {
+          if (cancelled || !player) return false;
+          try {
+            // Ruffle's exposed legacy method exists only after AS3 addCallback has run.
+            if (typeof player.workshopOpenActivation !== "function") return false;
+            player.workshopOpenActivation();
+            return true;
+          } catch { return false; }
+        };
+        window.workshopShowSign = () => {
+          if (cancelled || !player || typeof player.workshopOpenSign !== "function") return false;
+          try { player.workshopOpenSign(); return true; } catch { return false; }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -161,6 +179,8 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       cancelled = true;
       player?.remove();
       delete window.game_interruption;
+      delete window.workshopShowActivation;
+      delete window.workshopShowSign;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);
