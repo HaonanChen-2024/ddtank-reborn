@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/room.swf",
+  "sourceAssetSha256": "a4a33f05dfd77cad4fa237d97a0594e9dc64f32c1266815540603beb8da53aed",
+  "expectedSwfSha256": "ecfa5ddb0dbc1ae949b18ada1e6c2bed20fb62d6193c920c1fa6f7a9c5fe4503",
+  "fontFamily": "Workshop RoomList CJK",
+  "fontFile": "msyhbd.ttc",
+  "bitmaps": [
+    {
+      "id": 69,
+      "className": "asset.room.view.roomPlayerItemWaitBGAsset",
+      "tagCode": 36,
+      "width": 170,
+      "height": 203,
+      "sourceTagSha256": "26c7a1a6d9cbdeeb211b145c5213fe75124148b04efafcdb4174808b39fddb13",
+      "sourcePixelsSha256": "98c1d5ee8c015002493ea7dea8ab372ad2017f2d2a24fb2ed83f7718d7c8beb8",
+      "originalText": "Clique p/ fechar",
+      "regions": [
+        {
+          "box": [
+            9,
+            152,
+            153,
+            28
+          ],
+          "text": "关闭座位",
+          "fontSize": 19,
+          "fill": "#fff5da",
+          "stroke": "#6f5235",
+          "strokeWidth": 2,
+          "textOffsetY": 0,
+          "transparent": true,
+          "preserveAlpha": true
+        }
+      ],
+      "preparedImage": {
+        "path": "69.png",
+        "sha256": "4969958c00d46c2d9c107c75d4bdcecfc923959dd2dcd559e3d3ccc1abb56c4a"
+      }
+    },
+    {
+      "id": 62,
+      "className": "asset.room.view.roomPlayerItemCloseBGAsset",
+      "tagCode": 36,
+      "width": 170,
+      "height": 203,
+      "sourceTagSha256": "84531150fc0e537ceb939d06869b51383bcbfe6b2d25deb0908fff8881338ea0",
+      "sourcePixelsSha256": "df6e14428b35a2f8547e7fa9c21f5c6d14b6af7b6c25fb84118c424153a2c947",
+      "originalText": "Clique p/ abrir",
+      "regions": [
+        {
+          "box": [
+            13,
+            150,
+            146,
+            27
+          ],
+          "text": "开启座位",
+          "fontSize": 19,
+          "fill": "#f6ead5",
+          "stroke": "#68452b",
+          "strokeWidth": 2,
+          "textOffsetY": 0,
+          "transparent": true,
+          "preserveAlpha": true
+        }
+      ],
+      "preparedImage": {
+        "path": "62.png",
+        "sha256": "a0c229b74ad13637af59b8694a2f0cb9ab0bc4b0f9fb9e45a907199fd28525a5"
+      }
+    },
+    {
+      "id": 65,
+      "className": "asset.room.view.roomPlayerItemHostAsset",
+      "tagCode": 36,
+      "width": 92,
+      "height": 24,
+      "sourceTagSha256": "f27e9567b05f90ac62aa7d60003df7dcb60d5ba14b9ea6d8a71eb7f70964a2d2",
+      "sourcePixelsSha256": "41f4879ca6441017371166e2f4c7197e68d94a1bc19ec84b9369ab2b52eb458f",
+      "originalText": "chủ phòng",
+      "regions": [
+        {
+          "box": [
+            2,
+            2,
+            81,
+            20
+          ],
+          "text": "房主",
+          "fontSize": 16,
+          "fill": "#edd65d",
+          "stroke": "#38200c",
+          "strokeWidth": 1.2,
+          "textOffsetY": -1,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "65.png",
+        "sha256": "aee3ead3f97ea1e1172bf9471c7d6989a764ffda9bcce5a823bc95d12a9482cb"
+      }
+    },
+    {
+      "id": 64,
+      "className": "asset.room.view.roomPlayerItemGuildTxtAsset",
+      "tagCode": 36,
+      "width": 34,
+      "height": 18,
+      "sourceTagSha256": "273936f319d8a8482120ab738915b428998165c0158f6b18383b4a632c6ba98b",
+      "sourcePixelsSha256": "0b73c6635e812974ff7dcc09f2a71901441956eb80e48c0711a0a7500e1b92f0",
+      "originalText": "Guild",
+      "regions": [
+        {
+          "box": [
+            1,
+            1,
+            32,
+            16
+          ],
+          "text": "公会",
+          "fontSize": 13,
+          "fill": "#ffffff",
+          "stroke": "#000000",
+          "strokeWidth": 1,
+          "textOffsetY": -1,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "64.png",
+        "sha256": "8a667c1b07047919874fb44944c754eaae3d31dfa09e622a33dae33e8bd5e178"
+      }
+    }
+  ],
+  "note": "Four reviewed original seat/guild/host captions only. Seat alpha is unchanged; host/guild glyph alpha may change only inside reviewed ROIs. No positions, frames, hitArea or game logic changed. Offline candidate; original full-page/runtime acceptance pending."
+}
