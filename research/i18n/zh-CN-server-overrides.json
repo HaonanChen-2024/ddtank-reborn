@@ -43,5 +43,14 @@
   "ItemReclaimHandler.Success2": "出售成功，获得 {0} 金币。",
   "ChangeSexHandlerHandler.Success": "性别修改成功，请重新登录以更新信息。",
   "UserChangeItemColorHandler.Success": "染色成功。",
-  "GameTakeTempItemsHandler.Msg": "背包已满，剩余物品已通过邮件发送，请查收。"
+  "GameTakeTempItemsHandler.Msg": "背包已满，剩余物品已通过邮件发送，请查收。",
+  "UserItemContineueHandler.CanNotContineu": "该物品无法续费。",
+  "UserReclaimItemHandler.fail": "该物品无法出售。",
+  "UserBuyItemHandler.FailByPermission2": "今日免费商品已领取，请明日再来。",
+  "UserBuyItemHandler.petScore": "宠物积分不足。",
+  "UserBuyItemHandler.boguScore": "所需积分不足。",
+  "UserBuyItemHandler.SystemError": "系统错误，操作已中止。",
+  "UserItemContineueHandler.InvalidShopItem": "续费请求异常，操作已中止。",
+  "UserEquipListHandler.InvalidPlayer": "玩家信息无效。",
+  "GameTakeTempItemsHandler.MailTitle": "背包已满，物品退回"
 }

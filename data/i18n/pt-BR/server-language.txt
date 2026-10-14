@@ -4119,3 +4119,10 @@ FigSpiritUpGradeHandler.Msg:Alma de Combate insuficiente!
 
 Game.Server.GameUtils.ConsortiaBag.Sender:  Devolução do Cofre do Clã
 Game.Server.GameUtils.ConsortiaBag.Title: Item do cofre
+UserBuyItemHandler.FailByPermission2:O item gratuito já foi retirado hoje. Volte amanhã.
+UserBuyItemHandler.petScore:Pontos de pet insuficientes.
+UserBuyItemHandler.boguScore:Pontos insuficientes.
+UserBuyItemHandler.SystemError:Erro do sistema. O problema foi enviado ao administrador.
+UserItemContineueHandler.InvalidShopItem:Trapaça detectada pelo sistema. Isto será enviado à administração para análise.
+UserEquipListHandler.InvalidPlayer:Informações do jogador inválidas!
+GameTakeTempItemsHandler.MailTitle:Mochila cheia! Itens devolvidos

@@ -201,7 +201,7 @@ export async function buyGoods(ctx: ServerContext, p: GamePlayer, pkt: GSPacket)
   const need = new Map<number, number>();
   const buy: { item: ItemInfo; dress: boolean; place: number }[] = [];
   const count = pkt.readInt();
-  if (count <= 0 || count > 99) return p.sendMessage(0, "Erro do sistema. O problema foi enviado ao administrador.");
+  if (count <= 0 || count > 99) return p.sendMessage(0, ctx.lang.t("UserBuyItemHandler.SystemError"));
   for (let i = 0; i < count; i++) {
     const goodsId = pkt.readInt();
     const type = pkt.readInt();
@@ -246,7 +246,7 @@ export async function buyGoods(ctx: ServerContext, p: GamePlayer, pkt: GSPacket)
   const { gold, money, offer, gifttoken, petScore, score, dmgScore } = totals;
   const anyCost = gold > 0 || money > 0 || offer > 0 || gifttoken > 0 || petScore > 0 || score > 0 || dmgScore > 0 || need.size > 0;
   if (!(gold >= 0 && money >= 0 && offer >= 0 && gifttoken >= 0 && petScore >= 0 && score >= 0 && dmgScore >= 0 && anyCost)) {
-    return p.sendMessage(0, "Erro do sistema. O problema foi enviado ao administrador.");
+    return p.sendMessage(0, ctx.lang.t("UserBuyItemHandler.SystemError"));
   }
   const c = p.info;
   let eMsg = 0;
@@ -362,15 +362,15 @@ export async function itemContinue(ctx: ServerContext, p: GamePlayer, pkt: GSPac
     const type = pkt.readByte();
     pkt.readBoolean();
     if (!((bagType === BagType.EquipBag && place >= 31) || bagType === BagType.PropBag || bagType === BagType.Store)) {
-      p.sendMessage(0, "Não é possível renovar");
+      p.sendMessage(0, ctx.lang.t("UserItemContineueHandler.CanNotContineu"));
       continue;
     }
     const bag = p.getInventory(bagType);
     const item = bag?.getItemAt(place);
-    if (!bag || !item || item.ValidDate === 0) { p.sendMessage(0, "Este item não pode ser renovado"); continue; }
+    if (!bag || !item || item.ValidDate === 0) { p.sendMessage(0, ctx.lang.t("UserItemContineueHandler.CanNotContineu")); continue; }
     const shop = ctx.templates.shop.get(shopId);
     if (!shop || shop.TemplateID !== item.TemplateID) {
-      p.sendMessage(0, "Trapaça detectada pelo sistema. Isto será enviado à administração para análise.");
+      p.sendMessage(0, ctx.lang.t("UserItemContineueHandler.InvalidShopItem"));
       return; // the original's loop can only exit (via `break`) on this exact mismatch
     }
     const totals: PriceTotals = { gold: 0, money: 0, offer: 0, gifttoken: 0, petScore: 0, score: 0, dmgScore: 0 };
@@ -430,7 +430,7 @@ export function registerItems(r: HandlerRegistry): void {
     if (it.Count <= count) count = it.Count;
     const t = it.template;
     const price = count * t.ReclaimValue;
-    if (t.ReclaimType === 3) return p.sendMessage(0, "Este item não pode ser vendido.");
+    if (t.ReclaimType === 3) return p.sendMessage(0, ctx.lang.t("UserReclaimItemHandler.fail"));
     if (t.ReclaimType === 2) {
       p.addGiftToken(price);
       p.sendMessage(0, ctx.lang.t("ItemReclaimHandler.Success1", price));
@@ -490,7 +490,7 @@ export function registerItems(r: HandlerRegistry): void {
       info = byId ? await loadPlayerInfo(ctx.db.db, id) : await loadPlayerInfoByNick(ctx.db.db, nick);
       if (info) items = await loadEquippedItems(ctx.db.db, info.ID, ctx.templates.findItem);
     }
-    if (!info || !items) return p.sendMessage(3, "Informações do jogador inválidas!");
+    if (!info || !items) return p.sendMessage(3, ctx.lang.t("UserEquipListHandler.InvalidPlayer"));
     p.send(Out.userEquip(info, items, ctx.now()));
   });
 
@@ -592,7 +592,7 @@ export function registerItems(r: HandlerRegistry): void {
     }
     const left = p.tempBag.getItems();
     if (left.length) {
-      await mailItems(ctx, p, left, "Mochila cheia! Itens devolvidos", 9);
+      await mailItems(ctx, p, left, ctx.lang.t("GameTakeTempItemsHandler.MailTitle"), 9);
       for (const it of left) p.tempBag.takeOutItem(it);
       p.sendMessage(1, ctx.lang.t("GameTakeTempItemsHandler.Msg")); // eMessageType.BIGBUGLE_NOTICE
     }
