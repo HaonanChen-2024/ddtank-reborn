@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "module": "workshop-native-wardrobe",
+  "publicBasePath": "/flash/workshop-native/wardrobe/",
+  "bridgeOwner": "workshop/native/WorkshopNativeWardrobeBridge/v1",
+  "bridgeClass": "WorkshopNativeWardrobeBridge",
+  "originalCore": {
+    "path": "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+    "sha256": "af361678887e2413efe54e6cd86d37426cc6724ea964080178eea4816a785ae4",
+    "libraryAbcCount": 92,
+    "adaptations": [
+      "magicWardrobe/view/MagicWardrobeItem and MagicNeedEquipView: isHasDressCellbyTempleteId => getItemByTemplateId; original boolean conversion and all method bodies unchanged.",
+      "Original parent/interface closure includes IComponent/IBox/IClip/IContent; stable dependency-first DoABC ordering."
+    ]
+  },
+  "assets": [
+    {
+      "file": "magicwardrobe-original-library.swf",
+      "source": "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/magicwardrobe-original-library.swf",
+      "sha256": "ad3151811f44d99570ae10b13a219c290aa97ed42d131df2c1ec5bf2b3cf8bc5"
+    },
+    {
+      "file": "shared-art.swf",
+      "source": "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/shared-art.swf",
+      "sha256": "a030162b43ce520957ee3a088d69d7c05aaaf47f1623d6107ab5907fa378937c"
+    },
+    {
+      "file": "magicwardrobe_v3_6_1_u1.swf",
+      "source": "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.swf",
+      "sha256": "df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca"
+    },
+    {
+      "file": "magicwardrobe_v3_6_1_u1.ui",
+      "source": "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.ui",
+      "sha256": "46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145"
+    },
+    {
+      "file": "MagicClothList.decoded.xml",
+      "source": "runtime/reference-activities-completion-20261014/reference-core/MagicClothList.decoded.xml",
+      "sha256": "e9aff57becd1a90e53c838e552a3360e0f93779a824f04ab82da275782fa7ad0"
+    }
+  ],
+  "compiler": {
+    "path": "runtime/tools/flex-min/lib/mxmlc.jar",
+    "sha256": "cc07d749e376715e650271a9875289e49d94234902fff5e5fae287c478c8557b"
+  },
+  "playerGlobal": {
+    "path": "downloads/flex/playerglobal32_0.swc",
+    "sha256": "7d4d6168d27603cfb3b750302448e354e0bbc1bdd58f5d101c3dcf6891e9bb65"
+  }
+}

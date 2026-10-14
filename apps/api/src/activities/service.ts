@@ -9,12 +9,17 @@ import { sendMail } from "../routes/admin.js";
 import { gameInternalPost } from "../routes/public.js";
 import { PRIZES } from "./config.js";
 import { createActivityState, transitionActivity, viewActivities } from "./engine.js";
+import type { PairNativeEffect } from "./pair-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityWallet } from "./types.js";
 
 interface Owner { NickName: string; Sex: boolean }
 interface WalletRow { Points: number; Earned: number; Revision: number }
 interface WardrobeRow { TemplateID: number; Name: string; CategoryID: number; Pic: string | null; NeedSex: number }
-export interface ActivityResult extends ActivitySnapshot { characterId: number; message?: string; mailedCount?: number; replayed?: boolean }
+export interface ActivityResult extends ActivitySnapshot {
+  characterId: number; message?: string; mailedCount?: number; replayed?: boolean;
+  /** New committed native actions only; replays return the latest projection without reanimating. */
+  nativePairAction?: { requestId: string; effects: PairNativeEffect[] };
+}
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
 function wardrobeIcon(app: AppCtx, item: WardrobeRow): string | undefined {
@@ -127,7 +132,8 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     await tx.execute(sql`UPDATE app."ActivityWallet" SET "Points"=${next.points},"Earned"=${next.earned},"Revision"=${next.revision} WHERE "UserID"=${characterId}`);
     await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},'reference',${JSON.stringify(changed.state)}::jsonb)
       ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
-    const response: ActivityResult = { characterId, ...viewActivities(changed.state, next, ctx), message: changed.message, mailedCount };
+    const response: ActivityResult = { characterId, ...viewActivities(changed.state, next, ctx), message: changed.message, mailedCount,
+      ...(changed.nativePairEffects ? { nativePairAction: { requestId, effects: changed.nativePairEffects } } : {}) };
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);

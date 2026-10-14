@@ -16,6 +16,9 @@ interface RufflePlayerElement extends HTMLElement {
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
   workshopOpenSign?: () => unknown;
+  workshopOpenWardrobe?: (characterId: number) => boolean;
+  workshopStatusWardrobe?: () => { phase?: string; visible?: boolean; actualUserId?: number; errors?: unknown[] };
+  workshopCloseWardrobe?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -32,6 +35,7 @@ declare global {
     workshopOpenActivities?: (characterId: number) => boolean;
     workshopShowActivation?: () => boolean;
     workshopShowSign?: () => boolean;
+    workshopShowWardrobe?: (characterId: number, signal?: AbortSignal) => Promise<boolean>;
   }
 }
 
@@ -90,6 +94,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
     if (!host) return;
     let cancelled = false;
     let player: RufflePlayerElement | null = null;
+    let wardrobeRequest: { cancel: () => void } | null = null;
     setPhase("ruffle");
     setError(null);
 
@@ -118,6 +123,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           if (cancelled) return;
           setError(String(msg ?? ""));
           setPhase("kicked");
+          wardrobeRequest?.cancel();
           player?.remove();
           player = null;
         };
@@ -152,6 +158,39 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           if (cancelled || !player || typeof player.workshopOpenSign !== "function") return false;
           try { player.workshopOpenSign(); return true; } catch { return false; }
         };
+        window.workshopShowWardrobe = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenWardrobe || !owner.workshopStatusWardrobe || !owner.workshopCloseWardrobe) return false;
+          wardrobeRequest?.cancel();
+          const request = { cancel: () => {
+            if (wardrobeRequest !== request) return;
+            wardrobeRequest = null;
+            try { owner.workshopCloseWardrobe?.(); } catch { /* The player may already have disconnected. */ }
+          } };
+          wardrobeRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenWardrobe(characterId) !== true) return false;
+            const deadline = Date.now() + 15_000;
+            while (wardrobeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusWardrobe();
+              if (state?.errors?.length || state?.phase === "error") return false;
+              if (state?.phase === "open" && state.visible && state.actualUserId === characterId) {
+                opened = true;
+                return true;
+              }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (wardrobeRequest === request) wardrobeRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -177,10 +216,12 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
 
     return () => {
       cancelled = true;
+      wardrobeRequest?.cancel();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
       delete window.workshopShowSign;
+      delete window.workshopShowWardrobe;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

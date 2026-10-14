@@ -3,6 +3,7 @@ import { advanceWardrobe, viewWardrobe } from "./wardrobe.js";
 import { ACTIVITY_TITLES, LOCAL_RULES as C, PRIZES } from "./config.js";
 import { actMinesweeper, createMinesweeper, viewMinesweeper, type MinesweeperAction, type MinesweeperState } from "./minesweeper.js";
 import { actPairBox, createPairBox, viewPairBox, type PairBoxAction, type PairBoxState } from "./pair-box.js";
+import { advancePairNative, viewPairNative } from "./pair-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
@@ -63,20 +64,24 @@ function countsDailyAction(id: string, type: string): boolean {
   if (["tasks", "first-gift", "points-gift", "luxury"].includes(id) && type === "claim") return false;
   if (["wheel", "devil", "christmas"].includes(id) && type === "take") return false;
   if (id === "devil" && type === "giveup") return false;
+  if (id === "pair-native" && type === "exchange") return false;
   return true;
 }
+
+const hasCompletedBoard = (s: ActivityState) => (s.completed.mines ?? 0) + (s.completed.pair ?? 0) + (s.completed["pair-native"] ?? 0) > 0;
 
 /** All returned changes (including costs and rewards) must commit in one transaction. */
 export function transitionActivity(input: ActivityState, id: string, action: ActivityAction, ctx: ActivityContext, wallet: ActivityWallet, rng = random): ActivityTransition {
   const s = normalize(input, ctx.now), rewards: ActivityReward[] = [];
   let pointsDelta = 0, earnedDelta = 0, message = "活动进度已保存。";
+  let nativePairEffects: ActivityTransition["nativePairEffects"];
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
   const count = (key: string, n = 1) => { s.daily[key] = (s.daily[key] ?? 0) + n; };
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
 
@@ -85,6 +90,12 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     const task = taskList(s, ctx).find(t => t.id === action.choice);
     need(task && task.current >= task.target && !task.claimed, "任务尚未完成或已经领取。");
     once(`task:${s.day}:${task.id}`); earn(task.points, true); message = `任务完成，获得${task.points}活动积分。`;
+  } else if (id === "pair-native") {
+    const result = advancePairNative(s.games.pairNativeV1, action, ctx, wallet, rng);
+    charge(result.cost); s.games.pairNativeV1 = result.state; rewards.push(...result.rewards);
+    for (const effect of result.effects) if (effect.type === "matched") count("pairs");
+    if (result.completed) done();
+    nativePairEffects = result.effects; message = result.message;
   } else if (id === "mines" || id === "pair") {
     if (id === "mines" && action.type === "mode") {
       need(action.choice === "open" || action.choice === "mark", "扫雷操作模式无效。");
@@ -185,7 +196,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   } else if (id === "points-gift" || id === "luxury" || id === "first-gift") {
     need(action.type === "claim", "领奖操作无效。");
     if (id === "first-gift") {
-      need((s.completed.mines ?? 0) + (s.completed.pair ?? 0) > 0, "完成一次扫雷阶段奖励或整局配对后解锁。");
+      need(hasCompletedBoard(s), "完成一次扫雷阶段奖励或整局配对后解锁。");
       once(id); rewards.push(reward(5), { templateId: 11021, count: 1 });
     } else {
       const tiers = id === "points-gift" ? C.pointsGift : C.luxuryGift;
@@ -221,8 +232,8 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     }
   } else throw new ActivityError("请通过游戏内原签到窗口签到，活动中心会同步已保存的进度。");
   if (counted) count("actions");
-  s.history = [`${ctx.now.toISOString()} ${ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message };
+  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}) };
 }
 
 const prizeName = (id: number) => PRIZES.find(p => p.templateId === id)?.name ?? `物品${id}`;
@@ -281,7 +292,7 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     } else if (["points-gift", "luxury", "first-gift"].includes(id)) {
       v.rules = ["由本地任务解锁，不接真实付款。抽奖返还、回收积分不计入累计任务积分。", "奖励不扣除积分，每档每角色仅可领取一次，永久绑定材料通过邮件交付。"];
       v.stats = [{ label: "累计任务积分", value: wallet.earned }];
-      if (id === "first-gift") button("完成首次棋盘目标后领奖", { type: "claim" }, s.claims.includes(id) || (s.completed.mines ?? 0) + (s.completed.pair ?? 0) === 0);
+      if (id === "first-gift") button("完成首次棋盘目标后领奖", { type: "claim" }, s.claims.includes(id) || !hasCompletedBoard(s));
       else (id === "points-gift" ? C.pointsGift : C.luxuryGift).forEach((n, i) => button(`${n}积分档 · 强化石×${(i + 1) * (id === "luxury" ? 5 : 3)}`, { type: "claim", tier: i + 1 }, wallet.earned < n || s.claims.includes(`${id}:${i + 1}`)));
     } else if (id === "christmas") {
       const b = s.games.christmas as SnowState | undefined;
@@ -293,5 +304,5 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     }
     return v;
   });
-  return { ...wallet, day: s.day, activities, tasks: taskList(s, ctx), history: s.history };
+  return { ...wallet, day: s.day, activities, tasks: taskList(s, ctx), history: s.history, nativePair: viewPairNative(s.games.pairNativeV1, ctx) };
 }
