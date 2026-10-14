@@ -42,7 +42,8 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  expect(result).not.toHaveProperty("nativePairAction"); expect(result).not.toHaveProperty("nativeMinesAction"); return result;
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction"]) expect(result).not.toHaveProperty(key);
+  return result;
 }
 async function walk(count: number, start = 0) { for (let index = start; index < start + count; index++) await mines({ type: "walk", index }); }
 async function pairPaidReady() {
@@ -80,7 +81,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -245,5 +246,57 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(after.states).not.toEqual(before.states); expect(await snapshot()).toMatchObject({points:130,nativeDDPlay:{spins:1,lastResult:{multiplier:10,reels:[3,3,3]}}});
     const replay = await action("ddplay-native",{type:"exchange",count:6},id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1,points:130});
     expect(replay).not.toHaveProperty("nativeDDPlayAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("keeps free refresh exact under competing UUIDs, charges one paid refresh/buy and shares eight-slot stock with legacy purchases", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},100,0)`);
+    const free = await race("gypsy-native-free-refresh-different-uuids", [
+      () => post(appA,"gypsy-native",{type:"refresh",choice:"free"}), () => post(appB,"gypsy-native",{type:"refresh",choice:"free"})]);
+    expect(free.map(response=>response.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:100,Revision:1});
+    const first = await snapshot(); expect(first.nativeGypsy).toMatchObject({refreshes:1,shelfKey:`${day}:1`,refreshCost:5,freeRefresh:false});
+    expect(first.nativeGypsy.offers).toHaveLength(8); expect((await saved()).receipts).toHaveLength(1);
+    const refreshId = randomUUID(), refreshed = await race("gypsy-native-paid-refresh-same-uuid", duplicates("gypsy-native",{type:"refresh",choice:"points"},refreshId));
+    duplicateResults(refreshed,"nativeGypsyAction"); expect(await wallet()).toEqual({Points:95,Revision:2});
+    expect(refreshed.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeGypsyAction:{requestId:refreshId,
+      effects:[{type:"refreshed",shelfKey:`${day}:2`,offerCount:8,cost:5,score:95,free:false}]}});
+    const beforeStale = await saved(); expect((await post(appA,"gypsy-native",{type:"buy",index:0,choice:first.nativeGypsy.shelfKey!})).statusCode).toBe(400);
+    expect(await saved()).toEqual(beforeStale);
+    const buyId = randomUUID(), value = {type:"buy",index:0,choice:`${day}:2`};
+    const bought = await race("gypsy-native-buy-same-uuid",duplicates("gypsy-native",value,buyId)); duplicateResults(bought,"nativeGypsyAction");
+    expect(await wallet()).toEqual({Points:80,Revision:3}); expect((await snapshot()).nativeGypsy.offers[4]).toMatchObject({templateId:11019,sold:false});
+    const beforeConflict = await saved(); expect((await post(appB,"ddplay-native",{type:"spin"},buyId)).statusCode).toBe(409); expect(await saved()).toEqual(beforeConflict);
+    const shared = await race("gypsy-legacy-native-shared-stock-different-uuids",[
+      ()=>post(appA,"gypsy",{type:"buy",index:4}),()=>post(appB,"gypsy-native",{type:"buy",index:4,choice:`${day}:2`})]);
+    expect(shared.map(response=>response.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:65,Revision:4});
+    const after = await saved(); expect(after.receipts).toHaveLength(4); expect(after.goods).toHaveLength(2); expect(after.mails).toHaveLength(2);
+    expect(after.goods.map(item=>item.Count)).toEqual([3,3]); expect(after.goods.every(item=>item.TemplateID===11019&&item.IsBinds===true)).toBe(true);
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.completed.gypsy).toBe(2); expect(state.games).not.toHaveProperty("gypsyNativeV1");
+    expect((await snapshot()).nativeGypsy.offers.filter(item=>item.sold).map(item=>item.index)).toEqual([0,4]);
+    const legacy = await action("gypsy",{type:"refresh"}); expect(legacy.points).toBe(60); expect(legacy.nativeGypsy.offers).toHaveLength(3);
+    expect(legacy).not.toHaveProperty("nativeGypsyAction"); const final = await saved();
+    const replay = await action("gypsy-native",value,buyId,appB); expect(replay).toMatchObject({replayed:true,points:60});
+    expect(replay.nativeGypsy.offers).toHaveLength(3); expect(replay).not.toHaveProperty("nativeGypsyAction"); expect(await saved()).toEqual(final); passed++;
+  });
+  it("rolls back Gypsy stock, charge and written mail on the final receipt failure, then buys the same package UUID once", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},100,0)`);
+    const shelf = await action("gypsy-native",{type:"refresh",choice:"free"}), before = await saved(), id = randomUUID();
+    const value = {type:"buy",index:0,choice:shelf.nativeGypsy.shelfKey!};
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    // This final receipt constraint is checked AFTER sendMail, wallet UPDATE and shared shelf INSERT.
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"gypsy-native",value,id); expect(failed.statusCode,failed.body).toBe(500);
+    expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retry = await race("gypsy-receipt-tail-failure-retry-same-uuid",duplicates("gypsy-native",value,id)); duplicateResults(retry,"nativeGypsyAction");
+    expect(await wallet()).toEqual({Points:85,Revision:2}); const fresh = retry.find(response=>!response.json().replayed)!.json<ActivityResult>();
+    expect(fresh).toMatchObject({mailedCount:1,nativeGypsyAction:{requestId:id,effects:[{type:"bought",shelfKey:value.choice,index:0,templateId:11019,itemCount:3,cost:15,score:85}]}});
+    const after = await saved(), items = after.goods.slice(before.goods.length), mails = after.mails.slice(before.mails.length);
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect(items.map(item=>item.Count)).toEqual([3]); expect(mails).toHaveLength(1);
+    expect(items.every(item=>item.TemplateID===11019&&item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(mails[0].ReceiverID).toBe(uid); expect(Number(mails[0].Annex1)).toBe(items[0].ItemID); expect(mails[0].Annex2).toBeNull();
+    expect((await snapshot()).nativeGypsy.offers[0]).toMatchObject({sold:true,canBuy:false});
+    expect((await snapshot()).nativeGypsy.offers[4]).toMatchObject({sold:false,canBuy:true});
+    const replay = await action("gypsy-native",value,id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1,points:85});
+    expect(replay).not.toHaveProperty("nativeGypsyAction"); expect(await saved()).toEqual(after); passed++;
   });
 });

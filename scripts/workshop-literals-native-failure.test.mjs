@@ -118,10 +118,11 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false) {
       assert.ok(!withDDPlay || withMines);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "")),
-        tag = Buffer.from(withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withGypsy || withDDPlay);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "")),
+        tag = Buffer.from(withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -130,6 +131,8 @@ function fixture() {
           "boguadventure_v3_6_1_u1.ui", "bogu-styles.xml", "bogu-player-game.png"].map(file => ["mines", file]) : [])
         .concat(withDDPlay ? ["WorkshopNativeDDPlayBootstrap.swf", "ddplay-original-library.swf", "ddplay_v3_6_1_u1.swf",
           "ddplay-styles.xml"].map(file => ["ddplay", file]) : [])
+        .concat(withGypsy ? ["WorkshopNativeGypsyBootstrap.swf", "gypsy-original-library.swf", "gypsyshop_v3_6_1_u1.swf",
+          "gypsy-styles.xml"].map(file => ["gypsy", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -137,7 +140,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -145,6 +148,7 @@ function fixture() {
     nativePath: name => path.join(overlay, "workshop-native/wardrobe", name),
     minesPath: name => path.join(overlay, "workshop-native/mines", name),
     ddplayPath: name => path.join(overlay, "workshop-native/ddplay", name),
+    gypsyPath: name => path.join(overlay, "workshop-native/gypsy", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
@@ -341,6 +345,52 @@ test("unknown or shortened DDPlay manifests and foreign destinations are refused
     if (reason === "foreign") f.put(f.ddplayPath("ddplay-styles.xml"), "user owned");
     else f.put(ddplay, JSON.stringify(manifest));
     const before = f.snapshot(); assert.throws(() => f.run("install", ddplay));
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("old6 through the previous variants upgrades to exact thirty-two assets and rolls back", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install"); f.run("install", f.upgradedBuild()); f.run("install", f.upgradedBuild(true));
+  f.run("install", f.upgradedBuild(true, true));
+  const gypsy = f.upgradedBuild(true, true, true);
+  assert.equal(f.run("verify", gypsy).nativeWardrobeInstalled, false);
+  assert.equal(f.run("install", gypsy).nativeWardrobe.assets.length, 32);
+  assert.equal(f.run("install", gypsy).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.gypsyPath("gypsy-styles.xml")), true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial Gypsy resource writes restore the prior twenty-eight asset receipt and allow retry", () => {
+  for (const file of ["WorkshopNativeGypsyBootstrap.swf", "gypsy-styles.xml"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true));
+    const before = f.snapshot(), gypsy = f.upgradedBuild(true, true, true);
+    f.arm("write", f.gypsyPath(file));
+    assert.throws(() => f.run("install", gypsy), /ENOSPC/);
+    assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", gypsy).nativeWardrobe.assets.length, 32);
+  }
+});
+
+test("Gypsy rollback failure compensates the full thirty-two asset receipt", () => {
+  const f = fixture(), original = f.snapshot(); f.run("install", f.upgradedBuild(true, true, true));
+  const installed = f.snapshot(); f.arm("unlink", f.gypsyPath("gypsyshop_v3_6_1_u1.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.deepEqual(f.snapshot(), installed); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or shortened Gypsy manifests and foreign destinations are refused before mutation", () => {
+  for (const reason of ["variant", "paths", "foreign"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true));
+    const gypsy = f.upgradedBuild(true, true, true), manifest = JSON.parse(f.fs.readFileSync(gypsy, "utf8"));
+    if (reason === "variant") manifest.variant = "wardrobe-pair-mines-ddplay-gypsy-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "foreign") f.put(f.gypsyPath("gypsy-styles.xml"), "user owned");
+    else f.put(gypsy, JSON.stringify(manifest));
+    const before = f.snapshot(); assert.throws(() => f.run("install", gypsy));
     assert.deepEqual(f.snapshot(), before);
   }
 });

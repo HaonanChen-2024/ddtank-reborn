@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -55,5 +55,15 @@ describe("ActivityCenter native entry contract", () => {
   });
   it("requires the actual game character for the DDPlay trial entry", () => {
     expect(render("ddplay", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版弹弹乐<\/button>/);
+  });
+  it("offers the original eight-slot merchant and states the shared local shelf rules", () => {
+    const html = render("gypsy");
+    expect(html).toContain("网页玩法"); expect(html).toContain("试用原版吉普赛商人");
+    expect(html).toContain("原窗刷新8件、网页刷新3件"); expect(html).toContain("两边共用货架和售罄状态");
+    expect(html).toContain("每天首次刷新免费，此后5积分"); expect(html).toContain("整包购买");
+    expect(html).toContain("顶部展示本地普通材料"); expect(html).not.toContain("试用原版弹弹乐");
+  });
+  it("requires the actual game character for the merchant trial entry", () => {
+    expect(render("gypsy", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版吉普赛商人<\/button>/);
   });
 });

@@ -23,8 +23,8 @@ export interface NativeActivityHostOptions {
   onStatus?: (status: Record<string, unknown>) => void;
 }
 export interface NativeActivitySpec {
-  activityId: "pair-native" | "mines-native" | "ddplay-native"; title: string;
-  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction";
+  activityId: "pair-native" | "mines-native" | "ddplay-native" | "gypsy-native"; title: string;
+  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction";
   parseAction: (value: unknown) => ActivityAction | null;
   validatePublic: (snapshot: ActivityResponse) => void;
 }
@@ -66,7 +66,7 @@ export function attachNativeActivityHost(options: NativeActivityHostOptions, spe
       throw new ActivityRequestError("返回操作编号不匹配，请重试原操作。", true);
     const snapshot = { ...next };
     // GET and replay synchronize current state, including when another module returned old effects.
-    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction"] as const)
+    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction"] as const)
       if (!op.request || snapshot.replayed || key !== spec.effectKey) delete snapshot[key];
     try {
       const accepted = options.accept({ generation: options.generation,

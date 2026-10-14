@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {inflateRawSync} from 'node:zlib';
+import {ByteReader} from '../../tools/i18n/abc-strings/lib.mjs';
+import {zipRecords} from '../workshop-bag-layout.mjs';
+import {scan,pinned,sha} from '../native-pair/build-library.mjs';
+import {gypsyOwners} from './build-library.mjs';
+const repo=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),A=resolve(repo,'../../runtime/reference-activities-completion-20261014'),area=resolve(A,'native-gypsy-analysis-20261015');
+const out=process.argv.find(x=>x.startsWith('--out='))?.slice(6)??resolve(area,'resources-a');assert(!existsSync(out),'preserve prior extraction');
+const corePath=resolve(A,'reference-core/2_v3_6_1_u9.png'),coreBytes=pinned(corePath,'af361678887e2413efe54e6cd86d37426cc6724ea964080178eea4816a785ae4'),core=scan(coreBytes);
+const artPath=resolve(area,'gypsyshop_v3_6_1_u1.swf'),artBytes=pinned(artPath,'1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be'),art=scan(artBytes);
+const archivePath=resolve(A,'native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png'),archive=pinned(archivePath,'1d1c4fc983ce7d3df36cb16dd1f62a93591aaf0181c67ffcf11764c927c24f33');
+const unzip=b=>zipRecords(b).records.map(r=>({name:r.name,bytes:inflateRawSync(b.subarray(r.data,r.data+r.compressedSize))}));
+const entries=unzip(archive),entry=entries.find(e=>e.name==='gypsyShop.xml');assert(entry);const xml=entry.bytes.toString('utf8');
+const parse=xml=>[...xml.matchAll(/<(set|component|custom|bitmapData|bitmap)\b[^>]*\/>/gs)].map(([raw,kind])=>({raw,kind,attrs:Object.fromEntries([...raw.matchAll(/([\w.]+)=(['"])(.*?)\2/gs)].map(m=>[m[1],m[3]]))}));
+const nodes=parse(xml);for(const n of nodes)n.key=n.attrs.stylename??n.attrs.resourceLink;assert.equal(nodes.length,40);
+const symbols=[];for(const t of art.tags.filter(t=>t.code===76)){const r=new ByteReader(art.body.subarray(t.bodyStart,t.bodyEnd));for(let n=r.u16();n;n--)symbols.push({id:r.u16(),name:r.cstring()});}
+const oldEntries=unzip(readFileSync(resolve(repo,'vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/xml.png'))),available=new Set(symbols.map(x=>x.name)),selected=new Set(nodes.map(n=>n.key));
+const omitted=['gypsy.confirmView','gypsy.rmb.confirmView','gypsy.confirmViewHonour'];
+const active=nodes.filter(n=>!omitted.includes(n.key)).map(n=>({...n,attrs:{...n.attrs}}));
+for(const n of active){if(n.attrs.closestyle==='core.roundClosebt'){n.raw=n.raw.replace('core.roundClosebt','core.closebt');n.attrs.closestyle='core.closebt';}if(n.kind==='set'&&n.attrs.type==='flash.text.TextFormat'){n.raw=n.raw.replace('宋体','Microsoft YaHei');n.attrs.args=n.attrs.args.replace('宋体','Microsoft YaHei');}}
+const help='<component classname="gypsyShop.view.GypsyHelpFrame" stylename="gypsy.local.helpFrame" backStyle="SimpleFrameBackgoundOne" width="400" height="480" titleStyle="FrameTitleTextStyle" escEnable="true" type="2" closestyle="core.closebt" closeInnerRectString="44,12,6,30,14" submitButtonStyle="core.simplebt" moveEnable="false" containerX="20" containerY="40" titleOuterRectPosString="12,11,5"/>';
+active.push({...parse(help)[0],key:'gypsy.local.helpFrame'});
+const external=[];for(const n of active)for(const [key,v]of Object.entries(n.attrs))if(['backStyle','unSelectedStyle','selectedStyle','resourceLink','parentStyle','targetFieldStyle','upStyle','downStyle','closestyle','titleStyle','textFormatStyle','filterString'].includes(key))for(const part of v.split(','))if(part&&part!=='null'&&!selected.has(part)&&!available.has(part))external.push(part);
+const find=(rows,key)=>rows.flatMap(e=>parse(e.bytes.toString('utf8')).filter(n=>n.attrs.stylename===key||n.attrs.resourceLink===key).map(n=>({entry:e.name,definition:n.raw})));
+const common=[...new Set(external)].sort().map(key=>({key,legacy:find(oldEntries,key),reference:find(entries,key)}));
+assert(common.every(c=>c.legacy.length),'all selected common styles present in legacy host');
+const owners=core.abcs.filter(a=>a.name.startsWith('gypsyShop/'));assert.equal(owners.length,19);
+const groups={component:'components',set:'sets',custom:'customDisplay',bitmapData:'bitmaps',bitmap:'bitmaps'};let subset='<style name="gypsyShop" version="1.0.1" source="ui/zh_cn/swf/gypsyShop.swf">\n';for(const group of [...new Set(Object.values(groups))]){const rows=active.filter(n=>groups[n.kind]===group);if(rows.length)subset+='  <'+group+'>\n'+rows.map(n=>'    '+n.raw).join('\n')+'\n  </'+group+'>\n';}subset+='</style>\n';
+const report={offlineOnly:true,executed:false,owners:owners.map(a=>({owner:a.name,sha256:sha(a.abc),selected:gypsyOwners.includes(a.name)})),art:{path:artPath,bytes:artBytes.length,sha256:sha(artBytes),abcOwners:art.abcs.map(a=>({owner:a.name,sha256:sha(a.abc)})),symbols},style:{originalSha256:sha(entry.bytes),originalCount:nodes.length,count:active.length,sha256:sha(Buffer.from(subset)),nodes:active,omitted,common},inputs:[{path:corePath,sha256:sha(coreBytes)},{path:archivePath,sha256:sha(archive)}]};
+mkdirSync(out,{recursive:true});writeFileSync(resolve(out,'gypsy.original.xml'),entry.bytes,{flag:'wx'});writeFileSync(resolve(out,'gypsy.styles.xml'),subset,{flag:'wx'});writeFileSync(resolve(out,'gypsy.resource-manifest.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({out,styles:active.length,styleSha256:report.style.sha256,artAbcs:report.art.abcOwners,symbolCount:symbols.length,missingCommon:common.filter(c=>!c.legacy.length)},null,2));

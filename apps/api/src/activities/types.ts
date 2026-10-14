@@ -2,6 +2,7 @@
 import type { PairNativeEffect, PairNativeView } from "./pair-native.js";
 import type { MinesNativeEffect, MinesNativeView } from "./mines-native.js";
 import type { DDPlayNativeEffect, DDPlayNativeView } from "./ddplay-native.js";
+import type { GypsyNativeEffect, GypsyNativeView } from "./gypsy-native.js";
 
 export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
@@ -38,6 +39,7 @@ export interface ActivitySnapshot {
   nativePair: PairNativeView;
   nativeMines: MinesNativeView;
   nativeDDPlay: DDPlayNativeView;
+  nativeGypsy: GypsyNativeView;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;
@@ -46,6 +48,7 @@ export interface ActivityTransition {
   nativePairEffects?: PairNativeEffect[];
   nativeMinesEffects?: MinesNativeEffect[];
   nativeDDPlayEffects?: DDPlayNativeEffect[];
+  nativeGypsyEffects?: GypsyNativeEffect[];
 }
 export class ActivityError extends Error {
   constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }

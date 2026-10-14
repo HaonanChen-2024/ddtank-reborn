@@ -64,7 +64,7 @@ try {
   assert.deepEqual(hashes(), receipt.source, "Sources changed while native tests ran; repeat against stable sources");
   const evidence = JSON.parse(readFileSync(join(directory, "test-evidence.json"), "utf8"));
   assert.equal(evidence.database, database); assert.equal(evidence.token, token);
-  assert.equal(evidence.passed, 9); assert.equal(evidence.closedConnections, true);
+  assert.equal(evidence.passed, 11); assert.equal(evidence.closedConnections, true);
   receipt.passed = evidence.passed; receipt.connectionPids = evidence.connectionPids; receipt.lockScenarios = evidence.scenarios.length;
   receipt.phase = "passed";
 } catch (error) {

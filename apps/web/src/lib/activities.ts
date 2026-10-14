@@ -23,6 +23,8 @@ export interface ActivityResponse extends ActivitySnapshot {
   nativeMinesAction?: { requestId: string; effects: unknown[] };
   nativeDDPlay?: unknown;
   nativeDDPlayAction?: { requestId: string; effects: unknown[] };
+  nativeGypsy?: unknown;
+  nativeGypsyAction?: { requestId: string; effects: unknown[] };
 }
 export interface ActivityRequest {
   characterId: number; activityId: string; requestId: string; action: ActivityAction;

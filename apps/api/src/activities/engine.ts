@@ -6,6 +6,7 @@ import { actPairBox, createPairBox, viewPairBox, type PairBoxAction, type PairBo
 import { advancePairNative, viewPairNative } from "./pair-native.js";
 import { advanceMinesNative, viewMinesNative } from "./mines-native.js";
 import { advanceDDPlayNative, viewDDPlayNative } from "./ddplay-native.js";
+import { advanceGypsy, viewGypsyNative, type GypsyState } from "./gypsy-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
@@ -21,7 +22,6 @@ function randomIndex(length: number, rng: () => number) {
 const chanceIds = ["wheel", "devil", "ddplay", "carnival"] as const;
 type ChanceId = typeof chanceIds[number];
 interface BagState { bag: ActivityReward[]; draws: number; score: number; fragments: number; pity: number; choices: string[]; claimed: number[] }
-interface ShopState { offers: { templateId: number; count: number; price: number; sold: boolean }[]; day: string; refreshes: number }
 interface SnowState { cells: number[]; opened: number[]; found: number; expires: string; claimed: boolean; round: number }
 function bagState(state: ActivityState, id: string): BagState {
   return (state.games[id] as BagState | undefined) ?? { bag: [], draws: 0, score: 0, fragments: 0, pity: 0, choices: PRIZES.map(p => p.name), claimed: [] };
@@ -81,13 +81,14 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let nativePairEffects: ActivityTransition["nativePairEffects"];
   let nativeMinesEffects: ActivityTransition["nativeMinesEffects"];
   let nativeDDPlayEffects: ActivityTransition["nativeDDPlayEffects"];
+  let nativeGypsyEffects: ActivityTransition["nativeGypsyEffects"];
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
   const count = (key: string, n = 1) => { s.daily[key] = (s.daily[key] ?? 0) + n; };
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
 
@@ -191,20 +192,12 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
       if (b.choices.includes(action.choice)) { need(b.choices.length > 1, "请至少保留一类宝物。"); b.choices = b.choices.filter(c => c !== action.choice); }
       else b.choices.push(action.choice);
     } else throw new ActivityError("寻宝操作无效。");
-  } else if (id === "gypsy") {
-    let shop = s.games.gypsy as ShopState | undefined;
-    if (action.type === "refresh") {
-      const free = !shop || shop.day !== s.day;
-      if (!free) charge(5);
-      const picks = [...C.shop];
-      for (let i = picks.length - 1; i > 0; i--) { const j = randomIndex(i + 1, rng); [picks[i], picks[j]] = [picks[j], picks[i]]; }
-      shop = { day: s.day, refreshes: free ? 1 : shop!.refreshes + 1, offers: picks.slice(0, 3).map(p => ({ ...p, sold: false })) };
-      s.games.gypsy = shop; message = free ? "已使用今日免费刷新。" : "已花费5积分刷新货架。";
-    } else if (action.type === "buy") {
-      need(shop && integer(action.index, 0, shop.offers.length - 1), "请先刷新货架。");
-      const p = shop.offers[action.index]; need(!p.sold, "这件商品已售罄。"); charge(p.price); p.sold = true;
-      rewards.push({ templateId: p.templateId, count: p.count }); done(); message = "购买成功，商品已寄往邮箱。";
-    } else throw new ActivityError("商店操作无效。");
+  } else if (id === "gypsy" || id === "gypsy-native") {
+    const result = advanceGypsy(s.games.gypsy, action, ctx, wallet, rng, id === "gypsy-native");
+    charge(result.cost); s.games.gypsy = result.state; rewards.push(...result.rewards);
+    if (result.completed) s.completed.gypsy = (s.completed.gypsy ?? 0) + 1;
+    if (id === "gypsy-native") nativeGypsyEffects = result.effects;
+    message = result.message;
   } else if (id === "exchange") {
     need(action.type === "exchange" && integer(action.index, 0, C.shop.length - 1), "兑换配方无效。");
     const p = C.shop[action.index]; need((s.daily[`exchange:${action.index}`] ?? 0) < 3, "此配方今日已兑换3次。");
@@ -250,8 +243,8 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     }
   } else throw new ActivityError("请通过游戏内原签到窗口签到，活动中心会同步已保存的进度。");
   if (counted) count("actions");
-  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}) };
+  s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}) };
 }
 
 const prizeName = (id: number) => PRIZES.find(p => p.templateId === id)?.name ?? `物品${id}`;
@@ -296,9 +289,9 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
       if (id === "treasure") { v.rules.push("普通寻宝只抽已选材料，概率按原权重重新分配；保底固定强化石2级×2。高级寻宝需全选4类，数量翻倍。");
         for (const c of PRIZES.map(p => p.name)) button(`${b.choices.includes(c) ? "✓ " : ""}${c}`, { type: "category", choice: c }); }
     } else if (id === "gypsy" || id === "exchange") {
-      const shop = s.games.gypsy as ShopState | undefined;
+      const shop = s.games.gypsy as GypsyState | undefined;
       const offers = id === "gypsy" ? shop?.offers ?? [] : C.shop;
-      v.rules = id === "gypsy" ? ["每天第一次刷新免费，此后每次5积分。每轮3件商品，每件限购一次。", "商品在刷新前保持不变，购买后由游戏邮件交付。"] : ["本地积分兑换，单配方每天最多3次。", "原游戏材料兑换仍保留原规则和入口。"];
+      v.rules = id === "gypsy" ? ["每天第一次刷新免费，此后每次5积分。网页刷新每轮3件，原窗口刷新每轮8件，两入口共用当前货架，每格限购一次。", "商品在刷新前保持不变，购买后由游戏邮件交付。"] : ["本地积分兑换，单配方每天最多3次。", "原游戏材料兑换仍保留原规则和入口。"];
       if (id === "gypsy") button(!shop || shop.day !== s.day ? "今日免费刷新" : "刷新 · 5积分", { type: "refresh" });
       v.cells = offers.map((p, index) => ({ label: prizeName(p.templateId), detail: `×${p.count} · ${p.price}积分`, tone: "gold", action: "sold" in p && p.sold ? undefined : { type: id === "gypsy" ? "buy" : "exchange", index } })); v.columns = 3;
     } else if (id === "wardrobe") {
@@ -323,5 +316,6 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     return v;
   });
   return { ...wallet, day: s.day, activities, tasks: taskList(s, ctx), history: s.history, nativePair: viewPairNative(s.games.pairNativeV1, ctx), nativeMines: viewMinesNative(s.games.minesNativeV1, ctx),
-    nativeDDPlay: viewDDPlayNative(s.games.ddplay, wallet, (s.daily.actions ?? 0) < C.maxDailyActions) };
+    nativeDDPlay: viewDDPlayNative(s.games.ddplay, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
+    nativeGypsy: viewGypsyNative(s.games.gypsy, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions) };
 }

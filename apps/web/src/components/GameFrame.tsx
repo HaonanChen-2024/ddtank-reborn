@@ -6,6 +6,7 @@ import type { ActivityResponse } from "@/lib/activities";
 import { attachNativePairHost, type NativePairPlayer } from "@/lib/native-pair-host";
 import { attachNativeMinesHost, type NativeMinesPlayer } from "@/lib/native-mines-host";
 import { attachNativeDDPlayHost, type NativeDDPlayPlayer } from "@/lib/native-ddplay-host";
+import { attachNativeGypsyHost, type NativeGypsyPlayer } from "@/lib/native-gypsy-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -20,7 +21,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -37,6 +38,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenDDPlay?: (characterId: number, generation: string) => boolean;
   workshopStatusDDPlay?: () => NativePairStatus;
   workshopCloseDDPlay?: () => unknown;
+  workshopOpenGypsy?: (characterId: number, generation: string) => boolean;
+  workshopStatusGypsy?: () => NativePairStatus;
+  workshopCloseGypsy?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -140,6 +144,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       ddplayCharacterId = 0;
       ddplayGeneration = "";
     };
+    let gypsyRequest: { cancel: () => void } | null = null;
+    let gypsyHost: ReturnType<typeof attachNativeGypsyHost> | null = null;
+    let gypsyCharacterId = 0;
+    let gypsyGeneration = "";
+    const detachGypsy = () => {
+      gypsyRequest?.cancel();
+      gypsyHost?.cancel();
+      gypsyHost = null;
+      gypsyCharacterId = 0;
+      gypsyGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -180,6 +195,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachMines();
 
           detachDDPlay();
+          detachGypsy();
           player?.remove();
           player = null;
         };
@@ -412,6 +428,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (ddplayRequest === request) ddplayRequest = null;
           }
         };
+        window.workshopShowGypsy = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenGypsy || !owner.workshopStatusGypsy || !owner.workshopCloseGypsy) return false;
+          try {
+            const initial = owner.workshopStatusGypsy();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (gypsyHost && gypsyCharacterId !== characterId) return false;
+            if (!gypsyHost) {
+              gypsyCharacterId = characterId;
+              gypsyGeneration = crypto.randomUUID();
+              const generation = gypsyGeneration;
+              gypsyHost = attachNativeGypsyHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || gypsyCharacterId !== characterId || gypsyGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusGypsy?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          gypsyRequest?.cancel();
+          const request = { cancel: () => {
+            if (gypsyRequest !== request) return;
+            gypsyRequest = null;
+            try { owner.workshopCloseGypsy?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          gypsyRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenGypsy(characterId, gypsyGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (gypsyRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusGypsy();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === gypsyGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (gypsyRequest === request) gypsyRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -433,6 +504,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         detachMines();
 
         detachDDPlay();
+        detachGypsy();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -446,6 +518,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachMines();
 
       detachDDPlay();
+      detachGypsy();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -454,6 +527,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowPair;
       delete window.workshopShowMines;
       delete window.workshopShowDDPlay;
+      delete window.workshopShowGypsy;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);
