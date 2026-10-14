@@ -118,12 +118,13 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
       assert.ok(!withMoonlight || withGypsy);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "")),
-        tag = Buffer.from(withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withTreasure || withMoonlight);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "")),
+        tag = Buffer.from(withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -136,6 +137,8 @@ function fixture() {
           "gypsy-styles.xml"].map(file => ["gypsy", file]) : [])
         .concat(withMoonlight ? ["WorkshopNativeMoonlightBootstrap.swf", "moonlight-original-library.swf", "moonlighttreasure_v3_6_1_u1.swf",
           "moonlighttreasure_v3_6_1_u1.ui"].map(file => ["moonlight", file]) : [])
+        .concat(withTreasure ? ["WorkshopNativeTreasureBootstrap.swf", "treasure-original-library.swf", "treasurehunting_v3_6_1_u1.swf",
+          "treasurehunting_v3_6_1_u1.ui", "treasure-styles.xml"].map(file => ["treasure", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -143,7 +146,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -153,6 +156,7 @@ function fixture() {
     ddplayPath: name => path.join(overlay, "workshop-native/ddplay", name),
     gypsyPath: name => path.join(overlay, "workshop-native/gypsy", name),
     moonlightPath: name => path.join(overlay, "workshop-native/moonlight", name),
+    treasurePath: name => path.join(overlay, "workshop-native/treasure", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
@@ -442,5 +446,44 @@ test("unknown or shortened Moonlight manifests and foreign destinations are refu
     else f.put(moonlight, JSON.stringify(manifest));
     const before = f.snapshot(); assert.throws(() => f.run("install", moonlight));
     assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("old6 through previous variants upgrades to exact forty-one assets and fully rolls back", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install"); f.run("install", f.upgradedBuild()); f.run("install", f.upgradedBuild(true));
+  f.run("install", f.upgradedBuild(true, true, true)); f.run("install", f.upgradedBuild(true, true, true, true));
+  const treasure = f.upgradedBuild(true, true, true, true, true);
+  assert.equal(f.run("verify", treasure).nativeWardrobeInstalled, false);
+  assert.equal(f.run("install", treasure).nativeWardrobe.assets.length, 41);
+  assert.equal(f.run("install", treasure).unchanged, true); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.fs.existsSync(f.treasurePath("treasure-styles.xml")), true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+test("partial Treasure writes restore the thirty-six asset baseline before exact retry", () => {
+  for (const file of ["WorkshopNativeTreasureBootstrap.swf", "treasure-styles.xml"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true, true, true));
+    const before = f.snapshot(), treasure = f.upgradedBuild(true, true, true, true, true);
+    f.arm("write", f.treasurePath(file)); assert.throws(() => f.run("install", treasure), /ENOSPC/);
+    assert.equal(f.failureCount, 1); assert.equal(f.openHandles, 0); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true); assert.equal(f.run("install", treasure).nativeWardrobe.assets.length, 41);
+  }
+});
+test("Treasure rollback failure compensates every owned asset and supports full retry", () => {
+  const f = fixture(), original = f.snapshot(); f.run("install", f.upgradedBuild(true, true, true, true, true));
+  const installed = f.snapshot(); f.arm("unlink", f.treasurePath("treasurehunting_v3_6_1_u1.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/); assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("verify").unchanged, true); assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+test("unknown or short Treasure manifests and foreign destinations fail without mutation", () => {
+  for (const reason of ["variant", "paths", "foreign"]) {
+    const f = fixture(); f.run("install", f.upgradedBuild(true, true, true, true));
+    const treasure = f.upgradedBuild(true, true, true, true, true), manifest = JSON.parse(f.fs.readFileSync(treasure, "utf8"));
+    if (reason === "variant") manifest.variant = "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "foreign") f.put(f.treasurePath("treasure-styles.xml"), "user owned");
+    else f.put(treasure, JSON.stringify(manifest));
+    const before = f.snapshot(); assert.throws(() => f.run("install", treasure)); assert.deepEqual(f.snapshot(), before);
   }
 });

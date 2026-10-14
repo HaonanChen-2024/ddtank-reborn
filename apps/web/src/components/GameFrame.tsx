@@ -8,6 +8,7 @@ import { attachNativeMinesHost, type NativeMinesPlayer } from "@/lib/native-mine
 import { attachNativeDDPlayHost, type NativeDDPlayPlayer } from "@/lib/native-ddplay-host";
 import { attachNativeGypsyHost, type NativeGypsyPlayer } from "@/lib/native-gypsy-host";
 import { attachNativeMoonlightHost, type NativeMoonlightPlayer } from "@/lib/native-moonlight-host";
+import { attachNativeTreasureHost, type NativeTreasurePlayer } from "@/lib/native-treasure-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -22,7 +23,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -45,6 +46,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenMoonlight?: (characterId: number, generation: string) => boolean;
   workshopStatusMoonlight?: () => NativePairStatus;
   workshopCloseMoonlight?: () => unknown;
+  workshopOpenTreasure?: (characterId: number, generation: string) => boolean;
+  workshopStatusTreasure?: () => NativePairStatus;
+  workshopCloseTreasure?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -170,6 +174,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       moonlightCharacterId = 0;
       moonlightGeneration = "";
     };
+    let treasureRequest: { cancel: () => void } | null = null;
+    let treasureHost: ReturnType<typeof attachNativeTreasureHost> | null = null;
+    let treasureCharacterId = 0;
+    let treasureGeneration = "";
+    const detachTreasure = () => {
+      treasureRequest?.cancel();
+      treasureHost?.cancel();
+      treasureHost = null;
+      treasureCharacterId = 0;
+      treasureGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -212,6 +227,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachDDPlay();
           detachGypsy();
       detachMoonlight();
+      detachTreasure();
           player?.remove();
           player = null;
         };
@@ -554,6 +570,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (moonlightRequest === request) moonlightRequest = null;
           }
         };
+        window.workshopShowTreasure = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenTreasure || !owner.workshopStatusTreasure || !owner.workshopCloseTreasure) return false;
+          try {
+            const initial = owner.workshopStatusTreasure();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (treasureHost && treasureCharacterId !== characterId) return false;
+            if (!treasureHost) {
+              treasureCharacterId = characterId;
+              treasureGeneration = crypto.randomUUID();
+              const generation = treasureGeneration;
+              treasureHost = attachNativeTreasureHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || treasureCharacterId !== characterId || treasureGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusTreasure?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          treasureRequest?.cancel();
+          const request = { cancel: () => {
+            if (treasureRequest !== request) return;
+            treasureRequest = null;
+            try { owner.workshopCloseTreasure?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          treasureRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenTreasure(characterId, treasureGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (treasureRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusTreasure();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === treasureGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (treasureRequest === request) treasureRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -577,6 +648,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         detachDDPlay();
         detachGypsy();
       detachMoonlight();
+      detachTreasure();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -592,6 +664,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachDDPlay();
       detachGypsy();
       detachMoonlight();
+      detachTreasure();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -602,6 +675,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowDDPlay;
       delete window.workshopShowGypsy;
       delete window.workshopShowMoonlight;
+      delete window.workshopShowTreasure;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

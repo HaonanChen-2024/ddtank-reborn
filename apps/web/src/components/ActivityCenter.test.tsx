@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -73,5 +73,14 @@ describe("ActivityCenter native entry contract", () => {
   });
   it("requires the actual game character for the merchant trial entry", () => {
     expect(render("gypsy", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版吉普赛商人<\/button>/);
+  });
+  it("offers original treasure with a finite local batch and shared bag rules", () => {
+    const html = render("treasure"); expect(html).toContain("网页玩法"); expect(html).toContain("试用原版迷宫寻宝");
+    expect(html).toContain("30积分"); expect(html).toContain("60积分"); expect(html).toContain("5次有限批次");
+    expect(html).toContain("共用30格临时包"); expect(html).toContain("单格取出"); expect(html).toContain("全服排行尚未接入");
+    expect(html).not.toContain("试用原版月光宝盒");
+  });
+  it("requires the actual game character for the treasure trial entry", () => {
+    expect(render("treasure", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版迷宫寻宝<\/button>/);
   });
 });

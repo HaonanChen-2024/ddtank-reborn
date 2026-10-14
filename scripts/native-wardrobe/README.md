@@ -14,7 +14,7 @@ node scripts/native-shared/build-activities.mjs <不存在的runtime输出目录
 
 `buildNativeWardrobe({ outputDir, projectRoot, javaPath, sharedLibraries })` 只输出衣橱组件；组件manifest明确要求联合构建，不能独立安装。默认项目根为仓库上两层，Java 为当前用户的 `.jdks/openjdk-22.0.1/bin/java.exe`。`source-spec.json` 固定本地原件、原参考 core、编译器和 PlayerGlobal 哈希；输入不符或输出目录已存在时拒绝构建。旧完整92类包及旧生产manifest保留为已安装批次的恢复依赖。
 
-衣橱组件输出包含，当前联合manifest另汇集共享、翻牌、原70格扫雷、原弹弹乐、原吉普赛商人与原月光宝盒资源共36项，variant为 `wardrobe-pair-mines-ddplay-gypsy-moonlight`；旧6/18/24/28/32项包保持兼容：
+衣橱组件输出包含，当前联合构建另汇集共享、翻牌、原70格扫雷、原弹弹乐、原吉普赛商人、原月光宝盒与原迷宫寻宝资源共41项，variant为 `wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure`；旧6/18/24/28/32/36项包保持兼容：
 
 - `flash/workshop-native/wardrobe/`：Bootstrap 和五份原业务/美术/布局/目录资源，共六文件。
 - `bridge/WorkshopNativeWardrobeBridge.doabc-tag.bin`：**含 SWF tag 头**的单个 tag 82，owner 为 `workshop/native/WorkshopNativeWardrobeBridge/v1`，flags 为 1。

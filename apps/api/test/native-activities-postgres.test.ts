@@ -42,7 +42,7 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 async function walk(count: number, start = 0) { for (let index = start; index < start + count; index++) await mines({ type: "walk", index }); }
@@ -81,7 +81,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -383,5 +383,109 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(final.receipts.length-delivered.receipts.length).toBe(1); expect((await snapshot()).nativeMoonlight).toMatchObject({bagSlotsUsed:2,bag:[{index:0,itemCount:1},{index:1,itemCount:1}]});
     const replay = await action("moonlight-native",value,id,appB); expect(replay).toMatchObject({replayed:true,mailedCount:1,points:802});
     expect(replay).not.toHaveProperty("nativeMoonlightAction"); expect(await saved()).toEqual(final); passed++;
+  });
+  it("keeps Treasure classifications shared, deduplicates five advanced draws and serializes old/native draws into the same bag", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const initial = await snapshot();
+    const chosen = await action("treasure-native",{type:"choose",index:3,marked:false,choice:initial.nativeTreasure.bagToken});
+    expect(await wallet()).toEqual({Points:1000,Revision:1});
+    const unavailable = await saved();
+    expect((await post(appB,"treasure-native",{type:"draw",mode:"advanced",count:5,choice:chosen.nativeTreasure.bagToken})).statusCode).toBe(400);
+    expect(await saved()).toEqual(unavailable);
+    const restored = await action("treasure",{type:"category",choice:"朱雀石2级"}), id = randomUUID();
+    const value = {type:"draw",mode:"advanced" as const,count:5,choice:restored.nativeTreasure.bagToken};
+    const same = await race("treasure-native-five-advanced-draws-same-uuid",duplicates("treasure-native",value,id));
+    duplicateResults(same,"nativeTreasureAction"); expect(await wallet()).toEqual({Points:700,Revision:3});
+    const first = await snapshot(); expect(first.nativeTreasure).toMatchObject({draws:5,bagSlotsUsed:5});
+    expect(first.nativeTreasure.bag.map(row=>[row.index,row.templateId,row.itemCount])).toEqual(Array.from({length:5},(_,index)=>[index,11002,2]));
+    expect(same.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeTreasureAction:{requestId:id,
+      effects:[{type:"drawn",mode:"advanced",count:5,cost:300,score:700,draws:5,
+        rewards:Array.from({length:5},(_,index)=>({index,sourceOriginalIndex:4,templateId:11002,itemCount:2}))}]}});
+    const competing = await race("treasure-legacy-native-draws-different-uuids",[
+      ()=>post(appA,"treasure",{type:"draw",count:2}),
+      ()=>post(appB,"treasure-native",{type:"draw",mode:"normal",count:1,choice:first.nativeTreasure.bagToken})]);
+    expect(competing[0].statusCode,competing[0].body).toBe(200); expect([200,400]).toContain(competing[1].statusCode);
+    const nativeWon = competing[1].statusCode===200, draws = nativeWon?8:7, current = await snapshot(), after = await saved();
+    expect(competing[0].json()).not.toHaveProperty("nativeTreasureAction");
+    if(nativeWon) expect(competing[1].json()).toHaveProperty("nativeTreasureAction");
+    else expect(competing[1].json().message).toContain("临时包、分类或日期已更新");
+    expect(await wallet()).toEqual({Points:nativeWon?610:640,Revision:nativeWon?5:4});
+    expect(current.nativeTreasure).toMatchObject({draws,bagSlotsUsed:draws});
+    expect(current.nativeTreasure.bag.map(row=>[row.index,row.templateId,row.itemCount])).toEqual(Array.from({length:draws},(_,index)=>[index,11002,index<5?2:1]));
+    expect(after.receipts).toHaveLength(nativeWon?5:4); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.games).not.toHaveProperty("treasureNativeV1"); expect(state.daily.actions).toBe(nativeWon?3:2);
+    const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true});
+    expect(replay).not.toHaveProperty("nativeTreasureAction");
+    expect((await post(appA,"moonlight-native",{type:"draw",count:1,choice:(await snapshot()).nativeMoonlight.bagToken},id)).statusCode).toBe(409);
+    expect(await saved()).toEqual(after); passed++;
+  });
+  it("takes one Treasure slot per UUID, preserves the other draw rows and settles one legacy/native whole-bag competitor", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const ready = await action("treasure-native",{type:"draw",mode:"advanced",count:5,choice:(await snapshot()).nativeTreasure.bagToken});
+    const id = randomUUID(), value = {type:"take",index:2,choice:ready.nativeTreasure.bagToken}, before = await saved();
+    const one = await race("treasure-single-slot-take-same-uuid",duplicates("treasure-native",value,id));
+    duplicateResults(one,"nativeTreasureAction"); expect(await wallet()).toEqual({Points:700,Revision:2});
+    const partial = await saved(), current = await snapshot();
+    expect(current.nativeTreasure.bag.map(row=>[row.index,row.templateId,row.itemCount])).toEqual(Array.from({length:4},(_,index)=>[index,11002,2]));
+    expect(current.nativeTreasure.bagToken).not.toBe(ready.nativeTreasure.bagToken);
+    expect(partial.goods.map(item=>[item.TemplateID,item.Count])).toEqual([[11002,2]]); expect(partial.mails).toHaveLength(1);
+    expect(partial.goods[0]).toMatchObject({UserID:0,Place:-1,IsBinds:true,ValidDate:0}); expect(Number(partial.mails[0].Annex1)).toBe(partial.goods[0].ItemID);
+    expect(partial.receipts.length-before.receipts.length).toBe(1);
+    expect(one.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeTreasureAction:{requestId:id,effects:[{type:"taken",itemCount:2,items:[{index:2,templateId:11002,itemCount:2}]}]}});
+    expect((await post(appA,"treasure-native",{type:"take",index:2,choice:ready.nativeTreasure.bagToken})).statusCode).toBe(400);
+    expect(await saved()).toEqual(partial);
+    const whole = await race("treasure-native-take-legacy-recycle-different-uuids",[
+      ()=>post(appA,"treasure-native",{type:"take",choice:current.nativeTreasure.bagToken}),
+      ()=>post(appB,"treasure",{type:"recycle"})]);
+    expect(whole.map(response=>response.statusCode).sort()).toEqual([200,400]);
+    const took = whole[0].statusCode===200, after = await saved(); expect(await wallet()).toEqual({Points:took?700:716,Revision:3});
+    expect((await snapshot()).nativeTreasure.bag).toEqual([]); expect(after.receipts.length-partial.receipts.length).toBe(1);
+    if(took) {
+      expect(whole[0].json()).toMatchObject({mailedCount:1,nativeTreasureAction:{effects:[{type:"taken",itemCount:8}]}});
+      expect(after.goods.slice(partial.goods.length).map(item=>item.Count)).toEqual([2,2,2,2]);
+      expect(after.mails.length-partial.mails.length).toBe(1);
+    } else {
+      expect(whole[1].json()).not.toHaveProperty("nativeTreasureAction"); expect(after.goods).toEqual(partial.goods); expect(after.mails).toEqual(partial.mails);
+    }
+    const expired = `${new Date(Date.parse(`${day}T00:00:00Z`)-86400000).toISOString().slice(0,10)}:${current.nativeTreasure.bagToken.split(":")[1]}`;
+    expect((await post(appB,"treasure-native",{type:"draw",mode:"normal",count:1,choice:expired})).statusCode).toBe(400);
+    const replay = await action("treasure-native",value,id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1}); expect(replay.nativeTreasure.bag).toEqual([]);
+    expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("reverts Treasure full-bag mail and recycled points on final receipt failures, then retries each UUID once", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const first = await action("treasure-native",{type:"draw",mode:"advanced",count:5,choice:(await snapshot()).nativeTreasure.bagToken});
+    const ready = await action("treasure-native",{type:"draw",mode:"advanced",count:5,choice:first.nativeTreasure.bagToken});
+    expect(ready.nativeTreasure.bag.map(row=>[row.templateId,row.itemCount])).toEqual([...Array.from({length:9},()=>[11002,2]),[11021,4]]);
+    const id = randomUUID(), value = {type:"take",choice:ready.nativeTreasure.bagToken}, before = await saved();
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"treasure-native",value,id); expect(failed.statusCode,failed.body).toBe(500);
+    expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retry = await race("treasure-full-mail-tail-failure-retry-same-uuid",duplicates("treasure-native",value,id));
+    duplicateResults(retry,"nativeTreasureAction"); expect(await wallet()).toEqual({Points:400,Revision:3});
+    const delivered = await saved(), items = delivered.goods.slice(before.goods.length), mails = delivered.mails.slice(before.mails.length);
+    expect(retry.find(response=>!response.json().replayed)!.json()).toMatchObject({mailedCount:2,nativeTreasureAction:{requestId:id,effects:[{type:"taken",itemCount:22}]}});
+    expect(items.map(item=>[item.TemplateID,item.Count])).toEqual([...Array.from({length:9},()=>[11002,2]),[11021,4]]); expect(mails).toHaveLength(2);
+    expect(items.every(item=>item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0&&Number(item.Count)<=5)).toBe(true);
+    expect(items.filter(item=>item.TemplateID===11002).reduce((sum,item)=>sum+Number(item.Count),0)).toBe(18);
+    expect(items.filter(item=>item.TemplateID===11021).reduce((sum,item)=>sum+Number(item.Count),0)).toBe(4);
+    expect(mails.flatMap(mail=>[mail.Annex1,mail.Annex2,mail.Annex3,mail.Annex4,mail.Annex5].filter(Boolean).map(Number))).toEqual(items.map(item=>item.ItemID));
+    expect(delivered.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeTreasure.bag).toEqual([]);
+    const refill = await action("treasure-native",{type:"draw",mode:"advanced",count:1,choice:(await snapshot()).nativeTreasure.bagToken});
+    const recycleId = randomUUID(), recycle = {type:"recycle",choice:refill.nativeTreasure.bagToken}, recycleBefore = await saved();
+    assert.match(recycleId,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${recycleId}') NOT VALID`));
+    expect((await post(appA,"treasure-native",recycle,recycleId)).statusCode).toBe(500); expect(await saved()).toEqual(recycleBefore);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const recycled = await race("treasure-full-recycle-tail-failure-retry-same-uuid",duplicates("treasure-native",recycle,recycleId));
+    duplicateResults(recycled,"nativeTreasureAction"); expect(await wallet()).toEqual({Points:344,Revision:5});
+    expect(recycled.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeTreasureAction:{requestId:recycleId,effects:[{type:"recycled",pointsAwarded:4,score:344}]}});
+    const final = await saved(); expect(final.goods).toEqual(recycleBefore.goods); expect(final.mails).toEqual(recycleBefore.mails);
+    expect(final.receipts.length-recycleBefore.receipts.length).toBe(1); expect((await snapshot()).nativeTreasure.bag).toEqual([]);
+    const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({replayed:true,points:344});
+    expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await saved()).toEqual(final); passed++;
   });
 });

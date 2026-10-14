@@ -26,6 +26,12 @@ GET 不创建状态，不返回隐藏的雷区、牌序或雪人位置。奖励�
 
 ### 原窗口移植检查点（2026-10-15）
 
+原迷宫寻宝新增 `treasure-native`、公开 `nativeTreasure` 与首次提交效果 `nativeTreasureAction`，和旧网页共用 `games.treasure`、钱包与邮件事务。原窗仅启用明确标注的四种普通材料分类，包30条；普通每抽30积分、高级60积分且四类全选，保底与高级数量翻倍保留。连续选项改为一次确认、一个UUID、count=5的原子有限批次，关闭不再提交自动下一抽，已提交结果仍保存。原未知券、完整14分类、全服/跨服榜与榜奖待移植，不假造排行。原积分按钮只明示映射本地活动积分，不冒称原彩票积分。
+
+所有native动作带当前UTC日期与完整SHA256的54字符包令牌。`choose(index,marked)` 只改四类选择，`take(index?)` 有index时整格邮寄且保留其余旧记录，无index全取；回收全包按数量返2积分，10碎片兑换和三档进度保留本地规则。只有 `treasure-native` 接受可选 `mode: normal|advanced` 字段，`items` 仍只有月光可用。GET不初始化、重放无动画；记录来自当前角色真实history，不新增全服榜或持久化。每天500次只限制新抽取，选择和已有奖励结算不计次。
+
+新13及既有61项API通过；Web最终迷宫24项、入口13项和其余64项既有通过，后两组未随最终数量修复再改；28安装故障、API/Web类型通过。独立审查修正网页误拒普通强化石2级×1，GET/POST均补回归。原生PG17项/29行锁/4连接/21源码pins通过并删除测试库、关闭连接；高级十抽实际10堆/2封邮件，整格领取保留其余格，取全包/回收尾回执失败五表回滚，同UUID只提交一次。证据 `runtime/reference-activities-completion-20261014/native-postgres-40f229fe-4145-4388-9619-92f0f5b33d44/receipt.json`。联合最终候选 `native-unified-treasure-candidate-20261015-c` 含41固定资源/34源码pins，manifest SHA256 `454922e71119db4db96b6c99aa9d817d6df3625e417fb99a2faabbb64e9fc35d`；编译与独立actualABC审查通过。17原业务/布局ABC、63适配分派、149其余方法体及24原方法不变；76美术symbol、22样式和6活跃布局依赖已核，raw原件保持。原Glint的frame56跳15保留，运行实例明确将slot55改为stop，实际56帧由原onEnterFrame检测后执行原飞包Tween与movieComplete；最后确认奖励结束才解锁，不用超时伪造完成或额外POST。修正新记录面板初始覆盖、两个原回调提前启用checkbox及旧Bag监听；关闭停止两Timer与movie、清完成回调、kill/clear Timeline并销毁proxy/bitmap，迟到结果不重开。21公共+30模块回调唯一，82共享只导入一次，6宿主定义无交集。Node24 V8 IsHeapObject工具崩溃仅用构建命令--jitless规避，a/b失败日志保留。真实SWF隔离6→18→36b→41c/重复/无flag验证/3core及41资源完整回滚通过，14现役输入保持；证据 `runtime/reference-activities-completion-20261014/isolated-native-upgrade-d3efa74a-4478-4d2b-a17c-8b9d9c43871f/receipt.json`。9脚本语法及源码/资源/桥接/PG21pins核验通过。候选未部署，字体、位置、动画、关闭及UI邮件尚未客户端验收，原A01与原17未完整移植。
+
 原月光宝盒增加 `moonlight-native`、公开 `nativeMoonlight` 与首次提交效果 `nativeMoonlightAction`。两入口共用旧 `games.moon` 临时包、碎片与进度；不新增迁移、路线或钥匙货币。原窗三档为明示的本地1/3/5抽，每抽20活动积分，四种普通材料及保底沿用本地规则。旧网页仍支持1至5抽和全取/全回收。native按模板聚合显示，`take`/`recycle` 只结算所选数量，余量按旧记录顺序保留；每单位回收2积分。动作必须携带当前UTC日期与完整SHA256的54字符 `bagToken`，旧包或跨日请求拒绝，不替用户改变消费。
 
 现有 action 路线仅对 `moonlight-native` 允许 `items: [{index,count}]`，其他活动仍拒绝；最多四个不同材料索引、数量须在真实余量内，不能提交模板、价格或货币。`draw` 仅1/3/5，`progress` 仅1/2/3，`exchange` 为10碎片换普通强化石2级×2。GET不创建状态或播放开盒，回执重放不重复效果；每天500次只限制新抽取，既有奖励仍可结算。邮件、积分、状态和回执沿用同一钱包行锁事务。原商城/排行仍待移植，当前入口明确禁用，不能据此称完整A07或17项完成。
