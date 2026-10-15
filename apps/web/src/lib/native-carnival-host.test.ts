@@ -22,7 +22,7 @@ const projection = (personalScore = 0, redPackageCount = 0, remainDrawCount = 10
   rules: { version: 1, drawCost: 10, maxBatchCount: 5, exchangeMaxCount: 10, maxDraws: 100_000_000,
     maxRedPackets: 300_000_000, recordLimit: 20, probabilityNumerator: 1, probabilityDenominator: 12,
     description: "本地积分及红包，无真实付款" },
-  unavailable: ["全服奖池", "全服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"],
+  unavailable: ["全服奖池", "私服及跨服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"],
 });
 const snapshot = (id: number, extra: Partial<ActivityResponse> = {}): ActivityResponse => ({ characterId: id, revision: 1,
   points: 1000, earned: 1000, day: "2026-10-15", activities: [], tasks: [], history: [], nativeCarnival: projection(), ...extra });
@@ -48,6 +48,58 @@ const effectKeys = ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction
   "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction"] as const;
 
 describe("original Carnival host", () => {
+  const ranking = (id: number) => ({ version: 1, kind: "carnival-native-ranking", scope: "local", metric: "cumulative-native-draws",
+    entries: [{ rank: 1, characterId: 2, nickName: "甲", score: 9 }, { rank: 1, characterId: 3, nickName: "乙", score: 9 },
+      { rank: 3, characterId: id, nickName: "本人", score: 5 }], personalScore: 5, personalRank: 3 });
+  it("passes the genuine local board with competition ranks and personal rank through one read-only GET", async () => {
+    const x = setup(), board = ranking(x.id), p = { ...projection(5, 5), ranking: board, ordinaryFutureCaption: "legacy fields remain compatible" };
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeCarnival: p })));
+    x.read(); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(x.accept.mock.calls[0][0].snapshot?.nativeCarnival).toEqual(p);
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(fetchMock.mock.calls[0][1]?.method).toBe("GET");
+    expect(x.reject).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("accepts omitted legacy ranking, explicit null, zero-score empty boards and a real own rank outside ten", async () => {
+    for (const kind of ["legacy", "null", "empty", "outside", "tie-cutoff"] as const) {
+      const x = setup(), board = ranking(x.id), p: Record<string, unknown> = projection(kind === "empty" ? 0 : 5);
+      if (kind === "null") p.ranking = null;
+      if (kind === "empty") p.ranking = { ...board, entries: [], personalScore: 0, personalRank: null };
+      if (kind === "outside") p.ranking = { ...board, personalRank: 11, entries: Array.from({ length: 10 }, (_, i) => ({
+        rank: i + 1, characterId: i + 1, nickName: `角色${i + 1}`, score: 20 - i })) };
+      if (kind === "tie-cutoff") p.ranking = { ...board, personalRank: 1, entries: Array.from({ length: 10 }, (_, i) => ({
+        rank: 1, characterId: i + 1, nickName: `角色${i + 1}`, score: 5 })) };
+      fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeCarnival: p })));
+      x.read(); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+      expect(x.reject).not.toHaveBeenCalled(); x.host.cancel();
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+  });
+  it("rejects private data, invented scopes, bad competition ranks, stale actor scores and omitted top-ten actors", async () => {
+    const mutations: ((r: ReturnType<typeof ranking>) => unknown)[] = [
+      r => ({ ...r, scope: "cross-server" }), r => ({ ...r, metric: "payment" }), r => ({ ...r, personalScore: 4 }),
+      r => ({ ...r, personalRank: null }), r => ({ ...r, personalRank: 2 }), r => ({ ...r, entries: [] }),
+      r => ({ ...r, entries: Array(11).fill(r.entries[0]) }), r => ({ ...r, seed: "private" }),
+      r => ({ ...r, entries: [{ ...r.entries[0], state: {} }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], accountId: 99 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], score: 0 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], nickName: " " }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [r.entries[0], { ...r.entries[1], characterId: 2 }, r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[1], r.entries[0], r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], { ...r.entries[1], rank: 2 }, r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], rank: 2 }] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], score: 4 }] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], characterId: 900000 }] }),
+      r => ({ ...r, personalRank: 2, entries: Array.from({ length: 10 }, (_, i) => ({ rank: i < 2 ? i + 1 : 3,
+        characterId: i + 1, nickName: `角色${i + 1}`, score: i === 0 ? 9 : i === 1 ? 5 : 4 })) }),
+      r => ({ ...r, personalRank: 1, entries: Array.from({ length: 10 }, (_, i) => ({ rank: 1,
+        characterId: 900000 + i, nickName: `角色${i + 1}`, score: 5 })) }),
+    ];
+    for (const mutate of mutations) {
+      const x = setup(); fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeCarnival: { ...projection(5, 5), ranking: mutate(ranking(x.id)) } })));
+      x.read(); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
+      expect(x.accept).not.toHaveBeenCalled(); x.host.cancel();
+    }
+  });
   it("opens with one GET, strips all eight action envelopes and never starts a draw", async () => {
     const x = setup(), stale = Object.fromEntries(effectKeys.map(key => [key, { requestId: "old", effects: ["old"] }]));
     fetchMock.mockResolvedValue(response(snapshot(x.id, stale)));

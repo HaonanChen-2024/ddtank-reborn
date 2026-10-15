@@ -20,6 +20,9 @@ import { attachNativeCaveLootHost, type NativeCaveLootPlayer } from "@/lib/nativ
 import { attachNativeChristmasHost, type NativeChristmasPlayer } from "@/lib/native-christmas-host";
 import { useI18n } from "@/i18n";
 
+// Shared loading (60s) precedes module loading (60s); leave room for status polling.
+const NATIVE_ACTIVITY_OPEN_TIMEOUT_MS = 125_000;
+
 /* Minimal typings for the bits of the Ruffle JS API we use. */
 interface RuffleLoadOptions {
   url: string;
@@ -421,7 +424,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenWardrobe(characterId) !== true) return false;
-            const deadline = Date.now() + 15_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (wardrobeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusWardrobe();
               if (state?.errors?.length || state?.phase === "error") return false;
@@ -478,7 +481,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenPair(characterId, pairGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (pairRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusPair();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -533,7 +536,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenMines(characterId, minesGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (minesRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusMines();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -588,7 +591,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenDDPlay(characterId, ddplayGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (ddplayRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusDDPlay();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -643,7 +646,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenGypsy(characterId, gypsyGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (gypsyRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusGypsy();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -698,7 +701,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenMoonlight(characterId, moonlightGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (moonlightRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusMoonlight();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -753,7 +756,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenTreasure(characterId, treasureGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (treasureRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusTreasure();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -808,7 +811,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenPurr(characterId, purrGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (purrRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusPurr();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -863,7 +866,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenCarnival(characterId, carnivalGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (carnivalRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusCarnival();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -918,7 +921,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenFirstRecharge(characterId, firstRechargeGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (firstRechargeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusFirstRecharge();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -973,7 +976,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenCharge(characterId, chargeGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (chargeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusCharge();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -1028,7 +1031,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenForthright(characterId, forthrightGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (forthrightRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusForthright();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -1083,7 +1086,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenExchange(characterId, exchangeGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (exchangeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusExchange();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -1138,7 +1141,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenDevil(characterId, devilGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (devilRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusDevil();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -1193,7 +1196,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenCaveLoot(characterId, cavelootGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (cavelootRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusCaveLoot();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
@@ -1248,7 +1251,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           let opened = false;
           try {
             if (owner.workshopOpenChristmas(characterId, christmasGeneration) !== true) return false;
-            const deadline = Date.now() + 60_000;
+            const deadline = Date.now() + NATIVE_ACTIVITY_OPEN_TIMEOUT_MS;
             while (christmasRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
               const state = owner.workshopStatusChristmas();
               if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;

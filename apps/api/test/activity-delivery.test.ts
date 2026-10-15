@@ -247,10 +247,10 @@ describe("reference activity API delivery", () => {
     const receipt = await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`);
     vi.mocked(transitionActivity).mockImplementation((state) => ({ state: { ...state, history: [...state.history, "后续进展"] }, pointsDelta: -1, earnedDelta: 0, rewards: [], message: "后续操作" }));
     expect((await post()).statusCode).toBe(200);
-    const { nativeExchange: _exchange, nativeChristmas: _christmas, ...current } = (await get()).json(); // Optional game authorities are only read outside wallet transactions.
+    const { nativeExchange: _exchange, nativeChristmas: _christmas, nativeChristmasSnowfield: _snowfield, ...current } = (await get()).json(); // Optional game authorities are only read outside wallet transactions.
     const replay = (await post(id)).json();
     expect(first.json().points).toBe(7);
-    expect(replay).toMatchObject({ ...current, nativeForthright: { ...current.nativeForthright, serverNow: expect.any(String) }, points: 6, revision: 2, history: ["真实提交", "后续进展"], message: "已发送", mailedCount: 2, replayed: true });
+    expect(replay).toMatchObject({ ...current, nativeCarnival: { ...current.nativeCarnival, ranking: null }, nativeForthright: { ...current.nativeForthright, serverNow: expect.any(String) }, points: 6, revision: 2, history: ["真实提交", "后续进展"], message: "已发送", mailedCount: 2, replayed: true });
     expect(transitionActivity).toHaveBeenCalledTimes(2);
     expect(await counts()).toEqual({ actions: 2, states: 1, items: 7, mails: 2 });
     expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
@@ -264,10 +264,10 @@ describe("reference activity API delivery", () => {
     const tomorrow = new Date(); tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(tomorrow);
     headers.authorization = `Bearer ${signJwt({ sub: 1, name: "activity-test", role: "player" }, "activity-tests-only", 3600)}`;
-    const { nativeExchange: _exchange, nativeChristmas: _christmas, ...current } = (await get()).json();
+    const { nativeExchange: _exchange, nativeChristmas: _christmas, nativeChristmasSnowfield: _snowfield, ...current } = (await get()).json();
     const replay = (await post(id)).json();
     expect(replay.day).not.toBe(first.day);
-    expect(replay).toMatchObject({ ...current, revision: first.revision, message: "已发送", mailedCount: 2, replayed: true });
+    expect(replay).toMatchObject({ ...current, nativeCarnival: { ...current.nativeCarnival, ranking: null }, revision: first.revision, message: "已发送", mailedCount: 2, replayed: true });
     expect(transitionActivity).toHaveBeenCalledTimes(1);
     expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
     expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);

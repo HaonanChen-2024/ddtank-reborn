@@ -4,9 +4,12 @@ import { tmpdir } from "node:os";
 import { isAbsolute, join, relative } from "node:path";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { PRIZES } from "../src/activities/config.js";
+import { advanceCarnivalNative, viewCarnivalNative } from "../src/activities/carnival-native.js";
+import { createActivityState } from "../src/activities/engine.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
@@ -27,18 +30,49 @@ const rebuild = async () => { built = await buildApp({ db: h, logger: false, ski
 const headers = () => ({ authorization: `Bearer ${signJwt({ sub: 1, name: "carnival-native-test", role: "player" }, secret, 3600)}` });
 const post = (id: string, action: ActivityAction, requestId: string = randomUUID(), characterId = uid) => built.app.inject({
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
+function expectPublicResult(body: string, result: ActivityResult) {
+  expect(body).not.toMatch(/nativeCarnivalEffects|"(?:games|seed)"\s*:/);
+  expect(result).not.toHaveProperty("state");
+  // Snowfield's public scene.state/attempt.state are lifecycle enums, not private activity saves.
+  expect(JSON.stringify(result.nativeCarnival ?? null)).not.toMatch(/"(?:games|state|seed)"\s*:/);
+}
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  expect(result).not.toHaveProperty("nativeCarnivalAction"); expect(response.body).not.toMatch(/nativeCarnivalEffects|"(?:games|state|seed)"\s*:/); return result;
+  expect(result).not.toHaveProperty("nativeCarnivalAction"); expectPublicResult(response.body, result); return result;
 }
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeCarnivalEffects|"(?:games|state|seed)"\s*:/); return response.json();
+  const result = response.json<ActivityResult>(); expectPublicResult(response.body, result); return result;
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("carnival-native", value, requestId, status);
 const draw = async (count = 1) => native({ type: "draw", count, choice: (await snapshot()).nativeCarnival.stateToken });
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;
+async function scoreSave(score: number): Promise<ActivityState> {
+  const state = createActivityState(new Date());
+  // Build only canonical states through the real owner; other activity data stays private.
+  for (let left = score; left > 0; left -= 5) {
+    const value = state.games.carnivalNativeV1, clock = { now: new Date() }, funds = { points: 1000 };
+    state.games.carnivalNativeV1 = advanceCarnivalNative(value, {
+      type: "draw", count: Math.min(5, left), choice: viewCarnivalNative(value, clock, funds).stateToken,
+    }, clock, funds, () => 0.99).state;
+  }
+  state.games.privateOtherActivity = { seed: "must-never-be-public", board: [7, 8, 9] };
+  return state;
+}
+async function storeScore(characterId: number, score: number, activity = "reference", corrupt = false) {
+  const state = await scoreSave(score);
+  if (corrupt) (state.games.carnivalNativeV1 as Record<string, unknown>).drawCount = 100_000_000;
+  await h.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${characterId},1000,40) ON CONFLICT DO NOTHING`);
+  await h.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},${activity},${JSON.stringify(state)}::jsonb)
+    ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
+}
+async function addRankRole(characterId: number, score: number, userName = `rank-role-${characterId}`, account = true) {
+  if (account) await h.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (${characterId},${userName},'tests-only')`);
+  await h.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst")
+    VALUES (${characterId},${userName},${`榜单角色${characterId}`},true,'2000-01-01',1)`);
+  await storeScore(characterId, score);
+}
 async function persisted() { return {
   wallets: await q(h, sql`SELECT * FROM app."ActivityWallet" ORDER BY "UserID"`),
   states: await q(h, sql`SELECT * FROM app."ActivityStates" ORDER BY "UserID","Activity"`),
@@ -76,6 +110,77 @@ afterAll(async () => {
 });
 
 describe("native carnival through atomic account API", () => {
+  it("reads the original native local top ten with real competition ties and the actor's rank outside that slice, without writes", async () => {
+    await storeScore(uid, 2);
+    const scores = [12, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3];
+    for (let index = 0; index < scores.length; index++) await addRankRole(900 + index, scores[index]);
+    const before = await persisted(), result = await snapshot(), rank = result.nativeCarnival.ranking!;
+    expect(rank).toMatchObject({ version: 1, kind: "carnival-native-ranking", scope: "local", metric: "cumulative-native-draws",
+      personalScore: 2, personalRank: 12 });
+    expect(rank.entries.map(row => [row.characterId, row.rank, row.score])).toEqual(scores.slice(0, 10).map((score, index) => [900 + index, index === 1 ? 1 : index + 1, score]));
+    expect(rank.entries.every(row => Object.keys(row).sort().join(",") === "characterId,nickName,rank,score")).toBe(true);
+    expect(JSON.stringify(rank)).not.toMatch(/must-never-be-public|rank-role-|redPackets|records|wallet|seed|board/);
+    expect(await persisted()).toEqual(before);
+  });
+
+  it("excludes banned, deleted, forbidden, unnamed, orphaned, zero, malformed and other-activity roles, while respecting account ownership", async () => {
+    await storeScore(uid, 1); await storeScore(otherUid, 2);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "NickName"='2026-10-15 12:00:00' WHERE "UserID"=${otherUid}`);
+    for (let id = 900; id <= 906; id++) await addRankRole(id, 5, `rank-role-${id}`, id !== 904);
+    await h.db.execute(sql`UPDATE member."Accounts" SET "IsBanned"=true WHERE "ID"=900`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "IsExist"=false WHERE "UserID"=901`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "ForbidDate"='2099-01-01' WHERE "UserID"=902`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "NickName"='  ' WHERE "UserID"=903`);
+    await storeScore(905, 5, "reference", true);
+    await h.db.execute(sql`DELETE FROM app."ActivityStates" WHERE "UserID"=906`); await storeScore(906, 5, "different-activity");
+    await addRankRole(907, 0);
+    const before = await persisted(), result = await snapshot();
+    expect(result.nativeCarnival.ranking!.entries.map(row => [row.characterId, row.score])).toEqual([[otherUid, 2], [uid, 1]]);
+    expect(result.nativeCarnival.ranking!.personalRank).toBe(2);
+    expect(result.nativeCarnival.ranking!.entries[0].nickName).toBe("2026-10-15 12:00:00");
+    const foreign = await built.app.inject({ url: `/api/account/activities?characterId=${otherUid}`, headers: headers() });
+    expect(foreign.statusCode).toBe(403); expect(foreign.body).not.toMatch(/entries|Other test|ranking|seed|board/);
+    expect(await persisted()).toEqual(before);
+  });
+
+  it("refreshes other roles without changing this actor's token, excludes legacy rolls and exchange, and counts only committed native draws once", async () => {
+    await storeScore(otherUid, 1);
+    const empty = await snapshot(); expect(empty.nativeCarnival.ranking).toMatchObject({ personalScore: 0, personalRank: null });
+    await storeScore(otherUid, 2); const refreshed = await snapshot();
+    expect(refreshed.nativeCarnival.stateToken).toBe(empty.nativeCarnival.stateToken);
+    expect(refreshed.nativeCarnival.ranking!.entries[0].score).toBe(2);
+    const value = { type: "draw", count: 5, choice: refreshed.nativeCarnival.stateToken }, requestId = randomUUID();
+    const drawn = await native(value, requestId); expect(drawn.nativeCarnival.ranking).toBeNull();
+    const ranked = await snapshot(); expect(ranked.nativeCarnival.ranking).toMatchObject({ personalScore: 5, personalRank: 1 });
+    const delivered = await persisted(); await native(value, requestId); expect(await persisted()).toEqual(delivered);
+    await action("carnival", { type: "roll" });
+    const exchangeView = await snapshot(); await native({ type: "exchange", index: 0, count: 1, choice: exchangeView.nativeCarnival.stateToken });
+    expect((await snapshot()).nativeCarnival.ranking).toEqual(ranked.nativeCarnival.ranking);
+    await built.app.close(); await rebuild(); expect((await snapshot()).nativeCarnival.ranking).toEqual(ranked.nativeCarnival.ranking);
+  });
+
+  it("withholds a ranking from a mismatched actor snapshot if a real committed draw arrives between its two reads", async () => {
+    await storeScore(uid, 2);
+    const execute = h.db.execute.bind(h.db), dialect = new PgDialect(); let changed = false;
+    const reader = vi.spyOn(h.db, "execute").mockImplementation((...args) => {
+      const statement = typeof args[0] === "string" ? args[0] : dialect.sqlToQuery(args[0].getSQL()).sql;
+      const query = execute(...args);
+      if (!changed && statement.includes('AS "Public"')) {
+        changed = true; const run = query.execute.bind(query);
+        query.execute = async () => {
+          await storeScore(uid, 3); // Real PGlite commit, not a fabricated ranking result.
+          return run();
+        };
+      }
+      return query;
+    });
+    try {
+      const crossed = await snapshot(); expect(changed).toBe(true);
+      expect(crossed.nativeCarnival.personalScore).toBe(2); expect(crossed.nativeCarnival.ranking).toBeNull();
+    } finally { reader.mockRestore(); }
+    expect((await snapshot()).nativeCarnival.ranking).toMatchObject({ personalScore: 3, personalRank: 1 });
+  });
+
   it("keeps GET pure and rejects foreign characters, fake templates, wrong counts, legacy actions and missing fingerprints", async () => {
     await h.db.execute(sql`DELETE FROM app."ActivityWallet"`); const before = await persisted(), view = await snapshot(), choice = view.nativeCarnival.stateToken;
     expect(view.nativeCarnival).toMatchObject({ started: false, score: 0, remainDrawCount: 0, records: [] });
@@ -119,7 +224,7 @@ describe("native carnival through atomic account API", () => {
     const again = await native(value, requestId); expect(again).toMatchObject({ replayed: true, mailedCount: 2 });
     expect(again).not.toHaveProperty("nativeCarnivalAction"); expect(await persisted()).toEqual(delivered);
     await draw(); const newer = await snapshot(); const replay = await native(value, requestId);
-    expect(replay.nativeCarnival).toEqual(newer.nativeCarnival); expect(replay).not.toHaveProperty("nativeCarnivalAction");
+    expect(replay.nativeCarnival).toEqual({ ...newer.nativeCarnival, ranking: null }); expect(replay).not.toHaveProperty("nativeCarnivalAction");
     const receipt = await q1<{ Result: Record<string, unknown> }>(h, sql`SELECT "Result" FROM app."ActivityActions" WHERE "RequestID"=${requestId}`);
     expect(receipt!.Result).toEqual({ message: again.message, mailedCount: 2 });
   });

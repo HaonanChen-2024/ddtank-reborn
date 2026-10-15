@@ -44,6 +44,39 @@ function nativeAction(value: unknown): ActivityAction | null {
     return { type: "exchange", choice: value.choice, index: value.index, count: value.count };
   return null;
 }
+function validateRanking(value: unknown, personalScore: number, characterId: number, fail: () => never): void {
+  // Older ordinary candidates omit this optional projection; null means a read is still needed.
+  if (value === undefined || value === null) return;
+  const keys = ["version", "kind", "scope", "metric", "entries", "personalScore", "personalRank"];
+  if (!nativeObject(value) || Object.keys(value).length !== keys.length || Object.keys(value).some(key => !keys.includes(key))
+    || value.version !== 1 || value.kind !== "carnival-native-ranking" || value.scope !== "local"
+    || value.metric !== "cumulative-native-draws" || value.personalScore !== personalScore
+    || !Array.isArray(value.entries) || value.entries.length > 10
+    || (personalScore === 0 ? value.personalRank !== null : !integer(value.personalRank, 1, 2_147_483_647))) return fail();
+  const seen = new Set<number>(); let previous: { score: number; characterId: number; rank: number } | null = null;
+  let own = false, sameScore = false, above = 0;
+  for (const [index, row] of value.entries.entries()) {
+    if (!nativeObject(row) || Object.keys(row).length !== 4 || Object.keys(row).some(key => !["rank", "characterId", "nickName", "score"].includes(key))
+      || !integer(row.rank, 1, 10) || !integer(row.characterId, 1, 2_147_483_647) || seen.has(row.characterId)
+      || typeof row.nickName !== "string" || !row.nickName.trim() || row.nickName.length > 200 || !integer(row.score, 1, 100_000_000)) return fail();
+    if (previous && (previous.score < row.score || (previous.score === row.score && previous.characterId >= row.characterId))) return fail();
+    if (row.rank !== (previous && previous.score === row.score ? previous.rank : index + 1)) return fail();
+    if (row.score > personalScore) above++;
+    if (row.score === personalScore) sameScore = true;
+    if (row.characterId === characterId) {
+      if (row.score !== personalScore || row.rank !== value.personalRank) return fail();
+      own = true;
+    }
+    seen.add(row.characterId); previous = { score: row.score, characterId: row.characterId, rank: row.rank };
+  }
+  if (personalScore > 0) {
+    if (!previous) return fail();
+    if (value.entries.length < 10 || personalScore >= previous.score) {
+      if (!sameScore || value.personalRank !== above + 1) return fail();
+      if (!own && (value.entries.length < 10 || personalScore > previous.score || characterId <= previous.characterId)) return fail();
+    } else if (!integer(value.personalRank, 11, 2_147_483_647) || own) return fail();
+  }
+}
 function validatePublic(snapshot: ActivityResponse) {
   const p = snapshot.nativeCarnival;
   const fail = () => { throw new ActivityRequestError("原版节日狂欢公开数据不完整，请重试原操作。", true); };
@@ -80,6 +113,7 @@ function validatePublic(snapshot: ActivityResponse) {
     const prize = p.prizes[row.prizeId - 1];
     if (!nativeObject(prize) || row.templateId !== prize.templateId || row.itemCount !== prize.itemCount || row.redPackets !== prize.redPackets) return fail();
   }
+  validateRanking(p.ranking, p.personalScore, snapshot.characterId, fail);
 }
 export const retryNativeCarnivalRequest = (request: ActivityRequest) =>
   request.activityId === "carnival-native" ? retryNativeActivityRequest(request) : null;

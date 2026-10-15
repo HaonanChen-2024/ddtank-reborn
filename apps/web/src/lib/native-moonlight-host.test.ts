@@ -13,7 +13,7 @@ const projection = () => ({
   drawChoices: [1, 3, 5].map(count => ({ count, cost: count * 20, canDraw: true })),
   bagCapacity: 30, bagSlotsUsed: 0, bagToken, draws: 0, progressScore: 0, fragments: 0, pityRemaining: 10,
   canDraw: true, canTake: false, canRecycle: false, bag: [] as unknown[], previewTemplateIds: [11019, 11001, 11021, 11002],
-  exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, canExchange: false },
+  exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, maxCount: 10, affordableCount: 0, canExchange: false },
   progress: [1, 2, 3].map(tier => ({ tier, target: tier * 10, templateId: 11019, itemCount: tier * 2, claimed: false, canClaim: false })),
   localRules: { version: 1, description: "本地1/3/5开盒，每单位回收2分" },
 });
@@ -81,7 +81,9 @@ describe("original Moonlight host", () => {
       { type: "take", choice: bagToken, items: [{ index: 0, count: 1 }, { index: 0, count: 1 }] },
       { type: "recycle", choice: bagToken, items: [{ index: 0, count: 1, templateId: 11019 }] },
       { type: "recycle", choice: bagToken, items: [{ index: 4, count: 1 }] },
-      { type: "progress", choice: bagToken, tier: 4 }, { type: "exchange", choice: bagToken, count: 1 },
+      { type: "progress", choice: bagToken, tier: 4 },
+      ...[0,-1,11,1.5,"2",null,undefined].map(count => ({ type: "exchange", choice: bagToken, count })),
+      { type: "exchange", choice: bagToken, count: 2, price: 1 },
       { type: "buy", choice: bagToken }, { type: "draw", choice: "2026-10-15:short", count: 1 },
       Object.create({ type: "draw", choice: bagToken, count: 1 }),
       Object.assign(Object.create({ choice: bagToken }), { type: "draw", count: 1 })])
@@ -102,7 +104,9 @@ describe("original Moonlight host", () => {
       { ...stocked(), bagCapacity: 29 }, { ...stocked(), canTake: false },
       { ...stocked(), drawChoices: [{ count: 1, cost: 0, canDraw: true }] },
       { ...stocked(), bag: [{ index: 0, templateId: 11019, itemCount: 2, recycleUnitPoints: 100 }] },
-      { ...stocked(), seed: "private" }, { ...stocked(), progress: [] }]) {
+      { ...stocked(), seed: "private" }, { ...stocked(), progress: [] },
+      { ...stocked(), exchange: { ...projection().exchange, maxCount: 11 } },
+      { ...stocked(), exchange: { ...projection().exchange, affordableCount: 1 } }]) {
       const x = setup(); fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeMoonlight: invalid })));
       x.target.workshopMoonlightRead!(x.id, x.generation, 1);
       await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
@@ -131,6 +135,40 @@ describe("original Moonlight host", () => {
       nativeMoonlightAction: { requestId: ack.requestId!, effects: ["must not replay"] } })));
     await retryNativeMoonlightRequest(pending);
     expect(sent().requestId).toBe(ack.requestId); expect(sent().action.count).toBe(3);
+    expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty("nativeMoonlightAction"); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it.each([undefined,1,2,10])("preserves the original exchange quantity %s and validates its complete material effect", async count => {
+    const x = setup(), action = { type: "exchange", choice: bagToken, ...(count === undefined ? {} : { count }) }, quantity = count ?? 1;
+    fetchMock.mockImplementation(async () => response(snapshot(x.id, { nativeMoonlight: { ...projection(), started: true },
+      nativeMoonlightAction: { requestId: sent().requestId, effects: [{ type: "exchanged", count: quantity, fragmentsSpent: quantity * 10,
+        fragments: 0, templateId: 11021, itemCount: quantity * 2 }] } })));
+    const ack = x.request(action); expect(ack.accepted).toBe(true); action.count = 99;
+    expect(x.request({ type: "exchange", choice: bagToken, count: 1 }, 2)).toEqual({ accepted: false });
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(sent().action).toEqual({ type: "exchange", choice: bagToken, ...(count === undefined ? {} : { count }) });
+    expect(x.accept.mock.calls[0][0]).toMatchObject({ generation: x.generation, sequence: 1, requestId: ack.requestId });
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("keeps an exchange unresolved when fresh count, cost, quantity or reward identity is inconsistent", async () => {
+    for (const patch of [{ count: 1 }, { count: undefined }, { fragmentsSpent: 10 }, { itemCount: 2 }, { fragments: 1 }, { templateId: 11019 }]) {
+      const x = setup(); fetchMock.mockImplementation(async () => response(snapshot(x.id, { nativeMoonlight: { ...projection(), started: true },
+        nativeMoonlightAction: { requestId: sent().requestId, effects: [{ type: "exchanged", count: 2, fragmentsSpent: 20,
+          fragments: 0, templateId: 11021, itemCount: 4, ...patch }] } })));
+      const ack = x.request({ type: "exchange", choice: bagToken, count: 2 });
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
+      expect(x.accept).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toMatchObject({ requestId: ack.requestId, action: { count: 2 } });
+      expect(x.target.workshopMoonlightRead!(x.id, x.generation, 2)).toEqual({ accepted: false });
+    }
+  });
+  it("retries the same exchange count and UUID after transport loss and never replays the old award", async () => {
+    const x = setup(); fetchMock.mockRejectedValueOnce(new Error("lost"));
+    const ack = x.request({ type: "exchange", choice: bagToken, count: 3 });
+    await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); const pending = readPendingActivity(x.id)!;
+    expect(retryNativeMoonlightRequest({ ...pending, action: { ...pending.action, count: 2 } })).toBeNull();
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { replayed: true, nativeMoonlight: { ...projection(), started: true },
+      nativeMoonlightAction: { requestId: ack.requestId!, effects: ["old award must not replay"] } })));
+    await retryNativeMoonlightRequest(pending);
+    expect(sent()).toMatchObject({ requestId: ack.requestId, action: { type: "exchange", choice: bagToken, count: 3 } });
     expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty("nativeMoonlightAction"); expect(readPendingActivity(x.id)).toBeNull();
   });
   it("shares the pending character lock while keeping merchant callbacks separate", async () => {

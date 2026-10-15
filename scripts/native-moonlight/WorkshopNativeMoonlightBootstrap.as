@@ -115,7 +115,7 @@ package {
    for each(var f:String in ["canDraw","canTake","canRecycle"])if(typeof p[f]!=="boolean")throw new Error("宝盒资格无效。");
    if(!(p.drawChoices is Array)||p.drawChoices.length!==3)throw new Error("开盒三档缺失。");for(var i:int=0;i<3;i++){var c:Object=p.drawChoices[i];if(c.count!==[1,3,5][i]||c.cost!==c.count*20||typeof c.canDraw!=="boolean")throw new Error("开盒档位无效。");}if(p.canDraw!==p.drawChoices[0].canDraw)throw new Error("开盒资格不符。");
    if(!(p.bag is Array)||p.bag.length>4||!(p.previewTemplateIds is Array)||p.previewTemplateIds.join(",")!=="11019,11001,11021,11002")throw new Error("材料目录无效。");var seen:Array=[];var total:int=0;for(i=0;i<p.bag.length;i++){var o:Object=p.bag[i];if(o.index!==i||!material(o.templateId)||seen.indexOf(o.templateId)>=0||!integer(o.itemCount,1,60)||o.recycleUnitPoints!==2)throw new Error("临时包材料无效。");seen.push(o.templateId);total+=o.itemCount;}if(total>60||(p.bagSlotsUsed===0)!==(p.bag.length===0)||p.canTake!==(p.bag.length>0)||(p.canRecycle&&p.bag.length===0))throw new Error("临时包总量无效。");
-   if(!p.exchange||p.exchange.fragmentCost!==10||p.exchange.templateId!==11021||p.exchange.itemCount!==2||typeof p.exchange.canExchange!=="boolean"||!(p.progress is Array)||p.progress.length!==3)throw new Error("奖励配置无效。");
+   if(!p.exchange||p.exchange.fragmentCost!==10||p.exchange.templateId!==11021||p.exchange.itemCount!==2||p.exchange.maxCount!==10||p.exchange.affordableCount!==Math.min(10,Math.floor(p.fragments/10))||p.exchange.canExchange!==(p.fragments>=10)||!(p.progress is Array)||p.progress.length!==3)throw new Error("奖励配置无效。");
    for(i=0;i<3;i++){o=p.progress[i];if(o.tier!==i+1||o.target!==(i+1)*10||o.templateId!==11019||o.itemCount!==(i+1)*2||typeof o.claimed!=="boolean"||typeof o.canClaim!=="boolean"||(o.claimed&&o.canClaim))throw new Error("进度奖励无效。");}
   }
   private function effects(value:Object,action:Object):Object {
@@ -124,7 +124,7 @@ package {
     if(e.type!=="drawn"||e.count!==action.count||e.cost!==action.count*20||e.score!==p.score||e.draws!==p.draws||!(e.rewards is Array)||e.rewards.length<1||e.rewards.length>4)throw new Error("开盒效果不符。");var total:int=0;var ids:Array=[];for each(var reward:Object in e.rewards){if(!material(reward.templateId)||ids.indexOf(reward.templateId)>=0||!integer(reward.itemCount,1,10))throw new Error("开盒材料效果无效。");ids.push(reward.templateId);total+=reward.itemCount;}if(total<action.count||total>action.count*2)throw new Error("开盒数量不符。");
    }else if(action.type==="take"||action.type==="recycle"){
     if(e.type!==(action.type==="take"?"taken":"recycled")||!(e.items is Array)||e.items.length!==action.items.length)throw new Error("临时包结算效果不符。");var awarded:int=0;for each(var choice:Object in action.items){var match:Object=null;for each(var item:Object in e.items)if(item.index===choice.index)match=item;var old:Object=projection.bag[choice.index];if(!match||match.templateId!==old.templateId||match.itemCount!==choice.count)throw new Error("结算材料数量不符。");awarded+=choice.count;}if(action.type==="recycle"&&(e.pointsAwarded!==awarded*2||e.score!==p.score))throw new Error("回收积分不符。");if(action.type==="take"&&e.itemCount!==awarded)throw new Error("取出总量不符。");
-   }else if(action.type==="exchange"){if(e.type!=="exchanged"||e.fragmentsSpent!==10||e.fragments!==p.fragments||e.templateId!==11021||e.itemCount!==2)throw new Error("兑换效果不符。");}
+   }else if(action.type==="exchange"){var count:int=action.count===undefined?1:action.count;if(!integer(count,1,10)||e.type!=="exchanged"||e.count!==count||e.fragmentsSpent!==count*10||e.fragments!==p.fragments||e.templateId!==11021||e.itemCount!==count*2)throw new Error("兑换效果不符。");}
    else if(action.type==="progress"){if(e.type!=="progress-claimed"||e.tier!==action.tier||e.templateId!==11019||e.itemCount!==action.tier*2||!p.progress[action.tier-1].claimed)throw new Error("进度领奖效果不符。");}else throw new Error("未知宝盒动作。");return e;
   }
   public function acceptSnapshot(envelope:Object):Object {try{return applySnapshot(envelope);}catch(error:Error){fail(error.message);throw error;}return statusNative();}
@@ -133,7 +133,7 @@ package {
    var value:Object=envelope.snapshot;if(!value||value.characterId!==expectedId||!integer(value.revision,0,2147483647)||value.revision<lastRevision)throw new Error("响应角色或版本不符。");if(pendingAction&&(!pendingId||String(envelope.requestId)!==pendingId))throw new Error("动作 UUID 不符。");validate(value.nativeMoonlight);
    var action:Object=pendingAction,e:Object=null,fresh:Boolean=Boolean(action&&!value.replayed);if(fresh)e=effects(value,action);
    projection=value.nativeMoonlight;lastRevision=value.revision;pending=false;pendingId="";pendingAction=null;syncModel();
-   if(!sceneRoot&&!action&&wantedOpen)constructWindow();if(main)renderStatic();message=value.message?String(value.message):"已读取本地宝盒。";
+   if(!sceneRoot&&!action&&wantedOpen)constructWindow();if(main)renderStatic();if(action&&action.type==="exchange"&&popup)refreshExchange(popup,1);message=value.message?String(value.message):"已读取本地宝盒。";
    if(main&&wantedOpen&&fresh&&action.type==="draw"){
     closeBag();closePopup();settledRewards=[];for each(var reward:Object in e.rewards)settledRewards.push({id:reward.templateId,count:reward.itemCount});animating=true;lock();
     var E:Object=cls("activity.ActivityNormalEvent");manager().dispatchEvent(new E("drawInfo",{type:[1,3,5].indexOf(action.count)+1,rewards:settledRewards}));
@@ -164,7 +164,7 @@ package {
    var blocked:Boolean=pending||animating||confirmation!==null||popup!==null||bag!==null;
    if(main){main.drawView.mouseChildren=!blocked;main.drawView.mouseEnabled=!blocked;main.viewTab.mouseChildren=!blocked;main.viewTab.mouseEnabled=!blocked;main.helpBtn.disabled=pending||animating;}
    if(bag){bag.list.mouseChildren=!pending;bag.checkBtn.disabled=pending;bag.getBtn.disabled=pending||!projection.canTake;bag.backBtn.disabled=pending||!projection.canRecycle;}
-   if(popup){popup.mouseChildren=!pending;popup.mouseEnabled=!pending;}if(notice&&message)notice.text=message;
+   if(popup){popup.mouseChildren=!pending&&!confirmation;popup.mouseEnabled=!pending&&!confirmation;}if(notice&&message)notice.text=message;
   }
   private function confirm(value:String,action:Object):void {
    if(pending||animating||confirmation||!main)return;var info:Object=cls("com.pickgliss.ui.vo.AlertInfo"),frame:Object=cls("com.pickgliss.ui.ComponentFactory").Instance.creatComponentByStylename("SimpleAlert");confirmation=frame;frame.info=new info("月光宝盒 · 本地确认","确认","取消",true,true,value,false,false,false,true);frame.moveEnable=false;
@@ -179,7 +179,13 @@ package {
   private function openHelp():void {var v:Object=openPopup("activity.moonlightbox.mornui.MoonlightHelpUI");if(!v)return;v.closeBtn.clickHandler=handler(closePopup);v.okBtn.clickHandler=handler(closePopup);}
   private function handler(fn:Function,args:Array=null):Object {var C:Object=cls("morn.core.handlers.Handler");return new C(fn,args);}
   private function openShow():void {var v:Object=openPopup("activity.moonlightbox.view.MoonlightShowView");if(v)v.closeBtn.clickHandler=handler(closePopup);}
-  private function openExchange():void {var v:Object=openPopup("activity.moonlightbox.view.MoonlightExchangeView");if(!v)return;v.setData(11021,0,10);v.setLimit(1);v.leftBtn.visible=false;v.rightBtn.visible=false;v.pageTxt.editable=false;v.pageTxt.text="1";v.limitTxt.text="每次1包：强化石2级×2";v.limitTxt.x=112;v.limitTxt.width=280;v.closeBtn.clickHandler=handler(closePopup);}
+  private function openExchange():void {var v:Object=openPopup("activity.moonlightbox.view.MoonlightExchangeView");if(!v)return;v.setData(11021,0,10);v.setLimit(projection.exchange.affordableCount);v.leftBtn.visible=true;v.rightBtn.visible=true;v.pageTxt.editable=true;v.pageTxt.textField.maxChars=2;v.limitTxt.x=112;v.limitTxt.width=280;v.closeBtn.clickHandler=handler(closePopup);}
+  private function exchangeCount(value:String,max:int):int {var n:Number=Number(value);return /^[1-9][0-9]?$/.test(value)&&integer(n,1,max)?int(n):0;}
+  private function refreshExchange(view:Object,value:Number):void {
+   if(view!==popup||!projection)return;var max:int=projection.exchange.affordableCount,count:int=Math.max(1,Math.min(Math.max(1,max),isFinite(value)?Math.floor(value):1));
+   view._max=max;view.pageTxt.text=String(count);view._totle=count*10;view.needTxt.text=(count*10)+"碎片";view.limitTxt.text="每次最多10包，当前可兑"+max+"包";
+   view.leftBtn.disabled=count<=1;view.rightBtn.disabled=count>=max;view.okBtn.disabled=max===0;
+  }
   private function draw(index:int):void {if(!projection||pending||animating||index<0||index>2)return;var option:Object=projection.drawChoices[index];if(!option.canDraw){say("积分不足、临时包已满或今日开盒已达上限。");return;}confirm("开启"+option.count+"盒，消耗"+option.cost+"活动积分；奖品先存临时包。",{type:"draw",count:option.count,choice:projection.bagToken});}
   private function useBag(view:Object,type:int):void {
    if(pending||animating||view!==bag)return;var items:Array=[],total:int=0;for each(var row:Object in projection.bag){var state:Object=view.selectDic[row.templateId];if(state&&state.isSelect){var count:Number=Number(state.count);if(!integer(count,1,row.itemCount))throw new Error("选中数量无效。");items.push({index:row.index,count:count});total+=count;}}
@@ -235,8 +241,11 @@ package {
    if(owner==="activity/moonlightbox/view/MoonlightBagView"){if(name==="__useBagHandler"){useBag(o,int(args[0]));return;}throw new Error("原服临时包网络确认已关闭。");}
    if(owner==="activity/moonlightbox/view/MoonlightRewardItem"&&name==="__getReward"){var tier:int=int(o._type)/10;if(tier>=1&&tier<=3&&projection.progress[tier-1].canClaim)confirm("领取本地"+(tier*10)+"进度奖励：强化石1级×"+(tier*2)+"，寄入邮箱。",{type:"progress",tier:tier,choice:projection.bagToken});return;}
    if(owner==="activity/moonlightbox/view/MoonlightExchangeView"){
-    if(name==="__okHandler"){if(projection.exchange.canExchange)confirm("消耗10本地碎片，兑换强化石2级×2寄入邮箱。",{type:"exchange",choice:projection.bagToken});else say("需要10本地碎片。");return;}
-    if(name==="setLimit"){o._max=1;o.limitTxt.text="每次1包";return;}o.pageTxt.text="1";o._totle=10;o.needTxt.text="10碎片";return;
+    if(o!==popup||!projection)return;if(name==="setLimit"||name==="refreshNumText"){refreshExchange(o,Number(o.pageTxt.text));return;}
+    if(pending||animating||confirmation)return;
+    if(name==="__okHandler"){var count:int=exchangeCount(String(o.pageTxt.text),projection.exchange.affordableCount);if(count>0)confirm("消耗"+(count*10)+"本地碎片，兑换"+count+"包强化石2级（共"+(count*2)+"个）寄入邮箱。",{type:"exchange",count:count,choice:projection.bagToken});else say("请选择可兑换数量；每包需要10本地碎片，每次最多10包。");return;}
+    if(name==="__inputChange"){refreshExchange(o,Number(o.pageTxt.text));return;}
+    if(name==="__leftHandler"||name==="__rightHandler"){refreshExchange(o,Number(o.pageTxt.text)+(name==="__leftHandler"?-1:1));return;}
    }
    throw new Error("未实现的原宝盒适配："+owner+"."+name);
   }

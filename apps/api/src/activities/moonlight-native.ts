@@ -11,14 +11,14 @@ type Funds = Pick<ActivityWallet, "points">;
 type Selection = { index: number; templateId: number; itemCount: number };
 type PrizeRoll = (guaranteed: boolean) => ActivityReward;
 export const moonlightNativeLocalRules = Object.freeze({ version: 1, drawCost: C.moonCost, bagCapacity: C.bagCapacity,
-  recycleUnitPoints: 2, exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2 },
-  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。10碎片兑换强化石2级×2，10/20/30进度各领一次普通材料。私服开盒档位、钥匙价、概率和全服排行未复刻，不产生钥匙货币或真实付款。",
+  recycleUnitPoints: 2, exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, maxCount: 10 },
+  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。每包10碎片兑换强化石2级×2，原窗口每次可选1至10包；旧网页保留单包兑换。10/20/30进度各领一次普通材料。私服开盒档位、钥匙价、概率和全服排行未复刻，不产生钥匙货币或真实付款。",
 });
 export type MoonlightNativeEffect =
   | { type: "drawn"; count: number; cost: number; score: number; draws: number; rewards: { templateId: number; itemCount: number }[] }
   | { type: "taken"; itemCount: number; items: Selection[] }
   | { type: "recycled"; pointsAwarded: number; score: number; items: Selection[] }
-  | { type: "exchanged"; fragmentsSpent: number; fragments: number; templateId: number; itemCount: number }
+  | { type: "exchanged"; count: number; fragmentsSpent: number; fragments: number; templateId: number; itemCount: number }
   | { type: "progress-claimed"; tier: number; templateId: number; itemCount: number };
 export interface MoonlightResult {
   state: MoonlightState; pointsDelta: number; cost: number; rewards: ActivityReward[]; completed: boolean; draws: number;
@@ -68,10 +68,11 @@ function bagToken(state: MoonlightState, ctx: Clock) {
 function validNativeAction(action: ActivityAction, state: MoonlightState, ctx: Clock) {
   need(action && typeof action === "object" && !Array.isArray(action) && Object.hasOwn(action, "type")
     && Object.hasOwn(action, "choice") && typeof action.choice === "string", "宝盒操作或参数无效。");
-  const fields: Record<string, string[]> = { draw: ["count"], take: ["items"], recycle: ["items"], exchange: [], progress: ["tier"] };
+  const fields: Record<string, string[]> = { draw: ["count"], take: ["items"], recycle: ["items"], exchange: ["count"], progress: ["tier"] };
   need(Object.hasOwn(fields, action.type) && Object.keys(action).every(key => key === "type" || key === "choice" || fields[action.type].includes(key)), "宝盒操作或参数无效。");
   need(action.choice === bagToken(state, ctx), "临时包或日期已更新，请重新查看后再确认。");
   if (action.type === "draw") need(Object.hasOwn(action, "count") && int(action.count, 1, 5) && [1, 3, 5].includes(action.count), "原窗口开盒档位只能是1、3或5。");
+  if (action.type === "exchange" && Object.hasOwn(action, "count")) need(int(action.count, 1, moonlightNativeLocalRules.exchange.maxCount), "每次只能兑换1至10包。");
   if (action.type === "progress") need(Object.hasOwn(action, "tier") && int(action.tier, 1, 3), "宝盒奖励档位无效。");
 }
 function select(state: MoonlightState, action: ActivityAction): Selection[] {
@@ -127,9 +128,11 @@ export function advanceMoonlight(value: unknown, action: ActivityAction, ctx: Cl
     }
     subtract(state, selections);
   } else if (action.type === "exchange") {
-    need(state.fragments >= 10, "需要10枚活动碎片。"); state.fragments -= 10; rewards.push({ templateId: 11021, count: 2 });
-    if (native) effects.push({ type: "exchanged", fragmentsSpent: 10, fragments: state.fragments, templateId: 11021, itemCount: 2 });
-    message = "10枚碎片已兑换，奖励已寄出。";
+    const count = native ? action.count ?? 1 : 1, fragmentsSpent = count * 10, itemCount = count * 2;
+    need(state.fragments >= fragmentsSpent, `需要${fragmentsSpent}枚活动碎片。`);
+    state.fragments -= fragmentsSpent; rewards.push({ templateId: 11021, count: itemCount });
+    if (native) effects.push({ type: "exchanged", count, fragmentsSpent, fragments: state.fragments, templateId: 11021, itemCount });
+    message = native ? `${fragmentsSpent}枚碎片已兑换${count}包，奖励已寄出。` : "10枚碎片已兑换，奖励已寄出。";
   } else if (action.type === "progress") {
     need(int(action.tier, 1, 3) && state.score >= action.tier * 10, "尚未达到该档寻宝进度。");
     need(!state.claimed.includes(action.tier), "这档进度奖励已经领取。"); state.claimed.push(action.tier); rewards.push({ templateId: 11019, count: action.tier * 2 });
@@ -148,7 +151,7 @@ export function viewMoonlightNative(value: unknown, ctx: Clock, funds: Funds, ac
     canDraw: drawChoices[0].canDraw, drawChoices,
     canTake: bag.length > 0, canRecycle: bag.length > 0 && score <= 2_147_483_645, bag,
     previewTemplateIds: PRIZES.map(item => item.templateId),
-    exchange: { ...moonlightNativeLocalRules.exchange, canExchange: state.fragments >= 10 },
+    exchange: { ...moonlightNativeLocalRules.exchange, affordableCount: Math.min(moonlightNativeLocalRules.exchange.maxCount, Math.floor(state.fragments / 10)), canExchange: state.fragments >= 10 },
     progress: [1, 2, 3].map(tier => ({ tier, target: tier * 10, templateId: 11019, itemCount: tier * 2,
       claimed: state.claimed.includes(tier), canClaim: state.score >= tier * 10 && !state.claimed.includes(tier) })),
     localRules: { version: moonlightNativeLocalRules.version, description: moonlightNativeLocalRules.description } };

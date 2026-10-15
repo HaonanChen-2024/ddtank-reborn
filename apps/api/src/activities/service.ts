@@ -18,7 +18,7 @@ import type { GypsyNativeEffect } from "./gypsy-native.js";
 import type { MoonlightNativeEffect } from "./moonlight-native.js";
 import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
-import type { CarnivalNativeEffect } from "./carnival-native.js";
+import { readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
 import type { DevilEffect } from "./devil-native.js";
 import type { CaveEffect } from "./caveloot-native.js";
 import { validateFirstRechargeNativeAction, type FirstRechargeNativeEffect } from "./first-recharge-native.js";
@@ -114,6 +114,39 @@ async function context(app: AppCtx, characterId: number, now: Date): Promise<Act
 }
 
 const walletOf = (w?: WalletRow): ActivityWallet => ({ points: w?.Points ?? 0, earned: w?.Earned ?? 0, revision: w?.Revision ?? 0 });
+/** No boards, account names, seeds or other activity states enter the public ranking. */
+async function carnivalRanking(app: AppCtx, characterId: number, now: Date, personalScore: number): Promise<CarnivalNativeRanking | null> {
+  // ponytail: validate the one activity subtree in memory for this local server; a materialized
+  // validated score table can replace the scan if the number of participating roles grows.
+  const rows = await q<{ Public: { characterId: number; nickName: string }; Native: unknown }>(app.h, sql`
+    SELECT jsonb_build_object('characterId',s."UserID",'nickName',d."NickName") AS "Public",s."State"->'games'->'carnivalNativeV1' AS "Native"
+    FROM app."ActivityStates" s JOIN player."Sys_Users_Detail" d ON d."UserID"=s."UserID"
+    JOIN app."ActivityWallet" w ON w."UserID"=s."UserID"
+    WHERE s."Activity"='reference' AND s."State"->'games'->'carnivalNativeV1' IS NOT NULL
+      AND d."IsExist"=true AND d."ForbidDate"<=${now} AND btrim(d."NickName")<>''
+      AND EXISTS (SELECT 1 FROM member."Accounts" a WHERE lower(a."UserName")=lower(d."UserName") AND a."IsBanned"=false)`);
+  const scores: { characterId: number; nickName: string; score: number }[] = [];
+  for (const row of rows) {
+    try {
+      const state = readCarnivalNativeState(row.Native);
+      // Keep nicknames inside JSON: q() normalizes top-level timestamp-looking strings into Dates.
+      if (int(row.Public.characterId) && row.Public.characterId > 0 && state.drawCount > 0) scores.push({ ...row.Public, score: state.drawCount });
+    } catch (err) {
+      if (!(err instanceof ActivityError)) throw err;
+      // A corrupt or obsolete role save must not publish a score or break another role's GET.
+    }
+  }
+  if ((scores.find(row => row.characterId === characterId)?.score ?? 0) !== personalScore) return null;
+  scores.sort((a, b) => b.score - a.score || a.characterId - b.characterId);
+  let rank = 0, personalRank: number | null = null;
+  const entries: CarnivalNativeRanking["entries"] = [];
+  for (let index = 0; index < scores.length; index++) {
+    if (index === 0 || scores[index].score !== scores[index - 1].score) rank = index + 1;
+    if (scores[index].characterId === characterId) personalRank = rank;
+    if (index < 10) entries.push({ rank, ...scores[index] });
+  }
+  return { version: 1, kind: "carnival-native-ranking", scope: "local", metric: "cumulative-native-draws", entries, personalScore, personalRank };
+}
 async function stateOf(app: AppCtx, characterId: number, now: Date): Promise<ActivityState> {
   const row = await q1<{ State: ActivityState }>(app.h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${characterId} AND "Activity"='reference'`);
   return row?.State ?? createActivityState(now);
@@ -129,6 +162,8 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
     context(app, characterId, now),
   ]);
   const result: ActivityResult = { characterId, ...viewActivities(row?.State ?? createActivityState(now), walletOf(row), ctx) };
+  // One committed ranking query, after ownership. Never join it into a locked POST/mail transaction.
+  result.nativeCarnival.ranking = await carnivalRanking(app, characterId, now, result.nativeCarnival.personalScore);
   // Never add internal inventory reads to context(): old actions hold the wallet lock there.
   if (loadExchange) {
     result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);

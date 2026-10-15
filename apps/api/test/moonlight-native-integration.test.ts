@@ -30,13 +30,15 @@ const post = (id: string, action: ActivityAction, requestId: string = randomUUID
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeMoonlightEffects|"(?:games|state|seed|choices)"\s*:/); return response.json();
+  expect(response.body).not.toMatch(/nativeMoonlightEffects|"(?:games|seed|choices)"\s*:/); const result = response.json();
+  expect(result).not.toHaveProperty("state"); if (result.nativeMoonlight) expect(JSON.stringify(result.nativeMoonlight)).not.toMatch(/"state"\s*:/); return result;
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("moonlight-native", value, requestId, status);
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
-  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeMoonlightEffects|"(?:games|state|seed)"\s*:/);
-  const result = response.json<ActivityResult>(); expect(result).not.toHaveProperty("nativeMoonlightAction"); return result;
+  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeMoonlightEffects|"(?:games|seed)"\s*:/);
+  const result = response.json<ActivityResult>(); expect(result).not.toHaveProperty("nativeMoonlightAction"); expect(result).not.toHaveProperty("state");
+  expect(JSON.stringify(result.nativeMoonlight)).not.toMatch(/"state"\s*:/); return result;
 }
 const draw = async (count: number) => native({ type: "draw", count, choice: (await snapshot()).nativeMoonlight.bagToken });
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;
@@ -135,7 +137,7 @@ describe("original Moonlight through the shared transactional API", () => {
     expect(final.nativeMoonlight.bag).toEqual([]); expect(after.receipts).toHaveLength(2);
     const took = committed.nativeMoonlightAction!.effects[0].type === "taken";
     expect(final.points).toBe(took ? 940 : 946); expect(after.goods).toHaveLength(took ? 2 : 0); expect(after.mails).toHaveLength(took ? 1 : 0);
-    const replay = await native(value, requestId); expect(replay).toMatchObject({ ...final, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
+    const replay = await native(value, requestId); expect(replay).toMatchObject({ points: final.points, earned: final.earned, revision: final.revision, nativeMoonlight: final.nativeMoonlight, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
     await native({ ...value, count: 5 }, requestId, 409); await action("ddplay-native", { type: "spin" }, requestId, 409);
     expect(await persisted()).toEqual(after); expect(after.receipts.every(row => Object.keys(row.Result as object).sort().join(",") === "mailedCount,message")).toBe(true);
   });
@@ -177,6 +179,46 @@ describe("original Moonlight through the shared transactional API", () => {
     expect(claim.mailedCount).toBe(1); expect(claim.nativeMoonlight.progress[0]).toMatchObject({ tier: 1, claimed: true, canClaim: false });
     await action("moon", { type: "progress", tier: 1 }, randomUUID(), 400);
     expect((await persisted()).goods.map(item => [item.TemplateID, item.Count])).toEqual([[11021, 2], [11019, 2]]);
+  });
+
+  it("atomically batches fragment exchange, rolls back mail and receipt failures and replays one UUID once", async () => {
+    await draw(1); const state = (await saved())!;
+    // Prepare earned fragments only in this isolated in-memory save; production counters and rules are untouched.
+    (state.games.moon as { fragments: number }).fragments = 100;
+    await h.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${uid}`);
+    const first = await snapshot(), before = await persisted(), requestId = randomUUID();
+    expect(first.nativeMoonlight.exchange).toMatchObject({ maxCount: 10, affordableCount: 10, canExchange: true });
+    const value = { type: "exchange", count: 10, choice: first.nativeMoonlight.bagToken };
+    for (const count of [0, 11, 1.5, "2", null]) await native({ ...value, count } as ActivityAction, randomUUID(), 400);
+    expect(await persisted()).toEqual(before);
+    // Ten max-stack-two attachments require two ordinary mails; a mail failure must also roll back fragment debit and goods.
+    await h.db.execute(sql`ALTER TABLE player."User_Messages" ADD CONSTRAINT moonlight_native_mail_failure CHECK ("Annex1" IS NULL) NOT VALID`);
+    await native(value, requestId, 500); expect(await persisted()).toEqual(before);
+    await h.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT moonlight_native_mail_failure`);
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT moonlight_native_receipt_failure CHECK ("Signature"='cannot-pass-test') NOT VALID`);
+    await native(value, requestId, 500); expect(await persisted()).toEqual(before);
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT moonlight_native_receipt_failure`);
+    const outcomes = await Promise.all(Array.from({ length: 4 }, () => post("moonlight-native", value, requestId)));
+    expect(outcomes.every(response => response.statusCode === 200)).toBe(true);
+    expect(outcomes.filter(response => response.json().nativeMoonlightAction)).toHaveLength(1);
+    expect(outcomes.filter(response => response.json().replayed)).toHaveLength(3);
+    const committed = outcomes.find(response => response.json().nativeMoonlightAction)!.json<ActivityResult>();
+    expect(committed).toMatchObject({ points: 980, revision: 2, mailedCount: 2, nativeMoonlight: { fragments: 0, exchange: { affordableCount: 0, canExchange: false } },
+      nativeMoonlightAction: { requestId, effects: [{ type: "exchanged", count: 10, fragmentsSpent: 100, fragments: 0, templateId: 11021, itemCount: 20 }] } });
+    const after = await persisted(); expect(after.goods.map(item => [item.TemplateID, item.Count])).toEqual(Array.from({ length: 10 }, () => [11021, 2]));
+    expect(after.mails).toHaveLength(2); expect(after.receipts).toHaveLength(2);
+    await native({ ...value, count: 1 }, requestId, 409);
+    await native({ type: "exchange", count: 1, choice: committed.nativeMoonlight.bagToken }, randomUUID(), 400);
+    expect((await native(value, requestId)).replayed).toBe(true); expect(await persisted()).toEqual(after);
+  });
+
+  it("serializes competing quantities against the same fragment token without a partial second award", async () => {
+    await draw(5); const initial = await draw(5), before = await persisted(), choice = initial.nativeMoonlight.bagToken;
+    const responses = await Promise.all([post("moonlight-native", { type: "exchange", count: 1, choice }), post("moonlight-native", { type: "exchange", count: 1, choice })]);
+    expect(responses.map(response => response.statusCode).sort()).toEqual([200, 400]);
+    const after = await persisted(); expect(after.goods.map(item => [item.TemplateID, item.Count])).toEqual([[11021, 2]]);
+    expect(after.mails).toHaveLength(1); expect(after.receipts).toHaveLength(before.receipts.length + 1);
+    expect((await snapshot()).nativeMoonlight.fragments).toBe(0);
   });
 
   it("restores partial bags across app restart and midnight, rejects old tokens and permits earned settlements at the play ceiling", async () => {

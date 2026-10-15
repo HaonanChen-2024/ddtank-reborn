@@ -8,7 +8,7 @@ import type { GypsyNativeEffect, GypsyNativeView } from "./gypsy-native.js";
 import type { MoonlightNativeEffect, MoonlightNativeView } from "./moonlight-native.js";
 import type { TreasureNativeEffect, TreasureNativeView } from "./treasure-native.js";
 import type { WheelNativeEffect, WheelNativeView } from "./wheel-native.js";
-import type { CarnivalNativeEffect, CarnivalNativeView } from "./carnival-native.js";
+import type { CarnivalNativeEffect, CarnivalNativeView, CarnivalNativeRanking } from "./carnival-native.js";
 import type { FirstRechargeNativeEffect, FirstRechargeNativeView } from "./first-recharge-native.js";
 import type { ChargeNativeEffect, ChargeNativeView } from "./charge-native.js";
 import type { ForthrightNativeEffect, ForthrightNativeView, PrivateGroup } from "./forthright-native.js";
@@ -27,6 +27,8 @@ export interface ActivityContext {
   requestId?: string;
   forthrightGroups?: PrivateGroup[];
   forthrightInspectCode?: string;
+  /** Public local draw-count ranking, loaded only by GET outside wallet transactions. */
+  carnivalNativeRanking?: CarnivalNativeRanking;
   /** Committed EventClaims sign/day keys, not a client-provided completion flag. */
   signDays: string[];
   ownedTemplateIds: number[];

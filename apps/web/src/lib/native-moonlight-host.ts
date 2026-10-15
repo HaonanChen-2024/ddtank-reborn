@@ -34,7 +34,11 @@ function nativeAction(value: unknown): ActivityAction | null {
   if (value.type === "draw" && Object.hasOwn(value, "count") && integer(value.count, 1, 5)
     && drawCounts.includes(value.count as 1 | 3 | 5) && exact("count"))
     return { type: "draw", choice: value.choice, count: value.count };
-  if (value.type === "exchange" && exact()) return { type: "exchange", choice: value.choice };
+  if (value.type === "exchange" && exact("count")) {
+    if (Object.hasOwn(value, "count")) return integer(value.count, 1, 10)
+      ? { type: "exchange", choice: value.choice, count: value.count } : null;
+    return { type: "exchange", choice: value.choice };
+  }
   if (value.type === "progress" && Object.hasOwn(value, "tier") && integer(value.tier, 1, 3) && exact("tier"))
     return { type: "progress", choice: value.choice, tier: value.tier };
   if ((value.type === "take" || value.type === "recycle") && exact("items") && Object.hasOwn(value, "items")
@@ -50,7 +54,7 @@ function nativeAction(value: unknown): ActivityAction | null {
   }
   return null;
 }
-function validatePublic(snapshot: ActivityResponse) {
+function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
   const p = snapshot.nativeMoonlight;
   const fail = () => { throw new ActivityRequestError("原版月光宝盒公开数据不完整，请重试原操作。", true); };
   if (!nativeObject(p) || p.version !== 1 || p.kind !== "moonlight-native" || typeof p.started !== "boolean"
@@ -80,7 +84,8 @@ function validatePublic(snapshot: ActivityResponse) {
       || typeof choice.canDraw !== "boolean" || choice.canDraw && (p.score < count * 20 || p.bagSlotsUsed + count > 30)) return fail();
   }
   if (p.canDraw !== p.drawChoices[0].canDraw || !nativeObject(p.exchange) || p.exchange.fragmentCost !== 10
-    || p.exchange.templateId !== 11021 || p.exchange.itemCount !== 2 || typeof p.exchange.canExchange !== "boolean"
+    || p.exchange.templateId !== 11021 || p.exchange.itemCount !== 2 || p.exchange.maxCount !== 10
+    || p.exchange.affordableCount !== Math.min(10, Math.floor(p.fragments / 10)) || typeof p.exchange.canExchange !== "boolean"
     || p.exchange.canExchange !== (p.fragments >= 10) || !Array.isArray(p.progress) || p.progress.length !== 3) return fail();
   for (const [index, tier] of p.progress.entries()) {
     const target = (index + 1) * 10;
@@ -90,6 +95,13 @@ function validatePublic(snapshot: ActivityResponse) {
   }
   if (!p.started && (p.bag.length || p.draws !== 0 || p.progressScore !== 0 || p.fragments !== 0 || p.pityRemaining !== 10
     || p.progress.some(tier => tier.claimed))) return fail();
+  if (action?.type === "exchange" && !snapshot.replayed) {
+    const count = action.count ?? 1, effects = snapshot.nativeMoonlightAction?.effects;
+    if (!integer(count, 1, 10) || !Array.isArray(effects) || effects.length !== 1) return fail();
+    const effect = effects[0];
+    if (!nativeObject(effect) || effect.type !== "exchanged" || effect.count !== count || effect.fragmentsSpent !== count * 10
+      || effect.fragments !== p.fragments || effect.templateId !== 11021 || effect.itemCount !== count * 2) return fail();
+  }
 }
 export const retryNativeMoonlightRequest = (request: ActivityRequest) =>
   request.activityId === "moonlight-native" ? retryNativeActivityRequest(request) : null;

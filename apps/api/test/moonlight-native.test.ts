@@ -76,7 +76,7 @@ describe("original Moonlight shared bag and local three-draw contract", () => {
       { type: "take", choice, items: [{ index: 0, count: 1 }, { index: 0, count: 1 }] }, { type: "take", choice, items: [{ index: 0, count: "1" }] },
       { type: "take", choice, items: [{ index: 0, count: 1, templateId: 1001 }] }, { type: "take", choice, items: [{ index: 1, count: 1 }] },
       { type: "recycle", choice, items: [{ index: 0.5, count: 1 }] }, { type: "take", choice, count: 1, items: [{ index: 0, count: 1 }] },
-      { type: "exchange", choice, count: 1 }, { type: "progress", choice, tier: "1" }, Object.create({ type: "draw", choice, count: 1 })]) {
+      { type: "exchange", choice, count: 0 }, { type: "progress", choice, tier: "1" }, Object.create({ type: "draw", choice, count: 1 })]) {
       expect(() => advanceMoonlight(state, value as ActivityAction, ctx, wallet, noRandom, true)).toThrow(ActivityError);
     }
     expect(state).toEqual(before);
@@ -102,6 +102,25 @@ describe("original Moonlight shared bag and local three-draw contract", () => {
     expect(run.view().bagToken).not.toBe(beforeClaim); expect(run.view().progress.map(t => [t.claimed, t.canClaim])).toEqual([[true, false], [false, false], [false, false]]);
     expect(() => run.act({ type: "progress", tier: 1, choice: run.view().bagToken })).toThrow(/已经领取/);
     expect(() => run.act({ type: "exchange", choice: run.view().bagToken })).toThrow(/10枚/);
+  });
+
+  it("exchanges a bounded native quantity without changing the recipe or legacy single-package settlement", () => {
+    const state = readMoonlightState(undefined); state.fragments = 105; const before = structuredClone(state);
+    expect(viewMoonlightNative(state, ctx, wallet).exchange).toEqual({ fragmentCost: 10, templateId: 11021, itemCount: 2, maxCount: 10, affordableCount: 10, canExchange: true });
+    const batch = advance(state, { type: "exchange", count: 10 });
+    expect(batch).toMatchObject({ state: { fragments: 5 }, pointsDelta: 0, cost: 0, rewards: [{ templateId: 11021, count: 20 }],
+      effects: [{ type: "exchanged", count: 10, fragmentsSpent: 100, fragments: 5, templateId: 11021, itemCount: 20 }] });
+    expect(state).toEqual(before); expect(viewMoonlightNative(batch.state, ctx, wallet).exchange).toMatchObject({ affordableCount: 0, canExchange: false });
+    expect(advance(state, { type: "exchange" }).state.fragments).toBe(95);
+    expect(advanceMoonlight(state, { type: "exchange" }, ctx, wallet, noRandom).rewards).toEqual([{ templateId: 11021, count: 2 }]);
+    for (const count of [0, -1, 11, 1.5, NaN, Infinity, "2", null, undefined]) {
+      expect(() => advance(state, { type: "exchange", count } as ActivityAction)).toThrow(/1至10/);
+    }
+    const limited = { ...state, fragments: 25 };
+    expect(viewMoonlightNative(limited, ctx, wallet).exchange.affordableCount).toBe(2);
+    expect(() => advance(limited, { type: "exchange", count: 3 })).toThrow(/30枚/);
+    expect(limited.fragments).toBe(25);
+    expect(() => advanceMoonlight(batch.state, { type: "exchange", count: 1, choice: token(state) }, ctx, wallet, noRandom, true)).toThrow(/已更新/);
   });
 
   it("bounds raw bag capacity, batch affordability, counter limits and recyclable wallet headroom", () => {

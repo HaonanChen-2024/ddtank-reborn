@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advanceCarnivalNative, carnivalNativeLocalRules as L, carnivalNativePrizes, carnivalNativeRecipes,
-  readCarnivalNativeState, viewCarnivalNative, type CarnivalNativeState } from "../src/activities/carnival-native.js";
+  readCarnivalNativeState, viewCarnivalNative, type CarnivalNativeState, type CarnivalNativeRanking } from "../src/activities/carnival-native.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext } from "../src/activities/types.js";
 
@@ -30,7 +30,8 @@ describe("ordinary original carnival local contract", () => {
     expect(view.prizes.map(prize => prize.id)).toEqual(Array.from({ length: 12 }, (_, index) => index + 1));
     expect(view.exchange.map(recipe => recipe.id)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(view.rules).toMatchObject({ probabilityNumerator: 1, probabilityDenominator: 12, drawCost: 10 });
-    expect(view.unavailable).toContain("大奖直播原窗口与动画"); expect(JSON.stringify(view)).not.toMatch(/seed|pending|rank|pool/);
+    expect(view.unavailable).toContain("大奖直播原窗口与动画"); expect(view.ranking).toBeNull();
+    expect(JSON.stringify(view)).not.toMatch(/seed|pending|"pool"/);
     view.prizes[0].itemCount = 999; view.exchange[0].redPacketsCost = 0;
     expect(viewCarnivalNative(undefined, ctx, wallet).prizes[0].itemCount).toBe(1);
     expect(viewCarnivalNative(undefined, ctx, wallet).exchange[0].redPacketsCost).toBe(10);
@@ -127,5 +128,59 @@ describe("ordinary original carnival local contract", () => {
     const view = viewCarnivalNative(frozen(state), ctx, wallet, 0); expect(view.canDraw).toBe(false);
     const result = advanceCarnivalNative(state, { type: "exchange", index: 4, count: 10, choice: view.stateToken }, ctx, wallet, noRandom, 0);
     expect(result.state.redPacketsSpent).toBe(200); expect(result.rewards).toEqual([{ templateId: 11019, count: 100 }]);
+  });
+});
+
+describe("committed local carnival ranking projection", () => {
+  const ranking = (): CarnivalNativeRanking => ({ version: 1, kind: "carnival-native-ranking", scope: "local",
+    metric: "cumulative-native-draws", entries: [
+      { rank: 1, characterId: 100, nickName: "甲", score: 9 },
+      { rank: 1, characterId: 101, nickName: "乙", score: 9 },
+      { rank: 3, characterId: 102, nickName: "本人", score: 5 },
+    ], personalScore: 5, personalRank: 3 });
+  const state = () => draw(undefined, 5).state;
+  it("clones only the public top entries, keeps competition ranks and never changes the action token", () => {
+    const source = frozen(ranking()), saved = frozen(state());
+    const view = viewCarnivalNative(saved, { ...ctx, carnivalNativeRanking: source }, wallet);
+    expect(view.ranking).toEqual(source); expect(view.ranking).not.toBe(source);
+    expect(view.ranking!.entries[0]).not.toBe(source.entries[0]);
+    expect(view.ranking!.entries.map(row => row.rank)).toEqual([1, 1, 3]);
+    expect(view.stateToken).toBe(viewCarnivalNative(saved, ctx, wallet).stateToken);
+    view.ranking!.entries[0].nickName = "changed";
+    expect(source.entries[0].nickName).toBe("甲");
+    expect(Object.keys(view.ranking!).sort()).toEqual(["version", "kind", "scope", "metric", "entries", "personalScore", "personalRank"].sort());
+  });
+  it("leaves absent and stale query rankings null while preserving the authoritative actor score", () => {
+    const saved = state(), stale = { ...ranking(), personalScore: 4 };
+    expect(viewCarnivalNative(saved, ctx, wallet).ranking).toBeNull();
+    expect(viewCarnivalNative(saved, { ...ctx, carnivalNativeRanking: stale }, wallet)).toMatchObject({ personalScore: 5, ranking: null });
+    expect(viewCarnivalNative(saved, { ...ctx, carnivalNativeRanking: ranking() }, wallet).ranking?.personalRank).toBe(3);
+  });
+  it("supports an empty genuine zero-score board and a real personal rank beyond the top ten", () => {
+    const empty: CarnivalNativeRanking = { ...ranking(), entries: [], personalScore: 0, personalRank: null };
+    expect(viewCarnivalNative(undefined, { ...ctx, carnivalNativeRanking: empty }, wallet).ranking).toEqual(empty);
+    const outside = ranking(); outside.entries = Array.from({ length: 10 }, (_, index) => ({ rank: index + 1,
+      characterId: index + 1, nickName: `角色${index + 1}`, score: 20 - index })); outside.personalRank = 11;
+    expect(viewCarnivalNative(state(), { ...ctx, carnivalNativeRanking: outside }, wallet).ranking?.personalRank).toBe(11);
+    const tied = ranking(); tied.entries = Array.from({ length: 10 }, (_, index) => ({ rank: 1,
+      characterId: index + 1, nickName: `角色${index + 1}`, score: 5 })); tied.personalRank = 1;
+    expect(viewCarnivalNative(state(), { ...ctx, carnivalNativeRanking: tied }, wallet).ranking?.personalRank).toBe(1);
+  });
+  it("rejects malformed, fabricated, duplicate, unordered, zero-score or wrong competition ranks", () => {
+    const mutations: ((r: CarnivalNativeRanking) => unknown)[] = [
+      r => ({ ...r, scope: "cross-server" }), r => ({ ...r, metric: "payment" }), r => ({ ...r, seed: "private" }),
+      r => ({ ...r, entries: Array.from({ length: 11 }, () => r.entries[0]) }),
+      r => ({ ...r, entries: [{ ...r.entries[0], accountId: 9 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], score: 0 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], nickName: " " }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [r.entries[1], r.entries[0], r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[0], r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], { ...r.entries[1], rank: 2 }, r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], rank: 2 }] }),
+      r => ({ ...r, personalRank: null }), r => ({ ...r, personalRank: 2 }), r => ({ ...r, entries: [] }),
+    ];
+    for (const mutate of mutations) expect(() => viewCarnivalNative(state(), {
+      ...ctx, carnivalNativeRanking: mutate(ranking()) as CarnivalNativeRanking,
+    }, wallet)).toThrow(ActivityError);
   });
 });

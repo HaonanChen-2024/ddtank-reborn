@@ -6,10 +6,10 @@ import { ActivityError, type ActivityAction, type ActivityContext, type Activity
 export const carnivalNativeLocalRules = Object.freeze({
   version: 1, drawCost: 10, maxBatchCount: 5, exchangeMaxCount: 10, maxDraws: 100_000_000,
   maxRedPackets: 300_000_000, recordLimit: 20, probabilityNumerator: 1, probabilityDenominator: 12,
-  description: "本地规则：12格等概率，每次10活动积分，仅发永久绑定普通材料与本活动红包；材料直接寄往游戏邮箱。连续模式一次确认1至5次、一个请求编号，全部结果一次提交，停止或关闭不会撤销已提交奖励，动画不再次抽奖或发奖。每次抽奖计入共用每日500次新玩法上限；红包兑换不占新玩法次数，每次1至10份。活动积分由本地任务获得，红包仅在本活动记账；旧网页骰盘单独存档并共用积分钱包。个人记录仅显示本人最近20次，个人分数为累计抽奖次数。原私服概率、装备、高额奖励、真实付款、全服奖池和排行、轮次大奖及缺失的大奖直播原资源均未复刻。",
+  description: "本地规则：12格等概率，每次10活动积分，仅发永久绑定普通材料与本活动红包；材料直接寄往游戏邮箱。连续模式一次确认1至5次、一个请求编号，全部结果一次提交，停止或关闭不会撤销已提交奖励，动画不再次抽奖或发奖。每次抽奖计入共用每日500次新玩法上限；红包兑换不占新玩法次数，每次1至10份。活动积分由本地任务获得，红包仅在本活动记账；旧网页骰盘单独存档并共用积分钱包。个人记录仅显示本人最近20次，个人分数为累计抽奖次数。本地累计榜只显示真实角色已提交的狂欢次数，同分同名次，不发排行奖。原私服概率、装备、高额奖励、真实付款、全服奖池、私服及跨服排行奖励、轮次大奖及缺失的大奖直播原资源均未复刻。",
 });
 const L = carnivalNativeLocalRules, LIMIT = 2_147_483_647;
-type Clock = Pick<ActivityContext, "now">;
+type Clock = Pick<ActivityContext, "now" | "carnivalNativeRanking">;
 type Funds = Pick<ActivityWallet, "points">;
 type Random = () => number;
 export const carnivalNativePrizes = Object.freeze(Array.from({ length: 12 }, (_, index) => Object.freeze({
@@ -25,6 +25,11 @@ export const carnivalNativeRecipes = Object.freeze([
   name: PRIZES[recipe.material].name, itemCount: recipe.itemCount, redPacketsCost: recipe.redPacketsCost })));
 export interface CarnivalNativeRecord {
   drawId: number; prizeId: number; templateId: number; itemCount: number; redPackets: number; day: string;
+}
+export interface CarnivalNativeRanking {
+  version: 1; kind: "carnival-native-ranking"; scope: "local"; metric: "cumulative-native-draws";
+  entries: { rank: number; characterId: number; nickName: string; score: number }[];
+  personalScore: number; personalRank: number | null;
 }
 /** Independent slot: never translate or modify the old games.carnival dice state. */
 export interface CarnivalNativeState {
@@ -85,6 +90,38 @@ export function readCarnivalNativeState(value: unknown): CarnivalNativeState {
     "狂欢红包与个人记录不一致。");
   return { version: 1, kind: "carnival-native", rulesVersion: 1, drawCount: value.drawCount,
     redPacketsEarned: value.redPacketsEarned, redPacketsSpent: value.redPacketsSpent, records };
+}
+/** Only a server-built public ranking is accepted. It never authorizes a draw or changes the action token. */
+function viewRanking(value: unknown, personalScore: number): CarnivalNativeRanking | null {
+  if (value === undefined || value === null) return null;
+  need(object(value, ["version", "kind", "scope", "metric", "entries", "personalScore", "personalRank"])
+    && value.version === 1 && value.kind === "carnival-native-ranking" && value.scope === "local"
+    && value.metric === "cumulative-native-draws" && int(value.personalScore, 0, L.maxDraws), "狂欢榜单投影无效。");
+  // The actor's save is authoritative; a concurrent query must not splice an older score into a newer view.
+  if (value.personalScore !== personalScore) return null;
+  need(value.personalScore === 0 ? value.personalRank === null : int(value.personalRank, 1), "狂欢本人名次无效。");
+  need(Array.isArray(value.entries) && value.entries.length <= 10, "狂欢榜单条数无效。");
+  const ids = new Set<number>(); let previous: CarnivalNativeRanking["entries"][number] | undefined;
+  const entries = value.entries.map((entry: unknown, index: number): CarnivalNativeRanking["entries"][number] => {
+    need(object(entry, ["rank", "characterId", "nickName", "score"]) && int(entry.rank, 1)
+      && int(entry.characterId, 1) && int(entry.score, 1, L.maxDraws)
+      && typeof entry.nickName === "string" && !!entry.nickName.trim() && entry.nickName.length <= 200,
+    "狂欢榜单条目无效。");
+    need(!ids.has(entry.characterId) && (!previous || previous.score > entry.score
+      || previous.score === entry.score && previous.characterId < entry.characterId), "狂欢榜单角色或顺序无效。");
+    need(entry.rank === (previous?.score === entry.score ? previous.rank : index + 1), "狂欢并列名次无效。");
+    const row = { rank: entry.rank, characterId: entry.characterId, nickName: entry.nickName, score: entry.score };
+    ids.add(row.characterId); previous = row; return row;
+  });
+  if (personalScore > 0) {
+    need(entries.length > 0, "狂欢本人名次与榜单不符。");
+    const above = entries.filter(row => row.score > personalScore).length;
+    if (entries.length < 10 || personalScore >= entries.at(-1)!.score)
+      need(entries.some(row => row.score === personalScore) && value.personalRank === above + 1, "狂欢本人名次与榜单不符。");
+    else need((value.personalRank as number) > 10, "狂欢榜外名次无效。");
+  }
+  return { version: 1, kind: "carnival-native-ranking", scope: "local", metric: "cumulative-native-draws",
+    entries, personalScore, personalRank: value.personalRank as number | null };
 }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -153,6 +190,7 @@ export function viewCarnivalNative(value: unknown, ctx: Clock, funds: Funds, dai
     prizes: carnivalNativePrizes.map(prize => ({ ...prize })),
     exchange: carnivalNativeRecipes.map(recipe => ({ ...recipe, canExchange: redPackageCount >= recipe.redPacketsCost })),
     records: state.records.map(record => ({ ...record })), rules: { ...L },
-    unavailable: ["全服奖池", "全服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"] };
+    ranking: viewRanking(ctx.carnivalNativeRanking, state.drawCount),
+    unavailable: ["全服奖池", "私服及跨服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"] };
 }
 export type CarnivalNativeView = ReturnType<typeof viewCarnivalNative>;
