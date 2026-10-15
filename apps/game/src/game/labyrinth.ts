@@ -9,6 +9,8 @@ import { eventsRuntime } from "../handlers/events.js";
 import { grantRewards, type Reward } from "./events.js";
 import { commitPlayerMutation, PlayerMutationCommittedError } from "./player-transaction.js";
 import { labyrinthCombatOwner } from "./labyrinth-combat.js";
+import { labyrinthCleanOutOwner } from "./labyrinth-clean-out.js";
+import { initialLabyrinthCleanOutPhase, readLabyrinthCleanOutPhase, saveLabyrinthCleanOutPhase } from "./labyrinth-clean-out-checkpoint.js";
 
 export type LabyrinthRow = typeof P.Sys_Users_Labyrinth.$inferSelect;
 
@@ -85,7 +87,8 @@ function processTokens(value: string): string[] {
   return tokens;
 }
 
-interface PublishedState { row: LabyrinthRow; messages: string[] }
+interface CleanOutAward { floor: number; exp: number; hardCurrency: number; materials: Reward[] }
+interface PublishedState { row: LabyrinthRow; messages: string[]; awards?: CleanOutAward[]; resetSweepPhase?: boolean; sweepPhase?: number }
 
 /** A committed notification error is not a failed business transaction. */
 async function mutate<T>(ctx: ServerContext, p: GamePlayer,
@@ -99,29 +102,56 @@ async function mutate<T>(ctx: ServerContext, p: GamePlayer,
 }
 
 function publish(ctx: ServerContext, p: GamePlayer, value: PublishedState): void {
-  for (const send of [() => p.send(labyrinthUpdatePkt(p.id, value.row)),
+  for (const send of [...(value.awards ?? []).map(award => () => {
+    // PlayerActives.method_3: the original per-floor sweep log, after COMMIT.
+    const packet = new GSPacket(131, p.id); packet.writeByte(7); packet.writeInt(award.floor); packet.writeInt(award.exp);
+    packet.writeInt(award.materials.length);
+    for (const item of award.materials) { packet.writeInt(item.templateId); packet.writeInt(item.count); }
+    packet.writeInt(award.hardCurrency); p.send(packet);
+  }), () => p.send(labyrinthUpdatePkt(p.id, value.row)),
     ...value.messages.map(message => () => p.sendMessage(0, message))]) {
     try { send(); } catch (error) { ctx.log.warn(`Labyrinth user ${p.id}: notification failed: ${error}`); }
   }
 }
 
 function hasPendingFloors(l: LabyrinthRow): boolean {
-  return l.completeChallenge && l.myProgress > 0 && l.currentFloor <= l.myProgress;
+  return l.completeChallenge && Number.isInteger(l.currentFloor) && Number.isInteger(l.myProgress)
+    && l.currentFloor >= 1 && l.currentFloor <= l.myProgress && l.myProgress <= floorMaterials.length;
 }
 
-/** Preserve the existing local instant-sweep approximation. It is not the
- * original battle award table or the unported per-second clean-out timer. */
-function settleCleanOut(p: GamePlayer, l: LabyrinthRow): { exp: number; hardCurrency: number } {
-  let exp = 0, hardCurrency = 0;
-  for (let floor = l.currentFloor; floor <= l.myProgress; floor += 2) {
-    const multiple = l.isDoubleAward ? 2 : 1;
-    exp += (660 + 690 * Math.max(0, floor - 1)) * multiple;
-    hardCurrency += 10 * Math.max(1, floor) * multiple;
-  }
-  l.accumulateExp += exp; l.currentFloor = l.myProgress; l.completeChallenge = false;
+function completeCleanOut(l: LabyrinthRow): void {
+  l.currentFloor = l.myProgress; l.completeChallenge = false;
   l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0; l.isCleanOut = false; l.isInGame = false;
-  p.addGP(exp, false); p.addHardCurrency(hardCurrency);
-  return { exp, hardCurrency };
+}
+
+function quoteCleanOut(ctx: ServerContext, l: LabyrinthRow, phase: number): number {
+  if (!hasPendingFloors(l)) { l.remainTime = l.currentRemainTime = l.cleanOutAllTime = 0; return 0; }
+  if (phase < 1) phase = ctx.templates.cfgInt("WarriorFamRaidTimeRemain", 120);
+  const total = phase + (l.myProgress - l.currentFloor) * 120;
+  if (!Number.isSafeInteger(phase) || phase < 1 || !Number.isSafeInteger(total) || total > 0x7fffffff)
+    throw new Error("Invalid Labyrinth clean-out quote");
+  // Default timing is unchanged. Honor a configured first phase without
+  // exhausting the total before its last reward, and retain a known partial phase.
+  l.remainTime = l.currentRemainTime = l.cleanOutAllTime = total;
+  return phase;
+}
+
+/** PlayerActives.method_1/2: every floor grants GP and attempts one card;
+ * only even floors use the original material/currency columns. No ProcessAward. */
+function cleanOutAward(ctx: ServerContext, p: GamePlayer, l: LabyrinthRow, now: Date) {
+  const floor = l.currentFloor;
+  if (!hasPendingFloors(l)) throw new Error("Invalid Labyrinth clean-out floor");
+  if (!p.propBag.getItemByTemplateID(0, 11916) || !p.propBag.removeTemplate(11916, 1)) l.isDoubleAward = false;
+  const multiple = l.isDoubleAward ? 2 : 1;
+  const exp = (660 + 690 * (floor - 1)) * multiple;
+  const hardCurrency = floor % 2 === 0 ? floorCurrency[floor - 1]! * multiple : 0;
+  const materials: Reward[] = floor % 2 === 0 ? (ctx.templates.pveDrop("copy", 2, 40002) ?? []).map(drop => ({
+    templateId: drop.templateId, count: floorMaterials[floor - 1]! * multiple, validDate: drop.validDate, isBind: true,
+  })) : [];
+  for (const item of materials) if (!ctx.templates.findItem(item.templateId)) throw new Error("Labyrinth material template is missing");
+  const grant = grantRewards(p, materials, ctx.templates.findItem, now);
+  p.addGP(exp, false); p.addHardCurrency(hardCurrency); l.accumulateExp += exp;
+  return { award: { floor, exp, hardCurrency, materials }, overflow: grant.overflow };
 }
 
 export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): Promise<void> {
@@ -130,7 +160,9 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
   const enabled = eventsRuntime(ctx).scheduler.events.find(e => e.kind === "labyrinth")?.enabled !== false;
   if (!enabled) return p.sendMessage(0, "勇士迷宫暂未开放。");
   if (labyrinthCombatOwner(ctx).stopping) return p.sendMessage(0, "服务器正在停止，迷宫暂不接受新操作。");
+  if (labyrinthCleanOutOwner(ctx).stopping) return p.sendMessage(0, "服务器正在停止，迷宫暂不接受新操作。");
   if (labyrinthCombatOwner(ctx).busy(p)) return p.sendMessage(0, "迷宫战斗或结算尚未结束，请稍后再操作。");
+  if (labyrinthCleanOutOwner(ctx).recovering(p)) return p.sendMessage(0, "迷宫扫荡正在恢复结算，请稍后再操作。");
   // This handler already owns GameClient.chain. Waiting for an award queued
   // behind it would deadlock; the combat owner rejects administrative mutations
   // for the whole admitted run and settles accepted outcomes on that same queue.
@@ -145,27 +177,35 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
       return mutate<PublishedState>(ctx, p, async (db, staged, now) => {
         if (!p.isActive || p.quitting || p.currentRoom?.game) return null;
         const l = (await loadLocked(db, p.id, now, true))!;
-        if (day(now) !== day(l.LastDate)) resetDay(l, now);
+        const rollover = day(now) !== day(l.LastDate);
+        if (rollover) resetDay(l, now);
         else if (isUnusedLegacyRow(l)) l.ProcessAward = initProcessAward();
         const messages: string[] = [];
+        let resetSweepPhase = rollover;
+        let sweepPhase = rollover ? 0 : (await readLabyrinthCleanOutPhase(db, l)) ?? initialLabyrinthCleanOutPhase(ctx, l);
+        const awards: CleanOutAward[] = [], overflow: ReturnType<typeof grantRewards>["overflow"] = [];
         switch (sub) {
           case 1:
             if (on && !l.isDoubleAward && staged.propBag.getItemByTemplateID(0, 11916)
               && staged.propBag.removeTemplate(11916, 1)) l.isDoubleAward = true;
             break;
           case 2: {
-            let minutes = 0;
-            if (hasPendingFloors(l)) for (let floor = l.currentFloor; floor <= l.myProgress; floor++) minutes += 2;
-            l.remainTime = minutes * 60; l.currentRemainTime = l.remainTime; l.cleanOutAllTime = l.remainTime;
+            // Refreshing an active or paused checkpoint must not rewind its
+            // remaining seconds, partial floor, or original progress-bar total.
+            if (sweepPhase > 0) break;
+            // A legacy row without a recoverable phase may explicitly request
+            // a fresh current-floor quote; it never receives an inferred award.
+            resetSweepPhase ||= sweepPhase === 0;
+            sweepPhase = quoteCleanOut(ctx, l, sweepPhase);
             break;
           }
           case 3: {
-            if (!hasPendingFloors(l)) break;
+            if (!hasPendingFloors(l) || l.isCleanOut) break;
+            if (l.currentRemainTime <= 0 || l.remainTime <= 0) sweepPhase = quoteCleanOut(ctx, l, sweepPhase);
+            if (sweepPhase < 1) { messages.push("扫荡计时无法安全恢复，请重新打开迷宫刷新计时。"); break; }
             const amount = price(ctx, "cleanOutGiftToken", 100);
             if (staged.info.GiftToken < amount) { messages.push("礼金不足。"); l.isCleanOut = false; break; }
-            staged.removeGiftToken(amount); l.isCleanOut = true;
-            const r = settleCleanOut(staged, l);
-            if (r.exp || r.hardCurrency) messages.push(`迷宫扫荡：经验 +${r.exp}，迷宫币 +${r.hardCurrency}。`);
+            staged.removeGiftToken(amount); l.isCleanOut = true; l.isInGame = true;
             break;
           }
           case 4: {
@@ -174,7 +214,11 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
             const amount = price(ctx, "pricePerMin", 10) * Math.abs(Math.floor(l.currentRemainTime / 60));
             if (!Number.isSafeInteger(amount)) throw new Error("Invalid Labyrinth speed-up amount");
             if (staged.info.Money < amount) break;
-            staged.removeMoney(amount); settleCleanOut(staged, l);
+            staged.removeMoney(amount);
+            for (; l.currentFloor <= l.myProgress; l.currentFloor++) {
+              const result = cleanOutAward(ctx, staged, l, now); awards.push(result.award); overflow.push(...result.overflow);
+            }
+            completeCleanOut(l);
             break;
           }
           case 5: l.isCleanOut = false; break;
@@ -183,6 +227,8 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
               l.currentFloor = 1; l.accumulateExp = 0; l.tryAgainComplete = false; l.ProcessAward = initProcessAward();
               l.completeChallenge = true; l.isCleanOut = false; l.isInGame = false;
               l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0;
+              resetSweepPhase = true;
+              sweepPhase = 0;
               messages.push("迷宫已重置。");
             } else messages.push("本次迷宫已重置过，请稍后再试。");
             break;
@@ -196,17 +242,63 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
             break;
         }
         await save(db, l);
-        return { value: { row: l, messages } };
+        await saveLabyrinthCleanOutPhase(db, l, hasPendingFloors(l) && sweepPhase > 0 ? sweepPhase : null);
+        return { value: { row: l, messages, awards, resetSweepPhase, sweepPhase }, overflow, mailTitle: "迷宫奖励" };
       });
     });
-    if (result) publish(ctx, p, result);
+    if (result) {
+      publish(ctx, p, result);
+      labyrinthCleanOutOwner(ctx).sync(p, result.row, result.resetSweepPhase, result.sweepPhase);
+    }
   });
 }
 
-// GamePlayer.cs labyrinthGolds[40]. Only the 30 original mission IDs have a
-// known combat implementation; the remaining reward rows do not create floors.
-const floorMaterials = [0, 2, 0, 2, 0, 2, 0, 3, 0, 3, 0, 3, 0, 4, 0, 4, 0, 4, 0, 5, 0, 5, 0, 5, 0, 6, 0, 6, 0, 6];
-const floorCurrency = [0, 2, 0, 2, 0, 3, 0, 3, 0, 4, 0, 4, 0, 5, 0, 5, 0, 6, 0, 6, 0, 7, 0, 7, 0, 8, 0, 8, 0, 10];
+// GamePlayer.cs labyrinthGolds[40]. These rows do not create combat missions.
+const floorMaterials = [0, 2, 0, 2, 0, 2, 0, 3, 0, 3, 0, 3, 0, 4, 0, 4, 0, 4, 0, 5, 0, 5, 0, 5, 0, 6, 0, 6, 0, 6, 0, 8, 0, 8, 0, 8, 0, 10, 0, 10];
+const floorCurrency = [0, 2, 0, 2, 0, 3, 0, 3, 0, 4, 0, 4, 0, 5, 0, 5, 0, 6, 0, 6, 0, 7, 0, 7, 0, 8, 0, 8, 0, 10, 0, 10, 0, 11, 0, 11, 0, 12, 0, 12];
+
+export interface LabyrinthCleanOutSnapshot {
+  day: string; currentFloor: number; myProgress: number;
+  remainTime: number; currentRemainTime: number; cleanOutAllTime: number;
+}
+
+/** Accepted online seconds, called only by the server-owned client queue while
+ * holding the player's award/fight barriers. No wall-clock/offline rewards. */
+export async function advanceLabyrinthCleanOut(ctx: ServerContext, p: GamePlayer, expected: LabyrinthCleanOutSnapshot,
+  seconds: number, untilFloor: number): Promise<{ row: LabyrinthRow; untilFloor: number } | null> {
+  if (!Number.isSafeInteger(seconds) || seconds < 1 || !Number.isSafeInteger(untilFloor) || untilFloor < 1)
+    throw new Error("Invalid Labyrinth clean-out timer");
+  const result = await p.withPersistenceLock(() => mutate<PublishedState & { untilFloor: number }>(ctx, p, async (db, staged, now) => {
+    const l = await loadLocked(db, p.id, now, false);
+    if (!l) throw new Error("Labyrinth clean-out row is missing");
+    if (day(l.LastDate) !== expected.day || (["currentFloor", "myProgress", "remainTime", "currentRemainTime", "cleanOutAllTime"] as const)
+      .some(key => l[key] !== expected[key])) throw new Error("Labyrinth clean-out run was replaced");
+    if (!l.isCleanOut || !hasPendingFloors(l)) return null;
+    if (![l.remainTime, l.currentRemainTime, l.cleanOutAllTime].every(value => Number.isSafeInteger(value) && value >= 0))
+      throw new Error("Invalid Labyrinth clean-out remaining time");
+    const durablePhase = await readLabyrinthCleanOutPhase(db, l);
+    if (durablePhase !== null && durablePhase !== untilFloor)
+      throw new Error("Labyrinth clean-out phase was replaced");
+    if (untilFloor + (l.myProgress - l.currentFloor) * 120 > Math.min(l.remainTime, l.currentRemainTime))
+      throw new Error("Labyrinth clean-out remaining time cannot cover its pending floors");
+    let left = seconds;
+    const awards: CleanOutAward[] = [], overflow: ReturnType<typeof grantRewards>["overflow"] = [];
+    while (left > 0 && l.remainTime > 0 && l.currentRemainTime > 0) {
+      const step = Math.min(left, untilFloor, l.remainTime, l.currentRemainTime);
+      left -= step; untilFloor -= step; l.remainTime -= step; l.currentRemainTime -= step;
+      if (untilFloor === 0) {
+        const award = cleanOutAward(ctx, staged, l, now); awards.push(award.award); overflow.push(...award.overflow);
+        untilFloor = 120; l.currentFloor++;
+        if (l.currentFloor > l.myProgress) { completeCleanOut(l); break; }
+      }
+    }
+    await save(db, l);
+    await saveLabyrinthCleanOutPhase(db, l, hasPendingFloors(l) ? untilFloor : null);
+    return { value: { row: l, untilFloor, awards, messages: [] }, overflow, mailTitle: "迷宫奖励" };
+  }));
+  if (result) publish(ctx, p, result);
+  return result && { row: result.row, untilFloor: result.untilFloor };
+}
 
 export interface LabyrinthFloorAward { floor: number; missionId: number; bigAward: boolean }
 export interface LabyrinthAwardResult extends PublishedState { exp: number; hardCurrency: number; materials: Reward[] }

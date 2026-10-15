@@ -226,3 +226,16 @@ export const CarnivalGlobalState = appSchema.table("CarnivalGlobalState", {
   Key: varchar("Key", { length: 32 }).primaryKey(),
   State: jsonb("State").notNull(),
 });
+
+/** Exact online sweep phase, written under the corresponding Labyrinth row lock.
+ * No wallet foreign key: activity wallet and player locks have different orders. */
+export const LabyrinthCleanOutPhases = appSchema.table("LabyrinthCleanOutPhases", {
+  UserID: integer("UserID").primaryKey(),
+  Day: varchar("Day", { length: 10 }).notNull(),
+  currentFloor: integer("currentFloor").notNull(),
+  myProgress: integer("myProgress").notNull(),
+  remainTime: integer("remainTime").notNull(),
+  currentRemainTime: integer("currentRemainTime").notNull(),
+  cleanOutAllTime: integer("cleanOutAllTime").notNull(),
+  untilFloor: integer("untilFloor").notNull(),
+});

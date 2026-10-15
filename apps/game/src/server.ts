@@ -1,6 +1,7 @@
 import { actNativeChristmas, readNativeChristmas } from "./game/activity-christmas-native.js";
 import { christmasSnowfieldOwner } from "./game/activity-christmas-snowfield.js";
 import { labyrinthCombatOwner } from "./game/labyrinth-combat.js";
+import { labyrinthCleanOutOwner } from "./game/labyrinth-clean-out.js";
 /**
  * GameServer (Game.Server/GameServer.cs Start/Stop + Center.Server's online registry): boots caches, listeners,
  * timers (DB autosave, ping, speed-heartbeat watchdog, server heartbeat) and the admin channel.
@@ -276,6 +277,7 @@ export class GameServer {
     }
     // m_saveDbTimer (DBAutosaveInterval) + speed heartbeat watchdog (GamePlayer.SaveIntoDatabase).
     this.every(cfg.SAVE_INTERVAL_MIN * 60_000, () => this.saveAll(true));
+    this.every(1000, () => labyrinthCleanOutOwner(this.ctx).tick());
     // SP_Auction_Scan equivalent: settle expired listings (buyer win or unsold return) on a timer.
     const auctionScanSec = Number(process.env.AUCTION_SCAN_SEC ?? 300);
     if (auctionScanSec > 0) this.every(auctionScanSec * 1000, () => scanExpiredAuctions(this.ctx));
@@ -402,8 +404,14 @@ export class GameServer {
   }
 
   async stop(): Promise<void> {
-    if (this.ctx) { labyrinthCombatOwner(this.ctx).beginShutdown(); await labyrinthCombatOwner(this.ctx).drain(); }
-    if (this.ctx) { christmasSnowfieldOwner(this.ctx).beginShutdown(); await christmasSnowfieldOwner(this.ctx).drain(); }
+    if (this.ctx) {
+      labyrinthCleanOutOwner(this.ctx).beginShutdown();
+      labyrinthCombatOwner(this.ctx).beginShutdown();
+      christmasSnowfieldOwner(this.ctx).beginShutdown();
+      await labyrinthCleanOutOwner(this.ctx).drain();
+      await labyrinthCombatOwner(this.ctx).drain();
+      await christmasSnowfieldOwner(this.ctx).drain();
+    }
     for (const t of this.timers) clearInterval(t);
     if (this.ctx) eventsRuntime(this.ctx).scheduler.stopTimer();
     this.ctx?.rooms.stop();
@@ -418,6 +426,7 @@ export class GameServer {
     ]);
     if (this.ctx) await christmasSnowfieldOwner(this.ctx).drain();
     if (this.ctx) await labyrinthCombatOwner(this.ctx).drain();
+    if (this.ctx) await labyrinthCleanOutOwner(this.ctx).drain();
     if (this.ownsDb) await this.ctx.db.close();
   }
 }

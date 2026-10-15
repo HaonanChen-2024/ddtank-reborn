@@ -57,6 +57,13 @@
       "when": 1792066235543,
       "tag": "0007_old_shadow_king",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792089543819,
+      "tag": "0008_labyrinth_clean_out_phases",
+      "breakpoints": true
     }
   ]
 }

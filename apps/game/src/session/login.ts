@@ -22,6 +22,10 @@ import { unixSeconds } from "../util/time.js";
 import { withWorldBossAdmission } from "../game/world-boss.js";
 import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
 import { labyrinthCombatOwner } from "../game/labyrinth-combat.js";
+import { labyrinthCleanOutOwner } from "../game/labyrinth-clean-out.js";
+import { readLabyrinthCleanOutPhase } from "../game/labyrinth-clean-out-checkpoint.js";
+import { eq } from "drizzle-orm";
+import { player as P } from "@ddt/db";
 import type { GameClient } from "./client.js";
 import type { ServerContext, TicketValidator } from "./context.js";
 import type { DbHandle } from "@ddt/db";
@@ -178,6 +182,10 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
   p.send(ev.boss.window ? worldBossOpen(ev, p) : Out.openWorldBoss());
   if (!ev.leagueOpen) p.send(Out.leagueNotice(p.id, match.restCount, 0, 2));
   p.send(Out.guildMemberWeek(p.id));
+  // Resume only a previously paid online sweep. The new clock starts now;
+  // yesterday's row waits for the existing 131 UTC reset, without offline credit.
+  const labyrinth = (await db.select().from(P.Sys_Users_Labyrinth).where(eq(P.Sys_Users_Labyrinth.UserID, p.id)))[0];
+  if (labyrinth) labyrinthCleanOutOwner(ctx).sync(p, labyrinth, false, await readLabyrinthCleanOutPhase(db, labyrinth));
   // WorldMgr.OnPlayerOnline: friends see the online state (160/165).
   // ChangePlayerState also notifies the members of the same guild (online list of the guild screen)
   for (const f of ctx.world.all()) if (f !== p && (f.friends.has(p.id) || (info.ConsortiaID !== 0 && f.info.ConsortiaID === info.ConsortiaID))) f.send(Out.friendState(p.id, 1, info.typeVIP, info.VIPLevel));
@@ -196,6 +204,7 @@ export function quitPlayer(ctx: ServerContext, p: GamePlayer): Promise<void> {
 
 async function doQuit(ctx: ServerContext, p: GamePlayer): Promise<void> {
   // Seal actual outcome producers and drain their detached ledger before any old-profile final save.
+  await labyrinthCleanOutOwner(ctx).beforeQuit(p);
   await labyrinthCombatOwner(ctx).beforeQuit(p);
   await christmasSnowfieldOwner(ctx).beforeQuit(p);
   p.isActive = false;

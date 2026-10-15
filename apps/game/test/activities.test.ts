@@ -87,10 +87,10 @@ describe("131 LABYRINTH economy", () => {
     eventsRuntime(ctx).scheduler.setEvents([]);
   });
 
-  it("131 sub 3 CLEAN_OUT: refuses without enough giftToken, settles currentFloor=myProgress and pays GP once myProgress>0", async () => {
+  it("131 sub 3 CLEAN_OUT: starts a paid countdown without advancing floors or paying immediate GP", async () => {
     const { c, ch: p } = await loggedIn(server, { grade: 10 });
     const h = await sharedDb();
-    await h.db.insert(player.Sys_Users_Labyrinth).values({ UserID: p.userId, myProgress: 4, myRanking: 0, completeChallenge: true, isDoubleAward: false, currentFloor: 0, accumulateExp: 0, remainTime: 0, currentRemainTime: 0, cleanOutAllTime: 0, cleanOutGold: 50, tryAgainComplete: true, isInGame: false, isCleanOut: false, serverMultiplyingPower: false, LastDate: new Date(), ProcessAward: "-1" } as never).onConflictDoNothing();
+    await h.db.insert(player.Sys_Users_Labyrinth).values({ UserID: p.userId, myProgress: 4, myRanking: 0, completeChallenge: true, isDoubleAward: false, currentFloor: 1, accumulateExp: 0, remainTime: 0, currentRemainTime: 0, cleanOutAllTime: 0, cleanOutGold: 50, tryAgainComplete: true, isInGame: false, isCleanOut: false, serverMultiplyingPower: false, LastDate: new Date(), ProcessAward: "-1" } as never).onConflictDoNothing();
     eventsRuntime(ctx).scheduler.setEvents([{ id: 2, kind: "labyrinth", title: "", enabled: true, weekdays: "", startTime: "00:00", durationMin: 0, startDate: null, endDate: null, params: { cleanOutGiftToken: 0 } }]);
     const gp = ctx.world.get(p.userId)!;
     const gpBefore = gp.info.GP;
@@ -98,8 +98,8 @@ describe("131 LABYRINTH economy", () => {
     c.out(131, (o) => o.writeInt(3));
     await c.code(131, undefined, m);
     const [row] = await h.db.select().from(player.Sys_Users_Labyrinth).where(eq(player.Sys_Users_Labyrinth.UserID, p.userId));
-    expect(row!.currentFloor).toBe(4);
-    expect(gp.info.GP).toBeGreaterThan(gpBefore);
+    expect(row).toMatchObject({ currentFloor: 1, isCleanOut: true, isInGame: true, remainTime: 480 });
+    expect(gp.info.GP).toBe(gpBefore);
     eventsRuntime(ctx).scheduler.setEvents([]);
     c.close();
   });

@@ -75,16 +75,18 @@ async function failWrite(id: number, table: "Sys_Users_Detail" | "Sys_Users_Laby
   };
 }
 
-describe("131 local sweep settlement lifecycle", () => {
-  it("settles once, persists completion, and rejects queued clean/speed/update replays", async () => {
+describe("131 timed sweep settlement lifecycle", () => {
+  it("starts once, accelerates all remaining floors and rejects queued clean/speed/update replays", async () => {
     const f = await fixture();
     const before = f.wallet();
-    const completed = await f.request(3);
+    expect(await f.request(3)).toMatchObject({ completeChallenge: true, currentFloor: 1, isCleanOut: true, remainTime: 480 });
+    expect(f.wallet()).toEqual({ ...before, giftToken: before.giftToken - 5 });
+    const completed = await f.request(4);
     const paid = f.wallet();
     expect(paid.giftToken).toBe(before.giftToken - 5);
-    expect(paid.money).toBe(before.money);
-    expect(paid.gp).toBeGreaterThan(before.gp);
-    expect(paid.hardCurrency).toBeGreaterThan(before.hardCurrency);
+    expect(paid.money).toBe(before.money - 24);
+    expect(paid.gp).toBe(before.gp + 6780);
+    expect(paid.hardCurrency).toBe(before.hardCurrency + 4);
     expect(completed).toMatchObject({ ...idle, completeChallenge: false, currentFloor: 4, ProcessAward: "kept-sweep-marker" });
     const mark = f.c.mark();
     for (const sub of [3, 3, 4, 2]) f.c.out(131, pkt => pkt.writeInt(sub));
@@ -108,7 +110,8 @@ describe("131 local sweep settlement lifecycle", () => {
   it("keeps a legitimate unclaimed final floor eligible even when cursor equals progress", async () => {
     const f = await fixture({ currentFloor: 4 });
     const before = f.wallet();
-    expect(await f.request(3)).toMatchObject({ completeChallenge: false, currentFloor: 4 });
+    expect(await f.request(3)).toMatchObject({ completeChallenge: true, currentFloor: 4, remainTime: 120 });
+    expect(await f.request(4)).toMatchObject({ completeChallenge: false, currentFloor: 4 });
     const after = f.wallet();
     expect(after.gp).toBeGreaterThan(before.gp);
     expect(after.giftToken).toBe(before.giftToken - 5);
@@ -123,7 +126,7 @@ describe("131 local sweep settlement lifecycle", () => {
     expect(await f.request(3)).toMatchObject({ completeChallenge: true, currentFloor: 1, isCleanOut: false });
     expect(f.wallet()).toEqual(before);
     f.player().info.GiftToken = 5;
-    expect(await f.request(3)).toMatchObject({ completeChallenge: false });
+    expect(await f.request(3)).toMatchObject({ completeChallenge: true, isCleanOut: true });
     expect(f.wallet().giftToken).toBe(0);
     expect(f.wallet().money).toBe(before.money);
   });
@@ -137,10 +140,12 @@ describe("131 local sweep settlement lifecycle", () => {
     expect(reset.ProcessAward.split("-")).toEqual(Array.from({ length: 99 }, (_, i) => String(i)));
     await f.request(4); // stale acceleration cannot skip the new sweep's entry fee
     expect(f.wallet()).toEqual(before);
-    expect(await f.request(3)).toMatchObject({ completeChallenge: false });
+    expect(await f.request(3)).toMatchObject({ completeChallenge: true, isCleanOut: true });
+    expect(await f.request(4)).toMatchObject({ completeChallenge: false });
     const paid = f.wallet();
     expect(await f.request(6)).toMatchObject({ completeChallenge: false, tryAgainComplete: false });
     await f.request(3);
+    await f.request(4);
     expect(f.wallet()).toEqual(paid);
   });
 
@@ -153,6 +158,7 @@ describe("131 local sweep settlement lifecycle", () => {
     await f.request(4);
     expect(f.wallet()).toEqual(before);
     await f.request(3);
+    await f.request(4);
     const paid = f.wallet();
     expect(paid.giftToken).toBe(before.giftToken - 5);
     await f.request(3);
@@ -207,7 +213,7 @@ describe("131 local sweep settlement lifecycle", () => {
       expect((await db.db.select().from(player.Sys_Users_Detail).where(eq(player.Sys_Users_Detail.UserID, p.id)))[0]).toEqual(stored);
     } finally { await remove(); }
     await labyrinthHandler(server.ctx, p, command(sub, true));
-    expect(await f.read()).toMatchObject(sub === 3 ? { completeChallenge: false } : { isInGame: true });
+    expect(await f.read()).toMatchObject(sub === 3 ? { completeChallenge: true, isCleanOut: true } : { isInGame: true });
     expect(sub === 3 ? p.info.GiftToken : p.info.Money).toBe(sub === 3 ? before.GiftToken - 5 : 0);
   });
 
@@ -306,7 +312,7 @@ describe("131 local sweep settlement lifecycle", () => {
       expect(committed!.GiftToken).toBe(15);
       rooms.startGame(room); rooms.tick(); expect(room.game).toBeNull();
       await labyrinthHandler(ctx, p, command(6)); // Busy rejection never waits on itself or reopens the stored run.
-      expect(await f.read()).toMatchObject({ completeChallenge: false, tryAgainComplete: true });
+      expect(await f.read()).toMatchObject({ completeChallenge: true, isCleanOut: true, tryAgainComplete: true });
       release(); await running;
       expect(p.info.GiftToken).toBe(15); expect(p.worldBossAwardPending).toBeNull();
       await Promise.resolve(); rooms.tick(); expect(room.game).not.toBeNull();
