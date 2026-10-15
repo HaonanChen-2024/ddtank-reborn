@@ -105,7 +105,7 @@ it("shares the seven PvE display rows with API and Game while preserving every o
 });
 const rows = (xml: XEl) => new Map(xml.children[0]!.children.map((row) => [Number(new Map(row.attrs).get("TemplateID")), row.attrs]));
 
-it("uses the same 13 names in API plain/zlib templates and Game without changing other fields or historical data", async () => {
+it("uses the same 21 names in API plain/zlib templates and Game without changing other fields or historical data", async () => {
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", "");
   const before = await snapshot(), oldGame = await new Templates().load(h.db, 1), oldXml = await definition.build(h);
   const oldRows = rows(oldXml);
@@ -113,7 +113,11 @@ it("uses the same 13 names in API plain/zlib templates and Game without changing
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", file);
   const currentGame = await new Templates().load(h.db, 1), currentXml = await definition.build(h);
   const currentRows = rows(currentXml);
-  expect(Object.keys(names)).toHaveLength(13);
+  expect(Object.keys(names)).toHaveLength(21);
+  const signNames = { 11023: "强化石4级", 11035: "开孔钻头1级", 11041: "初级SUPER·古枪碎片", 11024: "强化石5级",
+    11029: "幸运符50%", 13689: "龙骑士套装", 11560: "攻击祝福宝珠" };
+  expect(names).toMatchObject(signNames);
+  for (const [id, name] of Object.entries(signNames)) expect(currentGame.findItem(Number(id))?.Name).toBe(name);
   expect(currentRows.size).toBe(oldRows.size);
   for (const [id, oldItem] of oldGame.items) {
     const translated = currentGame.findItem(id)!;

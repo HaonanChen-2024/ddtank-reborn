@@ -146,8 +146,9 @@ async function levelRequest(f: Fixture) {
   await timeBox(f.ctx, f.p, packet);
   expect(f.sent.some(packet => packet.code === 53)).toBe(false); // Level requests have no 53 response in the original handler.
 }
-async function allowSign(f: Fixture) {
-  await h.db.insert(player.DailyLogList).values({ UserID: f.p.id, DayLog: "True,True,True", UserAwardLog: 3, LastDate: f.ctx.now() });
+async function allowSign(f: Fixture, days = 3) {
+  expect(days).toBeLessThanOrEqual(f.ctx.now().getUTCDate());
+  await h.db.insert(player.DailyLogList).values({ UserID: f.p.id, DayLog: Array.from({ length: days }, () => "True").join(","), UserAwardLog: days, LastDate: f.ctx.now() });
 }
 async function historicMail(f: Fixture) {
   return (await h.db.insert(player.User_Messages).values({ ReceiverID: f.p.id, Title: "Historic reward", Content: "Original content", Annex1Name: "Original attachment", Type: 12 }).returning())[0]!;
@@ -206,14 +207,21 @@ it.each([false, true])("reports the actually received level for the current seed
   expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
 });
 
-it.each([false, true])("translates cumulative-sign rewards while retaining the no-90-reply contract (full=%s)", async full => {
-  const f = await fixture(full), historic = await historicMail(f); await allowSign(f);
-  expect(await signAward(f.ctx, f.p, 3)).toBe(true);
-  expect(notices(f)).toEqual([`累计签到奖励领取成功。 ${templates.findItem(11023)!.Name} x5, ${templates.findItem(11035)!.Name} x3`]);
+it.each([
+  { days: 3, summary: "强化石4级 x5, 开孔钻头1级 x3" },
+  { days: 6, summary: "初级SUPER·古枪碎片 x2, 强化石5级 x2" },
+  { days: 12, summary: "强化石5级 x5, 幸运符50% x1" },
+  { days: 18, summary: "龙骑士套装 x1, 攻击祝福宝珠 x3" },
+].flatMap(tier => [false, true].map(full => ({ ...tier, full }))))("translates $days-day cumulative-sign rewards while retaining the no-90-reply contract (full=$full)", async ({ days, summary, full }) => {
+  const f = await fixture(full), historic = await historicMail(f);
+  if (days === 18) f.advance(16 * 24 * 60); // October 29: every signed day is already in this fixture's current month.
+  await allowSign(f, days);
+  expect(await signAward(f.ctx, f.p, days)).toBe(true);
+  expect(notices(f)).toEqual([`累计签到奖励领取成功。 ${summary}`]);
   expect(f.sent.some(packet => packet.code === 90)).toBe(false);
   await newMailTitles(f, historic, "累计签到奖励", full);
   const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
-  expect(await signAward(f.ctx, f.p, 3)).toBe(false); expect(f.sent).toEqual([]);
+  expect(await signAward(f.ctx, f.p, days)).toBe(false); expect(f.sent).toEqual([]);
   expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
 });
 
