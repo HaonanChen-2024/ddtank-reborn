@@ -8,6 +8,7 @@ import { SimpleBomb } from "../phy/bomb.js";
 import { hertAddition, turnDelay, turnEnergy } from "./formulas.js";
 import type { BaseGame } from "./game.js";
 import { EffectListOf, HookBus, type EffectLike } from "./effects.js";
+import { applyEquipEffects, type EquipEffectTemplate } from "./equipEffects.js";
 
 /** Game.Logic/LivingConfig.cs — PascalCase on purpose: donor scripts set these fields directly. */
 export class LivingConfig {
@@ -369,6 +370,8 @@ export interface PlayerSpec {
    * GamePlayer.FightBuffers) — e.g. ConsortionAddPropertyBuffer → attack/defence/agility/lucky,
    * ConsortionAddMaxBloodBuffer → maxBloodPercent, ConsortionAddCriticalBuffer → critical. */
   guildBuffs?: { attack?: number; defence?: number; agility?: number; lucky?: number; maxBloodPercent?: number; critical?: number };
+  /** Ordered templates from positive equipment holes (PlayerEquipInventory.EquipBuffer / Player.InitBuffer). */
+  equipEffects?: EquipEffectTemplate[];
 }
 
 export interface PetSkillSpec { id: number; costMP: number; coldDown: number; newBallId: number; ballType: number; delay: number; pic?: string; effectPic?: string }
@@ -420,12 +423,14 @@ export class Player extends TurnedLiving {
     this.vaneOpen = !!spec.isBot || spec.grade >= 9;
     this.reduceDamePlus = spec.reduceDamePlus ?? 0;
     this.deputyWeaponResCount = spec.deputyWeapon ? spec.deputyWeapon.strengthenLevel + 1 : 0;
+    applyEquipEffects(this, spec.equipEffects ?? []);
   }
 
   /** Player.Reset (Player.cs:2205): stats from the spec, full blood, main weapon balls. `GuildBuffs` mirrors
    * `GamePlayer.FightBuffers`/`BufferList` (Game.Server/Buffer/*, ConsortiaBuffer rows) — guild-skill fight
    * buffs are resolved to flat deltas by the caller (apps/game), not re-implemented inside the pure engine. */
   reset(): void {
+    this.effectList.stopAll(); // Player.Reset: detach the previous battle effects before InitBuffer.
     const s = this.spec;
     this.attack = s.attack;
     this.defence = s.defence;
@@ -452,6 +457,7 @@ export class Player extends TurnedLiving {
     this.energy = turnEnergy(this.agility);
     this.psychic = 0; // Player.cs:2220
     this.petSkillTurn.clear();
+    applyEquipEffects(this, s.equipEffects ?? []);
     this.hooks.emit("playerAfterReset", this); // Player.PlayerAfterReset (Player.cs:2232-ish)
   }
 

@@ -31,6 +31,8 @@ export interface HookArgs {
   beginAttacked: [living: Living];
   /** Living.BeforeTakeDamage (Living.cs:1330, OnBeforeTakedDamage — ref damageAmount/criticalAmount) */
   beforeTakeDamage: [living: Living, source: Living, d: DamageRef];
+  /** Living.TakePlayerDamage (Living.cs:1402), fired on the SHOOTER by SimpleBomb.cs:273 before victim.TakeDamage. */
+  takePlayerDamage: [living: Living, source: Living, d: DamageRef];
   /** Living.AfterKilledByLiving (Living.cs:1314→, OnAfterTakedDamage) — fires on the VICTIM; `source` = attacker. */
   afterTakenHit: [living: Living, source: Living, damage: number, critical: number];
   /** Living.AfterKillingLiving (Living.cs:1283/2291) — fires on the ATTACKER; `target` = victim. */

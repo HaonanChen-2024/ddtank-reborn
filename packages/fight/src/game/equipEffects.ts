@@ -503,18 +503,21 @@ export class MakeCriticalEffect extends ProcEffect {
   constructor(count: number, probability: number) {
     super(T.MakeCritical, count, probability, "attack");
   }
-  private readonly onBeforeTakeDamage = (l: Living, source: Living, d: { damage: number; critical: number }) => {
-    if (this.tryProc(source as Player)) {
-      d.critical = Math.trunc(0.5 + source.lucky * 0.0005 * d.damage);
-      source.flyingPartical = 65;
-      msg(source, PROC_MSG.attack);
+  private readonly onTakePlayerDamage = (living: Living, _source: Living, d: { damage: number; critical: number }) => {
+    if (this.tryProc(living as Player)) {
+      d.critical = Math.trunc(0.5 + living.lucky * 0.0005 * d.damage); // MakeCriticalEffect.cs:56 (not the ordinary critical formula).
+      living.flyingPartical = 65;
+      msg(living, PROC_MSG.attack);
     }
   };
+  private readonly onAfterShot = (p: Player) => { p.flyingPartical = 0; };
   protected override onAttachedToPlayer(p: Player): void {
-    p.hooks.on("beforeTakeDamage", this.onBeforeTakeDamage);
+    p.hooks.on("takePlayerDamage", this.onTakePlayerDamage);
+    p.hooks.on("afterPlayerShooted", this.onAfterShot);
   }
   protected override onRemovedFromPlayer(p: Player): void {
-    p.hooks.off("beforeTakeDamage", this.onBeforeTakeDamage);
+    p.hooks.off("takePlayerDamage", this.onTakePlayerDamage);
+    p.hooks.off("afterPlayerShooted", this.onAfterShot);
   }
 }
 

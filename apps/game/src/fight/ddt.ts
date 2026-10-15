@@ -3,12 +3,13 @@
  * (GameMgr.THREAD_INTERVAL); engine events are serialized to 91 GAME_CMD packets exactly as the C# writers cited in
  * packages/fight/src/game/events.ts. Bots (VirtualPlayer seats) are played server-side by @ddt/fight's BotRunner.
  */
-import { type BaseGame, type FightAssets, type FightCommand, type FightEvent, GameState, type PlayerSpec, PvpGame, PveGame, type PveData, type PveInfo, type DropItem, BotRunner, type BotProfile, hertAddition, setTranslator } from "@ddt/fight";
+import { type BaseGame, type FightAssets, type FightCommand, type FightEvent, GameState, type PlayerSpec, type EquipEffectTemplate, PvpGame, PveGame, type PveData, type PveInfo, type DropItem, BotRunner, type BotProfile, hertAddition, setTranslator } from "@ddt/fight";
 import "@ddt/fight/pve-scripts";
 import { loadPackedAssets } from "@ddt/fight/node";
 import { type GSPacket, PacketOut } from "@ddt/protocol";
 import * as Out from "../packets/out.js";
 import type { RoomMember } from "../game/player.js";
+import type { StatTables } from "../game/stats.js";
 import type { FightEngine, FightGame, StartGameOptions, StartPveOptions } from "./types.js";
 import type { WorldBossAttempt } from "../game/world-boss.js";
 import { WorldBossSettlementGate } from "./world-boss-settlement.js";
@@ -76,12 +77,13 @@ export interface DdtFightOptions {
 let gameIdSeq = 1;
 
 /** Item-like shapes we read from the lobby player without importing GamePlayer (bots don't have bags). */
-type ItemLike = { TemplateID: number; StrengthenLevel?: number; RefineryLevel?: number; template: { Property7?: number | null; Property8?: number | null; Name?: string | null } };
+type ItemLike = { TemplateID: number; StrengthenLevel?: number; RefineryLevel?: number; Hole1?: number; Hole2?: number; Hole3?: number; Hole4?: number; Hole5?: number; Hole6?: number; template: { Property7?: number | null; Property8?: number | null; Name?: string | null } };
 type PetLike = { ID: number; Place: number; TemplateID: number; Name: string; UserID: number; Level: number; SkillEquip: string };
 type BagLike = { getItemAt(i: number): (ItemLike & { Count: number }) | null; removeCountFromStack(it: unknown, n: number): boolean; removeItem(it: unknown): boolean };
 type LobbyLike = RoomMember & {
   mainWeapon?: ItemLike | null;
   equipBag?: BagLike;
+  statTables?: Pick<StatTables, "findItem">;
   propBag?: BagLike;
   fightBag?: BagLike;
   addGiftToken?(v: number): void;
@@ -229,9 +231,22 @@ function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtF
   const hs = m.equipBag?.getItemAt(18) ?? null; // healstone slot (Player.m_Healstone = GamePlayer.Healstone)
   const pet = m.petBag?.equipped() ?? null;
   const equip = pet ? petSkillEquip(pet.SkillEquip) : [];
+  // PlayerEquipInventory.EquipBuffer: slots 0..30, all six positive holes, in order without deduplication.
+  // Resolve against the live lobby templates; a missing row cannot be replaced by a packed or similar item.
+  const equipEffects: EquipEffectTemplate[] = [];
+  for (let slot = 0; slot < 31; slot++) {
+    const it = m.equipBag?.getItemAt(slot);
+    if (!it) continue;
+    for (const id of [it.Hole1, it.Hole2, it.Hole3, it.Hole4, it.Hole5, it.Hole6]) {
+      if (id == null || id <= 0) continue;
+      const t = m.statTables?.findItem(id);
+      if (t) equipEffects.push({ templateId: t.TemplateID, property3: t.Property3, property4: t.Property4, property5: t.Property5 });
+    }
+  }
   return {
     userId: m.id, nickname: c.NickName ?? `p${m.id}`, team, grade: c.Grade, attack: c.Attack, defence: c.Defence, agility: c.Agility, lucky: c.Luck,
     baseAttack: Math.max(1, baseAttack), baseDefence, hp: Math.max(1, c.hp),
+    equipEffects,
     weapon: { templateId: weaponTemplateId, property8: wTpl?.property8 ?? w?.template.Property8 ?? 0, refineryLevel: w?.RefineryLevel ?? 0 },
     deputyWeapon: dep && depTpl ? { template: depTpl, strengthenLevel: dep.StrengthenLevel ?? 0 } : null,
     isBot: m.isBot, isVip: (c.typeVIP ?? 0) > 0, inGuild: (c.ConsortiaID ?? 0) > 0,

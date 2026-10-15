@@ -825,6 +825,7 @@ export class BaseGame implements BombHost {
             const d = { damage: this.makeDamage(bomb, owner, p), critical: 0 };
             if (d.damage !== 0) {
               d.critical = criticalDamage(this.rng, owner.lucky, d.damage, { critRate: owner.critRate, targetReduce: p.reduceCrit, guildAddCritical: owner.guildAddCritical });
+              owner.hooks.emit("takePlayerDamage", owner, owner, d); // SimpleBomb.cs:273: owner.OnTakedDamage(owner, ref damage, ref critical).
               const wasLiving = p.isLiving;
               if (p.takeDamage(owner, d)) {
                 act(ActionType.KILL_PLAYER, p.id, d.damage + d.critical, d.critical === 0 ? 1 : 2, p.blood);
