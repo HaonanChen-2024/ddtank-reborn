@@ -30,7 +30,8 @@ function readTag(tag) {
 }
 
 // Opt-in v1 gate only. Legacy bridge installation and byte generation do not call this helper.
-export function verifyNativeActivityMenuBridge(bridgeTag) {
+export function verifyNativeActivityMenuBridge(bridgeTag, { nativeMenuArtVersion } = {}) {
+  assert.ok(nativeMenuArtVersion === undefined || nativeMenuArtVersion === 1, "unknown native menu art bridge version");
   const bridge = readTag(bridgeTag); assert.equal(bridge.name, bridgeName);
   const p = parseActivityAbc(bridge.abc);
   const qualified = index => {
@@ -76,8 +77,26 @@ export function verifyNativeActivityMenuBridge(bridgeTag) {
     assert.equal(registration.binding, `::${name}`, `native menu callback points to the wrong method: ${callback}`);
     return { callback, ...method, registrationOffset: registration.offset, codeSha256: sha(body.code) };
   });
+  let art;
+  if (nativeMenuArtVersion === 1) {
+    const required = ["menuBitmap", "menuIcon", "menuBackground", "renderMenuArt", "ensureMenuArt"];
+    const bodies = required.map(name => {
+      const traits = p.methodTraits.filter(t => p.strings[p.names[t.name]?.name] === name);
+      assert.equal(traits.length, 1, "native menu art method: " + name);
+      assert.equal(traits[0].owner, null, "native menu art method must be static");
+      const body = p.bodies.find(b => b.method === traits[0].method); assert.ok(body);
+      return { name, body, ops: decode(body.code) };
+    });
+    const loader = bodies.find(row => row.name === "ensureMenuArt");
+    assert.ok(bodies.find(row => row.name === "menuBitmap").ops.some(op => op.op === 0x2c && p.strings[op.args[0]] === "workshop.menu.art."), "native menu original art class namespace missing");
+    assert.ok(loader.ops.some(op => op.op === 0x2c && p.strings[op.args[0]] === "menu/hall-activity-original-art.swf"), "native menu original art URL missing");
+    assert.ok(loader.ops.some(op => op.op === 0x4f && p.strings[p.names[op.args[0]]?.name] === "load" && op.args[1] === 2), "native menu original art loader missing");
+    const open = publicMethod("openActivityMenu", ["::Number", "::String"], "::Boolean");
+    assert.ok(decode(open.body.code).some(op => [0x46, 0x4f].includes(op.op) && p.strings[p.names[op.args[0]]?.name] === "ensureMenuArt"), "native menu opener does not load original art");
+    art = { version: 1, methods: bodies.map(({ name, body }) => ({ name, codeSha256: sha(body.code) })) };
+  }
   return { version: 1, bridgeSha256: sha(bridgeTag), initMethod: init.method, initCallbackCount: registrations.length,
-    legacyCallbacks: legacy.length, menuCallbacks: methods, compiledOnly: true, runtimeVerified: false };
+    legacyCallbacks: legacy.length, menuCallbacks: methods, ...(art ? { art } : {}), compiledOnly: true, runtimeVerified: false };
 }
 
 export function buildNativeWardrobeEntry(input, bridgeTag) {

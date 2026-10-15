@@ -1,0 +1,688 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/quest.swf",
+  "sourceAssetSha256": "ff30801c6b2e03f0b623c5a324254d4f9f1e68cc786a77bef9ac42920a3f2c7f",
+  "sourceBaseSha256": "ff30801c6b2e03f0b623c5a324254d4f9f1e68cc786a77bef9ac42920a3f2c7f",
+  "fontFile": "simsun.ttc",
+  "fontFamily": "Workshop Tooltip Song",
+  "bitmaps": [
+    {
+      "id": 51,
+      "className": "asset.core.quest.QuestCateTitle3Collapsed",
+      "tagCode": 36,
+      "width": 212,
+      "height": 37,
+      "sourcePixelsSha256": "30b7630491ca633c5e0c267864eae94858a4748bf8d4b6a46f7596aef9e5bfcb",
+      "tagSha256": "7f6b54456a45761c8fa78714b54a57434d904a178cce57f21b8d9b5f442f5688",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            190,
+            37
+          ],
+          "text": "日常任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -49,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "className": "asset.core.quest.QuestCateTitle3Expanded",
+      "tagCode": 36,
+      "width": 212,
+      "height": 34,
+      "sourcePixelsSha256": "8af5a51e1ccc9833fd97085a6653005b43d84d4d82b86a5f845ee9006322690d",
+      "tagSha256": "9f63923101817a51638682c42ed9f86494111421335699b584c1afbc46a7c7ba",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            190,
+            34
+          ],
+          "text": "日常任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -49,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "className": "asset.core.quest.QuestInfoDescTitle",
+      "tagCode": 36,
+      "width": 114,
+      "height": 27,
+      "sourcePixelsSha256": "5556672a8a0aef49a05a712e99a96808b978fdbd618b65b12464d56c29271c18",
+      "tagSha256": "8fccbd1b066a288d252ee04dfbc10ff99a070395d72d61b838cb528480a8c670",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            114,
+            27
+          ],
+          "text": "任务描述",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -17
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "className": "asset.core.quest.QuestCateTitle7Collapsed",
+      "tagCode": 36,
+      "width": 187,
+      "height": 37,
+      "sourcePixelsSha256": "93d08c3ead63092139ba3ad172edf1007fcffb046f1dd2c9c6d04fb6dbeff384",
+      "tagSha256": "b4b6f2ec6a93f71b25481eae4881bc8a1aaf6ef2369250465607799538f7bfa9",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            165,
+            37
+          ],
+          "text": "史诗任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -36.5,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "className": "asset.core.quest.QuestCateTitle7Expanded",
+      "tagCode": 36,
+      "width": 191,
+      "height": 41,
+      "sourcePixelsSha256": "894af51c6d6b9830ebd0c19854138d123410c50ba49228bd1eb7e56ceb66d82d",
+      "tagSha256": "5617790334bbdc54c0d548954996481645661deddba7eee63de736bf52d126f1",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            169,
+            41
+          ],
+          "text": "史诗任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -38.5,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "className": "asset.core.quest.QuestCateTitle4Collapsed",
+      "tagCode": 36,
+      "width": 188,
+      "height": 37,
+      "sourcePixelsSha256": "6d3e7f46844e03db8b1bba1bde6b60ac1f9a6426f7847453c1ac4555c0ae0417",
+      "tagSha256": "d3c29a1cdc4cdb777bfb22093da8f6860c2102b89766e0714f71cdb232e9b7e1",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            166,
+            37
+          ],
+          "text": "活动任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -37,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "className": "asset.core.quest.QuestCateTitle4Expanded",
+      "tagCode": 36,
+      "width": 188,
+      "height": 34,
+      "sourcePixelsSha256": "63a407a5eaf474a70c81f72bcf478d7b4ecb7c214cfdd695e069f45f75e3bab1",
+      "tagSha256": "906becd75a78f6141b81f5107ad45c8c797a773c7d70f971e6640c5508e71a72",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            166,
+            34
+          ],
+          "text": "活动任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -37,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "className": "asset.core.quest.RewardText.Type1",
+      "tagCode": 36,
+      "width": 30,
+      "height": 17,
+      "sourcePixelsSha256": "2b82ce777e21bd46d897c8a4d11bb7d98d49e95dbda006567c5db51ce9f4b557",
+      "tagSha256": "a60293248ccd4f9a39a5476841bba79974513fb8f20ad2336933e87269c88528",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            30,
+            17
+          ],
+          "text": "经验",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "className": "asset.core.quest.RewardText.Type2",
+      "tagCode": 36,
+      "width": 31,
+      "height": 16,
+      "sourcePixelsSha256": "23185e45955bea5f5c2ad75f6bad10e34485cc933b321d937afc3869fae216a3",
+      "tagSha256": "f545089fc546dcd3ff7aab2bca7697b633558e818ecb57c1ace628dd083212f5",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            31,
+            16
+          ],
+          "text": "金币",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "className": "asset.core.quest.QuestCateTitle1Collapsed",
+      "tagCode": 36,
+      "width": 208,
+      "height": 37,
+      "sourcePixelsSha256": "c9d6fecf571f1703810fe7258ef0f7f1b9047972437152f95f255bcc06e207f7",
+      "tagSha256": "40d0ffacddcbdb25820a6d8eea9f6bcd4469532cb66590d333ea3f95db9d5982",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            186,
+            37
+          ],
+          "text": "主线任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -47,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "className": "asset.core.quest.QuestCateTitle1Expanded",
+      "tagCode": 36,
+      "width": 208,
+      "height": 34,
+      "sourcePixelsSha256": "51222cde9753b4641207518ff113a84d1471949916abebf4bb64e610bb9cfa08",
+      "tagSha256": "9e1525c51d9b4f4297f1228c6279826bc12fc6115d0990cb4edb314668916696",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            186,
+            34
+          ],
+          "text": "主线任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -47,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "className": "asset.core.quest.necessary",
+      "tagCode": 36,
+      "width": 164,
+      "height": 29,
+      "sourcePixelsSha256": "0ac09c5c2a428b80edaca18dcaa8849bf3611b30141d6a95cfd73580bedf1201",
+      "tagSha256": "a9c2c43179be782fa6e363b154461d0649076edc4d846ca043a5276ef61e97c8",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            164,
+            29
+          ],
+          "text": "必要目标",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -42
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "className": "asset.core.quest.notNecessary",
+      "tagCode": 36,
+      "width": 164,
+      "height": 28,
+      "sourcePixelsSha256": "f5e39e4883a99898f01d2294d4afc0070bc369745b65ee1273373cf9f469632b",
+      "tagSha256": "7a359e070a9042d8a9ef9d0beb522ddbc81af3dfffd52ba30f9ebec6ab82ead2",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            164,
+            28
+          ],
+          "text": "可选目标",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -42
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "className": "asset.core.quest.eligibly1",
+      "tagCode": 36,
+      "width": 119,
+      "height": 26,
+      "sourcePixelsSha256": "9701c6fc3d00d0ee7c271970fa8ddd5384a6d069cc93ab9b076514c6c11c9a67",
+      "tagSha256": "992e1485db67a72cac90ecc30191e791bac4748fc21c9bf63ab082b12a5a0eb1",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            119,
+            26
+          ],
+          "text": "选择奖励",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -19.5
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "className": "asset.core.quest.eligibly2",
+      "tagCode": 36,
+      "width": 121,
+      "height": 25,
+      "sourcePixelsSha256": "1d120c540dd9198cf38ad6920b89308db31789d26e0ca563a60f71ddb86d10a0",
+      "tagSha256": "8851d20e5c14278078c55cce4dc0cada5189861ab006c1b9972ba8fb54769534",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            121,
+            25
+          ],
+          "text": "选择奖励",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -20.5
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "className": "asset.core.quest.QuestInfoPlanTitle",
+      "tagCode": 36,
+      "width": 103,
+      "height": 21,
+      "sourcePixelsSha256": "661fa41bc846dc3998af98bd59b3054d14fa306df611bfef16196a97b8280d5f",
+      "tagSha256": "aab780792d462cbda501f506060a5aa7a891d1709deb1630d2a5876454dcfce8",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            103,
+            21
+          ],
+          "text": "任务进度",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -11.5
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "className": "asset.core.quest.RewardText.OptionalTitle",
+      "tagCode": 36,
+      "width": 119,
+      "height": 25,
+      "sourcePixelsSha256": "209d2ee0371562224f8c52b20d6e6e03cb48d82d25b7a2bd39c2af0dad331bf8",
+      "tagSha256": "1b05e863daff96bb7b1418d6633d38ed351533ac19ac40e2f81fa35d7bbc9866",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            119,
+            25
+          ],
+          "text": "可选奖励",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1,
+          "textOffsetX": -19.5
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "className": "asset.core.quest.QuestCateTitle2Collapsed",
+      "tagCode": 36,
+      "width": 156,
+      "height": 37,
+      "sourcePixelsSha256": "15e07c1d29eb3d6a77595030c97877ec37983ca8929f31093e3f756a359b5cbb",
+      "tagSha256": "88910997bf3a406ff43562420621e7172eed215318e7c1246647430faa889c4d",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            134,
+            37
+          ],
+          "text": "支线任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -21,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "className": "asset.core.quest.QuestCateTitle2Expanded",
+      "tagCode": 36,
+      "width": 156,
+      "height": 34,
+      "sourcePixelsSha256": "2e87449748befc204317244797f6144fc9038f17b6293c3b6aff55d28cc81fb4",
+      "tagSha256": "68a7421b21940b8da50fff81c966cfe47849d459f7a5f3d160f8f086826236b3",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            134,
+            34
+          ],
+          "text": "支线任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -21,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "className": "asset.core.quest.QuestInfoCondTitle",
+      "tagCode": 36,
+      "width": 88,
+      "height": 23,
+      "sourcePixelsSha256": "1af5ee33bfb1fc4b356c2e379f9c4733751e42bba4b1c413b22435ba3a2dc42d",
+      "tagSha256": "d4fa5cb4cd7a5d4d80bc875c164f256cc1e0cbdabc5370140f1c26ad4b7e2516",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            88,
+            23
+          ],
+          "text": "任务目标",
+          "transparent": true,
+          "fontSize": 18,
+          "fill": "#fff36c",
+          "stroke": "#352408",
+          "strokeWidth": 1,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "className": "asset.core.quest.QuestOverBtn",
+      "tagCode": 35,
+      "width": 179,
+      "height": 58,
+      "sourcePixelsSha256": "eb6a09967f27669260e620e1012cfa491f348e8b8ba3bae8f7eb13e37313ae72",
+      "tagSha256": "b5bf910ac44484dee0da3b390b8544b2d1cb78abb3736d3110e5285bac0836f4",
+      "regions": [
+        {
+          "box": [
+            16,
+            10,
+            145,
+            39
+          ],
+          "text": "领取奖励",
+          "transparent": false,
+          "fontSize": 24,
+          "fill": "#fff5c7",
+          "stroke": "#352408",
+          "strokeWidth": 1.6,
+          "inkMargin": 1,
+          "sample": [
+            154,
+            10,
+            1,
+            39
+          ],
+          "preserveAlpha": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "className": "asset.core.quest.QuestCateTitle6Collapsed",
+      "tagCode": 36,
+      "width": 203,
+      "height": 37,
+      "sourcePixelsSha256": "73c6e7cf3f329c6986a599042fc2250068a2add37f194d3b7ddce98892d6fb54",
+      "tagSha256": "5433a25c9251a6182d9ee49fb963464435bd4e0326e113df0153c2807dbe18ba",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            181,
+            37
+          ],
+          "text": "训练任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -44.5,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "className": "asset.core.quest.QuestCateTitle6Expanded",
+      "tagCode": 36,
+      "width": 207,
+      "height": 41,
+      "sourcePixelsSha256": "5a6008d60d03352d21b14f3c7a088e9b2369d18cb787b47976fb2673f4cfb98d",
+      "tagSha256": "37dc7438dbd5457e094c95af29463c1803969cc8b4507879d7c13cc77bbe2c00",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            207,
+            41
+          ],
+          "text": "训练任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -35.5,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "className": "asset.core.quest.QuestCateTitle5Collapsed",
+      "tagCode": 36,
+      "width": 151,
+      "height": 37,
+      "sourcePixelsSha256": "10b47c34d9e835918dfb59f802d3c63f078be060213bf7fd7fba22627371678e",
+      "tagSha256": "aba961434e348d122d34a68496436c8cdb47102853c08d2ba3d5eab8f6b49f63",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            129,
+            37
+          ],
+          "text": "VIP任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -18.5,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "className": "asset.core.quest.QuestCateTitle5Expanded",
+      "tagCode": 36,
+      "width": 151,
+      "height": 34,
+      "sourcePixelsSha256": "5dbce0cf17fff3a6c510ea8c3cb15e0fe179412804ed3f9678fb9d1cdd3f0c8f",
+      "tagSha256": "72d793cf55b6d3cd5d46ae25629ff76e7860d73c153d8c4a98a1e00c72144461",
+      "regions": [
+        {
+          "box": [
+            22,
+            0,
+            129,
+            34
+          ],
+          "text": "VIP任务",
+          "transparent": true,
+          "fontSize": 20,
+          "fill": "#fff0b3",
+          "stroke": "#623508",
+          "strokeWidth": 1.3,
+          "textOffsetX": -18.5,
+          "inkMargin": 1
+        }
+      ]
+    }
+  ]
+}

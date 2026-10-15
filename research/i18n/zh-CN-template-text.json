@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "table": "Shop_Goods",
+      "rowId": "11028",
+      "text": {
+        "Name": "幸运符100%",
+        "Description": "合成、强化装备时，成功率提高100%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10008",
+      "text": {
+        "Name": "伤害+10%",
+        "Description": "伤害提高10%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11001",
+      "text": {
+        "Name": "朱雀石1级",
+        "Description": "合成成功后增加10点攻击，合成失败不会损失装备。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11005",
+      "text": {
+        "Name": "玄武石1级",
+        "Description": "合成成功后增加10点防御，合成失败不会损失装备。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11009",
+      "text": {
+        "Name": "青龙石1级",
+        "Description": "合成成功后增加10点敏捷，合成失败不会损失装备。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11013",
+      "text": {
+        "Name": "白虎石1级",
+        "Description": "合成成功后增加10点幸运，请前往铁匠铺合成。"
+      }
+    },
+    {
+      "table": "Quest",
+      "rowId": "318",
+      "text": {
+        "Title": "夺回宝物",
+        "Detail": "丑陋的小鸡抢走了弹弹王国居民的许多宝物。击败它们，夺回<cr伤害10%道具cr>。"
+      }
+    },
+    {
+      "table": "Quest_Condiction",
+      "rowId": "318:1",
+      "text": {
+        "CondictionTitle": "击败这些丑陋的小鸡，夺回伤害10%道具"
+      }
+    },
+    {
+      "table": "Quest",
+      "rowId": "341",
+      "text": {
+        "Title": "勇士训练",
+        "Detail": "身为勇士不能骄傲，只有不断练习，才能成为名副其实的勇士。"
+      }
+    },
+    {
+      "table": "Quest_Condiction",
+      "rowId": "341:1",
+      "text": {
+        "CondictionTitle": "赢得4场战斗"
+      }
+    },
+    {
+      "table": "Quest",
+      "rowId": "346",
+      "text": {
+        "Title": "通关魔蚁之巢（简单）",
+        "Detail": "达到8级后，就可以在<cr远征码头cr>挑战副本<cr怪物cr>。进入远征码头后，<cr创建房间或加入副本房间cr>即可开始冒险。点击右下角的<cr切换频道cr>可以前往远征码头，请选择适合自己的难度，新手可以先尝试简单难度……"
+      }
+    },
+    {
+      "table": "Quest_Condiction",
+      "rowId": "346:1",
+      "text": {
+        "CondictionTitle": "成功通关简单难度的魔蚁之巢"
+      }
+    },
+    {
+      "table": "Quest",
+      "rowId": "347",
+      "text": {
+        "Title": "第一次购物",
+        "Detail": "完成任务可以获得礼金。前往<cr商城cr> --> <cr兑换区cr> --> <cr礼金区cr>，用礼金兑换心仪的物品吧。"
+      }
+    },
+    {
+      "table": "Quest_Condiction",
+      "rowId": "347:1",
+      "text": {
+        "CondictionTitle": "使用礼金购买任意1件物品"
+      }
+    }
+  ]
+}

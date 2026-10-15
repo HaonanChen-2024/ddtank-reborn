@@ -99,6 +99,49 @@ function nativeMenuBuild(f, source = battleReturnBuild(f)) {
   f.put(next, JSON.stringify(manifest)); return next;
 }
 
+function originalMenuArtBuild(f, source = nativeMenuBuild(f)) {
+  const manifest = JSON.parse(f.fs.readFileSync(source, "utf8")), root = path.dirname(source);
+  const tag = Buffer.concat([f.fs.readFileSync(manifest.bridge.tagPath), Buffer.from("|original-menu-art")]);
+  manifest.bridge.tagPath = path.join(root, "original-menu-bridge.bin"); f.put(manifest.bridge.tagPath, tag); manifest.bridge.tagSha256 = digest(tag);
+  const file = "hall-activity-original-art.swf", bytes = Buffer.from("18 original Hall BitmapData resources"), assetPath = path.join(root, "flash", "workshop-native", "menu", file);
+  f.put(assetPath, bytes); manifest.assets.push({ file, path: assetPath, urlPath: "/flash/workshop-native/menu/" + file, bytes: bytes.length, sha256: digest(bytes) });
+  manifest.nativeMenuArtVersion = 1;
+  const next = path.join(root, "original-menu-manifest.json"); f.put(next, JSON.stringify(manifest)); return next;
+}
+
+test("original menu art upgrades89 to90 with idempotent verification and complete rollback", () => {
+  const f = fixture(), original = f.snapshot(), old = nativeMenuBuild(f); f.run("install", old);
+  const next = originalMenuArtBuild(f, old), before = f.snapshot();
+  assert.equal(f.run("verify", next).pendingTransition, true); assert.deepEqual(f.snapshot(), before);
+  const installed = f.run("install", next); assert.equal(installed.nativeWardrobe.assets.length, 90); assert.equal(installed.nativeWardrobe.nativeMenuArtVersion, 1);
+  assert.equal(f.run("install", next).unchanged, true); assert.equal(f.run("verify").unchanged, true);
+  const ready = f.snapshot(); assert.throws(() => f.run("install", old), /remove an installed resource|remove installed original activity art/); assert.deepEqual(f.snapshot(), ready);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original); assert.equal(f.openHandles, 0);
+});
+
+test("original menu art rejects invalid versions, missing art, foreign URLs and a legacy bridge before writes", () => {
+  for (const kind of ["version", "missing-menu", "missing-art", "foreign-url", "duplicate", "legacy-bridge"]) {
+    const f = fixture(), next = originalMenuArtBuild(f), m = JSON.parse(f.fs.readFileSync(next, "utf8"));
+    if (kind === "version") m.nativeMenuArtVersion = "1";
+    if (kind === "missing-menu") delete m.nativeMenuVersion;
+    if (kind === "missing-art") m.assets.pop();
+    if (kind === "foreign-url") m.assets.at(-1).urlPath = "/flash/workshop-native/menu/unreviewed.swf";
+    if (kind === "duplicate") m.assets.push(m.assets.at(-1));
+    if (kind === "legacy-bridge") { const tag = Buffer.from("fixture|four-menu-callbacks"); f.put(m.bridge.tagPath, tag); m.bridge.tagSha256 = digest(tag); }
+    f.put(next, JSON.stringify(m)); const before = f.snapshot(), mutations = f.mutationCount;
+    assert.throws(() => f.run("install", next)); assert.deepEqual(f.snapshot(), before); assert.equal(f.mutationCount, mutations);
+  }
+});
+
+test("original menu art partial asset, core and journal writes compensate the installed89", () => {
+  for (const kind of ["asset", "core", "journal"]) {
+    const f = fixture(), old = nativeMenuBuild(f); f.run("install", old); const next = originalMenuArtBuild(f, old), before = f.snapshot();
+    const target = kind === "asset" ? path.join(path.dirname(f.corePath("2.png")), "workshop-native", "menu", "hall-activity-original-art.swf") : (kind === "core" ? f.corePath("2.png") : f.ledger) + ".workshop-777";
+    f.arm("write", target); assert.throws(() => f.run("install", next), /ENOSPC/); assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0);
+    assert.equal(f.run("verify").unchanged, true); assert.equal(f.run("install", next).nativeWardrobe.assets.length, 90);
+  }
+});
+
 test("native menu upgrades legacy89 and preserves no-option verify and rollback", () => {
   const f = fixture(), original = f.snapshot(), old = battleReturnBuild(f);
   f.run("install", old); const legacy = f.fs.readFileSync(f.corePath("2.png"));
@@ -346,7 +389,7 @@ function fixture() {
       : { out: append(bytes, "|Chinese"), totalChanged: 1 },
     buildActivityEntry: (bytes, options = {}) => ({ output: append(bytes, options.nativeMenuVersion === 1 ? "|activities|native-menu:1" : "|activities"), proof: {} }),
     buildNativeWardrobeEntry: (bytes, tag) => ({ output: append(bytes, "|native:" + digest(tag)), proof: {} }),
-    verifyNativeActivityMenuBridge: tag => assert.ok(tag.includes(Buffer.from("|four-menu-callbacks")), "menu callbacks missing"),
+    verifyNativeActivityMenuBridge: (tag, options = {}) => { assert.ok(tag.includes(Buffer.from("|four-menu-callbacks")), "menu callbacks missing"); if (options.nativeMenuArtVersion === 1) assert.ok(tag.includes(Buffer.from("|original-menu-art")), "original menu art bridge missing"); },
     patchBattleReturn: ({ coreBytes, bridgeBytes }) => {
       patchCalls.push({ coreBytes: Buffer.from(coreBytes), bridgeBytes: Buffer.from(bridgeBytes) });
       if (rejectBattleReturn) throw new Error("fixture battle return refusal");

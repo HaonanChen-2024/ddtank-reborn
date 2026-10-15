@@ -27,6 +27,45 @@ const PVE_TEXT_COLUMNS: Record<string, readonly string[]> = {
 };
 type PveTextOverride = { table: string; id: number; text: Record<string, string> };
 
+const TEMPLATE_TEXT_COLUMNS: Record<string, readonly string[]> = {
+  Shop_Goods: ["Name", "Description", "Remark"],
+  Quest: ["Title", "Detail", "Objective"],
+  Quest_Condiction: ["CondictionTitle"],
+};
+type TemplateTextOverride = { table: string; rowId: string; text: Record<string, string> };
+
+/** Local item/quest display text only. Conditions use the complete QuestID:CondictionID address. */
+export function parseTemplateTextOverrides(text: string): TemplateTextOverride[] {
+  const value: unknown = JSON.parse(text);
+  const object = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!object(value) || Object.keys(value).sort().join(",") !== "entries,schemaVersion" ||
+      value.schemaVersion !== 1 || !Array.isArray(value.entries)) {
+    throw new Error("TEMPLATE_TEXT_OVERRIDES_FILE must contain only schemaVersion:1 and entries");
+  }
+  const seen = new Set<string>();
+  for (const entry of value.entries) {
+    if (!object(entry) || Object.keys(entry).sort().join(",") !== "rowId,table,text" ||
+        typeof entry.table !== "string" || !Object.hasOwn(TEMPLATE_TEXT_COLUMNS, entry.table) ||
+        typeof entry.rowId !== "string" || !object(entry.text) || Object.keys(entry.text).length === 0) {
+      throw new Error("Invalid TEMPLATE_TEXT_OVERRIDES_FILE entry");
+    }
+    const ids = entry.rowId.split(":");
+    if (ids.length !== (entry.table === "Quest_Condiction" ? 2 : 1) ||
+        ids.some(id => !/^[1-9]\d*$/.test(id) || Number(id) > 2147483647)) {
+      throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE rowId: ${entry.table}:${entry.rowId}`);
+    }
+    const key = `${entry.table}:${entry.rowId}`;
+    if (seen.has(key)) throw new Error(`Duplicate TEMPLATE_TEXT_OVERRIDES_FILE entry: ${key}`);
+    seen.add(key);
+    for (const [column, displayText] of Object.entries(entry.text)) {
+      if (!TEMPLATE_TEXT_COLUMNS[entry.table]!.includes(column) || typeof displayText !== "string" || !displayText.trim()) {
+        throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE display column: ${key}.${column}`);
+      }
+    }
+  }
+  return value.entries as TemplateTextOverride[];
+}
+
 /** Optional local PvE display text; separate from the Shop_Goods-only name contract. */
 export function parsePveTextOverrides(text: string): PveTextOverride[] {
   const value: unknown = JSON.parse(text);
@@ -98,12 +137,19 @@ export async function loadTranslations(db: Database, table: string, lang: string
       }
     }
   }
+  const templateFile = Object.hasOwn(TEMPLATE_TEXT_COLUMNS, table) ? process.env.TEMPLATE_TEXT_OVERRIDES_FILE : undefined;
+  if (templateFile) {
+    for (const entry of parseTemplateTextOverrides(await readFile(templateFile, "utf8"))) {
+      if (entry.table === table) overlay.set(entry.rowId, { ...overlay.get(entry.rowId), ...entry.text });
+    }
+  }
   return overlay;
 }
 
-/** Returns a shallow-copied row with any translated columns substituted in, by its primary-key column. */
-export function applyTranslations<T extends Record<string, unknown>>(row: T, pkCol: keyof T, overlay: TranslationOverlay): T {
-  const byCol = overlay.get(String(row[pkCol]));
+/** Returns a shallow-copied row, addressed by one column or an explicit ordered composite key. */
+export function applyTranslations<T extends Record<string, unknown>>(row: T, pkCol: keyof T | readonly (keyof T)[], overlay: TranslationOverlay): T {
+  const rowId = typeof pkCol === "object" ? pkCol.map(column => String(row[column])).join(":") : String(row[pkCol]);
+  const byCol = overlay.get(rowId);
   if (!byCol) return row;
   return { ...row, ...byCol };
 }

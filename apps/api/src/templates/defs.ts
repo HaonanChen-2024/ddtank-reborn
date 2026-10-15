@@ -19,7 +19,7 @@ import { item, spec, type Row } from "../lib/spec.js";
  * original `game` schema text (no overlay row ever matches, which is the designed fallback).
  */
 const LANG = "pt-BR";
-const TRANSLATED_PK: Record<string, string> = {
+const TRANSLATED_PK: Record<string, string | readonly string[]> = {
   Game_Map: "ID",
   NPC_Info: "ID",
   Pve_Info: "ID",
@@ -27,6 +27,7 @@ const TRANSLATED_PK: Record<string, string> = {
   Mission_Info_Backup: "Id",
   Achievement: "ID",
   Quest: "ID",
+  Quest_Condiction: ["QuestID", "CondictionID"],
   Shop_Goods: "TemplateID",
   Pet_Template_Info: "TemplateID",
   Pet_Skill_Info: "ID",
@@ -42,6 +43,7 @@ const TRANSLATED_PK: Record<string, string> = {
 async function translateRows(h: DbHandle, table: string, rows: Row[]): Promise<Row[]> {
   const pk = TRANSLATED_PK[table];
   if (!pk) return rows;
+  if (table === "Quest_Condiction" && !process.env.TEMPLATE_TEXT_OVERRIDES_FILE) return rows;
   const overlay = await loadTranslations(h.db, table, LANG);
   if (!overlay.size) return rows;
   return rows.map((r) => applyTranslations(r, pk, overlay));
@@ -460,7 +462,7 @@ export const TEMPLATES: TemplateDef[] = [
       wrap(async () => {
         const [qs, cs, gs] = await Promise.all([
           translateRows(h, "Quest", await all(h, "game", "Quest", `"ID"`)),
-          all(h, "game", "Quest_Condiction"),
+          translateRows(h, "Quest_Condiction", await all(h, "game", "Quest_Condiction")),
           all(h, "game", "Quest_Goods"),
         ]);
         const cBy = groupBy(cs, "QuestID");

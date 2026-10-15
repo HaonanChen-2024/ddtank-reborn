@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/coreiconandtip.swf",
+  "sourceAssetSha256": "62609063634c0985da0ee251d9aa4c34e036962d12eea3827383c4bfe284ee20",
+  "sourceBaseSha256": "62609063634c0985da0ee251d9aa4c34e036962d12eea3827383c4bfe284ee20",
+  "fontFile": "simsun.ttc",
+  "fontFamily": "Workshop Tooltip Song",
+  "bitmaps": [
+    {
+      "id": 28,
+      "className": "asset.core.tip.GoodsType",
+      "tagCode": 36,
+      "width": 82,
+      "height": 16,
+      "sourcePixelsSha256": "25277cc41fead880be06a60ed5018d5cff803c38e194c616e0421fa27cfce324",
+      "tagSha256": "e650d3720d524cdc675860c8799730f4dbe841ed344b57fcd4aa7108979ded91",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            82,
+            16
+          ],
+          "text": "类型",
+          "transparent": true,
+          "fontSize": 11,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -27,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              16
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 27
+    },
+    {
+      "id": 27,
+      "className": "asset.core.tip.GoodsTipQuality",
+      "tagCode": 36,
+      "width": 82,
+      "height": 21,
+      "sourcePixelsSha256": "3cd5c78bce2e8ec0e3c8480e9061f24fb93609b1096c4af56a7a8dc29b6f51db",
+      "tagSha256": "97e9852fc3f537569b4413fc64182b7d9ac0a40b54a5a33ced7605c8390fc8aa",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            82,
+            21
+          ],
+          "text": "品质",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -24,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              21
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 32
+    },
+    {
+      "id": 26,
+      "className": "asset.core.tip.GoodsTipItemRecover1",
+      "tagCode": 36,
+      "width": 82,
+      "height": 22,
+      "sourcePixelsSha256": "6335d1d6c77a1086e557d86799b4192a24789104841d82352d1a2d3bbd90ca7d",
+      "tagSha256": "9a9ab9732767305929f9e639efd0407c594294ba68d6c4c3482bdb8ad0df0717",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            82,
+            22
+          ],
+          "text": "减伤",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -24,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              22
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 51
+    },
+    {
+      "id": 24,
+      "className": "asset.core.tip.GoodsTipItemRecover",
+      "tagCode": 36,
+      "width": 99,
+      "height": 15,
+      "sourcePixelsSha256": "27e71d59fdb83e84adf0940606d61575764b345b63862309114548932ca93ada",
+      "tagSha256": "6f635df3a5015cdd7ecce14e19f7caa156afd5752e2c2c13889f226ef6981027",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            99,
+            15
+          ],
+          "text": "恢复",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -32.5,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              15
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 32
+    },
+    {
+      "id": 23,
+      "className": "asset.core.tip.GoodsTipItemPart",
+      "tagCode": 36,
+      "width": 94,
+      "height": 15,
+      "sourcePixelsSha256": "5c70aeb69cf9644387b606d445297b9e3a6c73fb3f2a590d03c07a40039064a1",
+      "tagSha256": "2c28ae19bde1845f92fde3977f846c3ea199d2c7b232cb4d113e3f9b8edddf53",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            94,
+            15
+          ],
+          "text": "部位",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -30,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              15
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 51
+    },
+    {
+      "id": 21,
+      "className": "asset.core.tip.GoodsTipItemHert",
+      "tagCode": 36,
+      "width": 114,
+      "height": 15,
+      "sourcePixelsSha256": "ceb91a64be699a4372008dd0bfe0adae6d581284fa195efb106332f3ca9a6081",
+      "tagSha256": "11d90990ccf0f2e582fd5e0dd87b964e4abce2a52fb57fd240763e4e5993b51c",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            114,
+            15
+          ],
+          "text": "伤害",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -40,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              15
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 51
+    },
+    {
+      "id": 20,
+      "className": "asset.core.tip.GoodsTipItemDefence",
+      "tagCode": 36,
+      "width": 120,
+      "height": 15,
+      "sourcePixelsSha256": "4c1118f4bac67f6e07fe342bcc1148489eb296f13aa23808f8f8abaf06545fa6",
+      "tagSha256": "c8ecb87d2f411097de033b7c576e55d451d8a6c7a6b0fd98c19504ca50c34f32",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            120,
+            15
+          ],
+          "text": "护甲",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -43,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              15
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 32
+    },
+    {
+      "id": 19,
+      "className": "asset.core.tip.GoodsTipItemArmAngle",
+      "tagCode": 36,
+      "width": 97,
+      "height": 18,
+      "sourcePixelsSha256": "c7040663d0bf479e8e6e2eb1431a42719fbbbf75bf4d8637fffd33f4f8ff2a3d",
+      "tagSha256": "b762498d9159e28c4a3c0edb0dde54a3c8c54ded2ea322dcfaddff0a341856e5",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            97,
+            18
+          ],
+          "text": "角度",
+          "transparent": true,
+          "fontSize": 12,
+          "fill": "#fff6e9",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1,
+          "textOffsetX": -31.5,
+          "clearBoxes": [
+            [
+              0,
+              0,
+              65,
+              18
+            ]
+          ]
+        }
+      ],
+      "valueTextStartX": 51
+    },
+    {
+      "id": 73,
+      "className": "asset.core.tip.Band2",
+      "tagCode": 36,
+      "width": 57,
+      "height": 27,
+      "sourcePixelsSha256": "2f8ce5999866da8f491b006a3bd0ad5a7493403de51446a84742abebbaeb6370",
+      "tagSha256": "28a2f44177ae67fb9afa7db4cee0a18479deae05ff99d47f6ff704df2813b00c",
+      "regions": [
+        {
+          "box": [
+            5,
+            5,
+            47,
+            17
+          ],
+          "text": "未绑定",
+          "transparent": true,
+          "fontSize": 11,
+          "fill": "#a9ff57",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "className": "asset.core.tip.Band1",
+      "tagCode": 36,
+      "width": 57,
+      "height": 27,
+      "sourcePixelsSha256": "b280e8e5a7a335296160be9fbebc450dd955d0b356c13f9c58317e9d47174304",
+      "tagSha256": "bc62563fa138cef56eb602a68469b3c54b2adb5ff65bb2605c15c246753006eb",
+      "regions": [
+        {
+          "box": [
+            5,
+            5,
+            47,
+            17
+          ],
+          "text": "已绑定",
+          "transparent": true,
+          "fontSize": 11,
+          "fill": "#ff6666",
+          "stroke": "#171717",
+          "strokeWidth": 0.75,
+          "inkMargin": 1
+        }
+      ]
+    }
+  ]
+}

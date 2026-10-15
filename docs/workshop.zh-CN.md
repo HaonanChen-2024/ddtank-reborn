@@ -183,6 +183,14 @@ node scripts/workshop-language.mjs rollback
 
 该名称配置已实现但尚未部署。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。物品描述、等级/VIP礼包文案及全界面中文仍不在本批验收范围。
 
+### 物品描述与任务文字
+
+可选 `TEMPLATE_TEXT_OVERRIDES_FILE` 在同一模板翻译层提供内存覆盖，不写数据库。配置严格为 `{"schemaVersion":1,"entries":[{"table":"Quest_Condiction","rowId":"341:1","text":{"CondictionTitle":"赢得4场战斗"}}]}`。仅允许 `Shop_Goods.Name/Description/Remark`、`Quest.Title/Detail/Objective` 和 `Quest_Condiction.CondictionTitle`；物品和任务以正整数 ID 字符串定位，条件必须使用完整的 `QuestID:CondictionID`，不能按全局条件编号定位。未知表/字段、玩法列、错误或重复地址、空白文字、缺失文件会明确报错。该覆盖优先于相同列的数据库语言翻译及旧物品名称覆盖；未覆盖列和原有两种文件覆盖保持。未设置或为空时，API/Game 保持原加载行为，尤其不会额外启用数据库里的任务条件翻译。
+
+`research/i18n/zh-CN-template-text.json` 当前逐项核对种子后覆盖14行：幸运符100%（11028）及四个任务实际奖励引用的伤害+10%（10008）、四类1级合成石，共6件物品的名称/描述；任务318“夺回宝物”、341“勇士训练”、346“通关魔蚁之巢（简单）”、347“第一次购物”的标题/正文及4条复合条件。保留原 `<cr...cr>` 着色标记、空 Objective、等级限制、前后置任务、条件类型/参数、奖励 ID/数量与全部物品属性。“成功率提高100%”保留原文相对提高语义，不表示必定成功。任务346原正文提到8级，接受任务的既有 `NeedMinLevel=9` 仍保留；本批没有修改副本或任务门槛。
+
+部署时把此 JSON 的绝对路径写入 `.env.workshop` 的 `TEMPLATE_TEXT_OVERRIDES_FILE`，既有 `scripts/workshop.mjs` 会传给 API 和 Game；由主控在空闲时正常重启两端以重建内存模板/cache，客户端重新登录读取 `/Request/TemplateAlllist1.xml`、压缩 `/Request/TemplateAlllist.xml` 与 `/Request/QuestList.xml`。移除该变量或恢复旧配置后正常重启即可回退。无需运行数据库翻译导入；API 旧 `pt-BR` 查询和 Game 默认语言保持。源码、隔离 HTTP/模板回归与实际部署、客户端字体/位置验收分开记录；本文件覆盖范围不代表全部7640件物品或728个任务已中文化。
+
 ### 普通副本显示文字
 
 可选 `PVE_TEXT_OVERRIDES_FILE` 复用 API 与 Game 的模板翻译层，默认关闭。格式为 `{"schemaVersion":1,"entries":[{"table":"NPC_Info","id":2001,"text":{"Name":"先锋蚁"}}]}`；仅允许 `Pve_Info.Name/Description`、`Mission_Info.Name/Title/Description/Success/Failure` 和 `NPC_Info.Name`。未知字段、表、显示列、非法 ID、重复行或错误文件会明确失败。配置只覆盖内存中指定的显示列，未覆盖行、既有数据库翻译和 `ITEM_NAME_OVERRIDES_FILE` 保持；不会改写玩法数值、模板、库存或邮件。API 的 `LoadPVEItems` 也按原翻译层处理 `Pve_Info`，与 Game 保持一致。
@@ -381,3 +389,13 @@ node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
 道具从不持久化的 `FightBag` 自动返包时，并入已有堆栈使用 `removeItem(item, 26)` 保存源物品的删除；进入空槽继续使用 `takeOutItem` 移交同一物品。即使原来源背包已中途保存，正 ID 源记录仍会失效；数据库写入失败保留待删除队列供重试，临时 ID0 不新增数据库记录。此修复不改堆栈上限、道具效果或历史异常行。
 
 新增五项真实 PGlite 回归覆盖中间保存后并栈、源 UPDATE 失败重试且目标不重复累加、普通及满堆栈对照的空槽返还、ID0并栈。原客户端两瓶正常怒气道具的消费与原生存档已验证；自动返包补丁通过7组63项隔离UTC单worker回归及game类型检查，尚待正常部署后的客户端返包验收。完整自然对局仍未通过，不能据数据库回归推断移动、命中和结算已完成。
+
+### 原活动图标与提示/任务图片文字
+
+`scripts/native-menu/build-original-art.mjs` 从已保存的原大厅资源提取17个活动图标及背景，保留18份原位图tag与透明度。纯资源导出使用独立的 `workshop.menu.art.*` 类名，不导入原大厅业务代码；桥在子 `ApplicationDomain` 加载。图标使用原尺寸和图片自带中文，背景按原 `34,30,34,30` 的左/上/右/下九宫格扩展。首次加载可关闭，迟到回调不得重开旧窗口；激活仍在“更多”。
+
+联合构建增加精确资源 `/flash/workshop-native/menu/hall-activity-original-art.swf`，以 `nativeMenuArtVersion:1` 区分90资源版与旧89资源版。安装器保留旧菜单ABI及全部旧资源，校验真实编译桥中的加载入口与精确资源集合，不允许省略原图包降级；沿原日志完整回退。`scripts/native-menu/build-menu-upgrade.mjs` 需要显式旧清单及SHA，只重编共享桥和图标资源，复核其余编译输入并逐字节保留89个活动文件。
+
+`scripts/workshop-tooltip-quest-art.mjs candidate <新目录>` 构建3份提示/任务SWF，`verify [候选目录]` 只读校验，`install <候选目录>` 按独立 `client-overlay-tooltip-quest-art.json` 安装，`rollback` 精确恢复并保留备份。只修改已核45个位图，保持尺寸、原边框、数值起点及521个未选tag；不接受未知源、已被其他覆盖日志接管的目标或外部修改后的回退。当前覆盖品质/类型/伤害/角度/绑定、任务分类双状态及领奖等文字；物品/任务正文另由上述模板显示覆盖提供。其他奖励类型图片和未覆盖数据仍待后续处理。
+
+本批实际安装与无参校验、隔离升级/回退及原件像素比对通过；静态组装预览与源码双体测试不代表AVM2实机验收。重新启动Workshop并关闭旧游戏页后才会载入新桥及模板文本。

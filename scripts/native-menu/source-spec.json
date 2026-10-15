@@ -1,0 +1,265 @@
+{
+  "version": 1,
+  "kind": "exact-original-hall-menu-art",
+  "source": {
+    "path": "runtime/reference-server-research/hall-language-recon/tounimane1.swf",
+    "sha256": "ff947a6002a598cb82ae07d6e030d1094cfcce97eefc9b33e011c211c14f315a"
+  },
+  "styles": {
+    "path": "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+    "sha256": "1d1c4fc983ce7d3df36cb16dd1f62a93591aaf0181c67ffcf11764c927c24f33",
+    "entry": "coreI.xml"
+  },
+  "hallOwner": "runtime/reference-activities-completion-20261014/native-wonderful-readonly-20261015/export-a/scripts/hall/HallActiveBox.as",
+  "compiler": {
+    "path": "runtime/tools/flex-min/lib/mxmlc.jar",
+    "sha256": "cc07d749e376715e650271a9875289e49d94234902fff5e5fae287c478c8557b"
+  },
+  "player": {
+    "path": "downloads/flex/playerglobal32_0.swc",
+    "sha256": "7d4d6168d27603cfb3b750302448e354e0bbc1bdd58f5d101c3dcf6891e9bb65"
+  },
+  "ffdec": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/ffdec.jar",
+  "art": {
+    "file": "hall-activity-original-art.swf",
+    "urlPath": "/flash/workshop-native/menu/hall-activity-original-art.swf"
+  },
+  "background": {
+    "symbol": "asset.hall.activeBg",
+    "sizeGrid": [
+      34,
+      30,
+      34,
+      30
+    ],
+    "sizeGridOrder": [
+      "left",
+      "top",
+      "right",
+      "bottom"
+    ],
+    "centerSize": [
+      2,
+      1
+    ],
+    "originalWidth": 330
+  },
+  "rows": [
+    {
+      "kind": "mines",
+      "label": "弹弹扫雷",
+      "style": "boguAdventure.hallBtn",
+      "symbol": "asset.hall.boguAdventureBtn",
+      "id": 2,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.boguAdventureBtn",
+      "sourceSymbol": "asset.hall.boguAdventureBtn",
+      "exportClass": "workshop.menu.art.boguAdventureBtn"
+    },
+    {
+      "kind": "ddplay",
+      "label": "弹弹乐",
+      "style": "DDPlay.hallBtn",
+      "symbol": "asset.hall.DDPlayBtn",
+      "id": 32,
+      "width": 70,
+      "height": 69,
+      "exportSymbol": "workshop.menu.art.DDPlayBtn",
+      "sourceSymbol": "asset.hall.DDPlayBtn",
+      "exportClass": "workshop.menu.art.DDPlayBtn"
+    },
+    {
+      "kind": "gypsy",
+      "label": "吉普赛商人",
+      "style": "gyshop.hallBtn",
+      "symbol": "asset.hall.gyshopBtn",
+      "id": 6,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.gyshopBtn",
+      "sourceSymbol": "asset.hall.gyshopBtn",
+      "exportClass": "workshop.menu.art.gyshopBtn"
+    },
+    {
+      "kind": "treasure",
+      "label": "迷宫寻宝",
+      "style": "treasure.hallBtn",
+      "symbol": "asset.hall.treasureBtn",
+      "id": 16,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.treasureBtn",
+      "sourceSymbol": "asset.hall.treasureBtn",
+      "exportClass": "workshop.menu.art.treasureBtn"
+    },
+    {
+      "kind": "exchange",
+      "label": "兑换活动",
+      "style": "wonderFull.hallBtn",
+      "symbol": "asset.hall.wonderfulBtn",
+      "id": 39,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.wonderfulBtn",
+      "sourceSymbol": "asset.hall.wonderfulBtn",
+      "exportClass": "workshop.menu.art.wonderfulBtn"
+    },
+    {
+      "kind": "wardrobe",
+      "label": "魔法衣橱",
+      "style": "magicWardrobe.hallBtn",
+      "symbol": "asset.hall.magicWardrobeBtn",
+      "id": 22,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.magicWardrobeBtn",
+      "sourceSymbol": "asset.hall.magicWardrobeBtn",
+      "exportClass": "workshop.menu.art.magicWardrobeBtn"
+    },
+    {
+      "kind": "moonlight",
+      "label": "月光宝盒",
+      "style": "moonLight.hallBtn",
+      "symbol": "asset.hall.moonLightBtn",
+      "id": 36,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.moonLightBtn",
+      "sourceSymbol": "asset.hall.moonLightBtn",
+      "exportClass": "workshop.menu.art.moonLightBtn"
+    },
+    {
+      "kind": "sign",
+      "label": "签到",
+      "style": "signin.hallBtn",
+      "symbol": "asset.hall.signinBtn",
+      "id": 33,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.signinBtn",
+      "sourceSymbol": "asset.hall.signinBtn",
+      "exportClass": "workshop.menu.art.signinBtn"
+    },
+    {
+      "kind": "charge",
+      "label": "充值大赠送",
+      "style": "chargeActivity.hallBtn",
+      "symbol": "asset.hall.chargeActivityBtn",
+      "id": 21,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.chargeActivityBtn",
+      "sourceSymbol": "asset.hall.chargeActivityBtn",
+      "exportClass": "workshop.menu.art.chargeActivityBtn"
+    },
+    {
+      "kind": "pair",
+      "label": "欧皇兑宝",
+      "style": "pairBox.hallBtn",
+      "symbol": "asset.hall.pairboxBtn",
+      "id": 38,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.pairboxBtn",
+      "sourceSymbol": "asset.hall.pairboxBtn",
+      "exportClass": "workshop.menu.art.pairboxBtn"
+    },
+    {
+      "kind": "carnival",
+      "label": "节日狂欢",
+      "style": "carnival.hallBtn",
+      "symbol": "asset.hall.carnivalBtn",
+      "id": 37,
+      "width": 78,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.carnivalBtn",
+      "sourceSymbol": "asset.hall.carnivalBtn",
+      "exportClass": "workshop.menu.art.carnivalBtn"
+    },
+    {
+      "kind": "purr",
+      "label": "啵咕大转盘",
+      "style": "boguTurn.hallBtn",
+      "symbol": "asset.hall.boguturnBtn",
+      "id": 24,
+      "width": 79,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.boguturnBtn",
+      "sourceSymbol": "asset.hall.boguturnBtn",
+      "exportClass": "workshop.menu.art.boguturnBtn"
+    },
+    {
+      "kind": "first-recharge",
+      "label": "首充大礼",
+      "style": "firstRecharge.hallBtn",
+      "symbol": "asset.hall.shouchongBtn",
+      "id": 23,
+      "width": 78,
+      "height": 78,
+      "exportSymbol": "workshop.menu.art.shouchongBtn",
+      "sourceSymbol": "asset.hall.shouchongBtn",
+      "exportClass": "workshop.menu.art.shouchongBtn"
+    },
+    {
+      "kind": "forthright",
+      "label": "至尊豪礼",
+      "style": "ForthActive.hallBtn",
+      "symbol": "asset.hall.PDDBtn",
+      "id": 28,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.PDDBtn",
+      "sourceSymbol": "asset.hall.PDDBtn",
+      "exportClass": "workshop.menu.art.PDDBtn"
+    },
+    {
+      "kind": "devil",
+      "label": "恶魔宝藏",
+      "style": "devilTurn.hallBtn",
+      "symbol": "asset.hall.devilBtn",
+      "id": 29,
+      "width": 74,
+      "height": 74,
+      "exportSymbol": "workshop.menu.art.devilBtn",
+      "sourceSymbol": "asset.hall.devilBtn",
+      "exportClass": "workshop.menu.art.devilBtn"
+    },
+    {
+      "kind": "christmas",
+      "label": "快乐圣诞",
+      "style": "christmas.hallBtn",
+      "symbol": "asset.hall.chrismasBtn",
+      "id": 30,
+      "width": 72,
+      "height": 71,
+      "exportSymbol": "workshop.menu.art.chrismasBtn",
+      "sourceSymbol": "asset.hall.chrismasBtn",
+      "exportClass": "workshop.menu.art.chrismasBtn"
+    },
+    {
+      "kind": "caveloot",
+      "label": "矿洞寻宝",
+      "style": "caveloot.hallBtn",
+      "symbol": "asset.hall.cavelootBtn",
+      "id": 26,
+      "width": 70,
+      "height": 70,
+      "exportSymbol": "workshop.menu.art.cavelootBtn",
+      "sourceSymbol": "asset.hall.cavelootBtn",
+      "exportClass": "workshop.menu.art.cavelootBtn"
+    },
+    {
+      "kind": "background",
+      "label": "活动背景",
+      "style": null,
+      "symbol": "asset.hall.activeBg",
+      "id": 5,
+      "width": 70,
+      "height": 61,
+      "exportSymbol": "workshop.menu.art.activeBg",
+      "sourceSymbol": "asset.hall.activeBg",
+      "exportClass": "workshop.menu.art.activeBg"
+    }
+  ]
+}

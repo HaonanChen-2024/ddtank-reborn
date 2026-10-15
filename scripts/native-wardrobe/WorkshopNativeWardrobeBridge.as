@@ -1,5 +1,7 @@
 package {
  import flash.display.Loader;
+ import flash.display.Bitmap;
+ import flash.display.BitmapData;
  import flash.display.DisplayObject;
  import flash.display.Sprite;
  import flash.events.Event;
@@ -16,6 +18,9 @@ package {
  import flash.utils.Timer;
  import flash.text.TextField;
  import flash.text.TextFormat;
+ import flash.geom.Rectangle;
+ import flash.geom.Matrix;
+ import flash.geom.ColorTransform;
  /** Existing injection ABI; a single shared import for all activity modules. */
  public final class WorkshopNativeWardrobeBridge extends Sprite {
   private static var registered:Boolean=false;
@@ -31,11 +36,16 @@ package {
   private static var sharedImports:int=0;
   private static var activityMenu:Object;
   private static var menuMessage:String="";
+  private static var menuArtDomain:ApplicationDomain;
+  private static var menuArtLoader:Loader;
+  private static var menuArtTimer:Timer;
+  private static var menuArtPhase:String="idle";
+  private static var menuArtError:String="";
   private static const MENU_ITEMS:Array=[
-   ["mines","迷宫寻宝"],["ddplay","弹弹扫雷"],["gypsy","吉普赛商人"],["treasure","惊喜宝箱"],
-   ["exchange","兑换活动"],["wardrobe","魔法衣橱"],["moonlight","月光宝盒"],["purr","弹弹乐"],
-   ["charge","充值大赠送"],["pair","啵咕大转盘"],["carnival","节日狂欢"],["first-recharge","首充大礼"],
-   ["forthright","至尊豪礼"],["devil","恶魔宝藏"],["christmas","快乐圣诞"],["caveloot","矿洞寻宝"]
+   ["mines","弹弹扫雷","boguAdventureBtn"],["ddplay","弹弹乐","DDPlayBtn"],["gypsy","吉普赛商人","gyshopBtn"],["treasure","迷宫寻宝","treasureBtn"],
+   ["exchange","兑换活动","wonderfulBtn"],["wardrobe","魔法衣橱","magicWardrobeBtn"],["moonlight","月光宝盒","moonLightBtn"],["purr","啵咕大转盘","boguturnBtn"],
+   ["charge","充值大赠送","chargeActivityBtn"],["pair","欧皇兑宝","pairboxBtn"],["carnival","节日狂欢","carnivalBtn"],["first-recharge","首充大礼","shouchongBtn"],
+   ["forthright","至尊豪礼","PDDBtn"],["devil","恶魔宝藏","devilBtn"],["christmas","快乐圣诞","chrismasBtn"],["caveloot","矿洞寻宝","cavelootBtn"]
   ];
   private static var wardrobe:Object=record("wardrobe");
   private static var pair:Object=record("pair");
@@ -161,13 +171,14 @@ package {
    field.x=x;field.y=y;field.width=width;field.height=height;field.multiline=true;field.wordWrap=true;
    field.selectable=false;field.mouseEnabled=false;field.text=text;parent.addChild(field);return field;
   }
-  private static function menuButton(m:Object,kind:String,label:String,x:int,y:int,height:int=62):Object {
-   var factory:Object=clientClass("com.pickgliss.ui.ComponentFactory")["Instance"];
-   var button:Object=factory["creatComponentByStylename"]("copyFile.btn");
-   if(!(button is DisplayObject))throw new Error("客户端原生按钮皮肤未就绪。");
-   button["text"]="";button["x"]=x;button["y"]=y;button["width"]=74;button["height"]=height;
-   var caption:TextField=menuLabel(m.panel,label,x+3,y+(height>40?12:5),68,height>40?44:25,height>40?14:12);
-   m.panel.addChildAt(button as DisplayObject,m.panel.numChildren-1);
+  private static function menuButton(m:Object,kind:String,label:String,x:int,y:int):Object {
+   // Auxiliary controls only. Activity entries use the original labelled artwork below.
+   var button:Sprite=new Sprite();button.x=x;button.y=y;button.buttonMode=true;
+   button.graphics.lineStyle(1,0xC5A160);button.graphics.beginFill(0x342A1A,0.9);button.graphics.drawRoundRect(0,0,70,26,8,8);button.graphics.endFill();m.panel.addChild(button);
+   var caption:TextField=menuLabel(m.panel,label,x+1,y+3,68,23,12);
+   return menuBind(m,kind,button,caption);
+  }
+  private static function menuBind(m:Object,kind:String,button:Sprite,caption:TextField=null):Object {
    var click:Function=function(e:MouseEvent):void{
     e.stopImmediatePropagation();if(!menuAlive(m))return;
     if(kind==="close"){disposeMenu(m,true);return;}
@@ -181,14 +192,79 @@ package {
    button.addEventListener(MouseEvent.CLICK,click);m.controls.push({view:button,listener:click,caption:caption,kind:kind});
    return {view:button,caption:caption};
   }
+  private static function menuBitmap(name:String):BitmapData {
+   var full:String="workshop.menu.art."+name;
+   if(!menuArtDomain||!menuArtDomain.hasDefinition(full))throw new Error("原活动图标未载入："+name);
+   var type:Class=menuArtDomain.getDefinition(full) as Class,value:BitmapData=new type(0,0) as BitmapData;
+   if(!value||value.width<1||value.height<1)throw new Error("原活动图标无效："+name);
+   return value;
+  }
+  private static function menuIcon(m:Object,kind:String,name:String,x:int,y:int):void {
+   var pixels:BitmapData=menuBitmap(name),button:Sprite=new Sprite(),art:Bitmap=new Bitmap(pixels);
+   if(pixels.width>80||pixels.height>80){pixels.dispose();throw new Error("原活动图标尺寸不匹配。");}
+   m.bitmaps.push(pixels);button.x=x;button.y=y;button.buttonMode=true;button.mouseChildren=false;
+   button.graphics.beginFill(0,0);button.graphics.drawRect(0,0,80,80);button.graphics.endFill();
+   // Original images already contain their Chinese captions. Do not overlay text or stretch them.
+   art.x=int((80-pixels.width)/2);art.y=int((80-pixels.height)/2);button.addChild(art);m.panel.addChild(button);
+   var over:Function=function(e:MouseEvent):void{button.transform.colorTransform=new ColorTransform(1.1,1.1,1.1);};
+   var out:Function=function(e:MouseEvent):void{button.transform.colorTransform=new ColorTransform();};
+   button.addEventListener(MouseEvent.ROLL_OVER,over);button.addEventListener(MouseEvent.ROLL_OUT,out);
+   menuBind(m,kind,button);var control:Object=m.controls[m.controls.length-1];control.over=over;control.out=out;
+  }
+  private static function menuBackground(m:Object):void {
+   var original:BitmapData=menuBitmap("activeBg"),pixels:BitmapData=new BitmapData(330,450,true,0);
+   // Morn sizeGrid is left,top,right,bottom: original HallActiveBox uses 34,30,34,30.
+   var sx:Array=[0,34,original.width-34,original.width],sy:Array=[0,30,original.height-30,original.height];
+   var dx:Array=[0,34,296,330],dy:Array=[0,30,420,450];
+   if(original.width!==70||original.height!==61){original.dispose();pixels.dispose();throw new Error("原活动背景尺寸不匹配。");}
+   for(var row:int=0;row<3;row++)for(var col:int=0;col<3;col++){
+    var scaleX:Number=(dx[col+1]-dx[col])/(sx[col+1]-sx[col]),scaleY:Number=(dy[row+1]-dy[row])/(sy[row+1]-sy[row]);
+    pixels.draw(original,new Matrix(scaleX,0,0,scaleY,dx[col]-sx[col]*scaleX,dy[row]-sy[row]*scaleY),null,null,new Rectangle(dx[col],dy[row],dx[col+1]-dx[col],dy[row+1]-dy[row]),true);
+   }
+   original.dispose();m.bitmaps.push(pixels);m.background=new Bitmap(pixels);m.panel.addChildAt(m.background,0);
+  }
+  private static function renderMenuArt(m:Object):void {
+   if(!menuAlive(m)||m.artReady)return;
+   try {
+    menuBackground(m);
+    for(var i:int=0;i<MENU_ITEMS.length;i++)menuIcon(m,MENU_ITEMS[i][0],MENU_ITEMS[i][2],5+80*(i%4),5+80*int(i/4));
+    menuIcon(m,"sign","signinBtn",5,325);m.artReady=true;m.message.text="点击图标打开活动";
+   }catch(error:Error){menuArtFail(error.message);}
+  }
+  private static function menuArtFail(message:String):void {
+   if(menuArtTimer)menuArtTimer.stop();menuArtPhase="failed";menuArtError="活动原图加载失败，请重新进入游戏。";
+   if(menuAlive(activityMenu))activityMenu.message.text=menuArtError;
+  }
+  private static function ensureMenuArt():void {
+   if(menuArtPhase==="ready"){renderMenuArt(activityMenu);return;}
+   if(menuArtPhase==="failed"){if(menuAlive(activityMenu))activityMenu.message.text=menuArtError;return;}
+   if(menuArtPhase==="loading")return;
+   ensureRoot();menuArtPhase="loading";menuArtLoader=new Loader();
+   // Pure BitmapData resources live in a child domain, never in the game's shared class domain.
+   menuArtDomain=new ApplicationDomain(ApplicationDomain.currentDomain);
+   var loadContext:LoaderContext=new LoaderContext(false,menuArtDomain);loadContext.allowCodeImport=true;
+   menuArtLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,function(e:IOErrorEvent):void{menuArtFail(e.text);});
+   menuArtLoader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR,function(e:SecurityErrorEvent):void{menuArtFail(e.text);});
+   menuArtLoader.contentLoaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR,function(e:UncaughtErrorEvent):void{menuArtFail(String(e.error));});
+   menuArtLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,function(e:Event):void{
+    if(menuArtPhase!=="loading")return;
+    try {
+     for each(var item:Array in MENU_ITEMS){var image:BitmapData=menuBitmap(item[2]);image.dispose();}
+     var sign:BitmapData=menuBitmap("signinBtn"),background:BitmapData=menuBitmap("activeBg");sign.dispose();background.dispose();
+     if(menuArtTimer)menuArtTimer.stop();menuArtPhase="ready";renderMenuArt(activityMenu);
+    }catch(error:Error){menuArtFail(error.message);}
+   });
+   menuArtTimer=new Timer(30000,1);menuArtTimer.addEventListener(TimerEvent.TIMER_COMPLETE,function(e:TimerEvent):void{menuArtFail("timeout");});menuArtTimer.start();
+   menuArtLoader.load(new URLRequest(root+"menu/hall-activity-original-art.swf"),loadContext);
+  }
   private static function disposeMenu(m:Object,notify:Boolean):void {
    if(!m||activityMenu!==m)return;
    activityMenu=null;
    if(m.root&&m.tick)m.root.removeEventListener(Event.ENTER_FRAME,m.tick);
    if(m.stage&&m.key)m.stage.removeEventListener(KeyboardEvent.KEY_DOWN,m.key);
    if(m.root&&m.root.parent)m.root.parent.removeChild(m.root);
-   for each(var control:Object in m.controls){control.view.removeEventListener(MouseEvent.CLICK,control.listener);try{control.view.dispose();}catch(ignored:Error){}}
-   if(m.background){try{m.background.dispose();}catch(backgroundError:Error){}}
+   for each(var control:Object in m.controls){control.view.removeEventListener(MouseEvent.CLICK,control.listener);if(control.over)control.view.removeEventListener(MouseEvent.ROLL_OVER,control.over);if(control.out)control.view.removeEventListener(MouseEvent.ROLL_OUT,control.out);}
+   for each(var bitmap:BitmapData in m.bitmaps)bitmap.dispose();
    if(notify&&ExternalInterface.available){try{ExternalInterface.call("workshopActivityMenuClosed",m.id,m.token);}catch(notifyError:Error){}}
   }
   public static function openActivityMenu(id:Number,token:String):Boolean {
@@ -202,7 +278,7 @@ package {
      if(r.module){var s:Object=r.module.statusNative();if(!s||s.pending===true||s.animating===true||s.visible===true||s.open===true)throw new Error("请先完成操作并关闭当前活动窗口。");}
     }
     var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];
-    var m:Object={id:int(id),token:token,self:self,zone:self["ZoneID"],root:new Sprite(),panel:new Sprite(),controls:[],pendingKind:""};
+    var m:Object={id:int(id),token:token,self:self,zone:self["ZoneID"],root:new Sprite(),panel:new Sprite(),controls:[],bitmaps:[],pendingKind:"",artReady:false};
     activityMenu=m;menuMessage="";
     var Layer:Class=clientClass("com.pickgliss.ui.LayerManager");
     // Own the backdrop explicitly: removing this Sprite removes every modal hit area as well.
@@ -210,22 +286,17 @@ package {
     if(!m.root.stage)throw new Error("游戏原生显示层未就绪。");
     m.stage=m.root.stage;var w:int=m.stage.stageWidth,h:int=m.stage.stageHeight;
     m.root.graphics.beginFill(0x000000,0.4);m.root.graphics.drawRect(0,0,w,h);m.root.graphics.endFill();
-    m.panel.x=Math.max(8,int((w-330)/2));m.panel.y=Math.max(8,int((h-466)/2));m.root.addChild(m.panel);
-    m.background=clientClass("com.pickgliss.ui.ComponentFactory")["Instance"]["creatComponentByStylename"]("SimpleFrameBackgound");
-    if(!(m.background is DisplayObject))throw new Error("客户端原生窗口皮肤未就绪。");
-    m.background.width=330;m.background.height=466;m.panel.addChild(m.background);
-    menuLabel(m.panel,"活动",10,10,310,29,18);
-    for(var i:int=0;i<MENU_ITEMS.length;i++){
-     var label:String=MENU_ITEMS[i][1];if(label.length>4)label=label.substr(0,2)+"\n"+label.substr(2);
-     menuButton(m,MENU_ITEMS[i][0],label,10+80*(i%4),44+80*int(i/4));
-    }
-    menuButton(m,"sign","签到",10,369,34);menuButton(m,"more","更多",90,369,34);
-    var extra:Object=menuButton(m,"activation","激活",170,369,34);m.extra=extra.view;m.extraCaption=extra.caption;m.extra.visible=false;m.extraCaption.visible=false;
-    menuButton(m,"close","关闭",250,369,34);
-    m.message=menuLabel(m.panel,"点击活动打开原窗口\n奖励以活动内规则为准",10,414,310,44,12);
+    m.panel.x=Math.max(8,int((w-330)/2));m.panel.y=Math.max(8,int((h-450)/2));m.root.addChild(m.panel);
+    // Loading is visible and cancellable. Never substitute the missing art with placeholder activity buttons.
+    m.panel.graphics.beginFill(0x17130D,0.85);m.panel.graphics.drawRect(0,0,330,450);m.panel.graphics.endFill();
+    menuButton(m,"more","更多",95,352);
+    var extra:Object=menuButton(m,"activation","激活",175,352);m.extra=extra.view;m.extraCaption=extra.caption;m.extra.visible=false;m.extraCaption.visible=false;
+    menuButton(m,"close","关闭",255,352);
+    m.message=menuLabel(m.panel,"正在加载原活动图标……",10,410,310,30,12);
     m.tick=function(e:Event):void{if(!menuAlive(m))disposeMenu(m,true);};
     m.key=function(e:KeyboardEvent):void{if(e.keyCode===27&&activityMenu===m){e.stopImmediatePropagation();disposeMenu(m,true);}};
     m.root.addEventListener(Event.ENTER_FRAME,m.tick);m.stage.addEventListener(KeyboardEvent.KEY_DOWN,m.key,false,1000);
+    ensureMenuArt();
     return menuAlive(m);
    }catch(error:Error){menuMessage=error.message;if(activityMenu)disposeMenu(activityMenu,true);return false;}
    return false;
@@ -234,7 +305,7 @@ package {
    var id:int=0;try{var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];id=self?int(self["ID"]):0;}catch(ignored:Error){}
    if(activityMenu&&!menuAlive(activityMenu))disposeMenu(activityMenu,true);
    var m:Object=activityMenu;
-   return {version:1,open:Boolean(m),actualUserId:id,characterId:m?m.id:0,token:m?m.token:"",pending:Boolean(m&&m.pendingKind),message:menuMessage};
+   return {version:1,open:Boolean(m),actualUserId:id,characterId:m?m.id:0,token:m?m.token:"",pending:Boolean(m&&m.pendingKind),artReady:Boolean(m&&m.artReady),artPhase:menuArtPhase,message:menuMessage};
   }
   public static function closeActivityMenu(token:String):Boolean {
    var m:Object=activityMenu;if(!m||m.token!==token)return false;disposeMenu(m,true);return true;

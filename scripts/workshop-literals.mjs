@@ -66,6 +66,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     assert.ok(native.assets.some(next => next.target === asset.target), "native upgrade would remove an installed resource; preserve it");
   assert.ok(!priorNative?.battleReturn || native?.battleReturn, "native upgrade would remove installed Christmas battle return; use complete rollback instead");
   assert.ok(priorNative?.nativeMenuVersion !== 1 || native?.nativeMenuVersion === 1, "native upgrade would remove installed activity menu; use complete rollback instead");
+  assert.ok(priorNative?.nativeMenuArtVersion !== 1 || native?.nativeMenuArtVersion === 1, "native upgrade would remove installed original activity art; use complete rollback instead");
   assert.ok(!previous || previous.referenceActivities === undefined || typeof previous.referenceActivities === "boolean", "unknown reference-activities journal flag");
   const oldActivities = previous?.referenceActivities ?? false, activitiesEnabled = oldActivities || referenceActivities || Boolean(native);
   assert.ok(!previous || previous.activityResponse === undefined || typeof previous.activityResponse === "boolean", "unknown activity-response journal flag");
@@ -280,6 +281,8 @@ function readNativeWardrobe(manifestPath, overlay) {
   assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
   assert.ok(manifest.nativeMenuVersion === undefined || manifest.module === "workshop-native-activities" && manifest.nativeMenuVersion === 1, "unknown native activity menu version");
   const nativeMenuVersion = manifest.nativeMenuVersion;
+  assert.ok(manifest.nativeMenuArtVersion === undefined || manifest.module === "workshop-native-activities" && nativeMenuVersion === 1 && manifest.nativeMenuArtVersion === 1, "unknown native activity menu art version");
+  const nativeMenuArtVersion = manifest.nativeMenuArtVersion;
   const christmasVariant = "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas";
   assert.ok(manifest.christmasSceneVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1, "unknown native Christmas scene layout");
   assert.ok(manifest.christmasBattleReturnVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1 && manifest.christmasBattleReturnVersion === 1, "unknown native Christmas battle return layout");
@@ -289,7 +292,7 @@ function readNativeWardrobe(manifestPath, overlay) {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
   };
   const bridge = readFileSync(within(manifest.bridge.tagPath)); assert.equal(hash(bridge), manifest.bridge.tagSha256);
-  if (nativeMenuVersion === 1) verifyNativeActivityMenuBridge(bridge);
+  if (nativeMenuVersion === 1) verifyNativeActivityMenuBridge(bridge, { nativeMenuArtVersion });
   const bridgeSwf = battleReturn ? readFileSync(within(manifest.bridge.compiledSwf)) : null;
   if (battleReturn) assert.equal(hash(bridgeSwf), manifest.bridge.compiledSwfSha256, "native Christmas compiled bridge changed");
   const expected = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstrap.swf", "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf", "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"].map(file => "/flash/workshop-native/wardrobe/" + file);
@@ -344,6 +347,7 @@ function readNativeWardrobe(manifestPath, overlay) {
     ...["ChristmasMap.swf", "living1.swf", "living2.swf", "living3.swf"].map(file => "/resource/image/scene/christmas/workshop/" + file),
     ...["M", "F"].flatMap(sex => ["cloth", "clothF"].flatMap(layer => [1, 2].map(direction => `/resource/image/scene/christmas/workshop/cloth/${sex}/${layer}/${direction}.png`))),
   );
+  if (nativeMenuArtVersion === 1) expected.push("/flash/workshop-native/menu/hall-activity-original-art.swf");
   assert.deepEqual(manifest.assets.map(a => a.urlPath).sort(), expected.sort());
   const assets = manifest.assets.map(asset => {
     assert.equal(asset.file, asset.urlPath.slice(asset.urlPath.lastIndexOf("/") + 1));
@@ -352,8 +356,8 @@ function readNativeWardrobe(manifestPath, overlay) {
       ? join(overlay, "native-resources", asset.urlPath.slice("/resource/".length))
       : join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
   });
-  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })), ...(battleReturn ? { christmasBattleReturnVersion: 1 } : {}), ...(nativeMenuVersion === 1 ? { nativeMenuVersion } : {}) };
-  return { bridge, bridgeSwf, assets, receipt, battleReturn, nativeMenuVersion };
+  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })), ...(battleReturn ? { christmasBattleReturnVersion: 1 } : {}), ...(nativeMenuVersion === 1 ? { nativeMenuVersion } : {}), ...(nativeMenuArtVersion === 1 ? { nativeMenuArtVersion } : {}) };
+  return { bridge, bridgeSwf, assets, receipt, battleReturn, nativeMenuVersion, nativeMenuArtVersion };
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url)

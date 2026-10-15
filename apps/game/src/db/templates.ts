@@ -107,12 +107,13 @@ export class Templates {
     const [pveI, missI, npcI] = await Promise.all([db.select().from(game.Pve_Info), db.select().from(game.Mission_Info), db.select().from(game.NPC_Info)]);
     await this.loadForge(db);
     await this.loadPetsCards(db, lang);
-    const [pveOverlay, missionOverlay, npcOverlay, shopGoodsOverlay, questOverlay] = await Promise.all([
+    const [pveOverlay, missionOverlay, npcOverlay, shopGoodsOverlay, questOverlay, questCondOverlay] = await Promise.all([
       loadTranslations(db, "Pve_Info", lang),
       loadTranslations(db, "Mission_Info", lang),
       loadTranslations(db, "NPC_Info", lang),
       loadTranslations(db, "Shop_Goods", lang),
       loadTranslations(db, "Quest", lang),
+      process.env.TEMPLATE_TEXT_OVERRIDES_FILE ? loadTranslations(db, "Quest_Condiction", lang) : Promise.resolve(new Map()),
     ]);
     this.pveInfos = new Map(pveI.map((r) => [r.ID, applyTranslations(r, "ID", pveOverlay)]));
     this.missions = new Map(missI.map((r) => [r.Id, applyTranslations(r, "Id", missionOverlay)]));
@@ -135,7 +136,7 @@ export class Templates {
     this.maps = new Set(maps.map((m) => m.ID));
     this.serverMaps = new Map(mapServer.map((m) => [m.ServerID, m.OpenMap.split(/[|,]/).map(Number).filter((x) => x > 0)]));
     this.quests = new Map(quests.map((q) => [q.ID, { info: applyTranslations(q, "ID", questOverlay), conds: [], goods: [] } as QuestTemplate]));
-    for (const c of qConds) this.quests.get(c.QuestID)?.conds.push(c);
+    for (const c of qConds) this.quests.get(c.QuestID)?.conds.push(applyTranslations(c, ["QuestID", "CondictionID"], questCondOverlay));
     for (const g of qGoods) this.quests.get(g.QuestID)?.goods.push(g);
     for (const q of this.quests.values()) q.conds.sort((a, b) => a.CondictionID - b.CondictionID);
     this.levels = new Map(levels.map((l) => [l.Grade, l.Blood]));
