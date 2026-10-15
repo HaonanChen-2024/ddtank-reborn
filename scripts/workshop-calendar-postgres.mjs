@@ -15,7 +15,7 @@ assert.equal(process.versions.node.split(".")[0], "24", "Node 24 is required");
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), runtime = resolve(repo, "../../runtime");
 const token = randomUUID(), database = `workshop_calendar_${token.replaceAll("-", "")}`, port = 55439;
 assert.match(database, /^workshop_calendar_[a-f0-9]{32}$/);
-const parent = join(runtime, "moonlight-shop-followup-20261016"), directory = join(parent, `native-postgres-${token}`), cluster = join(directory, "data");
+const parent = join(runtime, "forthright-owner-wait-20261016"), directory = join(parent, `native-postgres-${token}`), cluster = join(directory, "data");
 mkdirSync(parent, { recursive: true }); mkdirSync(directory, { recursive: false });
 const password = randomBytes(32).toString("base64url");
 const redact = value => [password, encodeURIComponent(password)]
@@ -29,10 +29,10 @@ const environment = { ...Object.fromEntries(Object.entries(process.env).filter((
 const sources = ["apps/api/test/calendar-concurrency-postgres.test.ts", "scripts/workshop-calendar-postgres.mjs",
   "apps/api/src/request/endpoints/social.ts", "apps/api/src/request/endpoints/activity-state.ts",
   "apps/api/src/request/types.ts", "apps/api/src/routes/request.ts", "apps/game/src/handlers/events.ts", "apps/game/src/game/world-boss-rewards.ts",
-  "apps/api/src/activities/service.ts", "apps/api/src/activities/moonlight-native.ts", "apps/api/src/activities/engine.ts"];
+  "apps/api/src/activities/service.ts", "apps/api/src/activities/moonlight-native.ts", "apps/api/src/activities/forthright-native.ts", "apps/api/src/activities/engine.ts"];
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash("sha256").update(readFileSync(join(repo, path))).digest("hex")]));
-const receipt = { version: 2, database, token, directory, cluster, port, startedAt: new Date().toISOString(), phase: "prepared",
-  scope: "Fresh owned cluster/template0 DB; four independent calendar/sign-in/activity-clock PostgreSQL connections", liveConfigurationRead: false,
+const receipt = { version: 3, database, token, directory, cluster, port, startedAt: new Date().toISOString(), phase: "prepared",
+  scope: "Fresh owned cluster/template0 DB; four independent calendar/sign-in/activity-clock/A14-member-wait PostgreSQL connections", liveConfigurationRead: false,
   liveDatabaseOpened: false, liveServiceStarted: false, databaseRemoved: false, clusterRetained: true, portClosed: false };
 const save = () => writeFileSync(join(directory, "receipt.json"), redact(JSON.stringify(receipt, null, 2)) + "\n");
 const fail = (error, field = "error") => { receipt.phase = "failed"; receipt[field] = redact(error?.message ?? error); process.exitCode = 1; };
@@ -140,16 +140,33 @@ try {
   }
   assert.equal(result.code, 0, "Native calendar tests failed"); assert(receipt.evidence, "Native calendar evidence is missing");
   const evidence = receipt.evidence;
-  assert.equal(evidence.database, database); assert.equal(evidence.token, token); assert.equal(evidence.passed, 11); assert.equal(evidence.closedConnections, true);
+  assert.equal(evidence.database, database); assert.equal(evidence.token, token); assert.equal(evidence.passed, 17); assert.equal(evidence.closedConnections, true);
   assert(Array.isArray(evidence.connectionPids) && evidence.connectionPids.length === 4, "Four independent backend PIDs are required");
   assert(evidence.connectionPids.every(pid => Number.isSafeInteger(pid) && pid > 0)); assert.equal(new Set(evidence.connectionPids).size, 4);
   const blockers = { "existing-calendar-authenticated": 1, "existing-calendar-legacy": 1, "legacy-first-creation": 1,
     "legacy-month-rollover": 1, "queued-date-legacy": 3, "queued-date-authenticated": 3, "queued-date-game": 1, "queued-date-sign-award": 1,
-    "queued-shop-account": 1, "queued-shop-character": 1, "queued-moon-daily": 1, "queued-shop-same-day": 1 };
+    "queued-shop-account": 1, "queued-shop-character": 1, "queued-moon-daily": 1, "queued-shop-same-day": 1,
+    "queued-forthright-account-expired": 1, "queued-forthright-account-current": 1,
+    "queued-forthright-member-expired": 1, "queued-forthright-member-current": 1, "queued-forthright-member-midnight": 1,
+    "queued-forthright-account-replay-expired": 1 };
   assert(Array.isArray(evidence.scenarios), "Calendar lock scenarios are missing");
   assert.deepEqual(evidence.scenarios.map(scenario => scenario.label).sort(), Object.keys(blockers).sort(), "Expected calendar races are missing");
   assert(evidence.scenarios.every(({ label, observed }) => observed?.state === "blocked" && observed.wait === "Lock"
     && observed.blockers?.includes(evidence.connectionPids[blockers[label]])), "Every successful calendar race must observe its expected owner-row blocker");
+  for (const { label, observed, details } of evidence.scenarios.filter(scenario => scenario.label.startsWith("queued-forthright-"))) {
+    assert.equal(observed.pid, evidence.connectionPids[2]); assert.deepEqual(observed.blockers, [evidence.connectionPids[1]]);
+    const account = label.includes("-account-"), query = observed.query.replace(/\s+/g, " ").trim();
+    assert.match(query, account
+      ? /^SELECT "ID","UserName","IsBanned" FROM member\."Accounts" WHERE "ID"=\$\d+ AND lower\("UserName"\)=lower\(\$\d+\) FOR SHARE$/
+      : /^SELECT "UserID","NickName","Sex" FROM player\."Sys_Users_Detail" WHERE "UserID" IN \([^)]+\) ORDER BY "UserID" FOR SHARE$/);
+    assert.equal(details.authority, account ? "actor-account" : "non-actor-member"); assert.equal(details.walletProbePid, evidence.connectionPids[3]);
+    const walletCount = label.includes("-replay-") ? 1 : 3;
+    assert.equal(details.walletProbes.length, walletCount); assert.equal(new Set(details.walletProbes.map(row => row.uid)).size, walletCount);
+    assert(details.walletProbes.every(row => Number.isSafeInteger(row.uid) && row.uid > 0 && row.code === "55P03"), "All group wallets must already be locked");
+    assert(Date.parse(details.previousTime) < Date.parse(details.expiresAt));
+    assert(label.endsWith("-expired") ? Date.parse(details.releasedAt) > Date.parse(details.expiresAt) : Date.parse(details.releasedAt) < Date.parse(details.expiresAt));
+    if (label.endsWith("-midnight")) assert.notEqual(details.previousTime.slice(0, 10), details.releasedAt.slice(0, 10));
+  }
   receipt.lockScenarios = evidence.scenarios.length; receipt.phase = "verified";
 } catch (error) { fail(error); }
 finally {

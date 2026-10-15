@@ -19,7 +19,7 @@ import { World, type ServerContext } from "../../game/src/session/context.js";
 import type { AppCtx } from "../src/context.js";
 import { createActivityState } from "../src/activities/engine.js";
 import { advanceMoonlight, viewMoonlightNative } from "../src/activities/moonlight-native.js";
-import { activityAction } from "../src/activities/service.js";
+import { activityAction, activitySnapshot } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { requestRoutes } from "../src/routes/request.js";
@@ -68,9 +68,9 @@ async function calendar(api: FastifyInstance, uid: number, authenticated = false
   return { response, text: inflateSync(response.rawPayload).toString("utf8") };
 }
 const rows = (uid: number) => monitor.db.select().from(player.DailyLogList).where(eq(player.DailyLogList.UserID, uid));
-const context = () => ({ db: game, now: () => new Date(clock.now) }) as ServerContext;
+const context = () => ({ db: game, now: () => new Date(clock.now), lang: { t: (key: string) => key } }) as ServerContext;
 async function character() {
-  const [owner] = await monitor.db.insert(player.Sys_Users_Detail).values({ UserName: `calendar-${++sequence}`, NickName: `Calendar ${sequence}`, Password: "test", Sex: true, IsFirst: 1 }).returning();
+  const [owner] = await monitor.db.insert(player.Sys_Users_Detail).values({ UserName: `calendar-${++sequence}`, NickName: `Calendar ${sequence}`, Password: "test", Sex: true, IsFirst: 1, ForbidDate: new Date("2000-01-01T00:00:00Z") }).returning();
   const uid = owner!.UserID;
   await monitor.db.execute(sql`INSERT INTO app."LoginSessions" ("UserName","WebKey","GameKey","UserID","Count","ExpiresAt","GameKeyExpiresAt")
     VALUES (${owner!.UserName}, ${`web-${uid}`}, ${`game-${uid}`}, ${uid}, 1, '2100-01-01', '2100-01-01')`);
@@ -116,10 +116,10 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
     expect(await q(monitor, sql`SELECT token FROM public."WorkshopCalendarTest"`)).toEqual([{ token }]);
     expect(await q(monitor, sql`SELECT tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')`)).toEqual([{ tablename: "WorkshopCalendarTest" }]);
     await migrateDb(monitor);
-    const potion = (JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString()) as
-      (Omit<typeof gameTables.Shop_Goods.$inferInsert, "AddTime"> & { AddTime: string })[]).find(item => item.TemplateID === 40002)!;
-    assert(potion);
-    await monitor.db.insert(gameTables.Shop_Goods).values({ ...potion, AddTime: new Date(potion.AddTime) });
+    const templates = (JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString()) as
+      (Omit<typeof gameTables.Shop_Goods.$inferInsert, "AddTime"> & { AddTime: string })[]).filter(item => [40002, 11019].includes(item.TemplateID));
+    assert.equal(templates.length, 2);
+    await monitor.db.insert(gameTables.Shop_Goods).values(templates.map(item => ({ ...item, AddTime: new Date(item.AddTime) })));
     a = await createDb(url, { max: 1 }); b = await createDb(url, { max: 1 }); game = await createDb(url, { max: 1 });
     for (const [index, h] of [monitor, a, b, game].entries()) {
       assert.equal(h.kind, "postgres");
@@ -312,7 +312,8 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
     const call = (id: string, requestId: string, action: ActivityAction) => activityAction(activityApp(), claims, uid, id, requestId, action);
     return { uid, state, call };
   }
-  async function afterOwnerWait<T>(label: string, uid: number, account: boolean, crossDay: boolean, work: () => Promise<T>) {
+  async function afterOwnerWait<T>(label: string, uid: number, account: boolean, crossDay: boolean, work: () => Promise<T>,
+    beforeRelease?: (observed: { pid: number; blockers: number[]; wait: string; query: string }) => Promise<unknown>) {
     const locked = deferred(), release = deferred();
     const holder = a.db.transaction(async tx => {
       await tx.execute(account ? sql`SELECT "ID" FROM member."Accounts" WHERE "ID"=${uid} FOR UPDATE`
@@ -333,7 +334,8 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
         await delay(10);
       }
       assert(observed, "Activity must reach the real authority share lock after its wallet lock");
-      scenarios.push({ label, observed: { state: "blocked", ...observed } });
+      const details = await beforeRelease?.(observed);
+      scenarios.push({ label, observed: { state: "blocked", ...observed }, ...(details ? { details } : {}) });
       if (crossDay) { clock.now = "2026-11-01T00:00:01Z"; vi.setSystemTime(new Date(clock.now)); }
     } catch (error) { failure = error; } finally { release.resolve(); }
     const results = await Promise.allSettled([holder, pending]);
@@ -388,6 +390,124 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
       expect(saved).toMatchObject({ day: "2026-10-31", daily: { actions: 500 }, games: { moon: { fragments: 0 } } });
       expect(after.receipts.length).toBe(before.receipts.length + 1); expect(after.mails.length).toBe(before.mails.length + 1);
       expect(after.goods.slice(before.goods.length)).toMatchObject([{ TemplateID: 40002, Count: 2, IsBinds: true, ValidDate: 0 }]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  async function forthrightRole() {
+    const uid = await character(), name = `calendar-${sequence}`;
+    await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (${uid},${name},'test-only')`);
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,1000)`);
+    const issued = Math.floor(new Date(clock.now).getTime() / 1000);
+    const claims = { sub: uid, name, role: "player" as const, iat: issued, exp: issued + 7200 };
+    return { uid, claims, call: (action: ActivityAction, requestId = randomUUID()) =>
+      activityAction(activityApp(), claims, uid, "forthright-native", requestId, action) };
+  }
+  async function forthrightPair() {
+    const creator = await forthrightRole(), member = await forthrightRole(), actor = await forthrightRole();
+    const snapshot = await activitySnapshot(activityApp(), creator.claims, creator.uid);
+    const opened = await creator.call({ type: "open-group", index: 0, tier: 0, count: 1, marked: true, choice: snapshot.nativeForthright.stateToken });
+    const group = opened.nativeForthright.pages.groups.createdOrders[0]!;
+    const inspected = (await member.call({ type: "inspect-group", choice: group.code })).nativeForthright.pages.groups.inspected!;
+    const memberAction = { type: "join-group", count: 1, choice: inspected.actionToken }, memberRequestId = randomUUID();
+    const joined = await member.call(memberAction, memberRequestId);
+    expect(joined.nativeForthright.pages.groups.joinedOrders[0]).toMatchObject({ status: "pending", members: [{ status: "active" }, { status: "active" }] });
+    expect((await activityRows()).states.some(row => row.UserID === actor.uid)).toBe(false);
+    return { creator, member, actor, group, memberAction, memberRequestId, ids: [creator.uid, member.uid, actor.uid] };
+  }
+  async function afterForthrightWait<T>(label: string, pair: Awaited<ReturnType<typeof forthrightPair>>, account: boolean, nextTime: string, work: () => Promise<T>) {
+    // The creator's character is a non-actor member: this can block only the final
+    // member SELECT, after the third actor's own account/character checks passed.
+    return afterOwnerWait(label, account ? pair.actor.uid : pair.creator.uid, account, false, work, async observed => {
+      expect(observed.pid).toBe(connectionPids[2]); expect(observed.blockers).toEqual([connectionPids[1]]);
+      const query = observed.query.replace(/\s+/g, " ").trim();
+      expect(query).toMatch(account
+        ? /^SELECT "ID","UserName","IsBanned" FROM member\."Accounts" WHERE "ID"=\$\d+ AND lower\("UserName"\)=lower\(\$\d+\) FOR SHARE$/
+        : /^SELECT "UserID","NickName","Sex" FROM player\."Sys_Users_Detail" WHERE "UserID" IN \([^)]+\) ORDER BY "UserID" FOR SHARE$/);
+      const walletProbes = [];
+      for (const uid of pair.ids) {
+        let code: unknown;
+        try { await game.db.execute(sql`SELECT "UserID" FROM app."ActivityWallet" WHERE "UserID"=${uid} FOR UPDATE NOWAIT`); }
+        catch (error) { const pg = error as { code?: unknown; cause?: { code?: unknown } }; code = pg.cause?.code ?? pg.code; }
+        expect(code).toBe("55P03"); walletProbes.push({ uid, code });
+      }
+      const previousTime = clock.now; clock.now = nextTime; vi.setSystemTime(new Date(clock.now));
+      return { walletProbePid: connectionPids[3], walletProbes, previousTime, releasedAt: clock.now,
+        authority: account ? "actor-account" : "non-actor-member", expiresAt: pair.group.expiresAt };
+    });
+  }
+  async function completedForthright(pair: Awaited<ReturnType<typeof forthrightPair>>, before: Awaited<ReturnType<typeof activityRows>>) {
+    const after = await activityRows();
+    expect(after.receipts).toHaveLength(before.receipts.length + 1);
+    for (const uid of pair.ids) {
+      const old = before.wallets.find(row => row.UserID === uid)!, wallet = after.wallets.find(row => row.UserID === uid)!;
+      expect(wallet).toMatchObject({ Points: 969, Earned: 1000, Revision: Number(old.Revision) + 1 });
+      expect((after.states.find(row => row.UserID === uid)!.State as ActivityState).day).toBe(clock.now.slice(0, 10));
+    }
+    const mails = after.mails.slice(before.mails.length), goods = after.goods.slice(before.goods.length);
+    expect(mails).toHaveLength(6);
+    expect(mails.filter(row => row.Title === "本地活动奖励").map(row => row.ReceiverID).sort((x, y) => Number(x) - Number(y))).toEqual(pair.ids);
+    expect(goods.every(row => row.TemplateID === 11019 && row.IsBinds === true && row.ValidDate === 0)).toBe(true);
+    expect(goods.reduce((sum, row) => sum + Number(row.Count), 0)).toBe(15);
+    return after;
+  }
+  for (const account of [true, false]) for (const expired of [true, false]) check(
+    `third forthright member ${expired ? "rejects an expired group" : "completes before expiry"} after the ${account ? "actor account" : "non-actor member"} lock wait`, async () => {
+      clock.now = "2026-10-15T01:00:00Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+      try {
+        const pair = await forthrightPair();
+        clock.now = expired ? "2026-10-15T01:29:59Z" : "2026-10-15T01:29:58Z"; vi.setSystemTime(new Date(clock.now));
+        const inspected = (await pair.actor.call({ type: "inspect-group", choice: pair.group.code })).nativeForthright.pages.groups.inspected!;
+        expect(inspected.canJoin).toBe(true);
+        const before = await activityRows(), requestId = randomUUID();
+        const action = { type: "join-group", count: 1, choice: inspected.actionToken };
+        const result = await afterForthrightWait(`queued-forthright-${account ? "account" : "member"}-${expired ? "expired" : "current"}`, pair, account,
+          expired ? "2026-10-15T01:30:01Z" : "2026-10-15T01:29:59Z", () => pair.actor.call(action, requestId));
+        if (expired) {
+          expect(result.status).toBe("rejected"); expect((result as PromiseRejectedResult).reason).toMatchObject({ statusCode: 409 });
+          expect(await activityRows()).toEqual(before);
+        } else {
+          expect(result.status).toBe("fulfilled");
+          expect((result as PromiseFulfilledResult<unknown>).value).toMatchObject({ mailedCount: 6,
+            nativeForthrightAction: { requestId, effects: [{ type: "group-completed" }] } });
+          const after = await completedForthright(pair, before);
+          expect(await pair.actor.call(action, requestId)).toMatchObject({ replayed: true }); expect(await activityRows()).toEqual(after);
+        }
+      } finally { vi.useRealTimers(); }
+    });
+  check("a stateless third member rejects its old-day group token after the member lock and initializes on a fresh retry", async () => {
+    clock.now = "2026-10-31T23:45:00Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const pair = await forthrightPair();
+      clock.now = "2026-10-31T23:59:59Z"; vi.setSystemTime(new Date(clock.now));
+      const inspected = (await pair.actor.call({ type: "inspect-group", choice: pair.group.code })).nativeForthright.pages.groups.inspected!;
+      expect(inspected.canJoin).toBe(true);
+      const before = await activityRows();
+      const result = await afterForthrightWait("queued-forthright-member-midnight", pair, false, "2026-11-01T00:00:01Z",
+        () => pair.actor.call({ type: "join-group", count: 1, choice: inspected.actionToken }));
+      expect(result.status).toBe("rejected"); expect((result as PromiseRejectedResult).reason).toMatchObject({ statusCode: 409 });
+      expect(await activityRows()).toEqual(before);
+      const refreshed = (await pair.actor.call({ type: "inspect-group", choice: pair.group.code })).nativeForthright.pages.groups.inspected!;
+      expect(refreshed.canJoin).toBe(true); expect(refreshed.actionToken).not.toBe(inspected.actionToken);
+      expect(await pair.actor.call({ type: "join-group", count: 1, choice: refreshed.actionToken })).toMatchObject({ day: "2026-11-01", mailedCount: 6 });
+      const after = await completedForthright(pair, before), state = after.states.find(row => row.UserID === pair.actor.uid)!.State as ActivityState;
+      expect(state).toMatchObject({ day: "2026-11-01", daily: { actions: 1 } }); expect(state.history[0]).toMatch(/^2026-11-01 /);
+    } finally { vi.useRealTimers(); }
+  });
+  check("a committed forthright UUID replay projects expiry after the actor account lock without repeating any delivery", async () => {
+    clock.now = "2026-10-15T01:00:00Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const pair = await forthrightPair(), before = await activityRows();
+      clock.now = "2026-10-15T01:29:59Z"; vi.setSystemTime(new Date(clock.now));
+      // A committed replay locks only its own wallet, then returns the current
+      // projection; the immutable receipt and original action token stay intact.
+      const result = await afterForthrightWait("queued-forthright-account-replay-expired",
+        { ...pair, actor: pair.member, ids: [pair.member.uid] }, true, "2026-10-15T01:30:01Z",
+        () => pair.member.call(pair.memberAction, pair.memberRequestId));
+      expect(result.status).toBe("fulfilled");
+      const replay = (result as PromiseFulfilledResult<Awaited<ReturnType<typeof pair.member.call>>>).value;
+      expect(replay).toMatchObject({ replayed: true, nativeForthright: { serverNow: "2026-10-15T01:30:01.000Z",
+        pages: { groups: { joinedOrders: [{ status: "expired-unsettled", canJoin: false }] } } } });
+      expect(replay).not.toHaveProperty("nativeForthrightAction"); expect(await activityRows()).toEqual(before);
     } finally { vi.useRealTimers(); }
   });
 });

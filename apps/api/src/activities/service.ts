@@ -318,13 +318,14 @@ async function firstRechargeGift(app: AppCtx, claims: Claims, characterId: numbe
 class ForthrightRetry extends Error {}
 async function forthrightReplay(app: AppCtx, claims: Claims, characterId: number, requestId: string, signature: string): Promise<ActivityResult | undefined> {
   return app.h.db.transaction(async tx => {
-    const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } }, now = new Date();
+    const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } }, authenticatedAt = new Date();
     const row = await q1<WalletRow>(txApp.h, sql`SELECT "Points","Earned","Revision" FROM app."ActivityWallet" WHERE "UserID"=${characterId} FOR UPDATE`);
-    await owner(txApp, claims, characterId, now, true);
+    await owner(txApp, claims, characterId, authenticatedAt, true);
     const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
       sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
     if (!previous) return undefined;
     if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+    const now = new Date();
     const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
     return { characterId, ...viewActivities(state, walletOf(row), ctx), ...previous.Result, replayed: true };
   });
@@ -361,23 +362,27 @@ async function forthrightGroupAction(app: AppCtx, claims: Claims, characterId: n
         for (const id of ids) await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${id}) ON CONFLICT DO NOTHING`);
         const rows = await q<WalletRow & { UserID: number }>(txApp.h, sql`SELECT "UserID","Points","Earned","Revision" FROM app."ActivityWallet"
           WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR UPDATE`);
-        const now = new Date(); await owner(txApp, claims, characterId, now, true);
+        const authenticatedAt = new Date(); await owner(txApp, claims, characterId, authenticatedAt, true);
         const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
           sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
         if (previous) {
           if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+          const now = new Date();
           const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
           throw new GiftReplay({ characterId, ...viewActivities(state, walletOf(rows.find(r => r.UserID === characterId)), ctx), ...previous.Result, replayed: true });
         }
-        const states = new Map(await Promise.all(ids.map(async id => [id, await stateOf(txApp, id, now)] as const)));
         if (sequence !== undefined) {
-          const current = readForthrightNativeState(states.get(creatorId)!.games.forthrightNativeV1).createdGroups[String(sequence)];
+          const creatorState = await stateOf(txApp, creatorId, authenticatedAt);
+          const current = readForthrightNativeState(creatorState.games.forthrightNativeV1).createdGroups[String(sequence)];
           const actualIds = [...new Set([characterId, creatorId, ...(current?.members.map(m => m.characterId) ?? [])])].sort((x, y) => x - y);
           if (!current || canonical(actualIds) !== canonical(ids)) throw new ForthrightRetry();
         }
         const details = await q<Owner & { UserID: number }>(txApp.h, sql`SELECT "UserID","NickName","Sex" FROM player."Sys_Users_Detail"
           WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR SHARE`);
         if (rows.length !== ids.length || details.length !== ids.length) throw new ActivityError("拼团成员资料缺失。", 409);
+        // Owner and member share locks can both wait past a token's expiry or UTC midnight.
+        const now = new Date();
+        const states = new Map(await Promise.all(ids.map(async id => [id, await stateOf(txApp, id, now)] as const)));
         const ctx = { ...await context(txApp, characterId, now), requestId };
         const changed = advanceForthrightGroup(ids.map(id => ({ characterId: id, nickname: details.find(d => d.UserID === id)!.NickName,
           root: states.get(id)!, wallet: walletOf(rows.find(r => r.UserID === id)) })), a, ctx);
