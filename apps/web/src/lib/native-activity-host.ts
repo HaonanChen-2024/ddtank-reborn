@@ -23,8 +23,8 @@ export interface NativeActivityHostOptions {
   onStatus?: (status: Record<string, unknown>) => void;
 }
 export interface NativeActivitySpec {
-  activityId: "pair-native" | "mines-native" | "ddplay-native" | "gypsy-native" | "moonlight-native" | "treasure-native" | "wheel-native" | "carnival-native" | "first-recharge-native" | "charge-native" | "forthright-native" | "exchange-native"; title: string;
-  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction" | "nativeExchangeAction";
+  activityId: "pair-native" | "mines-native" | "ddplay-native" | "gypsy-native" | "moonlight-native" | "treasure-native" | "wheel-native" | "carnival-native" | "first-recharge-native" | "charge-native" | "forthright-native" | "exchange-native" | "devil-native"; title: string;
+  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction" | "nativeExchangeAction" | "nativeDevilAction";
   parseAction: (value: unknown) => ActivityAction | null;
   validatePublic: (snapshot: ActivityResponse, action?: ActivityAction) => void;
   isReadOnlyAction?: (action: ActivityAction) => boolean;
@@ -68,7 +68,7 @@ export function attachNativeActivityHost(options: NativeActivityHostOptions, spe
       throw new ActivityRequestError("返回操作编号不匹配，请重试原操作。", true);
     const snapshot = { ...next };
     // GET and replay synchronize current state, including when another module returned old effects.
-    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction", "nativeExchangeAction"] as const)
+    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction", "nativeExchangeAction", "nativeDevilAction"] as const)
       if (!op.request || readOnly || snapshot.replayed || key !== spec.effectKey) delete snapshot[key];
     try {
       const accepted = options.accept({ generation: options.generation,

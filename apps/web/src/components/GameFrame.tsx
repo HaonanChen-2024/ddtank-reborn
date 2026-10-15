@@ -15,6 +15,7 @@ import { attachNativeFirstRechargeHost, type NativeFirstRechargePlayer } from "@
 import { attachNativeChargeHost, type NativeChargePlayer } from "@/lib/native-charge-host";
 import { attachNativeForthrightHost, type NativeForthrightPlayer } from "@/lib/native-forthright-host";
 import { attachNativeExchangeHost, type NativeExchangePlayer } from "@/lib/native-exchange-host";
+import { attachNativeDevilHost, type NativeDevilPlayer } from "@/lib/native-devil-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -29,7 +30,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -65,14 +66,17 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenCharge?: (characterId: number, generation: string) => boolean;
   workshopOpenForthright?: (characterId: number, generation: string) => boolean;
   workshopOpenExchange?: (characterId: number, generation: string) => boolean;
+  workshopOpenDevil?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
   workshopStatusCharge?: () => NativePairStatus;
   workshopStatusForthright?: () => NativePairStatus;
   workshopStatusExchange?: () => NativePairStatus;
+  workshopStatusDevil?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
   workshopCloseCharge?: () => unknown;
   workshopCloseForthright?: () => unknown;
   workshopCloseExchange?: () => unknown;
+  workshopCloseDevil?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -275,6 +279,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       exchangeCharacterId = 0;
       exchangeGeneration = "";
     };
+    let devilRequest: { cancel: () => void } | null = null;
+    let devilHost: ReturnType<typeof attachNativeDevilHost> | null = null;
+    let devilCharacterId = 0;
+    let devilGeneration = "";
+    const detachDevil = () => {
+      devilRequest?.cancel();
+      devilHost?.cancel();
+      devilHost = null;
+      devilCharacterId = 0;
+      devilGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -324,6 +339,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachCharge();
           detachForthright();
           detachExchange();
+          detachDevil();
           player?.remove();
           player = null;
         };
@@ -1051,6 +1067,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (exchangeRequest === request) exchangeRequest = null;
           }
         };
+        window.workshopShowDevil = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenDevil || !owner.workshopStatusDevil || !owner.workshopCloseDevil) return false;
+          try {
+            const initial = owner.workshopStatusDevil();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (devilHost && devilCharacterId !== characterId) return false;
+            if (!devilHost) {
+              devilCharacterId = characterId;
+              devilGeneration = crypto.randomUUID();
+              const generation = devilGeneration;
+              devilHost = attachNativeDevilHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || devilCharacterId !== characterId || devilGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusDevil?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          devilRequest?.cancel();
+          const request = { cancel: () => {
+            if (devilRequest !== request) return;
+            devilRequest = null;
+            try { owner.workshopCloseDevil?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          devilRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenDevil(characterId, devilGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (devilRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusDevil();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === devilGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (devilRequest === request) devilRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -1081,6 +1152,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachCharge();
       detachForthright();
       detachExchange();
+      detachDevil();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -1103,6 +1175,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachCharge();
       detachForthright();
       detachExchange();
+      detachDevil();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -1120,6 +1193,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowCharge;
       delete window.workshopShowForthright;
       delete window.workshopShowExchange;
+      delete window.workshopShowDevil;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

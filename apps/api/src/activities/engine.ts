@@ -15,6 +15,7 @@ import { advanceFirstRechargeNative, claimFirstRechargeTier, transferFirstRechar
 import { advanceChargeNative, recordChargeNativeSpending, viewChargeNative } from "./charge-native.js";
 import { advanceForthrightNative, viewForthrightNative } from "./forthright-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
+import { advanceDevilNative, viewDevilNative } from "./devil-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
 const random = () => randomInt(0x100000000) / 0x100000000;
@@ -62,6 +63,8 @@ function taskList(s: ActivityState, ctx: ActivityContext): ActivityTask[] {
 }
 
 function countsDailyAction(id: string, type: string): boolean {
+  // This owner counts an actual finite batch, paid continuation or purchase itself.
+  if (id === "devil-native") return false;
   // Navigation neither earns rewards nor advances a game. Keep this list explicit so
   // a future wardrobe/game action does not inherit an unlimited-play exemption.
   if (id === "wardrobe" && ["page", "select-set", "directory"].includes(type)) return false;
@@ -102,6 +105,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let nativeFirstRechargeEffects: ActivityTransition["nativeFirstRechargeEffects"];
   let nativeChargeEffects: ActivityTransition["nativeChargeEffects"];
   let nativeForthrightEffects: ActivityTransition["nativeForthrightEffects"];
+  let nativeDevilEffects: ActivityTransition["nativeDevilEffects"];
   let nativeForthrightNotification: string | undefined;
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; grossCost += n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
@@ -109,7 +113,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || id === "charge-native" || id === "forthright-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || id === "charge-native" || id === "forthright-native" || id === "devil-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   let countedActions = counted ? 1 : 0;
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
@@ -204,6 +208,11 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     charge(result.cost); s.games.chargeNativeV1 = result.state; rewards.push(...result.rewards);
     if (result.claimKey) once(result.claimKey);
     nativeChargeEffects = result.effects; message = result.message;
+  } else if (id === "devil-native") {
+    const result = advanceDevilNative(s.games.devilNativeV1, action, ctx, wallet, rng, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)), s.claims);
+    charge(result.cost); s.games.devilNativeV1 = result.state; countedActions = result.countedActions;
+    if (result.claimKey) once(result.claimKey);
+    rewards.push(...result.rewards); nativeDevilEffects = result.effects; message = result.message;
   } else if (chanceIds.includes(id as ChanceId)) {
     const result = advanceChanceGame(id as ChanceId, s.games[id], action, rng);
     charge(result.cost); earn(result.points); s.games[id] = result.state;
@@ -305,7 +314,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   if (countedActions) count("actions", countedActions);
   if (grossCost > 0) s.games.chargeNativeV1 = recordChargeNativeSpending(s.games.chargeNativeV1, ctx, grossCost);
   s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : id === "moonlight-native" ? "原生月光宝盒" : id === "treasure-native" ? "原生迷宫寻宝" : id === "wheel-native" ? "原生啵咕大转盘" : id === "carnival-native" ? "原生节日狂欢" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}), ...(nativeFirstRechargeEffects ? { nativeFirstRechargeEffects } : {}), ...(nativeChargeEffects ? { nativeChargeEffects } : {}), ...(nativeForthrightEffects ? { nativeForthrightEffects } : {}), ...(nativeForthrightNotification ? { nativeForthrightNotification } : {}) };
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}), ...(nativeFirstRechargeEffects ? { nativeFirstRechargeEffects } : {}), ...(nativeChargeEffects ? { nativeChargeEffects } : {}), ...(nativeForthrightEffects ? { nativeForthrightEffects } : {}), ...(nativeDevilEffects ? { nativeDevilEffects } : {}), ...(nativeForthrightNotification ? { nativeForthrightNotification } : {}) };
 }
 
 /** Called only after the service owns BOTH wallets in ascending character-ID order. */
@@ -400,5 +409,6 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     nativeWheel: viewWheelNative(s.games.wheelNativeV1, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
     nativeCarnival: viewCarnivalNative(s.games.carnivalNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))), nativeFirstRecharge,
     nativeCharge: viewChargeNative(s.games.chargeNativeV1, ctx, wallet, s.claims, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))),
-    nativeForthright: viewForthrightNative(s, ctx, wallet) };
+    nativeForthright: viewForthrightNative(s, ctx, wallet),
+    nativeDevil: viewDevilNative(s.games.devilNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)), s.claims) };
 }

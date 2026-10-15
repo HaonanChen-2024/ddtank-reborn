@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange" | "devil", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -17,6 +17,14 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 }
 
 describe("ActivityCenter native entry contract", () => {
+  it("offers the original devil flow with explicit local counters and pending runtime acceptance", () => {
+    const html = render("devil");
+    for (const text of ["试用原版恶魔宝藏", "网页玩法", "五色珠", "双骰五阶段", "次数礼", "印记商店", "不接真实付款", "活动计数", "游戏邮件", "关闭后可恢复骰局", "原窗口仍待游戏内验收"]) expect(html).toContain(text);
+    expect(html).not.toContain("试用原版兑换活动");
+  });
+  it("requires the live game character for the original devil entry", () => {
+    expect(render("devil", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版恶魔宝藏<\/button>/);
+  });
   it("offers original material exchange with explicit local recipes and no point charge", () => {
     const html = render("exchange"); expect(html).toContain("试用原版兑换活动"); expect(html).toContain("网页玩法");
     for (const text of ["真实背包材料", "不扣活动积分", "每日最多10份", "游戏邮件", "解锁背包", "打开只读取", "原服其它分类和未知奖励尚未接入"]) expect(html).toContain(text);

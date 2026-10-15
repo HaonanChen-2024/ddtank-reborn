@@ -17,6 +17,7 @@ import type { MoonlightNativeEffect } from "./moonlight-native.js";
 import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import type { CarnivalNativeEffect } from "./carnival-native.js";
+import type { DevilEffect } from "./devil-native.js";
 import { validateFirstRechargeNativeAction, type FirstRechargeNativeEffect } from "./first-recharge-native.js";
 import { recordChargeNativeSpending, type ChargeNativeEffect } from "./charge-native.js";
 import { advanceForthrightGroup, decodeForthrightCode, forthrightEntityCode, readForthrightNativeState, validateForthrightGroup, validateForthrightNativeAction,
@@ -42,6 +43,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
   nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
   nativeExchangeAction?: ExchangeEnvelope;
+  nativeDevilAction?: { requestId: string; effects: DevilEffect[] };
 }
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
@@ -353,7 +355,7 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}),
       ...(changed.nativeFirstRechargeEffects ? { nativeFirstRechargeAction: { requestId, effects: changed.nativeFirstRechargeEffects } } : {}),
       ...(changed.nativeChargeEffects ? { nativeChargeAction: { requestId, effects: changed.nativeChargeEffects } } : {}),
-      ...(changed.nativeForthrightEffects ? { nativeForthrightAction: { requestId, effects: changed.nativeForthrightEffects } } : {}) };
+      ...(changed.nativeForthrightEffects ? { nativeForthrightAction: { requestId, effects: changed.nativeForthrightEffects } } : {}), ...(changed.nativeDevilEffects ? { nativeDevilAction: { requestId, effects: changed.nativeDevilEffects } } : {}) };
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
