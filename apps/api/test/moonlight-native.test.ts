@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { advanceMoonlight, readMoonlightState, viewMoonlightNative } from "../src/activities/moonlight-native.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
@@ -123,6 +124,67 @@ describe("original Moonlight shared bag and local three-draw contract", () => {
     expect(() => advance(limited, { type: "exchange", count: 3 })).toThrow(/30枚/);
     expect(limited.fragments).toBe(25);
     expect(() => advanceMoonlight(batch.state, { type: "exchange", count: 1, choice: token(state) }, ctx, wallet, noRandom, true)).toThrow(/已更新/);
+  });
+
+  it("publishes only the two safe shop recipes and binds its token to the full save, day and exact catalog", () => {
+    const state = readMoonlightState(undefined); state.fragments = 27;
+    const before = structuredClone(state), shop = viewMoonlightNative(state, ctx, wallet).shop;
+    expect(shop).toEqual({ version: 1, kind: "moonlight-native-shop", currency: "local-fragments", maxCount: 10, token: expect.stringMatching(/^2026-10-15:[A-Za-z0-9_-]{43}$/), entries: [
+      { index: 0, templateId: 11021, itemCount: 2, fragmentCost: 10, sourceGoodsId: 0, affordableCount: 2, canBuy: true },
+      { index: 1, templateId: 40002, itemCount: 1, fragmentCost: 5, sourceGoodsId: 160000024, affordableCount: 5, canBuy: true },
+    ] });
+    const catalog = { version: shop.version, kind: shop.kind, currency: shop.currency, maxCount: shop.maxCount,
+      entries: shop.entries.map(({ affordableCount: _affordable, canBuy: _canBuy, ...product }) => product) };
+    const hash = (catalogValue: unknown) => `${shop.token.slice(0, 11)}${createHash("sha256").update(JSON.stringify({ state, catalog: catalogValue })).digest("base64url")}`;
+    expect(shop.token).toBe(hash(catalog)); expect(shop.token).not.toBe(token(state));
+    const buy = (choice: string) => advanceMoonlight(state, { type: "buy", index: 1, count: 1, choice }, ctx, wallet, noRandom, true);
+    expect(() => buy(hash({ ...catalog, entries: catalog.entries.map(p => ({ ...p, fragmentCost: p.fragmentCost + 1 })) }))).toThrow(/已更新/);
+    expect(() => buy(token(state))).toThrow(/已更新/);
+    for (const changed of [{ ...state, fragments: 26 }, { ...state, draws: 1 }, { ...state, score: 1 }, { ...state, pity: 1 },
+      { ...state, claimed: [1] }, { ...state, choices: [state.choices[0]] }, { ...state, bag: [{ templateId: 11019, count: 1 }] }]) {
+      expect(viewMoonlightNative(changed, ctx, wallet).shop.token).not.toBe(shop.token);
+    }
+    expect(viewMoonlightNative(state, next, wallet).shop.token).not.toBe(shop.token);
+    expect(viewMoonlightNative({ ...state, fragments: 1000 }, ctx, wallet).shop.entries.map(p => p.affordableCount)).toEqual([10, 10]);
+    expect(viewMoonlightNative(state, ctx, wallet, false).shop.entries.map(p => [p.affordableCount, p.canBuy])).toEqual([[2, false], [5, false]]);
+    expect(state).toEqual(before);
+  });
+
+  it("buys bounded server-owned products without rerolling, changing draw progress or trusting client prices", () => {
+    const state = readMoonlightState(undefined); state.fragments = 105;
+    const choice = viewMoonlightNative(state, ctx, wallet).shop.token, before = structuredClone(state);
+    const potion = advanceMoonlight(state, { type: "buy", index: 1, count: 10, choice }, ctx, wallet, noRandom, true);
+    expect(potion).toMatchObject({ state: { ...state, fragments: 55 }, pointsDelta: 0, cost: 0, completed: false, draws: 0,
+      rewards: [{ templateId: 40002, count: 10 }], effects: [{ type: "purchased", index: 1, count: 10, templateId: 40002, itemCount: 10, fragmentsSpent: 50, fragments: 55 }] });
+    expect(advanceMoonlight(state, { type: "buy", index: 0, count: 10, choice }, ctx, wallet, noRandom, true))
+      .toMatchObject({ rewards: [{ templateId: 11021, count: 20 }], state: { fragments: 5 }, effects: [{ type: "purchased", index: 0, count: 10, itemCount: 20, fragmentsSpent: 100 }] });
+    for (const action of [{ type: "buy", index: 1 }, { type: "buy", count: 1 }, { type: "buy", index: 2, count: 1 },
+      { type: "buy", index: "1", count: 1 }, ...[0, -1, 11, 1.5, "2", null, undefined].map(count => ({ type: "buy", index: 1, count })),
+      { type: "buy", index: 1, count: 1, templateId: 11160 }, { type: "buy", index: 1, count: 1, fragmentCost: 0 }]) {
+      expect(() => advanceMoonlight(state, { ...action, choice } as ActivityAction, ctx, wallet, noRandom, true)).toThrow(ActivityError);
+    }
+    expect(() => advanceMoonlight(state, { type: "buy", index: 1, count: 1, choice }, ctx, wallet, noRandom, false)).toThrow(/商品索引/);
+    const poor = { ...state, fragments: 4 };
+    expect(() => advanceMoonlight(poor, { type: "buy", index: 1, count: 1, choice: viewMoonlightNative(poor, ctx, wallet).shop.token }, ctx, wallet, noRandom, true)).toThrow(/5枚/);
+    expect(viewMoonlightNative(poor, ctx, wallet).shop.entries.every(p => p.affordableCount === 0 && !p.canBuy)).toBe(true);
+    expect(state).toEqual(before); expect(poor.fragments).toBe(4);
+  });
+
+  it("shares shop debits with old exchange and preserves their different daily action boundaries", () => {
+    const run = session(); run.draw(5); run.draw(5);
+    const shopChoice = run.view().shop.token;
+    run.act({ type: "exchange" }, "moon");
+    expect(() => run.act({ type: "buy", index: 1, count: 1, choice: shopChoice })).toThrow(/已更新/);
+    expect(run.view().shop.entries.every(p => !p.canBuy)).toBe(true);
+    run.draw(5); const before = structuredClone(run.state.games.moon);
+    run.state.daily.actions = 500;
+    expect(run.view().shop.entries[1]).toMatchObject({ affordableCount: 1, canBuy: false });
+    expect(() => run.act({ type: "buy", index: 1, count: 1, choice: run.view().shop.token })).toThrow(/今日玩法次数/);
+    expect(run.state.games.moon).toEqual(before);
+    run.state.daily.actions = 499;
+    const result = run.act({ type: "buy", index: 1, count: 1, choice: run.view().shop.token });
+    expect(result.state.daily.actions).toBe(500); expect(run.view().fragments).toBe(0);
+    expect(run.view().draws).toBe(15); expect(run.view().progressScore).toBe(15);
   });
 
   it("bounds raw bag capacity, batch affordability, counter limits and recyclable wallet headroom", () => {

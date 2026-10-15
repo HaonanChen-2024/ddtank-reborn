@@ -7,6 +7,7 @@ import { attachNativeGypsyHost, type NativeGypsyCallbackTarget } from "./native-
 
 const fetchMock = vi.fn<typeof fetch>(), hosts: NativeActivityHost[] = [];
 const bagToken = "2026-10-15:" + "A".repeat(43), response = (value: unknown) => new Response(JSON.stringify(value));
+const shopToken = "2026-10-15:" + "B".repeat(43);
 let nextId = 700;
 const projection = () => ({
   version: 1, kind: "moonlight-native", started: false, day: "2026-10-15", score: 100, drawCost: 20,
@@ -21,6 +22,12 @@ const stocked = () => ({ ...projection(), started: true, draws: 3, progressScore
   bagSlotsUsed: 3, canTake: true, canRecycle: true,
   bag: [{ index: 0, templateId: 11019, itemCount: 3, recycleUnitPoints: 2 },
     { index: 1, templateId: 11001, itemCount: 1, recycleUnitPoints: 2 }] });
+const shop = (fragments: number) => ({ version: 1, kind: "moonlight-native-shop", currency: "local-fragments", maxCount: 10, token: shopToken,
+  entries: [{ index: 0, templateId: 11021, itemCount: 2, fragmentCost: 10, sourceGoodsId: 0 },
+    { index: 1, templateId: 40002, itemCount: 1, fragmentCost: 5, sourceGoodsId: 160000024 }].map(entry => ({ ...entry,
+      affordableCount: Math.min(10, Math.floor(fragments / entry.fragmentCost)), canBuy: fragments >= entry.fragmentCost })) });
+const shopProjection = (fragments: number) => ({ ...projection(), started: true, fragments, shop: shop(fragments),
+  exchange: { ...projection().exchange, affordableCount: Math.min(10, Math.floor(fragments / 10)), canExchange: fragments >= 10 } });
 const snapshot = (id: number, extra: Partial<ActivityResponse> = {}): ActivityResponse =>
   ({ characterId: id, revision: 1, points: 100, earned: 100, day: "2026-10-15", activities: [], tasks: [], history: [],
     nativeMoonlight: projection(), ...extra });
@@ -203,6 +210,98 @@ describe("original Moonlight host", () => {
     await retryNativeMoonlightRequest(pending);
     expect(sent().requestId).toBe(ack.requestId); expect(sent().action.count).toBe(3);
     expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty("nativeMoonlightAction"); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("reads the two verified fragment shop entries without posting or inferring a purchase", async () => {
+    const x = setup(), p = shopProjection(17);
+    p.shop.entries[0]!.canBuy = false; // The server may stop actions while the fragments remain affordable.
+    fetchMock.mockResolvedValue(response(snapshot(x.id, { nativeMoonlight: p })));
+    expect(x.target.workshopMoonlightRead!(x.id, x.generation, 1)).toEqual({ accepted: true });
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(fetchMock.mock.calls[0]![1]!.method).toBe("GET");
+    expect(x.accept.mock.calls[0][0].snapshot!.nativeMoonlight).toEqual(p);
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it.each([[0, 1], [0, 10], [1, 1], [1, 10]] as const)("buys only quoted shop entry %s with quantity %s and validates its fresh receipt", async (index, count) => {
+    const x = setup(), expected = shop(0).entries[index]!, action = { type: "buy", choice: shopToken, index: Number(index), count: Number(count) };
+    fetchMock.mockImplementation(async () => response(snapshot(x.id, { nativeMoonlight: shopProjection(3), mailedCount: 1,
+      nativeMoonlightAction: { requestId: sent().requestId, effects: [{ type: "purchased", index, count,
+        templateId: expected.templateId, itemCount: expected.itemCount * count, fragmentsSpent: expected.fragmentCost * count, fragments: 3 }] } })));
+    const ack = x.request(action); expect(ack.accepted).toBe(true); action.count = 99; action.index = 99;
+    expect(x.request({ type: "buy", choice: shopToken, index, count: 1 }, 2)).toEqual({ accepted: false });
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(sent().action).toEqual({ type: "buy", choice: shopToken, index, count });
+    expect(x.accept.mock.calls[0][0]).toMatchObject({ generation: x.generation, sequence: 1, requestId: ack.requestId });
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("rejects shop indices, quantities and client prices outside the two verified entries", () => {
+    const x = setup(), valid = { type: "buy", choice: shopToken, index: 1, count: 1 };
+    for (const action of [
+      ...[-1, 2, 1.5, "1", undefined, null].map(index => ({ ...valid, index })),
+      ...[0, 11, 1.5, "1", undefined, null].map(count => ({ ...valid, count })),
+      { type: "buy", choice: shopToken, count: 1 }, { type: "buy", choice: shopToken, index: 0 },
+      { ...valid, price: 1 }, { ...valid, fragmentCost: 1 }, { ...valid, templateId: 11160 },
+      { ...valid, choice: "2026-10-15:short" }, Object.assign(Object.create({ index: 1 }), { type: "buy", choice: shopToken, count: 1 }),
+    ]) expect(x.request(action)).toEqual({ accepted: false });
+    expect(fetchMock).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("rejects altered shop identity, prices, quantities, source goods, affordability and tokens", async () => {
+    const entry = shop(17).entries[1]!;
+    const invalid = [null, { ...shop(17), version: 2 }, { ...shop(17), kind: "private-server-shop" },
+      { ...shop(17), currency: "money" }, { ...shop(17), maxCount: 11 }, { ...shop(17), state: {} },
+      { ...shop(17), token: "2026-10-14:" + "B".repeat(43) }, { ...shop(17), token: "2026-10-15:short" },
+      { ...shop(17), entries: shop(17).entries.slice(0, 1) }, { ...shop(17), entries: [...shop(17).entries].reverse() },
+      ...[{ index: 0 }, { templateId: 11160 }, { itemCount: 2 }, { fragmentCost: 4 }, { sourceGoodsId: 0 },
+        { affordableCount: 4 }, { canBuy: "true" }, { seed: 7 }].map(patch => ({ ...shop(17), entries: [shop(17).entries[0], { ...entry, ...patch }] })),
+    ];
+    for (const invalidShop of invalid) {
+      const x = setup(); fetchMock.mockResolvedValue(response(snapshot(x.id, { nativeMoonlight: { ...shopProjection(17), shop: invalidShop } })));
+      expect(x.target.workshopMoonlightRead!(x.id, x.generation, 1)).toEqual({ accepted: true });
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+    }
+    const x = setup(), p = shopProjection(0); p.shop.entries[1]!.canBuy = true;
+    fetchMock.mockResolvedValue(response(snapshot(x.id, { nativeMoonlight: p })));
+    x.target.workshopMoonlightRead!(x.id, x.generation, 1);
+    await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+  });
+  it("requires a current shop and one matching purchased effect before clearing the buy UUID", async () => {
+    const effect = { type: "purchased", index: 1, count: 2, templateId: 40002, itemCount: 2, fragmentsSpent: 10, fragments: 3 };
+    for (const effects of [[], [effect, effect], ...[{ type: "exchanged" }, { index: 0 }, { count: 1 }, { templateId: 11021 },
+      { itemCount: 4 }, { fragmentsSpent: 5 }, { fragments: 0 }, { count: undefined }].map(patch => [{ ...effect, ...patch }])]) {
+      const x = setup(); fetchMock.mockImplementation(async () => response(snapshot(x.id, { nativeMoonlight: shopProjection(3),
+        nativeMoonlightAction: { requestId: sent().requestId, effects } })));
+      const ack = x.request({ type: "buy", choice: shopToken, index: 1, count: 2 });
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+      expect(readPendingActivity(x.id)).toMatchObject({ requestId: ack.requestId, action: { index: 1, count: 2 } });
+      expect(x.target.workshopMoonlightRead!(x.id, x.generation, 2)).toEqual({ accepted: false });
+    }
+    const x = setup(); fetchMock.mockImplementation(async () => response(snapshot(x.id, { nativeMoonlight: { ...projection(), started: true, fragments: 3 },
+      nativeMoonlightAction: { requestId: sent().requestId, effects: [effect] } })));
+    const ack = x.request({ type: "buy", choice: shopToken, index: 1, count: 2 });
+    await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+    expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+  });
+  it("recovers an uncertain buy with the same index, count and UUID and strips replay effects", async () => {
+    const x = setup(); fetchMock.mockRejectedValueOnce(new Error("lost"));
+    const ack = x.request({ type: "buy", choice: shopToken, index: 1, count: 10 });
+    await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); const pending = readPendingActivity(x.id)!;
+    expect(retryNativeMoonlightRequest({ ...pending, action: { ...pending.action, index: 0 } })).toBeNull();
+    expect(retryNativeMoonlightRequest({ ...pending, action: { ...pending.action, count: 1 } })).toBeNull();
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { replayed: true,
+      nativeMoonlightAction: { requestId: ack.requestId!, effects: ["old purchase"] } })));
+    await retryNativeMoonlightRequest(pending);
+    expect(sent()).toMatchObject({ requestId: ack.requestId, action: { type: "buy", choice: shopToken, index: 1, count: 10 } });
+    expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty("nativeMoonlightAction"); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("does not deliver or repeat a late shop purchase after the native host closes", async () => {
+    let resolve!: (value: Response) => void; const x = setup();
+    fetchMock.mockImplementation(() => new Promise<Response>(r => { resolve = r; }));
+    const ack = x.request({ type: "buy", choice: shopToken, index: 0, count: 1 });
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce()); x.host.cancel();
+    resolve(response(snapshot(x.id, { nativeMoonlight: shopProjection(0), nativeMoonlightAction: { requestId: ack.requestId!,
+      effects: [{ type: "purchased", index: 0, count: 1, templateId: 11021, itemCount: 2, fragmentsSpent: 10, fragments: 0 }] } })));
+    await new Promise(r => setTimeout(r, 0));
+    expect(x.accept).not.toHaveBeenCalled(); expect(x.reject).not.toHaveBeenCalled(); expect(fetchMock).toHaveBeenCalledOnce();
+    expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
   });
   it.each([undefined,1,2,10])("preserves the original exchange quantity %s and validates its complete material effect", async count => {
     const x = setup(), action = { type: "exchange", choice: bagToken, ...(count === undefined ? {} : { count }) }, quantity = count ?? 1;

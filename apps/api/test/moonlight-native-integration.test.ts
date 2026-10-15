@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, relative } from "node:path";
+import { gunzipSync } from "node:zlib";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
@@ -22,6 +23,10 @@ vi.mock("node:crypto", async original => ({ ...await original<typeof import("nod
   randomInt: (min: number, max?: number) => max === undefined ? Math.floor(random.fraction * min) : min + Math.floor(random.fraction * (max - min)) }));
 const tmp = mkdtempSync(join(tmpdir(), "ddt-moonlight-native-"));
 const uid = 611, otherUid = 612, secret = "moonlight-native-integration-tests-only";
+// Use the unchanged committed local potion template, never reference-server equipment attributes.
+const seedPotion = (JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString()) as (Omit<typeof game.Shop_Goods.$inferInsert, "AddTime"> & { AddTime: string })[])
+  .find(item => item.TemplateID === 40002)!;
+const potionTemplate: typeof game.Shop_Goods.$inferInsert = { ...seedPotion, AddTime: new Date(seedPotion.AddTime) };
 let h: DbHandle, built: Awaited<ReturnType<typeof buildApp>>;
 const config = { NODE_ENV: "test" as const, DB_MIGRATE: false, DB_SEED_IF_EMPTY: false,
   JWT_SECRET: secret, RSA_USE_VENDOR_KEY: false, RSA_PRIVATE_KEY: "", GAME_INTERNAL_URL: "",
@@ -77,7 +82,7 @@ beforeAll(async () => {
     NeedSex: 0, NeedLevel: 1, CanStrengthen: false, CanCompose: false, CanDrop: true, CanEquip: false, CanUse: true, CanDelete: true,
     Property1: 0, Property2: 0, Property3: 0, Property4: 0, Property5: 0, Property6: 0, Property7: 0, Property8: 0,
     BindType: 0, FusionType: 0, FusionRate: 0, FusionNeedRate: 0, RefineryLevel: 0, ReclaimValue: 0, ReclaimType: 0 };
-  await h.db.insert(game.Shop_Goods).values(PRIZES.map(prize => ({ ...template, TemplateID: prize.templateId, Name: prize.name }))); await rebuild();
+  await h.db.insert(game.Shop_Goods).values([...PRIZES.map(prize => ({ ...template, TemplateID: prize.templateId, Name: prize.name })), potionTemplate]); await rebuild();
 });
 beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-15T12:00:00Z")); random.fraction = 0;
@@ -86,6 +91,7 @@ beforeEach(async () => {
   await h.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
     member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);
   await h.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false`);
+  await h.db.update(game.Shop_Goods).set(potionTemplate).where(eq(game.Shop_Goods.TemplateID, 40002));
   await h.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (1,'moonlight-native-test','tests-only'),(2,'other-moonlight-test','tests-only')`);
   await h.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst")
     VALUES (${uid},'moonlight-native-test','Moonlight native test',true,'2000-01-01',1),(${otherUid},'other-moonlight-test','Other test',true,'2000-01-01',1)`);
@@ -312,6 +318,91 @@ describe("original Moonlight through the shared transactional API", () => {
     const after = await persisted(); expect(after.goods.map(item => [item.TemplateID, item.Count])).toEqual([[11021, 2]]);
     expect(after.mails).toHaveLength(1); expect(after.receipts).toHaveLength(before.receipts.length + 1);
     expect((await snapshot()).nativeMoonlight.fragments).toBe(0);
+  });
+
+  it("reads the safe original shop without writes and buys real local potions through one UUID and ordinary mail", async () => {
+    await draw(1); const state = (await saved())!;
+    // Only this isolated save supplies enough earned fragments to exercise the per-request upper bound.
+    (state.games.moon as { fragments: number }).fragments = 100;
+    await h.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${uid}`);
+    const before = await persisted(), first = await snapshot(), requestId = randomUUID();
+    expect(first.nativeMoonlight.shop).toMatchObject({ version: 1, kind: "moonlight-native-shop", currency: "local-fragments", maxCount: 10,
+      entries: [{ index: 0, templateId: 11021, itemCount: 2, fragmentCost: 10, sourceGoodsId: 0, affordableCount: 10, canBuy: true },
+        { index: 1, templateId: 40002, itemCount: 1, fragmentCost: 5, sourceGoodsId: 160000024, affordableCount: 10, canBuy: true }] });
+    expect(await persisted()).toEqual(before);
+    const buy = { type: "buy", index: 1, count: 10, choice: first.nativeMoonlight.shop.token };
+    const responses = await Promise.all(Array.from({ length: 4 }, () => post("moonlight-native", buy, requestId)));
+    expect(responses.every(response => response.statusCode === 200)).toBe(true);
+    expect(responses.filter(response => response.json().replayed)).toHaveLength(3);
+    const committed = responses.map(response => response.json<ActivityResult>()).find(value => value.nativeMoonlightAction)!;
+    expect(committed).toMatchObject({ points: 980, revision: 2, mailedCount: 1, nativeMoonlight: { fragments: 50, draws: 1, progressScore: 1 },
+      nativeMoonlightAction: { requestId, effects: [{ type: "purchased", index: 1, count: 10, templateId: 40002, itemCount: 10, fragmentsSpent: 50, fragments: 50 }] } });
+    const after = await persisted();
+    expect(after.goods).toHaveLength(1); expect(after.goods[0]).toMatchObject({ UserID: 0, TemplateID: 40002, Count: 10, IsBinds: true, ValidDate: 0 });
+    expect(after.mails).toHaveLength(1); expect(after.mails[0]).toMatchObject({ ReceiverID: uid, Annex1: String(after.goods[0].ItemID) });
+    expect(after.receipts).toHaveLength(before.receipts.length + 1);
+    expect((await saved())!.daily.actions).toBe(2);
+    expect((await saved())!.games.moon).toEqual({ ...(state.games.moon as object), fragments: 50 });
+    expect((await native(buy, requestId)).replayed).toBe(true);
+    await native({ ...buy, count: 1 }, requestId, 409);
+    await native(buy, randomUUID(), 400);
+    expect(await persisted()).toEqual(after);
+  });
+
+  it("rejects client catalog edits, unearned fragments and any incompatible potion template without a debit", async () => {
+    await draw(5); const page = await snapshot(), before = await persisted(), choice = page.nativeMoonlight.shop.token;
+    for (const invalid of [{ type: "buy", index: 2, count: 1 }, { type: "buy", index: 1, count: 0 },
+      { type: "buy", index: 1, count: 11 }, { type: "buy", index: 1, count: "1" }, { type: "buy", index: 1, count: 2 },
+      { type: "buy", index: 1, count: 1, templateId: 11160 }, { type: "buy", index: 1, count: 1, fragmentCost: 0 }]) {
+      await native({ ...invalid, choice } as ActivityAction, randomUUID(), 400);
+    }
+    await native({ type: "buy", index: 1, count: 1, choice: page.nativeMoonlight.bagToken }, randomUUID(), 400);
+    await action("moon", { type: "buy", index: 1, count: 1, choice }, randomUUID(), 400);
+    expect(await persisted()).toEqual(before);
+    const variants: Partial<typeof game.Shop_Goods.$inferInsert>[] = [{ CategoryID: 11 }, { CanUse: false }, { CanEquip: true },
+      { Property1: 47 }, { Property2: 9999 }, { MaxCount: 0 }, { NeedSex: 2 }];
+    for (const variant of variants) {
+      await h.db.update(game.Shop_Goods).set(variant).where(eq(game.Shop_Goods.TemplateID, 40002));
+      await native({ type: "buy", index: 1, count: 1, choice }, randomUUID(), 503);
+      expect(await persisted()).toEqual(before);
+      await h.db.update(game.Shop_Goods).set(potionTemplate).where(eq(game.Shop_Goods.TemplateID, 40002));
+    }
+    await h.db.delete(game.Shop_Goods).where(eq(game.Shop_Goods.TemplateID, 40002));
+    await native({ type: "buy", index: 1, count: 1, choice }, randomUUID(), 503); expect(await persisted()).toEqual(before);
+    await h.db.insert(game.Shop_Goods).values(potionTemplate);
+    // A category-20 exception for one shop product must never relax the old ordinary-reward gate.
+    await h.db.update(game.Shop_Goods).set({ CategoryID: 20, CanUse: true, Property2: 300 }).where(eq(game.Shop_Goods.TemplateID, 11019));
+    try {
+      await action("moon", { type: "take" }, randomUUID(), 503); expect(await persisted()).toEqual(before);
+    } finally {
+      await h.db.update(game.Shop_Goods).set({ CategoryID: 11, CanUse: true, Property2: 0 }).where(eq(game.Shop_Goods.TemplateID, 11019));
+    }
+  });
+
+  it("rolls back shop fragments, goods, mail and the tail receipt together, then retries the same UUID safely", async () => {
+    await draw(5); await draw(5); const page = await snapshot(), before = await persisted(), requestId = randomUUID();
+    const buy = { type: "buy", index: 1, count: 2, choice: page.nativeMoonlight.shop.token };
+    await h.db.execute(sql`ALTER TABLE player."User_Messages" ADD CONSTRAINT moonlight_native_mail_failure CHECK ("Annex1" IS NULL) NOT VALID`);
+    await native(buy, requestId, 500); expect(await persisted()).toEqual(before);
+    await h.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT moonlight_native_mail_failure`);
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT moonlight_native_receipt_failure CHECK ("Signature"='cannot-pass-test') NOT VALID`);
+    await native(buy, requestId, 500); expect(await persisted()).toEqual(before);
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT moonlight_native_receipt_failure`);
+    const success = await native(buy, requestId);
+    expect(success).toMatchObject({ mailedCount: 1, nativeMoonlight: { fragments: 0 }, nativeMoonlightAction: { effects: [{ type: "purchased", itemCount: 2, fragmentsSpent: 10 }] } });
+    const after = await persisted(); expect(after.goods.map(item => [item.TemplateID, item.Count])).toEqual([[40002, 2]]);
+    expect(after.mails).toHaveLength(1); expect(after.receipts).toHaveLength(before.receipts.length + 1);
+    expect((await native(buy, requestId)).replayed).toBe(true); expect(await persisted()).toEqual(after);
+  });
+
+  it("serializes original-shop purchases against the old moon exchange on the same earned fragments", async () => {
+    await draw(5); await draw(5); const page = await snapshot(), before = await persisted();
+    const results = await Promise.all([post("moonlight-native", { type: "buy", index: 1, count: 2, choice: page.nativeMoonlight.shop.token }), post("moon", { type: "exchange" })]);
+    expect(results.map(response => response.statusCode).sort()).toEqual([200, 400]);
+    const after = await persisted(); expect((await snapshot()).nativeMoonlight.fragments).toBe(0);
+    expect(after.goods).toHaveLength(1); expect([11021, 40002]).toContain(after.goods[0].TemplateID); expect(after.goods[0].Count).toBe(2);
+    expect(after.mails).toHaveLength(1); expect(after.receipts).toHaveLength(before.receipts.length + 1);
+    expect((await saved())!.games.moon).toMatchObject({ draws: 10, score: 10, fragments: 0 });
   });
 
   it("restores partial bags across app restart and midnight, rejects old tokens and permits earned settlements at the play ceiling", async () => {

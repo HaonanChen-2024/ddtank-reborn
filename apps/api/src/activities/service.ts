@@ -209,13 +209,15 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
 }
 
 /** Keep all ordinary attachments in the claim transaction; sendMail itself truncates after five. */
-async function rewardMail(app: AppCtx, characterId: number, who: Owner, rewards: ActivityReward[]): Promise<number> {
+async function rewardMail(app: AppCtx, characterId: number, who: Owner, rewards: ActivityReward[], moonlightShopBuy = false): Promise<number> {
   const items: { templateId: number; count: number; validDays: number }[] = [];
   for (const reward of rewards) {
     const validDays = reward.validDays ?? 0;
-    if (!int(reward.templateId) || !PRIZES.some((p) => p.templateId === reward.templateId) || !int(reward.count) || reward.count === 0 || !int(validDays)) throw new ActivityError("活动奖励配置无效。", 503);
-    const template = await q1<{ MaxCount: number; NeedSex: number; CategoryID: number; CanEquip: boolean }>(app.h, sql`SELECT "MaxCount","NeedSex","CategoryID","CanEquip" FROM game."Shop_Goods" WHERE "TemplateID"=${reward.templateId}`);
-    if (!template || template.CategoryID !== 11 || template.CanEquip || !int(template.MaxCount) || template.MaxCount === 0 || (template.NeedSex !== 0 && template.NeedSex !== (who.Sex ? 1 : 2))) throw new ActivityError("活动奖励模板不可交付。", 503);
+    const potion = moonlightShopBuy && reward.templateId === 40002;
+    if (!int(reward.templateId) || (!potion && !PRIZES.some((p) => p.templateId === reward.templateId)) || !int(reward.count) || reward.count === 0 || !int(validDays)) throw new ActivityError("活动奖励配置无效。", 503);
+    const template = await q1<{ MaxCount: number; NeedSex: number; CategoryID: number; CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number }>(app.h, sql`SELECT "MaxCount","NeedSex","CategoryID","CanEquip","CanUse","Property1","Property2" FROM game."Shop_Goods" WHERE "TemplateID"=${reward.templateId}`);
+    if (!template || (potion ? template.CategoryID !== 20 || !template.CanUse || template.Property1 !== 0 || template.Property2 !== 300 : template.CategoryID !== 11)
+      || template.CanEquip || !int(template.MaxCount) || template.MaxCount === 0 || (template.NeedSex !== 0 && template.NeedSex !== (who.Sex ? 1 : 2))) throw new ActivityError("活动奖励模板不可交付。", 503);
     const stacks = Math.ceil(reward.count / template.MaxCount);
     if (items.length + stacks > 1000) throw new ActivityError("活动奖励数量超过交付上限。", 503);
     for (let left = reward.count; left > 0; left -= template.MaxCount) items.push({ templateId: reward.templateId, count: Math.min(left, template.MaxCount), validDays });
@@ -441,7 +443,7 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     const changed = transitionActivity(state, activityId, action, ctx, wallet);
     const next: ActivityWallet = { points: wallet.points + changed.pointsDelta, earned: wallet.earned + changed.earnedDelta, revision: wallet.revision + 1 };
     if (![changed.pointsDelta, changed.earnedDelta].every(Number.isInteger) || changed.earnedDelta < 0 || ![next.points, next.earned, next.revision].every(int)) throw new ActivityError("活动积分不足或结算配置无效。", 409);
-    let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards);
+    let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards, activityId === "moonlight-native" && action.type === "buy");
     if (changed.nativeForthrightNotification) { await sendMail(txApp, characterId, who.NickName, "本地活动积分结算", changed.nativeForthrightNotification, {}); mailedCount++; }
     await tx.execute(sql`UPDATE app."ActivityWallet" SET "Points"=${next.points},"Earned"=${next.earned},"Revision"=${next.revision} WHERE "UserID"=${characterId}`);
     await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},'reference',${JSON.stringify(changed.state)}::jsonb)

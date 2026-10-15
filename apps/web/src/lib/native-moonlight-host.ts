@@ -28,6 +28,10 @@ const day = (value: unknown): value is string => typeof value === "string" && /^
 const token = (value: unknown): value is string => typeof value === "string" && /^\d{4}-\d{2}-\d{2}:[A-Za-z0-9_-]{43}$/.test(value);
 const materials = [11019, 11001, 11021, 11002] as const;
 const drawCounts = [1, 3, 5] as const;
+const shopEntries = [
+  { templateId: 11021, itemCount: 2, fragmentCost: 10, sourceGoodsId: 0 },
+  { templateId: 40002, itemCount: 1, fragmentCost: 5, sourceGoodsId: 160000024 },
+] as const;
 function nativeAction(value: unknown): ActivityAction | null {
   if (!nativeObject(value) || !Object.hasOwn(value, "type") || !Object.hasOwn(value, "choice") || !token(value.choice)) return null;
   const exact = (...keys: string[]) => Object.keys(value).every(key => ["type", "choice", ...keys].includes(key));
@@ -39,6 +43,9 @@ function nativeAction(value: unknown): ActivityAction | null {
       ? { type: "exchange", choice: value.choice, count: value.count } : null;
     return { type: "exchange", choice: value.choice };
   }
+  if (value.type === "buy" && exact("index", "count") && Object.hasOwn(value, "index") && Object.hasOwn(value, "count")
+    && integer(value.index, 0, 1) && integer(value.count, 1, 10))
+    return { type: "buy", choice: value.choice, index: value.index, count: value.count };
   if (value.type === "progress" && Object.hasOwn(value, "tier") && integer(value.tier, 1, 3) && exact("tier"))
     return { type: "progress", choice: value.choice, tier: value.tier };
   if ((value.type === "take" || value.type === "recycle") && exact("items") && Object.hasOwn(value, "items")
@@ -128,6 +135,29 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
   if (!p.started && (p.bag.length || p.draws !== 0 || p.progressScore !== 0 || p.fragments !== 0 || p.pityRemaining !== 10
     || p.progress.some(tier => tier.claimed))) return fail();
   validateRanking(p.ranking, p.draws, snapshot.characterId, fail);
+  if (p.shop !== undefined) {
+    const shop = p.shop, keys = ["version", "kind", "currency", "maxCount", "token", "entries"];
+    if (!nativeObject(shop) || Object.keys(shop).length !== keys.length || Object.keys(shop).some(key => !keys.includes(key))
+      || shop.version !== 1 || shop.kind !== "moonlight-native-shop" || shop.currency !== "local-fragments" || shop.maxCount !== 10
+      || !token(shop.token) || !shop.token.startsWith(p.day + ":") || !Array.isArray(shop.entries) || shop.entries.length !== shopEntries.length) return fail();
+    for (const [index, entry] of shop.entries.entries()) {
+      const expected = shopEntries[index]!, fields = ["index", "templateId", "itemCount", "fragmentCost", "sourceGoodsId", "affordableCount", "canBuy"];
+      if (!nativeObject(entry) || Object.keys(entry).length !== fields.length || Object.keys(entry).some(key => !fields.includes(key))
+        || entry.index !== index || entry.templateId !== expected.templateId || entry.itemCount !== expected.itemCount
+        || entry.fragmentCost !== expected.fragmentCost || entry.sourceGoodsId !== expected.sourceGoodsId
+        || entry.affordableCount !== Math.min(10, Math.floor(p.fragments / expected.fragmentCost))
+        || typeof entry.canBuy !== "boolean" || entry.canBuy && entry.affordableCount === 0) return fail();
+    }
+  }
+  if (action?.type === "buy" && !snapshot.replayed) {
+    const effects = snapshot.nativeMoonlightAction?.effects;
+    if (!nativeObject(p.shop) || !integer(action.index, 0, 1) || !integer(action.count, 1, 10)
+      || !Array.isArray(effects) || effects.length !== 1) return fail();
+    const expected = shopEntries[action.index]!, effect = effects[0];
+    if (!nativeObject(effect) || effect.type !== "purchased" || effect.index !== action.index || effect.count !== action.count
+      || effect.templateId !== expected.templateId || effect.itemCount !== expected.itemCount * action.count
+      || effect.fragmentsSpent !== expected.fragmentCost * action.count || effect.fragments !== p.fragments) return fail();
+  }
   if (action?.type === "exchange" && !snapshot.replayed) {
     const count = action.count ?? 1, effects = snapshot.nativeMoonlightAction?.effects;
     if (!integer(count, 1, 10) || !Array.isArray(effects) || effects.length !== 1) return fail();

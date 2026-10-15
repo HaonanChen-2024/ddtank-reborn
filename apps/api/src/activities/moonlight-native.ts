@@ -15,15 +15,21 @@ type Clock = Pick<ActivityContext, "now">;
 type Funds = Pick<ActivityWallet, "points">;
 type Selection = { index: number; templateId: number; itemCount: number };
 type PrizeRoll = (guaranteed: boolean) => ActivityReward;
+const shopCatalog = Object.freeze({ version: 1 as const, kind: "moonlight-native-shop" as const, currency: "local-fragments" as const, maxCount: 10,
+  entries: Object.freeze([
+    Object.freeze({ index: 0, templateId: 11021, itemCount: 2, fragmentCost: 10, sourceGoodsId: 0 }),
+    Object.freeze({ index: 1, templateId: 40002, itemCount: 1, fragmentCost: 5, sourceGoodsId: 160000024 }),
+  ]) });
 export const moonlightNativeLocalRules = Object.freeze({ version: 1, drawCost: C.moonCost, bagCapacity: C.bagCapacity,
   recycleUnitPoints: 2, exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, maxCount: 10 },
-  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。每包10碎片兑换强化石2级×2，原窗口每次可选1至10包；旧网页保留单包兑换。10/20/30进度各领一次普通材料。本地榜按旧网页与原窗口共用的真实累计寻宝次数排名，显示前十及本人名次，同分并列，不发排名奖励。私服开盒档位、钥匙价、概率和原服排名及奖励未复刻，不产生钥匙货币或真实付款。",
+  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。每包10碎片兑换强化石2级×2，原窗口每次可选1至10包；旧网页保留单包兑换。商店另售修炼药水2级×1，5碎片的价格参考私服公开商品160000024，使用本地原模板。商店1至10份为本地每次请求上限，原服个人限购未复刻；购买消耗本地每日玩法次数，已有碎片兑换保持原规则。修炼药水增加修炼经验，仍守现有等级、VIP和每日使用上限，不提升人物等级。10/20/30进度各领一次普通材料。本地榜按旧网页与原窗口共用的真实累计寻宝次数排名，显示前十及本人名次，同分并列，不发排名奖励。私服开盒档位、钥匙价、概率和原服排名及奖励未复刻，不产生钥匙货币或真实付款。",
 });
 export type MoonlightNativeEffect =
   | { type: "drawn"; count: number; cost: number; score: number; draws: number; rewards: { templateId: number; itemCount: number }[] }
   | { type: "taken"; itemCount: number; items: Selection[] }
   | { type: "recycled"; pointsAwarded: number; score: number; items: Selection[] }
   | { type: "exchanged"; count: number; fragmentsSpent: number; fragments: number; templateId: number; itemCount: number }
+  | { type: "purchased"; index: number; count: number; templateId: number; itemCount: number; fragmentsSpent: number; fragments: number }
   | { type: "progress-claimed"; tier: number; templateId: number; itemCount: number };
 export interface MoonlightResult {
   state: MoonlightState; pointsDelta: number; cost: number; rewards: ActivityReward[]; completed: boolean; draws: number;
@@ -70,15 +76,20 @@ function bagRows(state: Pick<MoonlightState, "bag">) {
 function bagToken(state: MoonlightState, ctx: Clock) {
   return `${dayOf(ctx)}:${createHash("sha256").update(JSON.stringify(state)).digest("base64url")}`;
 }
+function shopToken(state: MoonlightState, ctx: Clock) {
+  return `${dayOf(ctx)}:${createHash("sha256").update(JSON.stringify({ state, catalog: shopCatalog })).digest("base64url")}`;
+}
 function validNativeAction(action: ActivityAction, state: MoonlightState, ctx: Clock) {
   need(action && typeof action === "object" && !Array.isArray(action) && Object.hasOwn(action, "type")
     && Object.hasOwn(action, "choice") && typeof action.choice === "string", "宝盒操作或参数无效。");
-  const fields: Record<string, string[]> = { draw: ["count"], take: ["items"], recycle: ["items"], exchange: ["count"], progress: ["tier"] };
+  const fields: Record<string, string[]> = { draw: ["count"], take: ["items"], recycle: ["items"], exchange: ["count"], progress: ["tier"], buy: ["index", "count"] };
   need(Object.hasOwn(fields, action.type) && Object.keys(action).every(key => key === "type" || key === "choice" || fields[action.type].includes(key)), "宝盒操作或参数无效。");
-  need(action.choice === bagToken(state, ctx), "临时包或日期已更新，请重新查看后再确认。");
+  need(action.choice === (action.type === "buy" ? shopToken(state, ctx) : bagToken(state, ctx)), "临时包、商品或日期已更新，请重新查看后再确认。");
   if (action.type === "draw") need(Object.hasOwn(action, "count") && int(action.count, 1, 5) && [1, 3, 5].includes(action.count), "原窗口开盒档位只能是1、3或5。");
   if (action.type === "exchange" && Object.hasOwn(action, "count")) need(int(action.count, 1, moonlightNativeLocalRules.exchange.maxCount), "每次只能兑换1至10包。");
   if (action.type === "progress") need(Object.hasOwn(action, "tier") && int(action.tier, 1, 3), "宝盒奖励档位无效。");
+  if (action.type === "buy") need(Object.hasOwn(action, "index") && int(action.index, 0, shopCatalog.entries.length - 1)
+    && Object.hasOwn(action, "count") && int(action.count, 1, shopCatalog.maxCount), "商品索引或数量无效，每次只能购买1至10份。");
 }
 function select(state: MoonlightState, action: ActivityAction): Selection[] {
   const rows = bagRows(state), indexes = new Set<number>();
@@ -132,6 +143,13 @@ export function advanceMoonlight(value: unknown, action: ActivityAction, ctx: Cl
       if (native) effects.push({ type: "recycled", pointsAwarded: pointsDelta, score, items: selections }); message = `已回收${native ? "选中的材料" : "临时背包"}，获得${pointsDelta}活动积分。`;
     }
     subtract(state, selections);
+  } else if (action.type === "buy") {
+    need(native && int(action.index, 0, shopCatalog.entries.length - 1) && int(action.count, 1, shopCatalog.maxCount), "商品索引或数量无效。");
+    const product = shopCatalog.entries[action.index], fragmentsSpent = action.count * product.fragmentCost, itemCount = action.count * product.itemCount;
+    need(state.fragments >= fragmentsSpent, `需要${fragmentsSpent}枚活动碎片。`);
+    state.fragments -= fragmentsSpent; rewards.push({ templateId: product.templateId, count: itemCount });
+    effects.push({ type: "purchased", index: product.index, count: action.count, templateId: product.templateId, itemCount, fragmentsSpent, fragments: state.fragments });
+    message = `${fragmentsSpent}枚碎片已购买${action.count}份商品，物品已寄往游戏邮箱。`;
   } else if (action.type === "exchange") {
     const count = native ? action.count ?? 1 : 1, fragmentsSpent = count * 10, itemCount = count * 2;
     need(state.fragments >= fragmentsSpent, `需要${fragmentsSpent}枚活动碎片。`);
@@ -158,6 +176,10 @@ export function viewMoonlightNative(value: unknown, ctx: Clock, funds: Funds, ac
     previewTemplateIds: PRIZES.map(item => item.templateId),
     // Filled only by an authenticated, committed GET; action/replay projections never run ranking reads.
     ranking: null as MoonlightNativeRanking | null,
+    shop: { ...shopCatalog, token: shopToken(state, ctx), entries: shopCatalog.entries.map(product => {
+      const affordableCount = Math.min(shopCatalog.maxCount, Math.floor(state.fragments / product.fragmentCost));
+      return { ...product, affordableCount, canBuy: actionsRemaining && affordableCount > 0 };
+    }) },
     exchange: { ...moonlightNativeLocalRules.exchange, affordableCount: Math.min(moonlightNativeLocalRules.exchange.maxCount, Math.floor(state.fragments / 10)), canExchange: state.fragments >= 10 },
     progress: [1, 2, 3].map(tier => ({ tier, target: tier * 10, templateId: 11019, itemCount: tier * 2,
       claimed: state.claimed.includes(tier), canClaim: state.score >= tier * 10 && !state.claimed.includes(tier) })),
