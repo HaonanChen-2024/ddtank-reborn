@@ -39,6 +39,46 @@ describe("caddy/lottery pure helpers", () => {
 });
 
 describe("131 LABYRINTH economy", () => {
+  it.each([false, true])("131 sub 2 uses the original client field order and exact body length (invert=%s)", async invert => {
+    const { c, ch: p, player: getPlayer } = await loggedIn(server, { grade: 10 });
+    try {
+      const h = await sharedDb();
+      const row: LabyrinthRow = {
+        UserID: p.userId, myProgress: 17, myRanking: 29, completeChallenge: !invert,
+        isDoubleAward: invert, currentFloor: 3, accumulateExp: 53, remainTime: 41,
+        currentRemainTime: 97, cleanOutAllTime: 67, cleanOutGold: 79,
+        tryAgainComplete: invert, isInGame: !invert, isCleanOut: invert,
+        serverMultiplyingPower: !invert, LastDate: ctx.now(), ProcessAward: "-1",
+      };
+      await h.db.insert(player.Sys_Users_Labyrinth).values(row);
+      expect(getPlayer().propBag.getItemByTemplateID(0, 11916)).toBeNull();
+      const mark = c.mark();
+      // No labyrinth stone: this branch replies without changing the stored fields.
+      c.out(131, o => { o.writeInt(1); o.writeBoolean(false); });
+      const response = await c.code(131, 2, mark);
+      const [stored] = await h.db.select().from(player.Sys_Users_Labyrinth).where(eq(player.Sys_Users_Labyrinth.UserID, p.userId));
+      expect(stored).toEqual(row);
+      const pkt = response.pkt;
+      expect(pkt.readByte()).toBe(2);
+      // Original LabyrinthManager reader / SendLabyrinthUpdataInfo: seven ints and five booleans.
+      const actual = {
+        myProgress: pkt.readInt(), currentFloor: pkt.readInt(), completeChallenge: pkt.readBoolean(),
+        remainTime: pkt.readInt(), accumulateExp: pkt.readInt(), cleanOutAllTime: pkt.readInt(),
+        cleanOutGold: pkt.readInt(), myRanking: pkt.readInt(), isDoubleAward: pkt.readBoolean(),
+        isInGame: pkt.readBoolean(), isCleanOut: pkt.readBoolean(), serverMultiplyingPower: pkt.readBoolean(),
+      };
+      expect.soft(pkt.length).toBe(54); // 20-byte header + subtype + 33-byte public body.
+      expect(actual).toEqual({
+        myProgress: row.myProgress, currentFloor: row.currentFloor, completeChallenge: row.completeChallenge,
+        remainTime: row.remainTime, accumulateExp: row.accumulateExp, cleanOutAllTime: row.cleanOutAllTime,
+        cleanOutGold: row.cleanOutGold, myRanking: row.myRanking, isDoubleAward: row.isDoubleAward,
+        isInGame: row.isInGame, isCleanOut: row.isCleanOut, serverMultiplyingPower: row.serverMultiplyingPower,
+      });
+      expect(pkt.offset).toBe(pkt.length);
+      expect(pkt.dataLeft).toBe(0);
+    } finally { c.close(); }
+  });
+
   it("labyrinthTryAgainMoney: price big every even checkpoint floor below myProgress, else small", () => {
     eventsRuntime(ctx).scheduler.setEvents([{ id: 1, kind: "labyrinth", title: "", enabled: true, weekdays: "", startTime: "00:00", durationMin: 0, startDate: null, endDate: null, params: { priceBig: 5000, priceSmall: 1000 } }]);
     const row = (currentFloor: number, myProgress: number): LabyrinthRow => ({ UserID: 1, myProgress, myRanking: 0, completeChallenge: false, isDoubleAward: false, currentFloor, accumulateExp: 0, remainTime: 0, currentRemainTime: 0, cleanOutAllTime: 0, cleanOutGold: 0, tryAgainComplete: false, isInGame: false, isCleanOut: false, serverMultiplyingPower: false, LastDate: new Date(), ProcessAward: "-1" });

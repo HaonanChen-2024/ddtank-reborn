@@ -449,10 +449,11 @@ async function saveLabyrinth(ctx: ServerContext, row: LabyrinthRow): Promise<voi
 function labyrinthUpdatePkt(id: number, l: LabyrinthRow): GSPacket {
   const p = new GSPacket(131, id);
   p.writeByte(2);
-  p.writeInt(l.myProgress); p.writeInt(l.myRanking); p.writeBoolean(l.completeChallenge); p.writeBoolean(l.isDoubleAward);
-  p.writeInt(l.currentFloor); p.writeInt(l.accumulateExp); p.writeInt(l.remainTime); p.writeInt(l.currentRemainTime);
-  p.writeInt(l.cleanOutAllTime); p.writeInt(l.cleanOutGold); p.writeBoolean(l.tryAgainComplete); p.writeBoolean(l.isInGame);
-  p.writeBoolean(l.isCleanOut);
+  // Shipped LabyrinthManager.__onUpdataInfo / original SendLabyrinthUpdataInfo wire order.
+  p.writeInt(l.myProgress); p.writeInt(l.currentFloor); p.writeBoolean(l.completeChallenge);
+  p.writeInt(l.remainTime); p.writeInt(l.accumulateExp); p.writeInt(l.cleanOutAllTime);
+  p.writeInt(l.cleanOutGold); p.writeInt(l.myRanking); p.writeBoolean(l.isDoubleAward);
+  p.writeBoolean(l.isInGame); p.writeBoolean(l.isCleanOut); p.writeBoolean(l.serverMultiplyingPower);
   return p;
 }
 function initProcessAward(): string {
