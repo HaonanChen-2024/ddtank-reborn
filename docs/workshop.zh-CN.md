@@ -399,3 +399,7 @@ node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
 `scripts/workshop-tooltip-quest-art.mjs candidate <新目录>` 构建3份提示/任务SWF，`verify [候选目录]` 只读校验，`install <候选目录>` 按独立 `client-overlay-tooltip-quest-art.json` 安装，`rollback` 精确恢复并保留备份。只修改已核45个位图，保持尺寸、原边框、数值起点及521个未选tag；不接受未知源、已被其他覆盖日志接管的目标或外部修改后的回退。当前覆盖品质/类型/伤害/角度/绑定、任务分类双状态及领奖等文字；物品/任务正文另由上述模板显示覆盖提供。其他奖励类型图片和未覆盖数据仍待后续处理。
 
 本批实际安装与无参校验、隔离升级/回退及原件像素比对通过；静态组装预览与源码双体测试不代表AVM2实机验收。重新启动Workshop并关闭旧游戏页后才会载入新桥及模板文本。
+
+后续原图版使用 `scripts/workshop-tooltip-quest-art.mjs candidate-original <新目录>`，按 `research/i18n/tooltip-quest-art/original-resources.json` 移植三份包的332处原位图引用；313个位图tag实际变化、250个其他tag保持，仅92个纯BitmapData构造器默认宽高适配，所有方法体保持。支持从上一版45处绘字覆盖升级，保留旧输出和原始备份；失败补偿恢复旧输出，禁止直接降级。回退不依赖原素材缓存可读，工具/配置/目标/备份仍须匹配。原包不随源码发布，精确输入缺失时不得构建。
+
+配套 `scripts/workshop-bag-layout.mjs install --original-tooltip-layout` 只增改coreI.xml三个提示坐标，沿现有日志保留四项已安装布局。当前三份原图及坐标已安装，完整332映射、升级/失败恢复/回退和无参校验通过；原任务分类、奖励标签、领奖按钮及品质/类型/伤害/角度/绑定等采用原中文图片，动态物品和任务正文仍由模板显示覆盖处理。未移植参考服业务代码或装备属性，AVM2、全界面中文和17活动完整验收仍未完成；详见上述目录README。

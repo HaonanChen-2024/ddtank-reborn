@@ -52,6 +52,16 @@ export function patchBagLayoutXml(bytes, { bagLabelAlignment = false } = {}) {
   return Buffer.from(text);
 }
 
+// Coordinates from the reference coreI.xml; paired with its original Chinese tip bitmaps.
+export function patchOriginalTooltipLayoutXml(bytes) {
+  const original = bytes.toString("utf8");
+  assert.deepEqual(Buffer.from(original), bytes, "tooltip layout is not lossless UTF-8");
+  let text = component(original, "core.GoodsTipTxt", { x: 32, y: -4 });
+  text = component(text, "core.GoodsTipTypeTxt", { x: 32, y: -4 });
+  text = component(text, "core.goodTip.BoundImage", { x: 125, y: 45 });
+  return Buffer.from(text);
+}
+
 export function patchGameoverTitleXml(bytes) {
   const original = bytes.toString("utf8");
   assert.deepEqual(Buffer.from(original), bytes, "layout is not lossless UTF-8");
@@ -187,12 +197,13 @@ async function patchLayoutEntry(bytes, entryName, patchXml) {
 }
 
 function patchFlags(flags = {}) {
-  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment", "calendarExchangeLayout", "hallActivityLayout"].includes(key)), "unknown layout patch flag");
+  assert.ok(flags && typeof flags === "object" && !Array.isArray(flags) && Object.keys(flags).every(key => ["gameoverTitle", "bagLabelAlignment", "calendarExchangeLayout", "hallActivityLayout", "originalTooltipLayout"].includes(key)), "unknown layout patch flag");
   assert.ok(flags.gameoverTitle === undefined || typeof flags.gameoverTitle === "boolean", "invalid gameover title flag");
   assert.ok(flags.bagLabelAlignment === undefined || typeof flags.bagLabelAlignment === "boolean", "invalid bag label alignment flag");
   assert.ok(flags.calendarExchangeLayout === undefined || typeof flags.calendarExchangeLayout === "boolean", "invalid calendar exchange layout flag");
   assert.ok(flags.hallActivityLayout === undefined || typeof flags.hallActivityLayout === "boolean", "invalid hall activity layout flag");
-  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}), ...(flags.calendarExchangeLayout ? { calendarExchangeLayout: true } : {}), ...(flags.hallActivityLayout ? { hallActivityLayout: true } : {}) };
+  assert.ok(flags.originalTooltipLayout === undefined || typeof flags.originalTooltipLayout === "boolean", "invalid original tooltip layout flag");
+  return { gameoverTitle: flags.gameoverTitle ?? false, ...(flags.bagLabelAlignment ? { bagLabelAlignment: true } : {}), ...(flags.calendarExchangeLayout ? { calendarExchangeLayout: true } : {}), ...(flags.hallActivityLayout ? { hallActivityLayout: true } : {}), ...(flags.originalTooltipLayout ? { originalTooltipLayout: true } : {}) };
 }
 
 export async function patchBagLayoutArchive(bytes, flags = {}) {
@@ -223,6 +234,14 @@ export async function patchBagLayoutArchive(bytes, flags = {}) {
       preservedEntries: summary.entries - changedEntries.length, preservedCompressedEntries: summary.entries - changedEntries.length,
       patchFlags: selected, changedEntries, hallActivityLayout: { style: "hallIcon.hallRightIconViewPos", x: 820, y: 82 } });
   }
+  if (selected.originalTooltipLayout) {
+    const tips = await patchLayoutEntry(output, "coreI.xml", patchOriginalTooltipLayoutXml);
+    output = tips.output;
+    const changedEntries = [...(summary.changedEntries ?? [entryName]), "coreI.xml"];
+    Object.assign(summary, { sha256: tips.summary.sha256, bytes: output.length,
+      preservedEntries: summary.entries - changedEntries.length, preservedCompressedEntries: summary.entries - changedEntries.length,
+      patchFlags: selected, changedEntries, originalTooltipLayout: { valueX: 32, valueY: -4, boundX: 125, boundY: 45, requiresMatchingOriginalArt: true } });
+  }
   return { output, summary };
 }
 
@@ -240,6 +259,7 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
   assert.ok(options.bagLabelAlignment === undefined || requested.bagLabelAlignment, "bag label option only enables the reviewed patch");
   assert.ok(options.calendarExchangeLayout === undefined || requested.calendarExchangeLayout, "calendar exchange layout option only enables the reviewed patch");
   assert.ok(options.hallActivityLayout === undefined || requested.hallActivityLayout, "hall activity layout option only enables the reviewed patch");
+  assert.ok(options.originalTooltipLayout === undefined || requested.originalTooltipLayout, "original tooltip layout option only enables the reviewed patch");
   assert.ok(command !== "rollback" || Object.keys(options).length === 0, "rollback does not take patch flags");
   const target = join(runtime, "client-overlay/ui/vietnam/xml/xml.png"), journalFile = join(runtime, "client-text-followup/layout-overlay.json");
   const backupRoot = resolve(runtime, "client-text-followup/layout-backups");
@@ -295,6 +315,6 @@ export async function runLayoutCommand(command, runtime = defaultRuntime, source
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const flags = process.argv.slice(3);
-  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment", "--calendar-exchange-layout", "--hall-activity-layout"].includes(flag)), "unknown or duplicate layout option");
-  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}), ...(flags.includes("--calendar-exchange-layout") ? { calendarExchangeLayout: true } : {}), ...(flags.includes("--hall-activity-layout") ? { hallActivityLayout: true } : {}) })));
+  assert.ok(new Set(flags).size === flags.length && flags.every(flag => ["--gameover-title", "--bag-label-alignment", "--calendar-exchange-layout", "--hall-activity-layout", "--original-tooltip-layout"].includes(flag)), "unknown or duplicate layout option");
+  console.log(JSON.stringify(await runLayoutCommand(process.argv[2] ?? "verify", defaultRuntime, defaultSource, { ...(flags.includes("--gameover-title") ? { gameoverTitle: true } : {}), ...(flags.includes("--bag-label-alignment") ? { bagLabelAlignment: true } : {}), ...(flags.includes("--calendar-exchange-layout") ? { calendarExchangeLayout: true } : {}), ...(flags.includes("--hall-activity-layout") ? { hallActivityLayout: true } : {}), ...(flags.includes("--original-tooltip-layout") ? { originalTooltipLayout: true } : {}) })));
 }

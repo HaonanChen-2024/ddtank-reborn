@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import { inflateRawSync } from "node:zlib";
-import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, patchCalendarExchangeXml, patchHallActivityLayoutXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
+import { patchBagLayoutArchive, patchBagLayoutXml, patchGameoverTitleXml, patchCalendarExchangeXml, patchHallActivityLayoutXml, patchOriginalTooltipLayoutXml, runLayoutCommand, zipRecords } from "./workshop-bag-layout.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), runtime = resolve(repo, "../../runtime");
 const source = join(repo, "apps/api/assets/flash/ui/vietnam/xml/xml.png"), sourceBytes = readFileSync(source);
@@ -126,6 +126,92 @@ test("hall opt-in upgrades the current three-flag ledger and retains all patches
     assert.deepEqual(readFileSync(ledger), newLedger); assert.deepEqual(readFileSync(target), newOverlay);
     assert.equal((await runLayoutCommand("rollback", fixture, source)).backupRetained, true);
     assert.equal(existsSync(target), false); assert.equal(existsSync(ledger), false); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+  } finally { rmSync(fixture, { recursive: true }); }
+});
+
+test("original tooltip restores only the three reviewed style positions and rejects missing or duplicate owners", () => {
+  const original = entryBytes(sourceBytes, "coreI.xml"), patched = patchOriginalTooltipLayoutXml(original);
+  const positions = { "core.GoodsTipTxt": [32, -4], "core.GoodsTipTypeTxt": [32, -4], "core.goodTip.BoundImage": [125, 45] };
+  const tags = bytes => [...bytes.toString("utf8").matchAll(/<component\b[^>]*\/>/g)].map(([tag]) => tag);
+  const unchanged = bytes => bytes.toString("utf8").replace(/<component\b[^>]*\/>/g, tag => Object.keys(positions).some(style => tag.includes(`stylename="${style}"`)) ? "<reviewed-tooltip-style/>" : tag);
+  assert.equal(unchanged(patched), unchanged(original));
+  for (const [style, [x, y]] of Object.entries(positions)) {
+    const matches = tags(patched).filter(tag => tag.includes(`stylename="${style}"`));
+    assert.equal(matches.length, 1);
+    assert.match(matches[0], new RegExp(`\\bx="${x}"`)); assert.match(matches[0], new RegExp(`\\by="${y}"`));
+    const owner = tags(original).find(tag => tag.includes(`stylename="${style}"`));
+    for (const changed of [original.toString().replace(owner, ""), original.toString() + owner]) assert.throws(() => patchOriginalTooltipLayoutXml(Buffer.from(changed)), /expected one original component/);
+  }
+  assert.deepEqual(patchOriginalTooltipLayoutXml(patched), patched);
+  const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+  assert.deepEqual(patchOriginalTooltipLayoutXml(Buffer.concat([bom, original])), Buffer.concat([bom, patched]));
+  assert.throws(() => patchOriginalTooltipLayoutXml(Buffer.from([0xff])), /not lossless UTF-8/);
+});
+
+test("original tooltip opt-in retains all sixteen old flag combinations and every other compressed entry", async () => {
+  for (let mask = 0; mask < 16; mask++) {
+    const flags = { gameoverTitle: Boolean(mask & 1), ...(mask & 2 ? { bagLabelAlignment: true } : {}), ...(mask & 4 ? { calendarExchangeLayout: true } : {}), ...(mask & 8 ? { hallActivityLayout: true } : {}) };
+    const baseline = await patchBagLayoutArchive(sourceBytes, flags);
+    assert.deepEqual(await patchBagLayoutArchive(sourceBytes, { ...flags, originalTooltipLayout: false }), baseline);
+    const combined = await patchBagLayoutArchive(sourceBytes, { ...flags, originalTooltipLayout: true });
+    assert.deepEqual(combined.summary.patchFlags, { ...flags, originalTooltipLayout: true });
+    assert.deepEqual(combined.summary.originalTooltipLayout, { valueX: 32, valueY: -4, boundX: 125, boundY: 45, requiresMatchingOriginalArt: true });
+    assert.deepEqual(combined.summary.changedEntries, [...(baseline.summary.changedEntries ?? ["bagAndInfo.xml"]), "coreI.xml"]);
+    assert.equal(combined.summary.preservedCompressedEntries, baseline.summary.preservedCompressedEntries - 1);
+    assert.deepEqual(entryBytes(combined.output, "coreI.xml"), patchOriginalTooltipLayoutXml(entryBytes(sourceBytes, "coreI.xml")));
+    const before = zipRecords(baseline.output).records, after = zipRecords(combined.output).records;
+    assert.deepEqual(before.map(x => x.name), after.map(x => x.name));
+    for (let i = 0; i < before.length; i++) if (before[i].name !== "coreI.xml") {
+      assert.deepEqual(combined.output.subarray(after[i].local, after[i].data + after[i].compressedSize), baseline.output.subarray(before[i].local, before[i].data + before[i].compressedSize), before[i].name);
+      assert.deepEqual(entryBytes(combined.output, before[i].name), entryBytes(baseline.output, before[i].name), before[i].name);
+    }
+  }
+  assert.deepEqual(readFileSync(source), sourceBytes);
+});
+
+test("original tooltip upgrades the four-flag ledger once and preserves previews, repeat verification and permanent backup", async () => {
+  const { fixture, target, ledger } = fixtureRoot();
+  try {
+    const oldFlags = { gameoverTitle: true, bagLabelAlignment: true, calendarExchangeLayout: true, hallActivityLayout: true };
+    await runLayoutCommand("install", fixture, source, oldFlags);
+    const oldOverlay = readFileSync(target), oldLedger = readFileSync(ledger), old = JSON.parse(oldLedger);
+    const preview = await runLayoutCommand("verify", fixture, source, { originalTooltipLayout: true });
+    assert.equal(preview.installed, false); assert.equal(preview.unchanged, false);
+    assert.deepEqual(preview.patchFlags, { ...oldFlags, originalTooltipLayout: true });
+    assert.deepEqual(readFileSync(target), oldOverlay); assert.deepEqual(readFileSync(ledger), oldLedger);
+    const installed = await runLayoutCommand("install", fixture, source, { originalTooltipLayout: true });
+    assert.equal(installed.sha256, preview.sha256); assert.equal(installed.unchanged, false);
+    assert.deepEqual(installed.patchFlags, { ...oldFlags, originalTooltipLayout: true });
+    const newOverlay = readFileSync(target), newLedger = readFileSync(ledger);
+    assert.equal(JSON.parse(newLedger).backup, old.backup); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+    for (const name of ["bagAndInfo.xml", "gameOver.xml", "calendar.xml", "ddthallIcon.xml"]) assert.deepEqual(entryBytes(newOverlay, name), entryBytes(oldOverlay, name));
+    for (const [command, flags] of [["install", { originalTooltipLayout: true }], ["install", {}], ["verify", { originalTooltipLayout: true }], ["verify", {}]]) {
+      const result = await runLayoutCommand(command, fixture, source, flags);
+      assert.equal(result.unchanged, true); assert.equal(result.sha256, installed.sha256);
+      assert.deepEqual(result.patchFlags, { ...oldFlags, originalTooltipLayout: true });
+    }
+    assert.deepEqual(readFileSync(ledger), newLedger); assert.deepEqual(readFileSync(target), newOverlay);
+    assert.deepEqual(await runLayoutCommand("rollback", fixture, source), { rolledBack: true, backupRetained: true, restartRequired: true });
+    assert.equal(existsSync(target), false); assert.equal(existsSync(ledger), false); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+    assert.deepEqual(readFileSync(source), sourceBytes);
+  } finally { rmSync(fixture, { recursive: true }); }
+});
+
+test("original tooltip rejects wrong flag types and false downgrade without changing the owned overlay or ledger", async () => {
+  const { fixture, target, ledger } = fixtureRoot();
+  try {
+    await runLayoutCommand("install", fixture, source, { originalTooltipLayout: true });
+    const before = readFileSync(target), ledgerBytes = readFileSync(ledger), old = JSON.parse(ledgerBytes);
+    for (const value of ["true", 1, null, {}, []]) {
+      await assert.rejects(patchBagLayoutArchive(sourceBytes, { originalTooltipLayout: value }), /invalid original tooltip layout flag/);
+      for (const command of ["install", "verify"]) await assert.rejects(runLayoutCommand(command, fixture, source, { originalTooltipLayout: value }), /invalid original tooltip layout flag/);
+    }
+    for (const command of ["install", "verify"]) await assert.rejects(runLayoutCommand(command, fixture, source, { originalTooltipLayout: false }), /original tooltip layout option only enables/);
+    await assert.rejects(runLayoutCommand("rollback", fixture, source, { originalTooltipLayout: true }), /rollback does not take patch flags/);
+    assert.deepEqual(readFileSync(target), before); assert.deepEqual(readFileSync(ledger), ledgerBytes); assert.deepEqual(readFileSync(old.backup), sourceBytes);
+    assert.equal((await runLayoutCommand("verify", fixture, source)).unchanged, true);
+    await runLayoutCommand("rollback", fixture, source);
+    assert.deepEqual(readFileSync(old.backup), sourceBytes);
   } finally { rmSync(fixture, { recursive: true }); }
 });
 

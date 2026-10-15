@@ -1,0 +1,4154 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "name": "coreiconandtip",
+      "path": "runtime/reference-original-bag-tip-ui-20261015/public-inputs/coreiconandtip_v3_6_1_u3.swf",
+      "sha256": "328fdb53eaee97b2554e57a9fa3e528858b67a0798f05aea8e34f4e18b38d128",
+      "mappings": [
+        {
+          "targetId": 123,
+          "targetSymbol": "asset.seniorVipIcon.small_1",
+          "sourceSymbol": "asset.seniorVipIcon.small_1",
+          "sourceTagSha256": "417fe5275e4bbfb6ddd473843b254afe6e3bbba4627a7aada6c72abf9b7a7d25",
+          "targetTagSha256": "745b4ef2666ec6478cdd86e8d877af1f7e2d26bcb8d25495725c2832cde684a7",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 122,
+          "targetSymbol": "asset.vipIcon.levelSmal7",
+          "sourceSymbol": "asset.vipIcon.levelSmal7",
+          "sourceTagSha256": "4712aa1a39f442330f1fd1b04bfce93833abb942ae035553978d2f367faafa50",
+          "targetTagSha256": "b31e2d572df20c64b428d5d435f46290530e2bfb73f61eb8e7c8196c87e4a257",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 121,
+          "targetSymbol": "asset.seniorVipIcon.small_8",
+          "sourceSymbol": "asset.seniorVipIcon.small_8",
+          "sourceTagSha256": "5e7b63bd459e7155f108fa19df0528da132b017b5d7699e772afe166c47986e0",
+          "targetTagSha256": "f63876ed768d94b77370cea4df00098357859a22fe81d1a4c51e2e9f4b994cda",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 120,
+          "targetSymbol": "asset.seniorVipIcon.big_7",
+          "sourceSymbol": "asset.seniorVipIcon.big_7",
+          "sourceTagSha256": "9183f36529206ffccba5c72dab7d5b80f99752e679d23d0665fd2acc6f613275",
+          "targetTagSha256": "0c14ee2f107b48108574e0674f61d0429711fff3dc33983e87d83c44513dc628",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 119,
+          "targetSymbol": "asset.seniorVipIcon.small_7",
+          "sourceSymbol": "asset.seniorVipIcon.small_7",
+          "sourceTagSha256": "e266eeb873932c9710c1d20283dd7cda1815603c69e5fcd320efc5b700b1789d",
+          "targetTagSha256": "e51e53602483ad493c5c18e8f9f203930d3c84741c1726e48f89c0d634f74bda",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 118,
+          "targetSymbol": "asset.seniorVipIcon.big_6",
+          "sourceSymbol": "asset.seniorVipIcon.big_6",
+          "sourceTagSha256": "9e5b45a543f973626189e8cae2d773b86b992897ebaa3db88cf0f78e29f4920d",
+          "targetTagSha256": "ce6f5ead5537a9aa87547637dad9dfe338167cf199d8dcb1630efa6cdefa2f40",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 117,
+          "targetSymbol": "asset.seniorVipIcon.small_6",
+          "sourceSymbol": "asset.seniorVipIcon.small_6",
+          "sourceTagSha256": "a8c3bb26f402a0b39b1f106cc0f00d3cfd9a830f2b3289a52afaddffa4bb6d7e",
+          "targetTagSha256": "aae065d301a3fb04c2dc775b4c3f196212dddb80abfdf965d7e01e4e09508e0d",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 116,
+          "targetSymbol": "asset.seniorVipIcon.big_5",
+          "sourceSymbol": "asset.seniorVipIcon.big_5",
+          "sourceTagSha256": "106a7ae4cdb24bb489fab5d267437d196094a5d86e51c38987db298ea618fffe",
+          "targetTagSha256": "89dffc5e2db8afdc997f3bb91fd7d1ce0627576318c07621373d3d90599c8664",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 115,
+          "targetSymbol": "asset.seniorVipIcon.small_5",
+          "sourceSymbol": "asset.seniorVipIcon.small_5",
+          "sourceTagSha256": "a0e1ba197233d6db8fc6f9abea346bdadea96b4a4d7655d2eec9ebdb9497ea5f",
+          "targetTagSha256": "e2946665106ec8a99a4e2cd902591cf1d59631e57b080c34978517053df03084",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 114,
+          "targetSymbol": "asset.Effort.5",
+          "sourceSymbol": "asset.Effort.5",
+          "sourceTagSha256": "6c2108de66855998ef8156dc349b5ac5b67f841f12ca3cef42ffab478a37d507",
+          "targetTagSha256": "e90a9dfe0f476a547bf7ff8802df3adfc6d435656d3cc5ffefef602916b29638",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 113,
+          "targetSymbol": "asset.seniorVipIcon.big_4",
+          "sourceSymbol": "asset.seniorVipIcon.big_4",
+          "sourceTagSha256": "333ef5408707fbfc2fd8089c56f7bb8f28ad451f47f1c208cd667b3f5748fb6e",
+          "targetTagSha256": "ddcb2df5c257f30280c82c245f934770abd0a8624d9936118975f5607fd24897",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 112,
+          "targetSymbol": "asset.core.payBuffAsset51",
+          "sourceSymbol": "asset.core.payBuffAsset51",
+          "sourceTagSha256": "eea72f3ada5bfafa023076bf1f6fb1769cebe2c231ecf8a4dbc506cbb625f96a",
+          "targetTagSha256": "76e21778c3ff2192f916a4bd54f0f0f43ccf4d8a37cefd281c7d64c4b5515fbf",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 111,
+          "targetSymbol": "core.tip.bubble",
+          "sourceSymbol": "core.tip.bubble",
+          "sourceTagSha256": "548e82dc076d61bf466c0e6094de40eec20f5da59ca9497df93e9bf871367d58",
+          "targetTagSha256": "54e353a8dd37cb352346495372b319fadf9e90c64333bb56f02dea858f0a16f1",
+          "width": 224,
+          "height": 72,
+          "targetWidth": 224,
+          "targetHeight": 72
+        },
+        {
+          "targetId": 110,
+          "targetSymbol": "asset.core.payBuffAsset73.note",
+          "sourceSymbol": "asset.core.payBuffAsset73.note",
+          "sourceTagSha256": "ac443376ffd78177db676ea4e8c1e081e9449310fdf256cc7541c374e8675aea",
+          "targetTagSha256": "457342820228eac6ef80917cd3eb687b88d800f997b294407144843bfe85902d",
+          "width": 163,
+          "height": 46,
+          "targetWidth": 224,
+          "targetHeight": 50,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            205,
+            50
+          ]
+        },
+        {
+          "targetId": 109,
+          "targetSymbol": "asset.seniorVipIcon.small_4",
+          "sourceSymbol": "asset.seniorVipIcon.small_4",
+          "sourceTagSha256": "9cca6962e88e61b8412f66829513e43cd5d3ec6efaf781b647906d6f4cb7aa91",
+          "targetTagSha256": "b062d7d0545625fbb7498f4797a571fe0cb9f7a5af2a48366871282236db74ce",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 108,
+          "targetSymbol": "asset.Effort.4",
+          "sourceSymbol": "asset.Effort.4",
+          "sourceTagSha256": "c974e7174fd8f5db420aa0c8ce5271b45dafbf2432055a267fdf6f4ccbd3a457",
+          "targetTagSha256": "59216329e9a879374bcd3ce761450b9f105ec36c287833963c5d90d7b78b6ff5",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 107,
+          "targetSymbol": "asset.seniorVipIcon.big_3",
+          "sourceSymbol": "asset.seniorVipIcon.big_3",
+          "sourceTagSha256": "47a87e358f34bc6594f2bb44308beec1f23ce9d3ea2cd78ee598156230ff0229",
+          "targetTagSha256": "a693b6ffd9cd53d1bfe811aee5c45fabba1947b5ecb05fb37a813b568939541a",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 106,
+          "targetSymbol": "asset.seniorVipIcon.small_3",
+          "sourceSymbol": "asset.seniorVipIcon.small_3",
+          "sourceTagSha256": "eeba98484ef9d26507eec8385a81378e3d489647ef7825dff25529d3ffe21bb4",
+          "targetTagSha256": "ed12821e941d024d15207b3d03c614975d5a3d239f98da7b6987262432e83057",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 105,
+          "targetSymbol": "asset.Effort.3",
+          "sourceSymbol": "asset.Effort.3",
+          "sourceTagSha256": "f8f73b8302449a4c86fe433598be6d05db10c7e88c4a5cef6b0ee81e0237014a",
+          "targetTagSha256": "02e61537df8f00768d3153e1a36a5c0e3c9cec90a0d17399bb047ecd5c33be2b",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 104,
+          "targetSymbol": "asset.seniorVipIcon.big_2",
+          "sourceSymbol": "asset.seniorVipIcon.big_2",
+          "sourceTagSha256": "f037b2324fd10eac2257e359458b7359188fefc6ff2ec155cb37dd237c1f753b",
+          "targetTagSha256": "4e2deaae65e2899efd84ee7d6a5bbf59f331a3843b05baa61ce857adb29326d1",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 103,
+          "targetSymbol": "asset.seniorVipIcon.small_2",
+          "sourceSymbol": "asset.seniorVipIcon.small_2",
+          "sourceTagSha256": "ccda427128e9682b89fc929d29e24ea5432ec3f5f09eed23301e8e82473e94d6",
+          "targetTagSha256": "c8a6ef30cdf61ac34ee6952fc95f58efe7b6c34c2d1d439c00c580061abbfc5a",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 102,
+          "targetSymbol": "asset.Effort.2",
+          "sourceSymbol": "asset.Effort.2",
+          "sourceTagSha256": "f35710237d050f312c661c1528a6a21954b7917ed5401483338c8e4c7e8152f6",
+          "targetTagSha256": "81b86508a89185928544d4daea9c5f59c4845b084b15353ce385a7c11168a8a0",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 101,
+          "targetSymbol": "asset.seniorVipIcon.big_1",
+          "sourceSymbol": "asset.seniorVipIcon.big_1",
+          "sourceTagSha256": "81cd558b42fa2a9d648f32c40bdd4ebcab25ac6b77e0933bf8d611747527da10",
+          "targetTagSha256": "8ff070174ec1bdf9533ec922875391a8d666bde9445ad7597194350e47340585",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 100,
+          "targetSymbol": "asset.vipIcon.levelBig7",
+          "sourceSymbol": "asset.vipIcon.levelBig7",
+          "sourceTagSha256": "9627c8a4813c06705b3bad7c8422a0b6fb64871a0093c7192c1122464eacc30a",
+          "targetTagSha256": "d35bf63acfd92377d1e583843bf9de425746b09f54ab71dc88684b14752b71ce",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 99,
+          "targetSymbol": "asset.core.tip.cardsTipPanel.sets",
+          "sourceSymbol": "asset.core.tip.cardsTipPanel.sets",
+          "sourceTagSha256": "2be2942776c86de04d8dcb13176f87e904e113d98354444dd0adb2d88a489173",
+          "targetTagSha256": "787d4f1409e9d735ef940a5d577423b2ba521c39f51386df480a9913e6a99884",
+          "width": 92,
+          "height": 14,
+          "targetWidth": 84,
+          "targetHeight": 14,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            94,
+            14
+          ]
+        },
+        {
+          "targetId": 98,
+          "targetSymbol": "asset.seniorVipIcon.small_9",
+          "sourceSymbol": "asset.seniorVipIcon.small_9",
+          "sourceTagSha256": "aa286b0659305d9ac618a580a5e7ac702e04a562c3c2839a35afc248e7def060",
+          "targetTagSha256": "94ec281d041eb11514ee7dd98f0ee7a5a761b8001b8db2ec913d49cef1acf140",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 97,
+          "targetSymbol": "asset.latentEnergy.tipIcon",
+          "sourceSymbol": "asset.latentEnergy.tipIcon",
+          "sourceTagSha256": "a5bce03fcd4438d11ff2d3f55a420af507db09c30b0e62553d3623b1ab74d1f6",
+          "targetTagSha256": "22c6b81634536bb75c75d54fc5c9064d9a2c043db5784b58f3ea8f00e8947d17",
+          "width": 20,
+          "height": 20,
+          "targetWidth": 20,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 96,
+          "targetSymbol": "asset.latentEnergy.rightArrows",
+          "sourceSymbol": "asset.latentEnergy.rightArrows",
+          "sourceTagSha256": "489b59a17a01020db2a9e4dc9acc8c188d1986b1fcefb379efb1a93c77b8ea2e",
+          "targetTagSha256": "b4c8f6f4f46b65523ebcd922b6ee4873afb7a4bcf55bf959764dcbbbd5625c47",
+          "width": 55,
+          "height": 122,
+          "targetWidth": 55,
+          "targetHeight": 122
+        },
+        {
+          "targetId": 95,
+          "targetSymbol": "asset.core.payBuffAsset72.note",
+          "sourceSymbol": "asset.core.payBuffAsset72.note",
+          "sourceTagSha256": "9056f8ff52a72d43b58b609d7377f23155b65df82972c1b7b8d274bbc98ee774",
+          "targetTagSha256": "2aa779ebf6257a3cb2b18b9dec29dd43a4a15c2e1c922d0689e4c818a97cd806",
+          "width": 171,
+          "height": 52,
+          "targetWidth": 269,
+          "targetHeight": 50,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            213,
+            50
+          ]
+        },
+        {
+          "targetId": 94,
+          "targetSymbol": "asset.vipIcon.levelSmal6",
+          "sourceSymbol": "asset.vipIcon.levelSmal6",
+          "sourceTagSha256": "fa9882be85fdc7effd2e9a40a041710207d71835a31b88edffb5772387b5a993",
+          "targetTagSha256": "d49725f136b3586b3a36ca37d6eac763665af73ae24379c588d260b46aeeb3a9",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 93,
+          "targetSymbol": "asset.vipIcon.levelBig6",
+          "sourceSymbol": "asset.vipIcon.levelBig6",
+          "sourceTagSha256": "373e6cc1f3c4eb71dfd232f46c98440b8fca964df9ce0a46a9490c02a1ee2381",
+          "targetTagSha256": "26663b83e89b2ac0331be8bb91e3a93e2e9e93902b3fdf74115c7babdd07c489",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 92,
+          "targetSymbol": "asset.vipIcon.levelSmal5",
+          "sourceSymbol": "asset.vipIcon.levelSmal5",
+          "sourceTagSha256": "c16523a58faa720afe75ad9836b7ab4accde717e4cc4bd5f2ecf578486fb498e",
+          "targetTagSha256": "803e6d7e452d3c31c011152027bd91e997f10becb15b97da7829c1343c6c2998",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 91,
+          "targetSymbol": "asset.vipIcon.levelBig5",
+          "sourceSymbol": "asset.vipIcon.levelBig5",
+          "sourceTagSha256": "743a4e7ca7f61598a66db72ddbc559aa08ee4b5abb59abc5793691428199ba3a",
+          "targetTagSha256": "b425b91dcb345bf065a1d2b4bb828bf92cbee2bbd322f5ab63c5caec36abf26c",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 90,
+          "targetSymbol": "asset.vipIcon.levelSmal4",
+          "sourceSymbol": "asset.vipIcon.levelSmal4",
+          "sourceTagSha256": "aabbef6d09909d9b0451b662c53bd2bb7bb66f439e9247b4ab28f643a3b14066",
+          "targetTagSha256": "1e03e45c12ad7eca51278cafeb623e86eebc5870a20a857f23fea9da6e078dd3",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 89,
+          "targetSymbol": "asset.vipIcon.levelBig4",
+          "sourceSymbol": "asset.vipIcon.levelBig4",
+          "sourceTagSha256": "a4bcc91394893be54389acb3f604dc6b7b875b792785f60b7006487059a394a6",
+          "targetTagSha256": "8a9aee66e23d1c8793035fd39d4971c1d82fa4ae8902dab75b2d2b8aea18ac07",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 88,
+          "targetSymbol": "asset.core.payBuffAsset73",
+          "sourceSymbol": "asset.core.payBuffAsset73",
+          "sourceTagSha256": "966ca5877b4730ffee88ce1e3ed5cc25c2893d1bbcc068bbb4446c9fe01e1066",
+          "targetTagSha256": "ca923f69e4bbbbbf706a3d07b1eb071448fa87f4677a2fb1489b2385e096971b",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 87,
+          "targetSymbol": "asset.vipIcon.levelSmal3",
+          "sourceSymbol": "asset.vipIcon.levelSmal3",
+          "sourceTagSha256": "fc45a596d74e9f61a8bad82c02b1926af63ef089a178c9b75c6351384bb7dbb0",
+          "targetTagSha256": "a94b2190f2c489c64b3f474caeaee7280e624c01a2b8b075478e920df7ff96ff",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 86,
+          "targetSymbol": "asset.vipIcon.levelBig3",
+          "sourceSymbol": "asset.vipIcon.levelBig3",
+          "sourceTagSha256": "7bce02cf2232ad3def1e3d5cafcf14f9934b8ca6e05ceee189274a5d16b9a918",
+          "targetTagSha256": "93b78f734bd28295215ee3bdb667ca09c68085f95cff202c486c270cad5033b1",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 85,
+          "targetSymbol": "asset.core.leveltip.BattleBg",
+          "sourceSymbol": "asset.core.leveltip.BattleBg",
+          "sourceTagSha256": "4c7efff1675fc91c8e1c69dcbf74ed3647a107d6f370ada803fece670e3edf3c",
+          "targetTagSha256": "11b3959140a65e11e93077a4aee6f5fdea697d36ea3e94cf844ff3adc8733010",
+          "width": 46,
+          "height": 18,
+          "targetWidth": 46,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 84,
+          "targetSymbol": "asset.vipIcon.levelSmal2",
+          "sourceSymbol": "asset.vipIcon.levelSmal2",
+          "sourceTagSha256": "e91ee16a6160a7633d936e9e45ee5c3c19cdadd8938a078a65e59522d18607aa",
+          "targetTagSha256": "6ed0d9f4e9dedeebeb948753bd06ffca5c3bdc39f6eaa84affef39bf6df5b93c",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 83,
+          "targetSymbol": "asset.vipIcon.levelBig2",
+          "sourceSymbol": "asset.vipIcon.levelBig2",
+          "sourceTagSha256": "b5f74c7f6f8b88ad0659f3d7af8682372610f0e4eb8ef19fc66fbc94b5af0c6c",
+          "targetTagSha256": "5b34f894896ccf04289fec06d6c5d9c57bb36a875478deecc1a949372e28239c",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 82,
+          "targetSymbol": "asset.core.payBuffAsset72",
+          "sourceSymbol": "asset.core.payBuffAsset72",
+          "sourceTagSha256": "a7ddb55e1d6c883a01252b1d4f7503116afbcecd5a18258344104559d1371a4b",
+          "targetTagSha256": "57f0ff0a29a94e77d8ed8d40f2fc1402db534c29668e94e907e8a4938ecb878b",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 81,
+          "targetSymbol": "asset.vipIcon.levelSmal1",
+          "sourceSymbol": "asset.vipIcon.levelSmal1",
+          "sourceTagSha256": "c98e0b9c4a72df671b7de0e97d9046f0e871e5b7e0dc52454929de5136f42296",
+          "targetTagSha256": "739d7dd162f40a28d35917a8d9c8fa4b03d0cbaa211f4a42cfc311b6bce8feea",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 80,
+          "targetSymbol": "asset.vipIcon.levelBig1",
+          "sourceSymbol": "asset.vipIcon.levelBig1",
+          "sourceTagSha256": "d3b6ce1db04a54822d18e097192b6c9433c5c6d1459c2426dade1ca4b32b1336",
+          "targetTagSha256": "812fefdbf8253e621d8ecc7a1f9cfc79ca198cc1d135146f6075f481a252f9ea",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 79,
+          "targetSymbol": "asset.coreIcon.EdictumTitle",
+          "sourceSymbol": "asset.coreIcon.EdictumTitle",
+          "sourceTagSha256": "1eb62afd14b8f24009ee7dc64eacd72184776282e1cec557b6241e3a2f0c7b0d",
+          "targetTagSha256": "070c2c3a262f31ac97f6debf9a2c1a36e00dcee19e783c76ee7fc1ee4cca3f5a",
+          "width": 295,
+          "height": 45,
+          "targetWidth": 295,
+          "targetHeight": 45
+        },
+        {
+          "targetId": 78,
+          "targetSymbol": "asset.core.QQtipsBG",
+          "sourceSymbol": "asset.core.QQtipsBG",
+          "sourceTagSha256": "fd08b9878f8fd6275e8b81651099ef92d87b71311c531f416065989c5436b22a",
+          "targetTagSha256": "ba730d6db00bbb334d73d082b117bef277b2b9d30fe419b854e3b950597514dc",
+          "width": 268,
+          "height": 167,
+          "targetWidth": 268,
+          "targetHeight": 167
+        },
+        {
+          "targetId": 77,
+          "targetSymbol": "asset.Effort.1",
+          "sourceSymbol": "asset.Effort.1",
+          "sourceTagSha256": "ed578be074d071636a6126e2dcac21660b4be1a6a615c6615f08b79cc53dc74e",
+          "targetTagSha256": "e1772b9bfbe2cb7b6e7c0f0ccfa4d05c8dfac3c26db0165aac444a19731de18c",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 76,
+          "targetSymbol": "asset.core.consortiaTip.StatePic",
+          "sourceSymbol": "asset.core.consortiaTip.StatePic",
+          "sourceTagSha256": "6bb2e7ebd1566778158a3060ed49c708d8411cc188640737237b1c492cc96b64",
+          "targetTagSha256": "396a21a304f2693926dcad050f5df3cb8a0cd56920a3d5d4c7e653c11cc506ee",
+          "width": 47,
+          "height": 19,
+          "targetWidth": 58,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            58,
+            21
+          ]
+        },
+        {
+          "targetId": 75,
+          "targetSymbol": "asset.core.tip.restTime",
+          "sourceSymbol": "asset.core.tip.restTime",
+          "sourceTagSha256": "5c849006a6a163c1d3c2354bbf691852c36f971378facf0026059b363d4c5555",
+          "targetTagSha256": "937cf3906ff5ccdce33a2895ba119f0edac2d29827661f2ece92d6394cad9a3d",
+          "width": 133,
+          "height": 17,
+          "targetWidth": 133,
+          "targetHeight": 17
+        },
+        {
+          "targetId": 74,
+          "targetSymbol": "invite.response.response_mode5",
+          "sourceSymbol": "invite.response.response_mode5",
+          "sourceTagSha256": "04aa7181bf95fe48559b938fe50b3cf0ed383c703d8f0a07b746a49365fd94ad",
+          "targetTagSha256": "a8b9ee11035d29559f0b49cd20f0497ed225946e1356b06b111171c76454bb15",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 73,
+          "targetSymbol": "asset.core.tip.Band2",
+          "sourceSymbol": "asset.core.tip.Band2",
+          "sourceTagSha256": "95c00eb891d87e54aee354593cfaa81623a036910bfa0f00e12e7f9e7c839f94",
+          "targetTagSha256": "28a2f44177ae67fb9afa7db4cee0a18479deae05ff99d47f6ff704df2813b00c",
+          "width": 57,
+          "height": 27,
+          "targetWidth": 57,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 72,
+          "targetSymbol": "invite.response.response_mode4",
+          "sourceSymbol": "invite.response.response_mode4",
+          "sourceTagSha256": "770e75bf60ec6942970f242b386b81e7d3b410c96ca8c6330d3f11d459d91ce0",
+          "targetTagSha256": "a47b0a82ed4d1e0f98f88b2515d50082b2172ad6c8ca5ddb4760649fdded52ae",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 71,
+          "targetSymbol": "invite.response.response_mode3",
+          "sourceSymbol": "invite.response.response_mode3",
+          "sourceTagSha256": "f828820f8c09b3ffd60558641e1b65e7db0f2c0ba424438155b163af28e84ecc",
+          "targetTagSha256": "c09a751046484cc176c736d2da99e794fd7fd56e9a9c05201921f8dc5bf77ce0",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 70,
+          "targetSymbol": "invite.response.response_mode2",
+          "sourceSymbol": "invite.response.response_mode2",
+          "sourceTagSha256": "28a677ac95cd893a6c5b097cfbef67ecd9aa82fbd010a51e64c5aeeb2dfbafcf",
+          "targetTagSha256": "1e6f835023cc1cbaae6e2ee4c12312bedd011460509d0bb8c38adef6be634753",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 36,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 69,
+          "targetSymbol": "asset.core.payBuffAsset71",
+          "sourceSymbol": "asset.core.payBuffAsset71",
+          "sourceTagSha256": "6a6670af0faca1177f0e0681307a7080ffe211fdd66079be1a6383dece1a94ea",
+          "targetTagSha256": "0eb173bddba896eba40058bc5eaac023012c1a0a803377df0311c3f0587b2f6b",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 68,
+          "targetSymbol": "invite.response.response_mode1",
+          "sourceSymbol": "invite.response.response_mode1",
+          "sourceTagSha256": "bce77edd67037ccf28f8d5d9bbc3cd931eba3c00dbe2a3bd95020526a3cd613b",
+          "targetTagSha256": "b362934f8ca0a16cc4a72bf77fa19edff13cfee1288989375bf47d9ec33a2237",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 67,
+          "targetSymbol": "asset.core.consortiaTip.ReputePic",
+          "sourceSymbol": "asset.core.consortiaTip.ReputePic",
+          "sourceTagSha256": "f1f189505cdd9e2f744182c43ce4ab7eb159038a5e74df4abc160e246b957fe2",
+          "targetTagSha256": "9b22f803a05a914e2bb92df6252e70b80e0d144aafdb88e3d09063b782ae3906",
+          "width": 43,
+          "height": 18,
+          "targetWidth": 43,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 66,
+          "targetSymbol": "asset.Effort.0",
+          "sourceSymbol": "asset.Effort.0",
+          "sourceTagSha256": "8d9a8f1b5302564c20784984aa80f191475101dac3deeb97afb6910a1fa139c8",
+          "targetTagSha256": "9397535de12cf66c0ee1c3216c589bca9b6d165349fc0db459170c51acb22d1f",
+          "width": 18,
+          "height": 31,
+          "targetWidth": 18,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 65,
+          "targetSymbol": "asset.core.leveltip.ReputeBg",
+          "sourceSymbol": "asset.core.leveltip.ReputeBg",
+          "sourceTagSha256": "edee4cbd189da19a5bb39e182b4f4607bde7ee4db3915a133a86861af670a305",
+          "targetTagSha256": "aa213747610bb530250755a840f96c9355bd5ba678c80b680be511956d096bc5",
+          "width": 43,
+          "height": 18,
+          "targetWidth": 43,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 64,
+          "targetSymbol": "asset.core.pvtKickAsset",
+          "sourceSymbol": "asset.core.pvtKickAsset",
+          "sourceTagSha256": "1eaaf3356dc4d5c82556faa4eb7b9810a6db1848a16b9a9ddbd8b5d2e65d1c2c",
+          "targetTagSha256": "b2ac7a2f767b6c875bfe59292a3dde6201f8b7d4722a21a5e84a6f60d5f14879",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 63,
+          "targetSymbol": "asset.core.PayBuffBtn",
+          "sourceSymbol": "asset.core.PayBuffBtn",
+          "sourceTagSha256": "bd257fb71f2d44123c7a78fc8b317d950561a03c168f4aa5e7d4686afdf0b181",
+          "targetTagSha256": "e596da9f43a637553bcaa03ccc340da10e62e4ced608f2748df2ef15cac03ecc",
+          "width": 81,
+          "height": 39,
+          "targetWidth": 84,
+          "targetHeight": 41,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            95,
+            41
+          ]
+        },
+        {
+          "targetId": 62,
+          "targetSymbol": "asset.coreIcon.orderNo3Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo3Asset",
+          "sourceTagSha256": "09278279dd0cd78cffa2322fa2aa4ea07aaedcb808e6fdae38938adfb3ad4d6f",
+          "targetTagSha256": "da73e3a0316ac6d50866af0807610a563b97310b30347e171f8ad5591957a6a6",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 61,
+          "targetSymbol": "asset.core.tip.Band1",
+          "sourceSymbol": "asset.core.tip.Band1",
+          "sourceTagSha256": "6de14bb6e88ea89c0af7b227cba9d8da385deeacb444e7c5d7661edf8c242c1d",
+          "targetTagSha256": "bc62563fa138cef56eb602a68469b3c54b2adb5ff65bb2605c15c246753006eb",
+          "width": 57,
+          "height": 27,
+          "targetWidth": 57,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 60,
+          "targetSymbol": "asset.coreIcon.orderNo2Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo2Asset",
+          "sourceTagSha256": "73c0a9ee97475ca36a470b1d5a67180ae491d1dcba9a7a01f688a49158ecc348",
+          "targetTagSha256": "145ae1eb5a841016c4fdc0422b6348685d4020ec6b957b403e3a5288cdbcd505",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 59,
+          "targetSymbol": "asset.coreIcon.orderNo1Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo1Asset",
+          "sourceTagSha256": "5d6a585144b0d15e04f3ad1f3593da99d6a926fed74309a16627871db58863fb",
+          "targetTagSha256": "185b26838726e7271f2d7b0a58698fd148d86436ba0756c644753436be718dd1",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 58,
+          "targetSymbol": "bagAndInfo.AddPrice.CheckBtnMoneyBG",
+          "sourceSymbol": "bagAndInfo.AddPrice.CheckBtnMoneyBG",
+          "sourceTagSha256": "f3e4058690d5b068235b5789b3963a5e11e5f83b3f8eca1ed694989b592a2dec",
+          "targetTagSha256": "12d58ae99908a9cce068e50d3cfaef968fedadb90fbc2c3bb49fd1cfcd49cb60",
+          "width": 62,
+          "height": 34,
+          "targetWidth": 62,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            72,
+            34
+          ]
+        },
+        {
+          "targetId": 57,
+          "targetSymbol": "asset.core.bufftip.Min",
+          "sourceSymbol": "asset.core.bufftip.Min",
+          "sourceTagSha256": "5acf0f5d06613ba2589e9a5680c4d74afca667239739eb7631fb733f0212b59e",
+          "targetTagSha256": "e16fa1b0d89b835240ffcc42f60d38a03dccb216000c8fdd465f0cf6cc11fc70",
+          "width": 34,
+          "height": 20,
+          "targetWidth": 34,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 56,
+          "targetSymbol": "asset.core.payBuffAsset50",
+          "sourceSymbol": "asset.core.payBuffAsset50",
+          "sourceTagSha256": "40ac0edd6aeaa99828fcbff7a5b8575a63cd4ffee9a2926f53afafcb510643d2",
+          "targetTagSha256": "90ed9b628036c8b1b3c3f339ece2a1f2dbeb9f0c4209fe11a514fc7f89ae81ed",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 55,
+          "targetSymbol": "asset.core.leveltip.WinRateBg",
+          "sourceSymbol": "asset.core.leveltip.WinRateBg",
+          "sourceTagSha256": "ecfe5d4aa474e85db7860187856cb86cb2bd86d3651e967e51320f35724bbb0b",
+          "targetTagSha256": "5ea87826378885d681b4ef20eac635da54fbfba3e0eb66b4c23bce274e63ea51",
+          "width": 44,
+          "height": 18,
+          "targetWidth": 44,
+          "targetHeight": 19,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            44,
+            19
+          ]
+        },
+        {
+          "targetId": 54,
+          "targetSymbol": "asset.core.MarriedIcon",
+          "sourceSymbol": "asset.core.MarriedIcon",
+          "sourceTagSha256": "8fee6718feb030c61d835ef0b409f9b2a2931e1566e5515fad92db4770e2a098",
+          "targetTagSha256": "e8b432ada56d7f74c76aa83f230fd64aeb55faf7f737f650cc8a691e368baa1e",
+          "width": 26,
+          "height": 26,
+          "targetWidth": 26,
+          "targetHeight": 26
+        },
+        {
+          "targetId": 53,
+          "targetSymbol": "asset.core.bufftip.LTime",
+          "sourceSymbol": "asset.core.bufftip.LTime",
+          "sourceTagSha256": "9509e10fc1c59ddc12fa5f0de3c58c6c2ddd1605e7afd364eb1ac57e58d10503",
+          "targetTagSha256": "9be082b01a2d01ec9891b3a6704e562d17e24386e52f0e2a8fe0033632efa0d4",
+          "width": 72,
+          "height": 20,
+          "targetWidth": 40,
+          "targetHeight": 20,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            40,
+            20
+          ]
+        },
+        {
+          "targetId": 52,
+          "targetSymbol": "asset.core.leveltip.LevelTipLv",
+          "sourceSymbol": "asset.core.leveltip.LevelTipLv",
+          "sourceTagSha256": "83e8a47b0804d537dadc86fdaddbee98c418684462a5e8c927059be7af610eeb",
+          "targetTagSha256": "660f7244d628daae4d317f5ce493c8a3d578791f317d9f2536358ccc951c0319",
+          "width": 37,
+          "height": 19,
+          "targetWidth": 37,
+          "targetHeight": 19
+        },
+        {
+          "targetId": 51,
+          "targetSymbol": "asset.vipIcon.levelSmal0",
+          "sourceSymbol": "asset.vipIcon.levelSmal0",
+          "sourceTagSha256": "0960dd348837191af43053c3d14ffeb182f709b2ef62a195e4f11413449cb9c8",
+          "targetTagSha256": "6ab518196c32f165fe58268f70c8c590b8b6b0b0b0aa50c9885126cc9f383ddf",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 50,
+          "targetSymbol": "asset.core.consortiaTip.LevelPic",
+          "sourceSymbol": "asset.core.consortiaTip.LevelPic",
+          "sourceTagSha256": "09e94a6bef6a9b9a9c078a7357b01ba27dda4d79bc81d43065f47a9907f3b289",
+          "targetTagSha256": "0b5911c2d65bcdc276d8a0a5ce512b047fc41a9fcd303492c1348a4dd2777c82",
+          "width": 60,
+          "height": 18,
+          "targetWidth": 60,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 49,
+          "targetSymbol": "invite.response.background_response_title",
+          "sourceSymbol": "invite.response.background_response_title",
+          "sourceTagSha256": "e4f68c217d7db4689f4a2e637d6c89daac2e3ba555c8eb14bf6578074938760f",
+          "targetTagSha256": "235679890841ea3b4b1707811d7f8c38d921465f260a0e7f1d89c39aaef2437d",
+          "width": 423,
+          "height": 37,
+          "targetWidth": 423,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 48,
+          "targetSymbol": "asset.vipIcon.levelBig0",
+          "sourceSymbol": "asset.vipIcon.levelBig0",
+          "sourceTagSha256": "cbcb34faa4e2800663f370ba1e8ae1a50b04b61be8f0ca75e8055a47ea0f0cc4",
+          "targetTagSha256": "fa4653ad3c1a3768d09e66a1394112da2ec4e49dde4f2236c3ce8e370bf4c662",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 47,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_9",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_9",
+          "sourceTagSha256": "3e352a1a13e137a3aec469b9ba35b0c5cf9278cb88c6757ea26c271cd4d1eb37",
+          "targetTagSha256": "b8de823fb238afcc105cd1b4e7505c736c352ef1a8c46000f5843f6bb825de5b",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 46,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_8",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_8",
+          "sourceTagSha256": "216701d09716732d9df6f4c42962504d83b1094054181a3feab4641ac8614f93",
+          "targetTagSha256": "aa4614f343a08a469597109cc2aefb727031cac2188f27f1a0fca92ef7339330",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 45,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_7",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_7",
+          "sourceTagSha256": "4c724942d1efbc6253a0ea467ad41de6fc2f5d2e098a5f843ee9c060bdb24455",
+          "targetTagSha256": "90a8eacf6736afc364155c6d284cedf6dd9b15489371342dd33a3d9c4b8218f0",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 44,
+          "targetSymbol": "asset.vipIcon.levelSmal9",
+          "sourceSymbol": "asset.vipIcon.levelSmal9",
+          "sourceTagSha256": "ab6c3f4547365ebfa3f283fb9daed50be35ac3b4e7c71bb01f7b5810ba9eb75a",
+          "targetTagSha256": "2fbf3d4e9e689dc296911cf4508a2f6c371e7cf4f74027f0b77d0b0c96e010a5",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 43,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_6",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_6",
+          "sourceTagSha256": "f64866e8c50ddbb9ded58a58fabee54a712ecf96548bd5ce0840a83e7e1f0338",
+          "targetTagSha256": "0e8b37649a425d3932e971ac9c9dca5d3d5ffb6ce1b6221b84287b064bdfd19d",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 42,
+          "targetSymbol": "asset.core.payBuffAssetFight",
+          "sourceSymbol": "asset.core.payBuffAssetFight",
+          "sourceTagSha256": "764e811c332652d1b07b79b80e464546deee414acc8562f8839f2973774e8600",
+          "targetTagSha256": "c96ff85631dec01b840a9bed76cd9253d02b608b1063a6590b18c9e4e05da122",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 41,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_5",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_5",
+          "sourceTagSha256": "b2988538b00e5b18294975a6a6754f964b4b98e918143566ce7e8b7b87520e64",
+          "targetTagSha256": "a72720043dec21ea67f8c670d99c1e6caa803f03db06f47bac285062eaebbf90",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 40,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_4",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_4",
+          "sourceTagSha256": "29b03a58d64263161e5fbebb793034db52ac4b53b6981e50a2df7e022a6d80ce",
+          "targetTagSha256": "90704434a56d4eb66b736e76e55f5645712f1bf151ab7e9b931bd26c554c1fdf",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 39,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_3",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_3",
+          "sourceTagSha256": "5cdef0ac1de60b36243d469bd8f28cc2efb7569a4ff4ef33aebed4501b0dc27e",
+          "targetTagSha256": "7df41376684cb54f384162ea7a9e8ea7d4fc83a2958bc35b26934a9e3d416349",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 38,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_2",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_2",
+          "sourceTagSha256": "a7aa77c2f3775de07698c93d3435f7f29d6a3cc700706e26a92d04bb833b3bbb",
+          "targetTagSha256": "642c34da47cdb8b0788e4b1a0583fff2d3b38e80c2077c04ad564e56a924a7d5",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 37,
+          "targetSymbol": "bagAndInfo.AddPrice.Labe",
+          "sourceSymbol": "bagAndInfo.AddPrice.Labe",
+          "sourceTagSha256": "baad9d46250501350d9e547971bf1495007be8ef92d50a88340c6eb1dc6e8956",
+          "targetTagSha256": "dd5bfd8d002d25b5bdf7d2569318972e9429e1a0b873996eb68a45924be0ecfb",
+          "width": 81,
+          "height": 67,
+          "targetWidth": 81,
+          "targetHeight": 67,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            101,
+            67
+          ]
+        },
+        {
+          "targetId": 36,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_1",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_1",
+          "sourceTagSha256": "ae1b4d1ac2d9799324851ea3164656b07b62a073efb78a744cc38ce7e5e83cd7",
+          "targetTagSha256": "ab85601c19f396d0fbda836234cc4005f9ab53d5392c25537d345e076b5382a0",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 35,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_0",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_0",
+          "sourceTagSha256": "93005646b8cf463be439cfd5abbfccb0fcaca969a58c208f5a1c27beee77bbdb",
+          "targetTagSha256": "a6a23c0558411ee7809d485f938b065029d0c8a219be723a2bdbfaadd1038c7c",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 34,
+          "targetSymbol": "asset.core.tip.HRuleAsset",
+          "sourceSymbol": "asset.core.tip.HRuleAsset",
+          "sourceTagSha256": "d4d527cb791991e68a235eb672e158649917ba12f8b8258d50778ae95c83a128",
+          "targetTagSha256": "9b344d58808283cd275b36312311756c509cc1af1b553ce76b6cadb99e0d6a5d",
+          "width": 192,
+          "height": 2,
+          "targetWidth": 192,
+          "targetHeight": 2
+        },
+        {
+          "targetId": 33,
+          "targetSymbol": "asset.vipIcon.levelBig9",
+          "sourceSymbol": "asset.vipIcon.levelBig9",
+          "sourceTagSha256": "b14d6c646affa0ad3486af78f4a61f6b1e3a942d9ee626737e1bf831cf0fee50",
+          "targetTagSha256": "b2e3b2ae8d42502ee755e9f3e80828c7c5297b00e781ab4a811f797b5d8a6340",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 32,
+          "targetSymbol": "asset.core.tip.hp",
+          "sourceSymbol": "asset.core.tip.hp",
+          "sourceTagSha256": "27c7abc4ae2f4506c0305f21ec723a8fdfbcb05532fb6b7fb09d6002d840bf88",
+          "targetTagSha256": "1bdc1d25b4f7926acd0e409bfe518bfa9c3c919b84117fadba5e40a5d389a7de",
+          "width": 88,
+          "height": 15,
+          "targetWidth": 86,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            86,
+            18
+          ]
+        },
+        {
+          "targetId": 31,
+          "targetSymbol": "asset.core.bufftip.Hour",
+          "sourceSymbol": "asset.core.bufftip.Hour",
+          "sourceTagSha256": "5fc921f11d5a83d009cc3c486e4b228b404d831553b02022bbd2152797978c2c",
+          "targetTagSha256": "e53b2e76bf43525bf19928c6b7edfa44d15fa2ef61ea6301fd6bc408f14cf946",
+          "width": 34,
+          "height": 20,
+          "targetWidth": 34,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 30,
+          "targetSymbol": "asset.core.guildLevelAsset",
+          "sourceSymbol": "asset.core.guildLevelAsset",
+          "sourceTagSha256": "6e189fe19e72f969aae9dd41fb08932eb45959f1df85a0443cd73d6a3ec73a25",
+          "targetTagSha256": "853a4aa8528768bdea5b48338ca777f04a779ea9a027a032af272a8350508216",
+          "width": 60,
+          "height": 18,
+          "targetWidth": 60,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            60,
+            21
+          ]
+        },
+        {
+          "targetId": 29,
+          "targetSymbol": "asset.core.payBuffAsset",
+          "sourceSymbol": "asset.core.payBuffAsset",
+          "sourceTagSha256": "abc52beb91b8b88a04462046da3519fa9acd6e4081e6eb9803332bfb94ea4748",
+          "targetTagSha256": "e5710ed659577c7e7a215ddabded540a86a6ac736b0ef3b8d0cc85a3d598a27b",
+          "width": 32,
+          "height": 30,
+          "targetWidth": 32,
+          "targetHeight": 30,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            26,
+            30
+          ]
+        },
+        {
+          "targetId": 28,
+          "targetSymbol": "asset.core.tip.GoodsType",
+          "sourceSymbol": "asset.core.tip.GoodsType",
+          "sourceTagSha256": "0a4b4d51ff608a09d987aff10b40c1d8f9509aca8e1b19965e1d58e88ec426da",
+          "targetTagSha256": "e650d3720d524cdc675860c8799730f4dbe841ed344b57fcd4aa7108979ded91",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 16
+        },
+        {
+          "targetId": 27,
+          "targetSymbol": "asset.core.tip.GoodsTipQuality",
+          "sourceSymbol": "asset.core.tip.GoodsTipQuality",
+          "sourceTagSha256": "af6369cc25884b8e47266ef9f0968d45611c022d66f538e49c7e9a98dc420aa2",
+          "targetTagSha256": "97e9852fc3f537569b4413fc64182b7d9ac0a40b54a5a33ced7605c8390fc8aa",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            82,
+            21
+          ]
+        },
+        {
+          "targetId": 26,
+          "targetSymbol": "asset.core.tip.GoodsTipItemRecover1",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemRecover1",
+          "sourceTagSha256": "37a0e708a49f6502c304019f2fa039840672e773cdca66756c390089a89d52aa",
+          "targetTagSha256": "9a9ab9732767305929f9e639efd0407c594294ba68d6c4c3482bdb8ad0df0717",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 22,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            82,
+            22
+          ]
+        },
+        {
+          "targetId": 25,
+          "targetSymbol": "asset.Effort.AchievementPointBG",
+          "sourceSymbol": "asset.Effort.AchievementPointBG",
+          "sourceTagSha256": "e8070c08c427b6c553f238db2a4ebc3a2b9c34b9114551137faaa4f54b69ff96",
+          "targetTagSha256": "91080ab03260703e190dd03b4c7b85aaad47082b3c55cc305b07b54b05fc01b6",
+          "width": 72,
+          "height": 62,
+          "targetWidth": 72,
+          "targetHeight": 62
+        },
+        {
+          "targetId": 24,
+          "targetSymbol": "asset.core.tip.GoodsTipItemRecover",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemRecover",
+          "sourceTagSha256": "b941213b508ac270ab07831f6b8bfd6d058080580190317b5c333f427ef88d5e",
+          "targetTagSha256": "6f635df3a5015cdd7ecce14e19f7caa156afd5752e2c2c13889f226ef6981027",
+          "width": 99,
+          "height": 15,
+          "targetWidth": 99,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 23,
+          "targetSymbol": "asset.core.tip.GoodsTipItemPart",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemPart",
+          "sourceTagSha256": "883cf81175c4a26b343b9fb2598bc734209485caf448289f1fb459d703538f85",
+          "targetTagSha256": "2c28ae19bde1845f92fde3977f846c3ea199d2c7b232cb4d113e3f9b8edddf53",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 94,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            88,
+            15
+          ]
+        },
+        {
+          "targetId": 22,
+          "targetSymbol": "asset.vipIcon.levelSmal8",
+          "sourceSymbol": "asset.vipIcon.levelSmal8",
+          "sourceTagSha256": "60fc4ed139131c95836d1685b3807c40fd209ecc2393a177794f718b45e4f91c",
+          "targetTagSha256": "e714f4a8f6c6f265a29f493463cf475b61ea63693fb743075524702716db2e8e",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 21,
+          "targetSymbol": "asset.core.tip.GoodsTipItemHert",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemHert",
+          "sourceTagSha256": "3225762f2f9ae4a069184da5bf73cc14fbe2a06fe6b12565b4fa09b46aebefe9",
+          "targetTagSha256": "11d90990ccf0f2e582fd5e0dd87b964e4abce2a52fb57fd240763e4e5993b51c",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 114,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            133,
+            15
+          ]
+        },
+        {
+          "targetId": 20,
+          "targetSymbol": "asset.core.tip.GoodsTipItemDefence",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemDefence",
+          "sourceTagSha256": "db1714046e0101df0fa9559edefb75f5baf4cd2242545dd50b1f6992657f9ed7",
+          "targetTagSha256": "c8ecb87d2f411097de033b7c576e55d451d8a6c7a6b0fd98c19504ca50c34f32",
+          "width": 103,
+          "height": 15,
+          "targetWidth": 120,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            120,
+            15
+          ]
+        },
+        {
+          "targetId": 19,
+          "targetSymbol": "asset.core.tip.GoodsTipItemArmAngle",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemArmAngle",
+          "sourceTagSha256": "3f7b7b78c486ca824dc2838d719043392a93eeedcf092c43e62aaf9596acc766",
+          "targetTagSha256": "b762498d9159e28c4a3c0edb0dde54a3c8c54ded2ea322dcfaddff0a341856e5",
+          "width": 88,
+          "height": 15,
+          "targetWidth": 97,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            96,
+            18
+          ]
+        },
+        {
+          "targetId": 18,
+          "targetSymbol": "asset.core.tip.GoodsTipBg",
+          "sourceSymbol": "asset.core.tip.GoodsTipBg",
+          "sourceTagSha256": "312b4454f9a3446bbc38fdd2ecc1a30eb87b67065132f7627dfc3c966a9bb3a4",
+          "targetTagSha256": "a982eae2d32662348e8058b70cc6e0b6d04e09bc8a8cf1beea4bcb479ec4fe93",
+          "width": 71,
+          "height": 56,
+          "targetWidth": 71,
+          "targetHeight": 56
+        },
+        {
+          "targetId": 17,
+          "targetSymbol": "asset.core.tip.GoodsLevel",
+          "sourceSymbol": "asset.core.tip.GoodsLevel",
+          "sourceTagSha256": "dfe4631e57bbb3b757486b1cfaac570aecfe027c393c7336b708ea027b509447",
+          "targetTagSha256": "80eba2378e47d610f2193f41abd1c3f64bea1435d6248be3428307769d78d3a1",
+          "width": 74,
+          "height": 18,
+          "targetWidth": 74,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 16,
+          "targetSymbol": "asset.core.payBuffAsset70",
+          "sourceSymbol": "asset.core.payBuffAsset70",
+          "sourceTagSha256": "ba5ea7fc7f5859d7cbe07b9c08bb295c016b8e67f51f0fa8d2a3c7183f156e96",
+          "targetTagSha256": "4888f72c152ecabeb2071d2122e0529912e1a35410bbc9c485577ad18b2a1549",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 15,
+          "targetSymbol": "bagAndInfo.AddPrice.CheckBtnGiftBG",
+          "sourceSymbol": "bagAndInfo.AddPrice.CheckBtnGiftBG",
+          "sourceTagSha256": "01f8431502efdc5a0da08273a17e8631a8b454885d281ba0168cc4c9c90873d6",
+          "targetTagSha256": "50a16ae434bbd3ba9e8de4583077087c1cd7cfff93ede9a25366ec8cdf3329f9",
+          "width": 62,
+          "height": 34,
+          "targetWidth": 62,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            73,
+            34
+          ]
+        },
+        {
+          "targetId": 14,
+          "targetSymbol": "asset.core.freeAsset",
+          "sourceSymbol": "asset.core.freeAsset",
+          "sourceTagSha256": "c8c52b689b7a64c0c990feceb8bbf07d23eb588e456b3796b90903f3d6ce63d4",
+          "targetTagSha256": "d7f20ebad05134bd8405cf47c34da2e312fece178f986bae0b2a5fc0d2024e51",
+          "width": 60,
+          "height": 60,
+          "targetWidth": 60,
+          "targetHeight": 60
+        },
+        {
+          "targetId": 13,
+          "targetSymbol": "asset.seniorVipIcon.big_9",
+          "sourceSymbol": "asset.seniorVipIcon.big_9",
+          "sourceTagSha256": "7633aa66bcc0d8929596ee126d89c8db9ba859875cb5a73d4334d32db3d26a43",
+          "targetTagSha256": "e40b8258fa7ff8e30f39af1c3fc391c46f9a938644620e01551a9c8ebfb3ff7e",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 12,
+          "targetSymbol": "asset.core.leveltip.ExploitBg",
+          "sourceSymbol": "asset.core.leveltip.ExploitBg",
+          "sourceTagSha256": "5473fc72e2e7474380dd27b08399929076f84e4b3f40627b52da35af07a2cee2",
+          "targetTagSha256": "6ed537b27fd2411ba8d5682ffe4dc3e45676871bcf1ba770a985aeb39f9e3399",
+          "width": 43,
+          "height": 17,
+          "targetWidth": 43,
+          "targetHeight": 25,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            43,
+            25
+          ]
+        },
+        {
+          "targetId": 11,
+          "targetSymbol": "asset.vipIcon.levelBig8",
+          "sourceSymbol": "asset.vipIcon.levelBig8",
+          "sourceTagSha256": "93668c9eabbf04decdfa81cc84568959d75fe9d10f3735e0ae6d773b7ae9019c",
+          "targetTagSha256": "04fdba5e2d18a192f98bf86343c8af97bbca07c2b58b922902c5351de84a9eef",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 10,
+          "targetSymbol": "asset.core.doubleGesteAsset",
+          "sourceSymbol": "asset.core.doubleGesteAsset",
+          "sourceTagSha256": "594641ab8566f097f47743e580b7a570c2b31db2a53483b6fd7687f0b6aa8464",
+          "targetTagSha256": "df4dfc07a956985c3f13708d2d22f5caa1051df57d81006d17ac00467d6ecadb",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 9,
+          "targetSymbol": "asset.core.doubleExpAsset",
+          "sourceSymbol": "asset.core.doubleExpAsset",
+          "sourceTagSha256": "c7cd119b237e0b8ed4812af0ca5d25ab8668263758923537d94a2ab8e015ade1",
+          "targetTagSha256": "f80e1d6beabb5e1f553540fce33ea33f5c982ed2103191c43eff789790549326",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 8,
+          "targetSymbol": "asset.core.bufftip.Day",
+          "sourceSymbol": "asset.core.bufftip.Day",
+          "sourceTagSha256": "a9adbb5bdc08c1d6ee3bcb3aaaea07513e7ce99b67ef5fa0ffafdf3cf1730c43",
+          "targetTagSha256": "c6bfc126dd93ae80c4f2a2c560572f8befb06e85ee0a76fda3b795c2f4d6f3f4",
+          "width": 19,
+          "height": 20,
+          "targetWidth": 33,
+          "targetHeight": 20,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            33,
+            20
+          ]
+        },
+        {
+          "targetId": 7,
+          "targetSymbol": "asset.core.sex_W",
+          "sourceSymbol": "asset.core.sex_W",
+          "sourceTagSha256": "43cc1f87407be37c882e52e16b86d790a0b72c0204acbe3ed32c4bcff985f18b",
+          "targetTagSha256": "74a98162211150c8d36c5d320250db753ac24dd2732e13ee132361a3a5e2b4ae",
+          "width": 18,
+          "height": 23,
+          "targetWidth": 18,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 6,
+          "targetSymbol": "asset.core.sex_M",
+          "sourceSymbol": "asset.core.sex_M",
+          "sourceTagSha256": "ca005fd1b69e3b81a7b95387e74c47d30ae994a20594721a2a876953f94d2ccc",
+          "targetTagSha256": "c08d9b3ffbe7877f8e8a6ec1b4221773f48221c40f97d62a7a7a1123e1e9114f",
+          "width": 18,
+          "height": 24,
+          "targetWidth": 18,
+          "targetHeight": 24
+        },
+        {
+          "targetId": 3,
+          "targetSymbol": "asset.core.payBuffAsset52",
+          "sourceSymbol": "asset.core.payBuffAsset52",
+          "sourceTagSha256": "5d7e3196c63c89a6f3f18c45df27cb137a7cebab558efd1b994702f71ab0ff12",
+          "targetTagSha256": "da8be4379243d078d16d0676f5c6ebdba7a7906be8d4c6ac51778a671ed646db",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 2,
+          "targetSymbol": "asset.core.tip.Color",
+          "sourceSymbol": "asset.core.tip.Color",
+          "sourceTagSha256": "607044cc676ec964842abbcba87863c3df09f85e7da3a34cd1feb075ce87697e",
+          "targetTagSha256": "9d44262d16adad689712dcc85459887723030d718766305b30779b0a2e6f9956",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 94,
+          "targetHeight": 14,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            111,
+            17
+          ]
+        },
+        {
+          "targetId": 1,
+          "targetSymbol": "asset.seniorVipIcon.big_8",
+          "sourceSymbol": "asset.seniorVipIcon.big_8",
+          "sourceTagSha256": "a850473b045feb2cc305c79b2ed4ff8c85a794fdc17dd51fc75f63ce2f086f01",
+          "targetTagSha256": "b35859da825de55a2f983645959fc5bc83c1fd76ad5938e47955c764665ad533",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        }
+      ]
+    },
+    {
+      "name": "coreiconandtip1",
+      "path": "runtime/reference-original-bag-tip-ui-20261015/public-inputs/coreiconandtip_v3_6_1_u3.swf",
+      "sha256": "328fdb53eaee97b2554e57a9fa3e528858b67a0798f05aea8e34f4e18b38d128",
+      "mappings": [
+        {
+          "targetId": 123,
+          "targetSymbol": "asset.latentEnergy.rightArrows",
+          "sourceSymbol": "asset.latentEnergy.rightArrows",
+          "sourceTagSha256": "489b59a17a01020db2a9e4dc9acc8c188d1986b1fcefb379efb1a93c77b8ea2e",
+          "targetTagSha256": "9b2bb05d935beeeab1bf2d2907d4b2a4a3216852474769baf25ebbbe70850c4a",
+          "width": 55,
+          "height": 122,
+          "targetWidth": 55,
+          "targetHeight": 122
+        },
+        {
+          "targetId": 122,
+          "targetSymbol": "asset.latentEnergy.tipIcon",
+          "sourceSymbol": "asset.latentEnergy.tipIcon",
+          "sourceTagSha256": "a5bce03fcd4438d11ff2d3f55a420af507db09c30b0e62553d3623b1ab74d1f6",
+          "targetTagSha256": "d0d5510dde607b9d8cb46717e985c4049bc643f81a7ab3c52fe53db9fc96e1bd",
+          "width": 20,
+          "height": 20,
+          "targetWidth": 20,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 121,
+          "targetSymbol": "asset.seniorVipIcon.small_9",
+          "sourceSymbol": "asset.seniorVipIcon.small_9",
+          "sourceTagSha256": "aa286b0659305d9ac618a580a5e7ac702e04a562c3c2839a35afc248e7def060",
+          "targetTagSha256": "8491c01daa0b177539cb2bf9d649040987beb971de7e4c2b7ca8809866026e02",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 120,
+          "targetSymbol": "asset.core.tip.cardsTipPanel.sets",
+          "sourceSymbol": "asset.core.tip.cardsTipPanel.sets",
+          "sourceTagSha256": "2be2942776c86de04d8dcb13176f87e904e113d98354444dd0adb2d88a489173",
+          "targetTagSha256": "3cf1ce6e01318a6b8ce13497a6a493ca25de65ca292b6464c96f277ed8f36afa",
+          "width": 92,
+          "height": 14,
+          "targetWidth": 84,
+          "targetHeight": 14,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            94,
+            14
+          ]
+        },
+        {
+          "targetId": 119,
+          "targetSymbol": "asset.seniorVipIcon.big_1",
+          "sourceSymbol": "asset.seniorVipIcon.big_1",
+          "sourceTagSha256": "81cd558b42fa2a9d648f32c40bdd4ebcab25ac6b77e0933bf8d611747527da10",
+          "targetTagSha256": "2d0b965a04fd7477e547bc0451573ba0831de49694b99a5a6878aed9612e95c5",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 117,
+          "targetSymbol": "asset.seniorVipIcon.small_2",
+          "sourceSymbol": "asset.seniorVipIcon.small_2",
+          "sourceTagSha256": "ccda427128e9682b89fc929d29e24ea5432ec3f5f09eed23301e8e82473e94d6",
+          "targetTagSha256": "c868645e53d0d56f0e71986f9e91ea796a544b5c88b046ef565daa1cdb468eb9",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 116,
+          "targetSymbol": "asset.seniorVipIcon.big_2",
+          "sourceSymbol": "asset.seniorVipIcon.big_2",
+          "sourceTagSha256": "f037b2324fd10eac2257e359458b7359188fefc6ff2ec155cb37dd237c1f753b",
+          "targetTagSha256": "b1f35092ee36259cd4d98ef63b7d8ff62f704c0fafdb309bf84aa90a1b0319a8",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 114,
+          "targetSymbol": "asset.seniorVipIcon.small_3",
+          "sourceSymbol": "asset.seniorVipIcon.small_3",
+          "sourceTagSha256": "eeba98484ef9d26507eec8385a81378e3d489647ef7825dff25529d3ffe21bb4",
+          "targetTagSha256": "be4a4d1f343377ff36b71e8dc3b779a98858b4bb6620a652e31a577875e0c490",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 113,
+          "targetSymbol": "asset.seniorVipIcon.big_3",
+          "sourceSymbol": "asset.seniorVipIcon.big_3",
+          "sourceTagSha256": "47a87e358f34bc6594f2bb44308beec1f23ce9d3ea2cd78ee598156230ff0229",
+          "targetTagSha256": "bd4caebb44b2ad1c8cb1eb6b45f6699340c37a644209214770958daf06b26ac5",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 111,
+          "targetSymbol": "asset.seniorVipIcon.small_4",
+          "sourceSymbol": "asset.seniorVipIcon.small_4",
+          "sourceTagSha256": "9cca6962e88e61b8412f66829513e43cd5d3ec6efaf781b647906d6f4cb7aa91",
+          "targetTagSha256": "47fae0635df7302b9e78f916bd98cbe1d961a9e4125811ea062adb1e3941abd4",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 110,
+          "targetSymbol": "asset.core.payBuffAsset73.note",
+          "sourceSymbol": "asset.core.payBuffAsset73.note",
+          "sourceTagSha256": "ac443376ffd78177db676ea4e8c1e081e9449310fdf256cc7541c374e8675aea",
+          "targetTagSha256": "2153c999178f9e0a0ef8421de4437f290705bd948ecad1a060effc2856161b9e",
+          "width": 163,
+          "height": 46,
+          "targetWidth": 224,
+          "targetHeight": 50,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            205,
+            50
+          ]
+        },
+        {
+          "targetId": 109,
+          "targetSymbol": "asset.core.payBuffAsset51",
+          "sourceSymbol": "asset.core.payBuffAsset51",
+          "sourceTagSha256": "eea72f3ada5bfafa023076bf1f6fb1769cebe2c231ecf8a4dbc506cbb625f96a",
+          "targetTagSha256": "9c981391c927ceb501ee30309d50828c35266fe463d88c9a956bb20129a6b977",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 108,
+          "targetSymbol": "asset.seniorVipIcon.big_4",
+          "sourceSymbol": "asset.seniorVipIcon.big_4",
+          "sourceTagSha256": "333ef5408707fbfc2fd8089c56f7bb8f28ad451f47f1c208cd667b3f5748fb6e",
+          "targetTagSha256": "939b6c8cf93172856e69d07430c09c7a108d9528d904ec61ae76708830a91b1d",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 106,
+          "targetSymbol": "asset.seniorVipIcon.small_5",
+          "sourceSymbol": "asset.seniorVipIcon.small_5",
+          "sourceTagSha256": "a0e1ba197233d6db8fc6f9abea346bdadea96b4a4d7655d2eec9ebdb9497ea5f",
+          "targetTagSha256": "1a4a32da366e697edfa4811d342f69c65323e5b3ecece9b371ca544becbe944f",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 105,
+          "targetSymbol": "asset.seniorVipIcon.big_5",
+          "sourceSymbol": "asset.seniorVipIcon.big_5",
+          "sourceTagSha256": "106a7ae4cdb24bb489fab5d267437d196094a5d86e51c38987db298ea618fffe",
+          "targetTagSha256": "9e881c8c8a7eda74c064cc3e163660e83aa3c714b0accb970c50175173928c5d",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 104,
+          "targetSymbol": "asset.seniorVipIcon.small_6",
+          "sourceSymbol": "asset.seniorVipIcon.small_6",
+          "sourceTagSha256": "a8c3bb26f402a0b39b1f106cc0f00d3cfd9a830f2b3289a52afaddffa4bb6d7e",
+          "targetTagSha256": "cf0dd1a3b79d1666cb01e7f8fb648fe4867838c7a0936d9715594194977306ab",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 103,
+          "targetSymbol": "asset.seniorVipIcon.big_6",
+          "sourceSymbol": "asset.seniorVipIcon.big_6",
+          "sourceTagSha256": "9e5b45a543f973626189e8cae2d773b86b992897ebaa3db88cf0f78e29f4920d",
+          "targetTagSha256": "82d422f8407cdb492627839b54cf6fb3eea23fafa6c7d9bf1492733c82eff0fc",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 102,
+          "targetSymbol": "asset.seniorVipIcon.small_7",
+          "sourceSymbol": "asset.seniorVipIcon.small_7",
+          "sourceTagSha256": "e266eeb873932c9710c1d20283dd7cda1815603c69e5fcd320efc5b700b1789d",
+          "targetTagSha256": "389affc1225929e3bfc3833f5ddcd672578b3db588a5cd4197e3e4acbbc755ac",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 101,
+          "targetSymbol": "asset.seniorVipIcon.big_7",
+          "sourceSymbol": "asset.seniorVipIcon.big_7",
+          "sourceTagSha256": "9183f36529206ffccba5c72dab7d5b80f99752e679d23d0665fd2acc6f613275",
+          "targetTagSha256": "b3ec8624c985ccca60cb750aa15351d181c3a0af24e02ca3147397568f586cca",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 100,
+          "targetSymbol": "asset.seniorVipIcon.small_8",
+          "sourceSymbol": "asset.seniorVipIcon.small_8",
+          "sourceTagSha256": "5e7b63bd459e7155f108fa19df0528da132b017b5d7699e772afe166c47986e0",
+          "targetTagSha256": "42a6152209790f859e5ec794fcd13a855fb316e615c99b2f4d6e1fbcd4161fda",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        },
+        {
+          "targetId": 99,
+          "targetSymbol": "asset.seniorVipIcon.big_8",
+          "sourceSymbol": "asset.seniorVipIcon.big_8",
+          "sourceTagSha256": "a850473b045feb2cc305c79b2ed4ff8c85a794fdc17dd51fc75f63ce2f086f01",
+          "targetTagSha256": "576eb40233be0c1a07b88bf67ffb88028138e8a90de8c932278a31d283394ddf",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 98,
+          "targetSymbol": "asset.core.tip.Color",
+          "sourceSymbol": "asset.core.tip.Color",
+          "sourceTagSha256": "607044cc676ec964842abbcba87863c3df09f85e7da3a34cd1feb075ce87697e",
+          "targetTagSha256": "6ca29973408ea8fa90b38125c1b6e03229638b1798e73182165fd3600eb86341",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 94,
+          "targetHeight": 14,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            111,
+            17
+          ]
+        },
+        {
+          "targetId": 97,
+          "targetSymbol": "asset.core.payBuffAsset52",
+          "sourceSymbol": "asset.core.payBuffAsset52",
+          "sourceTagSha256": "5d7e3196c63c89a6f3f18c45df27cb137a7cebab558efd1b994702f71ab0ff12",
+          "targetTagSha256": "d0ac704ead3724689f979bad942e833747e1f01ddf701d5e0c35905cc9815927",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 94,
+          "targetSymbol": "asset.core.sex_M",
+          "sourceSymbol": "asset.core.sex_M",
+          "sourceTagSha256": "ca005fd1b69e3b81a7b95387e74c47d30ae994a20594721a2a876953f94d2ccc",
+          "targetTagSha256": "790af941b1dcfd9e462f25c2ada0d6b953a6622e7dd7e76050d96e61a27cbee0",
+          "width": 18,
+          "height": 24,
+          "targetWidth": 18,
+          "targetHeight": 24
+        },
+        {
+          "targetId": 93,
+          "targetSymbol": "asset.core.sex_W",
+          "sourceSymbol": "asset.core.sex_W",
+          "sourceTagSha256": "43cc1f87407be37c882e52e16b86d790a0b72c0204acbe3ed32c4bcff985f18b",
+          "targetTagSha256": "54b4639462744b58dad0fa92dae4a7a955eb297d5b6c4f72684478802dbf7cd1",
+          "width": 18,
+          "height": 23,
+          "targetWidth": 18,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 92,
+          "targetSymbol": "asset.core.bufftip.Day",
+          "sourceSymbol": "asset.core.bufftip.Day",
+          "sourceTagSha256": "a9adbb5bdc08c1d6ee3bcb3aaaea07513e7ce99b67ef5fa0ffafdf3cf1730c43",
+          "targetTagSha256": "1736f3e2c904f9de47a8c9a9220e5d9cec4e7fee78ed5562fa2cdc57fc4c9ef9",
+          "width": 19,
+          "height": 20,
+          "targetWidth": 33,
+          "targetHeight": 20,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            33,
+            20
+          ]
+        },
+        {
+          "targetId": 91,
+          "targetSymbol": "asset.core.doubleExpAsset",
+          "sourceSymbol": "asset.core.doubleExpAsset",
+          "sourceTagSha256": "c7cd119b237e0b8ed4812af0ca5d25ab8668263758923537d94a2ab8e015ade1",
+          "targetTagSha256": "cdd1b00489d5a8a0197e07b4d0bb44b71cc6dbbeca177ff2fdcf61655898be3f",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 90,
+          "targetSymbol": "asset.core.doubleGesteAsset",
+          "sourceSymbol": "asset.core.doubleGesteAsset",
+          "sourceTagSha256": "594641ab8566f097f47743e580b7a570c2b31db2a53483b6fd7687f0b6aa8464",
+          "targetTagSha256": "ac18f13957d2c09248e3ebc92ad02b3cb3b6d3fa4e2aeb06fe7b226a76ac5262",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 89,
+          "targetSymbol": "asset.core.leveltip.ExploitBg",
+          "sourceSymbol": "asset.core.leveltip.ExploitBg",
+          "sourceTagSha256": "5473fc72e2e7474380dd27b08399929076f84e4b3f40627b52da35af07a2cee2",
+          "targetTagSha256": "345b66d4da40e0d86935d00909b409c7f87a6cd71e7c975252d58275135dc94a",
+          "width": 43,
+          "height": 17,
+          "targetWidth": 43,
+          "targetHeight": 25,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            43,
+            25
+          ]
+        },
+        {
+          "targetId": 88,
+          "targetSymbol": "asset.seniorVipIcon.big_9",
+          "sourceSymbol": "asset.seniorVipIcon.big_9",
+          "sourceTagSha256": "7633aa66bcc0d8929596ee126d89c8db9ba859875cb5a73d4334d32db3d26a43",
+          "targetTagSha256": "e24fba16fb78c221d587104c28cf06f0631bb6acbe110a520f80cd848cf0c6a1",
+          "width": 40,
+          "height": 40,
+          "targetWidth": 40,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 87,
+          "targetSymbol": "asset.core.freeAsset",
+          "sourceSymbol": "asset.core.freeAsset",
+          "sourceTagSha256": "c8c52b689b7a64c0c990feceb8bbf07d23eb588e456b3796b90903f3d6ce63d4",
+          "targetTagSha256": "283de07457794448c0db7761689cb2011a5a9ee2c5e2295ab6bd13418ea3752a",
+          "width": 60,
+          "height": 60,
+          "targetWidth": 60,
+          "targetHeight": 60
+        },
+        {
+          "targetId": 86,
+          "targetSymbol": "bagAndInfo.AddPrice.CheckBtnGiftBG",
+          "sourceSymbol": "bagAndInfo.AddPrice.CheckBtnGiftBG",
+          "sourceTagSha256": "01f8431502efdc5a0da08273a17e8631a8b454885d281ba0168cc4c9c90873d6",
+          "targetTagSha256": "bc078327136240ba4af13fc59749c56a5374d3b7face983b608d6cf6a645a06b",
+          "width": 62,
+          "height": 34,
+          "targetWidth": 62,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            73,
+            34
+          ]
+        },
+        {
+          "targetId": 85,
+          "targetSymbol": "asset.core.payBuffAsset70",
+          "sourceSymbol": "asset.core.payBuffAsset70",
+          "sourceTagSha256": "ba5ea7fc7f5859d7cbe07b9c08bb295c016b8e67f51f0fa8d2a3c7183f156e96",
+          "targetTagSha256": "97df62148feceada3274bfd8e94e79054d1a2c53071c8d83dc7c1bfd7108c720",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 84,
+          "targetSymbol": "asset.core.tip.GoodsLevel",
+          "sourceSymbol": "asset.core.tip.GoodsLevel",
+          "sourceTagSha256": "dfe4631e57bbb3b757486b1cfaac570aecfe027c393c7336b708ea027b509447",
+          "targetTagSha256": "934f1fd00c7a42d70bb244eda916b9a6244becc154f9ef0e655b3e74cab54513",
+          "width": 74,
+          "height": 18,
+          "targetWidth": 74,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 83,
+          "targetSymbol": "asset.core.tip.GoodsTipBg",
+          "sourceSymbol": "asset.core.tip.GoodsTipBg",
+          "sourceTagSha256": "312b4454f9a3446bbc38fdd2ecc1a30eb87b67065132f7627dfc3c966a9bb3a4",
+          "targetTagSha256": "ea3e5c7ff08962bf8a5de198f3c06693d4430cc1d5832764c8800623ee39f197",
+          "width": 71,
+          "height": 56,
+          "targetWidth": 71,
+          "targetHeight": 56
+        },
+        {
+          "targetId": 82,
+          "targetSymbol": "asset.core.tip.GoodsTipItemArmAngle",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemArmAngle",
+          "sourceTagSha256": "3f7b7b78c486ca824dc2838d719043392a93eeedcf092c43e62aaf9596acc766",
+          "targetTagSha256": "2d2026c6123226f29c695b2cd11b208d8f787b5c633e810323d34b732cc871c9",
+          "width": 88,
+          "height": 15,
+          "targetWidth": 97,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            96,
+            18
+          ]
+        },
+        {
+          "targetId": 81,
+          "targetSymbol": "asset.core.tip.GoodsTipItemDefence",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemDefence",
+          "sourceTagSha256": "db1714046e0101df0fa9559edefb75f5baf4cd2242545dd50b1f6992657f9ed7",
+          "targetTagSha256": "c83bdc4c117f8eee6e6faca646467dd1782fee31ad3fa11f1635b276eb4b875e",
+          "width": 103,
+          "height": 15,
+          "targetWidth": 120,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            120,
+            15
+          ]
+        },
+        {
+          "targetId": 80,
+          "targetSymbol": "asset.core.tip.GoodsTipItemHert",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemHert",
+          "sourceTagSha256": "3225762f2f9ae4a069184da5bf73cc14fbe2a06fe6b12565b4fa09b46aebefe9",
+          "targetTagSha256": "4ecd1a9e07659a04a0c2f5ad8fca771e708235f1f062a36fc93f0028c284d56b",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 114,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            133,
+            15
+          ]
+        },
+        {
+          "targetId": 79,
+          "targetSymbol": "asset.core.tip.GoodsTipItemPart",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemPart",
+          "sourceTagSha256": "883cf81175c4a26b343b9fb2598bc734209485caf448289f1fb459d703538f85",
+          "targetTagSha256": "cc1f48352ee0aa973a89ffac81815b4d6f2601ed32ba2211cb1d6abeb455bd2f",
+          "width": 80,
+          "height": 15,
+          "targetWidth": 94,
+          "targetHeight": 15,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            88,
+            15
+          ]
+        },
+        {
+          "targetId": 78,
+          "targetSymbol": "asset.core.tip.GoodsTipItemRecover",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemRecover",
+          "sourceTagSha256": "b941213b508ac270ab07831f6b8bfd6d058080580190317b5c333f427ef88d5e",
+          "targetTagSha256": "f1326a621223c4149a8bd2b7532b5eebc7e73f05a4ed5749734b0775d360f297",
+          "width": 99,
+          "height": 15,
+          "targetWidth": 99,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 77,
+          "targetSymbol": "asset.Effort.AchievementPointBG",
+          "sourceSymbol": "asset.Effort.AchievementPointBG",
+          "sourceTagSha256": "e8070c08c427b6c553f238db2a4ebc3a2b9c34b9114551137faaa4f54b69ff96",
+          "targetTagSha256": "0fd6337834d513a31711ba6dbc13db195b9733ae406c497614411e99f38c2a98",
+          "width": 72,
+          "height": 62,
+          "targetWidth": 72,
+          "targetHeight": 62
+        },
+        {
+          "targetId": 76,
+          "targetSymbol": "asset.core.tip.GoodsTipItemRecover1",
+          "sourceSymbol": "asset.core.tip.GoodsTipItemRecover1",
+          "sourceTagSha256": "37a0e708a49f6502c304019f2fa039840672e773cdca66756c390089a89d52aa",
+          "targetTagSha256": "86ad61e8e6f2fcc736ddd1b276c66a3043477a1653faca433cd91f3aa6335705",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 22,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            82,
+            22
+          ]
+        },
+        {
+          "targetId": 75,
+          "targetSymbol": "asset.core.tip.GoodsTipQuality",
+          "sourceSymbol": "asset.core.tip.GoodsTipQuality",
+          "sourceTagSha256": "af6369cc25884b8e47266ef9f0968d45611c022d66f538e49c7e9a98dc420aa2",
+          "targetTagSha256": "7141385fcad0c45ca58eadbe5eae37a9da6257e05f5c5f0033636f8c98287049",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            82,
+            21
+          ]
+        },
+        {
+          "targetId": 74,
+          "targetSymbol": "asset.core.tip.GoodsType",
+          "sourceSymbol": "asset.core.tip.GoodsType",
+          "sourceTagSha256": "0a4b4d51ff608a09d987aff10b40c1d8f9509aca8e1b19965e1d58e88ec426da",
+          "targetTagSha256": "b83b0409af76e390fe61d32a37016f77408583cbf0969349951ee58123a85dab",
+          "width": 82,
+          "height": 16,
+          "targetWidth": 82,
+          "targetHeight": 16
+        },
+        {
+          "targetId": 73,
+          "targetSymbol": "asset.core.payBuffAsset",
+          "sourceSymbol": "asset.core.payBuffAsset",
+          "sourceTagSha256": "abc52beb91b8b88a04462046da3519fa9acd6e4081e6eb9803332bfb94ea4748",
+          "targetTagSha256": "db5cc42440cc2018bea4e3c34cd46b994b89abd743fe64d9127cc278bbd985e8",
+          "width": 32,
+          "height": 30,
+          "targetWidth": 32,
+          "targetHeight": 30,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            26,
+            30
+          ]
+        },
+        {
+          "targetId": 72,
+          "targetSymbol": "asset.core.guildLevelAsset",
+          "sourceSymbol": "asset.core.guildLevelAsset",
+          "sourceTagSha256": "6e189fe19e72f969aae9dd41fb08932eb45959f1df85a0443cd73d6a3ec73a25",
+          "targetTagSha256": "12c4476b7959dd1c87740a4ff240e8d040c896aedc673e5ad5e691319f81f461",
+          "width": 60,
+          "height": 18,
+          "targetWidth": 60,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            60,
+            21
+          ]
+        },
+        {
+          "targetId": 71,
+          "targetSymbol": "asset.core.bufftip.Hour",
+          "sourceSymbol": "asset.core.bufftip.Hour",
+          "sourceTagSha256": "5fc921f11d5a83d009cc3c486e4b228b404d831553b02022bbd2152797978c2c",
+          "targetTagSha256": "4473c5fa35e3868101073b13c25e65f26a674f4aa52d5bbecd0928cb20151eac",
+          "width": 34,
+          "height": 20,
+          "targetWidth": 34,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 70,
+          "targetSymbol": "asset.core.tip.hp",
+          "sourceSymbol": "asset.core.tip.hp",
+          "sourceTagSha256": "27c7abc4ae2f4506c0305f21ec723a8fdfbcb05532fb6b7fb09d6002d840bf88",
+          "targetTagSha256": "25413e7d2b921108e9d02e41fb141fb7d0b3d962c88796cb106951e3e80175dd",
+          "width": 88,
+          "height": 15,
+          "targetWidth": 86,
+          "targetHeight": 18,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            86,
+            18
+          ]
+        },
+        {
+          "targetId": 69,
+          "targetSymbol": "asset.core.tip.HRuleAsset",
+          "sourceSymbol": "asset.core.tip.HRuleAsset",
+          "sourceTagSha256": "d4d527cb791991e68a235eb672e158649917ba12f8b8258d50778ae95c83a128",
+          "targetTagSha256": "8156e646eb630842d63bea5cbdac9a547929fef1c7bea4355fccbfa6dfd256ac",
+          "width": 192,
+          "height": 2,
+          "targetWidth": 192,
+          "targetHeight": 2
+        },
+        {
+          "targetId": 68,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_0",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_0",
+          "sourceTagSha256": "93005646b8cf463be439cfd5abbfccb0fcaca969a58c208f5a1c27beee77bbdb",
+          "targetTagSha256": "197087e8b5a177b619084c46e8f36b8b0ad3b12fe71e1b42d31546bc25a9928c",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 67,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_1",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_1",
+          "sourceTagSha256": "ae1b4d1ac2d9799324851ea3164656b07b62a073efb78a744cc38ce7e5e83cd7",
+          "targetTagSha256": "cc571869f19a5291ab2326393b722d914797adb8a821713d60372e834db181de",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 66,
+          "targetSymbol": "bagAndInfo.AddPrice.Labe",
+          "sourceSymbol": "bagAndInfo.AddPrice.Labe",
+          "sourceTagSha256": "baad9d46250501350d9e547971bf1495007be8ef92d50a88340c6eb1dc6e8956",
+          "targetTagSha256": "8eeca07bed11f84ab6b1faafada21d77bb5b5c46322c46c5b1c8240d02184e24",
+          "width": 81,
+          "height": 67,
+          "targetWidth": 81,
+          "targetHeight": 67,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            101,
+            67
+          ]
+        },
+        {
+          "targetId": 65,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_2",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_2",
+          "sourceTagSha256": "a7aa77c2f3775de07698c93d3435f7f29d6a3cc700706e26a92d04bb833b3bbb",
+          "targetTagSha256": "9f8d20cce63eea44e0879130dcac2e904a8f0883709037e84e588f69006c12c9",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 64,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_3",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_3",
+          "sourceTagSha256": "5cdef0ac1de60b36243d469bd8f28cc2efb7569a4ff4ef33aebed4501b0dc27e",
+          "targetTagSha256": "b07b4a5651fa4f0bb32b835950fab33e7b4d777f72b5fe52e1b35072e58c7b63",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 63,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_4",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_4",
+          "sourceTagSha256": "29b03a58d64263161e5fbebb793034db52ac4b53b6981e50a2df7e022a6d80ce",
+          "targetTagSha256": "f1484037da7848a65f694ef476b084a04b694bc78f5b64a67983d012a2fddff8",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 62,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_5",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_5",
+          "sourceTagSha256": "b2988538b00e5b18294975a6a6754f964b4b98e918143566ce7e8b7b87520e64",
+          "targetTagSha256": "cf73f5c224e5a5eca6398ebb5941f60995cc8f74b8f275df0fcac4165997e486",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 61,
+          "targetSymbol": "asset.core.payBuffAssetFight",
+          "sourceSymbol": "asset.core.payBuffAssetFight",
+          "sourceTagSha256": "764e811c332652d1b07b79b80e464546deee414acc8562f8839f2973774e8600",
+          "targetTagSha256": "b3be663b6308d28d0cae5598a5dceae2146216f4edcc04c2d919af033ac1a5ed",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 60,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_6",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_6",
+          "sourceTagSha256": "f64866e8c50ddbb9ded58a58fabee54a712ecf96548bd5ce0840a83e7e1f0338",
+          "targetTagSha256": "8a4f46e08fbc78e3f84257b5e58f8d7b817b50b2d00ec8c8cfd92f7a474a3ae0",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 59,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_7",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_7",
+          "sourceTagSha256": "4c724942d1efbc6253a0ea467ad41de6fc2f5d2e098a5f843ee9c060bdb24455",
+          "targetTagSha256": "9eddbde221aeab73b2020829730196f407180800cbcd2124d1b245cc62ed3bf6",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 58,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_8",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_8",
+          "sourceTagSha256": "216701d09716732d9df6f4c42962504d83b1094054181a3feab4641ac8614f93",
+          "targetTagSha256": "9792e54b6ae8e0d14ec2037690680cea196da9655e3f1d72f9cb53fe4cef315d",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 57,
+          "targetSymbol": "asset.core.leveltip.Level_Tip_9",
+          "sourceSymbol": "asset.core.leveltip.Level_Tip_9",
+          "sourceTagSha256": "3e352a1a13e137a3aec469b9ba35b0c5cf9278cb88c6757ea26c271cd4d1eb37",
+          "targetTagSha256": "b81f621ea9ac39a4f60c1df62784334458c9e568e081df1159d396769dad0ee2",
+          "width": 14,
+          "height": 15,
+          "targetWidth": 14,
+          "targetHeight": 15
+        },
+        {
+          "targetId": 56,
+          "targetSymbol": "asset.vipIcon.levelBig0",
+          "sourceSymbol": "asset.vipIcon.levelBig0",
+          "sourceTagSha256": "cbcb34faa4e2800663f370ba1e8ae1a50b04b61be8f0ca75e8055a47ea0f0cc4",
+          "targetTagSha256": "f08a632090a2a5ca6ae73929aa2ceb3de2e2552c234606b3939c564d112c7f77",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 55,
+          "targetSymbol": "invite.response.background_response_title",
+          "sourceSymbol": "invite.response.background_response_title",
+          "sourceTagSha256": "e4f68c217d7db4689f4a2e637d6c89daac2e3ba555c8eb14bf6578074938760f",
+          "targetTagSha256": "addaf11cc164ed4e84180c22b075347e28bb9453f58f5310b1a3e4fec7c4f333",
+          "width": 423,
+          "height": 37,
+          "targetWidth": 423,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 54,
+          "targetSymbol": "asset.core.consortiaTip.LevelPic",
+          "sourceSymbol": "asset.core.consortiaTip.LevelPic",
+          "sourceTagSha256": "09e94a6bef6a9b9a9c078a7357b01ba27dda4d79bc81d43065f47a9907f3b289",
+          "targetTagSha256": "6c2de9439a21ef232cf08cc46597c0961f2960d2cd1550e142555ff93eba49a0",
+          "width": 60,
+          "height": 18,
+          "targetWidth": 60,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 53,
+          "targetSymbol": "asset.vipIcon.levelSmal0",
+          "sourceSymbol": "asset.vipIcon.levelSmal0",
+          "sourceTagSha256": "0960dd348837191af43053c3d14ffeb182f709b2ef62a195e4f11413449cb9c8",
+          "targetTagSha256": "77f2436a6933d3d25bf7ac7820ea54f7a1aac28b3d665b04c2b8f41f06a65c85",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 52,
+          "targetSymbol": "asset.core.leveltip.LevelTipLv",
+          "sourceSymbol": "asset.core.leveltip.LevelTipLv",
+          "sourceTagSha256": "83e8a47b0804d537dadc86fdaddbee98c418684462a5e8c927059be7af610eeb",
+          "targetTagSha256": "9d3919a33e2a24e63b1f6e983c27ce852d3a7a6e1befcdc67625a38edec78983",
+          "width": 37,
+          "height": 19,
+          "targetWidth": 37,
+          "targetHeight": 19
+        },
+        {
+          "targetId": 51,
+          "targetSymbol": "asset.core.bufftip.LTime",
+          "sourceSymbol": "asset.core.bufftip.LTime",
+          "sourceTagSha256": "9509e10fc1c59ddc12fa5f0de3c58c6c2ddd1605e7afd364eb1ac57e58d10503",
+          "targetTagSha256": "7ef0942c0e402fbf114e3aede2cff4187eb1b891653da95db289d643452ab81f",
+          "width": 72,
+          "height": 20,
+          "targetWidth": 40,
+          "targetHeight": 20,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            40,
+            20
+          ]
+        },
+        {
+          "targetId": 50,
+          "targetSymbol": "asset.core.MarriedIcon",
+          "sourceSymbol": "asset.core.MarriedIcon",
+          "sourceTagSha256": "8fee6718feb030c61d835ef0b409f9b2a2931e1566e5515fad92db4770e2a098",
+          "targetTagSha256": "edb4b145952363924268341fabd58106aa2e9d352419836c7ed2c54cf6e2e6dd",
+          "width": 26,
+          "height": 26,
+          "targetWidth": 26,
+          "targetHeight": 26
+        },
+        {
+          "targetId": 49,
+          "targetSymbol": "asset.core.payBuffAsset50",
+          "sourceSymbol": "asset.core.payBuffAsset50",
+          "sourceTagSha256": "40ac0edd6aeaa99828fcbff7a5b8575a63cd4ffee9a2926f53afafcb510643d2",
+          "targetTagSha256": "23ceacb228c79edde534bda7adf53d4632513ad6a7ccdf8712e60b9ad65e86c8",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 48,
+          "targetSymbol": "asset.core.bufftip.Min",
+          "sourceSymbol": "asset.core.bufftip.Min",
+          "sourceTagSha256": "5acf0f5d06613ba2589e9a5680c4d74afca667239739eb7631fb733f0212b59e",
+          "targetTagSha256": "02f4e43cd41f58e1104e1da69bdccfafc5a9a8a7a9e05c9536a117e9b5db1ebd",
+          "width": 34,
+          "height": 20,
+          "targetWidth": 34,
+          "targetHeight": 20
+        },
+        {
+          "targetId": 47,
+          "targetSymbol": "bagAndInfo.AddPrice.CheckBtnMoneyBG",
+          "sourceSymbol": "bagAndInfo.AddPrice.CheckBtnMoneyBG",
+          "sourceTagSha256": "f3e4058690d5b068235b5789b3963a5e11e5f83b3f8eca1ed694989b592a2dec",
+          "targetTagSha256": "9eb47877f37812154c6edc8a3fda9fdb1a47e7d151cf6148389e480486564798",
+          "width": 62,
+          "height": 34,
+          "targetWidth": 62,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            72,
+            34
+          ]
+        },
+        {
+          "targetId": 46,
+          "targetSymbol": "asset.coreIcon.orderNo1Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo1Asset",
+          "sourceTagSha256": "5d6a585144b0d15e04f3ad1f3593da99d6a926fed74309a16627871db58863fb",
+          "targetTagSha256": "d34effa45af1db41015ef397dfdf788a3f02e1946d93a6335970ea5ec87ad548",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 45,
+          "targetSymbol": "asset.coreIcon.orderNo2Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo2Asset",
+          "sourceTagSha256": "73c0a9ee97475ca36a470b1d5a67180ae491d1dcba9a7a01f688a49158ecc348",
+          "targetTagSha256": "bf2e2cc547de8ec26c8787a2749c851237b568eedb19859e32e24d5c83902c0d",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 44,
+          "targetSymbol": "asset.core.tip.Band1",
+          "sourceSymbol": "asset.core.tip.Band1",
+          "sourceTagSha256": "6de14bb6e88ea89c0af7b227cba9d8da385deeacb444e7c5d7661edf8c242c1d",
+          "targetTagSha256": "169aad4cc48ca02a3a13a6e36c5ae19bd3ca6769d5569c23fa4e14b1d620f40e",
+          "width": 57,
+          "height": 27,
+          "targetWidth": 57,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 43,
+          "targetSymbol": "asset.coreIcon.orderNo3Asset",
+          "sourceSymbol": "asset.coreIcon.orderNo3Asset",
+          "sourceTagSha256": "09278279dd0cd78cffa2322fa2aa4ea07aaedcb808e6fdae38938adfb3ad4d6f",
+          "targetTagSha256": "87353fec3c44556c63da150925f995ae688a916f60a4d3389d65dcb0633bd534",
+          "width": 49,
+          "height": 27,
+          "targetWidth": 49,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 42,
+          "targetSymbol": "asset.core.PayBuffBtn",
+          "sourceSymbol": "asset.core.PayBuffBtn",
+          "sourceTagSha256": "bd257fb71f2d44123c7a78fc8b317d950561a03c168f4aa5e7d4686afdf0b181",
+          "targetTagSha256": "a11015ef193f428353036d854ac09defb494de36c1b070f595eed7b063616797",
+          "width": 81,
+          "height": 39,
+          "targetWidth": 84,
+          "targetHeight": 41,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            95,
+            41
+          ]
+        },
+        {
+          "targetId": 41,
+          "targetSymbol": "asset.core.pvtKickAsset",
+          "sourceSymbol": "asset.core.pvtKickAsset",
+          "sourceTagSha256": "1eaaf3356dc4d5c82556faa4eb7b9810a6db1848a16b9a9ddbd8b5d2e65d1c2c",
+          "targetTagSha256": "1533970f5461b41b57e5a6ffeb83cc47c5fe7e4274e6e6fc5c277f79698121b6",
+          "width": 46,
+          "height": 58,
+          "targetWidth": 46,
+          "targetHeight": 58
+        },
+        {
+          "targetId": 40,
+          "targetSymbol": "asset.core.leveltip.ReputeBg",
+          "sourceSymbol": "asset.core.leveltip.ReputeBg",
+          "sourceTagSha256": "edee4cbd189da19a5bb39e182b4f4607bde7ee4db3915a133a86861af670a305",
+          "targetTagSha256": "13dc3b1d97373213129731e6cd0b1eda22876a7fcf2dec7f0bfa662bfe8b151a",
+          "width": 43,
+          "height": 18,
+          "targetWidth": 43,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 39,
+          "targetSymbol": "asset.core.consortiaTip.ReputePic",
+          "sourceSymbol": "asset.core.consortiaTip.ReputePic",
+          "sourceTagSha256": "f1f189505cdd9e2f744182c43ce4ab7eb159038a5e74df4abc160e246b957fe2",
+          "targetTagSha256": "c093b501397d6ac6e1471038e8e35185e54c9d1c29e78af82e7c3fd395567eb0",
+          "width": 43,
+          "height": 18,
+          "targetWidth": 43,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 38,
+          "targetSymbol": "invite.response.response_mode1",
+          "sourceSymbol": "invite.response.response_mode1",
+          "sourceTagSha256": "bce77edd67037ccf28f8d5d9bbc3cd931eba3c00dbe2a3bd95020526a3cd613b",
+          "targetTagSha256": "bc52a52f8b34d5493167c1d9ecb26ce425ab25eb8d793ca171c988e39feb9f8e",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 37,
+          "targetSymbol": "asset.core.payBuffAsset71",
+          "sourceSymbol": "asset.core.payBuffAsset71",
+          "sourceTagSha256": "6a6670af0faca1177f0e0681307a7080ffe211fdd66079be1a6383dece1a94ea",
+          "targetTagSha256": "e4cf4cfd3f962ae63391c61bab1e70655c161fa35c266ec572ff70e05bf374cc",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 36,
+          "targetSymbol": "invite.response.response_mode2",
+          "sourceSymbol": "invite.response.response_mode2",
+          "sourceTagSha256": "28a677ac95cd893a6c5b097cfbef67ecd9aa82fbd010a51e64c5aeeb2dfbafcf",
+          "targetTagSha256": "4553f0056dec049657ab234f735949d11d99e826fb28782ee60a196dcaebbb3a",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 36,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 35,
+          "targetSymbol": "invite.response.response_mode3",
+          "sourceSymbol": "invite.response.response_mode3",
+          "sourceTagSha256": "f828820f8c09b3ffd60558641e1b65e7db0f2c0ba424438155b163af28e84ecc",
+          "targetTagSha256": "08a834f83aa89582a297d43d3a42bdef246ca4e52a97624108007dafa95fbae0",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 34,
+          "targetSymbol": "invite.response.response_mode4",
+          "sourceSymbol": "invite.response.response_mode4",
+          "sourceTagSha256": "770e75bf60ec6942970f242b386b81e7d3b410c96ca8c6330d3f11d459d91ce0",
+          "targetTagSha256": "b6fa1896f549646433aa81e7d2eb21d27c36c5d67717d26c4c6be328b3ed83ae",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 33,
+          "targetSymbol": "asset.core.tip.Band2",
+          "sourceSymbol": "asset.core.tip.Band2",
+          "sourceTagSha256": "95c00eb891d87e54aee354593cfaa81623a036910bfa0f00e12e7f9e7c839f94",
+          "targetTagSha256": "7afebda6ed9ee15901bebd0747b9003a24464019cf41819a3db2e8de2d6ae014",
+          "width": 57,
+          "height": 27,
+          "targetWidth": 57,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 32,
+          "targetSymbol": "invite.response.response_mode5",
+          "sourceSymbol": "invite.response.response_mode5",
+          "sourceTagSha256": "04aa7181bf95fe48559b938fe50b3cf0ed383c703d8f0a07b746a49365fd94ad",
+          "targetTagSha256": "1a554833b706405e5ddaf69e3b4ec50db94864d498980aca22bfaff0a1df9e41",
+          "width": 89,
+          "height": 33,
+          "targetWidth": 89,
+          "targetHeight": 33,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            104,
+            33
+          ]
+        },
+        {
+          "targetId": 31,
+          "targetSymbol": "asset.core.tip.restTime",
+          "sourceSymbol": "asset.core.tip.restTime",
+          "sourceTagSha256": "5c849006a6a163c1d3c2354bbf691852c36f971378facf0026059b363d4c5555",
+          "targetTagSha256": "d9a4e9cfab5150c15ec44764aa73a2ce2e6d62c24ecfc0f12c66ca1bc164e8f0",
+          "width": 133,
+          "height": 17,
+          "targetWidth": 133,
+          "targetHeight": 17
+        },
+        {
+          "targetId": 30,
+          "targetSymbol": "asset.core.consortiaTip.StatePic",
+          "sourceSymbol": "asset.core.consortiaTip.StatePic",
+          "sourceTagSha256": "6bb2e7ebd1566778158a3060ed49c708d8411cc188640737237b1c492cc96b64",
+          "targetTagSha256": "0ba2b73fdc25d3d71ac5ecbcf0409d750034a916d2ad6e0cbb114dbb8a6a880d",
+          "width": 47,
+          "height": 19,
+          "targetWidth": 58,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            58,
+            21
+          ]
+        },
+        {
+          "targetId": 29,
+          "targetSymbol": "asset.core.QQtipsBG",
+          "sourceSymbol": "asset.core.QQtipsBG",
+          "sourceTagSha256": "fd08b9878f8fd6275e8b81651099ef92d87b71311c531f416065989c5436b22a",
+          "targetTagSha256": "b17ace6e27b6f6ec8b6e22cac255e842cbcf78eb4b05d70d2601cbf68149c600",
+          "width": 268,
+          "height": 167,
+          "targetWidth": 268,
+          "targetHeight": 167
+        },
+        {
+          "targetId": 28,
+          "targetSymbol": "asset.coreIcon.EdictumTitle",
+          "sourceSymbol": "asset.coreIcon.EdictumTitle",
+          "sourceTagSha256": "1eb62afd14b8f24009ee7dc64eacd72184776282e1cec557b6241e3a2f0c7b0d",
+          "targetTagSha256": "84c16d4140c614d6e879929553ec8f38357f3d790f389dea173d71342a2dcd86",
+          "width": 295,
+          "height": 45,
+          "targetWidth": 295,
+          "targetHeight": 45
+        },
+        {
+          "targetId": 27,
+          "targetSymbol": "asset.vipIcon.levelBig1",
+          "sourceSymbol": "asset.vipIcon.levelBig1",
+          "sourceTagSha256": "d3b6ce1db04a54822d18e097192b6c9433c5c6d1459c2426dade1ca4b32b1336",
+          "targetTagSha256": "4afd39fbe0bca9b0a9f0e3f4451125770624ed0c7a701080cf4fc3fc8bb884de",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 26,
+          "targetSymbol": "asset.vipIcon.levelSmal1",
+          "sourceSymbol": "asset.vipIcon.levelSmal1",
+          "sourceTagSha256": "c98e0b9c4a72df671b7de0e97d9046f0e871e5b7e0dc52454929de5136f42296",
+          "targetTagSha256": "88e6651622bb1ad76dd753cfac2beb232c7bbfce98497c83a873513af08635cd",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 25,
+          "targetSymbol": "asset.core.payBuffAsset72",
+          "sourceSymbol": "asset.core.payBuffAsset72",
+          "sourceTagSha256": "a7ddb55e1d6c883a01252b1d4f7503116afbcecd5a18258344104559d1371a4b",
+          "targetTagSha256": "71d36609281dc01de01789126b3c30f735a1043dcd14f9c47063f2abc3705f69",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 24,
+          "targetSymbol": "asset.vipIcon.levelBig2",
+          "sourceSymbol": "asset.vipIcon.levelBig2",
+          "sourceTagSha256": "b5f74c7f6f8b88ad0659f3d7af8682372610f0e4eb8ef19fc66fbc94b5af0c6c",
+          "targetTagSha256": "031a4c64c68d733f990e221bb92cff571473fefcefda9c0e58eb6126cd00f066",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 23,
+          "targetSymbol": "asset.vipIcon.levelSmal2",
+          "sourceSymbol": "asset.vipIcon.levelSmal2",
+          "sourceTagSha256": "e91ee16a6160a7633d936e9e45ee5c3c19cdadd8938a078a65e59522d18607aa",
+          "targetTagSha256": "cd2e242f65f510f17b5ac20d8e2bec729a870aae011eece1041b3d58f933aa56",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 22,
+          "targetSymbol": "asset.core.leveltip.BattleBg",
+          "sourceSymbol": "asset.core.leveltip.BattleBg",
+          "sourceTagSha256": "4c7efff1675fc91c8e1c69dcbf74ed3647a107d6f370ada803fece670e3edf3c",
+          "targetTagSha256": "9f61a209ea31da35e11a91a668ee4135403f44b5ce163e3ec0362c7a1447fbf8",
+          "width": 46,
+          "height": 18,
+          "targetWidth": 46,
+          "targetHeight": 18
+        },
+        {
+          "targetId": 21,
+          "targetSymbol": "asset.vipIcon.levelBig3",
+          "sourceSymbol": "asset.vipIcon.levelBig3",
+          "sourceTagSha256": "7bce02cf2232ad3def1e3d5cafcf14f9934b8ca6e05ceee189274a5d16b9a918",
+          "targetTagSha256": "c82f8b00ce1307e170fe38783e43d9c5754b2d7c75beaf9bafd5805d839fae7b",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 20,
+          "targetSymbol": "asset.vipIcon.levelSmal3",
+          "sourceSymbol": "asset.vipIcon.levelSmal3",
+          "sourceTagSha256": "fc45a596d74e9f61a8bad82c02b1926af63ef089a178c9b75c6351384bb7dbb0",
+          "targetTagSha256": "c2673d6acd3e66d83b82f220cdb3282839a9cc1cbdc8ba54f383946f481322f3",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 19,
+          "targetSymbol": "asset.vipIcon.levelBig4",
+          "sourceSymbol": "asset.vipIcon.levelBig4",
+          "sourceTagSha256": "a4bcc91394893be54389acb3f604dc6b7b875b792785f60b7006487059a394a6",
+          "targetTagSha256": "a4fd525420cc5d6c0c6639bb303265b87a8a54ef6708466b2b37fcaf6a7bfd42",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 18,
+          "targetSymbol": "asset.vipIcon.levelSmal4",
+          "sourceSymbol": "asset.vipIcon.levelSmal4",
+          "sourceTagSha256": "aabbef6d09909d9b0451b662c53bd2bb7bb66f439e9247b4ab28f643a3b14066",
+          "targetTagSha256": "e3a8fd13f9103c73bcb02d1161e27232daffc6d49bb6720f58293ff8034bcab2",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 17,
+          "targetSymbol": "asset.vipIcon.levelBig5",
+          "sourceSymbol": "asset.vipIcon.levelBig5",
+          "sourceTagSha256": "743a4e7ca7f61598a66db72ddbc559aa08ee4b5abb59abc5793691428199ba3a",
+          "targetTagSha256": "77bca857ac27650b1dd060a31c8d31019bd7cf2bda44a2986246aa46d013e61d",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 16,
+          "targetSymbol": "asset.vipIcon.levelSmal5",
+          "sourceSymbol": "asset.vipIcon.levelSmal5",
+          "sourceTagSha256": "c16523a58faa720afe75ad9836b7ab4accde717e4cc4bd5f2ecf578486fb498e",
+          "targetTagSha256": "aee81c30efe8e7db9f19a1407f0c036b76284208b4e1c5978f7a0c1d7efa8f44",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 15,
+          "targetSymbol": "asset.vipIcon.levelBig6",
+          "sourceSymbol": "asset.vipIcon.levelBig6",
+          "sourceTagSha256": "373e6cc1f3c4eb71dfd232f46c98440b8fca964df9ce0a46a9490c02a1ee2381",
+          "targetTagSha256": "ba238ffa4757dfdd959fbd6dac876c6cbb32bca4fc050988373e70248ff1209d",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 14,
+          "targetSymbol": "asset.vipIcon.levelSmal6",
+          "sourceSymbol": "asset.vipIcon.levelSmal6",
+          "sourceTagSha256": "fa9882be85fdc7effd2e9a40a041710207d71835a31b88edffb5772387b5a993",
+          "targetTagSha256": "8248bb5d639fd3e710db7a5c4f77fa67695cdd1a268942031902bc33f9e095ae",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 13,
+          "targetSymbol": "asset.core.payBuffAsset72.note",
+          "sourceSymbol": "asset.core.payBuffAsset72.note",
+          "sourceTagSha256": "9056f8ff52a72d43b58b609d7377f23155b65df82972c1b7b8d274bbc98ee774",
+          "targetTagSha256": "0d436ef551dca0f37b3dd24ac00b67572a7934eec3d04f64335c1a9aba3d5436",
+          "width": 171,
+          "height": 52,
+          "targetWidth": 269,
+          "targetHeight": 50,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            213,
+            50
+          ]
+        },
+        {
+          "targetId": 12,
+          "targetSymbol": "asset.vipIcon.levelBig7",
+          "sourceSymbol": "asset.vipIcon.levelBig7",
+          "sourceTagSha256": "9627c8a4813c06705b3bad7c8422a0b6fb64871a0093c7192c1122464eacc30a",
+          "targetTagSha256": "48fb29c0e2e9613986af1762701408adb2655d572d764f773b20246cc4c51a8e",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 11,
+          "targetSymbol": "core.tip.bubble",
+          "sourceSymbol": "core.tip.bubble",
+          "sourceTagSha256": "548e82dc076d61bf466c0e6094de40eec20f5da59ca9497df93e9bf871367d58",
+          "targetTagSha256": "7d634ed676be7fe4982e1ff4ba7aa231f6fb81bb4ec8416c2b0190c33971ee5d",
+          "width": 224,
+          "height": 72,
+          "targetWidth": 224,
+          "targetHeight": 72
+        },
+        {
+          "targetId": 10,
+          "targetSymbol": "asset.vipIcon.levelSmal7",
+          "sourceSymbol": "asset.vipIcon.levelSmal7",
+          "sourceTagSha256": "4712aa1a39f442330f1fd1b04bfce93833abb942ae035553978d2f367faafa50",
+          "targetTagSha256": "3134e7bc599a36d557c0c9edfc3349ef2f5f15225ea88356ab42a126c45f797b",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 9,
+          "targetSymbol": "asset.vipIcon.levelBig8",
+          "sourceSymbol": "asset.vipIcon.levelBig8",
+          "sourceTagSha256": "93668c9eabbf04decdfa81cc84568959d75fe9d10f3735e0ae6d773b7ae9019c",
+          "targetTagSha256": "b020da16bbd5387785412549e0b4e86fde3f6f1cd7ee46c9cddb7e9b0a2b5abd",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 8,
+          "targetSymbol": "asset.vipIcon.levelSmal8",
+          "sourceSymbol": "asset.vipIcon.levelSmal8",
+          "sourceTagSha256": "60fc4ed139131c95836d1685b3807c40fd209ecc2393a177794f718b45e4f91c",
+          "targetTagSha256": "2d57f3a679ad867c4de780ffffd0d757dc62ddbd2d25808dbd6fafb8886b3d2c",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 7,
+          "targetSymbol": "asset.vipIcon.levelBig9",
+          "sourceSymbol": "asset.vipIcon.levelBig9",
+          "sourceTagSha256": "b14d6c646affa0ad3486af78f4a61f6b1e3a942d9ee626737e1bf831cf0fee50",
+          "targetTagSha256": "dd31fa591cf34eb093f37fc3d37bed28f91e33931c2cd543af446b6d4a38b068",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 6,
+          "targetSymbol": "asset.vipIcon.levelSmal9",
+          "sourceSymbol": "asset.vipIcon.levelSmal9",
+          "sourceTagSha256": "ab6c3f4547365ebfa3f283fb9daed50be35ac3b4e7c71bb01f7b5810ba9eb75a",
+          "targetTagSha256": "ebf5ac7351917bef5a00b6f751534cca42a10acb6283527facca045b55428d4b",
+          "width": 27,
+          "height": 27,
+          "targetWidth": 27,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 5,
+          "targetSymbol": "asset.core.leveltip.WinRateBg",
+          "sourceSymbol": "asset.core.leveltip.WinRateBg",
+          "sourceTagSha256": "ecfe5d4aa474e85db7860187856cb86cb2bd86d3651e967e51320f35724bbb0b",
+          "targetTagSha256": "f42801a9002b82827b8429e901b4b0c577f57718ff6ae206c7f3a9a4ed852f71",
+          "width": 44,
+          "height": 18,
+          "targetWidth": 44,
+          "targetHeight": 19,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            44,
+            19
+          ]
+        },
+        {
+          "targetId": 2,
+          "targetSymbol": "asset.core.payBuffAsset73",
+          "sourceSymbol": "asset.core.payBuffAsset73",
+          "sourceTagSha256": "966ca5877b4730ffee88ce1e3ed5cc25c2893d1bbcc068bbb4446c9fe01e1066",
+          "targetTagSha256": "ed2018e9a4ea2123910ab098061a3f4250154617fc90098c6f36eebe80b52b7c",
+          "width": 78,
+          "height": 78,
+          "targetWidth": 78,
+          "targetHeight": 78
+        },
+        {
+          "targetId": 1,
+          "targetSymbol": "asset.seniorVipIcon.small_1",
+          "sourceSymbol": "asset.seniorVipIcon.small_1",
+          "sourceTagSha256": "417fe5275e4bbfb6ddd473843b254afe6e3bbba4627a7aada6c72abf9b7a7d25",
+          "targetTagSha256": "ab010fea8961da79536101fdb467f042381f9a5b64566c0792f0e1876cbe2e54",
+          "width": 30,
+          "height": 30,
+          "targetWidth": 30,
+          "targetHeight": 30
+        }
+      ]
+    },
+    {
+      "name": "quest",
+      "path": "runtime/reference-original-quest-ui-20261015/quest_v3_6_1_u1.swf",
+      "sha256": "917cb069d676c4bf1577ac11116c333690ae6ebaff3b197402265f4fe010bbc9",
+      "mappings": [
+        {
+          "targetId": 166,
+          "targetSymbol": "asset.core.quest.QuestOverBtnBorder",
+          "sourceSymbol": "asset.core.quest.QuestOverBtnBorder",
+          "sourceTagSha256": "6a5ef978caf2d0e252edf517146b54bf91b9890b44da2f1eaadb6356b2aed5c9",
+          "targetTagSha256": "0f1a98366dce5dceece443fe238c79530d6c5a4a79db98e2747f85e5992832d4",
+          "width": 188,
+          "height": 71,
+          "targetWidth": 188,
+          "targetHeight": 71
+        },
+        {
+          "targetId": 135,
+          "targetSymbol": "asset.core.quest.QuestCateCollapseIcon",
+          "sourceSymbol": "asset.core.quest.QuestCateCollapseIcon",
+          "sourceTagSha256": "b6d3747049593db6038b5bf18c5e8f15d26e2b51e4eba096c277d4000fff84a7",
+          "targetTagSha256": "6dbaf9cf2ee171de5241c9b8ff98c2ba7e09acc82a9b387738fa25699161400e",
+          "width": 16,
+          "height": 7,
+          "targetWidth": 16,
+          "targetHeight": 7
+        },
+        {
+          "targetId": 134,
+          "targetSymbol": "asset.core.quest.QuestCateExpandIcon",
+          "sourceSymbol": "asset.core.quest.QuestCateExpandIcon",
+          "sourceTagSha256": "bcf259a6d158480a92701fbbdc388da098e4ccf5067b15f909d67ff1b833331d",
+          "targetTagSha256": "3f92f3b336b6fc8712495e4892408b0e4a2fa01a9492b62aae494d89c6cf7065",
+          "width": 16,
+          "height": 17,
+          "targetWidth": 16,
+          "targetHeight": 17
+        },
+        {
+          "targetId": 133,
+          "targetSymbol": "asset.core.quest.leftBGStyle1",
+          "sourceSymbol": "asset.core.quest.leftBGStyle1",
+          "sourceTagSha256": "4b1f44196ea560c4e055ba2bd63e73e46f96492e07cd7a8727eda618363c9fa2",
+          "targetTagSha256": "4b1f44196ea560c4e055ba2bd63e73e46f96492e07cd7a8727eda618363c9fa2",
+          "width": 253,
+          "height": 476,
+          "targetWidth": 253,
+          "targetHeight": 476
+        },
+        {
+          "targetId": 132,
+          "targetSymbol": "asset.scale9Core1.1",
+          "sourceSymbol": "asset.scale9Core1.1",
+          "sourceTagSha256": "5117d99789db31ad02591a2d682cdb90a297e13b99f6f6dcaed9c5709f5d7d5d",
+          "targetTagSha256": "0f9dcfbe7915016327fd9f04920ce55a3871897a433e3036f4b1ff3a76052f1f",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 131,
+          "targetSymbol": "asset.scale9Core2.1",
+          "sourceSymbol": "asset.scale9Core2.1",
+          "sourceTagSha256": "61550019a1191816dba61a50a0fd7fa865d957fdffb646e8052b77e5d7026c88",
+          "targetTagSha256": "95a798aea02b8d137e53d6060bd04f38f9c6de31144ac2db3831a11bcfb0e608",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 130,
+          "targetSymbol": "asset.scale9Core3.1",
+          "sourceSymbol": "asset.scale9Core3.1",
+          "sourceTagSha256": "a9a265030cec3205e0bd9a94428f853b7ea5d3f93ee68eb1f1f22d428e3d736a",
+          "targetTagSha256": "0b618ec7c9a26e211225bcdbe37961fb1ce085391d86b3cb33a8be2423ec9f2f",
+          "width": 23,
+          "height": 23,
+          "targetWidth": 23,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 129,
+          "targetSymbol": "asset.scale9Core4.1",
+          "sourceSymbol": "asset.scale9Core4.1",
+          "sourceTagSha256": "59727315e7332081afaa6d7547c24a7c3c4c990ef40e8ea5d94e22c6becdb466",
+          "targetTagSha256": "6e38b839a9561c55cd32305c12c5f38b7f4403ecd82957599892a0cb75ee65ab",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 128,
+          "targetSymbol": "asset.scale9Core7.1",
+          "sourceSymbol": "asset.scale9Core7.1",
+          "sourceTagSha256": "93b96ce1210dcfc6fa930ae6497c57e60db34d9d25bfa0e85e32db93cb3ab4bd",
+          "targetTagSha256": "b9e0e56f7abd1246326d3e13f7d9b50e164a2defc598b291755807959b1eb304",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 127,
+          "targetSymbol": "asset.scale9Core8.1",
+          "sourceSymbol": "asset.scale9Core8.1",
+          "sourceTagSha256": "fba9e3dfbfa10d10915824745d74e221e78f7fe3d56406edac999dffb10c682d",
+          "targetTagSha256": "f2ea71d13ba32a4bc2494d9ea3daff622289f3f085d25229cf21131dc497c3b2",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 126,
+          "targetSymbol": "asset.scale9Core9.1",
+          "sourceSymbol": "asset.scale9Core9.1",
+          "sourceTagSha256": "1ca9fb37a39f10f0bfa01c70d54f46abfed54f93beab043fd8cd98ab565c8a61",
+          "targetTagSha256": "7088e85999e6797deb5fea0c0bf1483988f241af464fa12a62b4a763b72f521a",
+          "width": 22,
+          "height": 21,
+          "targetWidth": 22,
+          "targetHeight": 21
+        },
+        {
+          "targetId": 125,
+          "targetSymbol": "asset.scale9Core10.1",
+          "sourceSymbol": "asset.scale9Core10.1",
+          "sourceTagSha256": "df141e5eabfc27a9e178da8a5763ac4af05dccc7a43573318ebd558e66bb44f8",
+          "targetTagSha256": "0ebb07c9f5a83e5169bf31148fce5fe4c3b63cf9b582b652aebcbfc11ed4ea35",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 116,
+          "targetSymbol": "asset.scale9Core1.3",
+          "sourceSymbol": "asset.scale9Core1.3",
+          "sourceTagSha256": "c92591b51f774dcc2ab0bd4ea8d9d64dfa145b71b7d5f0cef0e6581129771565",
+          "targetTagSha256": "2ad898a129d5a6d409e55df2b7bcad82fd557e39cff98a508ed3fdb74bc91992",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 115,
+          "targetSymbol": "asset.scale9Core2.3",
+          "sourceSymbol": "asset.scale9Core2.3",
+          "sourceTagSha256": "53d95496d5357bf8350d5054d3ede66193814b09d35a9f3cd5d2d6ad05983940",
+          "targetTagSha256": "5dd9d8948be59e5d4c025dffcef1f4602dbc9cfb3a7c89a6d99a740e55331869",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 114,
+          "targetSymbol": "asset.scale9Core3.3",
+          "sourceSymbol": "asset.scale9Core3.3",
+          "sourceTagSha256": "d9f61a907deaeb8aefef13a478555dc4045f0e3fe6b0f98009fb79b6fc45f134",
+          "targetTagSha256": "31c4492be400f3f8eb1fb5af2708d20d622614f8e300c40e7a5115ca19bf3b2d",
+          "width": 23,
+          "height": 23,
+          "targetWidth": 23,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 113,
+          "targetSymbol": "asset.scale9Core4.3",
+          "sourceSymbol": "asset.scale9Core4.3",
+          "sourceTagSha256": "d778f9c6e3403b4938a83a2b217d186494fc9af84860dbd9f427990e9fea231c",
+          "targetTagSha256": "b33ef16751845b4f0aae4f306137f4d628f5cb74ff5e7e9f62dbb53539fe05e2",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 112,
+          "targetSymbol": "asset.scale9Core7.3",
+          "sourceSymbol": "asset.scale9Core7.3",
+          "sourceTagSha256": "c8d3bc6f550d776df6936cf442cb80bf2a8bc4bb68c2d095c321f916ab36b7fc",
+          "targetTagSha256": "feee7018272bbbce89c197489111accf920e147b3cd9cb9e88f0f862101e5a65",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 111,
+          "targetSymbol": "asset.scale9Core8.3",
+          "sourceSymbol": "asset.scale9Core8.3",
+          "sourceTagSha256": "ecab70825553c11fcf5070b5a9344a829e5b12d50f73a259014abb751c6dd89a",
+          "targetTagSha256": "9985042934b8a988f15bb4a683ae2126b03cb0feee35d7a6efb233e4799e2226",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 110,
+          "targetSymbol": "asset.scale9Core9.3",
+          "sourceSymbol": "asset.scale9Core9.3",
+          "sourceTagSha256": "e3ca0d3ec02b00ae2cfb8ec584e0b59f7eae945fd992172b736db721d82ca17f",
+          "targetTagSha256": "7893d26108b9a54b9ffc8ac7a9522b9566d90d78ecd14890ed81879730ba455a",
+          "width": 22,
+          "height": 21,
+          "targetWidth": 22,
+          "targetHeight": 21
+        },
+        {
+          "targetId": 109,
+          "targetSymbol": "asset.scale9Core10.3",
+          "sourceSymbol": "asset.scale9Core10.3",
+          "sourceTagSha256": "754b29c944c07eb3069c868928e1bcf1c58df1fa1ea59556a77477e38af9968f",
+          "targetTagSha256": "a52f6199c48be6f34c71d93abdcb4aff2301e8480d8299da42d41595aa836ce4",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 108,
+          "targetSymbol": "asset.core.quest.titleBG",
+          "sourceSymbol": "asset.core.quest.titleBG",
+          "sourceTagSha256": "6906c9e688250b09b31c3e92a68f8a7cf620774c983115fa4fe9af97a84a930d",
+          "targetTagSha256": "9ebb2d5f056746ec9e47b6ddd5ab8fc3a76c0693d83dae019c1146875890b1ec",
+          "width": 391,
+          "height": 35,
+          "targetWidth": 391,
+          "targetHeight": 35
+        },
+        {
+          "targetId": 99,
+          "targetSymbol": "asset.scale9Core1.9",
+          "sourceSymbol": "asset.scale9Core1.9",
+          "sourceTagSha256": "595bb8f626a06c98b02642cb369234d1cb5dce6b51b1f5cb6594c990bfe8d82c",
+          "targetTagSha256": "903d0bfa96c01c937f678f6342bc01cce78866be5174f932851a7b972300be6e",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 98,
+          "targetSymbol": "asset.scale9Core2.9",
+          "sourceSymbol": "asset.scale9Core2.9",
+          "sourceTagSha256": "18034594a6bbaeca6b96cabb23d5737a117059232b2fad678b4ac759c588219d",
+          "targetTagSha256": "f5619c25f97e63cab48a57caa5d4760589c0f9c2674eac72640d6f4f69ff0a1b",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 97,
+          "targetSymbol": "asset.scale9Core3.9",
+          "sourceSymbol": "asset.scale9Core3.9",
+          "sourceTagSha256": "6c6d150504a7e9ea8492b7217599ff8a33dcba8b6deeb091db35e98317cca956",
+          "targetTagSha256": "25daa857da3caa31fbc2a895fbc1a76741eeae2eefb6a807c1349d3c755cdec0",
+          "width": 23,
+          "height": 23,
+          "targetWidth": 23,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 96,
+          "targetSymbol": "asset.scale9Core4.9",
+          "sourceSymbol": "asset.scale9Core4.9",
+          "sourceTagSha256": "8708cbff73e260bf6d10ce8097a5f23df432c212e9ae0afd5d9a2f6795425f73",
+          "targetTagSha256": "a30cf18d777eaae8058baa47e805cbf6b0c71bab72467ae9394da6a092010c63",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 95,
+          "targetSymbol": "asset.scale9Core7.9",
+          "sourceSymbol": "asset.scale9Core7.9",
+          "sourceTagSha256": "95d31bede9eb882ac9696ed3df80d195dee6ad7ebb570bb99517ad03c1ac054d",
+          "targetTagSha256": "703e8440eb83f1fc46567d74cdff56cec632758f82fc3b759f3aeccf3f8dcfa6",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 94,
+          "targetSymbol": "asset.scale9Core8.9",
+          "sourceSymbol": "asset.scale9Core8.9",
+          "sourceTagSha256": "19a00cc8d0cfe2ea5dd93f3f77145b42b4c0165b06e2f0581ad6526c1006bb35",
+          "targetTagSha256": "b65e6b51002c96733220b60b0096f8a45da3bad3b6f78b6badf80ae0ee937176",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 93,
+          "targetSymbol": "asset.scale9Core9.9",
+          "sourceSymbol": "asset.scale9Core9.9",
+          "sourceTagSha256": "c6b786ed62a8489610a64d06c1b6d6370913a674e7cea22141d92ae6ef1242e6",
+          "targetTagSha256": "77372b1cf8530950654c6504c49bb54c7d3fda6b05159ed99a9b88143dc5f5d5",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 92,
+          "targetSymbol": "asset.scale9Core10.9",
+          "sourceSymbol": "asset.scale9Core10.9",
+          "sourceTagSha256": "2917929720f1ed1ff9d1e0cb4ad4d78a36e51b5a7c6d5536419dfec1b231e66a",
+          "targetTagSha256": "00b4e8d9ed4170f7239eb9327053940394c1deb961e4d2779a59c613b0c446eb",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 83,
+          "targetSymbol": "asset.scale9Core1.7",
+          "sourceSymbol": "asset.scale9Core1.7",
+          "sourceTagSha256": "e78af9611e8f3a00bf6430c67f76e652489c86b1dd03cd40509ffce11567cc0b",
+          "targetTagSha256": "960d75d45abb1ba66990ac8e3127c2150ec8dbd390dac8a247be64958df10c83",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 82,
+          "targetSymbol": "asset.scale9Core2.7",
+          "sourceSymbol": "asset.scale9Core2.7",
+          "sourceTagSha256": "85e76a1b6051bd29f738374c18a632575024cfd5de76e8e29cc9686f6bd4a671",
+          "targetTagSha256": "de243e29d9da88e706d4c836c29690e046f0212e3fbed2ddab74775740a16c6f",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 81,
+          "targetSymbol": "asset.scale9Core3.7",
+          "sourceSymbol": "asset.scale9Core3.7",
+          "sourceTagSha256": "42b7bf680282e0bf0551412d8da3a0dc8feab7bb3a9bcee9d7a560362bdb1b7a",
+          "targetTagSha256": "efbf5fd0936444106a0139a6aa3fbb5322e0d047765583e2e2c4bd220f79cfd5",
+          "width": 23,
+          "height": 23,
+          "targetWidth": 23,
+          "targetHeight": 23
+        },
+        {
+          "targetId": 80,
+          "targetSymbol": "asset.scale9Core4.7",
+          "sourceSymbol": "asset.scale9Core4.7",
+          "sourceTagSha256": "8a76500262a9c72876dcc508a45c246b55d8a521edf174302ebdbffca49ec111",
+          "targetTagSha256": "97870c3e6b97291147d33267c23a270ea5001921a61c3939a312cfbb36661904",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 79,
+          "targetSymbol": "asset.scale9Core7.7",
+          "sourceSymbol": "asset.scale9Core7.7",
+          "sourceTagSha256": "a086028eddc7a718ae658e0fa40e43163e3508a5c20440d04862a3a9fc7bf03e",
+          "targetTagSha256": "3152d23e7bb7b03353b74148e242d690fe2303275ae85a2c34f9977d3ca8e39c",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 78,
+          "targetSymbol": "asset.scale9Core8.7",
+          "sourceSymbol": "asset.scale9Core8.7",
+          "sourceTagSha256": "c38dc485288d540a02b2ce72e31cf579f7f617423bc8dd8a41b430a8287d5679",
+          "targetTagSha256": "19a7a8dd0dd591b881a48e7047970e451e5c056f1c69177a52d2242489222b1b",
+          "width": 29,
+          "height": 29,
+          "targetWidth": 29,
+          "targetHeight": 29
+        },
+        {
+          "targetId": 77,
+          "targetSymbol": "asset.scale9Core9.7",
+          "sourceSymbol": "asset.scale9Core9.7",
+          "sourceTagSha256": "42eac6c62de725402730824a97e66080828cb94ae5518fc3550e86f8f0413b0d",
+          "targetTagSha256": "dd088f75eb57546d4c6cd382e54851de87bc4a7a4189597a1c5b5033004ebbf1",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 76,
+          "targetSymbol": "asset.scale9Core10.7",
+          "sourceSymbol": "asset.scale9Core10.7",
+          "sourceTagSha256": "38c5770252bfa83e63d7823f536aa76445168d7fa3e1f8705080804017eb4e97",
+          "targetTagSha256": "46d1c2e6594452709b41655e3aeb5cd15ef46e94b82fa16f0e942d7ba7348715",
+          "width": 22,
+          "height": 22,
+          "targetWidth": 22,
+          "targetHeight": 22
+        },
+        {
+          "targetId": 59,
+          "targetSymbol": "asset.core.quest.collectInfo.Already",
+          "sourceSymbol": "asset.core.quest.collectInfo.Already",
+          "sourceTagSha256": "e71ddee4a2d3473825ca2db91beacf67fda337eb58f8333f513bd8ffb686413a",
+          "targetTagSha256": "81df1240cbeda648aafb96b7b6422c54a5bcf0d6c12d99b432ef55a8c9d9dae4",
+          "width": 68,
+          "height": 27,
+          "targetWidth": 68,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 58,
+          "targetSymbol": "asset.core.quest.QuestItemUnselectedStyle2",
+          "sourceSymbol": "asset.core.quest.QuestItemUnselectedStyle2",
+          "sourceTagSha256": "75d94646747f6c9e8874493690a3bc5981fb6b89cae95056d098454aba391828",
+          "targetTagSha256": "f4f940f73d273cb70783ca894ad8762997ed0a2d0b0fab53d96212e7e3a5700a",
+          "width": 214,
+          "height": 31,
+          "targetWidth": 214,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 57,
+          "targetSymbol": "asset.core.quest.QuestItemLight",
+          "sourceSymbol": "asset.core.quest.QuestItemLight",
+          "sourceTagSha256": "6fbd552cef00fb06da996b4e1509d2e5d6433093d9831dbf96839e08a608bd13",
+          "targetTagSha256": "99e7fe4b307defb9c452d9f87ccc63a694053b2a634ddf8e16c6cb899ae3b371",
+          "width": 222,
+          "height": 44,
+          "targetWidth": 222,
+          "targetHeight": 44
+        },
+        {
+          "targetId": 56,
+          "targetSymbol": "asset.core.quest.buySpinelBtn",
+          "sourceSymbol": "asset.core.quest.buySpinelBtn",
+          "sourceTagSha256": "d46e2060c8d83ae8826e5b64b08cb6dfa1405a2a322e5af7c9104dcebeaa54b0",
+          "targetTagSha256": "b442ffdd93ba5f9e60f9446e2eff28f7c89f144e7aef67ab21726862bcbdd667",
+          "width": 151,
+          "height": 45,
+          "targetWidth": 151,
+          "targetHeight": 45
+        },
+        {
+          "targetId": 55,
+          "targetSymbol": "asset.core.quest.collectInfo.Check",
+          "sourceSymbol": "asset.core.quest.collectInfo.Check",
+          "sourceTagSha256": "8a37716e42abdcc1eb9ad4a93e6d2870a9b078775dad0c6c589bd3ec268fb138",
+          "targetTagSha256": "533039d7312f3fd279afef6ae8a273474c0b5be518fb7656d3e0a3264eab0d6f",
+          "width": 51,
+          "height": 27,
+          "targetWidth": 51,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 54,
+          "targetSymbol": "asset.core.quest.QuestRewardCellBGShine",
+          "sourceSymbol": "asset.core.quest.QuestRewardCellBGShine",
+          "sourceTagSha256": "11364904edd5c1398cc410b82e58a9442c317eb00584f424e048b18adcff6a33",
+          "targetTagSha256": "0c2206f536458a45cfb3dc128af7745f45d9364d134108473a512ad10d353437",
+          "width": 155,
+          "height": 59,
+          "targetWidth": 155,
+          "targetHeight": 59
+        },
+        {
+          "targetId": 53,
+          "targetSymbol": "asset.core.quest.RewardText.Type3",
+          "sourceSymbol": "asset.core.quest.RewardText.Type3",
+          "sourceTagSha256": "314bcd013645f95c8fc2f6a98c56daa631987fc380710d74a4ab899f0471c863",
+          "targetTagSha256": "2d1e345f6b1fae5760ed8ff85f84301e271484db70f873a759c3bd4dbd84b01f",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 37,
+          "targetHeight": 19,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            37,
+            19
+          ]
+        },
+        {
+          "targetId": 52,
+          "targetSymbol": "asset.core.quest.QuestConditionBGHighlight",
+          "sourceSymbol": "asset.core.quest.QuestConditionBGHighlight",
+          "sourceTagSha256": "81f441a5b9c87b6f58b9470a9c13211736ba7f3151ef23dacdb6d3b9a344c5dd",
+          "targetTagSha256": "81f441a5b9c87b6f58b9470a9c13211736ba7f3151ef23dacdb6d3b9a344c5dd",
+          "width": 153,
+          "height": 31,
+          "targetWidth": 153,
+          "targetHeight": 31
+        },
+        {
+          "targetId": 51,
+          "targetSymbol": "asset.core.quest.QuestCateTitle3Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle3Collapsed",
+          "sourceTagSha256": "2983c87efa39b4663f01d6173f45d973e9c0b71531466a76bc0d9b7be125c459",
+          "targetTagSha256": "7f6b54456a45761c8fa78714b54a57434d904a178cce57f21b8d9b5f442f5688",
+          "width": 140,
+          "height": 37,
+          "targetWidth": 212,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            212,
+            37
+          ]
+        },
+        {
+          "targetId": 50,
+          "targetSymbol": "asset.core.quest.QuestCateTitle3Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle3Expanded",
+          "sourceTagSha256": "def2a83bfbc6fe91a01952a9d12e6ce54977a970870a266987332b754c378886",
+          "targetTagSha256": "9f63923101817a51638682c42ed9f86494111421335699b584c1afbc46a7c7ba",
+          "width": 140,
+          "height": 34,
+          "targetWidth": 212,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            212,
+            34
+          ]
+        },
+        {
+          "targetId": 49,
+          "targetSymbol": "asset.core.quest.QuestInfoDescTitle",
+          "sourceSymbol": "asset.core.quest.QuestInfoDescTitle",
+          "sourceTagSha256": "b92e0a44273c2956fc3d25a0f8f0e018b9eeea95d535897331135086b94c0e60",
+          "targetTagSha256": "8fccbd1b066a288d252ee04dfbc10ff99a070395d72d61b838cb528480a8c670",
+          "width": 92,
+          "height": 22,
+          "targetWidth": 114,
+          "targetHeight": 27,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            114,
+            27
+          ]
+        },
+        {
+          "targetId": 48,
+          "targetSymbol": "asset.core.quest.QuestCateTitle7Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle7Collapsed",
+          "sourceTagSha256": "563805a85a73bd8def9511b402c9b1ee71321c24537f570fa39052def66ed037",
+          "targetTagSha256": "b4b6f2ec6a93f71b25481eae4881bc8a1aaf6ef2369250465607799538f7bfa9",
+          "width": 128,
+          "height": 27,
+          "targetWidth": 187,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            187,
+            37
+          ]
+        },
+        {
+          "targetId": 47,
+          "targetSymbol": "asset.core.quest.QuestCateTitle7Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle7Expanded",
+          "sourceTagSha256": "596b05cc25cc41c36d04b120b531a2f6527810be899bdf22272c826647f3e688",
+          "targetTagSha256": "5617790334bbdc54c0d548954996481645661deddba7eee63de736bf52d126f1",
+          "width": 125,
+          "height": 25,
+          "targetWidth": 191,
+          "targetHeight": 41,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            191,
+            41
+          ]
+        },
+        {
+          "targetId": 46,
+          "targetSymbol": "asset.core.quest.QuestCateTitle4Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle4Collapsed",
+          "sourceTagSha256": "2b4783938281698c28e49c2f10438a86a13fb2198dbb71849062d172f5569da0",
+          "targetTagSha256": "d3c29a1cdc4cdb777bfb22093da8f6860c2102b89766e0714f71cdb232e9b7e1",
+          "width": 140,
+          "height": 37,
+          "targetWidth": 188,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            188,
+            37
+          ]
+        },
+        {
+          "targetId": 45,
+          "targetSymbol": "asset.core.quest.QuestCateTitle4Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle4Expanded",
+          "sourceTagSha256": "405254d33b4253d520b90a5df1ac419ef0649d80b849a055f4fcee8c29fa41fe",
+          "targetTagSha256": "906becd75a78f6141b81f5107ad45c8c797a773c7d70f971e6640c5508e71a72",
+          "width": 140,
+          "height": 34,
+          "targetWidth": 188,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            188,
+            34
+          ]
+        },
+        {
+          "targetId": 44,
+          "targetSymbol": "asset.core.quest.RewardText.Type1",
+          "sourceSymbol": "asset.core.quest.RewardText.Type1",
+          "sourceTagSha256": "467fd7d8636ad0f347980a1c4501ba2c7e696720597768a969ed9c33049107ee",
+          "targetTagSha256": "a60293248ccd4f9a39a5476841bba79974513fb8f20ad2336933e87269c88528",
+          "width": 33,
+          "height": 17,
+          "targetWidth": 30,
+          "targetHeight": 17,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            30,
+            17
+          ]
+        },
+        {
+          "targetId": 43,
+          "targetSymbol": "asset.core.quest.RewardText.Buff4",
+          "sourceSymbol": "asset.core.quest.RewardText.Buff4",
+          "sourceTagSha256": "8c136ce50b94e72249fac59a4f71970fda840e32440e5ad581083e423f47cea4",
+          "targetTagSha256": "8014c382969db88886eec2472b31edb2e2cc0eae998e7d141607c21bd30254a8",
+          "width": 69,
+          "height": 19,
+          "targetWidth": 40,
+          "targetHeight": 17,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            40,
+            17
+          ]
+        },
+        {
+          "targetId": 42,
+          "targetSymbol": "asset.core.quest.RewardText.Type4",
+          "sourceSymbol": "asset.core.quest.RewardText.Type4",
+          "sourceTagSha256": "ed556af73dd6a0ea18a806283b2c0fe6421a5e685a9a8aa0a5a4051ea3adda5b",
+          "targetTagSha256": "c7205c67802830e5829ef165fe2284c777cfb3dc1e3ad95740986a9ee3e42759",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 37,
+          "targetHeight": 19,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            37,
+            19
+          ]
+        },
+        {
+          "targetId": 41,
+          "targetSymbol": "asset.core.quest.RewardText.Type6",
+          "sourceSymbol": "asset.core.quest.RewardText.Type6",
+          "sourceTagSha256": "63e45af7e13551e3ff1d1aec6ed14a1b1d86bac9d849c7609ae7d55b582f890f",
+          "targetTagSha256": "7755fb7dc94a031c1bdc164ae39555ac81b903443737f4743b477e650ee5f641",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 39,
+          "targetHeight": 20,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            39,
+            20
+          ]
+        },
+        {
+          "targetId": 40,
+          "targetSymbol": "asset.core.quest.GoDungeonAsset",
+          "sourceSymbol": "asset.core.quest.GoDungeonAsset",
+          "sourceTagSha256": "8f964515ce284ed17b2890fe55956891fd7e89110b98285202a93f6a9c8c19fb",
+          "targetTagSha256": "b12d36e325570e1ba76886bfe107c94fb6d563a04c0fec81e32eb9f55714548b",
+          "width": 174,
+          "height": 55,
+          "targetWidth": 178,
+          "targetHeight": 57,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            178,
+            57
+          ]
+        },
+        {
+          "targetId": 39,
+          "targetSymbol": "asset.core.quest.RewardText.Type2",
+          "sourceSymbol": "asset.core.quest.RewardText.Type2",
+          "sourceTagSha256": "f2c79009a458f49d6b2080c6feccb656a0f3e655fc1c7abfe679a89456156857",
+          "targetTagSha256": "f545089fc546dcd3ff7aab2bca7697b633558e818ecb57c1ace628dd083212f5",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 31,
+          "targetHeight": 16,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            31,
+            16
+          ]
+        },
+        {
+          "targetId": 38,
+          "targetSymbol": "asset.core.quest.gotoAcademyBtn",
+          "sourceSymbol": "asset.core.quest.gotoAcademyBtn",
+          "sourceTagSha256": "7a38cebf15b699bf7ed5b2ecf71b41ee858f1f31bc248922e3111873d20d1ebe",
+          "targetTagSha256": "aca8c5dc931f11bc40f7e11df4791e45d4bcb7c6be8efd25220df411403e75da",
+          "width": 178,
+          "height": 52,
+          "targetWidth": 215,
+          "targetHeight": 53,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            215,
+            53
+          ]
+        },
+        {
+          "targetId": 37,
+          "targetSymbol": "asset.core.quest.RewardText.Type5",
+          "sourceSymbol": "asset.core.quest.RewardText.Type5",
+          "sourceTagSha256": "6d81b0a7003e7aa79f4d6f46d226ee24df071b627abcd48b7fd92b4bca732cd3",
+          "targetTagSha256": "395a2c8de2f816a0f9bf944bb99cde8965da64c0dfc6ca1f27314ad29635edbc",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 59,
+          "targetHeight": 14,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            59,
+            14
+          ]
+        },
+        {
+          "targetId": 36,
+          "targetSymbol": "asset.core.quest.RewardText.Buff3",
+          "sourceSymbol": "asset.core.quest.RewardText.Buff3",
+          "sourceTagSha256": "3e7f8864274069b0244c4dad94380f15e275c1fd67f336e5ecfb2a553ec51da2",
+          "targetTagSha256": "89acf2ea775d806a8197e9797dc4c530c46b6f6bea53ac534de938d64d73827a",
+          "width": 69,
+          "height": 19,
+          "targetWidth": 71,
+          "targetHeight": 17,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            71,
+            17
+          ]
+        },
+        {
+          "targetId": 35,
+          "targetSymbol": "asset.core.quest.styleGuideleaf",
+          "sourceSymbol": "asset.core.quest.styleGuideleaf",
+          "sourceTagSha256": "b29b79dcd0ea39fc491efab304092f7c95821fae1a814a92b2f569475b0d5459",
+          "targetTagSha256": "c53c1db4d8c8891846cb8cc341d794d0369bf07104600dbbcbb291a3ea96b5c5",
+          "width": 734,
+          "height": 520,
+          "targetWidth": 734,
+          "targetHeight": 520
+        },
+        {
+          "targetId": 34,
+          "targetSymbol": "asset.core.quest.textImg.TaskFlagGrade40",
+          "sourceSymbol": "asset.core.quest.textImg.TaskFlagGrade40",
+          "sourceTagSha256": "6a9e5dd1c58b7f999039bbc44c4245a901d06522da595ce19d6ffb82673d84b3",
+          "targetTagSha256": "a60b010abac8af8274a1f2bf5678074ed86a6adec61f6709d69662157442b99a",
+          "width": 40,
+          "height": 36,
+          "targetWidth": 40,
+          "targetHeight": 36
+        },
+        {
+          "targetId": 33,
+          "targetSymbol": "asset.core.quest.QuestCateTitle1Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle1Collapsed",
+          "sourceTagSha256": "8531bbde1d74da4aa27a9386eb37d82ea70234203b3d572e7c6c556bbdb47eb8",
+          "targetTagSha256": "40d0ffacddcbdb25820a6d8eea9f6bcd4469532cb66590d333ea3f95db9d5982",
+          "width": 140,
+          "height": 37,
+          "targetWidth": 208,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            208,
+            37
+          ]
+        },
+        {
+          "targetId": 32,
+          "targetSymbol": "asset.core.quest.QuestCateTitle1Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle1Expanded",
+          "sourceTagSha256": "7b19dcbc7a43d1e31670d9e11f35e228e29b2392a039e1f363ada01dd2313a18",
+          "targetTagSha256": "9e1525c51d9b4f4297f1228c6279826bc12fc6115d0990cb4edb314668916696",
+          "width": 140,
+          "height": 34,
+          "targetWidth": 208,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            208,
+            34
+          ]
+        },
+        {
+          "targetId": 31,
+          "targetSymbol": "asset.core.quest.RewardText.Type7",
+          "sourceSymbol": "asset.core.quest.RewardText.Type7",
+          "sourceTagSha256": "79437ae5661d65b1d993a64288a3b350769205b81646dffd492da39ce7f11f2c",
+          "targetTagSha256": "234af621e7107178e813e404bd087e45c1828592c941e6b4a935bbc612d575a2",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 60,
+          "targetHeight": 17,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            60,
+            17
+          ]
+        },
+        {
+          "targetId": 30,
+          "targetSymbol": "asset.core.quest.necessary",
+          "sourceSymbol": "asset.core.quest.necessary",
+          "sourceTagSha256": "9d1d43bca9e8aa93e88b13b6e02f97eeba929bb8aff483545da3b21ffa02fae2",
+          "targetTagSha256": "a9c2c43179be782fa6e363b154461d0649076edc4d846ca043a5276ef61e97c8",
+          "width": 123,
+          "height": 23,
+          "targetWidth": 164,
+          "targetHeight": 29,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            164,
+            29
+          ]
+        },
+        {
+          "targetId": 29,
+          "targetSymbol": "asset.core.quest.textImg.NEW",
+          "sourceSymbol": "asset.core.quest.textImg.NEW",
+          "sourceTagSha256": "464c162e7e553fa6c0634d17d9435a13154b6939a9fe57ac65dfbd2c7a165706",
+          "targetTagSha256": "9bd482533182a308df1aadf4f6b40d638cde1e8384801f51d509bc3cc3ec8487",
+          "width": 49,
+          "height": 40,
+          "targetWidth": 49,
+          "targetHeight": 40
+        },
+        {
+          "targetId": 28,
+          "targetSymbol": "asset.quest.newRewardCell1",
+          "sourceSymbol": "asset.quest.newRewardCell1",
+          "sourceTagSha256": "74547d86befa416cb333d8d8d64656de89618ea58c20640cfcf9fb3c40b724ee",
+          "targetTagSha256": "0df476c72341ce12fd0949e48b7e3671418794b6f1d5aadc10b3d6bc4a1b578b",
+          "width": 147,
+          "height": 53,
+          "targetWidth": 147,
+          "targetHeight": 53
+        },
+        {
+          "targetId": 27,
+          "targetSymbol": "asset.quest.newRewardCell2",
+          "sourceSymbol": "asset.quest.newRewardCell2",
+          "sourceTagSha256": "b371e1c2ea255114eb28270962925c8771e19744b52b9efc74bf51e93537bb12",
+          "targetTagSha256": "c48f1b4cd0be9606f1dea95a925063ca6d67160a7f14a90c9947b6dd03a62082",
+          "width": 147,
+          "height": 53,
+          "targetWidth": 147,
+          "targetHeight": 53
+        },
+        {
+          "targetId": 26,
+          "targetSymbol": "asset.core.quest.RewardText.Buff2",
+          "sourceSymbol": "asset.core.quest.RewardText.Buff2",
+          "sourceTagSha256": "88274a9a6c914a30a9fbcbfe605197426bd84ba167b28d2033d387db79a64846",
+          "targetTagSha256": "4f9064628404a2b21593445ebfeba53b270343ca5179597434dd1e189ce86db1",
+          "width": 69,
+          "height": 19,
+          "targetWidth": 74,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            74,
+            21
+          ]
+        },
+        {
+          "targetId": 25,
+          "targetSymbol": "asset.core.quest.notNecessary",
+          "sourceSymbol": "asset.core.quest.notNecessary",
+          "sourceTagSha256": "a027747902311836f544bf8df2526108fb5c4457f3d0482d218024bb3639f667",
+          "targetTagSha256": "7a359e070a9042d8a9ef9d0beb522ddbc81af3dfffd52ba30f9ebec6ab82ead2",
+          "width": 122,
+          "height": 23,
+          "targetWidth": 164,
+          "targetHeight": 28,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            164,
+            28
+          ]
+        },
+        {
+          "targetId": 24,
+          "targetSymbol": "asset.core.quest.RewardText.Buff1",
+          "sourceSymbol": "asset.core.quest.RewardText.Buff1",
+          "sourceTagSha256": "5ba696c1f9080f5690304d1934d1b7c56cac630560cd422e31c7103cc3f81599",
+          "targetTagSha256": "c235e4a2911b38ed74b52cdb1328e4a2545137ad8884112e8b95c9afb97f7893",
+          "width": 69,
+          "height": 19,
+          "targetWidth": 75,
+          "targetHeight": 16,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            75,
+            16
+          ]
+        },
+        {
+          "targetId": 23,
+          "targetSymbol": "asset.core.quest.textImg.OK",
+          "sourceSymbol": "asset.core.quest.textImg.OK",
+          "sourceTagSha256": "afae8e6b474203b99917e22d101c94931afc90dfb351a0373ff36d64b5a12c5d",
+          "targetTagSha256": "f39016a545da398c1dd7e919b45f0fc75403773df7a9e3a1002b3d567c400441",
+          "width": 49,
+          "height": 40,
+          "targetWidth": 49,
+          "targetHeight": 40,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            49,
+            40
+          ],
+          "expectedSourceDefaults": [
+            48,
+            39
+          ]
+        },
+        {
+          "targetId": 22,
+          "targetSymbol": "asset.quest.oldRewardCell1",
+          "sourceSymbol": "asset.quest.oldRewardCell1",
+          "sourceTagSha256": "8c86315eab6cf3c422548f059ea11c60742d2557f1c39e9450b7eb200aadbdf1",
+          "targetTagSha256": "b36d03a6e469c85e889e8de169b9f582a4a51e22b1b95a97818baad71475094e",
+          "width": 147,
+          "height": 53,
+          "targetWidth": 147,
+          "targetHeight": 53
+        },
+        {
+          "targetId": 21,
+          "targetSymbol": "asset.quest.oldRewardCell2",
+          "sourceSymbol": "asset.quest.oldRewardCell2",
+          "sourceTagSha256": "775931dedb35083c3a77fb77e473d1130a8fdc42f423e255ed4edefae82598cb",
+          "targetTagSha256": "ffdaa7f33ce704c2a20a9f7d5f529df4ce65ed5eea1f415da4aa9d242abcaf49",
+          "width": 147,
+          "height": 53,
+          "targetWidth": 147,
+          "targetHeight": 53
+        },
+        {
+          "targetId": 20,
+          "targetSymbol": "asset.core.quest.eligibly1",
+          "sourceSymbol": "asset.core.quest.eligibly1",
+          "sourceTagSha256": "f647f17ee5a1e86b3d4689fe312239e977ed86ea115a6c67ce4f99bfd730b5ce",
+          "targetTagSha256": "992e1485db67a72cac90ecc30191e791bac4748fc21c9bf63ab082b12a5a0eb1",
+          "width": 74,
+          "height": 21,
+          "targetWidth": 119,
+          "targetHeight": 26,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            119,
+            26
+          ]
+        },
+        {
+          "targetId": 19,
+          "targetSymbol": "asset.core.quest.eligibly2",
+          "sourceSymbol": "asset.core.quest.eligibly2",
+          "sourceTagSha256": "8c5ecd08968d54341c82d64cd78a06696943cb83068d73c06f41a406d21c31a4",
+          "targetTagSha256": "8851d20e5c14278078c55cce4dc0cada5189861ab006c1b9972ba8fb54769534",
+          "width": 77,
+          "height": 25,
+          "targetWidth": 121,
+          "targetHeight": 25,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            121,
+            25
+          ]
+        },
+        {
+          "targetId": 18,
+          "targetSymbol": "asset.core.quest.QuestInfoPlanTitle",
+          "sourceSymbol": "asset.core.quest.QuestInfoPlanTitle",
+          "sourceTagSha256": "f5d98da7eaa2f9308c5da00d1ed74d7f3742f58874b2135776b14a35fb8a95bc",
+          "targetTagSha256": "aab780792d462cbda501f506060a5aa7a891d1709deb1630d2a5876454dcfce8",
+          "width": 75,
+          "height": 19,
+          "targetWidth": 103,
+          "targetHeight": 21,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            103,
+            21
+          ]
+        },
+        {
+          "targetId": 17,
+          "targetSymbol": "asset.core.quest.QuestCateTitleBGStyle2",
+          "sourceSymbol": "asset.core.quest.QuestCateTitleBGStyle2",
+          "sourceTagSha256": "93af9372440f2e9e971189f2de0d500f8dfd674109b748bd9b6547a42d1eb8c8",
+          "targetTagSha256": "577d0ba521726e4267c72bd814849c5b66a63b6b6770e037716bd6e87b6e7795",
+          "width": 231,
+          "height": 45,
+          "targetWidth": 231,
+          "targetHeight": 45
+        },
+        {
+          "targetId": 16,
+          "targetSymbol": "asset.core.quest.QuestCateTitleBG",
+          "sourceSymbol": "asset.core.quest.QuestCateTitleBG",
+          "sourceTagSha256": "7c3b7ede3a9a42a079ac86cbcd6af1edc1534a89f207b74c790e44a19b478393",
+          "targetTagSha256": "1d16df4cef23b3f64c7862dc46a7f4bf62040f39106c67726aba87767fd7209c",
+          "width": 240,
+          "height": 46,
+          "targetWidth": 240,
+          "targetHeight": 46
+        },
+        {
+          "targetId": 15,
+          "targetSymbol": "asset.core.quest.QuestRewardCellBG",
+          "sourceSymbol": "asset.core.quest.QuestRewardCellBG",
+          "sourceTagSha256": "8d7d91e7a709bae2c1ef8a4c7306a0c3423a58db5d4e0ca11369de75b68d19c2",
+          "targetTagSha256": "2ccc68b698f4eb8ef04ad396fb9091f10a699d770550fb7320e8f214f8582754",
+          "width": 158,
+          "height": 55,
+          "targetWidth": 158,
+          "targetHeight": 55
+        },
+        {
+          "targetId": 14,
+          "targetSymbol": "asset.core.quest.QuestItemSelected",
+          "sourceSymbol": "asset.core.quest.QuestItemSelected",
+          "sourceTagSha256": "06c8fb73518a53e12e9d3e12b5362c3db335abb65a3533ac49e23fe16eff3031",
+          "targetTagSha256": "0cfc692cff7427aa222e2b28b6b430a6f348c364dd52565aaace7b8e0dee5a5b",
+          "width": 215,
+          "height": 34,
+          "targetWidth": 215,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            215,
+            34
+          ],
+          "expectedSourceDefaults": [
+            214,
+            33
+          ]
+        },
+        {
+          "targetId": 13,
+          "targetSymbol": "asset.core.quest.QuestItemUnselected",
+          "sourceSymbol": "asset.core.quest.QuestItemUnselected",
+          "sourceTagSha256": "4ba2ee4ccec280381f4ffe798bb1e265642f1cddca882dfbce99de05923eb6e9",
+          "targetTagSha256": "b8201a71e9a73cb4363d80e1e1e02bdf63831cc438af508825b9467e9c135504",
+          "width": 216,
+          "height": 35,
+          "targetWidth": 216,
+          "targetHeight": 35
+        },
+        {
+          "targetId": 12,
+          "targetSymbol": "asset.core.quest.RewardText.Type8",
+          "sourceSymbol": "asset.core.quest.RewardText.Type8",
+          "sourceTagSha256": "b4cbc1e1e60f91cd7146b2e92e7082646b090e9b0a8619c65ecdb769fa2f730a",
+          "targetTagSha256": "0dfaaf4b0099e37bf7a67c631f2046508074e9d52a85295b98834132c91b649b",
+          "width": 38,
+          "height": 19,
+          "targetWidth": 56,
+          "targetHeight": 19,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            56,
+            19
+          ]
+        },
+        {
+          "targetId": 11,
+          "targetSymbol": "asset.core.quest.recommend",
+          "sourceSymbol": "asset.core.quest.recommend",
+          "sourceTagSha256": "44f69165e8b90537685bd699dd7dcedb88ae3bbcfb83e3073027109ba3aae18b",
+          "targetTagSha256": "972789684d8ba4909e27832bb7c187c520a0f3af2eab892b3f663e8bb25b64c1",
+          "width": 37,
+          "height": 37,
+          "targetWidth": 37,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 10,
+          "targetSymbol": "asset.core.quest.RewardText.OptionalTitle",
+          "sourceSymbol": "asset.core.quest.RewardText.OptionalTitle",
+          "sourceTagSha256": "ec44368c99847e83b873ad7909a252e6d75e1c10cd889d016aabdc8619e8a579",
+          "targetTagSha256": "1b05e863daff96bb7b1418d6633d38ed351533ac19ac40e2f81fa35d7bbc9866",
+          "width": 52,
+          "height": 25,
+          "targetWidth": 119,
+          "targetHeight": 25,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            119,
+            25
+          ]
+        },
+        {
+          "targetId": 9,
+          "targetSymbol": "asset.core.quest.collectInfo.Send",
+          "sourceSymbol": "asset.core.quest.collectInfo.Send",
+          "sourceTagSha256": "7a4ef3c80094bf344a8d50ad75f31514318cbbaa89db30f33ac4eb8202c8a909",
+          "targetTagSha256": "4de59ac6f0e8147a5e8eacd1f9f6e0440d492dc7516052f9a4f030b20c96f5b8",
+          "width": 51,
+          "height": 27,
+          "targetWidth": 51,
+          "targetHeight": 27
+        },
+        {
+          "targetId": 8,
+          "targetSymbol": "asset.core.quest.QuestCateTitle2Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle2Collapsed",
+          "sourceTagSha256": "b09ca6f43dc05d5ebea63b007fc4c86dd3cfdaa6cd6ed6075461dd57b70e633e",
+          "targetTagSha256": "88910997bf3a406ff43562420621e7172eed215318e7c1246647430faa889c4d",
+          "width": 140,
+          "height": 37,
+          "targetWidth": 156,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            156,
+            37
+          ]
+        },
+        {
+          "targetId": 7,
+          "targetSymbol": "asset.core.quest.QuestCateTitle2Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle2Expanded",
+          "sourceTagSha256": "539200dd0eafea1c05d358664a8435bb24c334cc12b0095fdfff8391c0177219",
+          "targetTagSha256": "68a7421b21940b8da50fff81c966cfe47849d459f7a5f3d160f8f086826236b3",
+          "width": 140,
+          "height": 34,
+          "targetWidth": 156,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            156,
+            34
+          ]
+        },
+        {
+          "targetId": 6,
+          "targetSymbol": "asset.core.quest.QuestInfoCondTitle",
+          "sourceSymbol": "asset.core.quest.QuestInfoCondTitle",
+          "sourceTagSha256": "bab3cd4f9c8183e4c7407c3bed89246bb559cd1b571085fd514a3658e8c49921",
+          "targetTagSha256": "d4fa5cb4cd7a5d4d80bc875c164f256cc1e0cbdabc5370140f1c26ad4b7e2516",
+          "width": 88,
+          "height": 23,
+          "targetWidth": 88,
+          "targetHeight": 23,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            88,
+            23
+          ],
+          "expectedSourceDefaults": [
+            87,
+            22
+          ]
+        },
+        {
+          "targetId": 5,
+          "targetSymbol": "asset.core.quest.QuestOverBtn",
+          "sourceSymbol": "asset.core.quest.QuestOverBtn",
+          "sourceTagSha256": "a2cacba42e656cafccc5bdc325d7b73216bf66c66177188006b8fb9f4e8cc68c",
+          "targetTagSha256": "b5bf910ac44484dee0da3b390b8544b2d1cb78abb3736d3110e5285bac0836f4",
+          "width": 179,
+          "height": 58,
+          "targetWidth": 179,
+          "targetHeight": 58,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            179,
+            58
+          ],
+          "expectedSourceDefaults": [
+            178,
+            57
+          ]
+        },
+        {
+          "targetId": 4,
+          "targetSymbol": "asset.core.quest.QuestCateTitle6Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle6Collapsed",
+          "sourceTagSha256": "c7f05ab3d06dc9857ae02b808b4a7d40fda3ab0dc241d7491ec351970e683e47",
+          "targetTagSha256": "5433a25c9251a6182d9ee49fb963464435bd4e0326e113df0153c2807dbe18ba",
+          "width": 140,
+          "height": 37,
+          "targetWidth": 203,
+          "targetHeight": 37,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            203,
+            37
+          ]
+        },
+        {
+          "targetId": 3,
+          "targetSymbol": "asset.core.quest.QuestCateTitle6Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle6Expanded",
+          "sourceTagSha256": "ed3ede064e8fe232f0f3630b7a20ecb61a2f9588021326e69aaa8f6ae9cd78da",
+          "targetTagSha256": "37dc7438dbd5457e094c95af29463c1803969cc8b4507879d7c13cc77bbe2c00",
+          "width": 140,
+          "height": 34,
+          "targetWidth": 207,
+          "targetHeight": 41,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            207,
+            41
+          ]
+        },
+        {
+          "targetId": 2,
+          "targetSymbol": "asset.core.quest.QuestCateTitle5Collapsed",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle5Collapsed",
+          "sourceTagSha256": "6418989cfc0ee6b394b6a8c0c277ecfadd5969a11d55bf9b3a5b36090fa2e83a",
+          "targetTagSha256": "aba961434e348d122d34a68496436c8cdb47102853c08d2ba3d5eab8f6b49f63",
+          "width": 151,
+          "height": 37,
+          "targetWidth": 151,
+          "targetHeight": 37
+        },
+        {
+          "targetId": 1,
+          "targetSymbol": "asset.core.quest.QuestCateTitle5Expanded",
+          "sourceSymbol": "asset.core.quest.QuestCateTitle5Expanded",
+          "sourceTagSha256": "831e4369db0a3723fc4ce2c249b79583f5d480b895639cbfc8800d02bb354786",
+          "targetTagSha256": "72d793cf55b6d3cd5d46ae25629ff76e7860d73c153d8c4a98a1e00c72144461",
+          "width": 146,
+          "height": 34,
+          "targetWidth": 151,
+          "targetHeight": 34,
+          "dimensionChanges": true,
+          "expectedTargetDefaults": [
+            151,
+            34
+          ]
+        }
+      ]
+    }
+  ]
+}
