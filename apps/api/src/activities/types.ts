@@ -9,6 +9,7 @@ import type { WheelNativeEffect, WheelNativeView } from "./wheel-native.js";
 import type { CarnivalNativeEffect, CarnivalNativeView } from "./carnival-native.js";
 import type { FirstRechargeNativeEffect, FirstRechargeNativeView } from "./first-recharge-native.js";
 import type { ChargeNativeEffect, ChargeNativeView } from "./charge-native.js";
+import type { ForthrightNativeEffect, ForthrightNativeView, PrivateGroup } from "./forthright-native.js";
 
 export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; cardId?: string; recipientName?: string }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
@@ -17,6 +18,10 @@ export interface ActivityContext {
   now: Date;
   /** Authenticated character, provided by the server; never an action field. */
   characterId?: number;
+  /** Server-only request identity and private canonical groups; never action fields. */
+  requestId?: string;
+  forthrightGroups?: PrivateGroup[];
+  forthrightInspectCode?: string;
   /** Committed EventClaims sign/day keys, not a client-provided completion flag. */
   signDays: string[];
   ownedTemplateIds: number[];
@@ -54,6 +59,7 @@ export interface ActivitySnapshot {
   nativeCarnival: CarnivalNativeView;
   nativeFirstRecharge: FirstRechargeNativeView;
   nativeCharge: ChargeNativeView;
+  nativeForthright: ForthrightNativeView;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;
@@ -69,6 +75,8 @@ export interface ActivityTransition {
   nativeCarnivalEffects?: CarnivalNativeEffect[];
   nativeFirstRechargeEffects?: FirstRechargeNativeEffect[];
   nativeChargeEffects?: ChargeNativeEffect[];
+  nativeForthrightEffects?: ForthrightNativeEffect[];
+  nativeForthrightNotification?: string;
 }
 export class ActivityError extends Error {
   constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }

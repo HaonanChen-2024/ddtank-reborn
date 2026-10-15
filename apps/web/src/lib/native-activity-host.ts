@@ -23,10 +23,11 @@ export interface NativeActivityHostOptions {
   onStatus?: (status: Record<string, unknown>) => void;
 }
 export interface NativeActivitySpec {
-  activityId: "pair-native" | "mines-native" | "ddplay-native" | "gypsy-native" | "moonlight-native" | "treasure-native" | "wheel-native" | "carnival-native" | "first-recharge-native" | "charge-native"; title: string;
-  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction";
+  activityId: "pair-native" | "mines-native" | "ddplay-native" | "gypsy-native" | "moonlight-native" | "treasure-native" | "wheel-native" | "carnival-native" | "first-recharge-native" | "charge-native" | "forthright-native"; title: string;
+  effectKey: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction";
   parseAction: (value: unknown) => ActivityAction | null;
-  validatePublic: (snapshot: ActivityResponse) => void;
+  validatePublic: (snapshot: ActivityResponse, action?: ActivityAction) => void;
+  isReadOnlyAction?: (action: ActivityAction) => boolean;
 }
 interface Operation { sequence: number; request?: ActivityRequest; promise?: Promise<ActivityResponse>; deliveryFailed?: boolean }
 export interface NativeActivityHost { cancel: () => void; retry: (request: ActivityRequest) => Promise<ActivityResponse> | null }
@@ -61,13 +62,14 @@ export function attachNativeActivityHost(options: NativeActivityHostOptions, spe
     if (!owns(op)) throw new ActivityRequestError("游戏页面已更换，操作编号已保留，请显式重试。", true);
     if (next.characterId !== options.characterId || !Number.isSafeInteger(next.revision) || next.revision < Math.max(0, revision))
       throw new ActivityRequestError("返回角色或活动版本不匹配，请重试原操作。", true);
-    spec.validatePublic(next);
-    if (op.request && !next.replayed && next[spec.effectKey]?.requestId !== op.request.requestId)
+    spec.validatePublic(next, op.request?.action);
+    const readOnly = Boolean(op.request && spec.isReadOnlyAction?.(op.request.action));
+    if (op.request && !readOnly && !next.replayed && next[spec.effectKey]?.requestId !== op.request.requestId)
       throw new ActivityRequestError("返回操作编号不匹配，请重试原操作。", true);
     const snapshot = { ...next };
     // GET and replay synchronize current state, including when another module returned old effects.
-    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction"] as const)
-      if (!op.request || snapshot.replayed || key !== spec.effectKey) delete snapshot[key];
+    for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction"] as const)
+      if (!op.request || readOnly || snapshot.replayed || key !== spec.effectKey) delete snapshot[key];
     try {
       const accepted = options.accept({ generation: options.generation,
         sequence: op.sequence, requestId: op.request?.requestId, snapshot });

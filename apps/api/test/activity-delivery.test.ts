@@ -25,6 +25,7 @@ import { viewWheelNative } from "../src/activities/wheel-native.js";
 import { viewCarnivalNative } from "../src/activities/carnival-native.js";
 import { viewFirstRechargeNative } from "../src/activities/first-recharge-native.js";
 import { viewChargeNative } from "../src/activities/charge-native.js";
+import { viewForthrightNative } from "../src/activities/forthright-native.js";
 
 // These tests exercise auth, actual SQL transactions and original mail delivery, not engine rules.
 vi.mock("../src/activities/engine.js", () => ({
@@ -66,7 +67,7 @@ beforeEach(async () => {
   await h.db.execute(sql`UPDATE game."Shop_Goods" SET "CategoryID"=1,"NeedSex"=0,"Pic"=NULL WHERE "TemplateID"=1001`);
   ctx.cfg.GAME_INTERNAL_URL = "";
   vi.mocked(transitionActivity).mockReset();
-  vi.mocked(viewActivities).mockReset().mockImplementation((state, wallet, context) => ({ ...wallet, day: state.day, activities: [], tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []) }));
+  vi.mocked(viewActivities).mockReset().mockImplementation((state, wallet, context) => ({ ...wallet, day: state.day, activities: [], tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []), nativeForthright: viewForthrightNative(state, context, wallet) }));
   vi.mocked(transitionActivity).mockImplementation((state) => ({ state: { ...state, games: { serverOnlyLayout: [7, 8, 9] }, history: ["真实提交"] }, pointsDelta: -3, earnedDelta: 0, rewards: [{ templateId, count: 14, validDays: 7 }], message: "已发送" }));
 });
 afterEach(() => { vi.useRealTimers(); headers.authorization = `Bearer ${token}`; vi.restoreAllMocks(); vi.unstubAllGlobals(); });
@@ -90,7 +91,7 @@ const installIcon = (relative: string) => {
   return file;
 };
 const showWardrobeCatalog = () => vi.mocked(viewActivities).mockImplementation((state, wallet, context) => ({
-  ...wallet, day: state.day, tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []),
+  ...wallet, day: state.day, tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []), nativeForthright: viewForthrightNative(state, context, wallet),
   activities: [{ id: "wardrobe", title: "魔法衣橱", subtitle: "", ...viewWardrobe(advanceWardrobe(undefined, { type: "page", index: 0, choice: "catalog" }), context) }],
 }));
 
@@ -247,7 +248,7 @@ describe("reference activity API delivery", () => {
     const current = (await get()).json();
     const replay = (await post(id)).json();
     expect(first.json().points).toBe(7);
-    expect(replay).toMatchObject({ ...current, points: 6, revision: 2, history: ["真实提交", "后续进展"], message: "已发送", mailedCount: 2, replayed: true });
+    expect(replay).toMatchObject({ ...current, nativeForthright: { ...current.nativeForthright, serverNow: expect.any(String) }, points: 6, revision: 2, history: ["真实提交", "后续进展"], message: "已发送", mailedCount: 2, replayed: true });
     expect(transitionActivity).toHaveBeenCalledTimes(2);
     expect(await counts()).toEqual({ actions: 2, states: 1, items: 7, mails: 2 });
     expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
@@ -255,7 +256,7 @@ describe("reference activity API delivery", () => {
 
   it("rebuilds replay context across a day boundary even if revision is unchanged", async () => {
     const id = randomUUID();
-    vi.mocked(viewActivities).mockImplementation((state, wallet, context) => ({ ...wallet, day: context.now.toISOString().slice(0, 10), activities: [], tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []) }));
+    vi.mocked(viewActivities).mockImplementation((state, wallet, context) => ({ ...wallet, day: context.now.toISOString().slice(0, 10), activities: [], tasks: [], history: state.history, nativePair: viewPairNative(undefined, context), nativeMines: viewMinesNative(undefined, context), nativeDDPlay: viewDDPlayNative(undefined, wallet), nativeGypsy: viewGypsyNative(undefined, context, wallet), nativeMoonlight: viewMoonlightNative(undefined, context, wallet), nativeTreasure: viewTreasureNative(undefined, context, wallet), nativeWheel: viewWheelNative(undefined, context, wallet), nativeCarnival: viewCarnivalNative(undefined, context, wallet), nativeFirstRecharge: viewFirstRechargeNative(undefined, context, wallet, { claims: [], boardCompletions: 0 }), nativeCharge: viewChargeNative(undefined, context, wallet, []), nativeForthright: viewForthrightNative(state, context, wallet) }));
     const first = (await post(id)).json();
     const receipt = await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`);
     const tomorrow = new Date(); tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);

@@ -17,6 +17,8 @@ export interface ActivitySnapshot {
 }
 export interface ActivityResponse extends ActivitySnapshot {
   characterId: number; message?: string; mailedCount?: number; mailIds?: number[]; replayed?: boolean;
+  nativeForthright?: unknown;
+  nativeForthrightAction?: { requestId: string; effects: unknown[] };
   nativeCharge?: unknown;
   nativeChargeAction?: { requestId: string; effects: unknown[] };
   nativeFirstRecharge?: unknown;

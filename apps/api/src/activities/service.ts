@@ -18,7 +18,9 @@ import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import type { CarnivalNativeEffect } from "./carnival-native.js";
 import { validateFirstRechargeNativeAction, type FirstRechargeNativeEffect } from "./first-recharge-native.js";
-import type { ChargeNativeEffect } from "./charge-native.js";
+import { recordChargeNativeSpending, type ChargeNativeEffect } from "./charge-native.js";
+import { advanceForthrightGroup, decodeForthrightCode, forthrightEntityCode, readForthrightNativeState, validateForthrightGroup, validateForthrightNativeAction,
+  type ForthrightNativeEffect, type PrivateGroup } from "./forthright-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityWallet } from "./types.js";
 
 interface Owner { NickName: string; Sex: boolean }
@@ -37,6 +39,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeCarnivalAction?: { requestId: string; effects: CarnivalNativeEffect[] };
   nativeFirstRechargeAction?: { requestId: string; effects: FirstRechargeNativeEffect[] };
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
+  nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
 }
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
@@ -66,6 +69,25 @@ async function owner(app: AppCtx, claims: Claims, characterId: number, now: Date
   return character;
 }
 
+async function forthrightGroups(app: AppCtx, characterId: number, now: Date, inspectCode?: string): Promise<PrivateGroup[]> {
+  const root = await stateOf(app, characterId, now), s = readForthrightNativeState(root.games.forthrightNativeV1);
+  const ids = new Set([characterId, ...s.joinedGroupCodes.map(code => decodeForthrightCode(code).ownerId)]);
+  if (inspectCode) ids.add(decodeForthrightCode(inspectCode).ownerId);
+  // Only this activity's canonical group subtree is read; other roles' boards/seeds are never loaded.
+  const [related, publicRows] = await Promise.all([
+    q<{ Groups: Record<string, PrivateGroup> }>(app.h, sql`SELECT "State"->'games'->'forthrightNativeV1'->'createdGroups' AS "Groups"
+      FROM app."ActivityStates" WHERE "Activity"='reference' AND "UserID" IN (${sql.join([...ids].map(id => sql`${id}`), sql`,`)})`),
+    q<{ Group: PrivateGroup }>(app.h, sql`SELECT g.value AS "Group" FROM app."ActivityStates" s,
+      LATERAL jsonb_each(COALESCE(s."State"->'games'->'forthrightNativeV1'->'createdGroups','{}'::jsonb)) g
+      WHERE s."Activity"='reference' AND g.value->>'status'='pending' AND g.value->>'publicListing'='true'
+      ORDER BY g.value->>'createdAt' DESC,s."UserID",g.key LIMIT 50`),
+  ]);
+  const groups = new Map<string, PrivateGroup>();
+  for (const g of [...publicRows.map(row => row.Group), ...related.flatMap(row => Object.values(row.Groups ?? {}))]) {
+    const validated = validateForthrightGroup(g); groups.set(validated.code, validated);
+  }
+  return [...groups.values()];
+}
 async function context(app: AppCtx, characterId: number, now: Date): Promise<ActivityContext> {
   const [signs, owned, wardrobe] = await Promise.all([
     q<{ Key: string }>(app.h, sql`SELECT "Key" FROM app."EventClaims" WHERE "UserID"=${characterId} AND "Kind"='sign' ORDER BY "Key"`),
@@ -75,7 +97,7 @@ async function context(app: AppCtx, characterId: number, now: Date): Promise<Act
       LEFT JOIN app."Translations" tr ON tr."table"='Shop_Goods' AND tr."column"='Name' AND tr."rowId"=t."TemplateID"::text AND tr."lang"='zh-CN'
       WHERE t."CategoryID" IN (1,2,3,4,5,6,13,15) ORDER BY t."TemplateID"`),
   ]);
-  return { now, characterId, signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
+  return { now, characterId, forthrightGroups: await forthrightGroups(app, characterId, now), signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
     wardrobeItems: wardrobe.map((i) => {
       const icon = wardrobeIcon(app, i);
       return { templateId: i.TemplateID, name: i.Name, category: i.CategoryID, ...(icon ? { icon } : {}) };
@@ -176,9 +198,104 @@ async function firstRechargeGift(app: AppCtx, claims: Claims, characterId: numbe
   } catch (err) { if (err instanceof GiftReplay) return err.result; throw err; }
 }
 
+class ForthrightRetry extends Error {}
+async function forthrightReplay(app: AppCtx, claims: Claims, characterId: number, requestId: string, signature: string): Promise<ActivityResult | undefined> {
+  return app.h.db.transaction(async tx => {
+    const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } }, now = new Date();
+    const row = await q1<WalletRow>(txApp.h, sql`SELECT "Points","Earned","Revision" FROM app."ActivityWallet" WHERE "UserID"=${characterId} FOR UPDATE`);
+    await owner(txApp, claims, characterId, now, true);
+    const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
+      sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
+    if (!previous) return undefined;
+    if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+    const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
+    return { characterId, ...viewActivities(state, walletOf(row), ctx), ...previous.Result, replayed: true };
+  });
+}
+async function forthrightInspect(app: AppCtx, claims: Claims, characterId: number, requestId: string, action: ActivityAction, signature: string): Promise<ActivityResult> {
+  const a = validateForthrightNativeAction(action); if (a.type !== "inspect-group") throw new ActivityError("查询操作无效。");
+  const now = new Date(); await owner(app, claims, characterId, now);
+  const previous = await q1<{ Signature: string }>(app.h, sql`SELECT "Signature" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
+  if (previous && previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+  const [state, row, ctx, groups] = await Promise.all([stateOf(app, characterId, now), q1<WalletRow>(app.h,
+    sql`SELECT "Points","Earned","Revision" FROM app."ActivityWallet" WHERE "UserID"=${characterId}`), context(app, characterId, now), forthrightGroups(app, characterId, now, a.choice)]);
+  if (!groups.some(g => g.code === a.choice)) throw new ActivityError("拼团不存在。", 404);
+  return { characterId, ...viewActivities(state, walletOf(row), { ...ctx, forthrightGroups: groups, forthrightInspectCode: a.choice }), message: "拼团查询完成；本次查询未写入任何活动数据。" };
+}
+async function forthrightGroupAction(app: AppCtx, claims: Claims, characterId: number, requestId: string, action: ActivityAction, signature: string): Promise<ActivityResult> {
+  const a = validateForthrightNativeAction(action), notices = new Set<number>();
+  await owner(app, claims, characterId, new Date());
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // A receipt is authoritative even if the original group has since been archived.
+    const committed = await q1(app.h, sql`SELECT "Signature" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
+    if (committed) { const replay = await forthrightReplay(app, claims, characterId, requestId, signature); if (replay) return replay; }
+    const creatorId = a.type === "open-group" ? characterId : decodeForthrightCode(forthrightEntityCode(a.choice)).ownerId;
+    const before = readForthrightNativeState((await stateOf(app, creatorId, new Date())).games.forthrightNativeV1);
+    const sequence = a.type === "open-group" ? undefined : decodeForthrightCode(forthrightEntityCode(a.choice)).sequence;
+    const preGroup = sequence === undefined ? undefined : before.createdGroups[String(sequence)];
+    if (sequence !== undefined && !preGroup) {
+      const replay = await forthrightReplay(app, claims, characterId, requestId, signature); if (replay) return replay;
+      throw new ActivityError("拼团不存在。", 404);
+    }
+    const ids = [...new Set([characterId, creatorId, ...(preGroup?.members.map(m => m.characterId) ?? [])])].sort((x, y) => x - y);
+    try {
+      const result = await app.h.db.transaction(async tx => {
+        const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
+        for (const id of ids) await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${id}) ON CONFLICT DO NOTHING`);
+        const rows = await q<WalletRow & { UserID: number }>(txApp.h, sql`SELECT "UserID","Points","Earned","Revision" FROM app."ActivityWallet"
+          WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR UPDATE`);
+        const now = new Date(); await owner(txApp, claims, characterId, now, true);
+        const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
+          sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
+        if (previous) {
+          if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+          const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
+          throw new GiftReplay({ characterId, ...viewActivities(state, walletOf(rows.find(r => r.UserID === characterId)), ctx), ...previous.Result, replayed: true });
+        }
+        const states = new Map(await Promise.all(ids.map(async id => [id, await stateOf(txApp, id, now)] as const)));
+        if (sequence !== undefined) {
+          const current = readForthrightNativeState(states.get(creatorId)!.games.forthrightNativeV1).createdGroups[String(sequence)];
+          const actualIds = [...new Set([characterId, creatorId, ...(current?.members.map(m => m.characterId) ?? [])])].sort((x, y) => x - y);
+          if (!current || canonical(actualIds) !== canonical(ids)) throw new ForthrightRetry();
+        }
+        const details = await q<Owner & { UserID: number }>(txApp.h, sql`SELECT "UserID","NickName","Sex" FROM player."Sys_Users_Detail"
+          WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR SHARE`);
+        if (rows.length !== ids.length || details.length !== ids.length) throw new ActivityError("拼团成员资料缺失。", 409);
+        const ctx = { ...await context(txApp, characterId, now), requestId };
+        const changed = advanceForthrightGroup(ids.map(id => ({ characterId: id, nickname: details.find(d => d.UserID === id)!.NickName,
+          root: states.get(id)!, wallet: walletOf(rows.find(r => r.UserID === id)) })), a, ctx);
+        let mailedCount = 0, actorState: ActivityState | undefined, actorWallet: ActivityWallet | undefined;
+        for (const role of changed.roles.sort((x, y) => x.characterId - y.characterId)) {
+          const wallet = { points: role.wallet.points - role.cost + role.credited, earned: role.wallet.earned, revision: role.wallet.revision + 1 };
+          if (![wallet.points, wallet.earned, wallet.revision].every(int)) throw new ActivityError("拼团结算积分或版本无效。", 409);
+          if (role.cost > 0) role.root.games.chargeNativeV1 = recordChargeNativeSpending(role.root.games.chargeNativeV1, { now }, role.cost);
+          const who = details.find(d => d.UserID === role.characterId)!;
+          mailedCount += await rewardMail(txApp, role.characterId, who, role.rewards);
+          if (role.notification) { await sendMail(txApp, role.characterId, who.NickName, "本地活动积分结算", role.notification, {}); mailedCount++; }
+          if (role.rewards.length || role.notification) notices.add(role.characterId);
+          await tx.execute(sql`UPDATE app."ActivityWallet" SET "Points"=${wallet.points},"Earned"=${wallet.earned},"Revision"=${wallet.revision} WHERE "UserID"=${role.characterId}`);
+          await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${role.characterId},'reference',${JSON.stringify(role.root)}::jsonb)
+            ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
+          if (role.characterId === characterId) { actorState = role.root; actorWallet = wallet; }
+        }
+        const receipt = { message: changed.message, mailedCount };
+        await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
+        return { characterId, ...viewActivities(actorState!, actorWallet!, { ...ctx, forthrightGroups: [...(ctx.forthrightGroups ?? []).filter(g => g.code !== changed.group.code), changed.group] }),
+          ...receipt, nativeForthrightAction: { requestId, effects: changed.effects } };
+      });
+      for (const id of notices) await gameInternalPost(app, "/mail-notice", { userId: id });
+      return result;
+    } catch (err) { notices.clear(); if (err instanceof GiftReplay) return err.result; if (err instanceof ForthrightRetry) continue; throw err; }
+  }
+  throw new ActivityError("拼团成员刚刚变化，请刷新后重试。", 409);
+}
+
 export async function activityAction(app: AppCtx, claims: Claims, characterId: number, activityId: string, requestId: string, action: ActivityAction): Promise<ActivityResult> {
   const signature = createHash("sha256").update(canonical({ activityId, action })).digest("hex");
   if (activityId === "first-recharge-native" && action.type === "gift-card") return firstRechargeGift(app, claims, characterId, requestId, action, signature);
+  if (activityId === "forthright-native" && action.type === "inspect-group") return forthrightInspect(app, claims, characterId, requestId, action, signature);
+  if (activityId === "forthright-native" && ["open-group", "join-group", "leave-group", "cancel-group", "settle-group"].includes(action.type))
+    return forthrightGroupAction(app, claims, characterId, requestId, action, signature);
   let mailed = false;
   const result = await app.h.db.transaction(async (tx) => {
     const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
@@ -197,11 +314,12 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     }
     const wallet = walletOf(row);
     const state = await stateOf(txApp, characterId, now);
-    const ctx = await context(txApp, characterId, now);
+    const ctx = { ...await context(txApp, characterId, now), requestId };
     const changed = transitionActivity(state, activityId, action, ctx, wallet);
     const next: ActivityWallet = { points: wallet.points + changed.pointsDelta, earned: wallet.earned + changed.earnedDelta, revision: wallet.revision + 1 };
     if (![changed.pointsDelta, changed.earnedDelta].every(Number.isInteger) || changed.earnedDelta < 0 || ![next.points, next.earned, next.revision].every(int)) throw new ActivityError("活动积分不足或结算配置无效。", 409);
-    const mailedCount = await rewardMail(txApp, characterId, who, changed.rewards);
+    let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards);
+    if (changed.nativeForthrightNotification) { await sendMail(txApp, characterId, who.NickName, "本地活动积分结算", changed.nativeForthrightNotification, {}); mailedCount++; }
     await tx.execute(sql`UPDATE app."ActivityWallet" SET "Points"=${next.points},"Earned"=${next.earned},"Revision"=${next.revision} WHERE "UserID"=${characterId}`);
     await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},'reference',${JSON.stringify(changed.state)}::jsonb)
       ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
@@ -215,11 +333,12 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       ...(changed.nativeWheelEffects ? { nativeWheelAction: { requestId, effects: changed.nativeWheelEffects } } : {}),
       ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}),
       ...(changed.nativeFirstRechargeEffects ? { nativeFirstRechargeAction: { requestId, effects: changed.nativeFirstRechargeEffects } } : {}),
-      ...(changed.nativeChargeEffects ? { nativeChargeAction: { requestId, effects: changed.nativeChargeEffects } } : {}) };
+      ...(changed.nativeChargeEffects ? { nativeChargeAction: { requestId, effects: changed.nativeChargeEffects } } : {}),
+      ...(changed.nativeForthrightEffects ? { nativeForthrightAction: { requestId, effects: changed.nativeForthrightEffects } } : {}) };
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
-    mailed = changed.rewards.length > 0;
+    mailed = changed.rewards.length > 0 || !!changed.nativeForthrightNotification;
     return response;
   });
   if (mailed) await gameInternalPost(app, "/mail-notice", { userId: characterId });

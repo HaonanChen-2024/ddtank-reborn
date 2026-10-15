@@ -13,6 +13,7 @@ import { attachNativePurrHost, type NativePurrPlayer } from "@/lib/native-purr-h
 import { attachNativeCarnivalHost, type NativeCarnivalPlayer } from "@/lib/native-carnival-host";
 import { attachNativeFirstRechargeHost, type NativeFirstRechargePlayer } from "@/lib/native-first-recharge-host";
 import { attachNativeChargeHost, type NativeChargePlayer } from "@/lib/native-charge-host";
+import { attachNativeForthrightHost, type NativeForthrightPlayer } from "@/lib/native-forthright-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -27,7 +28,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -61,10 +62,13 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopCloseCarnival?: () => unknown;
   workshopOpenFirstRecharge?: (characterId: number, generation: string) => boolean;
   workshopOpenCharge?: (characterId: number, generation: string) => boolean;
+  workshopOpenForthright?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
   workshopStatusCharge?: () => NativePairStatus;
+  workshopStatusForthright?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
   workshopCloseCharge?: () => unknown;
+  workshopCloseForthright?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -245,6 +249,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       chargeCharacterId = 0;
       chargeGeneration = "";
     };
+    let forthrightRequest: { cancel: () => void } | null = null;
+    let forthrightHost: ReturnType<typeof attachNativeForthrightHost> | null = null;
+    let forthrightCharacterId = 0;
+    let forthrightGeneration = "";
+    const detachForthright = () => {
+      forthrightRequest?.cancel();
+      forthrightHost?.cancel();
+      forthrightHost = null;
+      forthrightCharacterId = 0;
+      forthrightGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -292,6 +307,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachCarnival();
           detachFirstRecharge();
           detachCharge();
+          detachForthright();
           player?.remove();
           player = null;
         };
@@ -909,6 +925,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (chargeRequest === request) chargeRequest = null;
           }
         };
+        window.workshopShowForthright = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenForthright || !owner.workshopStatusForthright || !owner.workshopCloseForthright) return false;
+          try {
+            const initial = owner.workshopStatusForthright();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (forthrightHost && forthrightCharacterId !== characterId) return false;
+            if (!forthrightHost) {
+              forthrightCharacterId = characterId;
+              forthrightGeneration = crypto.randomUUID();
+              const generation = forthrightGeneration;
+              forthrightHost = attachNativeForthrightHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || forthrightCharacterId !== characterId || forthrightGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusForthright?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          forthrightRequest?.cancel();
+          const request = { cancel: () => {
+            if (forthrightRequest !== request) return;
+            forthrightRequest = null;
+            try { owner.workshopCloseForthright?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          forthrightRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenForthright(characterId, forthrightGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (forthrightRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusForthright();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === forthrightGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (forthrightRequest === request) forthrightRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -937,6 +1008,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachCarnival();
       detachFirstRecharge();
       detachCharge();
+      detachForthright();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -957,6 +1029,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachCarnival();
       detachFirstRecharge();
       detachCharge();
+      detachForthright();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -972,6 +1045,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowCarnival;
       delete window.workshopShowFirstRecharge;
       delete window.workshopShowCharge;
+      delete window.workshopShowForthright;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

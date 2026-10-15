@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { pairNativeLocalRules } from "../src/activities/pair-native.js";
 import { createActivityState } from "../src/activities/engine.js";
@@ -41,11 +41,14 @@ async function saved() { return {
   mails: await q(monitor, sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`),
 }; }
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+// A14 exposes the fresh response clock; replay state must match while the ISO clock may advance.
+const latestView = (value: ActivityResult) => ({...value, nativeForthright:{...value.nativeForthright,
+  serverNow:expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)}});
 async function wallet() { return (await q1<{ Points: number; Revision: number }>(monitor, sql`SELECT "Points","Revision" FROM app."ActivityWallet" WHERE "UserID"=${uid}`))!; }
 async function snapshot(app = appB, who = uid) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});
@@ -85,7 +88,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[], 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -106,6 +109,29 @@ async function recharge(value: ActivityAction, who=uid, requestId: string=random
   const result=await post(app,"first-recharge-native",a,requestId,who); expect(result.statusCode,result.body).toBe(200); return result.json<ActivityResult>();
 }
 const rechargeCard=(result:ActivityResult,tier:number)=>result.nativeFirstRecharge.cards.cards.find(card=>card.kind===tier)!;
+const third = 603, replacement = 604, forthrightId = "forthright-native";
+async function forthrightSeed() {
+  await rechargeSeed(true);
+  for (const id of [third, replacement]) {
+    await monitor.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst") VALUES (${id},${friendName},${`Native PG ${id}`},true,'2000-01-01',1)`);
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${id},1000,1000)`);
+    await monitor.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${id},'reference',${JSON.stringify(createActivityState(new Date()))}::jsonb)`);
+  }
+}
+async function forthright(value: ActivityAction, who = uid, requestId: string = randomUUID(), app = appA) {
+  const choice = value.choice ?? (await snapshot(app, who)).nativeForthright.stateToken;
+  const response = await post(app, forthrightId, { ...value, choice }, requestId, who);
+  expect(response.statusCode, response.body).toBe(200); return response.json<ActivityResult>();
+}
+const openForthright = async (index = 0) => (await forthright({type:"open-group", index, tier:0, count:1, marked:true})).nativeForthright.pages.groups.createdOrders.at(-1)!;
+const inspectForthright = async (code: string, who = friend) => (await forthright({type:"inspect-group", choice:code},who)).nativeForthright.pages.groups.inspected!;
+const joinForthright = async (code: string, who = friend) => forthright({type:"join-group",count:1,choice:(await inspectForthright(code,who)).actionToken},who);
+const forthrightDuplicates = (value: ActivityAction, requestId: string, who = uid) => Array.from({length:8},(_,i)=>()=>post(i%2?appB:appA,forthrightId,value,requestId,who));
+async function editState(who: number, edit: (state: ActivityState) => void) {
+  const row = await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${who} AND "Activity"='reference'`);
+  const state = row!.State; edit(state);
+  await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${who} AND "Activity"='reference'`);
+}
 
 describe.skipIf(!url)("native PostgreSQL activity transactions across independent API connections", () => {
   beforeAll(async () => {
@@ -158,6 +184,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     await Promise.all([monitor, holder, a, b].filter(Boolean).map(handle => handle.close()));
     if (output) writeFileSync(join(output,"test-evidence.json"), JSON.stringify({ database, token, passed, connectionPids, scenarios, closedConnections: true }, null, 2)+"\n");
   });
+  afterEach(() => vi.useRealTimers());
 
   it("deduplicates a paid Pair match UUID and replays the latest view without another effect/mail", async () => {
     await pairPaidReady(); const before = await saved(), w = await wallet(), id = randomUUID();
@@ -166,7 +193,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     const after = await saved(); expect(after.mails.length-before.mails.length).toBe(1); expect(after.goods.length-before.goods.length).toBe(1); expect(after.receipts.length-before.receipts.length).toBe(1);
     expect(await snapshot()).toMatchObject({points:52,nativePair:{matchedPairs:2,hiddenRemaining:28}});
     await pair({type:"flip",index:5,choice:"points"}); const current = await snapshot(), prior = await saved();
-    expect(await action("pair-native",{type:"flip",index:4,choice:"points"},id,appB)).toMatchObject({...current,replayed:true});
+    expect(await action("pair-native",{type:"flip",index:4,choice:"points"},id,appB)).toMatchObject({...latestView(current),replayed:true});
     expect((await post(appB,"pair-native",{type:"flip",index:6,choice:"points"},id)).statusCode).toBe(409); expect(await saved()).toEqual(prior); passed++;
   });
   it("serializes different Pair UUIDs competing for the same paid match", async () => {
@@ -341,7 +368,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(after.receipts).toHaveLength(nativeWon?3:2); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
     const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
     expect(state.completed.moon).toBe(nativeWon?3:2); expect(state.games).not.toHaveProperty("moonlightNativeV1");
-    const replay = await action("moonlight-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true});
+    const replay = await action("moonlight-native",value,id,appB); expect(replay).toMatchObject({...latestView(current),replayed:true});
     expect(replay).not.toHaveProperty("nativeMoonlightAction");
     expect((await post(appA,"ddplay-native",{type:"spin"},id)).statusCode).toBe(409); expect(await saved()).toEqual(after); passed++;
   });
@@ -435,7 +462,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(after.receipts).toHaveLength(nativeWon?5:4); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
     const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
     expect(state.games).not.toHaveProperty("treasureNativeV1"); expect(state.daily.actions).toBe(nativeWon?3:2);
-    const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true});
+    const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({...latestView(current),replayed:true});
     expect(replay).not.toHaveProperty("nativeTreasureAction");
     expect((await post(appA,"moonlight-native",{type:"draw",count:1,choice:(await snapshot()).nativeMoonlight.bagToken},id)).statusCode).toBe(409);
     expect(await saved()).toEqual(after); passed++;
@@ -542,7 +569,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);
     const finalState = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
     expect(finalState.games.wheel).toEqual(state.games.wheel);
-    const replay = await action("wheel-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true}); expect(replay).not.toHaveProperty("nativeWheelAction");
+    const replay = await action("wheel-native",value,id,appB); expect(replay).toMatchObject({...latestView(current),replayed:true}); expect(replay).not.toHaveProperty("nativeWheelAction");
     expect(await saved()).toEqual(after); passed++;
   });
   it("chooses one complete native Wheel reward under competing UUIDs and mails the seven-level material once as five plus two", async () => {
@@ -635,7 +662,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(state.games.carnivalNativeV1).toMatchObject({kind:"carnival-native",drawCount:6,redPacketsEarned:18,redPacketsSpent:0}); expect(state.daily.actions).toBe(7);
     const after = await saved(), current = await snapshot();
     expect((await post(appA,"carnival-native",{...value,count:1},id)).statusCode).toBe(409);
-    const replay = await action("carnival-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true,mailedCount:1});
+    const replay = await action("carnival-native",value,id,appB); expect(replay).toMatchObject({...latestView(current),replayed:true,mailedCount:1});
     expect(replay).not.toHaveProperty("nativeCarnivalAction"); expect(await saved()).toEqual(after); passed++;
   });
 
@@ -792,7 +819,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(after.mails).toHaveLength(1); expect([after.mails[0].Annex1,after.mails[0].Annex2].map(Number)).toEqual(after.goods.map(g=>g.ItemID));
     expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeCharge.grossSpent).toBe(35); expect((await snapshot()).nativeCharge.exchange.rows[4].bought).toBe(1);
     await action("exchange",{type:"exchange",index:0}); const current=await snapshot(),delivered=await saved();
-    const replay=await action("charge-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true,mailedCount:1}); expect(replay.nativeChargeAction).toBeUndefined();
+    const replay=await action("charge-native",value,id,appB); expect(replay).toMatchObject({...latestView(current),replayed:true,mailedCount:1}); expect(replay.nativeChargeAction).toBeUndefined();
     expect(current.nativeCharge.grossSpent).toBe(50); expect(await saved()).toEqual(delivered);
     expect((await post(appA,"charge-native",{...value,index:5},id)).statusCode).toBe(409); expect(await saved()).toEqual(delivered); passed++;
   });
@@ -871,5 +898,128 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(results.map(r=>r.statusCode).sort()).toEqual([200,400]); expect((await snapshot()).nativeCharge.pages[0].tiers[2].claimed).toBe(true);
     const after=await saved(),stored=after.states.find(s=>s.UserID===uid)!.State as ActivityState; expect(stored.daily.actions).toBeUndefined();
     expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeCharge.grossSpent).toBe(15); passed++;
+  });
+  it("deduplicates Forthright creation under a real wallet lock and replays its receipt after archive", async()=>{
+    await forthrightSeed(); const requestId=randomUUID(),value={type:"open-group",index:0,tier:0,count:1,marked:true,choice:(await snapshot()).nativeForthright.stateToken};
+    duplicateResults(await race("forthright-open-same-uuid",forthrightDuplicates(value,requestId)),"nativeForthrightAction");
+    const after=await saved(); expect(await wallet()).toEqual({Points:968,Revision:1}); expect(after.receipts).toHaveLength(1); expect(after.mails).toHaveLength(0);
+    expect((await snapshot()).nativeCharge.grossSpent).toBe(32);
+    await editState(uid,state=>{ (state.games.forthrightNativeV1 as {createdGroups:unknown}).createdGroups={}; });
+    const archived=await saved(),replay=await forthright(value,uid,requestId,appB);
+    expect(replay.replayed).toBe(true); expect(replay.nativeForthrightAction).toBeUndefined(); expect(await saved()).toEqual(archived); passed++;
+  });
+
+  it("settles three true Forthright characters once with all wallets locked and original stack mail",async()=>{
+    await forthrightSeed(); const g=await openForthright(4); await joinForthright(g.code);
+    const requestId=randomUUID(),value={type:"join-group",count:1,choice:(await inspectForthright(g.code,third)).actionToken};
+    duplicateResults(await race("forthright-third-role-completes-same-uuid",forthrightDuplicates(value,requestId,third),[uid,friend,third]),"nativeForthrightAction");
+    const all=await saved(); expect(all.wallets.slice(0,3).map(w=>[w.Points,w.Revision])).toEqual([[939,3],[939,2],[939,1]]);
+    expect(all.mails).toHaveLength(6); expect(all.goods.map(g=>[g.TemplateID,g.Count])).toEqual(Array.from({length:3},()=>[[11019,5],[11019,3]]).flat());
+    expect(all.goods.every(g=>g.IsBinds===true&&g.ValidDate===0&&g.UserID===0&&g.Place===-1)).toBe(true);
+    for(const id of [uid,friend,third]) {const p=await snapshot(appB,id); expect(p.nativeCharge.grossSpent).toBe(64); expect(p.nativeForthright.pages.groups.createdOrders.concat(p.nativeForthright.pages.groups.joinedOrders)[0].status).toBe("completed");}
+    const receipt=await saved(); await forthright(value,third,requestId,appB); expect(await saved()).toEqual(receipt); passed++;
+  });
+
+  it("refunds only a leaving member, keeps the group open and awards the replacement rather than the old member",async()=>{
+    await forthrightSeed(); const g=await openForthright(); await joinForthright(g.code);
+    const requestId=randomUUID(),value={type:"leave-group",choice:(await inspectForthright(g.code)).actionToken};
+    duplicateResults(await race("forthright-member-leave-one-refund",forthrightDuplicates(value,requestId,friend),[uid,friend]),"nativeForthrightAction");
+    expect((await snapshot(appB,friend)).points).toBe(1000); expect((await snapshot()).points).toBe(968);
+    const old=await inspectForthright(g.code); expect(old.members.find(m=>m.self)).toMatchObject({status:"left",credited:32});
+    expect((await post(appA,forthrightId,{type:"join-group",count:1,choice:old.actionToken},randomUUID(),friend)).statusCode).toBe(409);
+    await joinForthright(g.code,third); await joinForthright(g.code,replacement);
+    const all=await saved(); expect(all.mails.filter(m=>m.ReceiverID===friend)).toHaveLength(1); expect(all.goods).toHaveLength(3);
+    const complete=await inspectForthright(g.code,replacement); expect(complete.status).toBe("completed"); expect(complete.members.filter(m=>m.status==="active")).toHaveLength(3);
+    expect(complete.members.find(m=>m.nickname==="Native PG friend")?.rewardMailed).toBe(false); passed++;
+  });
+
+  it("rolls back creator cancellation credits and membership on final receipt failure then refunds at daily500",async()=>{
+    await forthrightSeed(); const g=await openForthright(); await joinForthright(g.code);
+    for(const id of [uid,friend]) await editState(id,state=>{state.daily.actions=500;});
+    const requestId=randomUUID(),value={type:"cancel-group",choice:(await inspectForthright(g.code,uid)).actionToken},before=await saved();
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("Signature"='never-test-signature') NOT VALID`);
+    expect((await post(appB,forthrightId,value,requestId)).statusCode).toBe(500); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("forthright-creator-cancel-tail-rollback",forthrightDuplicates(value,requestId),[uid,friend]),"nativeForthrightAction");
+    for(const id of [uid,friend]) {const p=await snapshot(appB,id); expect(p.points).toBe(1000); expect(p.nativeCharge.grossSpent).toBe(32); expect(p.nativeForthright.dailyActionsRemaining).toBe(0);}
+    expect((await inspectForthright(g.code,uid)).status).toBe("refunded"); passed++;
+  });
+
+  it("rolls back all three member wallets, states, item stacks, mail and receipts on each completion tail fault",async()=>{
+    await forthrightSeed(); const g=await openForthright(4); await joinForthright(g.code);
+    const value={type:"join-group",count:1,choice:(await inspectForthright(g.code,third)).actionToken},requestId=randomUUID();
+    for(const target of ["mail","state","receipt"] as const) {
+      const before=await saved();
+      if(target==="mail") await monitor.db.execute(sql`ALTER TABLE player."User_Messages" ADD CONSTRAINT native_test_mail_failure CHECK ("ReceiverID"<>603) NOT VALID`);
+      else if(target==="state") await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" ADD CONSTRAINT native_test_recipient_failure CHECK ("UserID"<>603) NOT VALID`);
+      else await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("Signature"='never-test-signature') NOT VALID`);
+      const result=await post(appB,forthrightId,value,requestId,third); expect(result.statusCode,result.body).toBe(500); expect(await saved()).toEqual(before);
+      if(target==="mail") await monitor.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT native_test_mail_failure`);
+      else if(target==="state") await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" DROP CONSTRAINT native_test_recipient_failure`);
+      else await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    }
+    duplicateResults(await race("forthright-three-role-all-table-tail-retry",forthrightDuplicates(value,requestId,third),[uid,friend,third]),"nativeForthrightAction");
+    expect((await saved()).goods).toHaveLength(6); expect((await inspectForthright(g.code,uid)).status).toBe("completed"); passed++;
+  });
+
+  it("keeps expiry GET read-only and preserves overflow refund due even for a banned other member",async()=>{
+    await forthrightSeed(); const g=await openForthright(); await joinForthright(g.code);
+    await editState(uid,state=>{const own=state.games.forthrightNativeV1 as {createdGroups:Record<string,{expiresAt:string}>}; Object.values(own.createdGroups)[0].expiresAt=new Date(Date.now()-1).toISOString();});
+    await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=2147483647 WHERE "UserID" IN (${uid},${friend})`);
+    await monitor.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "ForbidDate"='2099-01-01' WHERE "UserID"=${friend}`);
+    const before=await saved(),expired=await inspectForthright(g.code,uid); expect(expired.status).toBe("expired-unsettled"); expect(await saved()).toEqual(before);
+    await forthright({type:"settle-group",choice:expired.actionToken});
+    let view=await inspectForthright(g.code,uid); expect(view.members.map(m=>m.creditDue)).toEqual([32,32]);
+    await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=2147483637 WHERE "UserID" IN (${uid},${friend})`);
+    const requestId=randomUUID(),value={type:"settle-group",choice:view.actionToken};
+    // Wallet edits invalidate actor tokens, so fetch the authentic current token before racing.
+    value.choice=(await inspectForthright(g.code,uid)).actionToken;
+    duplicateResults(await race("forthright-partial-credit-due-no-earned",forthrightDuplicates(value,requestId),[uid,friend]),"nativeForthrightAction");
+    view=await inspectForthright(g.code,uid); expect(view.members.map(m=>[m.credited,m.creditDue])).toEqual([[10,22],[10,22]]);
+    expect((await snapshot()).earned).toBe(600); expect((await snapshot()).nativeCharge.grossSpent).toBe(32); passed++;
+  });
+
+  it("shares native and old luxury entitlement under contention while exempting claims from daily500",async()=>{
+    await forthrightSeed(); await editState(uid,state=>{state.daily.actions=500;});
+    const value={type:"claim",tier:1,choice:(await snapshot()).nativeForthright.stateToken};
+    const results=await race("forthright-old-native-luxury-one-canonical",[()=>post(appA,forthrightId,value),()=>post(appB,"luxury",{type:"claim",tier:1})]);
+    expect(results.filter(r=>r.statusCode===200)).toHaveLength(1); expect(results.filter(r=>r.statusCode===400||r.statusCode===409)).toHaveLength(1);
+    const all=await saved(); expect(all.mails).toHaveLength(1); expect(all.goods.map(g=>g.Count)).toEqual([5]);
+    expect((all.states.find(s=>s.UserID===uid)!.State as ActivityState).claims).toEqual(["luxury:1"]); expect(await wallet()).toEqual({Points:1000,Revision:1}); passed++;
+  });
+
+  it("serializes Forthright single purchase against a legacy exchange using one actual wallet and gross counter",async()=>{
+    await forthrightSeed(); await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=40 WHERE "UserID"=${uid}`);
+    const value={type:"buy-alone",index:0,tier:0,count:1,choice:(await snapshot()).nativeForthright.stateToken};
+    const results=await race("forthright-single-buy-versus-old-exchange",[()=>post(appA,forthrightId,value),()=>post(appB,"exchange",{type:"exchange",index:0})]);
+    expect(results.filter(r=>r.statusCode===200)).toHaveLength(1); expect(results.filter(r=>r.statusCode===400||r.statusCode===409)).toHaveLength(1);
+    const v=await snapshot(); expect([0,25]).toContain(v.points); expect([15,40]).toContain(v.nativeCharge.grossSpent);
+    expect((await saved()).receipts).toHaveLength(1); expect((await saved()).mails).toHaveLength(1); passed++;
+  });
+
+  it("freezes deposit and balance prices across UTC phases and rolls back final balance delivery before exact retry",async()=>{
+    await forthrightSeed(); vi.useFakeTimers({toFake:["Date"]}); vi.setSystemTime(new Date(day+"T01:00:00Z"));
+    await forthright({type:"deposit",index:4,count:1}); expect((await snapshot()).nativeCharge.grossSpent).toBe(8); expect((await saved()).goods).toHaveLength(0);
+    vi.setSystemTime(new Date(day+"T09:00:00Z")); await editState(uid,state=>{state.daily.actions=500;});
+    const order=(await snapshot()).nativeForthright.pages.shop.unsettledOrders[0],requestId=randomUUID(),value={type:"pay-balance",choice:order.actionToken},before=await saved();
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("Signature"='never-test-signature') NOT VALID`);
+    expect((await post(appB,forthrightId,value,requestId)).statusCode).toBe(500); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("forthright-tail-payment-at-cap-retry",forthrightDuplicates(value,requestId)),"nativeForthrightAction");
+    expect(await wallet()).toEqual({Points:968,Revision:2}); expect((await snapshot()).nativeCharge.grossSpent).toBe(32); expect((await saved()).goods.map(g=>g.Count)).toEqual([5,1]); passed++;
+  });
+
+  it("retains expired order refunds across UTC rollover, with explicit partial settlement and same UUID replay",async()=>{
+    await forthrightSeed(); vi.useFakeTimers({toFake:["Date"]}); vi.setSystemTime(new Date(day+"T01:00:00Z"));
+    await forthright({type:"deposit",index:0,count:1}); const tomorrow=new Date(Date.parse(day+"T00:00:00Z")+86400000).toISOString().slice(0,10);
+    vi.setSystemTime(new Date(tomorrow+"T17:00:00Z")); await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=2147483647 WHERE "UserID"=${uid}`);
+    const before=await saved(),view=await snapshot(),order=view.nativeForthright.pages.shop.unsettledOrders[0]; expect(order.status).toBe("expired-unsettled"); expect(await saved()).toEqual(before);
+    const requestId=randomUUID(),value={type:"settle-order",choice:order.actionToken};
+    duplicateResults(await race("forthright-order-expiry-full-wallet",forthrightDuplicates(value,requestId)),"nativeForthrightAction");
+    expect((await snapshot()).nativeForthright.pages.shop.unsettledOrders[0]).toMatchObject({status:"refund-due",refundDue:4});
+    await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=2147483645 WHERE "UserID"=${uid}`);
+    const due=(await snapshot()).nativeForthright.pages.shop.unsettledOrders[0]; await forthright({type:"settle-order",choice:due.actionToken});
+    const final=await snapshot(); expect(final.points).toBe(2147483647); expect(final.nativeForthright.pages.shop.unsettledOrders[0].refundDue).toBe(2);
+    expect(final.earned).toBe(600); expect(final.nativeCharge.grossSpent).toBe(4); expect((await saved()).goods).toHaveLength(0); passed++;
   });
 });
