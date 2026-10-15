@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { realpathSync, writeFileSync } from "node:fs";
+import { createHash, randomUUID } from "node:crypto";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { inflateSync } from "node:zlib";
+import { gunzipSync, inflateSync } from "node:zlib";
 import Fastify, { type FastifyInstance } from "fastify";
-import { createDb, migrateDb, player, type Database, type DbHandle } from "@ddt/db";
+import { createDb, game as gameTables, migrateDb, player, type Database, type DbHandle } from "@ddt/db";
 import { eq, sql, type SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,6 +17,10 @@ import { defaultMatch } from "../../game/src/game/player-info.js";
 import { eventsRuntime, signAward, signIn } from "../../game/src/handlers/events.js";
 import { World, type ServerContext } from "../../game/src/session/context.js";
 import type { AppCtx } from "../src/context.js";
+import { createActivityState } from "../src/activities/engine.js";
+import { advanceMoonlight, viewMoonlightNative } from "../src/activities/moonlight-native.js";
+import { activityAction } from "../src/activities/service.js";
+import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { requestRoutes } from "../src/routes/request.js";
 
@@ -99,7 +103,7 @@ async function interleave<T>(label: string, first: () => Promise<unknown>, secon
 }
 function success(text: string) { expect(text).toContain('value="true"'); expect(text).toContain('<DailyLogList UserAwardLog='); }
 
-describe.skipIf(!url || !token)("Calendar opt-in fresh PostgreSQL cross-owner serialization", () => {
+describe.skipIf(!url || !token)("Calendar and activity clocks through fresh PostgreSQL owner locks", () => {
   beforeAll(async () => {
     assert(url && token); const parsed = new URL(url); database = parsed.pathname.slice(1); output = process.env.WORKSHOP_CALENDAR_OUTPUT!;
     assert.match(token, /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
@@ -112,6 +116,10 @@ describe.skipIf(!url || !token)("Calendar opt-in fresh PostgreSQL cross-owner se
     expect(await q(monitor, sql`SELECT token FROM public."WorkshopCalendarTest"`)).toEqual([{ token }]);
     expect(await q(monitor, sql`SELECT tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')`)).toEqual([{ tablename: "WorkshopCalendarTest" }]);
     await migrateDb(monitor);
+    const potion = (JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString()) as
+      (Omit<typeof gameTables.Shop_Goods.$inferInsert, "AddTime"> & { AddTime: string })[]).find(item => item.TemplateID === 40002)!;
+    assert(potion);
+    await monitor.db.insert(gameTables.Shop_Goods).values({ ...potion, AddTime: new Date(potion.AddTime) });
     a = await createDb(url, { max: 1 }); b = await createDb(url, { max: 1 }); game = await createDb(url, { max: 1 });
     for (const [index, h] of [monitor, a, b, game].entries()) {
       assert.equal(h.kind, "postgres");
@@ -280,5 +288,106 @@ describe.skipIf(!url || !token)("Calendar opt-in fresh PostgreSQL cross-owner se
     expect({ DayLog: saved[0]!.DayLog, UserAwardLog: saved[0]!.UserAwardLog, LastDate: saved[0]!.LastDate.toISOString(),
       oldClaim: await hasClaim(monitor.db, uid, "sign", "2026-10-31"), newClaim: await hasClaim(monitor.db, uid, "sign", "2026-11-01") })
       .toEqual({ DayLog: "True", UserAwardLog: 1, LastDate: "2026-11-01T00:00:01.000Z", oldClaim: false, newClaim: true });
+  });
+
+  const activityApp = () => ({ h: b, cfg: { GAME_INTERNAL_URL: "" } }) as unknown as AppCtx;
+  const activityRows = async () => ({
+    wallets: await q(monitor, sql`SELECT * FROM app."ActivityWallet" ORDER BY "UserID"`),
+    states: await q(monitor, sql`SELECT * FROM app."ActivityStates" ORDER BY "UserID","Activity"`),
+    receipts: await q(monitor, sql`SELECT * FROM app."ActivityActions" ORDER BY "UserID","RequestID"`),
+    goods: await q(monitor, sql`SELECT * FROM player."Sys_Users_Goods" ORDER BY "ItemID"`),
+    mails: await q(monitor, sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`),
+  });
+  async function moonlightRole(actions = 499) {
+    const uid = await character(), name = `calendar-${sequence}`;
+    await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (${uid},${name},'test-only')`);
+    const state = createActivityState(new Date(clock.now));
+    for (let i = 0; i < 2; i++) state.games.moon = advanceMoonlight(state.games.moon, { type: "draw", count: 5 },
+      { now: new Date(clock.now) }, { points: 1000 }, () => ({ templateId: 11019, count: 1 })).state;
+    state.daily.actions = actions;
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,40)`);
+    await monitor.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${uid},'reference',${JSON.stringify(state)}::jsonb)`);
+    const issued = Math.floor(new Date(clock.now).getTime() / 1000);
+    const claims = { sub: uid, name, role: "player" as const, iat: issued, exp: issued + 3600 };
+    const call = (id: string, requestId: string, action: ActivityAction) => activityAction(activityApp(), claims, uid, id, requestId, action);
+    return { uid, state, call };
+  }
+  async function afterOwnerWait<T>(label: string, uid: number, account: boolean, crossDay: boolean, work: () => Promise<T>) {
+    const locked = deferred(), release = deferred();
+    const holder = a.db.transaction(async tx => {
+      await tx.execute(account ? sql`SELECT "ID" FROM member."Accounts" WHERE "ID"=${uid} FOR UPDATE`
+        : sql`SELECT "UserID" FROM player."Sys_Users_Detail" WHERE "UserID"=${uid} FOR UPDATE`);
+      locked.resolve(); await release.promise;
+    });
+    void holder.catch(() => {}); await locked.promise;
+    const pending = work(); void pending.catch(() => {});
+    let failure: unknown;
+    try {
+      let observed: { pid: number; blockers: number[]; wait: string; query: string } | undefined;
+      const deadline = performance.now() + 5000;
+      while (performance.now() < deadline) {
+        const row = await q1<{ pid: number; blockers: number[]; wait: string; query: string }>(monitor,
+          sql`SELECT pid,pg_blocking_pids(pid) AS blockers,wait_event_type AS wait,query FROM pg_stat_activity WHERE pid=${connectionPids[2]!}`);
+        if (row?.wait === "Lock" && row.blockers.includes(connectionPids[1]!) && row.query.includes("FOR SHARE")
+          && row.query.includes(account ? 'member."Accounts"' : 'player."Sys_Users_Detail"')) { observed = row; break; }
+        await delay(10);
+      }
+      assert(observed, "Activity must reach the real authority share lock after its wallet lock");
+      scenarios.push({ label, observed: { state: "blocked", ...observed } });
+      if (crossDay) { clock.now = "2026-11-01T00:00:01Z"; vi.setSystemTime(new Date(clock.now)); }
+    } catch (error) { failure = error; } finally { release.resolve(); }
+    const results = await Promise.allSettled([holder, pending]);
+    if (failure) throw failure;
+    if (results[0].status === "rejected") throw results[0].reason;
+    return results[1];
+  }
+  for (const account of [false, true]) check(`old shop token expires while waiting for the ${account ? "account" : "character"} authority lock`, async () => {
+    clock.now = "2026-10-31T23:59:59Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const role = await moonlightRole(), requestId = randomUUID();
+      const token = viewMoonlightNative(role.state.games.moon, { now: new Date(clock.now) }, { points: 1000 }).shop.token;
+      const before = await activityRows();
+      const result = await afterOwnerWait(`queued-shop-${account ? "account" : "character"}`, role.uid, account, true,
+        () => role.call("moonlight-native", requestId, { type: "buy", index: 1, count: 2, choice: token }));
+      expect(result.status).toBe("rejected");
+      expect((result as PromiseRejectedResult).reason).toMatchObject({ statusCode: 400 });
+      expect(await activityRows()).toEqual(before);
+      const freshToken = viewMoonlightNative(role.state.games.moon, { now: new Date(clock.now) }, { points: 1000 }).shop.token;
+      const freshId = randomUUID(), buy = { type: "buy", index: 1, count: 2, choice: freshToken } as const;
+      const bought = await role.call("moonlight-native", freshId, buy);
+      expect(bought).toMatchObject({ day: "2026-11-01", points: 1000, revision: 1, mailedCount: 1, nativeMoonlight: { fragments: 0 } });
+      const after = await activityRows(), saved = after.states.find(row => row.UserID === role.uid)!.State as ActivityState;
+      expect(saved).toMatchObject({ day: "2026-11-01", daily: { actions: 1 } });
+      expect(saved.history[0]).toContain("2026-11-01T00:00:01.000Z");
+      expect(await role.call("moonlight-native", freshId, buy)).toMatchObject({ day: "2026-11-01", replayed: true });
+      expect(await activityRows()).toEqual(after);
+    } finally { vi.useRealTimers(); }
+  });
+  check("legacy moon draw resets yesterday's play ceiling after the character lock wait", async () => {
+    clock.now = "2026-10-31T23:59:59Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const role = await moonlightRole(500);
+      const result = await afterOwnerWait("queued-moon-daily", role.uid, false, true,
+        () => role.call("moon", randomUUID(), { type: "draw", count: 1 }));
+      expect(result.status).toBe("fulfilled");
+      expect((result as PromiseFulfilledResult<unknown>).value).toMatchObject({ day: "2026-11-01", points: 980, revision: 1, mailedCount: 0 });
+      const saved = (await activityRows()).states.find(row => row.UserID === role.uid)!.State as ActivityState;
+      expect(saved).toMatchObject({ day: "2026-11-01", daily: { actions: 1 }, games: { moon: { draws: 11, fragments: 11 } } });
+    } finally { vi.useRealTimers(); }
+  });
+  check("same-day shop purchase keeps its earned token and original delivery after the character lock wait", async () => {
+    clock.now = "2026-10-31T23:59:59Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const role = await moonlightRole(), before = await activityRows();
+      const token = viewMoonlightNative(role.state.games.moon, { now: new Date(clock.now) }, { points: 1000 }).shop.token;
+      const result = await afterOwnerWait("queued-shop-same-day", role.uid, false, false,
+        () => role.call("moonlight-native", randomUUID(), { type: "buy", index: 1, count: 2, choice: token }));
+      expect(result.status).toBe("fulfilled");
+      expect((result as PromiseFulfilledResult<unknown>).value).toMatchObject({ day: "2026-10-31", points: 1000, revision: 1, mailedCount: 1 });
+      const after = await activityRows(), saved = after.states.find(row => row.UserID === role.uid)!.State as ActivityState;
+      expect(saved).toMatchObject({ day: "2026-10-31", daily: { actions: 500 }, games: { moon: { fragments: 0 } } });
+      expect(after.receipts.length).toBe(before.receipts.length + 1); expect(after.mails.length).toBe(before.mails.length + 1);
+      expect(after.goods.slice(before.goods.length)).toMatchObject([{ TemplateID: 40002, Count: 2, IsBinds: true, ValidDate: 0 }]);
+    } finally { vi.useRealTimers(); }
   });
 });

@@ -455,8 +455,10 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
     await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${characterId}) ON CONFLICT DO NOTHING`);
     const row = await q1<WalletRow>(txApp.h, sql`SELECT "Points","Earned","Revision" FROM app."ActivityWallet" WHERE "UserID"=${characterId} FOR UPDATE`);
+    const who = await owner(txApp, claims, characterId, new Date(), true);
+    // Account/character FOR SHARE can wait after the wallet lock. Business dates must not
+    // reuse the pre-wait day for native tokens, daily limits or the committed history.
     const now = new Date();
-    const who = await owner(txApp, claims, characterId, now, true);
     // Signing remains owned by the original game handler, not a local completion flag.
     if (activityId === "sign") throw new ActivityError("请通过游戏中的原签到入口签到。", 400);
     const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h, sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);

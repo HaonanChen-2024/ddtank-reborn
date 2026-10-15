@@ -15,7 +15,7 @@ assert.equal(process.versions.node.split(".")[0], "24", "Node 24 is required");
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), ".."), runtime = resolve(repo, "../../runtime");
 const token = randomUUID(), database = `workshop_calendar_${token.replaceAll("-", "")}`, port = 55439;
 assert.match(database, /^workshop_calendar_[a-f0-9]{32}$/);
-const parent = join(runtime, "calendar-sign-recovery-20261016"), directory = join(parent, `native-postgres-${token}`), cluster = join(directory, "data");
+const parent = join(runtime, "moonlight-shop-followup-20261016"), directory = join(parent, `native-postgres-${token}`), cluster = join(directory, "data");
 mkdirSync(parent, { recursive: true }); mkdirSync(directory, { recursive: false });
 const password = randomBytes(32).toString("base64url");
 const redact = value => [password, encodeURIComponent(password)]
@@ -28,10 +28,11 @@ const environment = { ...Object.fromEntries(Object.entries(process.env).filter((
   NODE_ENV: "test", TZ: "UTC", LC_MESSAGES: "C", CI: "1", NO_COLOR: "1" };
 const sources = ["apps/api/test/calendar-concurrency-postgres.test.ts", "scripts/workshop-calendar-postgres.mjs",
   "apps/api/src/request/endpoints/social.ts", "apps/api/src/request/endpoints/activity-state.ts",
-  "apps/api/src/request/types.ts", "apps/api/src/routes/request.ts", "apps/game/src/handlers/events.ts", "apps/game/src/game/world-boss-rewards.ts"];
+  "apps/api/src/request/types.ts", "apps/api/src/routes/request.ts", "apps/game/src/handlers/events.ts", "apps/game/src/game/world-boss-rewards.ts",
+  "apps/api/src/activities/service.ts", "apps/api/src/activities/moonlight-native.ts", "apps/api/src/activities/engine.ts"];
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash("sha256").update(readFileSync(join(repo, path))).digest("hex")]));
 const receipt = { version: 2, database, token, directory, cluster, port, startedAt: new Date().toISOString(), phase: "prepared",
-  scope: "Fresh owned cluster/template0 DB; four independent calendar/sign-in PostgreSQL connections", liveConfigurationRead: false,
+  scope: "Fresh owned cluster/template0 DB; four independent calendar/sign-in/activity-clock PostgreSQL connections", liveConfigurationRead: false,
   liveDatabaseOpened: false, liveServiceStarted: false, databaseRemoved: false, clusterRetained: true, portClosed: false };
 const save = () => writeFileSync(join(directory, "receipt.json"), redact(JSON.stringify(receipt, null, 2)) + "\n");
 const fail = (error, field = "error") => { receipt.phase = "failed"; receipt[field] = redact(error?.message ?? error); process.exitCode = 1; };
@@ -139,11 +140,12 @@ try {
   }
   assert.equal(result.code, 0, "Native calendar tests failed"); assert(receipt.evidence, "Native calendar evidence is missing");
   const evidence = receipt.evidence;
-  assert.equal(evidence.database, database); assert.equal(evidence.token, token); assert.equal(evidence.passed, 7); assert.equal(evidence.closedConnections, true);
+  assert.equal(evidence.database, database); assert.equal(evidence.token, token); assert.equal(evidence.passed, 11); assert.equal(evidence.closedConnections, true);
   assert(Array.isArray(evidence.connectionPids) && evidence.connectionPids.length === 4, "Four independent backend PIDs are required");
   assert(evidence.connectionPids.every(pid => Number.isSafeInteger(pid) && pid > 0)); assert.equal(new Set(evidence.connectionPids).size, 4);
   const blockers = { "existing-calendar-authenticated": 1, "existing-calendar-legacy": 1, "legacy-first-creation": 1,
-    "legacy-month-rollover": 1, "queued-date-legacy": 3, "queued-date-authenticated": 3, "queued-date-game": 1, "queued-date-sign-award": 1 };
+    "legacy-month-rollover": 1, "queued-date-legacy": 3, "queued-date-authenticated": 3, "queued-date-game": 1, "queued-date-sign-award": 1,
+    "queued-shop-account": 1, "queued-shop-character": 1, "queued-moon-daily": 1, "queued-shop-same-day": 1 };
   assert(Array.isArray(evidence.scenarios), "Calendar lock scenarios are missing");
   assert.deepEqual(evidence.scenarios.map(scenario => scenario.label).sort(), Object.keys(blockers).sort(), "Expected calendar races are missing");
   assert(evidence.scenarios.every(({ label, observed }) => observed?.state === "blocked" && observed.wait === "Lock"
