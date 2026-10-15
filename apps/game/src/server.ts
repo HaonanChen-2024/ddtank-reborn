@@ -1,5 +1,6 @@
 import { actNativeChristmas, readNativeChristmas } from "./game/activity-christmas-native.js";
 import { christmasSnowfieldOwner } from "./game/activity-christmas-snowfield.js";
+import { labyrinthCombatOwner } from "./game/labyrinth-combat.js";
 /**
  * GameServer (Game.Server/GameServer.cs Start/Stop + Center.Server's online registry): boots caches, listeners,
  * timers (DB autosave, ping, speed-heartbeat watchdog, server heartbeat) and the admin channel.
@@ -166,6 +167,7 @@ export class GameServer {
             gradeForGp: (gp) => templates.gradeForGp(gp),
             onWorldBossHurt: (m, hurt, attempt) => { if (this.ctx) worldBossDamage(this.ctx, m as GamePlayer, hurt, attempt); },
             worldBossWindow: (pveId) => this.ctx ? worldBossFightWindow(this.ctx, pveId) : null,
+            labyrinth: { admit: (setup, id) => this.ctx ? labyrinthCombatOwner(this.ctx).admit(setup, id) : null },
             expRate: () => (this.ctx ? eventsRuntime(this.ctx).scheduler.rate("double_exp") : 1),
             takeCard: (m, roomType) => takeCardDrop(templates, m, roomType),
             payTakeCard: (m) => payTakeCard(m),
@@ -315,7 +317,7 @@ export class GameServer {
     c.onClosed = () => {
       this.clients.delete(c);
       const p = c.player;
-      if (p) void c.idle().then(() => quitPlayer(this.ctx, p));
+      if (p) void c.idle().then(() => quitPlayer(this.ctx, p)).catch(error => this.ctx.log.error(`quit failed for ${p.id}`, error));
     };
     return c;
   }
@@ -400,6 +402,7 @@ export class GameServer {
   }
 
   async stop(): Promise<void> {
+    if (this.ctx) { labyrinthCombatOwner(this.ctx).beginShutdown(); await labyrinthCombatOwner(this.ctx).drain(); }
     if (this.ctx) { christmasSnowfieldOwner(this.ctx).beginShutdown(); await christmasSnowfieldOwner(this.ctx).drain(); }
     for (const t of this.timers) clearInterval(t);
     if (this.ctx) eventsRuntime(this.ctx).scheduler.stopTimer();
@@ -414,6 +417,7 @@ export class GameServer {
       new Promise((r) => (this.admin ? this.admin.close(r) : r(null))),
     ]);
     if (this.ctx) await christmasSnowfieldOwner(this.ctx).drain();
+    if (this.ctx) await labyrinthCombatOwner(this.ctx).drain();
     if (this.ownsDb) await this.ctx.db.close();
   }
 }

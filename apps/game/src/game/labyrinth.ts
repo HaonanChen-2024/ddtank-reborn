@@ -1,5 +1,5 @@
-/** Labyrinth persistence/economy owner. Combat admission remains disabled until
- * the real fight identity and producer-drain lifecycle are connected. */
+/** Labyrinth persistence/economy owner. Incomplete production definitions still
+ * refuse admission; the combat coordinator owns each admitted run's lifetime. */
 import { eq } from "drizzle-orm";
 import { player as P, type Database } from "@ddt/db";
 import { GSPacket } from "@ddt/protocol";
@@ -8,6 +8,7 @@ import type { ServerContext } from "../session/context.js";
 import { eventsRuntime } from "../handlers/events.js";
 import { grantRewards, type Reward } from "./events.js";
 import { commitPlayerMutation, PlayerMutationCommittedError } from "./player-transaction.js";
+import { labyrinthCombatOwner } from "./labyrinth-combat.js";
 
 export type LabyrinthRow = typeof P.Sys_Users_Labyrinth.$inferSelect;
 
@@ -128,8 +129,11 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
   if (![1, 2, 3, 4, 5, 6, 9].includes(sub)) return;
   const enabled = eventsRuntime(ctx).scheduler.events.find(e => e.kind === "labyrinth")?.enabled !== false;
   if (!enabled) return p.sendMessage(0, "勇士迷宫暂未开放。");
+  if (labyrinthCombatOwner(ctx).stopping) return p.sendMessage(0, "服务器正在停止，迷宫暂不接受新操作。");
+  if (labyrinthCombatOwner(ctx).busy(p)) return p.sendMessage(0, "迷宫战斗或结算尚未结束，请稍后再操作。");
   // This handler already owns GameClient.chain. Waiting for an award queued
-  // behind it would deadlock; fight admission is deliberately still disabled.
+  // behind it would deadlock; the combat owner rejects administrative mutations
+  // for the whole admitted run and settles accepted outcomes on that same queue.
   if (p.currentRoom?.game) return p.sendMessage(0, "战斗期间暂时无法操作迷宫，请结束战斗后重试。");
   if (p.worldBossAwardPending) return p.sendMessage(0, "正在结算活动奖励，请稍后再操作迷宫。");
   const on = sub === 1 ? pkt.readBoolean() : false;
@@ -206,20 +210,62 @@ const floorCurrency = [0, 2, 0, 2, 0, 3, 0, 3, 0, 4, 0, 4, 0, 5, 0, 5, 0, 6, 0, 
 
 export interface LabyrinthFloorAward { floor: number; missionId: number; bigAward: boolean }
 export interface LabyrinthAwardResult extends PublishedState { exp: number; hardCurrency: number; materials: Reward[] }
+export interface LabyrinthRunSnapshot { day: string; processAward: string; currentFloor: number }
 
-/** Original GamePlayer.UpdateLabyrinth business transaction. The future combat
+function checkRun(l: LabyrinthRow, expected: LabyrinthRunSnapshot): void {
+  if (day(l.LastDate) !== expected.day || l.ProcessAward !== expected.processAward || l.currentFloor !== expected.currentFloor)
+    throw new Error("Labyrinth run was replaced; settlement refused");
+}
+
+/** Called from the real host's packet queue, after configuration/room checks. */
+export function prepareLabyrinthRun(ctx: ServerContext, p: GamePlayer): Promise<LabyrinthRow | null> {
+  return p.withPersistenceLock(() => mutate(ctx, p, async (db, _staged, now) => {
+    if (!p.isActive || p.quitting || p.currentRoom?.game) return null;
+    const l = (await loadLocked(db, p.id, now, true))!;
+    if (day(now) !== day(l.LastDate)) resetDay(l, now);
+    else if (isUnusedLegacyRow(l)) l.ProcessAward = initProcessAward();
+    processTokens(l.ProcessAward);
+    if (!l.completeChallenge || l.isCleanOut || l.currentFloor < 1 || l.currentFloor > 30) return null;
+    l.isInGame = true;
+    await save(db, l);
+    return { value: l };
+  }));
+}
+
+/** Original GamePlayer.OutLabyrinth/ResetLabyrinth (4315-4351). The coordinator
+ * seals the producer and drains accepted layer awards before reopening tokens. */
+export async function finishLabyrinthRun(ctx: ServerContext, p: GamePlayer, expected: LabyrinthRunSnapshot, isWin: boolean): Promise<void> {
+  const result = await p.withPersistenceLock(() => mutate(ctx, p, async (db, _staged, now) => {
+    const l = await loadLocked(db, p.id, now, false);
+    if (!l) throw new Error("Labyrinth run is missing");
+    checkRun(l, expected);
+    const retryPrice = !isWin && l.currentFloor > 1 ? labyrinthTryAgainMoney(ctx, l) : null;
+    l.isInGame = false; l.completeChallenge = false; l.ProcessAward = initProcessAward();
+    await save(db, l);
+    return { value: { row: l, retryPrice, messages: [] } };
+  }));
+  if (!result) return;
+  publish(ctx, p, result);
+  if (result.retryPrice !== null) {
+    const pkt = new GSPacket(131, p.id); pkt.writeByte(9); pkt.writeInt(result.retryPrice);
+    try { p.send(pkt); } catch (error) { ctx.log.warn(`Labyrinth user ${p.id}: retry quote notification failed: ${error}`); }
+  }
+}
+
+/** Original GamePlayer.UpdateLabyrinth business transaction. The combat
  * adapter must authenticate actual fight/participant/run identity and hold its
  * settlement barrier before calling this internal owner. No packet calls it. */
-export async function awardLabyrinthFloor(ctx: ServerContext, p: GamePlayer, award: LabyrinthFloorAward): Promise<LabyrinthAwardResult | null> {
+export async function awardLabyrinthFloor(ctx: ServerContext, p: GamePlayer, award: LabyrinthFloorAward, expected?: LabyrinthRunSnapshot): Promise<LabyrinthAwardResult | null> {
   const { floor, missionId, bigAward } = award;
   if (!Number.isInteger(floor) || floor < 1 || floor > 30 || missionId !== 40000 + floor
     || typeof bigAward !== "boolean" || (bigAward && floor % 2 !== 0)) throw new Error("Invalid Labyrinth floor award");
   const result = await p.withPersistenceLock(() => mutate<LabyrinthAwardResult>(ctx, p, async (db, staged, now) => {
     const l = await loadLocked(db, p.id, now, false);
     if (!l) throw new Error("Labyrinth run is missing");
+    if (expected) checkRun(l, expected);
     const tokens = processTokens(l.ProcessAward);
     if (tokens[floor] !== String(floor)) return null;
-    if (!l.completeChallenge || !l.isInGame || l.isCleanOut || day(l.LastDate) !== day(now) || l.currentFloor !== floor)
+    if (!l.completeChallenge || !l.isInGame || l.isCleanOut || (!expected && day(l.LastDate) !== day(now)) || l.currentFloor !== floor)
       throw new Error("Labyrinth award does not match the active current-floor run");
     // The original attempts this consumption even when double rewards are off.
     if (!staged.propBag.getItemByTemplateID(0, 11916) || !staged.propBag.removeTemplate(11916, 1)) l.isDoubleAward = false;

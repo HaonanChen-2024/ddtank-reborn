@@ -31,6 +31,8 @@ export interface PacketSink {
   idle?(): Promise<void>;
   /** Timed world-boss awards join the same queue as ordinary inbound packets. */
   enqueueWorldBossAward?<T>(work: () => Promise<T>): Promise<T>;
+  /** Runs at the next packet boundary; the current handler must not await work it just enqueued. */
+  enqueueCombatSettlement?<T>(work: () => Promise<T>): Promise<T>;
 }
 
 export interface RoomMember {

@@ -437,6 +437,7 @@ export class RoomMgr {
   /** StartGameAction PvE branch → GameMgr.StartPVEGame (Rooms/StartGameAction.cs:55-75). */
   private launchPve(room: BaseRoom, players: RoomMember[]): void {
     if (room.RoomType === 40) { this.launchSnowfield(room, players); return; }
+    const labyrinth = room.RoomType === 15;
     const access = room.RoomType === 14 ? this.o.worldBossAccess : undefined;
     const permit = room.RoomType === 14 ? access?.check(players, room.MapId) : undefined;
     if (room.RoomType === 14 && (!permit || permit.error)) {
@@ -457,6 +458,10 @@ export class RoomMgr {
       roomId: room.RoomId, roomType: room.RoomType, gameType: room.GameType, timeType: room.TimeMode, pveId: room.MapId,
       hardLevel: room.HardLevel, levelLimits: room.LevelLimits, currentFloor: room.currentFloor, players,
       onStopped: () => {
+        if (labyrinth) {
+          if (acceptedId === null) { stoppedDuringStart = true; return; }
+          if (room.game?.id !== acceptedId) return;
+        }
         if (key) {
           if (acceptedId === null) { stoppedDuringStart = true; return; }
           for (const p of players) finish(p.id);
@@ -468,6 +473,7 @@ export class RoomMgr {
       ...(key ? { onParticipantFinished: finish } : {}),
       // PlayerDetail.ResetRoom (GamePlayer.cs): a dungeon room goes back to "choose a dungeon"
       onFinished: () => {
+        if (labyrinth && room.game?.id !== acceptedId) return;
         if (room.RoomType === RoomType.Dungeon) {
           room.Pic = "";
           room.MapId = 10000;
@@ -490,6 +496,7 @@ export class RoomMgr {
       access!.started(key, players, game.id);
       for (const id of earlyFinished) finish(id);
     }
+    if (labyrinth) acceptedId = game.id;
     room.startGame(game);
   }
 

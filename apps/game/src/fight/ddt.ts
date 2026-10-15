@@ -15,6 +15,14 @@ import { WorldBossSettlementGate } from "./world-boss-settlement.js";
 import { unlockDungeonPvePermission } from "../game/pve-permissions.js";
 import { assertChristmasPveReady, christmasPveDefinition, consumeChristmasPveAdmission, createChristmasPveOverlay } from "../game/christmas-pve.js";
 
+/** Server-owned run identity and durable settlement; never supplied by a room packet. */
+export interface LabyrinthFightBinding {
+  processAwards: ReadonlyMap<number, string>;
+  started(fight: FightGame): void;
+  award(member: RoomMember, event: Extract<FightEvent, { cmd: "LABYRINTH_AWARD" }>): Promise<void>;
+  finish(isWin: boolean): Promise<void>;
+}
+
 export interface DdtFightOptions {
   assets?: FightAssets;
   /** Explicit local compatibility pack for new weapons; never overrides packed weapon data. */
@@ -45,6 +53,7 @@ export interface DdtFightOptions {
     drop(kind: "copy" | "npc", id: number, user?: number): DropItem[] | null;
     translate?(key: string, args: unknown[]): string;
   };
+  labyrinth?: { admit(s: StartPveOptions, fightId: number): LabyrinthFightBinding | null };
   /** Remaining server-wide world-boss HP (room type 14 fights start the dragon at this blood). */
   worldBossBlood?: () => number;
   /** GamePlayer.OnMissionOver (quest condition 21) */
@@ -104,7 +113,7 @@ export class DdtFightEngine implements FightEngine {
   /** GameMgr.StartPVEGame (Games/GameMgr.cs:140-165) */
   startPve(s: StartPveOptions): FightGame | null {
     // Original layer awards require one atomic ProcessAward/progress/inventory owner before admission.
-    if (s.roomType === 15) {
+    if (s.roomType === 15 && !this.o.labyrinth) {
       this.o.log?.("pve: Labyrinth room 15 requires the original reward settlement owner; combat start is disabled");
       return null;
     }
@@ -120,9 +129,11 @@ export class DdtFightEngine implements FightEngine {
       return null;
     }
     let starting: DdtGame | undefined;
+    let labyrinth: LabyrinthFightBinding | null = null;
     try {
       if (local) assertChristmasPveReady(local, this.assets);
       const id = gameIdSeq++;
+      if (s.roomType === 15 && !(labyrinth = this.o.labyrinth!.admit(s, id))) return null;
       const boss = s.roomType === 14 ? this.o.worldBossWindow?.(s.pveId) : undefined;
       if (s.roomType === 14 && this.o.worldBossWindow && !boss) return null;
       const specs = s.players.map((m) => specOf(m as LobbyLike, 1, this.assets, this.o.petSkill));
@@ -131,23 +142,29 @@ export class DdtFightEngine implements FightEngine {
         id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, assets: this.assets, players: specs, seed: this.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(),
         pveInfo: info, hardLevel: s.hardLevel, currentFloor: s.currentFloor, data: pv.data,
         ...(local ? { strictScripts: true, suppressDefaultRewards: true, placeholderMapId: local.mapId } : {}),
+        ...(labyrinth ? { strictScripts: true, labyrinthProcessAwards: labyrinth.processAwards } : {}),
         worldBossBlood: s.roomType === 14 ? (boss?.blood ?? this.o.worldBossBlood?.()) : undefined,
         drops: local ? {} : { copyDrop: (mid, user) => pv.drop("copy", mid, user), npcDrop: (did) => pv.drop("npc", did) },
         log: (m) => this.o.log?.(m),
         ...gameHooks(this, s.roomType, members),
         ...(local ? { boxDrop: () => null } : {}),
       });
-      const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s, boss ? { windowKey: boss.key, fightId: id } : undefined);
+      const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s, boss ? { windowKey: boss.key, fightId: id } : undefined, labyrinth ?? undefined);
       starting = g;
+      labyrinth?.started(g);
+      g.activatePets();
       this.games.set(g.id, g);
       this.ensureLoop();
       g.tick(Date.now());
       return g;
     } catch (e) {
       // A first-tick failure is not a successful boss admission. Do not leave an orphan engine game.
-      if ((s.roomType === 14 || (s.roomType === 40 && local)) && starting) {
+      if ((s.roomType === 14 || (s.roomType === 40 && local) || labyrinth) && starting) {
         this.games.delete(starting.id);
-        try { starting.stop(); } catch { /* Preserve the original startup error below. */ }
+        try { starting.fail(e); } catch { /* Preserve the original startup error below. */ }
+      } else if (labyrinth) {
+        try { void labyrinth.finish(false).catch(error => this.o.log?.(`pve: Labyrinth startup settlement failed: ${String(error)}`)); }
+        catch (error) { this.o.log?.(`pve: Labyrinth startup settlement failed: ${String(error)}`); }
       }
       this.o.log?.(`pve: cannot start game: ${(e as Error).stack}`);
       return null;
@@ -159,6 +176,7 @@ export class DdtFightEngine implements FightEngine {
     if (!this.assets.maps.has(mapId)) mapId = this.assets.maps.has(1001) ? 1001 : [...this.assets.maps.keys()][0]!;
     try {
       const g = new DdtGame(gameIdSeq++, mapId, s, this);
+      g.activatePets();
       this.games.set(g.id, g);
       this.ensureLoop();
       g.tick(Date.now());
@@ -182,7 +200,7 @@ export class DdtFightEngine implements FightEngine {
         g.tick(now);
       } catch (e) {
         this.o.log?.(`fight game ${g.id} update error: ${(e as Error).stack}`);
-        if (g.game instanceof PveGame && g.game.strictScripts) g.stop();
+        if (g.game instanceof PveGame && g.game.strictScripts) g.fail(e);
       }
     }
     if (this.games.size === 0 && this.timer) {
@@ -263,7 +281,17 @@ class DdtGame implements FightGame {
   private lastInputTime = 0;
   private readonly settlement = new WorldBossSettlementGate();
   holdWorldBossSettlement(): Promise<() => void> { return this.settlement.acquire(); }
-  waitWorldBossSettlement(): Promise<void> { return this.settlement.held ? this.settlement.defer(() => {}) : Promise.resolve(); }
+  async waitWorldBossSettlement(): Promise<void> {
+    do {
+      await Promise.all(this.labyrinthPending);
+      await this.settlement.waitIdle();
+    } while (this.labyrinthPending.size);
+    if (this.labyrinthFailure !== undefined) throw this.labyrinthFailure;
+  }
+  private readonly labyrinthPending = new Set<Promise<void>>();
+  private labyrinthFailure: unknown;
+  private labyrinthClosing = false;
+  private labyrinthFinish: Promise<void> | undefined;
   private settlementError = (error: unknown): void => { this.engine.o.log?.(`fight ${this.id}: queued operation failed: ${String(error)}`); };
   /** PVPGame.Cards (9 for PvP) and Player.CanTakeOut per userId, filled at GAME_OVER */
   private readonly cards: number[] = new Array(9).fill(0);
@@ -271,12 +299,13 @@ class DdtGame implements FightGame {
 
   private readonly pve: StartPveOptions | null;
   private readonly finishedParticipants = new Set<number>();
+  private pveStoppedApplied = false;
   private finishParticipant(id: number): void {
     if (this.s.roomType !== 14 || this.finishedParticipants.has(id)) return;
     this.finishedParticipants.add(id);
     this.pve?.onParticipantFinished?.(id);
   }
-  constructor(readonly id: number, readonly mapId: number, private readonly s: StartGameOptions, private readonly engine: DdtFightEngine, pveGame?: PveGame, pve?: StartPveOptions, private readonly bossAttempt?: WorldBossAttempt) {
+  constructor(readonly id: number, readonly mapId: number, private readonly s: StartGameOptions, private readonly engine: DdtFightEngine, pveGame?: PveGame, pve?: StartPveOptions, private readonly bossAttempt?: WorldBossAttempt, private readonly labyrinth?: LabyrinthFightBinding) {
     this.pve = pve ?? null;
     const specs: PlayerSpec[] = [];
     for (const [team, list] of [[1, s.red], [2, s.blue]] as const)
@@ -286,25 +315,29 @@ class DdtGame implements FightGame {
         specs.push(specOf(m as LobbyLike, team, engine.assets, engine.o.petSkill));
       }
     this.game = pveGame ?? new PvpGame({ id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId, assets: engine.assets, players: specs, seed: engine.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(), ...gameHooks(engine, s.roomType, this.members) });
-    // GameStart.cs:88 — every battle pet gets hungrier
-    for (const m of this.members.values()) if (!m.isBot && m.petBag?.equipped()) { m.petBag.reduceHunger(); m.flushPets?.(); }
     const profiles = new Map<number, BotProfile>();
     for (const m of this.members.values()) if (m.isBot) profiles.set(m.id, engine.o.botProfile?.(m) ?? { difficulty: 50 });
     this.bots = new BotRunner(this.game, profiles, id);
+  }
+
+  activatePets(): void {
+    // GameStart.cs:88 — only after the server-owned binding accepted the real fight.
+    for (const m of this.members.values()) if (!m.isBot && m.petBag?.equipped()) { m.petBag.reduceHunger(); m.flushPets?.(); }
   }
 
   tick(now: number): void {
     if (this.settlement.held) { this.settlement.tick(now, (time) => this.tick(time), this.settlementError); return; }
     if (this.stopped) return;
     now = this.lastInputTime = Math.max(now, this.lastInputTime);
-    this.dispatch(this.game.update(now));
-    this.dispatch(this.bots.update(now));
-    if (this.game.state === GameState.Stopped) this.stop();
+    if (this.labyrinthClosing) return;
+    this.dispatch(this.game.update(now), () => {
+      this.dispatch(this.bots.update(now), () => { if (this.game.state === GameState.Stopped) this.stop(); });
+    });
   }
 
   processData(from: RoomMember, pkt: GSPacket, now = Date.now()): void | Promise<void> {
-    if (this.settlement.held) return this.settlement.defer(() => { this.processData(from, pkt, now); });
-    if (this.stopped) return;
+    if (this.settlement.held) return this.settlement.defer(() => this.processData(from, pkt, now));
+    if (this.stopped || this.labyrinthClosing) return;
     now = this.lastInputTime = Math.max(now, this.lastInputTime);
     // TakeCardCommand (98) / BossTakeCardCommand (130): after GAME_OVER; index out of range (client sends 100 when
     // its countdown ends) = auto pick. Without an answer the client's card board never closes (stuck at "00").
@@ -352,14 +385,19 @@ class DdtGame implements FightGame {
   /** GameUserStartHandler (82): host forces every player Ready (PVEGame.MissionStart); no-op for PvP (AbstractGame
    * default). Reuses the DELIVER(137) semantics — set-only, no 116 echo — since GameUserStartHandler doesn't SendToAll. */
   missionStart(now = Date.now()): void | Promise<void> {
-    if (this.settlement.held) return this.settlement.defer(() => { this.missionStart(now); });
-    if (this.stopped) return;
+    if (this.settlement.held) return this.settlement.defer(() => this.missionStart(now));
+    if (this.stopped || this.labyrinthClosing) return;
     if (!this.pve) return;
     now = this.lastInputTime = Math.max(now, this.lastInputTime);
-    for (const id of this.members.keys()) this.dispatch(this.game.handle(id, { cmd: "DELIVER", ready: true }, now));
+    const ids = [...this.members.keys()];
+    const ready = (index: number): void => {
+      if (index < ids.length) this.dispatch(this.game.handle(ids[index]!, { cmd: "DELIVER", ready: true }, now), () => ready(index + 1));
+    };
+    ready(0);
   }
 
   removePlayer(p: RoomMember): void {
+    if (this.labyrinth && this.members.get(p.id) === p) { this.stop(); return; }
     if (this.settlement.held) { void this.settlement.defer(() => this.removePlayer(p), `remove:${p.id}`).catch(this.settlementError); return; }
     if (this.stopped) return;
     const fled = this.game.removePlayer(p.id);
@@ -402,7 +440,17 @@ class DdtGame implements FightGame {
   }
 
   stop(): void {
+    if (this.labyrinth) {
+      if (this.stopped || this.labyrinthClosing) return;
+      this.labyrinthClosing = true;
+      this.pauseLabyrinth(() => this.finishLabyrinth(false), () => this.cleanupStop(), true);
+      return;
+    }
     if (this.settlement.held) { void this.settlement.defer(() => this.stop(), "stop").catch(this.settlementError); return; }
+    this.cleanupStop();
+  }
+
+  private cleanupStop(): void {
     if (this.stopped) return;
     this.stopped = true;
     for (const id of this.members.keys()) this.finishParticipant(id);
@@ -413,6 +461,50 @@ class DdtGame implements FightGame {
     this.s.onStopped();
   }
 
+  /** Fatal strict-script/settlement failures remain observable to quit and shutdown drains. */
+  fail(error: unknown): void {
+    if (!this.labyrinth) { this.stop(); return; }
+    this.labyrinthFailure ??= error;
+    this.engine.o.log?.(`fight ${this.id}: Labyrinth settlement failed: ${String(error)}`);
+    if (this.stopped || this.labyrinthClosing) return;
+    this.labyrinthClosing = true;
+    this.pauseLabyrinth(() => this.finishLabyrinth(false), () => this.cleanupStop(), true);
+  }
+
+  private finishLabyrinth(isWin: boolean): Promise<void> {
+    if (!this.labyrinthFinish) {
+      try { this.labyrinthFinish = this.labyrinth!.finish(isWin); }
+      catch (error) { this.labyrinthFinish = Promise.reject(error); }
+    }
+    return this.labyrinthFinish;
+  }
+
+  /** Register synchronously, then detach from the triggering client packet's own queue. */
+  private pauseLabyrinth(work: () => Promise<void>, resume: () => void, closing = false): void {
+    const lease = this.settlement.acquire();
+    let result: Promise<void>;
+    try { result = work(); } catch (error) { result = Promise.reject(error); }
+    // A queued lease can wait behind another commit; observe rejection immediately.
+    const outcome = result.then(() => ({ ok: true as const }), error => ({ ok: false as const, error }));
+    const pending = (async () => {
+      const release = await lease;
+      try {
+        const completed = await outcome;
+        if (!completed.ok) throw completed.error;
+        if (!this.stopped && (!this.labyrinthClosing || closing)) resume();
+      } catch (error) {
+        this.labyrinthFailure ??= error;
+        this.labyrinthClosing = true;
+        this.engine.o.log?.(`fight ${this.id}: Labyrinth settlement failed: ${String(error)}`);
+        try { await this.finishLabyrinth(false); }
+        catch (finishError) { this.engine.o.log?.(`fight ${this.id}: Labyrinth exit failed: ${String(finishError)}`); }
+        finally { this.cleanupStop(); }
+      } finally { release(); }
+    })();
+    this.labyrinthPending.add(pending);
+    void pending.finally(() => this.labyrinthPending.delete(pending)).catch(this.settlementError);
+  }
+
   private send(e: FightEvent, pkt: GSPacket): void {
     const target = e.to ? new Set(e.to) : null;
     for (const p of this.game.players) {
@@ -421,9 +513,24 @@ class DdtGame implements FightGame {
     }
   }
 
-  private dispatch(events: FightEvent[] | void): void {
-    for (const e of events ?? []) {
-      if (e.cmd === "LABYRINTH_AWARD") throw new Error(`Labyrinth award ${this.id}/${e.userId}/${e.floor} has no settlement owner`);
+  private dispatch(events: FightEvent[] | void, after?: () => void): void {
+    const batch = events ?? [];
+    for (let i = 0; i < batch.length; i++) {
+      const e = batch[i]!;
+      if (e.cmd === "LABYRINTH_AWARD") {
+        if (!this.labyrinth || this.s.roomType !== 15 || !(this.game instanceof PveGame)) throw new Error(`Labyrinth award ${this.id}/${e.userId}/${e.floor} has no settlement owner`);
+        const member = this.members.get(e.userId);
+        const living = this.game.players.find(p => p.id === e.livingId && p.spec.userId === e.userId);
+        if (!member || member.isBot || !living?.isActive || !Number.isInteger(e.floor) || e.floor < 1 || e.floor > 30 ||
+          this.game.SessionId !== e.floor || this.game.MissionInfo?.Id !== e.missionId || e.missionId !== 40000 + e.floor ||
+          typeof e.bigAward !== "boolean" || (e.bigAward && e.floor % 2 !== 0)) {
+          const error = new Error(`Labyrinth award ${this.id}/${e.userId}/${e.floor} does not match its active mission/member`);
+          this.fail(error);
+          throw error;
+        }
+        this.pauseLabyrinth(() => this.labyrinth!.award(member, e), () => this.dispatch(batch.slice(i + 1), after));
+        return;
+      }
       if (e.cmd === "GAME_OVER") this.applyRewards(e);
       if (e.cmd === "GAME_MISSION_OVER") {
         this.applyMissionOver(e);
@@ -436,29 +543,44 @@ class DdtGame implements FightGame {
         continue;
       }
       if (e.cmd === "PVE_STOPPED") {
-        // PVEGame.Stop: unlock only after the whole Dungeon, before ResetRoom/onFinished.
-        if (this.pve && this.game instanceof PveGame) {
-          for (const living of this.game.players) {
-            // Engine-side load timeouts can leave an inactive player in members; dead teammates remain eligible.
-            if (!living.isActive) continue;
-            const m = this.members.get(living.spec.userId);
-            if (!m || m.isBot) continue;
-            const permission = unlockDungeonPvePermission(m.info.PvePermission, this.game.info, {
-              roomType: this.s.roomType, isWin: e.isWin, hasNextMission: e.hasNextMission, hardLevel: this.pve.hardLevel,
-            });
-            if (permission !== m.info.PvePermission) {
-              m.info.PvePermission = permission;
-              m.updateProperties?.();
-            }
-          }
+        if (this.labyrinth) {
+          this.labyrinthClosing = true;
+          this.pauseLabyrinth(() => this.finishLabyrinth(e.isWin), () => {
+            this.applyPveStopped(e);
+            this.dispatch(batch.slice(i + 1), () => this.cleanupStop());
+          }, true);
+          return;
         }
-        this.engine.o.log?.(`pve ${this.id}: stopped, win=${e.isWin}`);
-        this.pve?.onFinished?.(e.isWin);
+        this.applyPveStopped(e);
         continue;
       }
       const pkt = this.serialize(e);
       if (pkt) this.send(e, pkt);
     }
+    after?.();
+  }
+
+  private applyPveStopped(e: Extract<FightEvent, { cmd: "PVE_STOPPED" }>): void {
+    if (this.pveStoppedApplied) return;
+    this.pveStoppedApplied = true;
+    // PVEGame.Stop: unlock only after the whole Dungeon, before ResetRoom/onFinished.
+    if (this.pve && this.game instanceof PveGame) {
+      for (const living of this.game.players) {
+        // Engine-side load timeouts can leave an inactive player in members; dead teammates remain eligible.
+        if (!living.isActive) continue;
+        const m = this.members.get(living.spec.userId);
+        if (!m || m.isBot) continue;
+        const permission = unlockDungeonPvePermission(m.info.PvePermission, this.game.info, {
+          roomType: this.s.roomType, isWin: e.isWin, hasNextMission: e.hasNextMission, hardLevel: this.pve.hardLevel,
+        });
+        if (permission !== m.info.PvePermission) {
+          m.info.PvePermission = permission;
+          m.updateProperties?.();
+        }
+      }
+    }
+    this.engine.o.log?.(`pve ${this.id}: stopped, win=${e.isWin}`);
+    this.pve?.onFinished?.(e.isWin);
   }
 
   /** PVEGame.GameOver: PlayerDetail.AddGP(exp) (grade is written after), OnMissionOver (quests) */

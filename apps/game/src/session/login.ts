@@ -21,6 +21,7 @@ import * as Out from "../packets/out.js";
 import { unixSeconds } from "../util/time.js";
 import { withWorldBossAdmission } from "../game/world-boss.js";
 import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
+import { labyrinthCombatOwner } from "../game/labyrinth-combat.js";
 import type { GameClient } from "./client.js";
 import type { ServerContext, TicketValidator } from "./context.js";
 import type { DbHandle } from "@ddt/db";
@@ -185,11 +186,17 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
 
 /** GamePlayer.Quit: leave room/lobby, State = 0, save, WorldMgr.RemovePlayer. Idempotent: concurrent callers share one quit. */
 export function quitPlayer(ctx: ServerContext, p: GamePlayer): Promise<void> {
-  return (p.quitting ??= doQuit(ctx, p));
+  if (p.quitting) return p.quitting;
+  const work = p.quitting = doQuit(ctx, p);
+  // A failed durable settlement must be retryable; keep the player online until
+  // it succeeds instead of permanently caching one rejected quit promise.
+  void work.catch(() => { if (p.quitting === work) p.quitting = null; });
+  return work;
 }
 
 async function doQuit(ctx: ServerContext, p: GamePlayer): Promise<void> {
   // Seal actual outcome producers and drain their detached ledger before any old-profile final save.
+  await labyrinthCombatOwner(ctx).beforeQuit(p);
   await christmasSnowfieldOwner(ctx).beforeQuit(p);
   p.isActive = false;
   const leavingGame = p.currentRoom?.game;

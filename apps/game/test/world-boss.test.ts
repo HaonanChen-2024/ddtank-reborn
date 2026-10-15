@@ -348,6 +348,7 @@ describe("world boss fight write barrier", () => {
     gate.tick(30, (n) => out.push(`tick:${n}`), () => {});
     const stop = gate.defer(() => { out.push("stop"); }, "stop");
     expect(second).toBe(false); release(); release(); await Promise.all([next, rejected, stop]);
-    expect(out).toEqual(["tick:20", "packet", "tick:30", "stop", "next"]); expect(gate.held).toBe(false);
+    // An already-requested next award retains the barrier before ordinary queued work.
+    expect(out).toEqual(["next", "tick:20", "packet", "tick:30", "stop"]); expect(gate.held).toBe(false);
   });
 });

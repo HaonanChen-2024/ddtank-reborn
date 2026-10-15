@@ -11,6 +11,7 @@ import { roomList } from "../packets/out.js";
 import { SubRouter, type HandlerRegistry } from "./registry.js";
 import { parseWorldBossSetup } from "./world-boss-setup.js";
 import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
+import { labyrinthCombatOwner } from "../game/labyrinth-combat.js";
 
 const NO_WEAPON = "Sem arma equipada, não é possível participar.";
 
@@ -75,8 +76,9 @@ export function roomRouter(): SubRouter {
         ctx.rooms.setupChange(room, setup);
         return;
       }
-      const mapId = pkt.readInt();
+      let mapId = pkt.readInt();
       const roomType = pkt.readByte();
+      if (roomType === 15 && mapId === 0) mapId = 401; // original SetupChange.cs:29-34
       // GameSocketOut.enterUserGuide (freshman / quest "go" button) writes no isOpenBoss bool (GameSocketOut.as:1400)
       const isOpenBoss = roomType === RoomType.Freshman ? false : pkt.readBoolean();
       const password = pkt.readString();
@@ -121,6 +123,7 @@ export function roomRouter(): SubRouter {
         const permit = await christmasSnowfieldOwner(ctx).prepareStart(c, p, room);
         if (!permit.ok || p.currentRoom !== room) { if (!permit.ok) p.sendMessage(0, permit.message); return; }
       }
+      if (room.RoomType === 15 && !(await labyrinthCombatOwner(ctx).prepareStart(p, room))) return;
       ctx.rooms.startGame(room);
     }, "partial")
     .on(9, "ROOMLIST_UPDATE", (ctx, p, pkt) => {

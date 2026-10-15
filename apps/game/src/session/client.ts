@@ -43,6 +43,7 @@ export class GameClient implements PacketSink {
   /** Raw LOGIN parse result, handed to the login handler. */
   pendingLogin: LoginPacket | null = null;
   private chain: Promise<void> = Promise.resolve();
+  private readonly combatSettlements: (() => Promise<void>)[] = [];
   private readonly bucket: TokenBucket;
   private readonly loginTimer: NodeJS.Timeout | null;
   onClosed?: (c: GameClient) => void;
@@ -102,7 +103,7 @@ export class GameClient implements PacketSink {
     if (this.player) pkt.clientId = this.player.id; // GameClient.OnRecvPacket overwrites ClientID
     const def = this.handlers.get(code);
     if (!def) return;
-    this.chain = this.chain.then(async () => {
+    this.enqueueSerialized(async () => {
       if (this.closed && code !== 1) return;
       try {
         await def.handle(this.ctx, this, pkt);
@@ -112,28 +113,61 @@ export class GameClient implements PacketSink {
     });
   }
 
-  /** Waits until all queued packets were handled (tests). */
-  idle(): Promise<void> {
-    return this.chain;
+  /** Waits for queued packets and any settlements they accepted to finish. */
+  async idle(): Promise<void> {
+    for (;;) {
+      const chain = this.chain;
+      await chain;
+      if (chain === this.chain && this.combatSettlements.length === 0) return;
+    }
+  }
+
+  /**
+   * Combat callbacks register synchronously, then run at the next packet boundary, ahead of already queued
+   * packets that may wait on their fight gate. A running handler/queued work must not await a settlement it
+   * just enqueued: it has to return before that settlement can run. Accepted work survives disconnect.
+   */
+  enqueueCombatSettlement<T>(work: () => Promise<T>): Promise<T> {
+    const result = new Promise<T>((resolve, reject) => {
+      this.combatSettlements.push(async () => {
+        try { resolve(await work()); } catch (err) { reject(err); }
+      });
+    });
+    // Observe failures even when the combat owner attaches its handler after this checkpoint starts.
+    void result.catch(() => {});
+    // Also schedules a drain when no packet is running. Existing work drains this queue before it runs.
+    this.enqueueSerialized(async () => {});
+    return result;
+  }
+
+  private async drainCombatSettlements(): Promise<void> {
+    while (this.combatSettlements.length) await this.combatSettlements.shift()!();
+  }
+
+  private enqueueSerialized<T>(work: () => Promise<T>): Promise<T> {
+    const result = this.chain.then(async () => {
+      if (this.combatSettlements.length) await this.drainCombatSettlements();
+      try { return await work(); } finally {
+        if (this.combatSettlements.length) await this.drainCombatSettlements();
+      }
+    });
+    // Only the caller observes business failure; later work must still run.
+    this.chain = result.then(() => {}, () => {});
+    return result;
   }
 
   enqueueWorldBossAward<T>(work: () => Promise<T>): Promise<T> {
-    const result = this.chain.then(work);
-    // The scheduler observes the failure; it must not poison later packets.
-    this.chain = result.then(() => {}, () => {});
-    return result;
+    return this.enqueueSerialized(work);
   }
 
   /** A05 internal commands must share ordering with inventory packets and login. */
   enqueueActivityExchange<T>(work: () => Promise<T>): Promise<T> {
-    const result = this.chain.then(work);
-    this.chain = result.then(() => {}, () => {});
-    return result;
+    return this.enqueueSerialized(work);
   }
 
   /** Christmas commands share the real socket packet chain. */
   enqueueActivityChristmas<T>(work: () => Promise<T>): Promise<T> {
-    const result = this.chain.then(work); this.chain = result.then(() => {}, () => {}); return result;
+    return this.enqueueSerialized(work);
   }
 
   send(pkt: GSPacket): void {
