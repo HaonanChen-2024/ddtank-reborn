@@ -15,7 +15,6 @@
  */
 import { eq, sql } from "drizzle-orm";
 import { GSPacket } from "@ddt/protocol";
-import { player as P } from "@ddt/db";
 import { ItemInfo, templateBagType } from "../game/item.js";
 import type { GamePlayer } from "../game/player.js";
 import type { ServerContext } from "../session/context.js";
@@ -26,6 +25,9 @@ import { createItemBox } from "./use.js";
 import { mailItems } from "./items.js";
 import * as Out from "../packets/out.js";
 import type { HandlerRegistry } from "./registry.js";
+import { labyrinthHandler } from "../game/labyrinth.js";
+export { labyrinthHandler, labyrinthTryAgainMoney } from "../game/labyrinth.js";
+export type { LabyrinthRow } from "../game/labyrinth.js";
 
 // ------------------------------------------------------------------ shared reward-pool config
 export interface PoolItem { templateId: number; count: number; validDate?: number; isBind?: boolean; quality?: number; weight?: number }
@@ -431,132 +433,9 @@ function sendLuckyAllGoods(p: GamePlayer, s: LuckyState): void {
   p.send(out);
 }
 
-// ------------------------------------------------------------------ 131 LABYRINTH (administrative/economy layer)
-/** Sys_Users_Labyrinth row (UpdateLabyrinthTime's per-second climb is settled instantly on CLEAN_OUT/SPEEDED_UP here —
- *  no per-player timer thread — since `myProgress` (floors cleared by real combat) has nothing to settle until the
- *  Labyrinth combat-to-progress lifecycle is wired; see HANDLERS.md). */
-export type LabyrinthRow = typeof P.Sys_Users_Labyrinth.$inferSelect;
-async function loadLabyrinth(ctx: ServerContext, p: GamePlayer): Promise<LabyrinthRow> {
-  const [row] = await ctx.db.db.select().from(P.Sys_Users_Labyrinth).where(eq(P.Sys_Users_Labyrinth.UserID, p.id)).limit(1);
-  if (row) return row;
-  const fresh: LabyrinthRow = { UserID: p.id, myProgress: 0, myRanking: 0, completeChallenge: true, isDoubleAward: false, currentFloor: 1, accumulateExp: 0, remainTime: 0, currentRemainTime: 0, cleanOutAllTime: 0, cleanOutGold: 50, tryAgainComplete: true, isInGame: false, isCleanOut: false, serverMultiplyingPower: false, LastDate: ctx.now(), ProcessAward: "-1" };
-  await ctx.db.db.insert(P.Sys_Users_Labyrinth).values(fresh).onConflictDoNothing();
-  return fresh;
-}
-async function saveLabyrinth(ctx: ServerContext, row: LabyrinthRow): Promise<void> {
-  await ctx.db.db.update(P.Sys_Users_Labyrinth).set(row).where(eq(P.Sys_Users_Labyrinth.UserID, row.UserID));
-}
-function labyrinthUpdatePkt(id: number, l: LabyrinthRow): GSPacket {
-  const p = new GSPacket(131, id);
-  p.writeByte(2);
-  // Shipped LabyrinthManager.__onUpdataInfo / original SendLabyrinthUpdataInfo wire order.
-  p.writeInt(l.myProgress); p.writeInt(l.currentFloor); p.writeBoolean(l.completeChallenge);
-  p.writeInt(l.remainTime); p.writeInt(l.accumulateExp); p.writeInt(l.cleanOutAllTime);
-  p.writeInt(l.cleanOutGold); p.writeInt(l.myRanking); p.writeBoolean(l.isDoubleAward);
-  p.writeBoolean(l.isInGame); p.writeBoolean(l.isCleanOut); p.writeBoolean(l.serverMultiplyingPower);
-  return p;
-}
-function initProcessAward(): string {
-  return Array.from({ length: 99 }, (_, i) => String(i)).join("-");
-}
-export function labyrinthTryAgainMoney(ctx: ServerContext, l: LabyrinthRow): number {
-  const big = num(ctx, "labyrinth", "priceBig", 5000);
-  const small = num(ctx, "labyrinth", "priceSmall", 1000);
-  for (let i = 0; i < l.myProgress; i += 2) if (l.currentFloor === i) return big;
-  return small;
-}
-function hasPendingLabyrinthFloors(l: LabyrinthRow): boolean {
-  return l.completeChallenge && l.myProgress > 0 && l.currentFloor <= l.myProgress;
-}
-/** "Clean out": collect every 2-floor checkpoint reward from currentFloor..myProgress at once (see header note). */
-function settleCleanOut(ctx: ServerContext, p: GamePlayer, l: LabyrinthRow): { exp: number; hardCurrency: number } {
-  let exp = 0, hardCurrency = 0;
-  for (let f = l.currentFloor; f <= l.myProgress; f += 2) {
-    let gained = 660 + 690 * Math.max(0, f - 1);
-    let hc = 10 * Math.max(1, f);
-    if (l.isDoubleAward) { gained *= 2; hc *= 2; }
-    exp += gained; hardCurrency += hc;
-  }
-  l.accumulateExp += exp;
-  l.currentFloor = l.myProgress;
-  // PlayerActives.UpdateLabyrinthTime / SpeededUp clamp the cursor but close the run.
-  l.completeChallenge = false;
-  l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0; l.isCleanOut = false; l.isInGame = false;
-  if (exp) { p.addGP(exp, false); }
-  if (hardCurrency) p.addHardCurrency(hardCurrency);
-  return { exp, hardCurrency };
-}
-
-export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): Promise<void> {
-  const sub = pkt.readInt();
-  if (!isOpen(ctx, "labyrinth")) return p.sendMessage(0, "O Labirinto está fechado.");
-  const l = await loadLabyrinth(ctx, p);
-  const today = ctx.now().toISOString().slice(0, 10);
-  if (today !== l.LastDate.toISOString().slice(0, 10)) {
-    l.completeChallenge = true; l.accumulateExp = 0; l.isInGame = false; l.currentFloor = 1; l.tryAgainComplete = true; l.LastDate = ctx.now(); l.ProcessAward = initProcessAward();
-    l.isCleanOut = false; l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0;
-  }
-  switch (sub) {
-    case 1: { // DOUBLE_REWARD
-      const on = pkt.readBoolean();
-      const item = p.propBag.getItemByTemplateID(0, 11916);
-      if (!item) break;
-      if (on && !l.isDoubleAward && p.propBag.removeTemplate(11916, 1)) l.isDoubleAward = true;
-      break;
-    }
-    case 2: { // REQUEST_UPDATE
-      let left = 0;
-      if (hasPendingLabyrinthFloors(l)) for (let i = l.currentFloor; i <= l.myProgress; i++) left += 2;
-      l.remainTime = left * 60; l.currentRemainTime = l.remainTime; l.cleanOutAllTime = l.remainTime;
-      break;
-    }
-    case 3: { // CLEAN_OUT
-      if (!hasPendingLabyrinthFloors(l)) break;
-      const price = num(ctx, "labyrinth", "cleanOutGiftToken", 100);
-      if (p.info.GiftToken < price) { p.sendMessage(0, "Cupons de presente insuficientes."); l.isCleanOut = false; break; }
-      p.removeGiftToken(price);
-      l.isCleanOut = true;
-      const r = settleCleanOut(ctx, p, l);
-      if (r.exp || r.hardCurrency) p.sendMessage(0, `Labirinto: +${r.exp} exp, +${r.hardCurrency} moedas.`);
-      break;
-    }
-    case 4: { // SPEEDED_UP_CLEAN_OUT
-      if (!l.isCleanOut) { p.sendMessage(0, "O Labirinto ainda não foi limpo."); break; }
-      if (!hasPendingLabyrinthFloors(l)) break;
-      const mins = Math.abs(Math.floor(l.currentRemainTime / 60));
-      const price = num(ctx, "labyrinth", "pricePerMin", 10) * mins;
-      if (p.info.Money < price) break;
-      p.removeMoney(price);
-      settleCleanOut(ctx, p, l);
-      break;
-    }
-    case 5: // STOP_CLEAN_OUT
-      l.isCleanOut = false;
-      break;
-    case 6: // RESET_LABYRINTH
-      if (l.tryAgainComplete) {
-        l.currentFloor = 1; l.accumulateExp = 0; l.tryAgainComplete = false; l.ProcessAward = initProcessAward();
-        // The shipped frame also requires completeChallenge to open a reset run.
-        l.completeChallenge = true; l.isCleanOut = false; l.isInGame = false;
-        l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0;
-        p.sendMessage(0, "O Labirinto foi reiniciado.");
-      }
-      else p.sendMessage(0, "Ainda não é possível atualizar.");
-      break;
-    case 9: { // TRY_AGAIN
-      const again = pkt.readBoolean(); pkt.readBoolean();
-      if (again) {
-        const price = labyrinthTryAgainMoney(ctx, l);
-        if (p.info.Money >= price) { p.removeMoney(price); l.completeChallenge = true; l.isInGame = true; p.sendMessage(0, "Continuar o Labirinto."); }
-      } else p.sendMessage(0, "Labirinto pausado.");
-      break;
-    }
-    default:
-      return;
-  }
-  await saveLabyrinth(ctx, l);
-  p.send(labyrinthUpdatePkt(p.id, l));
-}
+// ------------------------------------------------------------------ 131 LABYRINTH
+// Administrative changes and battle awards share game/labyrinth.ts and one
+// detached player/database transaction. Combat admission remains disabled.
 
 // ------------------------------------------------------------------ 132 league (Chiến thần) stats — BattleGroundHandler
 /** PlayerBattle's reference stats are hard-coded constants in the original too (not derived from the player). */

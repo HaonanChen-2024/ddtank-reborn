@@ -408,8 +408,8 @@ export class GamePlayer implements RoomMember {
   private persistencePending = 0;
   worldBossAwardPending: Promise<void> | null = null;
 
-  /** Room start observes this barrier even when no DdtGame exists yet. Only
-   * the timed award owner calls this after joining the client's packet queue. */
+  /** Room start observes this barrier even when no DdtGame exists yet. The
+   * reward/administrative owner must already own the client's packet queue. */
   async withWorldBossAward<T>(work: () => Promise<T>): Promise<T> {
     while (this.worldBossAwardPending) await this.worldBossAwardPending;
     let release!: () => void;

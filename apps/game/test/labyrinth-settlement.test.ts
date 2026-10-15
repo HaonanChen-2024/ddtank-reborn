@@ -1,8 +1,13 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { eq } from "drizzle-orm";
-import { player } from "@ddt/db";
+import { eq, sql } from "drizzle-orm";
+import { player, type Database } from "@ddt/db";
+import { GSPacket } from "@ddt/protocol";
 import type { GameServer } from "../src/server.js";
 import type { LabyrinthRow } from "../src/handlers/activities.js";
+import { labyrinthHandler } from "../src/game/labyrinth.js";
+import { ItemInfo } from "../src/game/item.js";
+import { StubFightEngine } from "../src/fight/stub.js";
+import { RoomMgr } from "../src/rooms/room-mgr.js";
 import { eventsRuntime } from "../src/handlers/events.js";
 import { type FakeClient, loggedIn, sharedDb, startServer } from "./helpers.js";
 
@@ -47,6 +52,28 @@ async function fixture(over: Partial<LabyrinthRow> = {}, money = 100) {
 }
 
 const idle = { isCleanOut: false, isInGame: false, remainTime: 0, currentRemainTime: 0, cleanOutAllTime: 0 };
+
+function command(sub: number, value = false): GSPacket {
+  const pkt = new GSPacket(131); pkt.writeInt(sub);
+  if (sub === 1 || sub === 9) pkt.writeBoolean(value);
+  if (sub === 9) pkt.writeBoolean(false);
+  pkt.offset = 20;
+  return pkt;
+}
+
+async function failWrite(id: number, table: "Sys_Users_Detail" | "Sys_Users_Labyrinth" | "Sys_Users_Goods"): Promise<() => Promise<void>> {
+  const db = await sharedDb();
+  // The ID comes from the inserted test character, never from a packet/string.
+  if (!Number.isSafeInteger(id)) throw new Error("Invalid test character ID");
+  await db.db.execute(sql.raw(`CREATE FUNCTION player.test_labyrinth_131_failure() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN IF NEW."UserID" = ${id} THEN RAISE EXCEPTION 'injected 131 profile failure'; END IF; RETURN NEW; END; $$`));
+  await db.db.execute(sql.raw(`CREATE TRIGGER test_labyrinth_131_failure BEFORE UPDATE ON player."${table}"
+    FOR EACH ROW EXECUTE FUNCTION player.test_labyrinth_131_failure()`));
+  return async () => {
+    await db.db.execute(sql.raw(`DROP TRIGGER test_labyrinth_131_failure ON player."${table}"`));
+    await db.db.execute(sql`DROP FUNCTION player.test_labyrinth_131_failure()`);
+  };
+}
 
 describe("131 local sweep settlement lifecycle", () => {
   it("settles once, persists completion, and rejects queued clean/speed/update replays", async () => {
@@ -166,5 +193,126 @@ describe("131 local sweep settlement lifecycle", () => {
     const before = f.wallet();
     expect(await f.request(9, true)).toMatchObject({ completeChallenge: true, isInGame: true });
     expect(f.wallet()).toEqual({ ...before, money: 0 });
+  });
+
+  it.each([3, 9].flatMap(sub => (["Sys_Users_Detail", "Sys_Users_Labyrinth"] as const).map(table => ({ sub, table }))))
+  ("rolls back the live wallet and stored row if 131 sub $sub fails on $table", async ({ sub, table }) => {
+    const f = await fixture({}, 1000), p = f.player(), before = structuredClone(p.info), row = await f.read();
+    const db = await sharedDb(), stored = (await db.db.select().from(player.Sys_Users_Detail)
+      .where(eq(player.Sys_Users_Detail.UserID, p.id)))[0]!;
+    const remove = await failWrite(p.id, table);
+    try {
+      await expect(labyrinthHandler(server.ctx, p, command(sub, true))).rejects.toThrow();
+      expect(p.info).toEqual(before); expect(await f.read()).toEqual(row);
+      expect((await db.db.select().from(player.Sys_Users_Detail).where(eq(player.Sys_Users_Detail.UserID, p.id)))[0]).toEqual(stored);
+    } finally { await remove(); }
+    await labyrinthHandler(server.ctx, p, command(sub, true));
+    expect(await f.read()).toMatchObject(sub === 3 ? { completeChallenge: false } : { isInGame: true });
+    expect(sub === 3 ? p.info.GiftToken : p.info.Money).toBe(sub === 3 ? before.GiftToken - 5 : 0);
+  });
+
+  it.each(["Sys_Users_Detail", "Sys_Users_Goods"] as const)
+  ("commits DOUBLE_REWARD's last 11916 and its row together, preserving the live slot on $table failure", async table => {
+    const f = await fixture(), p = f.player(), db = await sharedDb();
+    const [goods] = await db.db.insert(player.Sys_Users_Goods).values({ UserID: p.id, BagType: 1, Place: 0,
+      TemplateID: 11916, Count: 1, IsBinds: true }).returning();
+    const item = ItemInfo.fromRow(goods!, server.ctx.templates.findItem(11916)!);
+    p.propBag.loadItems([item]);
+    const row = await f.read(), itemBefore = item.toRow(), dirtyBefore = item.isDirty;
+    const remove = await failWrite(p.id, table);
+    try {
+      await expect(labyrinthHandler(server.ctx, p, command(1, true))).rejects.toThrow();
+      expect(await f.read()).toEqual(row); expect(p.propBag.getItemAt(0)).toBe(item);
+      expect(item.toRow()).toEqual(itemBefore); expect(item.isDirty).toBe(dirtyBefore);
+      expect((await db.db.select().from(player.Sys_Users_Goods).where(eq(player.Sys_Users_Goods.ItemID, item.ItemID)))[0]).toEqual(goods);
+    } finally { await remove(); }
+    await labyrinthHandler(server.ctx, p, command(1, true));
+    expect(await f.read()).toMatchObject({ isDoubleAward: true }); expect(p.propBag.getItemAt(0)).toBeNull();
+    expect((await db.db.select().from(player.Sys_Users_Goods).where(eq(player.Sys_Users_Goods.ItemID, item.ItemID)))[0]).toMatchObject({ IsExist: false });
+    await labyrinthHandler(server.ctx, p, command(1, true));
+    expect(await f.read()).toMatchObject({ isDoubleAward: true });
+  });
+
+  it("initializes the original 99 slots only for a new or provably unused legacy row", async () => {
+    const f = await fixture({ myProgress: 0, ProcessAward: "-1" });
+    expect((await f.request(2)).ProcessAward.split("-")).toEqual(Array.from({ length: 99 }, (_, i) => String(i)));
+    const progressed = await fixture({ ProcessAward: "-1" });
+    expect((await progressed.request(2)).ProcessAward).toBe("-1");
+    const fresh = await loggedIn(server, { grade: 10 }); clients.push(fresh.c);
+    await labyrinthHandler(server.ctx, fresh.player(), command(2));
+    const db = await sharedDb(), [row] = await db.db.select().from(player.Sys_Users_Labyrinth)
+      .where(eq(player.Sys_Users_Labyrinth.UserID, fresh.ch.userId));
+    expect(row).toMatchObject({ currentFloor: 1, myProgress: 0 });
+    expect(row!.ProcessAward.split("-")).toEqual(Array.from({ length: 99 }, (_, i) => String(i)));
+  });
+
+  it("rejects in-fight commands and rechecks quit after waiting for the persistence owner", async () => {
+    const f = await fixture(), p = f.player(), row = await f.read(), before = f.wallet();
+    p.currentRoom = { game: {} } as never;
+    try { await labyrinthHandler(server.ctx, p, command(3)); } finally { p.currentRoom = null; }
+    expect(await f.read()).toEqual(row); expect(f.wallet()).toEqual(before);
+    let release!: () => void;
+    const held = p.withPersistenceLock(() => new Promise<void>(resolve => { release = resolve; }));
+    await Promise.resolve();
+    const pending = labyrinthHandler(server.ctx, p, command(3));
+    p.quitting = Promise.resolve(); release();
+    try { await held; await pending; } finally { p.quitting = null; }
+    expect(await f.read()).toEqual(row); expect(f.wallet()).toEqual(before);
+  });
+
+  it("reads the UTC day only after acquiring the persistence owner, resetting a queued previous-day request", async () => {
+    const previousDay = new Date("2026-10-16T23:59:59.000Z"), nextDay = new Date("2026-10-17T00:00:01.000Z");
+    const f = await fixture({ LastDate: previousDay, completeChallenge: false, currentFloor: 4,
+      tryAgainComplete: false, accumulateExp: 123, isInGame: true, isCleanOut: true }), p = f.player();
+    const originalNow = server.ctx.now;
+    let now = previousDay, release!: () => void;
+    server.ctx.now = () => now;
+    try {
+      const held = p.withPersistenceLock(() => new Promise<void>(resolve => { release = resolve; }));
+      await Promise.resolve();
+      const pending = labyrinthHandler(server.ctx, p, command(5));
+      now = nextDay; release(); await held; await pending;
+      const row = await f.read();
+      expect(row).toMatchObject({ ...idle, completeChallenge: true, currentFloor: 1, tryAgainComplete: true, accumulateExp: 0 });
+      expect(row.LastDate).toEqual(nextDay);
+      expect(row.ProcessAward.split("-")).toEqual(Array.from({ length: 99 }, (_, i) => String(i)));
+    } finally { server.ctx.now = originalNow; }
+  });
+
+  it("holds the existing room-start barrier through SQL COMMIT and live publication for another client's host", async () => {
+    const f = await fixture(), p = f.player(), host = await loggedIn(server, { grade: 10 }); clients.push(host.c);
+    const db = await sharedDb(), rooms = new RoomMgr({ maxRooms: 1, fight: new StubFightEngine(id => id), lang: key => key });
+    const room = rooms.rooms[0]!; room.start(); room.updateRoom("test", "", 1, 3, 10000);
+    room.addPlayer(host.player()); room.addPlayer(p); room.updatePlayerState(p, 1, true);
+    expect(room.host).toBe(host.player()); expect(room.canStart()).toBe(true);
+    let entered!: () => void, release!: () => void;
+    const enteredCommit = new Promise<void>(resolve => { entered = resolve; }), releaseCommit = new Promise<void>(resolve => { release = resolve; });
+    const ctx = { ...server.ctx, db: { ...db, db: new Proxy(db.db, { get(target, key, receiver) {
+      if (key !== "transaction") return Reflect.get(target, key, receiver);
+      return async (work: (tx: Database) => Promise<unknown>) => {
+        const result = await target.transaction(tx => work(tx as unknown as Database));
+        entered(); await releaseCommit; return result;
+      };
+    } }) as Database } };
+    eventsRuntime(ctx).scheduler.setEvents([{
+      id: 131, kind: "labyrinth", title: "", enabled: true, weekdays: "", startTime: "00:00", durationMin: 0,
+      startDate: null, endDate: null, params: { cleanOutGiftToken: 5 },
+    }]);
+    const running = labyrinthHandler(ctx, p, command(3));
+    try {
+      await enteredCommit;
+      expect(p.worldBossAwardPending).not.toBeNull(); expect(p.info.GiftToken).toBe(20);
+      const [committed] = await db.db.select().from(player.Sys_Users_Detail).where(eq(player.Sys_Users_Detail.UserID, p.id));
+      expect(committed!.GiftToken).toBe(15);
+      rooms.startGame(room); rooms.tick(); expect(room.game).toBeNull();
+      await labyrinthHandler(ctx, p, command(6)); // Busy rejection never waits on itself or reopens the stored run.
+      expect(await f.read()).toMatchObject({ completeChallenge: false, tryAgainComplete: true });
+      release(); await running;
+      expect(p.info.GiftToken).toBe(15); expect(p.worldBossAwardPending).toBeNull();
+      await Promise.resolve(); rooms.tick(); expect(room.game).not.toBeNull();
+    } finally {
+      release(); await running.catch(() => {}); room.game?.stop();
+      room.removePlayer(p); room.removePlayer(host.player()); rooms.stop();
+    }
   });
 });
