@@ -2954,5 +2954,14 @@
   "labyrinth.view.LabyrinthShopItem.explanationText": "需通关{0}层",
   "labyrinth.view.buyFrame.content": "确认消耗{0}枚秘境硬币购买？",
   "labyrinth.view.buyFrame.SelectedCheckButtonText": "确认",
-  "labyrinth.view.buyFrame.title": "购买"
+  "labyrinth.view.buyFrame.title": "购买",
+  "tank.consortia.myconsortia.AtLeastChoose": "请至少选择1项",
+  "ddt.consortion.pollFrame.pleaseSelceted": "请选择1名候选人\t",
+  "tank.chickActivationFrame.remainingTimeTxtMsg": "激活码剩余有效期： <FONT COLOR=\"#ffea00\">{0}</FONT> 天",
+  "tank.chickActivationFrame.selectBtn1Txt": "小鸡新兵激活码",
+  "tank.chickActivationFrame.selectBtn2Txt": "小鸡队长激活码",
+  "tank.chickActivation.inputTxtMsg": "请输入激活码",
+  "tank.chickActivation.inputTxtMsg2": "请输入14个字符的激活码",
+  "tank.chickActivation.clickRateMsg": "点击过快，请稍后重试 ",
+  "tank.chickActivation.receiveBtnMsg": "请先激活，再领取奖励 "
 }
