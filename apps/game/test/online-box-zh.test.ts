@@ -221,7 +221,8 @@ it.each([
   expect(f.sent.some(packet => packet.code === 90)).toBe(false);
   await newMailTitles(f, historic, "累计签到奖励", full);
   const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
-  expect(await signAward(f.ctx, f.p, days)).toBe(false); expect(f.sent).toEqual([]);
+  expect(await signAward(f.ctx, f.p, days)).toBe(false); expect(notices(f)).toEqual(["本月该档累计签到奖励已领取。"]);
+  expect(f.sent.map(packet => packet.code)).toEqual([3]);
   expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
 });
 
@@ -241,4 +242,27 @@ it.each(["original", "missing"] as const)("retains usable %s-language fallbacks 
     for (const mail of created) expect(mail).toMatchObject({ Title: action.title, Content: action.title, Type: 12 });
   }
   expect(f.sent.some(packet => packet.code === 90 || packet.code === 53)).toBe(false);
+});
+
+it.each(["Chinese", "original", "missing"] as const)("uses precise %s cumulative-sign rejection messages without adding a 90 response", async locale => {
+  for (const reason of [
+    { kind: "InvalidTier", chinese: "累计签到奖励档位不存在。", fallback: "Recompensa de presença indisponível." },
+    { kind: "NotReached", chinese: "本月累计签到天数尚未达到该档要求。", fallback: "Dias de presença insuficientes para esta recompensa." },
+    { kind: "AlreadyReceived", chinese: "本月该档累计签到奖励已领取。", fallback: "Você já recebeu esta recompensa de presença neste mês." },
+    { kind: "NoRewards", chinese: "此档暂无适用奖励。", fallback: "Nenhuma recompensa de presença disponível para este personagem." },
+  ]) {
+    const f = await fixture(false, locale); f.p.info.Sex = true;
+    await allowSign(f, reason.kind === "NotReached" ? 2 : 3);
+    if (reason.kind === "AlreadyReceived") expect(await signAward(f.ctx, f.p, 3)).toBe(true);
+    if (reason.kind === "NoRewards") {
+      const local = new EventData();
+      local.dailyAward = [{ ...data.dailyAward.find(row => row.AwardDays === 3 && row.Type === 1)!, Sex: 2 }];
+      eventsRuntime(f.ctx).data = local;
+    }
+    const before = inventory(f), beforeInfo = structuredClone(f.p.info), beforeMail = await mails(f); f.sent.length = 0;
+    expect(await signAward(f.ctx, f.p, reason.kind === "InvalidTier" ? 999 : 3)).toBe(false);
+    expect(notices(f)).toEqual([locale === "Chinese" ? reason.chinese : reason.fallback]);
+    expect(f.sent.map(packet => packet.code)).toEqual([3]);
+    expect(inventory(f)).toEqual(before); expect(f.p.info).toEqual(beforeInfo); expect(await mails(f)).toEqual(beforeMail);
+  }
 });

@@ -83,6 +83,77 @@ function committedGate(f: Fixture) {
   return { entered, release, ctx: f.ctx };
 }
 
+const notices = (f: Fixture) => f.sent.filter((pkt) => pkt.code === 3).map((pkt) => {
+  pkt.clearOffset(); expect(pkt.readInt()).toBe(0);
+  const text = pkt.readString(); expect(pkt.dataLeft).toBe(0); return text;
+});
+
+describe("sign award rejection notices", () => {
+  it.each([
+    { kind: "unknown tier", tier: 18, text: "Recompensa de presença indisponível." },
+    { kind: "unreached tier", tier: 3, text: "Dias de presença insuficientes para esta recompensa." },
+    { kind: "previous month", tier: 3, text: "Dias de presença insuficientes para esta recompensa." },
+    { kind: "already claimed", tier: 3, text: "Você já recebeu esta recompensa de presença neste mês." },
+  ])("reports $kind without changing rewards, claims or the original packet 90 contract", async ({ kind, tier, text }) => {
+    const f = await fixture();
+    if (kind === "unreached tier") await h.db.update(player.DailyLogList).set({ DayLog: "True,True" }).where(eq(player.DailyLogList.UserID, f.p.id));
+    if (kind === "previous month") await h.db.update(player.DailyLogList).set({ LastDate: new Date("2026-09-14T01:00:00Z") }).where(eq(player.DailyLogList.UserID, f.p.id));
+    if (kind === "already claimed") expect(await signAward(f.ctx, f.p, 3)).toBe(true);
+    const before = memory(f), beforeGoods = await goods(), beforeMail = await mails(), beforeDetail = await detail(f), claimed = await claim(f, tier);
+    f.sent.length = 0;
+    expect(await signAward(f.ctx, f.p, tier)).toBe(false);
+    expect(notices(f)).toEqual([text]); expect(f.sent.map((pkt) => pkt.code)).toEqual([3]);
+    expect(memory(f)).toEqual(before); expect(await goods()).toEqual(beforeGoods); expect(await mails()).toEqual(beforeMail);
+    expect(await detail(f)).toEqual(beforeDetail); expect(await claim(f, tier)).toBe(claimed);
+  });
+
+  it("rejects a sex-filtered empty reward tier without consuming its claim or reporting success", async () => {
+    const f = await fixture(), originalAwards = f.data.dailyAward;
+    f.data.dailyAward = [{ ...f.data.dailyAward[0]!, Sex: 2, TemplateID: 11009 }] as never;
+    const before = memory(f), beforeGoods = await goods(), beforeMail = await mails(), beforeDetail = await detail(f);
+    const outcome = await signAward(f.ctx, f.p, 3);
+    expect(await claim(f)).toBe(false); expect(outcome).toBe(false);
+    expect(notices(f)).toEqual(["Nenhuma recompensa de presença disponível para este personagem."]);
+    expect(f.sent.map((pkt) => pkt.code)).toEqual([3]); expect(memory(f)).toEqual(before);
+    expect(await goods()).toEqual(beforeGoods); expect(await mails()).toEqual(beforeMail); expect(await detail(f)).toEqual(beforeDetail);
+    f.data.dailyAward = originalAwards;
+    expect(await signAward(f.ctx, f.p, 3)).toBe(true); expect(await claim(f)).toBe(true);
+  });
+
+  it.each([false, true])("keeps rejection notices behind the owner transaction rollback and a later quit silent (quit=%s)", async (quit) => {
+    const f = await fixture(), entered = deferred(), release = deferred();
+    const db = new Proxy(h.db, { get(target, key, receiver) {
+      if (key !== "transaction") return Reflect.get(target, key, receiver);
+      return async (work: (tx: Database) => Promise<unknown>) => {
+        try { return await target.transaction((tx) => work(tx as unknown as Database)); }
+        finally { entered.resolve(); await release.promise; }
+      };
+    } }) as Database;
+    f.ctx.db = { ...h, db };
+    const request = signAward(f.ctx, f.p, 18); await entered.promise;
+    expect(f.sent).toEqual([]); expect(await claim(f, 18)).toBe(false);
+    if (quit) f.p.quitting = Promise.resolve();
+    release.resolve(); expect(await request).toBe(false);
+    expect(notices(f)).toEqual(quit ? [] : ["Recompensa de presença indisponível."]);
+  });
+
+  it.each(["inactive", "quitting"])("keeps an %s session silent and unclaimed", async (state) => {
+    const f = await fixture(), before = memory(f);
+    if (state === "inactive") f.p.isActive = false;
+    else f.p.quitting = Promise.resolve();
+    expect(await signAward(f.ctx, f.p, 3)).toBe(false); expect(f.sent).toEqual([]);
+    expect(await claim(f)).toBe(false); expect(memory(f)).toEqual(before);
+  });
+
+  it("propagates rejection transport failures without retrying or consuming the claim", async () => {
+    const f = await fixture();
+    const send = vi.spyOn(f.p.sink, "send").mockImplementation(() => { throw new Error("injected rejection transport failure"); });
+    await expect(signAward(f.ctx, f.p, 18)).rejects.toThrow("injected rejection transport failure");
+    expect(send).toHaveBeenCalledTimes(1); expect(await claim(f, 18)).toBe(false);
+    expect(f.p.worldBossAwardPending).toBeNull();
+  });
+});
+
 describe("sign award claim/rewards atomicity", () => {
   it.each(["claim", "goods", "profile", "mail"] as const)("rolls back %s failure, including detached mail attachments and currencies; retry succeeds", async (table) => {
     const f = await fixture(table === "mail"), before = memory(f), beforeGoods = await goods(), beforeMail = await mails(), beforeDetail = await detail(f);
@@ -116,6 +187,7 @@ describe("sign award claim/rewards atomicity", () => {
     const f = await fixture(), before = structuredClone(f.p.info);
     const outcomes = await Promise.all(Array.from({ length: 8 }, () => signAward(f.ctx, f.p, 3)));
     expect(outcomes.filter(Boolean)).toHaveLength(1); expect(await claim(f)).toBe(true);
+    expect(notices(f).filter((text) => text === "Você já recebeu esta recompensa de presença neste mês.")).toHaveLength(7);
     expect(f.p.info.Gold).toBe(before.Gold + 31); expect(f.p.info.GiftToken).toBe(before.GiftToken + 9);
     expect(f.p.propBag.getItems().map((it) => ({ id: it.TemplateID, count: it.Count, bound: it.IsBinds, days: it.ValidDate }))).toEqual([
       { id: 11001, count: 2, bound: false, days: 7 }, { id: 11005, count: 1, bound: true, days: 7 },

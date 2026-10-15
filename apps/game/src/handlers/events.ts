@@ -441,14 +441,30 @@ export async function signAward(ctx: ServerContext, p: GamePlayer, count: number
         const tiers = rt.data.signTiers();
         const rewards: Reward[] = rt.data.dailyAward.filter((d) => d.AwardDays === count && (d.Type === 1 || d.Type === 7) && (d.Sex === 0 || d.Sex === (p.info.Sex ? 1 : 2)))
           .map((d) => (d.Type === 7 ? { templateId: -1100, count: d.Count } : { templateId: d.TemplateID, count: d.Count, validDate: d.ValidDate, isBind: d.IsBinds }));
+        let rejection: "InvalidTier" | "NoRewards" | "NotReached" | "AlreadyReceived" | undefined;
         const s = await grantClaimRewards(ctx, p, rewards, eventText(ctx, "Workshop.Events.SignAward.Title", "Prêmio de presença"), async (db, now) => {
-          if (!tiers.includes(count)) return false;
+          if (!tiers.includes(count)) { rejection = "InvalidTier"; return false; }
+          if (!rewards.length) { rejection = "NoRewards"; return false; }
           // The shared owner row is locked before this read, as in signIn.
           const [row] = await db.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1).for("update");
           const signed = row && row.LastDate && monthKey(row.LastDate) === monthKey(now) ? (row.DayLog ?? "").split(",").filter((x) => x === "True").length : 0;
-          return signed >= count && claimOnce(db, p.id, "signaward", `${monthKey(now)}:${count}`);
+          if (signed < count) { rejection = "NotReached"; return false; }
+          if (!(await claimOnce(db, p.id, "signaward", `${monthKey(now)}:${count}`))) { rejection = "AlreadyReceived"; return false; }
+          return true;
         });
-        if (s === null) return false;
+        if (s === null) {
+          // Only an eligibility rejection returned by the owner transaction is a notice.
+          // SQL/COMMIT/publication errors still propagate without a misleading refusal.
+          const fallback = {
+            InvalidTier: "Recompensa de presença indisponível.",
+            NoRewards: "Nenhuma recompensa de presença disponível para este personagem.",
+            NotReached: "Dias de presença insuficientes para esta recompensa.",
+            AlreadyReceived: "Você já recebeu esta recompensa de presença neste mês.",
+          };
+          if (rejection && ctx.world.get(p.id) === p && p.isActive && !p.quitting)
+            p.sendMessage(0, eventText(ctx, `Workshop.Events.SignAward.${rejection}`, fallback[rejection]));
+          return false;
+        }
         p.sendMessage(0, eventText(ctx, "Workshop.Events.SignAward.Success", `Presente de presença diária recebido com sucesso! ${s}`, s));
         return true;
       } finally { release?.(); }

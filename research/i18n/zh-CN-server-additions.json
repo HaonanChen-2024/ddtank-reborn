@@ -5,5 +5,9 @@
   "Workshop.Events.Vip.Title": "每日VIP礼包",
   "Workshop.Events.SignAward.Title": "累计签到奖励",
   "Workshop.Events.SignAward.Success": "累计签到奖励领取成功。 {0}",
+  "Workshop.Events.SignAward.InvalidTier": "累计签到奖励档位不存在。",
+  "Workshop.Events.SignAward.NoRewards": "此档暂无适用奖励。",
+  "Workshop.Events.SignAward.NotReached": "本月累计签到天数尚未达到该档要求。",
+  "Workshop.Events.SignAward.AlreadyReceived": "本月该档累计签到奖励已领取。",
   "Workshop.Events.LevelBox.Title": "等级礼包奖励"
 }
