@@ -28,15 +28,30 @@ const rebuild = async () => { built = await buildApp({ db: h, logger: false, ski
 const headers = () => ({ authorization: `Bearer ${signJwt({ sub: 1, name: "treasure-native-test", role: "player" }, secret, 3600)}` });
 const post = (id: string, action: ActivityAction, requestId: string = randomUUID(), characterId = uid) => built.app.inject({
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
+const publicStates: Record<string, readonly string[]> = {
+  "root.nativeChristmasSnowfield.scene": ["outside", "loading", "inside", "fighting", "settling"],
+  "root.nativeChristmasSnowfield.attempt": ["none", "admitted", "launching", "fighting", "settling"],
+  "root.nativeChristmasSnowfield.challenges[]": ["unavailable", "alive", "reserved", "fighting", "dead"],
+};
+function expectPublicActivityJson(value: unknown, path = "root"): void {
+  if (Array.isArray(value)) { for (const item of value) expectPublicActivityJson(item, `${path}[]`); return; }
+  if (!value || typeof value !== "object") return;
+  for (const [key, child] of Object.entries(value)) {
+    expect(["games", "seed", "origin", "choices", "nativeTreasureEffects"], `${path}.${key} must remain private`).not.toContain(key);
+    // Only the declared public snowfield enums may use "state"; raw saved state stays private.
+    if (key === "state") expect(publicStates[path] ?? [], `${path}.state must be a public enum`).toContain(child);
+    expectPublicActivityJson(child, `${path}.${key}`);
+  }
+}
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeTreasureEffects|"(?:games|state|seed|choices)"\s*:/); return response.json();
+  const result = response.json<ActivityResult>(); expectPublicActivityJson(result); return result;
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("treasure-native", value, requestId, status);
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
-  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeTreasureEffects|"(?:games|state|seed)"\s*:/);
-  const result = response.json<ActivityResult>(); expect(result).not.toHaveProperty("nativeTreasureAction"); return result;
+  expect(response.statusCode, response.body).toBe(200);
+  const result = response.json<ActivityResult>(); expectPublicActivityJson(result); expect(result).not.toHaveProperty("nativeTreasureAction"); return result;
 }
 const draw = async (count: number, mode: "normal" | "advanced" = "normal") => native({ type: "draw", mode, count, choice: (await snapshot()).nativeTreasure.bagToken });
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;

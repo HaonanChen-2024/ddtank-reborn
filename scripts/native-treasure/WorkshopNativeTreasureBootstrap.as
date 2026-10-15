@@ -46,6 +46,7 @@ package {
   private var recordsBox:Object;
   private var categoryCells:Array=[];
   private var categoryLabels:Array=[];
+  private var previewRows:Dictionary=new Dictionary(true);
   private var localButtons:Array=[];
   private var rewardQueue:Array=[];
   private var message:String="尚未读取本地迷宫寻宝。";
@@ -180,7 +181,18 @@ package {
   private function frameComplete(view:Object,aux:Boolean):void {if(!main||view!==main||!wantedOpen||!animating)return;if(aux)return;for each(var timeline:Object in view._timeLineArr){if(timeline){timeline.vars.onComplete=null;timeline.vars.onCompleteParams=null;}}view._timeLineArr=[];startNextReward();}
   private function cycleLight(view:Object):void {if(main!==view||!wantedOpen||!animating)return;view.removeAllItemLight();var index:int=int(view._glintTimer.currentCount)%4;view._itemArr[index].selectedLight.visible=true;}
   private function openPreview():void {if(!main||pending||animating||confirmation||popup)return;var C:Object=cls("treasureHunting.views.TreasureAwardPreview");popup=new C();popup.x=191;popup.y=60;sceneRoot.addChild(popup as DisplayObject);lock();}
-  private function closePopup():void {if(popup){var view:Object=popup;popup=null;unbind(view);view.dispose();}lock();}
+  private function closePopup():void {clearPreviewCategories();if(popup){var view:Object=popup;popup=null;unbind(view);view.dispose();}lock();}
+  private function clearPreviewCategory(o:Object):void {var row:Object=previewRows[o];if(!row)return;delete previewRows[o];if(row.cell){if(row.cell.parent)row.cell.parent.removeChild(row.cell);row.cell.dispose();}if(row.label&&row.label.parent)row.label.parent.removeChild(row.label);}
+  private function clearPreviewCategories():void {var owners:Array=[];for(var o:Object in previewRows)owners.push(o);for each(o in owners)clearPreviewCategory(o);}
+  private function renderPreviewCategory(o:Object,index:int,items:Array):void {
+   clearPreviewCategory(o);o.typeIcon.skin=null;o.typeIcon.visible=false;
+   var valid:Boolean=projection&&index>=0&&index<projection.categories.length&&index<projection.previewTemplateIds.length;
+   o.itemList.array=valid?items:[];if(!valid)return;
+   var C:Object=cls("bagAndInfo.cell.BagCell"),cell:Object=new C(index,fillByID(projection.previewTemplateIds[index]),false,null,false);
+   var label:TextField=text(8,77,134,28,projection.categories[index].name,0xfff0bc);
+   cell.x=50;cell.y=10;cell.setContentSize(58,58);cell.mouseEnabled=false;cell.mouseChildren=false;
+   previewRows[o]={cell:cell,label:label};o.addChild(cell as DisplayObject);o.addChild(label);
+  }
   private function preview():Array {var rows:Array=[];for each(var id:int in projection.previewTemplateIds)rows.push([{template:id,count:1}]);return rows;}
   private function confirm(detail:String,action:Object):void {if(!main||pending||animating||confirmation||popup)return;role();var c:Object=cls("com.pickgliss.ui.ComponentFactory").Instance.creatComponentByStylename("SimpleAlert"),I:Object=cls("com.pickgliss.ui.vo.AlertInfo");confirmation=c;c.info=new I("本地寻宝确认","确认","取消",true,true,detail+"\n原券、点券与付款通道未接入。",false,false,false,true);c.x=295;c.y=170;sceneRoot.addChild(c as DisplayObject);bind(c,c,"response",function(e:Object):void{var yes:Boolean=e.responseCode===2||e.responseCode===3;clearConfirm();if(yes)request(action);else lock();});lock();}
   private function clearConfirm():void {if(confirmation){var c:Object=confirmation;confirmation=null;unbind(c);c.dispose();}}
@@ -221,6 +233,7 @@ package {
     if(name==="initialize"){initBag(o);return null;}if(name==="initData")return null;if(name==="updateBagFrame"){renderBag(o);return null;}if(name==="onItemClick"){take(int(args[0].data.place));return null;}if(name==="onGetAllBtnClick"){take();return null;}if(name==="onConvertBtnClick"){recycle();return null;}
    }
    if(owner==="treasureHunting/views/TreasureAwardPreview"){if(name==="show"){openPreview();return null;}if(name==="__onCloseBtn"){if(popup===o)closePopup();return null;}}
+   if(owner==="treasureHunting/items/TreasureHuntAwardListCell"){if(name==="setInfo"){renderPreviewCategory(o,int(args[0]),args[1] as Array);return null;}if(name==="dispose"){clearPreviewCategory(o);return null;}}
    throw new Error("原寻宝未启用的网络／付款／排行分支："+owner+"."+name);
   }
  }
