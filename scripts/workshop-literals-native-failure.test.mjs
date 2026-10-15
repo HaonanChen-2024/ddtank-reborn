@@ -118,14 +118,15 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
       assert.ok(!withMoonlight || withGypsy);
       assert.ok(!withTreasure || withMoonlight);
       assert.ok(!withPurr || withTreasure);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "")),
-        tag = Buffer.from(withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withCarnival || withPurr);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "")),
+        tag = Buffer.from(withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -141,6 +142,7 @@ function fixture() {
         .concat(withTreasure ? ["WorkshopNativeTreasureBootstrap.swf", "treasure-original-library.swf", "treasurehunting_v3_6_1_u1.swf",
           "treasurehunting_v3_6_1_u1.ui", "treasure-styles.xml"].map(file => ["treasure", file]) : [])
         .concat(withPurr ? ["WorkshopNativePurrBootstrap.swf", "purr-original-library.swf", "purrturntable_v3_6_1_u1.swf", "purrturntable_v3_6_1_u1.ui"].map(file => ["purr", file]) : [])
+        .concat(withCarnival ? ["WorkshopNativeCarnivalBootstrap.swf", "carnival-original-library.swf", "carnival_v3_6_1_u1.swf", "carnival_v3_6_1_u1.ui"].map(file => ["carnival", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -148,7 +150,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -159,6 +161,7 @@ function fixture() {
     gypsyPath: name => path.join(overlay, "workshop-native/gypsy", name),
     moonlightPath: name => path.join(overlay, "workshop-native/moonlight", name),
     purrPath: name => path.join(overlay, "workshop-native/purr", name),
+    carnivalPath: name => path.join(overlay, "workshop-native/carnival", name),
     treasurePath: name => path.join(overlay, "workshop-native/treasure", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
@@ -515,5 +518,32 @@ test("unknown or short Purr manifests and foreign destinations fail before mutat
   if(reason==="variant")manifest.variant="wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-extra";if(reason==="paths")manifest.assets.pop();
   if(reason==="foreign")f.put(f.purrPath("purrturntable_v3_6_1_u1.ui"),"user owned");else f.put(purr,JSON.stringify(manifest));
   const before=f.snapshot();assert.throws(()=>f.run("install",purr));assert.deepEqual(f.snapshot(),before);
+ }
+});
+
+test("all previous variants upgrade to exact forty-nine resources and fully roll back", () => {
+ const f=fixture(),original=f.snapshot();f.run("install");for(let n=0;n<=6;n++)f.run("install",f.upgradedBuild(...Array(n).fill(true)));
+ const carnival=f.upgradedBuild(true,true,true,true,true,true,true);assert.equal(f.run("verify",carnival).nativeWardrobeInstalled,false);
+ assert.equal(f.run("install",carnival).nativeWardrobe.assets.length,49);assert.equal(f.run("install",carnival).unchanged,true);assert.equal(f.run("verify").unchanged,true);
+ assert.equal(f.fs.existsSync(f.carnivalPath("carnival_v3_6_1_u1.ui")),true);assert.equal(f.run("rollback").rolledBack,true);assert.deepEqual(f.snapshot(),original);
+});
+test("partial Carnival writes restore the forty-five resource baseline before retry", () => {
+ for(const file of ["WorkshopNativeCarnivalBootstrap.swf","carnival_v3_6_1_u1.ui"]){
+  const f=fixture();f.run("install",f.upgradedBuild(true,true,true,true,true,true));const before=f.snapshot(),carnival=f.upgradedBuild(true,true,true,true,true,true,true);
+  f.arm("write",f.carnivalPath(file));assert.throws(()=>f.run("install",carnival),/ENOSPC/);assert.equal(f.failureCount,1);assert.equal(f.openHandles,0);assert.deepEqual(f.snapshot(),before);
+  assert.equal(f.run("verify").unchanged,true);assert.equal(f.run("install",carnival).nativeWardrobe.assets.length,49);
+ }
+});
+test("Carnival rollback failure compensates forty-nine resources and supports retry", () => {
+ const f=fixture(),original=f.snapshot();f.run("install",f.upgradedBuild(true,true,true,true,true,true,true));const installed=f.snapshot();
+ f.arm("unlink",f.carnivalPath("carnival_v3_6_1_u1.swf"));assert.throws(()=>f.run("rollback"),/EPERM/);assert.deepEqual(f.snapshot(),installed);
+ assert.equal(f.run("verify").unchanged,true);assert.equal(f.run("rollback").rolledBack,true);assert.deepEqual(f.snapshot(),original);
+});
+test("unknown or short Carnival manifests and foreign destinations fail before mutation", () => {
+ for(const reason of ["variant","paths","foreign"]){
+  const f=fixture();f.run("install",f.upgradedBuild(true,true,true,true,true,true));const carnival=f.upgradedBuild(true,true,true,true,true,true,true),manifest=JSON.parse(f.fs.readFileSync(carnival,"utf8"));
+  if(reason==="variant")manifest.variant="wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-extra";if(reason==="paths")manifest.assets.pop();
+  if(reason==="foreign")f.put(f.carnivalPath("carnival_v3_6_1_u1.ui"),"user owned");else f.put(carnival,JSON.stringify(manifest));
+  const before=f.snapshot();assert.throws(()=>f.run("install",carnival));assert.deepEqual(f.snapshot(),before);
  }
 });

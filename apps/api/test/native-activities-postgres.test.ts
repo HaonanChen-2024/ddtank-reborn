@@ -43,7 +43,7 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});
@@ -83,7 +83,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -595,5 +595,83 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect((await post(appA,"wheel-native",{...value,count:1},id)).statusCode).toBe(409);
     expect((await post(appB,"wheel-native",{...value,count:1})).statusCode).toBe(400);
     const replay = await action("wheel-native",value,id,appA); expect(replay).toMatchObject({replayed:true,mailedCount:1}); expect(replay).not.toHaveProperty("nativeWheelAction"); expect(await saved()).toEqual(after); passed++;
+  });
+  it("deduplicates a finite five-draw Carnival UUID and preserves old dice under real shared wallet contention", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const initial = await snapshot(), id = randomUUID(), value = {type:"draw",count:5,choice:initial.nativeCarnival.stateToken};
+    const same = await race("carnival-native-five-draws-one-uuid",duplicates("carnival-native",value,id));
+    duplicateResults(same,"nativeCarnivalAction"); expect(await wallet()).toEqual({Points:950,Revision:1});
+    const fresh = same.find(response=>!response.json().replayed)!.json<ActivityResult>();
+    expect(fresh).toMatchObject({mailedCount:1,nativeCarnival:{personalScore:5,redPackageCount:15},nativeCarnivalAction:{requestId:id}});
+    expect(fresh.nativeCarnivalAction!.effects.map(effect=>effect.type==="drawn"&&[effect.drawId,effect.prizeId,effect.batchIndex,effect.batchCount])).toEqual([
+      [1,12,0,5],[2,12,1,5],[3,12,2,5],[4,12,3,5],[5,12,4,5]]);
+    const delivered = await saved(); expect(delivered.receipts).toHaveLength(1); expect(delivered.goods.map(item=>[item.TemplateID,item.Count])).toEqual([[11002,5],[11002,5],[11002,5]]);
+    expect(delivered.goods.every(item=>item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(delivered.mails).toHaveLength(1); expect([delivered.mails[0].Annex1,delivered.mails[0].Annex2,delivered.mails[0].Annex3].map(Number)).toEqual(delivered.goods.map(item=>item.ItemID));
+    expect(delivered.mails[0].Annex4).toBeNull();
+    const shared = await race("carnival-original-and-legacy-dice-distinct-slots-shared-wallet",[
+      ()=>post(appA,"carnival",{type:"roll"}),()=>post(appB,"carnival-native",{type:"draw",count:1,choice:fresh.nativeCarnival.stateToken})]);
+    expect(shared.map(response=>response.statusCode)).toEqual([200,200]); expect(shared[0].json()).not.toHaveProperty("nativeCarnivalAction");
+    expect(await wallet()).toEqual({Points:934,Revision:3});
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))!.State;
+    expect(state.games.carnival).toEqual({version:1,kind:"carnival",rolls:1,distance:6,pool:105});
+    expect(state.games.carnivalNativeV1).toMatchObject({kind:"carnival-native",drawCount:6,redPacketsEarned:18,redPacketsSpent:0}); expect(state.daily.actions).toBe(7);
+    const after = await saved(), current = await snapshot();
+    expect((await post(appA,"carnival-native",{...value,count:1},id)).statusCode).toBe(409);
+    const replay = await action("carnival-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true,mailedCount:1});
+    expect(replay).not.toHaveProperty("nativeCarnivalAction"); expect(await saved()).toEqual(after); passed++;
+  });
+
+  it("rolls back Carnival batch and exchange mail on final receipts, then retries each UUID once with MaxCount five splitting", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    const id = randomUUID(), value = {type:"draw",count:5,choice:(await snapshot()).nativeCarnival.stateToken}, before = await saved();
+    assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+    const failed = await post(appB,"carnival-native",value,id); expect(failed.statusCode,failed.body).toBe(500); expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|UPDATE|Annex/);
+    expect(await saved()).toEqual(before); await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const retried = await race("carnival-five-draw-mail-tail-failure-retry-one-uuid",duplicates("carnival-native",value,id)); duplicateResults(retried,"nativeCarnivalAction");
+    expect(await wallet()).toEqual({Points:950,Revision:1});
+    const drawn = await saved(); expect(drawn.goods.map(item=>item.Count)).toEqual([5,5,5]); expect(drawn.mails).toHaveLength(1); expect(drawn.receipts).toHaveLength(1);
+    const ready = await action("carnival-native",{type:"draw",count:5,choice:(await snapshot()).nativeCarnival.stateToken});
+    expect(ready.nativeCarnival.redPackageCount).toBe(30);
+    const exchangeId = randomUUID(), exchange = {type:"exchange",index:4,count:1,choice:ready.nativeCarnival.stateToken}, exchangeBefore = await saved();
+    assert.match(exchangeId,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${exchangeId}') NOT VALID`));
+    expect((await post(appA,"carnival-native",exchange,exchangeId)).statusCode).toBe(500); expect(await saved()).toEqual(exchangeBefore);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    const exchanged = await race("carnival-packet-exchange-mail-tail-failure-retry-one-uuid",duplicates("carnival-native",exchange,exchangeId)); duplicateResults(exchanged,"nativeCarnivalAction");
+    expect(await wallet()).toEqual({Points:900,Revision:3});
+    expect(exchanged.find(response=>!response.json().replayed)!.json()).toMatchObject({mailedCount:1,nativeCarnival:{redPackageCount:10},
+      nativeCarnivalAction:{requestId:exchangeId,effects:[{type:"exchanged",index:4,catalogId:5,count:1,templateId:11019,itemCount:10,redPacketsSpent:20,redPackageCount:10}]}});
+    const after = await saved(), items = after.goods.slice(exchangeBefore.goods.length), mails = after.mails.slice(exchangeBefore.mails.length);
+    expect(items.map(item=>[item.TemplateID,item.Count])).toEqual([[11019,5],[11019,5]]);
+    expect(items.every(item=>item.UserID===0&&item.Place===-1&&item.IsBinds===true&&item.ValidDate===0)).toBe(true);
+    expect(mails).toHaveLength(1); expect([mails[0].Annex1,mails[0].Annex2].map(Number)).toEqual(items.map(item=>item.ItemID)); expect(mails[0].Annex3).toBeNull();
+    expect(after.receipts.length-exchangeBefore.receipts.length).toBe(1);
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid}`))!.State;
+    expect(state.daily.actions).toBe(10); const replay = await action("carnival-native",exchange,exchangeId,appB);
+    expect(replay).toMatchObject({replayed:true,mailedCount:1}); expect(replay).not.toHaveProperty("nativeCarnivalAction"); expect(await saved()).toEqual(after); passed++;
+  });
+
+  it("caps actual Carnival batch draws at shared five hundred but settles existing packets once with full-date stale-token rejection", async () => {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+    await action("carnival-native",{type:"draw",count:5,choice:(await snapshot()).nativeCarnival.stateToken});
+    const state = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid}`))!.State;
+    state.daily.actions = 499; await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${uid}`);
+    const partial = await snapshot(), before = await saved(); expect(partial.nativeCarnival).toMatchObject({remainDrawCount:1,maxBatchCount:1});
+    expect((await post(appA,"carnival-native",{type:"draw",count:5,choice:partial.nativeCarnival.stateToken})).statusCode).toBe(400); expect(await saved()).toEqual(before);
+    await action("carnival",{type:"roll"}); const capped = await snapshot(); expect(capped.nativeCarnival).toMatchObject({canDraw:false,remainDrawCount:0,maxBatchCount:0,redPackageCount:15});
+    const capSave = await saved(); expect((await post(appB,"carnival-native",{type:"draw",count:1,choice:capped.nativeCarnival.stateToken})).statusCode).toBe(400); expect(await saved()).toEqual(capSave);
+    const value = {type:"exchange",index:0,count:1,choice:capped.nativeCarnival.stateToken};
+    const expired = `${new Date(Date.parse(`${day}T00:00:00Z`)-86400000).toISOString().slice(0,10)}:${value.choice.split(":")[1]}`;
+    expect((await post(appA,"carnival-native",{...value,choice:expired})).statusCode).toBe(400); expect(await saved()).toEqual(capSave);
+    const settled = await race("carnival-at-cap-packet-settlement-different-uuids",[
+      ()=>post(appA,"carnival-native",value),()=>post(appB,"carnival-native",value)]);
+    expect(settled.map(response=>response.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:944,Revision:3});
+    const after = await saved(), final = await snapshot(); expect(final.nativeCarnival).toMatchObject({redPackageCount:5,personalScore:5,canDraw:false});
+    const finalState = (await q1<{State:ActivityState}>(monitor,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid}`))!.State;
+    expect(finalState.daily.actions).toBe(500); expect(after.receipts.length-capSave.receipts.length).toBe(1);
+    expect(after.goods.slice(capSave.goods.length).map(item=>[item.TemplateID,item.Count])).toEqual([[11019,5]]);
+    expect((await post(appB,"carnival-native",value)).statusCode).toBe(400); expect(await saved()).toEqual(after); passed++;
   });
 });

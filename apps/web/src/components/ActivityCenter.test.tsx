@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -17,6 +17,16 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 }
 
 describe("ActivityCenter native entry contract", () => {
+  it("offers the original carnival with finite committed batches and no second animation award", () => {
+    const html = render("carnival"); expect(html).toContain("网页玩法"); expect(html).toContain("试用原版节日狂欢");
+    expect(html).toContain("分别存档"); expect(html).toContain("打开只读取"); expect(html).toContain("最多5次");
+    expect(html).toContain("停止或关闭不会撤销已提交奖励"); expect(html).toContain("动画不再次发奖");
+    expect(html).toContain("7种本地配方"); expect(html).toContain("大奖直播原资源、全服奖池和排行尚未接入");
+    expect(html).not.toContain("试用原版啵咕大转盘");
+  });
+  it("requires the actual game character for the carnival trial entry", () => {
+    expect(render("carnival", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版节日狂欢<\/button>/);
+  });
   it("offers the original seven-level wheel with an honest separate-save contract", () => {
     const html = render("wheel"); expect(html).toContain("网页玩法"); expect(html).toContain("试用原版啵咕大转盘");
     expect(html).toContain("分别存档"); expect(html).toContain("打开只读取"); expect(html).toContain("本地追加成功率60%");

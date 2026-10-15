@@ -10,6 +10,7 @@ import { attachNativeGypsyHost, type NativeGypsyPlayer } from "@/lib/native-gyps
 import { attachNativeMoonlightHost, type NativeMoonlightPlayer } from "@/lib/native-moonlight-host";
 import { attachNativeTreasureHost, type NativeTreasurePlayer } from "@/lib/native-treasure-host";
 import { attachNativePurrHost, type NativePurrPlayer } from "@/lib/native-purr-host";
+import { attachNativeCarnivalHost, type NativeCarnivalPlayer } from "@/lib/native-carnival-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -24,7 +25,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -53,6 +54,9 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenPurr?: (characterId: number, generation: string) => boolean;
   workshopStatusPurr?: () => NativePairStatus;
   workshopClosePurr?: () => unknown;
+  workshopOpenCarnival?: (characterId: number, generation: string) => boolean;
+  workshopStatusCarnival?: () => NativePairStatus;
+  workshopCloseCarnival?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -200,6 +204,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       purrCharacterId = 0;
       purrGeneration = "";
     };
+    let carnivalRequest: { cancel: () => void } | null = null;
+    let carnivalHost: ReturnType<typeof attachNativeCarnivalHost> | null = null;
+    let carnivalCharacterId = 0;
+    let carnivalGeneration = "";
+    const detachCarnival = () => {
+      carnivalRequest?.cancel();
+      carnivalHost?.cancel();
+      carnivalHost = null;
+      carnivalCharacterId = 0;
+      carnivalGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -244,6 +259,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachMoonlight();
       detachTreasure();
           detachPurr();
+          detachCarnival();
           player?.remove();
           player = null;
         };
@@ -696,6 +712,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (purrRequest === request) purrRequest = null;
           }
         };
+        window.workshopShowCarnival = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenCarnival || !owner.workshopStatusCarnival || !owner.workshopCloseCarnival) return false;
+          try {
+            const initial = owner.workshopStatusCarnival();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (carnivalHost && carnivalCharacterId !== characterId) return false;
+            if (!carnivalHost) {
+              carnivalCharacterId = characterId;
+              carnivalGeneration = crypto.randomUUID();
+              const generation = carnivalGeneration;
+              carnivalHost = attachNativeCarnivalHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || carnivalCharacterId !== characterId || carnivalGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusCarnival?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          carnivalRequest?.cancel();
+          const request = { cancel: () => {
+            if (carnivalRequest !== request) return;
+            carnivalRequest = null;
+            try { owner.workshopCloseCarnival?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          carnivalRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenCarnival(characterId, carnivalGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (carnivalRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusCarnival();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === carnivalGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (carnivalRequest === request) carnivalRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -721,6 +792,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachMoonlight();
       detachTreasure();
       detachPurr();
+      detachCarnival();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -738,6 +810,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachMoonlight();
       detachTreasure();
       detachPurr();
+      detachCarnival();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -750,6 +823,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowMoonlight;
       delete window.workshopShowTreasure;
       delete window.workshopShowPurr;
+      delete window.workshopShowCarnival;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

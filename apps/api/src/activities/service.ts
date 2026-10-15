@@ -16,6 +16,7 @@ import type { GypsyNativeEffect } from "./gypsy-native.js";
 import type { MoonlightNativeEffect } from "./moonlight-native.js";
 import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
+import type { CarnivalNativeEffect } from "./carnival-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityWallet } from "./types.js";
 
 interface Owner { NickName: string; Sex: boolean }
@@ -31,6 +32,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeMoonlightAction?: { requestId: string; effects: MoonlightNativeEffect[] };
   nativeTreasureAction?: { requestId: string; effects: TreasureNativeEffect[] };
   nativeWheelAction?: { requestId: string; effects: WheelNativeEffect[] };
+  nativeCarnivalAction?: { requestId: string; effects: CarnivalNativeEffect[] };
 }
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
@@ -151,7 +153,8 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       ...(changed.nativeGypsyEffects ? { nativeGypsyAction: { requestId, effects: changed.nativeGypsyEffects } } : {}),
       ...(changed.nativeMoonlightEffects ? { nativeMoonlightAction: { requestId, effects: changed.nativeMoonlightEffects } } : {}),
       ...(changed.nativeTreasureEffects ? { nativeTreasureAction: { requestId, effects: changed.nativeTreasureEffects } } : {}),
-      ...(changed.nativeWheelEffects ? { nativeWheelAction: { requestId, effects: changed.nativeWheelEffects } } : {}) };
+      ...(changed.nativeWheelEffects ? { nativeWheelAction: { requestId, effects: changed.nativeWheelEffects } } : {}),
+      ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}) };
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
