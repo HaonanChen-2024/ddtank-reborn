@@ -35,7 +35,90 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer, NativeCaveLootPlayer, NativeChristmasPlayer {
+export interface NativeActivityMenuPlayer {
+  workshopOpenActivityMenu?: (characterId: number, token: string) => boolean;
+  workshopStatusActivityMenu?: () => { version?: number; open?: boolean; actualUserId?: number; characterId?: number; token?: string; pending?: boolean; message?: string };
+  workshopCloseActivityMenu?: (token: string) => boolean;
+  workshopActivityMenuResult?: (characterId: number, token: string, kind: string, opened: boolean, message: string) => boolean;
+}
+export const NATIVE_ACTIVITY_MENU_KINDS = ["wardrobe", "pair", "mines", "ddplay", "gypsy", "moonlight", "treasure", "purr", "carnival", "first-recharge", "charge", "forthright", "exchange", "devil", "caveloot", "christmas"] as const;
+type NativeActivityMenuKind = typeof NATIVE_ACTIVITY_MENU_KINDS[number];
+/** Menu selection only opens an existing AS window. Its host continues to own all economic requests. */
+export function createNativeActivityMenu(options: {
+  player: NativeActivityMenuPlayer; isCurrent: () => boolean;
+  openers: Record<NativeActivityMenuKind, (characterId: number, signal?: AbortSignal) => Promise<boolean>>;
+  sign: () => boolean; activation: () => boolean; notice: (message: string) => void;
+}) {
+  let cancelled = false, owner: { characterId: number; token: string; request?: AbortController } | null = null;
+  const live = () => !cancelled && options.isCurrent();
+  const matches = (id: number, token: string) => {
+    if (!live() || !owner || owner.characterId !== id || owner.token !== token) return false;
+    try {
+      const status = options.player.workshopStatusActivityMenu?.();
+      return status?.version === 1 && status.open === true && status.characterId === id && status.actualUserId === id && status.token === token;
+    } catch { return false; }
+  };
+  const close = () => {
+    const previous = owner; owner = null;
+    previous?.request?.abort();
+    if (previous) { try { options.player.workshopCloseActivityMenu?.(previous.token); } catch { /* A removed player cannot reopen the menu. */ } }
+  };
+  return {
+    open(characterId?: number): boolean {
+      if (!live()) return false;
+      const player = options.player;
+      if (!player.workshopOpenActivityMenu || !player.workshopStatusActivityMenu || !player.workshopCloseActivityMenu || !player.workshopActivityMenuResult) {
+        options.notice("原生活动菜单尚未安装，请更新客户端资源后重新进入游戏。"); return false;
+      }
+      try {
+        const status = player.workshopStatusActivityMenu(), id = characterId ?? status.actualUserId;
+        if (!Number.isSafeInteger(id) || !id || id < 1 || status.actualUserId !== id) {
+          options.notice("请先进入游戏大厅，再打开活动。"); return false;
+        }
+        if (owner?.request) return false;
+        if (owner && matches(owner.characterId, owner.token)) return true;
+        close();
+        const token = crypto.randomUUID(); owner = { characterId: id, token };
+        if (player.workshopOpenActivityMenu(id, token) !== true || !matches(id, token)) {
+          const message = player.workshopStatusActivityMenu()?.message;
+          close(); options.notice(message || "原生活动菜单未能打开，请返回游戏大厅后重试。"); return false;
+        }
+        options.notice(""); return true;
+      } catch {
+        close(); options.notice("原生活动菜单未能打开，请返回游戏大厅后重试。"); return false;
+      }
+    },
+    select(id: number, token: string, kind: string): boolean {
+      if (!matches(id, token) || !owner || owner.request || ![...NATIVE_ACTIVITY_MENU_KINDS, "sign", "activation"].includes(kind as NativeActivityMenuKind)) return false;
+      const selection = owner, request = new AbortController(); selection.request = request;
+      // Return the synchronous EI acknowledgement before calling back into AVM2 or loading a module.
+      queueMicrotask(() => {
+        if (!matches(id, token) || owner !== selection || request.signal.aborted) return;
+        void (async () => {
+          let opened = false;
+          try {
+            opened = kind === "sign" ? options.sign() : kind === "activation" ? options.activation()
+              : await options.openers[kind as NativeActivityMenuKind](id, request.signal);
+          } catch { /* Keep the menu and report a readable error, without a web fallback. */ }
+          if (!live() || owner !== selection || request.signal.aborted || !matches(id, token)) return;
+          selection.request = undefined;
+          try {
+            const accepted = options.player.workshopActivityMenuResult?.(id, token, kind, opened,
+              opened ? "" : "活动窗口未能打开。请留在大厅后重试；尚未提交任何活动操作。");
+            if (opened && accepted === true) owner = null; // Do not abort the successfully opened activity.
+          } catch { options.notice("活动菜单回执未确认，请关闭菜单后重试。"); }
+        })();
+      });
+      return true;
+    },
+    closed(id: number, token: string) {
+      if (!owner || owner.characterId !== id || owner.token !== token) return;
+      const previous = owner; owner = null; previous.request?.abort();
+    },
+    cancel() { close(); cancelled = true; },
+  };
+}
+interface RufflePlayerElement extends HTMLElement, NativeActivityMenuPlayer, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer, NativeCaveLootPlayer, NativeChristmasPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -102,6 +185,9 @@ declare global {
     /** ExternalInterface hook the client calls on kick / socket close (LeavePageManager.forcedToLoginPath). */
     game_interruption?: (loginUrl: string, msg: string) => void;
     workshopOpenActivities?: (characterId: number) => boolean;
+    workshopShowActivityMenu?: (characterId?: number) => boolean;
+    workshopSelectNativeActivity?: (characterId: number, token: string, kind: string) => boolean;
+    workshopActivityMenuClosed?: (characterId: number, token: string) => void;
     workshopShowActivation?: () => boolean;
     workshopShowSign?: () => boolean;
     workshopShowWardrobe?: (characterId: number, signal?: AbortSignal) => Promise<boolean>;
@@ -155,6 +241,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [progress, setProgress] = useState(0.08);
+  const [menuNotice, setMenuNotice] = useState("");
 
   // Stable key so a new object with the same values doesn't remount the player.
   const configKey = JSON.stringify({ rufflePath, swfUrl, flashvars, socketProxy, base });
@@ -164,6 +251,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
     if (!host) return;
     let cancelled = false;
     let player: RufflePlayerElement | null = null;
+    let activityMenu: ReturnType<typeof createNativeActivityMenu> | null = null;
     let wardrobeRequest: { cancel: () => void } | null = null;
     let pairRequest: { cancel: () => void } | null = null;
     let pairHost: ReturnType<typeof attachNativePairHost> | null = null;
@@ -358,6 +446,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           if (cancelled) return;
           setError(String(msg ?? ""));
           setPhase("kicked");
+          activityMenu?.cancel();
           wardrobeRequest?.cancel();
           detachPair();
           detachMines();
@@ -1269,6 +1358,20 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         };
         setPhase("swf");
 
+        const menuOwner = player;
+        activityMenu = createNativeActivityMenu({ player: menuOwner, isCurrent: () => !cancelled && player === menuOwner,
+          openers: {
+            wardrobe: window.workshopShowWardrobe, pair: window.workshopShowPair, mines: window.workshopShowMines,
+            ddplay: window.workshopShowDDPlay, gypsy: window.workshopShowGypsy, moonlight: window.workshopShowMoonlight,
+            treasure: window.workshopShowTreasure, purr: window.workshopShowPurr, carnival: window.workshopShowCarnival,
+            "first-recharge": window.workshopShowFirstRecharge, charge: window.workshopShowCharge, forthright: window.workshopShowForthright,
+            exchange: window.workshopShowExchange, devil: window.workshopShowDevil, caveloot: window.workshopShowCaveLoot, christmas: window.workshopShowChristmas,
+          }, sign: window.workshopShowSign, activation: window.workshopShowActivation,
+          notice: text => { if (!cancelled && player === menuOwner) setMenuNotice(text); },
+        });
+        window.workshopShowActivityMenu = characterId => activityMenu?.open(characterId) ?? false;
+        window.workshopSelectNativeActivity = (characterId, token, kind) => activityMenu?.select(characterId, token, kind) ?? false;
+        window.workshopActivityMenuClosed = (characterId, token) => activityMenu?.closed(characterId, token);
         const opts: RuffleLoadOptions = {
           url: swfUrl,
           parameters: flashvars,
@@ -1283,6 +1386,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
         markReady();
       } catch (e) {
         if (cancelled) return;
+        activityMenu?.cancel();
         const err = e instanceof Error ? e : new Error(String(e));
         detachPair();
         detachMines();
@@ -1308,6 +1412,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
 
     return () => {
       cancelled = true;
+      activityMenu?.cancel();
       wardrobeRequest?.cancel();
       detachPair();
       detachMines();
@@ -1345,6 +1450,9 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowDevil;
       delete window.workshopShowCaveLoot;
       delete window.workshopShowChristmas;
+      delete window.workshopShowActivityMenu;
+      delete window.workshopSelectNativeActivity;
+      delete window.workshopActivityMenuClosed;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);
@@ -1359,6 +1467,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-night-deep", className)}>
       <div ref={hostRef} className="absolute inset-0" />
+      {menuNotice && phase === "ready" && <p role="alert" className="absolute inset-x-4 bottom-4 z-10 rounded-lg border border-line bg-night px-4 py-2 text-center text-sm text-ink">{menuNotice}</p>}
 
       {phase !== "ready" && (
         <div className="absolute inset-0 grid place-items-center bg-night-deep bg-starfield animate-drift p-6">

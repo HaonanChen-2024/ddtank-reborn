@@ -11,7 +11,7 @@ import { patchActivityState } from "../tools/i18n/abc-strings/activity-state.mjs
 import { patchExchangeState } from "../tools/i18n/abc-strings/exchange-state.mjs";
 import { patchCraterMask } from "../tools/i18n/abc-strings/crater-mask.mjs";
 import { buildActivityEntry } from "./workshop-activity-entry.mjs";
-import { buildNativeWardrobeEntry } from "./workshop-native-wardrobe-entry.mjs";
+import { buildNativeWardrobeEntry, verifyNativeActivityMenuBridge } from "./workshop-native-wardrobe-entry.mjs";
 import { patchBattleReturn } from "./native-christmas/patch-battle-return.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -65,6 +65,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   if (priorNative) for (const asset of priorNative.assets)
     assert.ok(native.assets.some(next => next.target === asset.target), "native upgrade would remove an installed resource; preserve it");
   assert.ok(!priorNative?.battleReturn || native?.battleReturn, "native upgrade would remove installed Christmas battle return; use complete rollback instead");
+  assert.ok(priorNative?.nativeMenuVersion !== 1 || native?.nativeMenuVersion === 1, "native upgrade would remove installed activity menu; use complete rollback instead");
   assert.ok(!previous || previous.referenceActivities === undefined || typeof previous.referenceActivities === "boolean", "unknown reference-activities journal flag");
   const oldActivities = previous?.referenceActivities ?? false, activitiesEnabled = oldActivities || referenceActivities || Boolean(native);
   assert.ok(!previous || previous.activityResponse === undefined || typeof previous.activityResponse === "boolean", "unknown activity-response journal flag");
@@ -164,7 +165,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     if (oldState && name === "2.png") oldOut = patchActivityState(oldOut).out;
     if (oldExchange && name === "2.png") oldOut = patchExchangeState(oldOut).out;
     if (oldCrater && name === "2.png") oldOut = patchCraterMask(oldOut).out;
-    if (oldActivities && name === "2.png") oldOut = buildActivityEntry(oldOut).output;
+    if (oldActivities && name === "2.png") oldOut = buildActivityEntry(oldOut, { nativeMenuVersion: priorNative?.nativeMenuVersion }).output;
     if (oldNative && name === "2.png") oldOut = buildNativeCore(oldOut, priorNative).output;
     if (old) assert.equal(hash(oldOut), old.sha256, "recorded literal/consumer output changed; preserve the installed batch");
     let out = displayOut, response, state, exchange, crater, activities, nativeEntry, christmasBattleReturn;
@@ -189,7 +190,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       const { out: ignored, ...proof } = patched; crater = proof;
     }
     if (activitiesEnabled && name === "2.png") {
-      const patched = buildActivityEntry(out); out = patched.output; activities = patched.proof;
+      const patched = buildActivityEntry(out, { nativeMenuVersion: native?.nativeMenuVersion }); out = patched.output; activities = patched.proof;
     }
     if (native && name === "2.png") {
       const patched = buildNativeCore(out, native); out = patched.output; nativeEntry = patched.proof;
@@ -277,6 +278,8 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
 function readNativeWardrobe(manifestPath, overlay) {
   const path = resolve(manifestPath), bytes = readFileSync(path), manifest = JSON.parse(bytes);
   assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
+  assert.ok(manifest.nativeMenuVersion === undefined || manifest.module === "workshop-native-activities" && manifest.nativeMenuVersion === 1, "unknown native activity menu version");
+  const nativeMenuVersion = manifest.nativeMenuVersion;
   const christmasVariant = "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas";
   assert.ok(manifest.christmasSceneVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1, "unknown native Christmas scene layout");
   assert.ok(manifest.christmasBattleReturnVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1 && manifest.christmasBattleReturnVersion === 1, "unknown native Christmas battle return layout");
@@ -286,6 +289,7 @@ function readNativeWardrobe(manifestPath, overlay) {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
   };
   const bridge = readFileSync(within(manifest.bridge.tagPath)); assert.equal(hash(bridge), manifest.bridge.tagSha256);
+  if (nativeMenuVersion === 1) verifyNativeActivityMenuBridge(bridge);
   const bridgeSwf = battleReturn ? readFileSync(within(manifest.bridge.compiledSwf)) : null;
   if (battleReturn) assert.equal(hash(bridgeSwf), manifest.bridge.compiledSwfSha256, "native Christmas compiled bridge changed");
   const expected = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstrap.swf", "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf", "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"].map(file => "/flash/workshop-native/wardrobe/" + file);
@@ -348,8 +352,8 @@ function readNativeWardrobe(manifestPath, overlay) {
       ? join(overlay, "native-resources", asset.urlPath.slice("/resource/".length))
       : join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
   });
-  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })), ...(battleReturn ? { christmasBattleReturnVersion: 1 } : {}) };
-  return { bridge, bridgeSwf, assets, receipt, battleReturn };
+  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })), ...(battleReturn ? { christmasBattleReturnVersion: 1 } : {}), ...(nativeMenuVersion === 1 ? { nativeMenuVersion } : {}) };
+  return { bridge, bridgeSwf, assets, receipt, battleReturn, nativeMenuVersion };
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url)

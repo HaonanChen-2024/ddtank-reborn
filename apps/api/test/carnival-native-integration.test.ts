@@ -79,6 +79,7 @@ async function persisted() { return {
   receipts: await q(h, sql`SELECT * FROM app."ActivityActions" ORDER BY "UserID","RequestID"`),
   goods: await q(h, sql`SELECT * FROM player."Sys_Users_Goods" ORDER BY "ItemID"`),
   mails: await q(h, sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`),
+  global: await q(h, sql`SELECT * FROM app."CarnivalGlobalState" ORDER BY "Key"`),
 }; }
 beforeAll(async () => {
   h = await createDb("pglite:memory"); await migrateDb(h);
@@ -93,7 +94,7 @@ beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-15T12:00:00Z")); random.fraction = 0.99;
   await h.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT IF EXISTS carnival_native_second_mail_failure`);
   await h.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS carnival_native_receipt_failure`);
-  await h.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
+  await h.db.execute(sql`TRUNCATE app."CarnivalGlobalState",app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
     member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);
   await h.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false,"MaxCount"=2`);
   await h.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (1,'carnival-native-test','tests-only'),(2,'other-carnival-test','tests-only')`);

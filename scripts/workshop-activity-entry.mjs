@@ -1,4 +1,4 @@
-// Build-only patch: original hall click -> page activity center; original gift/sign windows remain callable.
+// Build-only hall callback; menu v1 consumes the click even when its native UI is unavailable.
 // No installation, network, database, or live player access. Unknown ABC owners fail closed.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -77,10 +77,11 @@ function addition(spec, n) {
     // Existing scope is initialized. Preserve all original branches by inserting before their start.
     o(0xd0); o(0x66, 39); j(0x12, "fallback");
     o(0xd1); o(0x66, 64); o(0xd0); o(0x66, 39); o(0x66, 65); j(0x1a, "fallback");
-    o(0x60, n.ExternalInterface); o(0x66, n.available); j(0x12, "fallback");
+    o(0x60, n.ExternalInterface); o(0x66, n.available); j(0x12, spec.nativeMenuVersion === 1 ? "consume" : "fallback");
     o(0x60, n.ExternalInterface); o(0x2c, n.open);
     o(0x60, 91); o(0x66, 76); o(0x66, 92); o(0x66, n.ID); o(0x46, n.call, 2);
-    o(0x26); j(0x1a, "fallback");
+    if (spec.nativeMenuVersion === 1) { o(0x29); a.label("consume"); }
+    else { o(0x26); j(0x1a, "fallback"); }
     o(0xd0); o(0x66, 39); o(0x27); o(0x4f, n.expand, 1);
     // Stage has its own expansion listener: do not let it reopen the legacy activation menu.
     o(0xd1); o(0x4f, n.stopPropagation, 0); o(0x47);
@@ -144,6 +145,7 @@ function checkAddition(p, spec, pool, added) {
       else if (op === 0x66) { const receiver = stack.pop(), value = receiver[codeNames.get(args[0])]; stack.push(typeof value === "function" ? value.bind(receiver) : value); }
       else if (op === 0x2c) stack.push(strings[args[0]]);
       else if (op === 0x26 || op === 0x27) stack.push(op === 0x26);
+      else if (op === 0x29) stack.pop();
       else if (op === 0x12) { if (!stack.pop()) position = byOffset.get(operation.target); }
       else if (op === 0x1a) { const right = stack.pop(), left = stack.pop(); if (left !== right) position = byOffset.get(operation.target); }
       else if (op === 0x46 || op === 0x4f) { const values = stack.splice(stack.length - args[1]), object = stack.pop(); const value = object[codeNames.get(args[0])](...values); if (op === 0x46) stack.push(value); }
@@ -158,14 +160,18 @@ function checkAddition(p, spec, pool, added) {
     }
     return { returned, calls };
   };
-  assert.deepEqual(execute(false, true, true).calls, []);
+  assert.deepEqual(execute(false, true, true).calls, spec.nativeMenuVersion === 1 ? [["expand", false], ["stopPropagation"]] : []);
+  assert.equal(execute(false, true, true).returned, spec.nativeMenuVersion === 1);
   if (spec.method === "setup") {
     const ok = execute(true, true, true); assert.equal(ok.calls.length, 2); assert.equal(ok.calls[0][0], "addCallback");
     assert.equal(ok.calls[0][1], "workshopOpenActivation"); assert.equal(typeof ok.calls[0][2], "function"); assert.equal(ok.returned, false);
     assert.equal(ok.calls[1][0], "addCallback"); assert.equal(ok.calls[1][1], "workshopOpenSign"); assert.equal(typeof ok.calls[1][2], "function");
   } else {
     assert.deepEqual(execute(true, true, false).calls, []); assert.deepEqual(execute(true, true, true, false).calls, []);
-    for (const value of [false, null, undefined, 1, "true"]) { const fallback = execute(true, value, true); assert.equal(fallback.returned, false); assert.equal(fallback.calls.length, 1); }
+    for (const value of [false, null, undefined, 1, "true"]) {
+      const fallback = execute(true, value, true); assert.equal(fallback.returned, spec.nativeMenuVersion === 1);
+      assert.equal(fallback.calls.length, spec.nativeMenuVersion === 1 ? 3 : 1);
+    }
     assert.deepEqual(execute(true, true, true), { returned: true, calls: [["call", "workshopOpenActivities", 40], ["expand", false], ["stopPropagation"]] });
   }
 }
@@ -201,7 +207,8 @@ function patchOwner(bytes, spec) {
   return { out, proof: { method: spec.method, methodIndex: body.method, originalAbcSha256: sha(bytes), candidateAbcSha256: sha(out), originalCodeSha256: sha(body.code), candidateCodeSha256: sha(code), insertedBytes: added.code.length, changedMethodBodies: changedBodies, unrelatedMethodsByteIdentical: true, inverseRestoresOriginalAbc: true, branchCasesChecked: true } };
 }
 
-export function buildActivityEntry(input) {
+export function buildActivityEntry(input, { nativeMenuVersion } = {}) {
+  assert.ok(nativeMenuVersion === undefined || nativeMenuVersion === 1, "unsupported native activity menu version");
   const swf = decompressSwf(input); assert.equal(swf.error, null); assert.equal(input.readUInt32LE(4), swf.body.length + 8);
   const original = parseTags(swf.body), owners = [], calendarOwners = [], outputTags = original.tags.map(tag => {
     if (tag.code !== 82) return tag.raw;
@@ -209,7 +216,9 @@ export function buildActivityEntry(input) {
     reader.u32(); const name = reader.cstring();
     if (name === CALENDAR.owner) calendarOwners.push(readCalendar(payload.subarray(reader.pos)));
     if (!Object.hasOwn(SPECS, name)) return tag.raw;
-    assert.ok(!owners.some(owner => owner.owner === name)); const changed = patchOwner(payload.subarray(reader.pos), SPECS[name]);
+    assert.ok(!owners.some(owner => owner.owner === name));
+    const spec = nativeMenuVersion === 1 && SPECS[name].method !== "setup" ? { ...SPECS[name], nativeMenuVersion } : SPECS[name];
+    const changed = patchOwner(payload.subarray(reader.pos), spec);
     owners.push({ owner: name, ...changed.proof }); return buildTag(82, cat(payload.subarray(0, reader.pos), changed.out));
   });
   assert.equal(owners.length, 2); assert.equal(calendarOwners.length, 1);
@@ -218,7 +227,7 @@ export function buildActivityEntry(input) {
   assert.deepEqual(parsed.headerPrefix, original.headerPrefix); assert.deepEqual(parsed.trailing, original.trailing);
   const changedTagIndices = original.tags.flatMap((tag, i) => tag.raw.equals(parsed.tags[i].raw) ? [] : [i]);
   assert.equal(changedTagIndices.length, 2);
-  return { output, proof: { owner: "ddtank-workshop/activity-entry-candidate", original: { bytes: input.length, sha256: sha(input) }, candidate: { bytes: output.length, sha256: sha(output) }, changedTagIndices, changedAbcOwners: owners, calendarWindowOwner: calendarOwners[0], allOtherTagsByteIdentical: true, installed: false, runtimeVerified: false, callbacks: { page: "workshopOpenActivities(characterId): boolean", flash: "workshopOpenActivation(): void", sign: "workshopOpenSign(): void" } } };
+  return { output, proof: { owner: "ddtank-workshop/activity-entry-candidate", ...(nativeMenuVersion === 1 ? { nativeMenuVersion: 1 } : {}), original: { bytes: input.length, sha256: sha(input) }, candidate: { bytes: output.length, sha256: sha(output) }, changedTagIndices, changedAbcOwners: owners, calendarWindowOwner: calendarOwners[0], allOtherTagsByteIdentical: true, installed: false, runtimeVerified: false, callbacks: { page: "workshopOpenActivities(characterId): boolean", flash: "workshopOpenActivation(): void", sign: "workshopOpenSign(): void" } } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

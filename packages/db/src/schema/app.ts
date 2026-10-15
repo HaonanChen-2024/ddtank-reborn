@@ -220,3 +220,9 @@ export const ActivityActions = appSchema.table("ActivityActions", {
   Result: jsonb("Result").notNull(),
   CreatedAt: ts("CreatedAt").notNull().defaultNow(),
 }, (t) => [primaryKey({ name: "ActivityActions_pkey", columns: [t.UserID, t.RequestID] })]);
+
+/** Shared native carnival rounds, independent of every character's private activity save. */
+export const CarnivalGlobalState = appSchema.table("CarnivalGlobalState", {
+  Key: varchar("Key", { length: 32 }).primaryKey(),
+  State: jsonb("State").notNull(),
+});

@@ -7,11 +7,14 @@ import {fileURLToPath} from 'node:url';
 import {christmasSourceFiles} from './reuse-candidate.mjs';
 
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-export function verifyNaturalReturnBridge(source){
+export function verifyNaturalReturnBridge(source,{nativeMenuVersion}={}){
+ assert(nativeMenuVersion===undefined||nativeMenuVersion===1,'unsupported native menu version');
+ const externalCallbacks=nativeMenuVersion===1?52:48;
  const match=source.match(/public static function routeChristmasNaturalReturn\(target:String,room:Object,game:Object\):String\s*\{([\s\S]*?)\}\r?\n  private static function/);assert(match,'actual public static bridge method');
  const body=match[1],code=body.replace(/\b(var\s+\w+):(?:Object|\*)/g,'$1').replace(/catch\((\w+):Error\)/g,'catch($1)').replace(/\bresult is String\b/g,'typeof result === "string"').replace(/\bint\(/g,'Math.trunc(');
  assert(!/ExternalInterface|verifyRole|\b(?:open|openReady|loadModule|ensureShared|read|request)\s*\(/.test(body),'routing must remain local and must not load/open/read');
- const init=source.match(/public static function init\(\):void\s*\{([\s\S]*?)\}\r?\n  private static function clientClass/);assert(init);assert.equal((init[1].match(/ExternalInterface[.]addCallback\(/g)??[]).length,48,'existing external callback count');assert(!init[1].includes('routeChristmasNaturalReturn'),'route is never an external callback');
+ const init=source.match(/public static function init\(\):void\s*\{([\s\S]*?)\}\r?\n  private static function clientClass/);assert(init);assert.equal((init[1].match(/ExternalInterface[.]addCallback\(/g)??[]).length,externalCallbacks,'versioned external callback count');assert(!init[1].includes('routeChristmasNaturalReturn'),'route is never an external callback');
+ if(nativeMenuVersion===1)for(const [callback,method]of [['workshopOpenActivityMenu','openActivityMenu'],['workshopStatusActivityMenu','statusActivityMenu'],['workshopCloseActivityMenu','closeActivityMenu'],['workshopActivityMenuResult','activityMenuResult']])assert(init[1].includes('ExternalInterface.addCallback("'+callback+'",'+method+')'),'exact menu registration '+callback);
  const fn=new Function('context','target','room','game','with(context){'+code+'}'),rows=[];
  const fixture=()=>{
   const room={ID:51},game={missionInfo:{id:164001}},calls=[],status={phase:'ready',ready:true,open:false,expectedUserId:7,characterId:7,generation:'g1'};
@@ -38,6 +41,10 @@ export function verifyNaturalReturnBridge(source){
  run('module refusal keeps original target',f=>f.module.naturalBattleReturn=(...args)=>{f.calls.push(['route',...args]);return args[0];},'dungeonRoom',1);
  for(const value of [null,undefined,true,1,{},'farm',''])run('bad delegated target '+String(value)+' falls back',f=>f.module.naturalBattleReturn=(...args)=>{f.calls.push(['route',...args]);return value;},'dungeonRoom',1);
  assert.equal(christmasSourceFiles.length,9);assert.equal(new Set(christmasSourceFiles).size,9);for(const file of ['scripts/native-christmas/verify-challenge-loading.mjs','scripts/native-christmas/verify-host-transport.mjs','scripts/native-christmas/verify-natural-battle-return.mjs','scripts/native-christmas/patch-battle-return.mjs'])assert(christmasSourceFiles.includes(file),'real audit dependency pinned');
- return{method:'Mechanical extraction of actual AS3 bridge method into JavaScript with host identity fixtures; not AVM2 or live return',sourceSha256:sha(Buffer.from(source)),methodBodySha256:sha(Buffer.from(body)),count:rows.length,rows,externalCallbacks:48,localRouteRegisteredExternally:false,christmasSourcePins:christmasSourceFiles};
+ return{method:'Mechanical extraction of actual AS3 bridge method into JavaScript with host identity fixtures; not AVM2 or live return',sourceSha256:sha(Buffer.from(source)),methodBodySha256:sha(Buffer.from(body)),count:rows.length,rows,externalCallbacks,localRouteRegisteredExternally:false,christmasSourcePins:christmasSourceFiles};
 }
-if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(verifyNaturalReturnBridge(readFileSync(resolve(process.argv[2]??'scripts/native-wardrobe/WorkshopNativeWardrobeBridge.as'),'utf8')),null,2));
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ const args=process.argv.slice(2),paths=args.filter(arg=>arg!=='--native-menu');
+ assert(paths.length<=1&&args.filter(arg=>arg==='--native-menu').length<=1,'usage: verify-natural-return-bridge.mjs [SOURCE] [--native-menu]');
+ console.log(JSON.stringify(verifyNaturalReturnBridge(readFileSync(resolve(paths[0]??'scripts/native-wardrobe/WorkshopNativeWardrobeBridge.as'),'utf8'),{nativeMenuVersion:args.includes('--native-menu')?1:undefined}),null,2));
+}

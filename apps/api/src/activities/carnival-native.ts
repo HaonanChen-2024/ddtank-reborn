@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import type { CarnivalNativeGlobal } from "./carnival-global.js";
+export const carnivalNativePersonalDescription = "本地个人模式：12格等概率，每抽10活动积分、共用每日500次上限，一次确认1至5抽，普通材料永久绑定寄邮件；红包兑换每次1至10份。停止或关闭只停止演出，已提交的奖励不撤销。本地累计榜同分同名次且无排名奖励。共享轮次表尚未安装，本模式不累计全服奖池、不发轮次大奖；安装后从新抽奖开始共同累计，不回补个人历史。原私服概率、装备、高额奖励、跨服、真实付款及缺失的大奖直播原资源未复刻。";
 import { LOCAL_RULES, PRIZES } from "./config.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivityWallet } from "./types.js";
 
@@ -6,7 +8,7 @@ import { ActivityError, type ActivityAction, type ActivityContext, type Activity
 export const carnivalNativeLocalRules = Object.freeze({
   version: 1, drawCost: 10, maxBatchCount: 5, exchangeMaxCount: 10, maxDraws: 100_000_000,
   maxRedPackets: 300_000_000, recordLimit: 20, probabilityNumerator: 1, probabilityDenominator: 12,
-  description: "本地规则：12格等概率，每次10活动积分，仅发永久绑定普通材料与本活动红包；材料直接寄往游戏邮箱。连续模式一次确认1至5次、一个请求编号，全部结果一次提交，停止或关闭不会撤销已提交奖励，动画不再次抽奖或发奖。每次抽奖计入共用每日500次新玩法上限；红包兑换不占新玩法次数，每次1至10份。活动积分由本地任务获得，红包仅在本活动记账；旧网页骰盘单独存档并共用积分钱包。个人记录仅显示本人最近20次，个人分数为累计抽奖次数。本地累计榜只显示真实角色已提交的狂欢次数，同分同名次，不发排行奖。原私服概率、装备、高额奖励、真实付款、全服奖池、私服及跨服排行奖励、轮次大奖及缺失的大奖直播原资源均未复刻。",
+  description: "本地规则：12格等概率，每次10活动积分，仅发永久绑定普通材料与本活动红包；材料直接寄往游戏邮箱。连续模式一次确认1至5次、一个请求编号，全部结果一次提交，停止或关闭不会撤销已提交奖励，动画不再次抽奖或发奖。每次抽奖计入共用每日500次新玩法上限；红包兑换不占新玩法次数，每次1至10份。活动积分由本地任务获得，红包仅在本活动记账；旧网页骰盘单独存档并共用积分钱包。个人记录仅显示本人最近20次，个人分数为累计抽奖次数。本地累计榜同分同名次，不发排行奖。本地全服从启用后的真实抽奖开始共同累计，每100抽结算一轮，每抽为共享材料池增加强化石1级×1；结算发放材料池强化石1级×100、强化石2级×2、朱雀石2级×2。按本轮仍有效真实角色的抽数加权，尽量选不同赢家，人数不足时复用候选，离线也寄绑定邮件；跨日不重置轮次。原私服概率、装备、高额奖励、私服及跨服排行奖励、真实付款及缺失的大奖直播原资源未复刻。",
 });
 const L = carnivalNativeLocalRules, LIMIT = 2_147_483_647;
 type Clock = Pick<ActivityContext, "now" | "carnivalNativeRanking">;
@@ -180,6 +182,7 @@ export function advanceCarnivalNative(value: unknown, action: ActivityAction, ct
 /** Committed public results only. GET never creates a save, draws, exchanges or grants mail. */
 export function viewCarnivalNative(value: unknown, ctx: Clock, funds: Funds, dailyActionsRemaining: number = LOCAL_RULES.maxDailyActions) {
   const state = readCarnivalNativeState(value), score = balance(funds), today = dayOf(ctx), redPackageCount = state.redPacketsEarned - state.redPacketsSpent;
+  const rules: Omit<typeof L, "description"> & { description: string } = { ...L };
   const remainDrawCount = Math.max(0, Math.min(Math.floor(score / L.drawCost), allowance(dailyActionsRemaining),
     L.maxDraws - state.drawCount, Math.floor((L.maxRedPackets - state.redPacketsEarned) / 3)));
   return { version: 1 as const, kind: "carnival-native" as const, started: value !== undefined, day: today,
@@ -189,8 +192,9 @@ export function viewCarnivalNative(value: unknown, ctx: Clock, funds: Funds, dai
     maxBatchCount: Math.min(L.maxBatchCount, remainDrawCount), canDraw: remainDrawCount > 0,
     prizes: carnivalNativePrizes.map(prize => ({ ...prize })),
     exchange: carnivalNativeRecipes.map(recipe => ({ ...recipe, canExchange: redPackageCount >= recipe.redPacketsCost })),
-    records: state.records.map(record => ({ ...record })), rules: { ...L },
+    records: state.records.map(record => ({ ...record })), rules,
     ranking: viewRanking(ctx.carnivalNativeRanking, state.drawCount),
-    unavailable: ["全服奖池", "私服及跨服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"] };
+    global: null as CarnivalNativeGlobal | null, globalMode: undefined as "personal-only" | "local-server" | undefined,
+    unavailable: ["私服及跨服排行与排行奖", "大奖直播原窗口与动画", "真实付款"] };
 }
 export type CarnivalNativeView = ReturnType<typeof viewCarnivalNative>;

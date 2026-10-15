@@ -50,6 +50,13 @@
       "when": 1791986229959,
       "tag": "0006_reference_activities",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792066235543,
+      "tag": "0007_old_shadow_king",
+      "breakpoints": true
     }
   ]
 }

@@ -4,12 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange" | "devil" | "cave" | "christmas", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange" | "devil" | "cave" | "christmas", initialCharacterId = 40, carnivalMode?: "personal-only" | "local-server") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
     characterId: 40, revision: 1, points: 100, earned: 100, day: "2026-10-15", tasks: [], history: [],
     activities: [{ id, title: "本地活动", subtitle: "", rules: [], stats: [], actions: [{ label: "网页玩法", action: { type: "start" } }] }],
+    ...(carnivalMode ? { nativeCarnival: { globalMode: carnivalMode } } : {}),
   });
   const html = renderToStaticMarkup(<QueryClientProvider client={client}><ActivityCenter initialCharacterId={initialCharacterId} onClose={() => {}} /></QueryClientProvider>);
   client.clear();
@@ -75,10 +76,17 @@ describe("ActivityCenter native entry contract", () => {
   });
   it("offers the original carnival with finite committed batches and no second animation award", () => {
     const html = render("carnival"); expect(html).toContain("网页玩法"); expect(html).toContain("试用原版节日狂欢");
-    expect(html).toContain("分别存档"); expect(html).toContain("打开只读取"); expect(html).toContain("最多5次");
-    expect(html).toContain("停止或关闭不会撤销已提交奖励"); expect(html).toContain("动画不再次发奖");
-    expect(html).toContain("7种本地配方"); expect(html).toContain("大奖直播原资源、全服奖池和排行尚未接入");
+    expect(html).toContain("分别存档"); expect(html).toContain("打开只读取"); expect(html).toContain("最多5抽并原子结算");
+    expect(html).toContain("停止或关闭只停止演出"); expect(html).toContain("奖励直接寄邮件");
+    expect(html).toContain("7种本地配方"); expect(html).toContain("本地累计榜可读、无排行奖");
+    expect(html).toContain("本服轮次暂未开放"); expect(html).not.toContain("本服轮次已启用");
     expect(html).not.toContain("试用原版啵咕大转盘");
+  });
+  it("shows shared-round rewards only when the Carnival API declares the capability enabled", () => {
+    const enabled = render("carnival", 40, "local-server"), personal = render("carnival", 40, "personal-only");
+    for (const text of ["本服轮次已启用", "每100抽完成一轮", "按本轮参与次数加权", "强化石1级×100", "强化石2级×2", "朱雀石2级×2"]) expect(enabled).toContain(text);
+    expect(enabled).not.toContain("本服轮次暂未开放"); expect(personal).toContain("本服轮次暂未开放");
+    expect(personal).not.toContain("每100抽完成一轮"); expect(personal).toContain("不把个人历史抽奖次数计入全服材料池");
   });
   it("requires the actual game character for the carnival trial entry", () => {
     expect(render("carnival", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版节日狂欢<\/button>/);

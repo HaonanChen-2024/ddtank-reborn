@@ -17,6 +17,17 @@ const STAGE_H = 836;
 /** Breathing room so the composition never touches the viewport edges. */
 const STAGE_MARGIN = 24;
 
+/** The hall callback acknowledges navigation, never an economic action or an opened HTML activity hub. */
+export function bindNativeActivityEntry(show: (characterId: number) => boolean, unavailable: (characterId: number) => void) {
+  const callback = (characterId: number) => {
+    if (!Number.isSafeInteger(characterId) || characterId <= 0) return false;
+    if (!show(characterId)) unavailable(characterId);
+    return true; // Consume the hall click even when installation is missing; do not open the legacy activation menu.
+  };
+  window.workshopOpenActivities = callback;
+  return () => { if (window.workshopOpenActivities === callback) delete window.workshopOpenActivities; };
+}
+
 /** Scales `.play-stage` to fit the viewport via CSS transform (GPU compositing — crisp at any factor, unlike
  *  resizing the 1000x600 game canvas itself, which the frame never does: GameFrame always renders at its real
  *  1000x600 CSS size). Snapped to the nearest 0.01 so the composition's hairline borders don't shimmer between
@@ -76,14 +87,22 @@ function Ruler() {
 export function PlayPage() {
   const [activitiesOpen, setActivitiesOpen] = useState(false);
   const [activityCharacter, setActivityCharacter] = useState<number | undefined>();
+  const [activityNotice, setActivityNotice] = useState("");
+  const openActivities = (characterId?: number) => {
+    const opened = window.workshopShowActivityMenu?.(characterId) === true;
+    setActivityNotice(opened ? "" : "原生活动菜单未就绪，请进入大厅或更新客户端资源后重试。");
+    return opened;
+  };
   useEffect(() => {
-    window.workshopOpenActivities = (characterId) => {
-      if (!Number.isSafeInteger(characterId) || characterId <= 0) return false;
+    return bindNativeActivityEntry(characterId => {
       setActivityCharacter(characterId);
-      setActivitiesOpen(true);
-      return true;
-    };
-    return () => { delete window.workshopOpenActivities; };
+      const opened = window.workshopShowActivityMenu?.(characterId) === true;
+      if (opened) setActivityNotice("");
+      return opened;
+    }, characterId => {
+      setActivityCharacter(characterId);
+      setActivityNotice("原生活动菜单未就绪，请进入大厅或更新客户端资源后重试。");
+    });
   }, []);
   const { t } = useI18n();
   const fullscreenRef = useRef<HTMLDivElement>(null);
@@ -111,7 +130,8 @@ export function PlayPage() {
           </Link>
         </Button>
         <span className="hidden min-w-0 truncate font-display text-muted sm:block">{data?.serverName}</span>
-        <Button size="sm" className="shrink-0" onClick={() => setActivitiesOpen(true)}>活动中心</Button>
+        <Button size="sm" className="shrink-0" onClick={() => openActivities()}>活动中心</Button>
+        {activityNotice && <span role="alert" className="min-w-0 truncate text-xs text-coral" title={activityNotice}>{activityNotice}</span>}
         <details className="ml-auto shrink-0">
           <summary className="cursor-pointer rounded-lg px-2 py-1 font-display text-sm text-ink hover:bg-panel-2 focus-visible:outline-2 focus-visible:outline-sun">
             {t("play.soloHelp")}
@@ -122,6 +142,7 @@ export function PlayPage() {
               <li>{t("play.soloHelp.arena")}</li>
               <li>{t("play.soloHelp.quickJoin")}</li>
             </ol>
+            <button type="button" className="mt-3 text-xs text-muted underline" onClick={() => setActivitiesOpen(true)}>恢复未确认操作（维护工具）</button>
           </div>
         </details>
         <Button

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { ByteReader, buildTag, compressSwf, decompressSwf, encodeU30, parseTags } from "../tools/i18n/abc-strings/lib.mjs";
 import { parseActivityAbc } from "../tools/i18n/abc-strings/activity-response.mjs";
+import { decode } from "./native-pair/audit-candidate.mjs";
 
 const sha = bytes => createHash("sha256").update(bytes).digest("hex");
 const cat = (...parts) => Buffer.concat(parts), u = encodeU30;
@@ -26,6 +27,57 @@ function readTag(tag) {
   const payload = reader.pos;
   reader.u32(); const name = reader.cstring();
   return { name, abc: tag.subarray(reader.pos), prefix: tag.subarray(payload, reader.pos) };
+}
+
+// Opt-in v1 gate only. Legacy bridge installation and byte generation do not call this helper.
+export function verifyNativeActivityMenuBridge(bridgeTag) {
+  const bridge = readTag(bridgeTag); assert.equal(bridge.name, bridgeName);
+  const p = parseActivityAbc(bridge.abc);
+  const qualified = index => {
+    const n = p.names[index];
+    assert.ok(n && n.kind === 7, "native menu requires a concrete QName");
+    return `${p.strings[p.namespaces[n.ns]?.name]}::${p.strings[n.name]}`;
+  };
+  const classes = [...new Set(p.traitBlocks.filter(t => t.owner != null).map(t => qualified(t.owner)))];
+  assert.deepEqual(classes, ["::WorkshopNativeWardrobeBridge"]);
+  const publicMethod = (name, params, returnType) => {
+    const traits = p.methodTraits.filter(t => qualified(t.name) === `::${name}`);
+    assert.equal(traits.length, 1, `native menu public method: ${name}`);
+    const trait = traits[0], ns = p.namespaces[p.names[trait.name].ns];
+    assert.equal(trait.owner, null, `native menu method must be static: ${name}`);
+    assert.equal(trait.kind & 15, 1); assert.equal(ns.kind, 22, `native menu method must be public: ${name}`);
+    const method = p.methods[trait.method], bodies = p.bodies.filter(b => b.method === trait.method);
+    assert.equal(bodies.length, 1, `native menu method body: ${name}`);
+    assert.deepEqual(method.params.map(qualified), params, `native menu parameter ABI: ${name}`);
+    assert.equal(qualified(method.returnType), returnType, `native menu return ABI: ${name}`);
+    return { name, method: trait.method, params, returnType, body: bodies[0] };
+  };
+  const menu = [
+    ["workshopOpenActivityMenu", "openActivityMenu", ["::Number", "::String"], "::Boolean"],
+    ["workshopStatusActivityMenu", "statusActivityMenu", [], "::Object"],
+    ["workshopCloseActivityMenu", "closeActivityMenu", ["::String"], "::Boolean"],
+    ["workshopActivityMenuResult", "activityMenuResult", ["::Number", "::String", "::String", "::Boolean", "::String"], "::Boolean"],
+  ];
+  const init = publicMethod("init", [], "::void"), ops = decode(init.body.code), registrations = [];
+  for (let i = 0; i < ops.length; i++) {
+    const op = ops[i]; if (![0x46, 0x4f].includes(op.op)) continue;
+    assert.equal(qualified(op.args[0]), "::addCallback", "native menu init may only register callbacks");
+    assert.equal(op.args[1], 2);
+    const [receiver, literal, binding] = ops.slice(i - 3, i);
+    assert.ok(receiver?.op === 0x60 && literal?.op === 0x2c && binding?.op === 0x60, "native menu callback requires an actual direct function binding");
+    assert.equal(qualified(receiver.args[0]), "flash.external::ExternalInterface");
+    registrations.push({ callback: p.strings[literal.args[0]], binding: qualified(binding.args[0]), offset: op.offset });
+  }
+  const legacy = ["Wardrobe", "Pair", "Mines", "DDPlay", "Gypsy", "Moonlight", "Treasure", "Purr", "Carnival", "FirstRecharge", "Charge", "Forthright", "Exchange", "Devil", "CaveLoot", "Christmas"]
+    .flatMap(name => ["Open", "Status", "Close"].map(action => `workshop${action}${name}`));
+  assert.deepEqual(registrations.map(r => r.callback).sort(), [...legacy, ...menu.map(row => row[0])].sort(), "native menu v1 requires exactly 52 real callback registrations");
+  const methods = menu.map(([callback, name, params, result]) => {
+    const { body, ...method } = publicMethod(name, params, result), registration = registrations.find(r => r.callback === callback);
+    assert.equal(registration.binding, `::${name}`, `native menu callback points to the wrong method: ${callback}`);
+    return { callback, ...method, registrationOffset: registration.offset, codeSha256: sha(body.code) };
+  });
+  return { version: 1, bridgeSha256: sha(bridgeTag), initMethod: init.method, initCallbackCount: registrations.length,
+    legacyCallbacks: legacy.length, menuCallbacks: methods, compiledOnly: true, runtimeVerified: false };
 }
 
 export function buildNativeWardrobeEntry(input, bridgeTag) {

@@ -1,16 +1,21 @@
 package {
  import flash.display.Loader;
+ import flash.display.DisplayObject;
  import flash.display.Sprite;
  import flash.events.Event;
  import flash.events.IOErrorEvent;
  import flash.events.SecurityErrorEvent;
  import flash.events.UncaughtErrorEvent;
  import flash.events.TimerEvent;
+ import flash.events.KeyboardEvent;
+ import flash.events.MouseEvent;
  import flash.external.ExternalInterface;
  import flash.net.URLRequest;
  import flash.system.ApplicationDomain;
  import flash.system.LoaderContext;
  import flash.utils.Timer;
+ import flash.text.TextField;
+ import flash.text.TextFormat;
  /** Existing injection ABI; a single shared import for all activity modules. */
  public final class WorkshopNativeWardrobeBridge extends Sprite {
   private static var registered:Boolean=false;
@@ -24,6 +29,14 @@ package {
   private static var sharedLoader:Loader;
   private static var sharedTimer:Timer;
   private static var sharedImports:int=0;
+  private static var activityMenu:Object;
+  private static var menuMessage:String="";
+  private static const MENU_ITEMS:Array=[
+   ["mines","迷宫寻宝"],["ddplay","弹弹扫雷"],["gypsy","吉普赛商人"],["treasure","惊喜宝箱"],
+   ["exchange","兑换活动"],["wardrobe","魔法衣橱"],["moonlight","月光宝盒"],["purr","弹弹乐"],
+   ["charge","充值大赠送"],["pair","啵咕大转盘"],["carnival","节日狂欢"],["first-recharge","首充大礼"],
+   ["forthright","至尊豪礼"],["devil","恶魔宝藏"],["christmas","快乐圣诞"],["caveloot","矿洞寻宝"]
+  ];
   private static var wardrobe:Object=record("wardrobe");
   private static var pair:Object=record("pair");
   private static var mines:Object=record("mines");
@@ -96,6 +109,10 @@ package {
    ExternalInterface.addCallback("workshopOpenChristmas",openChristmas);
    ExternalInterface.addCallback("workshopStatusChristmas",statusChristmas);
    ExternalInterface.addCallback("workshopCloseChristmas",closeChristmas);
+   ExternalInterface.addCallback("workshopOpenActivityMenu",openActivityMenu);
+   ExternalInterface.addCallback("workshopStatusActivityMenu",statusActivityMenu);
+   ExternalInterface.addCallback("workshopCloseActivityMenu",closeActivityMenu);
+   ExternalInterface.addCallback("workshopActivityMenuResult",activityMenuResult);
    registered=true;
   }
   private static function clientClass(name:String):Class {
@@ -123,6 +140,110 @@ package {
    if(actual<=0||actual!=id)throw new Error("网页角色与游戏内角色不一致。");
    if(expected>0&&expected!=actual)throw new Error("游戏角色已切换，请重新进入游戏后打开原活动。");
    if(domain)displayDomain();
+  }
+  private static function menuAlive(m:Object):Boolean {
+   if(!m||activityMenu!==m||!m.root||!m.root.parent||!m.root.stage||m.root.stage!==m.stage)return false;
+   try {
+    var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];
+    return self===m.self&&int(self["ID"])===m.id&&self["ZoneID"]===m.zone&&
+     clientClass("ddt.manager.StateManager")["currentStateType"]==="main"&&(expected===0||expected===m.id);
+   }catch(ignored:Error){return false;}
+   return false;
+  }
+  private static function menuKind(kind:String):Boolean {
+   if(kind==="sign"||kind==="activation")return true;
+   for each(var item:Array in MENU_ITEMS)if(item[0]===kind)return true;
+   return false;
+  }
+  private static function menuLabel(parent:Sprite,text:String,x:int,y:int,width:int,height:int,size:int=14):TextField {
+   var field:TextField=new TextField(),format:TextFormat=new TextFormat("宋体",size,0xFFE7A6,true);
+   format.align="center";format.leading=3;field.defaultTextFormat=format;
+   field.x=x;field.y=y;field.width=width;field.height=height;field.multiline=true;field.wordWrap=true;
+   field.selectable=false;field.mouseEnabled=false;field.text=text;parent.addChild(field);return field;
+  }
+  private static function menuButton(m:Object,kind:String,label:String,x:int,y:int,height:int=62):Object {
+   var factory:Object=clientClass("com.pickgliss.ui.ComponentFactory")["Instance"];
+   var button:Object=factory["creatComponentByStylename"]("copyFile.btn");
+   if(!(button is DisplayObject))throw new Error("客户端原生按钮皮肤未就绪。");
+   button["text"]="";button["x"]=x;button["y"]=y;button["width"]=74;button["height"]=height;
+   var caption:TextField=menuLabel(m.panel,label,x+3,y+(height>40?12:5),68,height>40?44:25,height>40?14:12);
+   m.panel.addChildAt(button as DisplayObject,m.panel.numChildren-1);
+   var click:Function=function(e:MouseEvent):void{
+    e.stopImmediatePropagation();if(!menuAlive(m))return;
+    if(kind==="close"){disposeMenu(m,true);return;}
+    if(m.pendingKind)return;
+    if(kind==="more"){m.extra.visible=!m.extra.visible;m.extraCaption.visible=m.extra.visible;return;}
+    if(!menuKind(kind))return;
+    m.pendingKind=kind;m.message.text="正在打开活动，请稍候……";
+    try{if(!ExternalInterface.available||ExternalInterface.call("workshopSelectNativeActivity",m.id,m.token,kind)!==true){m.pendingKind="";m.message.text="活动入口未就绪，请关闭后重试。";}}
+    catch(error:Error){m.pendingKind="";m.message.text="活动入口未就绪，请关闭后重试。";}
+   };
+   button.addEventListener(MouseEvent.CLICK,click);m.controls.push({view:button,listener:click,caption:caption,kind:kind});
+   return {view:button,caption:caption};
+  }
+  private static function disposeMenu(m:Object,notify:Boolean):void {
+   if(!m||activityMenu!==m)return;
+   activityMenu=null;
+   if(m.root&&m.tick)m.root.removeEventListener(Event.ENTER_FRAME,m.tick);
+   if(m.stage&&m.key)m.stage.removeEventListener(KeyboardEvent.KEY_DOWN,m.key);
+   if(m.root&&m.root.parent)m.root.parent.removeChild(m.root);
+   for each(var control:Object in m.controls){control.view.removeEventListener(MouseEvent.CLICK,control.listener);try{control.view.dispose();}catch(ignored:Error){}}
+   if(m.background){try{m.background.dispose();}catch(backgroundError:Error){}}
+   if(notify&&ExternalInterface.available){try{ExternalInterface.call("workshopActivityMenuClosed",m.id,m.token);}catch(notifyError:Error){}}
+  }
+  public static function openActivityMenu(id:Number,token:String):Boolean {
+   try {
+    verifyRole(id);
+    if(!token||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(token))throw new Error("活动菜单代次无效。");
+    if(activityMenu){if(activityMenu.id===id&&activityMenu.token===token&&menuAlive(activityMenu))return true;throw new Error("请先关闭当前活动菜单。");}
+    // Never cancel a module, its pending UUID, or an unconfirmed economic request to clear the screen.
+    for each(var r:Object in [wardrobe,pair,mines,ddplay,gypsy,moonlight,treasure,purr,carnival,firstRecharge,charge,forthright,exchange,devil,caveloot,christmas]){
+     if(r.wantOpen||r.phase==="waiting-shared"||r.phase==="loading")throw new Error("活动正在打开，请稍候。");
+     if(r.module){var s:Object=r.module.statusNative();if(!s||s.pending===true||s.animating===true||s.visible===true||s.open===true)throw new Error("请先完成操作并关闭当前活动窗口。");}
+    }
+    var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];
+    var m:Object={id:int(id),token:token,self:self,zone:self["ZoneID"],root:new Sprite(),panel:new Sprite(),controls:[],pendingKind:""};
+    activityMenu=m;menuMessage="";
+    var Layer:Class=clientClass("com.pickgliss.ui.LayerManager");
+    // Own the backdrop explicitly: removing this Sprite removes every modal hit area as well.
+    Layer["Instance"]["addToLayer"](m.root,3,false,0);
+    if(!m.root.stage)throw new Error("游戏原生显示层未就绪。");
+    m.stage=m.root.stage;var w:int=m.stage.stageWidth,h:int=m.stage.stageHeight;
+    m.root.graphics.beginFill(0x000000,0.4);m.root.graphics.drawRect(0,0,w,h);m.root.graphics.endFill();
+    m.panel.x=Math.max(8,int((w-330)/2));m.panel.y=Math.max(8,int((h-466)/2));m.root.addChild(m.panel);
+    m.background=clientClass("com.pickgliss.ui.ComponentFactory")["Instance"]["creatComponentByStylename"]("SimpleFrameBackgound");
+    if(!(m.background is DisplayObject))throw new Error("客户端原生窗口皮肤未就绪。");
+    m.background.width=330;m.background.height=466;m.panel.addChild(m.background);
+    menuLabel(m.panel,"活动",10,10,310,29,18);
+    for(var i:int=0;i<MENU_ITEMS.length;i++){
+     var label:String=MENU_ITEMS[i][1];if(label.length>4)label=label.substr(0,2)+"\n"+label.substr(2);
+     menuButton(m,MENU_ITEMS[i][0],label,10+80*(i%4),44+80*int(i/4));
+    }
+    menuButton(m,"sign","签到",10,369,34);menuButton(m,"more","更多",90,369,34);
+    var extra:Object=menuButton(m,"activation","激活",170,369,34);m.extra=extra.view;m.extraCaption=extra.caption;m.extra.visible=false;m.extraCaption.visible=false;
+    menuButton(m,"close","关闭",250,369,34);
+    m.message=menuLabel(m.panel,"点击活动打开原窗口\n奖励以活动内规则为准",10,414,310,44,12);
+    m.tick=function(e:Event):void{if(!menuAlive(m))disposeMenu(m,true);};
+    m.key=function(e:KeyboardEvent):void{if(e.keyCode===27&&activityMenu===m){e.stopImmediatePropagation();disposeMenu(m,true);}};
+    m.root.addEventListener(Event.ENTER_FRAME,m.tick);m.stage.addEventListener(KeyboardEvent.KEY_DOWN,m.key,false,1000);
+    return menuAlive(m);
+   }catch(error:Error){menuMessage=error.message;if(activityMenu)disposeMenu(activityMenu,true);return false;}
+   return false;
+  }
+  public static function statusActivityMenu():Object {
+   var id:int=0;try{var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];id=self?int(self["ID"]):0;}catch(ignored:Error){}
+   if(activityMenu&&!menuAlive(activityMenu))disposeMenu(activityMenu,true);
+   var m:Object=activityMenu;
+   return {version:1,open:Boolean(m),actualUserId:id,characterId:m?m.id:0,token:m?m.token:"",pending:Boolean(m&&m.pendingKind),message:menuMessage};
+  }
+  public static function closeActivityMenu(token:String):Boolean {
+   var m:Object=activityMenu;if(!m||m.token!==token)return false;disposeMenu(m,true);return true;
+  }
+  public static function activityMenuResult(id:Number,token:String,kind:String,opened:Boolean,message:String):Boolean {
+   var m:Object=activityMenu;
+   if(!menuAlive(m)||m.id!==id||m.token!==token||m.pendingKind!==kind||!menuKind(kind))return false;
+   if(opened){disposeMenu(m,false);return true;}
+   m.pendingKind="";m.message.text=message?message:"活动窗口未能打开，请重试。";return true;
   }
   public static function openWardrobe(id:Number):Boolean{return open(wardrobe,id,"wardrobe:"+id);}
   public static function openPair(id:Number,generation:String):Boolean{return open(pair,id,generation);}

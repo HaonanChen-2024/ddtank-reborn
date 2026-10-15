@@ -50,6 +50,8 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, staleTime: 0,
   });
   const snapshot = activities.data?.characterId === characterId ? activities.data : undefined;
+  const carnival = snapshot?.nativeCarnival;
+  const carnivalShared = Boolean(carnival && typeof carnival === "object" && "globalMode" in carnival && carnival.globalMode === "local-server");
   const selected = snapshot?.activities.find((activity) => activity.id === selectedId) ?? snapshot?.activities[0];
   const locked = busy || sharedBusy || Boolean(openingNative) || Boolean(retry) || Boolean(storageError) || activities.isFetching;
   const currentCharacterRef = useRef(characterId);
@@ -293,7 +295,8 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   <p className="activity-center__hint">本地四页活动：今日任务、累计任务、启用后累计消费、积分兑换。累计任务档与活动积分礼共用领取记录，奖励由游戏邮件送达；兑换仅扣活动积分，消费不补算历史，不接真实付款。原窗口仍待游戏内验收。</p></>}
                 {selected.id === "carnival" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("carnival"); }}>试用原版节日狂欢</button>
-                  <p className="activity-center__muted">原12格转盘、动画和红包兑换窗口仍在测试，与旧网页骰盘分别存档，共用活动积分。打开只读取；本地12格等概率，每次10积分，连续模式一次确认最多5次，全部结果一次提交。停止或关闭不会撤销已提交奖励；普通材料直接寄邮件，动画不再次发奖。红包可兑换7种本地配方，不接真实付款。大奖直播原资源、全服奖池和排行尚未接入。</p>
+                  <p className="activity-center__muted">原12格转盘、动画和红包兑换窗口仍待游戏内验收，与旧网页骰盘分别存档，共用活动积分。打开只读取；本地12格等概率，每次10积分，一次最多5抽并原子结算。奖励直接寄邮件，停止或关闭只停止演出。本地累计榜可读、无排行奖，红包可兑换7种本地配方。原私服赔率、跨服排行奖、大奖直播资源和真实付款尚未移植。</p>
+                  <p className="activity-center__muted">{carnivalShared ? "本服轮次已启用：真实角色每抽向材料池贡献1份强化石1级，每100抽完成一轮，按本轮参与次数加权选出3个普通材料奖：强化石1级×100、强化石2级×2、朱雀石2级×2，尽量由不同角色获得。" : "本服轮次暂未开放；目前保留个人抽奖、红包兑换和本地累计榜，不把个人历史抽奖次数计入全服材料池。"}</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版节日狂欢。</p>}</>}
                 {selected.id === "wheel" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("purr"); }}>试用原版啵咕大转盘</button>

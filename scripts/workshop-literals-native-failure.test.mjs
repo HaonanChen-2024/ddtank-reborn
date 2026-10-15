@@ -89,6 +89,64 @@ function battleReturnBuild(f, source = snowfieldBuild(f), suffix = "battle-retur
   const next = path.join(root, "manifest.json"); f.put(next, JSON.stringify(manifest)); return next;
 }
 
+function nativeMenuBuild(f, source = battleReturnBuild(f)) {
+  const manifest = JSON.parse(f.fs.readFileSync(source, "utf8"));
+  const tag = Buffer.concat([f.fs.readFileSync(manifest.bridge.tagPath), Buffer.from("|four-menu-callbacks")]);
+  const tagPath = path.join(path.dirname(source), "menu-bridge.bin"); f.put(tagPath, tag);
+  manifest.bridge.tagPath = tagPath; manifest.bridge.tagSha256 = digest(tag);
+  manifest.nativeMenuVersion = 1;
+  const next = path.join(path.dirname(source), "menu-manifest.json");
+  f.put(next, JSON.stringify(manifest)); return next;
+}
+
+test("native menu upgrades legacy89 and preserves no-option verify and rollback", () => {
+  const f = fixture(), original = f.snapshot(), old = battleReturnBuild(f);
+  f.run("install", old); const legacy = f.fs.readFileSync(f.corePath("2.png"));
+  const next = nativeMenuBuild(f, old), before = f.snapshot();
+  assert.equal(f.run("verify", next).pendingTransition, true); assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.run("install", next).nativeWardrobe.nativeMenuVersion, 1);
+  assert.notDeepEqual(f.fs.readFileSync(f.corePath("2.png")), legacy);
+  assert.ok(f.fs.readFileSync(f.corePath("2.png")).includes(Buffer.from("|activities|native-menu:1|native:")));
+  assert.equal(f.run("verify").unchanged, true); const installed = f.snapshot();
+  assert.equal(f.run("install", next).unchanged, true); assert.deepEqual(f.snapshot(), installed);
+  assert.throws(() => f.run("install", old), /remove installed activity menu/); assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("native menu rejects unknown version and module before writes", () => {
+  for (const value of [0, 2, "1", true, null]) {
+    const f = fixture(), next = nativeMenuBuild(f), m = JSON.parse(f.fs.readFileSync(next, "utf8"));
+    m.nativeMenuVersion = value; f.put(next, JSON.stringify(m));
+    const before = f.snapshot(), mutations = f.mutationCount;
+    assert.throws(() => f.run("install", next), /unknown native activity menu version/);
+    assert.deepEqual(f.snapshot(), before); assert.equal(f.mutationCount, mutations);
+  }
+  const f = fixture(), m = JSON.parse(f.fs.readFileSync(f.manifestPath, "utf8"));
+  m.nativeMenuVersion = 1; f.put(f.manifestPath, JSON.stringify(m)); const before = f.snapshot();
+  assert.throws(() => f.run("install", f.manifestPath), /unknown native activity menu version/);
+  assert.deepEqual(f.snapshot(), before);
+});
+
+test("native menu failed core and journal writes compensate legacy89 before retry", () => {
+  for (const kind of ["core", "journal"]) {
+    const f = fixture(), old = battleReturnBuild(f); f.run("install", old);
+    const next = nativeMenuBuild(f, old), before = f.snapshot();
+    const target = kind === "core" ? f.corePath("2.png") : f.ledger;
+    f.arm("write", target + ".workshop-777");
+    assert.throws(() => f.run("install", next), /ENOSPC/); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true); assert.equal(f.openHandles, 0);
+    assert.equal(f.run("install", next).nativeWardrobe.nativeMenuVersion, 1);
+  }
+});
+
+test("native menu rejects a declared v1 with the legacy callback bridge before writes", () => {
+  const f = fixture(), next = battleReturnBuild(f), m = JSON.parse(f.fs.readFileSync(next, "utf8"));
+  m.nativeMenuVersion = 1; f.put(next, JSON.stringify(m));
+  const before = f.snapshot(), mutations = f.mutationCount;
+  assert.throws(() => f.run("install", next), /menu callbacks missing/);
+  assert.deepEqual(f.snapshot(), before); assert.equal(f.mutationCount, mutations);
+});
+
 test("christmas natural battle return upgrades old89, preserves no-option verify and recomputes the recorded old core", () => {
   const f = fixture(), original = f.snapshot(), old = snowfieldBuild(f);
   assert.equal(f.run("install", old).nativeWardrobe.assets.length, 89); assert.equal(f.patchCalls.length, 0);
@@ -286,8 +344,9 @@ function fixture() {
     Date: class extends Date { static now() { return 12345; } }, // Failed installs may retry within the same millisecond.
     patchSwfBuffer: bytes => bytes.includes(Buffer.from("|Chinese")) ? { out: bytes, totalChanged: 0 }
       : { out: append(bytes, "|Chinese"), totalChanged: 1 },
-    buildActivityEntry: bytes => ({ output: append(bytes, "|activities"), proof: {} }),
+    buildActivityEntry: (bytes, options = {}) => ({ output: append(bytes, options.nativeMenuVersion === 1 ? "|activities|native-menu:1" : "|activities"), proof: {} }),
     buildNativeWardrobeEntry: (bytes, tag) => ({ output: append(bytes, "|native:" + digest(tag)), proof: {} }),
+    verifyNativeActivityMenuBridge: tag => assert.ok(tag.includes(Buffer.from("|four-menu-callbacks")), "menu callbacks missing"),
     patchBattleReturn: ({ coreBytes, bridgeBytes }) => {
       patchCalls.push({ coreBytes: Buffer.from(coreBytes), bridgeBytes: Buffer.from(bridgeBytes) });
       if (rejectBattleReturn) throw new Error("fixture battle return refusal");

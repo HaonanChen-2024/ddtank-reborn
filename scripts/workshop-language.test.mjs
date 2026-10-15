@@ -165,3 +165,47 @@ test("server rollback refuses a backup without its matching previous ownership r
   journal.previousJournal.sha256 = "0".repeat(64); writeFileSync(path, JSON.stringify(journal));
   assert.notEqual(f.run("rollback", "--server").status, 0); assert.deepEqual(readFileSync(target), before);
 });
+
+test("the 69 bag, card, pet and totem captions preserve real client formatting and install only in an isolated fixture", t => {
+  const f = fixture(t);
+  const source = readFileSync(join(repoRoot, "apps/api/assets/flash/ui/vietnam/language.txt"), "utf8").replace(/\r?\n/g, "\r\n");
+  const overridesText = readFileSync(join(repoRoot, "research/i18n/zh-CN-overrides.json"), "utf8"), overrides = JSON.parse(overridesText);
+  const keys = ["tank.BagAndInfo.BankBag.titleText", "tank.view.bagII.GoodsTipPanel.maxGP", "ddt.bagandinfo.bagAndInfo.itemOpenUpTxt",
+    "ddt.bagAndInfo.sell.CanNotSell", "tank.hall.ChooseHallView.labyrinth",
+    ...["UpGradeFrame.explain0", "UpGradeFrame.explain1", "UpGradeFrame.explain2", "PropResetFrame.attack", "PropResetFrame.defends",
+      "PropResetFrame.agility", "PropResetFrame.lucy", "PropResetFrame.damage", "PropResetFrame.guard", "PropResetFrame.explain", "cardProp.unknown",
+      "upgradeFrame.ownCardNum", "upgradeFrame.rule", "cardEquip.open3", "cardEquip.open4", "cardEquip.congratulate", "cardEquip.cannotOpen3", "cardEquip.cannotOpen4"].map(key => `ddt.cardSystem.${key}`),
+    ...["revertPetAlertMsg", "revertPetCostMsg", "foodAmountTipText", "fight", "unfight", "advancedTxt", "risingStar.tisingStarTxt", "risingStar.maxStarTxt",
+      "risingStar.helpTxt1", "risingStar.helpTxt2", "risingStar.helpTxt3", "evolution.helpTxt", "evolution.cannotEvolutionTxt", "advanced.noPropTxt", "openTxt",
+      "break.eatNum.NotEnough", "break.stars.NotEnough", "break.samsang.NotEnough", "break.petLevel.NotEnough", "break.shoudnotFight", "break.breakGradeEnough",
+      "break.protectedNotEnough", "break.starExpWaste", "break.SucMessage", "break.useProtected", "break.stone", "break.levelFull", "break.BreakLevelFull",
+      "break.sureToNotUseProtect", "break.warning", "break.detail", "break.breakCurGradeInfo", "break.fullGrade", "convert", "convertCannotTxt", "convertCannotTxt2",
+      "releaseCannotTxt", "releaseTransformTxt", "releaseDirectTxt", "hungerFull", "releasPetsDiscrp", "releaseCanTransTipTxt"].map(key => `ddt.pets.${key}`),
+    ...["totemPointTip.possibleValueTxt", "totemChapterTip.titleTxt", "rightViewTotemSignTxt", "rightViewTotemSignTipMsg"].map(key => `ddt.totem.${key}`)];
+  assert.equal(keys.length, 69); assert.equal(new Set(keys).size, 69);
+  const rows = source.split("\r\n"), parts = line => { const colon = line.indexOf(":"); return [colon, line.slice(0, colon).replace(/^\uFEFF/, ""), line.slice(colon + 1)]; };
+  const placeholders = value => [...value.matchAll(/\{\d+(?::[^}]*)?\}/g)].map(match => match[0]).sort();
+  const tags = value => value.match(/<[^>]*>/g) ?? [], lineEscapes = value => value.match(/\\+n/g) ?? [];
+  for (const key of keys) {
+    const matches = rows.map(parts).filter(([colon, candidate]) => colon > 0 && candidate === key);
+    assert.ok(matches.length > 0, `real client key missing: ${key}`);
+    assert.equal(typeof overrides[key], "string"); assert.match(overrides[key], /[\u3400-\u9fff]/); assert.doesNotMatch(overrides[key], /[\r\n]/);
+    for (const [, , original] of matches) {
+      assert.deepEqual(placeholders(overrides[key]), placeholders(original), `placeholder changed: ${key}`);
+      assert.deepEqual(tags(overrides[key]), tags(original), `HTML changed: ${key}`);
+      assert.deepEqual(lineEscapes(overrides[key]), lineEscapes(original), `literal newline changed: ${key}`);
+    }
+  }
+  assert.equal(overrides["tank.view.bagII.GoodsTipPanel.maxGP"], "经验上限");
+  assert.equal(overrides["ddt.bagAndInfo.sell.CanNotSell"], "此物品不可出售");
+  assert.match(overrides["tank.hall.ChooseHallView.labyrinth"], /30/);
+  assert.equal(overrides["ddt.pets.fight"], "出战"); assert.equal(overrides["ddt.pets.unfight"], "召回");
+  f.put("apps/api/assets/flash/ui/vietnam/language.txt", source); f.put("research/i18n/zh-CN-overrides.json", overridesText);
+  assert.equal(JSON.parse(f.ok("verify")).installed, false); assert.equal(existsSync(f.runtime), false);
+  const result = JSON.parse(f.ok("install")), target = join(f.runtime, "client-overlay/ui/vietnam/language.txt"), output = readFileSync(target);
+  const expected = rows.map(line => { const [colon, key] = parts(line); return colon > 0 && !line.startsWith("##") && Object.hasOwn(overrides, key) ? line.slice(0, colon + 1) + overrides[key] : line; }).join("\r\n");
+  assert.deepEqual(output, Buffer.from(expected)); assert.equal(output.subarray(0, 3).toString("hex"), "efbbbf");
+  assert.doesNotMatch(output.toString("utf8"), /(?<!\r)\n/); assert.equal(output.toString("utf8").split("\r\n").length, rows.length);
+  assert.equal(result.keys, Object.keys(overrides).length); assert.equal(JSON.parse(f.ok("install")).unchanged, true);
+  assert.equal(readFileSync(join(f.repo, "apps/api/assets/flash/ui/vietnam/language.txt"), "utf8"), source);
+});

@@ -1,6 +1,6 @@
 import { commandChristmas, type ChristmasEnvelope } from "./christmas-native.js";
 import { commandSnowfield, isSnowfieldAction, readSnowfieldPair, type SnowfieldEnvelope } from "./christmas-snowfield.js";
-import { createHash } from "node:crypto";
+import { createHash, randomInt } from "node:crypto";
 import { existsSync } from "node:fs";
 import { sql } from "drizzle-orm";
 import type { AppCtx } from "../context.js";
@@ -18,7 +18,9 @@ import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
 import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
-import { readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
+import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
+import { advanceCarnivalGlobal, carnivalGlobalKey, readCarnivalGlobalState, viewCarnivalGlobal,
+  type CarnivalRoundResult, type CarnivalNativeGlobal } from "./carnival-global.js";
 import type { DevilEffect } from "./devil-native.js";
 import type { CaveEffect } from "./caveloot-native.js";
 import { validateFirstRechargeNativeAction, type FirstRechargeNativeEffect } from "./first-recharge-native.js";
@@ -41,7 +43,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeMoonlightAction?: { requestId: string; effects: MoonlightNativeEffect[] };
   nativeTreasureAction?: { requestId: string; effects: TreasureNativeEffect[] };
   nativeWheelAction?: { requestId: string; effects: WheelNativeEffect[] };
-  nativeCarnivalAction?: { requestId: string; effects: CarnivalNativeEffect[] };
+  nativeCarnivalAction?: { requestId: string; effects: CarnivalNativeEffect[]; worldEffects: CarnivalRoundResult[] };
   nativeFirstRechargeAction?: { requestId: string; effects: FirstRechargeNativeEffect[] };
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
   nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
@@ -185,6 +187,31 @@ async function stateOf(app: AppCtx, characterId: number, now: Date): Promise<Act
   return row?.State ?? createActivityState(now);
 }
 
+async function carnivalGlobalValue(app: AppCtx): Promise<unknown> {
+  return (await q1<{ State: unknown }>(app.h, sql`SELECT "State" FROM app."CarnivalGlobalState" WHERE "Key"=${carnivalGlobalKey}`))?.State;
+}
+async function hasCarnivalGlobal(app: AppCtx): Promise<boolean> {
+  // A DB_MIGRATE=false install keeps its original personal gameplay. No DDL and no transaction-aborting probe.
+  const row = await q1<{ Name: string | null }>(app.h, sql`SELECT to_regclass('app."CarnivalGlobalState"')::text AS "Name"`);
+  return row?.Name != null;
+}
+function carnivalMode(result: ActivityResult, shared: boolean) {
+  result.nativeCarnival.globalMode = shared ? "local-server" : "personal-only";
+  if (!shared) {
+    result.nativeCarnival.global = null;
+    result.nativeCarnival.unavailable = ["全服奖池", "私服及跨服排行与排行奖", "轮次大奖", "大奖直播原窗口与动画", "真实付款"];
+    result.nativeCarnival.rules.description = carnivalNativePersonalDescription;
+  }
+}
+/** One read checks the actor again, including the boundary where its completed round has no current contribution. */
+async function carnivalGlobalRead(app: AppCtx, characterId: number, actorRevision: number): Promise<CarnivalNativeGlobal | null> {
+  const row = await q1<{ ActorRevision: number | null; Global: { state: unknown } | null }>(app.h, sql`SELECT
+    (SELECT "Revision" FROM app."ActivityWallet" WHERE "UserID"=${characterId}) AS "ActorRevision",
+    (SELECT jsonb_build_object('state',"State") FROM app."CarnivalGlobalState" WHERE "Key"=${carnivalGlobalKey}) AS "Global"`);
+  if ((row?.ActorRevision ?? 0) !== actorRevision) return null;
+  return viewCarnivalGlobal(row?.Global ? row.Global.state : undefined, characterId, actorRevision);
+}
+
 export async function activitySnapshot(app: AppCtx, claims: Claims, characterId: number, loadExchange = true): Promise<ActivityResult> {
   const now = new Date();
   await owner(app, claims, characterId, now);
@@ -198,6 +225,8 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
   // Committed ranking reads, after ownership. Never join them into a locked POST/mail transaction.
   result.nativeCarnival.ranking = await carnivalRanking(app, characterId, now, result.nativeCarnival.personalScore);
   result.nativeMoonlight.ranking = await moonlightRanking(app, characterId, now, result.nativeMoonlight.draws);
+  const shared = await hasCarnivalGlobal(app); carnivalMode(result, shared);
+  if (shared) result.nativeCarnival.global = await carnivalGlobalRead(app, characterId, result.revision);
   // Never add internal inventory reads to context(): old actions hold the wallet lock there.
   if (loadExchange) {
     result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);
@@ -421,7 +450,7 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
   if (activityId === "forthright-native" && action.type === "inspect-group") return forthrightInspect(app, claims, characterId, requestId, action, signature);
   if (activityId === "forthright-native" && ["open-group", "join-group", "leave-group", "cancel-group", "settle-group"].includes(action.type))
     return forthrightGroupAction(app, claims, characterId, requestId, action, signature);
-  let mailed = false;
+  const notices = new Set<number>(), sharedCarnival = await hasCarnivalGlobal(app);
   const result = await app.h.db.transaction(async (tx) => {
     const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
     await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${characterId}) ON CONFLICT DO NOTHING`);
@@ -435,7 +464,11 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
       // Keep the original receipt intact, but never let its historical page replace newer state.
       const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
-      return { characterId, ...viewActivities(state, walletOf(row), ctx), message: previous.Result.message, mailedCount: previous.Result.mailedCount, replayed: true };
+      const replay: ActivityResult = { characterId, ...viewActivities(state, walletOf(row), ctx), message: previous.Result.message,
+        mailedCount: previous.Result.mailedCount, replayed: true };
+      carnivalMode(replay, sharedCarnival);
+      if (activityId === "carnival-native" && sharedCarnival) replay.nativeCarnival.global = viewCarnivalGlobal(await carnivalGlobalValue(txApp), characterId, row!.Revision);
+      return replay;
     }
     const wallet = walletOf(row);
     const state = await stateOf(txApp, characterId, now);
@@ -444,6 +477,38 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     const next: ActivityWallet = { points: wallet.points + changed.pointsDelta, earned: wallet.earned + changed.earnedDelta, revision: wallet.revision + 1 };
     if (![changed.pointsDelta, changed.earnedDelta].every(Number.isInteger) || changed.earnedDelta < 0 || ![next.points, next.earned, next.revision].every(int)) throw new ActivityError("活动积分不足或结算配置无效。", 409);
     let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards, activityId === "moonlight-native" && action.type === "buy");
+    if (changed.rewards.length) notices.add(characterId);
+    let worldEffects: CarnivalRoundResult[] = [], global: CarnivalNativeGlobal | null = null;
+    if (activityId === "carnival-native" && sharedCarnival) {
+      let value: unknown;
+      if (action.type === "draw") {
+        // The actor wallet/ownership/receipt and ordinary transition are already validated. Never lock another wallet here.
+        await tx.execute(sql`INSERT INTO app."CarnivalGlobalState" ("Key","State") VALUES (${carnivalGlobalKey},${JSON.stringify(readCarnivalGlobalState(undefined))}::jsonb)
+          ON CONFLICT ("Key") DO NOTHING`);
+        value = (await q1<{ State: unknown }>(txApp.h, sql`SELECT "State" FROM app."CarnivalGlobalState" WHERE "Key"=${carnivalGlobalKey} FOR UPDATE`))!.State;
+        const shared = readCarnivalGlobalState(value);
+        let eligible: { Public: { characterId: number; nickName: string }; Sex: boolean }[] = [];
+        if (shared.totalDraws % 100 + action.count! >= 100) {
+          const ids = [...new Set([characterId, ...shared.contributions.map(r => r.characterId)])].sort((a, b) => a - b);
+          eligible = await q(txApp.h, sql`SELECT jsonb_build_object('characterId',d."UserID",'nickName',d."NickName") AS "Public",d."Sex"
+            FROM player."Sys_Users_Detail" d WHERE d."UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
+              AND d."IsExist"=true AND d."ForbidDate"<=${now} AND btrim(d."NickName")<>''
+              AND EXISTS (SELECT 1 FROM member."Accounts" a WHERE lower(a."UserName")=lower(d."UserName") AND a."IsBanned"=false FOR SHARE OF a)
+            ORDER BY d."UserID" FOR SHARE OF d`);
+        }
+        const advanced = advanceCarnivalGlobal(shared, { characterId, walletRevision: next.revision, draws: action.count!, now,
+          eligibleParticipants: eligible.map(row => row.Public) }, () => randomInt(0x100000000) / 0x100000000);
+        value = advanced.state; worldEffects = advanced.worldEffects;
+        for (const award of advanced.rewards.sort((a, b) => a.characterId - b.characterId)) {
+          const winner = eligible.find(row => row.Public.characterId === award.characterId)!;
+          const count = await rewardMail(txApp, award.characterId, { NickName: winner.Public.nickName, Sex: winner.Sex }, award.rewards);
+          if (award.characterId === characterId) mailedCount += count;
+          if (count) notices.add(award.characterId);
+        }
+        await tx.execute(sql`UPDATE app."CarnivalGlobalState" SET "State"=${JSON.stringify(value)}::jsonb WHERE "Key"=${carnivalGlobalKey}`);
+      } else value = await carnivalGlobalValue(txApp);
+      global = viewCarnivalGlobal(value, characterId, next.revision);
+    }
     if (changed.nativeForthrightNotification) { await sendMail(txApp, characterId, who.NickName, "本地活动积分结算", changed.nativeForthrightNotification, {}); mailedCount++; }
     await tx.execute(sql`UPDATE app."ActivityWallet" SET "Points"=${next.points},"Earned"=${next.earned},"Revision"=${next.revision} WHERE "UserID"=${characterId}`);
     await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},'reference',${JSON.stringify(changed.state)}::jsonb)
@@ -456,16 +521,18 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       ...(changed.nativeMoonlightEffects ? { nativeMoonlightAction: { requestId, effects: changed.nativeMoonlightEffects } } : {}),
       ...(changed.nativeTreasureEffects ? { nativeTreasureAction: { requestId, effects: changed.nativeTreasureEffects } } : {}),
       ...(changed.nativeWheelEffects ? { nativeWheelAction: { requestId, effects: changed.nativeWheelEffects } } : {}),
-      ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}),
+      ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects, worldEffects } } : {}),
       ...(changed.nativeFirstRechargeEffects ? { nativeFirstRechargeAction: { requestId, effects: changed.nativeFirstRechargeEffects } } : {}),
       ...(changed.nativeChargeEffects ? { nativeChargeAction: { requestId, effects: changed.nativeChargeEffects } } : {}),
       ...(changed.nativeForthrightEffects ? { nativeForthrightAction: { requestId, effects: changed.nativeForthrightEffects } } : {}), ...(changed.nativeDevilEffects ? { nativeDevilAction: { requestId, effects: changed.nativeDevilEffects } } : {}), ...(changed.nativeCaveLootEffects ? { nativeCaveLootAction: { requestId, effects: changed.nativeCaveLootEffects } } : {}) };
+    carnivalMode(response, sharedCarnival);
+    if (activityId === "carnival-native" && sharedCarnival) response.nativeCarnival.global = global;
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
-    mailed = changed.rewards.length > 0 || !!changed.nativeForthrightNotification;
+    if (changed.nativeForthrightNotification) notices.add(characterId);
     return response;
   });
-  if (mailed) await gameInternalPost(app, "/mail-notice", { userId: characterId });
+  for (const id of notices) await gameInternalPost(app, "/mail-notice", { userId: id });
   return result;
 }
