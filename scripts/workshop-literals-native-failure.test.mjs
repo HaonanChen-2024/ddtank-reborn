@@ -73,6 +73,122 @@ function snowfieldBuild(f) {
   const nextPath = path.join(root, "manifest.json"); f.put(nextPath, JSON.stringify(manifest)); return nextPath;
 }
 
+function battleReturnBuild(f, source = snowfieldBuild(f), suffix = "battle-return") {
+  const manifest = JSON.parse(f.fs.readFileSync(source, "utf8")), oldRoot = path.dirname(source), root = oldRoot + "-" + suffix;
+  const tag = Buffer.from("fixture Christmas natural return DoABC tag:" + suffix), tagPath = path.join(root, "bridge.bin");
+  const swf = Buffer.from("FWS fixture Christmas natural return compiled SWF:" + suffix), compiledSwf = path.join(root, "bridge.swf");
+  f.put(tagPath, tag); f.put(compiledSwf, swf);
+  manifest.bridge = { tagPath, tagSha256: digest(tag), compiledSwf, compiledSwfSha256: digest(swf) };
+  for (const asset of manifest.assets) {
+    let bytes = f.fs.readFileSync(asset.path);
+    if (asset.file === "WorkshopNativeChristmasBootstrap.swf") bytes = Buffer.concat([bytes, Buffer.from("|" + suffix)]);
+    asset.path = path.join(root, path.relative(oldRoot, asset.path)); f.put(asset.path, bytes);
+    asset.bytes = bytes.length; asset.sha256 = digest(bytes);
+  }
+  manifest.christmasBattleReturnVersion = 1;
+  const next = path.join(root, "manifest.json"); f.put(next, JSON.stringify(manifest)); return next;
+}
+
+test("christmas natural battle return upgrades old89, preserves no-option verify and recomputes the recorded old core", () => {
+  const f = fixture(), original = f.snapshot(), old = snowfieldBuild(f);
+  assert.equal(f.run("install", old).nativeWardrobe.assets.length, 89); assert.equal(f.patchCalls.length, 0);
+  const oldCore = f.fs.readFileSync(f.corePath("2.png")), oldOther = coreNames.slice(1).map(name => f.fs.readFileSync(f.corePath(name)));
+  const next = battleReturnBuild(f, old), before = f.snapshot();
+  assert.equal(f.run("verify", next).pendingTransition, true); assert.deepEqual(f.snapshot(), before);
+  const result = f.run("install", next); assert.equal(result.nativeWardrobe.assets.length, 89);
+  assert.equal(result.nativeWardrobe.christmasBattleReturnVersion, 1);
+  assert.notDeepEqual(f.fs.readFileSync(f.corePath("2.png")), oldCore);
+  coreNames.slice(1).forEach((name, i) => assert.deepEqual(f.fs.readFileSync(f.corePath(name)), oldOther[i]));
+  const journal = JSON.parse(f.fs.readFileSync(f.ledger, "utf8")), report = journal.files.find(row => row.name === "2.png").christmasBattleReturn;
+  assert.equal(report.kind, "fixture-christmas-battle-return");
+  const bridge = JSON.parse(f.fs.readFileSync(next, "utf8")).bridge;
+  assert.equal(report.bridgeSha256, bridge.compiledSwfSha256); assert.notEqual(bridge.tagSha256, bridge.compiledSwfSha256);
+  for (const row of journal.files.filter(row => row.name !== "2.png")) assert.equal(Object.hasOwn(row, "christmasBattleReturn"), false);
+  f.patchCalls.length = 0;
+  assert.equal(f.run("install", next).unchanged, true); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.patchCalls.length, 4, "each no-op rebuild must patch both oldOut and newOut from the original backup");
+  for (const call of f.patchCalls) {
+    assert.equal(call.coreBytes.toString(), "original:2.png|Chinese|activities|native:" + bridge.tagSha256);
+    assert.equal(digest(call.bridgeBytes), report.bridgeSha256);
+  }
+  const newer = battleReturnBuild(f, next, "new-bridge"), newBridge = JSON.parse(f.fs.readFileSync(newer, "utf8")).bridge.compiledSwfSha256;
+  f.patchCalls.length = 0; f.run("install", newer);
+  assert.deepEqual(f.patchCalls.map(call => digest(call.bridgeBytes)), [report.bridgeSha256, newBridge], "oldOut must use the prior bridge and newOut the new bridge");
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original); assert.equal(f.openHandles, 0);
+});
+
+test("christmas natural battle return partial asset, core and journal writes restore old89 before retry", () => {
+  for (const target of ["asset", "core", "journal"]) {
+    const f = fixture(), original = f.snapshot(), old = snowfieldBuild(f); f.run("install", old);
+    const next = battleReturnBuild(f, old), before = f.snapshot();
+    const file = target === "asset" ? f.christmasPath("WorkshopNativeChristmasBootstrap.swf") : target === "core" ? f.corePath("2.png") : f.ledger;
+    f.arm("write", file + ".workshop-777");
+    assert.throws(() => f.run("install", next), /ENOSPC/); assert.equal(f.failureCount, 1);
+    assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", next).nativeWardrobe.christmasBattleReturnVersion, 1);
+    assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+  }
+});
+
+test("christmas natural battle return failed rollback compensates the complete new89 journal", () => {
+  const f = fixture(), original = f.snapshot(); f.run("install", battleReturnBuild(f)); const before = f.snapshot();
+  f.arm("unlink", f.christmasPath("WorkshopNativeChristmasBootstrap.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/); assert.equal(f.failureCount, 1);
+  assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0); assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("christmas natural battle return rejects unsupported flag values before all filesystem mutations", () => {
+  for (const value of [0, 2, "1", true, [1], null]) {
+    const f = fixture(), next = battleReturnBuild(f), manifest = JSON.parse(f.fs.readFileSync(next, "utf8"));
+    manifest.christmasBattleReturnVersion = value; f.put(next, JSON.stringify(manifest));
+    const before = f.snapshot(), mutations = f.mutationCount;
+    assert.throws(() => f.run("install", next)); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.mutationCount, mutations); assert.equal(f.patchCalls.length, 0); assert.equal(f.openHandles, 0);
+  }
+});
+
+test("christmas natural battle return requires exact activities Christmas scene1 before writes", () => {
+  for (const kind of ["wardrobe", "caveloot", "christmas-no-scene", "scene-version"]) {
+    const f = fixture(), next = kind === "wardrobe" ? f.manifestPath : kind === "caveloot" ? f.upgradedBuild(...Array(13).fill(true)) : kind === "christmas-no-scene" ? f.upgradedBuild(...Array(14).fill(true)) : snowfieldBuild(f);
+    const manifest = JSON.parse(f.fs.readFileSync(next, "utf8")); manifest.christmasBattleReturnVersion = 1;
+    if (kind === "scene-version") manifest.christmasSceneVersion = 2;
+    f.put(next, JSON.stringify(manifest)); const before = f.snapshot(), mutations = f.mutationCount;
+    assert.throws(() => f.run("install", next)); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.mutationCount, mutations); assert.equal(f.patchCalls.length, 0); assert.equal(f.openHandles, 0);
+  }
+});
+
+test("christmas natural battle return requires its separately pinned compiled bridge SWF before writes", () => {
+  for (const kind of ["missing-file", "missing-sha", "bad-sha", "escaped-path", "nonexistent-file"]) {
+    const f = fixture(), next = battleReturnBuild(f), manifest = JSON.parse(f.fs.readFileSync(next, "utf8"));
+    if (kind === "missing-file") delete manifest.bridge.compiledSwf;
+    if (kind === "missing-sha") delete manifest.bridge.compiledSwfSha256;
+    if (kind === "bad-sha") manifest.bridge.compiledSwfSha256 = "0".repeat(64);
+    if (kind === "escaped-path") { const escaped = path.resolve(path.dirname(next), "..", "foreign-bridge.swf"); f.put(escaped, f.fs.readFileSync(manifest.bridge.compiledSwf)); manifest.bridge.compiledSwf = escaped; }
+    if (kind === "nonexistent-file") manifest.bridge.compiledSwf += ".missing";
+    f.put(next, JSON.stringify(manifest)); const before = f.snapshot(), mutations = f.mutationCount;
+    assert.throws(() => f.run("install", next)); assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.mutationCount, mutations); assert.equal(f.patchCalls.length, 0); assert.equal(f.openHandles, 0);
+  }
+});
+
+test("christmas natural battle return refuses an explicit semantic downgrade while rollback remains available", () => {
+  const f = fixture(), original = f.snapshot(), old = snowfieldBuild(f), next = battleReturnBuild(f, old);
+  f.run("install", next); const before = f.snapshot(), mutations = f.mutationCount;
+  for (const command of ["verify", "install"]) assert.throws(() => f.run(command, old));
+  assert.deepEqual(f.snapshot(), before); assert.equal(f.mutationCount, mutations);
+  assert.equal(f.run("verify").unchanged, true); assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+});
+
+test("christmas natural battle return SWF refusal happens before resource or journal mutation", () => {
+  const f = fixture(), old = snowfieldBuild(f); f.run("install", old); const next = battleReturnBuild(f, old), before = f.snapshot(), mutations = f.mutationCount;
+  f.rejectBattleReturn(); assert.throws(() => f.run("install", next), /fixture battle return refusal/);
+  assert.deepEqual(f.snapshot(), before); assert.equal(f.mutationCount, mutations); assert.equal(f.openHandles, 0);
+});
+
 function fixture() {
   // These paths are map keys only. No real filesystem writes are exposed to VM.
   const repoRoot = path.resolve("memory-only-native-test/repo");
@@ -82,7 +198,8 @@ function fixture() {
   const ledger = path.join(runtimeRoot, "client-overlay-literals.json");
   const manifestPath = path.join(buildRoot, "manifest.json");
   const files = new Map(), handles = new Map();
-  let nextInode = 1, nextFd = 100, fault = null;
+  let nextInode = 1, nextFd = 100, fault = null, mutationCount = 0, rejectBattleReturn = false;
+  const patchCalls = [];
   const ioError = (code, file) => Object.assign(new Error(`${code}: injected or missing ${file}`), { code });
   const key = file => path.resolve(file);
   const put = (file, bytes) => {
@@ -104,14 +221,14 @@ function fixture() {
     isFile: () => true, isDirectory: () => false });
   const fs = {
     existsSync: file => files.has(key(file)),
-    mkdirSync: () => {},
+    mkdirSync: () => { mutationCount++; },
     statSync: stat,
     lstatSync: stat,
     fstatSync: fd => stat(handles.get(fd).file),
     openSync(file, flags) {
       file = key(file);
       if (flags.includes("x") && files.has(file)) throw ioError("EEXIST", file);
-      if (flags.includes("w")) put(file, Buffer.alloc(0)); else get(file);
+      if (flags.includes("w")) { mutationCount++; put(file, Buffer.alloc(0)); } else get(file);
       const fd = nextFd++;
       handles.set(fd, { file, position: 0 });
       return fd;
@@ -122,6 +239,7 @@ function fixture() {
       return encoding ? bytes.toString(typeof encoding === "string" ? encoding : encoding.encoding) : Buffer.from(bytes);
     },
     writeSync(fd, bytes, offset = 0, length = bytes.length - offset, position = null) {
+      mutationCount++;
       const handle = handles.get(fd);
       assert.ok(handle, "unknown in-memory file descriptor");
       const failed = trip("write", handle.file);
@@ -140,11 +258,13 @@ function fixture() {
       finally { if (ownFd) fs.closeSync(fd); }
     },
     unlinkSync(file) {
+      mutationCount++;
       file = key(file);
       if (trip("unlink", file)) throw ioError("EPERM", file);
       get(file); files.delete(file);
     },
     renameSync(from, to) {
+      mutationCount++;
       from = key(from); to = key(to);
       const value = get(from); files.set(to, value); files.delete(from);
     },
@@ -168,6 +288,13 @@ function fixture() {
       : { out: append(bytes, "|Chinese"), totalChanged: 1 },
     buildActivityEntry: bytes => ({ output: append(bytes, "|activities"), proof: {} }),
     buildNativeWardrobeEntry: (bytes, tag) => ({ output: append(bytes, "|native:" + digest(tag)), proof: {} }),
+    patchBattleReturn: ({ coreBytes, bridgeBytes }) => {
+      patchCalls.push({ coreBytes: Buffer.from(coreBytes), bridgeBytes: Buffer.from(bridgeBytes) });
+      if (rejectBattleReturn) throw new Error("fixture battle return refusal");
+      assert.ok(bridgeBytes.toString().startsWith("FWS fixture Christmas natural return compiled SWF:"), "patch must receive the separately pinned compiled SWF, never the DoABC tag");
+      assert.equal(coreBytes.includes(Buffer.from("|christmas-return:")), false, "patch must receive the rebuilt native core once");
+      return { bytes: append(coreBytes, "|christmas-return:" + digest(bridgeBytes)), report: { kind: "fixture-christmas-battle-return", bridgeSha256: digest(bridgeBytes) } };
+    },
   });
   vm.runInContext(installerSource, context, { filename: "workshop-literals.mjs (memory-fs)" });
   return {
@@ -243,6 +370,9 @@ function fixture() {
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
     get failureCount() { return fault?.count ?? 0; },
     get openHandles() { return handles.size; },
+    get mutationCount() { return mutationCount; },
+    rejectBattleReturn() { rejectBattleReturn = true; },
+    patchCalls, manifestPath,
     snapshot: () => [...files].filter(([file]) => file === ledger || file.startsWith(overlay + path.sep))
       .map(([file, value]) => [file, value.bytes.toString("hex")]).sort(([a], [b]) => a.localeCompare(b)),
     fs, put, ledger,

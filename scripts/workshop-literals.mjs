@@ -12,10 +12,18 @@ import { patchExchangeState } from "../tools/i18n/abc-strings/exchange-state.mjs
 import { patchCraterMask } from "../tools/i18n/abc-strings/crater-mask.mjs";
 import { buildActivityEntry } from "./workshop-activity-entry.mjs";
 import { buildNativeWardrobeEntry } from "./workshop-native-wardrobe-entry.mjs";
+import { patchBattleReturn } from "./native-christmas/patch-battle-return.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const names = ["2.png", "3.png", "DDT_Loading.swf"];
+
+function buildNativeCore(input, native) {
+  const entry = buildNativeWardrobeEntry(input, native.bridge);
+  if (native.battleReturn !== true) return entry;
+  const returned = patchBattleReturn({ coreBytes: entry.output, bridgeBytes: native.bridgeSwf });
+  return { ...entry, output: returned.bytes, christmasBattleReturn: returned.report };
+}
 
 export function literalOptions(args) {
   const nativeArgs = args.filter(arg => arg.startsWith("--native-wardrobe=") || arg.startsWith("--native-activities="));
@@ -56,6 +64,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   const nativeChanged = Boolean(native) && (!oldNative || JSON.stringify(native.receipt) !== JSON.stringify(oldNative));
   if (priorNative) for (const asset of priorNative.assets)
     assert.ok(native.assets.some(next => next.target === asset.target), "native upgrade would remove an installed resource; preserve it");
+  assert.ok(!priorNative?.battleReturn || native?.battleReturn, "native upgrade would remove installed Christmas battle return; use complete rollback instead");
   assert.ok(!previous || previous.referenceActivities === undefined || typeof previous.referenceActivities === "boolean", "unknown reference-activities journal flag");
   const oldActivities = previous?.referenceActivities ?? false, activitiesEnabled = oldActivities || referenceActivities || Boolean(native);
   assert.ok(!previous || previous.activityResponse === undefined || typeof previous.activityResponse === "boolean", "unknown activity-response journal flag");
@@ -156,9 +165,9 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     if (oldExchange && name === "2.png") oldOut = patchExchangeState(oldOut).out;
     if (oldCrater && name === "2.png") oldOut = patchCraterMask(oldOut).out;
     if (oldActivities && name === "2.png") oldOut = buildActivityEntry(oldOut).output;
-    if (oldNative && name === "2.png") oldOut = buildNativeWardrobeEntry(oldOut, priorNative.bridge).output;
+    if (oldNative && name === "2.png") oldOut = buildNativeCore(oldOut, priorNative).output;
     if (old) assert.equal(hash(oldOut), old.sha256, "recorded literal/consumer output changed; preserve the installed batch");
-    let out = displayOut, response, state, exchange, crater, activities, nativeEntry;
+    let out = displayOut, response, state, exchange, crater, activities, nativeEntry, christmasBattleReturn;
     if (enabled && name === "2.png") {
       const patched = patchActivityResponse(displayOut); out = patched.out;
       const again = patchActivityResponse(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
@@ -183,11 +192,12 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       const patched = buildActivityEntry(out); out = patched.output; activities = patched.proof;
     }
     if (native && name === "2.png") {
-      const patched = buildNativeWardrobeEntry(out, native.bridge); out = patched.output; nativeEntry = patched.proof;
+      const patched = buildNativeCore(out, native); out = patched.output; nativeEntry = patched.proof;
+      christmasBattleReturn = patched.christmasBattleReturn;
     }
     return { name, sourceSha256: hash(bytes), sha256: hash(out), changedStrings: totalChanged, bytes: out.length,
       hadOverlay: old?.hadOverlay ?? existsSync(target), backup: old?.backup,
-      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), ...(crater ? { craterMask: crater } : {}), ...(activities ? { referenceActivities: activities } : {}), ...(nativeEntry ? { nativeWardrobe: nativeEntry } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
+      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), ...(crater ? { craterMask: crater } : {}), ...(activities ? { referenceActivities: activities } : {}), ...(nativeEntry ? { nativeWardrobe: nativeEntry } : {}), ...(christmasBattleReturn ? { christmasBattleReturn } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
   });
   const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange && craterEnabled === oldCrater && activitiesEnabled === oldActivities && !nativeChanged;
   const journalFiles = () => files.map(({ out, sourceBytes, currentBytes, ...entry }) => entry);
@@ -269,11 +279,15 @@ function readNativeWardrobe(manifestPath, overlay) {
   assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
   const christmasVariant = "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas";
   assert.ok(manifest.christmasSceneVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1, "unknown native Christmas scene layout");
+  assert.ok(manifest.christmasBattleReturnVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1 && manifest.christmasBattleReturnVersion === 1, "unknown native Christmas battle return layout");
+  const battleReturn = manifest.christmasBattleReturnVersion === 1;
   assert.ok(manifest.variant === undefined || manifest.module === "workshop-native-activities" && ["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas"].includes(manifest.variant), "unknown native activity variant");
   const root = dirname(path), within = file => {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
   };
   const bridge = readFileSync(within(manifest.bridge.tagPath)); assert.equal(hash(bridge), manifest.bridge.tagSha256);
+  const bridgeSwf = battleReturn ? readFileSync(within(manifest.bridge.compiledSwf)) : null;
+  if (battleReturn) assert.equal(hash(bridgeSwf), manifest.bridge.compiledSwfSha256, "native Christmas compiled bridge changed");
   const expected = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstrap.swf", "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf", "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"].map(file => "/flash/workshop-native/wardrobe/" + file);
   if (manifest.module === "workshop-native-activities") expected.push("/flash/workshop-native/shared/native-shared-library.swf",
     ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -334,8 +348,8 @@ function readNativeWardrobe(manifestPath, overlay) {
       ? join(overlay, "native-resources", asset.urlPath.slice("/resource/".length))
       : join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
   });
-  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })) };
-  return { bridge, assets, receipt };
+  const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })), ...(battleReturn ? { christmasBattleReturnVersion: 1 } : {}) };
+  return { bridge, bridgeSwf, assets, receipt, battleReturn };
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url)
