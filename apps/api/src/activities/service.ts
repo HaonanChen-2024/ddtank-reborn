@@ -278,13 +278,14 @@ async function firstRechargeGift(app: AppCtx, claims: Claims, characterId: numbe
       for (const id of ids) await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${id}) ON CONFLICT DO NOTHING`);
       const rows = await q<WalletRow & { UserID: number }>(txApp.h, sql`SELECT "UserID","Points","Earned","Revision" FROM app."ActivityWallet"
         WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR UPDATE`);
-      const now = new Date(), who = await owner(txApp, claims, characterId, now, true);
+      const authenticatedAt = new Date(), who = await owner(txApp, claims, characterId, authenticatedAt, true);
       const sourceRow = rows.find(row => row.UserID === characterId);
       if (!sourceRow) throw new ActivityError("赠送钱包锁定失败。", 503);
       const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
         sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
       if (previous) {
         if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+        const now = new Date();
         const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
         throw new GiftReplay({ characterId, ...viewActivities(state, walletOf(sourceRow), ctx), message: previous.Result.message,
           mailedCount: previous.Result.mailedCount, replayed: true });
@@ -295,8 +296,9 @@ async function firstRechargeGift(app: AppCtx, claims: Claims, characterId: numbe
           JOIN member."Accounts" a ON lower(a."UserName")=lower(d."UserName")
           WHERE d."UserID"=${target.UserID} AND lower(d."NickName")=lower(${a.recipientName}) FOR SHARE OF d,a`);
       const targetRow = rows.find(row => row.UserID === target.UserID);
-      if (!recipient || !targetRow || !recipient.IsExist || recipient.IsBanned || new Date(recipient.ForbidDate).getTime() > now.getTime())
+      if (!recipient || !targetRow || !recipient.IsExist || recipient.IsBanned || new Date(recipient.ForbidDate).getTime() > authenticatedAt.getTime())
         throw new ActivityError("收件角色无效或不能接收凭证。", 409);
+      const now = new Date();
       const [sourceState, targetState, ctx] = await Promise.all([stateOf(txApp, characterId, now), stateOf(txApp, target.UserID, now), context(txApp, characterId, now)]);
       const result = transitionFirstRechargeGift(sourceState, targetState, a, ctx,
         { now, characterId: target.UserID, signDays: [], ownedTemplateIds: [] }, walletOf(sourceRow), who.NickName, recipient.NickName);

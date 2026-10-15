@@ -28,15 +28,30 @@ const rebuild = async () => { built = await buildApp({ db: h, logger: false, ski
 const headers = (id = uid) => ({ authorization: `Bearer ${signJwt({ sub: account(id), name: username(id), role: "player" }, secret, 3600)}` });
 const post = (id: string, action: ActivityAction, who = uid, requestId = randomUUID()) => built.app.inject({ method: "POST",
   url: `/api/account/activities/${id}/action`, headers: headers(who), payload: { characterId: who, requestId, action } });
+const publicStates: Record<string, readonly string[]> = {
+  "root.nativeChristmasSnowfield.scene": ["outside", "loading", "inside", "fighting", "settling"],
+  "root.nativeChristmasSnowfield.attempt": ["none", "admitted", "launching", "fighting", "settling"],
+  "root.nativeChristmasSnowfield.challenges[]": ["unavailable", "alive", "reserved", "fighting", "dead"],
+};
+function expectPublicActivityJson(value: unknown, path = "root"): void {
+  if (Array.isArray(value)) { for (const item of value) expectPublicActivityJson(item, `${path}[]`); return; }
+  if (!value || typeof value !== "object") return;
+  for (const [key, child] of Object.entries(value)) {
+    expect(["games", "seed", "origin"], `${path}.${key} must remain private`).not.toContain(key);
+    // Only the declared public snowfield enums may use "state"; raw saved state stays private.
+    if (key === "state") expect(publicStates[path] ?? [], `${path}.state must be a public enum`).toContain(child);
+    expectPublicActivityJson(child, `${path}.${key}`);
+  }
+}
 async function snapshot(who = uid) {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
-  expect(response.statusCode,response.body).toBe(200); expect(response.body).not.toMatch(/"(?:origin|games|state|seed)"\s*:/);
-  const result = response.json<ActivityResult>(); expect(result.nativeFirstRechargeAction).toBeUndefined(); return result;
+  expect(response.statusCode,response.body).toBe(200);
+  const result = response.json<ActivityResult>(); expectPublicActivityJson(result); expect(result.nativeFirstRechargeAction).toBeUndefined(); return result;
 }
 async function native(value: ActivityAction, who = uid, requestId = randomUUID(), status = 200) {
   const action = value.choice === undefined ? { ...value, choice: (await snapshot(who)).nativeFirstRecharge.stateToken } : value;
   const response = await post("first-recharge-native",action,who,requestId); expect(response.statusCode,response.body).toBe(status);
-  expect(response.body).not.toMatch(/"(?:origin|games|state|seed)"\s*:/); return response.json<ActivityResult>();
+  const result = response.json<ActivityResult>(); expectPublicActivityJson(result); return result;
 }
 const saved = async (who = uid) => (await q1<{State:ActivityState}>(h,sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${who} AND "Activity"='reference'`))?.State;
 async function persisted() { return {

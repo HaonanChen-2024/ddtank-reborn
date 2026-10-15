@@ -18,6 +18,7 @@ import { eventsRuntime, signAward, signIn } from "../../game/src/handlers/events
 import { World, type ServerContext } from "../../game/src/session/context.js";
 import type { AppCtx } from "../src/context.js";
 import { createActivityState } from "../src/activities/engine.js";
+import type { FirstRechargeNativeState } from "../src/activities/first-recharge-native.js";
 import { advanceMoonlight, viewMoonlightNative } from "../src/activities/moonlight-native.js";
 import { activityAction, activitySnapshot } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
@@ -393,17 +394,17 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
     } finally { vi.useRealTimers(); }
   });
 
-  async function forthrightRole() {
+  async function activityRole(activityId = "forthright-native", points = 1000, earned = 1000) {
     const uid = await character(), name = `calendar-${sequence}`;
     await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (${uid},${name},'test-only')`);
-    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,1000)`);
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},${points},${earned})`);
     const issued = Math.floor(new Date(clock.now).getTime() / 1000);
     const claims = { sub: uid, name, role: "player" as const, iat: issued, exp: issued + 7200 };
     return { uid, claims, call: (action: ActivityAction, requestId = randomUUID()) =>
-      activityAction(activityApp(), claims, uid, "forthright-native", requestId, action) };
+      activityAction(activityApp(), claims, uid, activityId, requestId, action) };
   }
   async function forthrightPair() {
-    const creator = await forthrightRole(), member = await forthrightRole(), actor = await forthrightRole();
+    const creator = await activityRole(), member = await activityRole(), actor = await activityRole();
     const snapshot = await activitySnapshot(activityApp(), creator.claims, creator.uid);
     const opened = await creator.call({ type: "open-group", index: 0, tier: 0, count: 1, marked: true, choice: snapshot.nativeForthright.stateToken });
     const group = opened.nativeForthright.pages.groups.createdOrders[0]!;
@@ -508,6 +509,105 @@ describe.skipIf(!url || !token)("Calendar and activity clocks through fresh Post
       expect(replay).toMatchObject({ replayed: true, nativeForthright: { serverNow: "2026-10-15T01:30:01.000Z",
         pages: { groups: { joinedOrders: [{ status: "expired-unsettled", canJoin: false }] } } } });
       expect(replay).not.toHaveProperty("nativeForthrightAction"); expect(await activityRows()).toEqual(before);
+    } finally { vi.useRealTimers(); }
+  });
+
+  async function firstRechargePair() {
+    const sender = await activityRole("first-recharge-native"), recipient = await activityRole("first-recharge-native", 0, 0);
+    const state = createActivityState(new Date(clock.now)); state.daily.actions = 7;
+    await monitor.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${sender.uid},'reference',${JSON.stringify(state)}::jsonb)`);
+    const names = await q<{ UserID: number; NickName: string }>(monitor,
+      sql`SELECT "UserID","NickName" FROM player."Sys_Users_Detail" WHERE "UserID" IN (${sender.uid},${recipient.uid}) ORDER BY "UserID"`);
+    const senderName = names.find(row => row.UserID === sender.uid)!.NickName, recipientName = names.find(row => row.UserID === recipient.uid)!.NickName;
+    const snapshot = await activitySnapshot(activityApp(), sender.claims, sender.uid);
+    const issued = await sender.call({ type: "issue-card", tier: 2, choice: snapshot.nativeFirstRecharge.stateToken });
+    const saved = (await activityRows()).states.find(row => row.UserID === sender.uid)!.State as ActivityState;
+    const card = (saved.games.firstRechargeNativeV1 as FirstRechargeNativeState).cardSlots[1]!;
+    expect(issued.nativeFirstRecharge.cards.cards).toMatchObject([{ cardId: card.cardId, status: "owned", expiresAt: null, canGift: true }]);
+    expect((await activityRows()).states.some(row => row.UserID === recipient.uid)).toBe(false);
+    return { sender, recipient, senderName, recipientName, card, ids: [sender.uid, recipient.uid],
+      action: { type: "gift-card", cardId: card.cardId, recipientName, choice: issued.nativeFirstRecharge.stateToken } };
+  }
+  type GiftAuthority = "sender-account" | "recipient-detail" | "recipient-account";
+  async function afterGiftWait<T>(label: string, pair: Awaited<ReturnType<typeof firstRechargePair>>, authority: GiftAuthority, nextTime: string, work: () => Promise<T>) {
+    const sender = authority === "sender-account", account = authority !== "recipient-detail";
+    return afterOwnerWait(label, sender ? pair.sender.uid : pair.recipient.uid, account, false, work, async observed => {
+      expect(observed.pid).toBe(connectionPids[2]); expect(observed.blockers).toEqual([connectionPids[1]]);
+      const query = observed.query.replace(/\s+/g, " ").trim();
+      expect(query).toMatch(sender
+        ? /^SELECT "ID","UserName","IsBanned" FROM member\."Accounts" WHERE "ID"=\$\d+ AND lower\("UserName"\)=lower\(\$\d+\) FOR SHARE$/
+        : /^SELECT d\."UserID",d\."NickName",d\."IsExist",d\."ForbidDate",a\."IsBanned" FROM player\."Sys_Users_Detail" d JOIN member\."Accounts" a ON lower\(a\."UserName"\)=lower\(d\."UserName"\) WHERE d\."UserID"=\$\d+ AND lower\(d\."NickName"\)=lower\(\$\d+\) FOR SHARE OF d,a$/);
+      const walletProbes = [];
+      for (const uid of pair.ids) {
+        let code: unknown;
+        try { await game.db.execute(sql`SELECT "UserID" FROM app."ActivityWallet" WHERE "UserID"=${uid} FOR UPDATE NOWAIT`); }
+        catch (error) { const pg = error as { code?: unknown; cause?: { code?: unknown } }; code = pg.cause?.code ?? pg.code; }
+        expect(code).toBe("55P03"); walletProbes.push({ uid, code });
+      }
+      const previousTime = clock.now; clock.now = nextTime; vi.setSystemTime(new Date(clock.now));
+      return { walletProbePid: connectionPids[3], walletProbes, previousTime, releasedAt: clock.now, authority };
+    });
+  }
+  async function completedGift(pair: Awaited<ReturnType<typeof firstRechargePair>>, before: Awaited<ReturnType<typeof activityRows>>, requestId: string, crossDay: boolean) {
+    const after = await activityRows(), now = new Date(clock.now).toISOString(), day = now.slice(0, 10);
+    expect(after.receipts).toHaveLength(before.receipts.length + 1); expect(after.mails).toEqual(before.mails); expect(after.goods).toEqual(before.goods);
+    expect(after.receipts.find(row => row.UserID === pair.sender.uid && row.RequestID === requestId)).toMatchObject({ Result: { mailedCount: 0 } });
+    for (const uid of pair.ids) {
+      const wallet = before.wallets.find(row => row.UserID === uid)!;
+      expect(after.wallets.find(row => row.UserID === uid)).toEqual({ ...wallet, Revision: Number(wallet.Revision) + 1 });
+      const state = after.states.find(row => row.UserID === uid)!.State as ActivityState;
+      expect(state.day).toBe(day); expect(state.history[0]?.startsWith(`${now} `)).toBe(true);
+      expect(state.daily).toEqual(uid === pair.sender.uid && !crossDay ? { actions: 7 } : {}); expect(state.completed).toEqual({});
+      const native = state.games.firstRechargeNativeV1 as FirstRechargeNativeState;
+      expect(native.shopDay).toBe(day);
+      expect(native.cardSlots).toEqual([null, uid === pair.sender.uid ? { ...pair.card, status: "gifted", giftedToCharacterId: pair.recipient.uid }
+        : { ...pair.card, acquiredAt: now, senderName: pair.senderName }, null]);
+      expect(state.claims).toEqual(uid === pair.sender.uid ? ["first-recharge-native:tier:2"] : []);
+    }
+    return after;
+  }
+  for (const authority of ["sender-account", "recipient-detail", "recipient-account"] as const) for (const crossDay of authority === "recipient-account" ? [true, false] : [true]) check(
+    `first-recharge gift ${crossDay ? "rejects an old-day token then transfers the permanent card on refresh" : "completes in the same day"} after the ${authority} lock wait`, async () => {
+      clock.now = "2026-10-31T23:59:59Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+      try {
+        const pair = await firstRechargePair(), before = await activityRows(), requestId = randomUUID();
+        const result = await afterGiftWait(`queued-firstrecharge-${authority}-${crossDay ? "midnight" : "current"}`, pair, authority,
+          crossDay ? "2026-11-01T00:00:01Z" : "2026-10-31T23:59:59Z", () => pair.sender.call(pair.action, requestId));
+        let submittedAction = pair.action;
+        let sent: Awaited<ReturnType<typeof pair.sender.call>>;
+        if (crossDay) {
+          expect(result.status).toBe("rejected"); expect((result as PromiseRejectedResult).reason).toMatchObject({ statusCode: 409 });
+          expect(await activityRows()).toEqual(before);
+          const refreshed = await activitySnapshot(activityApp(), pair.sender.claims, pair.sender.uid);
+          expect(refreshed.nativeFirstRecharge.stateToken).toMatch(/^2026-11-01\./);
+          expect(refreshed.nativeFirstRecharge.stateToken).not.toBe(pair.action.choice);
+          expect(refreshed.nativeFirstRecharge.cards.cards).toMatchObject([{ cardId: pair.card.cardId, status: "owned", expiresAt: null, canGift: true }]);
+          submittedAction = { ...pair.action, choice: refreshed.nativeFirstRecharge.stateToken };
+          sent = await pair.sender.call(submittedAction, requestId);
+        } else { expect(result.status).toBe("fulfilled"); sent = (result as PromiseFulfilledResult<Awaited<ReturnType<typeof pair.sender.call>>>).value; }
+        expect(sent).toMatchObject({ day: clock.now.slice(0, 10), mailedCount: 0,
+          nativeFirstRecharge: { day: clock.now.slice(0, 10) },
+          nativeFirstRechargeAction: { requestId, effects: [{ type: "card-gifted", cardId: pair.card.cardId, tier: 2, recipientName: pair.recipientName }] } });
+        const after = await completedGift(pair, before, requestId, crossDay);
+        // Preserve the exact submitted action for UUID replay, including the refreshed token.
+        expect(await pair.sender.call(submittedAction, requestId)).toMatchObject({ replayed: true, mailedCount: 0 });
+        expect(await activityRows()).toEqual(after);
+      } finally { vi.useRealTimers(); }
+    });
+  check("a committed first-recharge gift UUID replay uses the new day after the sender account wait even after recipient rename", async () => {
+    clock.now = "2026-10-31T23:59:59Z"; vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(clock.now));
+    try {
+      const pair = await firstRechargePair(), requestId = randomUUID(), committed = await pair.sender.call(pair.action, requestId);
+      await monitor.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "NickName"=${`Renamed ${pair.recipient.uid}`} WHERE "UserID"=${pair.recipient.uid}`);
+      expect(await q(monitor, sql`SELECT "UserID" FROM player."Sys_Users_Detail" WHERE lower("NickName")=lower(${pair.recipientName})`)).toEqual([]);
+      const before = await activityRows();
+      const result = await afterGiftWait("queued-firstrecharge-sender-account-replay-midnight", { ...pair, ids: [pair.sender.uid] }, "sender-account", "2026-11-01T00:00:01Z",
+        () => pair.sender.call(pair.action, requestId));
+      expect(result.status).toBe("fulfilled");
+      const replay = (result as PromiseFulfilledResult<Awaited<ReturnType<typeof pair.sender.call>>>).value;
+      expect(replay).toMatchObject({ replayed: true, day: "2026-11-01", message: committed.message, mailedCount: 0, nativeFirstRecharge: { day: "2026-11-01" } });
+      expect(replay.nativeFirstRecharge.stateToken).toMatch(/^2026-11-01\./);
+      expect(replay).not.toHaveProperty("nativeFirstRechargeAction"); expect(await activityRows()).toEqual(before);
     } finally { vi.useRealTimers(); }
   });
 });
