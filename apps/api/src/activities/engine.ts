@@ -11,6 +11,7 @@ import { advanceMoonlight, viewMoonlightNative } from "./moonlight-native.js";
 import { advanceTreasure, viewTreasureNative } from "./treasure-native.js";
 import { advanceWheelNative, viewWheelNative } from "./wheel-native.js";
 import { advanceCarnivalNative, viewCarnivalNative } from "./carnival-native.js";
+import { advanceFirstRechargeNative, claimFirstRechargeTier, transferFirstRechargeCard, viewFirstRechargeNative } from "./first-recharge-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
@@ -75,10 +76,12 @@ function countsDailyAction(id: string, type: string): boolean {
   if (id === "mines-native" && type === "claim") return false;
   if (id === "wheel-native" && ["take-chip", "take-item", "exchange"].includes(type)) return false;
   if (id === "carnival-native" && type === "exchange") return false;
+  if (id === "first-recharge-native" && ["claim", "issue-card", "validate-card", "use-card", "gift-card"].includes(type)) return false;
   return true;
 }
 
-const hasCompletedBoard = (s: ActivityState) => (s.completed.mines ?? 0) + (s.completed.pair ?? 0) + (s.completed["pair-native"] ?? 0) + (s.completed["mines-native"] ?? 0) > 0;
+const firstRechargeInfo = (s: ActivityState) => ({ claims: s.claims,
+  boardCompletions: (s.completed.mines ?? 0) + (s.completed.pair ?? 0) + (s.completed["pair-native"] ?? 0) + (s.completed["mines-native"] ?? 0) });
 
 /** All returned changes (including costs and rewards) must commit in one transaction. */
 export function transitionActivity(input: ActivityState, id: string, action: ActivityAction, ctx: ActivityContext, wallet: ActivityWallet, rng = random): ActivityTransition {
@@ -92,13 +95,14 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let nativeTreasureEffects: ActivityTransition["nativeTreasureEffects"];
   let nativeWheelEffects: ActivityTransition["nativeWheelEffects"];
   let nativeCarnivalEffects: ActivityTransition["nativeCarnivalEffects"];
+  let nativeFirstRechargeEffects: ActivityTransition["nativeFirstRechargeEffects"];
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
   const count = (key: string, n = 1) => { s.daily[key] = (s.daily[key] ?? 0) + n; };
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   let countedActions = counted ? 1 : 0;
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
@@ -175,6 +179,13 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     countedActions = result.draws;
     if (result.draws) s.completed[id] = (s.completed[id] ?? 0) + result.draws;
     nativeCarnivalEffects = result.effects; message = result.message;
+  } else if (id === "first-recharge-native") {
+    const result = advanceFirstRechargeNative(s.games.firstRechargeNativeV1, action, ctx, wallet, firstRechargeInfo(s), Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)));
+    charge(result.cost); s.games.firstRechargeNativeV1 = result.state; rewards.push(...result.rewards);
+    if (result.claimKey) once(result.claimKey);
+    countedActions = result.purchases; nativeFirstRechargeEffects = result.effects;
+    message = result.rewards.length ? "任务礼奖励已寄往游戏邮箱。" : action.type === "issue-card" ? "本档权利已保存在任务凭证中。"
+      : action.type === "use-card" ? "任务凭证已激活，可领取同一档奖励。" : "任务凭证校验完成。";
   } else if (chanceIds.includes(id as ChanceId)) {
     const result = advanceChanceGame(id as ChanceId, s.games[id], action, rng);
     charge(result.cost); earn(result.points); s.games[id] = result.state;
@@ -237,8 +248,9 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   } else if (id === "points-gift" || id === "luxury" || id === "first-gift") {
     need(action.type === "claim", "领奖操作无效。");
     if (id === "first-gift") {
-      need(hasCompletedBoard(s), "完成一次扫雷阶段奖励或整局配对后解锁。");
-      once(id); rewards.push(reward(5), { templateId: 11021, count: 1 });
+      const result = claimFirstRechargeTier(s.games.firstRechargeNativeV1, 1, ctx, wallet, firstRechargeInfo(s), true);
+      once(result.claimKey); rewards.push(...result.rewards.map(({templateId, count}) => ({templateId, count})));
+      if (s.games.firstRechargeNativeV1 !== undefined) s.games.firstRechargeNativeV1 = result.state;
     } else {
       const tiers = id === "points-gift" ? C.pointsGift : C.luxuryGift;
       need(integer(action.tier, 1, 3), "奖励档位无效。"); const target = tiers[action.tier - 1];
@@ -274,12 +286,28 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   } else throw new ActivityError("请通过游戏内原签到窗口签到，活动中心会同步已保存的进度。");
   if (countedActions) count("actions", countedActions);
   s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : id === "moonlight-native" ? "原生月光宝盒" : id === "treasure-native" ? "原生迷宫寻宝" : id === "wheel-native" ? "原生啵咕大转盘" : id === "carnival-native" ? "原生节日狂欢" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}) };
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}), ...(nativeFirstRechargeEffects ? { nativeFirstRechargeEffects } : {}) };
+}
+
+/** Called only after the service owns BOTH wallets in ascending character-ID order. */
+export function transitionFirstRechargeGift(sourceInput: ActivityState, targetInput: ActivityState, action: ActivityAction,
+  sourceCtx: ActivityContext, targetCtx: ActivityContext, sourceWallet: ActivityWallet, senderName: string, recipientName: string) {
+  const source = normalize(sourceInput, sourceCtx.now), target = normalize(targetInput, sourceCtx.now);
+  const result = transferFirstRechargeCard(source.games.firstRechargeNativeV1, target.games.firstRechargeNativeV1, action,
+    sourceCtx, targetCtx, sourceWallet, firstRechargeInfo(source), firstRechargeInfo(target), senderName, recipientName,
+    Math.max(0, C.maxDailyActions - (source.daily.actions ?? 0)));
+  source.games.firstRechargeNativeV1 = result.source; target.games.firstRechargeNativeV1 = result.target;
+  source.claims.push(result.claimKey);
+  const message = "任务奖励权利已赠送，收件角色可激活后领取；本角色不再重复领取。";
+  source.history = [`${sourceCtx.now.toISOString()} 新手任务凭证：${message}`, ...source.history].slice(0, 20);
+  target.history = [`${sourceCtx.now.toISOString()} 新手任务凭证：收到${senderName}赠送的任务奖励权利。`, ...target.history].slice(0, 20);
+  return { source, target, message, effects: [result.effect] };
 }
 
 const prizeName = (id: number) => PRIZES.find(p => p.templateId === id)?.name ?? `物品${id}`;
 export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx: ActivityContext): ActivitySnapshot {
   const s = normalize(input, ctx.now);
+  const nativeFirstRecharge = viewFirstRechargeNative(s.games.firstRechargeNativeV1, ctx, wallet, firstRechargeInfo(s), Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)));
   const activities: ActivityView[] = Object.entries(ACTIVITY_TITLES).map(([id, title]) => {
     const v: ActivityView = { id, title, subtitle: "本地活动 · 奖励通过游戏邮件领取", rules: [], stats: [], actions: [] };
     const button = (label: string, action: ActivityAction, disabled = false) => v.actions.push({ label, action, disabled });
@@ -333,7 +361,7 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     } else if (["points-gift", "luxury", "first-gift"].includes(id)) {
       v.rules = ["由本地任务解锁，不接真实付款。抽奖返还、回收积分不计入累计任务积分。", "奖励不扣除积分，每档每角色仅可领取一次，永久绑定材料通过邮件交付。"];
       v.stats = [{ label: "累计任务积分", value: wallet.earned }];
-      if (id === "first-gift") button("完成首次棋盘目标后领奖", { type: "claim" }, s.claims.includes(id) || !hasCompletedBoard(s));
+      if (id === "first-gift") button(nativeFirstRecharge.tiers[0].entitlementStatus === "reserved" ? "请先激活任务凭证" : "领取首次任务奖励", { type: "claim" }, !nativeFirstRecharge.tiers[0].canClaim);
       else (id === "points-gift" ? C.pointsGift : C.luxuryGift).forEach((n, i) => button(`${n}积分档 · 强化石×${(i + 1) * (id === "luxury" ? 5 : 3)}`, { type: "claim", tier: i + 1 }, wallet.earned < n || s.claims.includes(`${id}:${i + 1}`)));
     } else if (id === "christmas") {
       const b = s.games.christmas as SnowState | undefined;
@@ -351,5 +379,5 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     nativeMoonlight: viewMoonlightNative(s.games.moon, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
     nativeTreasure: viewTreasureNative(s.games.treasure, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions, s.history),
     nativeWheel: viewWheelNative(s.games.wheelNativeV1, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions),
-    nativeCarnival: viewCarnivalNative(s.games.carnivalNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))) };
+    nativeCarnival: viewCarnivalNative(s.games.carnivalNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))), nativeFirstRecharge };
 }

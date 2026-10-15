@@ -118,15 +118,16 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false, withFirstRecharge = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
       assert.ok(!withMoonlight || withGypsy);
       assert.ok(!withTreasure || withMoonlight);
       assert.ok(!withPurr || withTreasure);
       assert.ok(!withCarnival || withPurr);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "")),
-        tag = Buffer.from(withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withFirstRecharge || withCarnival);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "") + (withFirstRecharge ? "-first-recharge" : "")),
+        tag = Buffer.from(withFirstRecharge ? "new first recharge bridge" : withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -143,6 +144,7 @@ function fixture() {
           "treasurehunting_v3_6_1_u1.ui", "treasure-styles.xml"].map(file => ["treasure", file]) : [])
         .concat(withPurr ? ["WorkshopNativePurrBootstrap.swf", "purr-original-library.swf", "purrturntable_v3_6_1_u1.swf", "purrturntable_v3_6_1_u1.ui"].map(file => ["purr", file]) : [])
         .concat(withCarnival ? ["WorkshopNativeCarnivalBootstrap.swf", "carnival-original-library.swf", "carnival_v3_6_1_u1.swf", "carnival_v3_6_1_u1.ui"].map(file => ["carnival", file]) : [])
+        .concat(withFirstRecharge ? ["WorkshopNativeFirstRechargeBootstrap.swf", "first-recharge-original-library.swf", "firstrecharge_v3_6_1_u1.swf", "firstrecharge_v3_6_1_u1.ui"].map(file => ["first-recharge", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -150,7 +152,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withFirstRecharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge" : withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -162,6 +164,7 @@ function fixture() {
     moonlightPath: name => path.join(overlay, "workshop-native/moonlight", name),
     purrPath: name => path.join(overlay, "workshop-native/purr", name),
     carnivalPath: name => path.join(overlay, "workshop-native/carnival", name),
+    firstRechargePath: name => path.join(overlay, "workshop-native/first-recharge", name),
     treasurePath: name => path.join(overlay, "workshop-native/treasure", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
@@ -546,4 +549,71 @@ test("unknown or short Carnival manifests and foreign destinations fail before m
   if(reason==="foreign")f.put(f.carnivalPath("carnival_v3_6_1_u1.ui"),"user owned");else f.put(carnival,JSON.stringify(manifest));
   const before=f.snapshot();assert.throws(()=>f.run("install",carnival));assert.deepEqual(f.snapshot(),before);
  }
+});
+
+test("all previous variants upgrade to exact fifty-three resources and fully roll back", () => {
+  const f = fixture(), original = f.snapshot();
+  assert.equal(f.run("install").nativeWardrobe.assets.length, 6);
+  const previousCounts = [18, 24, 28, 32, 36, 41, 45, 49];
+  for (let n = 0; n < previousCounts.length; n++)
+    assert.equal(f.run("install", f.upgradedBuild(...Array(n).fill(true))).nativeWardrobe.assets.length, previousCounts[n]);
+  const firstRecharge = f.upgradedBuild(...Array(8).fill(true)), before = f.snapshot();
+  const dry = f.run("verify", firstRecharge);
+  assert.equal(dry.nativeWardrobeInstalled, false);
+  assert.equal(dry.pendingTransition, true);
+  assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.run("install", firstRecharge).nativeWardrobe.assets.length, 53);
+  assert.equal(f.run("install", firstRecharge).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  for (const file of ["WorkshopNativeFirstRechargeBootstrap.swf", "first-recharge-original-library.swf", "firstrecharge_v3_6_1_u1.swf", "firstrecharge_v3_6_1_u1.ui"])
+    assert.equal(f.fs.existsSync(f.firstRechargePath(file)), true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial First Recharge writes restore the forty-nine resource baseline before retry", () => {
+  for (const file of ["WorkshopNativeFirstRechargeBootstrap.swf", "first-recharge-original-library.swf", "firstrecharge_v3_6_1_u1.swf", "firstrecharge_v3_6_1_u1.ui"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(7).fill(true)));
+    const before = f.snapshot(), firstRecharge = f.upgradedBuild(...Array(8).fill(true));
+    f.arm("write", f.firstRechargePath(file));
+    assert.throws(() => f.run("install", firstRecharge), /ENOSPC/);
+    assert.equal(f.failureCount, 1);
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", firstRecharge).nativeWardrobe.assets.length, 53);
+  }
+});
+
+test("First Recharge rollback failure compensates fifty-three resources and supports retry", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install", f.upgradedBuild(...Array(8).fill(true)));
+  const installed = f.snapshot();
+  f.arm("unlink", f.firstRechargePath("firstrecharge_v3_6_1_u1.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.equal(f.failureCount, 1);
+  assert.equal(f.openHandles, 0);
+  assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or incomplete First Recharge manifests, wrong URLs and foreign files fail before mutation", () => {
+  for (const reason of ["variant", "paths", "url", "foreign"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(7).fill(true)));
+    const firstRecharge = f.upgradedBuild(...Array(8).fill(true));
+    const manifest = JSON.parse(f.fs.readFileSync(firstRecharge, "utf8"));
+    if (reason === "variant") manifest.variant += "-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "url") manifest.assets.at(-1).urlPath = "/flash/workshop-native/firstrecharge/firstrecharge_v3_6_1_u1.ui";
+    if (reason === "foreign") f.put(f.firstRechargePath("firstrecharge_v3_6_1_u1.ui"), "user owned");
+    else f.put(firstRecharge, JSON.stringify(manifest));
+    const before = f.snapshot();
+    assert.throws(() => f.run("install", firstRecharge));
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+  }
 });

@@ -8,7 +8,7 @@ import { safeKey } from "../lib/storage.js";
 import { sendMail } from "../routes/admin.js";
 import { gameInternalPost } from "../routes/public.js";
 import { PRIZES } from "./config.js";
-import { createActivityState, transitionActivity, viewActivities } from "./engine.js";
+import { createActivityState, transitionActivity, transitionFirstRechargeGift, viewActivities } from "./engine.js";
 import type { PairNativeEffect } from "./pair-native.js";
 import type { MinesNativeEffect } from "./mines-native.js";
 import type { DDPlayNativeEffect } from "./ddplay-native.js";
@@ -17,6 +17,7 @@ import type { MoonlightNativeEffect } from "./moonlight-native.js";
 import type { TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import type { CarnivalNativeEffect } from "./carnival-native.js";
+import { validateFirstRechargeNativeAction, type FirstRechargeNativeEffect } from "./first-recharge-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityWallet } from "./types.js";
 
 interface Owner { NickName: string; Sex: boolean }
@@ -33,6 +34,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeTreasureAction?: { requestId: string; effects: TreasureNativeEffect[] };
   nativeWheelAction?: { requestId: string; effects: WheelNativeEffect[] };
   nativeCarnivalAction?: { requestId: string; effects: CarnivalNativeEffect[] };
+  nativeFirstRechargeAction?: { requestId: string; effects: FirstRechargeNativeEffect[] };
 }
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
@@ -71,7 +73,7 @@ async function context(app: AppCtx, characterId: number, now: Date): Promise<Act
       LEFT JOIN app."Translations" tr ON tr."table"='Shop_Goods' AND tr."column"='Name' AND tr."rowId"=t."TemplateID"::text AND tr."lang"='zh-CN'
       WHERE t."CategoryID" IN (1,2,3,4,5,6,13,15) ORDER BY t."TemplateID"`),
   ]);
-  return { now, signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
+  return { now, characterId, signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
     wardrobeItems: wardrobe.map((i) => {
       const icon = wardrobeIcon(app, i);
       return { templateId: i.TemplateID, name: i.Name, category: i.CategoryID, ...(icon ? { icon } : {}) };
@@ -118,8 +120,63 @@ function canonical(value: unknown): string {
   return JSON.stringify(value);
 }
 
+/** Roll back even speculative wallet inserts when a committed gift is replayed. */
+class GiftReplay extends Error { constructor(readonly result: ActivityResult) { super("committed gift replay"); } }
+async function firstRechargeGift(app: AppCtx, claims: Claims, characterId: number, requestId: string, action: ActivityAction, signature: string): Promise<ActivityResult> {
+  const a = validateFirstRechargeNativeAction(action);
+  if (a.type !== "gift-card") throw new ActivityError("赠送操作无效。");
+  await owner(app, claims, characterId, new Date());
+  const matches = await q<{ UserID: number; NickName: string }>(app.h, sql`SELECT "UserID","NickName" FROM player."Sys_Users_Detail"
+    WHERE lower("NickName")=lower(${a.recipientName}) ORDER BY "UserID" LIMIT 2`);
+  const target = matches.length === 1 && matches[0].UserID !== characterId ? matches[0] : undefined;
+  const ids = target ? [characterId, target.UserID].sort((x, y) => x - y) : [characterId];
+  try {
+    return await app.h.db.transaction(async tx => {
+      const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
+      // Both row creation and row locking use the same global order, before any state writes.
+      for (const id of ids) await tx.execute(sql`INSERT INTO app."ActivityWallet" ("UserID") VALUES (${id}) ON CONFLICT DO NOTHING`);
+      const rows = await q<WalletRow & { UserID: number }>(txApp.h, sql`SELECT "UserID","Points","Earned","Revision" FROM app."ActivityWallet"
+        WHERE "UserID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)}) ORDER BY "UserID" FOR UPDATE`);
+      const now = new Date(), who = await owner(txApp, claims, characterId, now, true);
+      const sourceRow = rows.find(row => row.UserID === characterId);
+      if (!sourceRow) throw new ActivityError("赠送钱包锁定失败。", 503);
+      const previous = await q1<{ Signature: string; Result: Pick<ActivityResult, "message" | "mailedCount"> }>(txApp.h,
+        sql`SELECT "Signature","Result" FROM app."ActivityActions" WHERE "UserID"=${characterId} AND "RequestID"=${requestId}`);
+      if (previous) {
+        if (previous.Signature !== signature) throw new ActivityError("requestId已用于另一操作，请使用新的请求编号。", 409);
+        const [state, ctx] = await Promise.all([stateOf(txApp, characterId, now), context(txApp, characterId, now)]);
+        throw new GiftReplay({ characterId, ...viewActivities(state, walletOf(sourceRow), ctx), message: previous.Result.message,
+          mailedCount: previous.Result.mailedCount, replayed: true });
+      }
+      if (!target) throw new ActivityError("收件角色无效或不能接收凭证。", 409);
+      const recipient = await q1<{ UserID: number; NickName: string; IsExist: boolean; ForbidDate: Date; IsBanned: boolean }>(txApp.h,
+        sql`SELECT d."UserID",d."NickName",d."IsExist",d."ForbidDate",a."IsBanned" FROM player."Sys_Users_Detail" d
+          JOIN member."Accounts" a ON lower(a."UserName")=lower(d."UserName")
+          WHERE d."UserID"=${target.UserID} AND lower(d."NickName")=lower(${a.recipientName}) FOR SHARE OF d,a`);
+      const targetRow = rows.find(row => row.UserID === target.UserID);
+      if (!recipient || !targetRow || !recipient.IsExist || recipient.IsBanned || new Date(recipient.ForbidDate).getTime() > now.getTime())
+        throw new ActivityError("收件角色无效或不能接收凭证。", 409);
+      const [sourceState, targetState, ctx] = await Promise.all([stateOf(txApp, characterId, now), stateOf(txApp, target.UserID, now), context(txApp, characterId, now)]);
+      const result = transitionFirstRechargeGift(sourceState, targetState, a, ctx,
+        { now, characterId: target.UserID, signDays: [], ownedTemplateIds: [] }, walletOf(sourceRow), who.NickName, recipient.NickName);
+      const sourceNext = { ...walletOf(sourceRow), revision: sourceRow.Revision + 1 }, targetNext = { ...walletOf(targetRow), revision: targetRow.Revision + 1 };
+      if (![sourceNext, targetNext].every(w => [w.points, w.earned, w.revision].every(int))) throw new ActivityError("赠送钱包状态无效。", 409);
+      for (const [id, wallet, state] of [[characterId, sourceNext, result.source], [target.UserID, targetNext, result.target]] as const) {
+        await tx.execute(sql`UPDATE app."ActivityWallet" SET "Revision"=${wallet.revision} WHERE "UserID"=${id}`);
+        await tx.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${id},'reference',${JSON.stringify(state)}::jsonb)
+          ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
+      }
+      const receipt = { message: result.message, mailedCount: 0 };
+      await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);
+      return { characterId, ...viewActivities(result.source, sourceNext, ctx), ...receipt,
+        nativeFirstRechargeAction: { requestId, effects: result.effects } };
+    });
+  } catch (err) { if (err instanceof GiftReplay) return err.result; throw err; }
+}
+
 export async function activityAction(app: AppCtx, claims: Claims, characterId: number, activityId: string, requestId: string, action: ActivityAction): Promise<ActivityResult> {
   const signature = createHash("sha256").update(canonical({ activityId, action })).digest("hex");
+  if (activityId === "first-recharge-native" && action.type === "gift-card") return firstRechargeGift(app, claims, characterId, requestId, action, signature);
   let mailed = false;
   const result = await app.h.db.transaction(async (tx) => {
     const txApp: AppCtx = { ...app, h: { ...app.h, db: tx } };
@@ -154,7 +211,8 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       ...(changed.nativeMoonlightEffects ? { nativeMoonlightAction: { requestId, effects: changed.nativeMoonlightEffects } } : {}),
       ...(changed.nativeTreasureEffects ? { nativeTreasureAction: { requestId, effects: changed.nativeTreasureEffects } } : {}),
       ...(changed.nativeWheelEffects ? { nativeWheelAction: { requestId, effects: changed.nativeWheelEffects } } : {}),
-      ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}) };
+      ...(changed.nativeCarnivalEffects ? { nativeCarnivalAction: { requestId, effects: changed.nativeCarnivalEffects } } : {}),
+      ...(changed.nativeFirstRechargeEffects ? { nativeFirstRechargeAction: { requestId, effects: changed.nativeFirstRechargeEffects } } : {}) };
     // Store only the immutable receipt; repeating all 17 views here would grow saves on every click.
     const receipt = { message: changed.message, mailedCount };
     await tx.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result") VALUES (${characterId},${requestId},${signature},${JSON.stringify(receipt)}::jsonb)`);

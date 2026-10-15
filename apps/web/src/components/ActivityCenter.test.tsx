@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -17,6 +17,14 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 }
 
 describe("ActivityCenter native entry contract", () => {
+  it("offers the original first-recharge with local tasks and one canonical first claim", () => {
+    const html = render("first-gift"); expect(html).toContain("试用原版首充大礼"); expect(html).toContain("网页玩法");
+    expect(html).toContain("任务解锁三档"); expect(html).toContain("活动积分"); expect(html).toContain("共用领取记录");
+    expect(html).toContain("赠送一次"); expect(html).toContain("无真实付款"); expect(html).not.toContain("试用原版节日狂欢");
+  });
+  it("requires the live game character for the first-recharge entry", () => {
+    expect(render("first-gift", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版首充大礼<\/button>/);
+  });
   it("offers the original carnival with finite committed batches and no second animation award", () => {
     const html = render("carnival"); expect(html).toContain("网页玩法"); expect(html).toContain("试用原版节日狂欢");
     expect(html).toContain("分别存档"); expect(html).toContain("打开只读取"); expect(html).toContain("最多5次");

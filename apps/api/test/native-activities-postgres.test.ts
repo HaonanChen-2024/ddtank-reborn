@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { pairNativeLocalRules } from "../src/activities/pair-native.js";
+import { createActivityState } from "../src/activities/engine.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
@@ -23,9 +24,10 @@ type App = Awaited<ReturnType<typeof buildApp>>;
 let monitor: DbHandle, holder: DbHandle, a: DbHandle, b: DbHandle, appA: App, appB: App;
 let database: string, output: string, day: string, passed = 0;
 const connectionPids: number[] = [], scenarios: unknown[] = [];
-const headers = () => ({ authorization: `Bearer ${signJwt({ sub: 1, name, role: "player" }, secret, 3600)}` });
-const post = (app: App, id: string, action: ActivityAction, requestId: string = randomUUID()) => app.app.inject({
-  method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId: uid, requestId, action } });
+const friend = 602, friendName = "native-activity-pg-friend", friendNick = "Native PG friend";
+const headers = (who = uid) => ({ authorization: `Bearer ${signJwt({ sub: who === uid ? 1 : 2, name: who === uid ? name : friendName, role: "player" }, secret, 3600)}` });
+const post = (app: App, id: string, action: ActivityAction, requestId: string = randomUUID(), who = uid) => app.app.inject({
+  method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(who), payload: { characterId: who, requestId, action } });
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), app = appA): Promise<ActivityResult> {
   const response = await post(app, id, value, requestId); expect(response.statusCode, response.body).toBe(200); return response.json();
 }
@@ -40,10 +42,10 @@ async function saved() { return {
 }; }
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 async function wallet() { return (await q1<{ Points: number; Revision: number }>(monitor, sql`SELECT "Points","Revision" FROM app."ActivityWallet" WHERE "UserID"=${uid}`))!; }
-async function snapshot(app = appB) {
-  const response = await app.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
+async function snapshot(app = appB, who = uid) {
+  const response = await app.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});
@@ -53,13 +55,13 @@ async function pairPaidReady() {
   await pair({ type: "reset", choice: "free" }); await pair({ type: "buy-reels", count: 2 });
   for (const index of [1, 2, 3]) await pair({ type: "flip", index, choice: "points" });
 }
-async function race(label: string, requests: (() => ReturnType<typeof post>)[]) {
+async function race(label: string, requests: (() => ReturnType<typeof post>)[], heldIds = [uid]) {
   const before = await saved();
   let unlock!: () => void, acquired!: () => void;
   const released = new Promise<void>(resolve => { unlock = resolve; });
   const locked = new Promise<void>(resolve => { acquired = resolve; });
   const held = holder.db.transaction(async tx => {
-    await tx.execute(sql`SELECT "UserID" FROM app."ActivityWallet" WHERE "UserID"=${uid} FOR UPDATE`);
+    await tx.execute(sql`SELECT "UserID" FROM app."ActivityWallet" WHERE "UserID" IN (${sql.join(heldIds.map(id=>sql`${id}`),sql`,`)}) ORDER BY "UserID" FOR UPDATE`);
     acquired(); await released;
   });
   await locked; const calls = requests.map(request => request());
@@ -83,13 +85,27 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[]) 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
   for (const r of results.filter(r => r.json().replayed)) expect(r.json()).not.toHaveProperty(key);
 }
 const duplicates = (id: string, value: ActivityAction, requestId: string, count = 8) => Array.from({ length: count }, (_, i) => () => post(i % 2 ? appB : appA, id, value, requestId));
+async function rechargeSeed(recipientCompleted = false) {
+  await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (2,${friendName},'tests-only')`);
+  await monitor.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst") VALUES (${friend},${friendName},${friendNick},true,'2000-01-01',1)`);
+  for (const who of [uid,friend]) {
+    await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${who},1000,600)`);
+    const state=createActivityState(new Date()); if(who===uid||recipientCompleted)state.completed.pair=1;
+    await monitor.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${who},'reference',${JSON.stringify(state)}::jsonb)`);
+  }
+}
+async function recharge(value: ActivityAction, who=uid, requestId: string=randomUUID(), app=appA) {
+  const a={...value,choice:value.choice??(await snapshot(app,who)).nativeFirstRecharge.stateToken};
+  const result=await post(app,"first-recharge-native",a,requestId,who); expect(result.statusCode,result.body).toBe(200); return result.json<ActivityResult>();
+}
+const rechargeCard=(result:ActivityResult,tier:number)=>result.nativeFirstRecharge.cards.cards.find(card=>card.kind===tier)!;
 
 describe.skipIf(!url)("native PostgreSQL activity transactions across independent API connections", () => {
   beforeAll(async () => {
@@ -129,6 +145,7 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(new Date().toISOString().slice(0,10)).toBe(day);
     await monitor.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT IF EXISTS native_test_mail_failure`);
     await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS native_test_receipt_failure`);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" DROP CONSTRAINT IF EXISTS native_test_recipient_failure`);
     await monitor.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
       member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);
     await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (1,${name},'tests-only')`);
@@ -673,5 +690,97 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(finalState.daily.actions).toBe(500); expect(after.receipts.length-capSave.receipts.length).toBe(1);
     expect(after.goods.slice(capSave.goods.length).map(item=>[item.TemplateID,item.Count])).toEqual([[11019,5]]);
     expect((await post(appB,"carnival-native",value)).statusCode).toBe(400); expect(await saved()).toEqual(after); passed++;
+  });
+
+  it("transfers one native task entitlement across both locked roles once per gift UUID",async()=>{
+    await rechargeSeed(); const issued=await recharge({type:"issue-card",tier:2}),id=randomUUID();
+    const value={type:"gift-card",cardId:rechargeCard(issued,2).cardId,recipientName:friendNick,choice:issued.nativeFirstRecharge.stateToken};
+    const before=await saved(),results=await race("first-native-dual-role-gift-same-uuid",duplicates("first-recharge-native",value,id),[uid,friend]);
+    duplicateResults(results,"nativeFirstRechargeAction"); const after=await saved();
+    expect(after.wallets.map(w=>[w.UserID,w.Points,w.Earned,w.Revision])).toEqual([[uid,1000,600,2],[friend,1000,600,1]]);
+    expect(after.mails).toEqual(before.mails); expect(after.goods).toEqual(before.goods); expect(after.receipts.length-before.receipts.length).toBe(1);
+    expect(rechargeCard(await snapshot(),2)).toMatchObject({status:"gifted",canGift:false,canUse:false});
+    const received=rechargeCard(await snapshot(appB,friend),2); expect(received).toMatchObject({cardId:value.cardId,status:"owned",senderName:"Native PG test",canGift:false});
+    const targetState=after.states.find(s=>s.UserID===friend)!.State as ActivityState; expect(targetState.completed).toEqual({});
+    const replay=await recharge(value,uid,id,appB); expect(replay.replayed).toBe(true); expect(replay).not.toHaveProperty("nativeFirstRechargeAction"); expect(await saved()).toEqual(after); passed++;
+  });
+
+  it("orders opposite-direction gift locks and rejects a stale second entitlement without deadlock or copying",async()=>{
+    await rechargeSeed(); const one=await recharge({type:"issue-card",tier:2}),two=await recharge({type:"issue-card",tier:3},friend);
+    const actions=[{type:"gift-card",cardId:rechargeCard(one,2).cardId,recipientName:friendNick,choice:(await snapshot()).nativeFirstRecharge.stateToken},
+      {type:"gift-card",cardId:rechargeCard(two,3).cardId,recipientName:"Native PG test",choice:two.nativeFirstRecharge.stateToken}];
+    const ids=[randomUUID(),randomUUID()],results=await race("first-native-opposite-direction-global-wallet-order",[
+      ()=>post(appA,"first-recharge-native",actions[0],ids[0],uid),()=>post(appB,"first-recharge-native",actions[1],ids[1],friend)],[uid,friend]);
+    expect(results.map(r=>r.statusCode).sort()).toEqual([200,409]);
+    const loser=results[0].statusCode===409?0:1,who=loser===0?uid:friend;
+    await recharge({...actions[loser],choice:(await snapshot(appB,who)).nativeFirstRecharge.stateToken},who,randomUUID(),appB);
+    const final=await saved(); expect(final.wallets.map(w=>[w.Points,w.Earned,w.Revision])).toEqual([[1000,600,3],[1000,600,3]]);
+    expect(final.mails).toHaveLength(0); expect(final.goods).toHaveLength(0); expect(final.receipts).toHaveLength(4);
+    expect((await snapshot()).nativeFirstRecharge.cards.cards.map(c=>[c.kind,c.status])).toEqual([[2,"gifted"],[3,"owned"]]);
+    expect((await snapshot(appB,friend)).nativeFirstRecharge.cards.cards.map(c=>[c.kind,c.status])).toEqual([[2,"owned"],[3,"gifted"]]); passed++;
+  });
+
+  it("serializes recipient old first-gift claims against incoming native gifts and shares the old/native canonical claim",async()=>{
+    await rechargeSeed(true); const issued=await recharge({type:"issue-card",tier:1});
+    const value={type:"gift-card",cardId:rechargeCard(issued,1).cardId,recipientName:friendNick,choice:issued.nativeFirstRecharge.stateToken};
+    const incoming=await race("first-native-gift-versus-qualified-recipient-old-claim",[
+      ()=>post(appA,"first-recharge-native",value),()=>post(appB,"first-gift",{type:"claim"},randomUUID(),friend)],[uid,friend]);
+    expect(incoming.map(r=>r.statusCode).sort()).toEqual([200,409]);
+    const target=await snapshot(appB,friend); if(incoming[0].statusCode===200){
+      expect(rechargeCard(target,1).status).toBe("owned"); await recharge({type:"use-card",cardId:value.cardId},friend);
+      const settled=await post(appB,"first-gift",{type:"claim"},randomUUID(),friend); expect(settled.statusCode,settled.body).toBe(200);
+    } else expect(target.nativeFirstRecharge.tiers[0].claimed).toBe(true);
+    const after=await saved(); expect(after.mails).toHaveLength(1); expect(after.goods.map(g=>[g.TemplateID,g.Count])).toEqual([[11019,5],[11021,1]]);
+    const state=after.states.find(s=>s.UserID===friend)!.State as ActivityState; expect(state.claims.filter(k=>k==="first-gift")).toHaveLength(1);
+    expect((await post(appA,"first-recharge-native",{type:"claim",tier:1,choice:target.nativeFirstRecharge.stateToken},randomUUID(),friend)).statusCode).toBe(409);
+    expect(await saved()).toEqual(after); passed++;
+  });
+
+  it("rolls back two-role gift state and revisions at recipient and final receipt failures before one UUID retry",async()=>{
+    await rechargeSeed(); const issued=await recharge({type:"issue-card",tier:2}),id=randomUUID();
+    const value={type:"gift-card",cardId:rechargeCard(issued,2).cardId,recipientName:friendNick,choice:issued.nativeFirstRecharge.stateToken},before=await saved();
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" ADD CONSTRAINT native_test_recipient_failure CHECK ("UserID"<>602 OR ("State" #>> '{games,firstRechargeNativeV1,cardSlots,1,cardId}') IS NULL) NOT VALID`);
+    expect((await post(appB,"first-recharge-native",value,id)).statusCode).toBe(500); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" DROP CONSTRAINT native_test_recipient_failure`);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("Signature"='never-test-signature') NOT VALID`);
+    expect((await post(appA,"first-recharge-native",value,id)).statusCode).toBe(500); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("first-native-dual-role-receipt-failure-uuid-retry",duplicates("first-recharge-native",value,id),[uid,friend]),"nativeFirstRechargeAction");
+    const after=await saved(); expect(after.wallets.map(w=>w.Revision)).toEqual([2,1]); expect(after.receipts.length-before.receipts.length).toBe(1);
+    expect(after.mails).toEqual(before.mails); expect(after.goods).toEqual(before.goods); passed++;
+  });
+
+  it("rolls back native claim mail stacks on tail failure and deduplicates both new tiers and old/native first-gift",async()=>{
+    await rechargeSeed(); const id=randomUUID(),value={type:"claim",tier:2,choice:(await snapshot()).nativeFirstRecharge.stateToken},before=await saved();
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("Signature"='never-test-signature') NOT VALID`);
+    expect((await post(appB,"first-recharge-native",value,id)).statusCode).toBe(500); expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("first-native-material-claim-receipt-tail-same-uuid",duplicates("first-recharge-native",value,id)),"nativeFirstRechargeAction");
+    const delivered=await saved(); expect(delivered.goods.map(g=>[g.TemplateID,g.Count])).toEqual([[11019,5],[11019,5],[11001,3]]);
+    expect(delivered.goods.every(g=>g.IsBinds===true&&g.ValidDate===0&&g.UserID===0&&g.Place===-1)).toBe(true);
+    expect(delivered.mails).toHaveLength(1); expect([delivered.mails[0].Annex1,delivered.mails[0].Annex2,delivered.mails[0].Annex3].map(Number)).toEqual(delivered.goods.map(g=>g.ItemID));
+    const token=(await snapshot()).nativeFirstRecharge.stateToken;
+    const common=await race("first-native-and-old-first-gift-one-canonical-mail",[
+      ()=>post(appA,"first-gift",{type:"claim"}),()=>post(appB,"first-recharge-native",{type:"claim",tier:1,choice:token})]);
+    expect(common.filter(r=>r.statusCode===200)).toHaveLength(1); expect(common.filter(r=>r.statusCode===400||r.statusCode===409)).toHaveLength(1);
+    const all=await saved(); expect(all.mails).toHaveLength(2); expect(all.receipts).toHaveLength(2);
+    const state=all.states.find(s=>s.UserID===uid)!.State as ActivityState; expect(state.claims.sort()).toEqual(["first-gift","first-recharge-native:tier:2"]);
+    expect(await wallet()).toEqual({Points:1000,Revision:2}); passed++;
+  });
+
+  it("shares shop wallet competition with legacy exchange and settles cards and task rewards at daily500",async()=>{
+    await rechargeSeed(); await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=15 WHERE "UserID"=${uid}`);
+    const value={type:"buy",index:0,count:1,choice:(await snapshot()).nativeFirstRecharge.stateToken};
+    const bought=await race("first-native-fixed-shop-and-legacy-exchange-one-wallet",[
+      ()=>post(appA,"first-recharge-native",value),()=>post(appB,"exchange",{type:"exchange",index:0})]);
+    expect(bought.filter(r=>r.statusCode===200)).toHaveLength(1); expect(bought.filter(r=>r.statusCode===400||r.statusCode===409)).toHaveLength(1);
+    expect(await wallet()).toEqual({Points:0,Revision:1}); const after=await saved(); expect(after.goods.map(g=>g.Count)).toEqual([3]); expect(after.mails).toHaveLength(1);
+    const state=after.states.find(s=>s.UserID===uid)!.State as ActivityState; state.daily.actions=500;
+    await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${uid}`);
+    const capped=await snapshot(); expect(capped.nativeFirstRecharge.shop.rows.every(r=>r.canBuy===0)).toBe(true);
+    expect((await post(appA,"first-recharge-native",{type:"buy",index:0,count:1,choice:capped.nativeFirstRecharge.stateToken})).statusCode).toBe(400);
+    const issued=await recharge({type:"issue-card",tier:3}); await recharge({type:"use-card",cardId:rechargeCard(issued,3).cardId}); await recharge({type:"claim",tier:3});
+    const final=await saved(),stored=final.states.find(s=>s.UserID===uid)!.State as ActivityState;
+    expect(stored.daily.actions).toBe(500); expect(await wallet()).toEqual({Points:0,Revision:4}); expect(final.mails).toHaveLength(2); passed++;
   });
 });
