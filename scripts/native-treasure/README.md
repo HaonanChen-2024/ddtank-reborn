@@ -16,6 +16,30 @@ The anonymous public version index supplies the exact `treasurehunting_v3_6_1_u1
 | Original zlib catalog, 965 bytes | `739530d89d7802ad8ce641627b72a1b6207bbec49044ea9035e495f1a35e285b` |
 | Original `treasureHunting.xml` ZIP entry, 18414 bytes | `62e0a05b29e5335107195b339061a69ecbedb27105e59a7a79f257f7f799ce79` |
 
+`catalog.mjs` now prepares the complete original directory: 158 ordered rows,
+157 templates, 14 selectable categories and the special category 15. Row keys
+combine the decoded source SHA and row number; repeated original IDs and the
+two differently counted `11905` rows remain separate. `prepare-catalog.mjs`
+writes an immutable offline catalog and display-identity report:
+
+```powershell
+& '..\..\runtime\tools\node-v24.21.0-win-x64\node.exe' scripts/native-treasure/prepare-catalog.mjs DISPLAY_INPUTS_JSON NEW_OUTPUT_DIRECTORY
+& '..\..\runtime\tools\node-v24.21.0-win-x64\node.exe' --test scripts/native-treasure/catalog.test.mjs
+```
+
+The input contains `referenceTemplates`, `localTemplates` and two
+`templateSources` (`reference-snapshot` / `local-snapshot`, each with path and
+SHA-256). Only `TemplateID`, `CategoryID`, `Pic` and `NeedSex` reach the report;
+the caller must separately verify their derivation from the pinned XML.
+Same-number display conflicts remain blocked even when another local ID has
+matching display fields. Such candidates do not establish matching effects,
+official attributes or item semantics. Neither the catalog nor the report is
+a live prize pool or permission to deliver an item. Completing the original
+pool still requires missing-template/resource resolution, official equipment
+attributes, delivery preflight and synchronized server/native-client rules.
+Existing installed manifests, source pins and four-material gameplay remain
+unchanged by this offline preparation command.
+
 `extract-resources.mjs` decodes all 11 original Morn layouts, selects the six actually used layouts and validates their skin/scroll references against the 76 symbols in the dedicated art. It retains 22 required ComponentFactory nodes from the original 109-node style entry, replacing only the selected style font with Microsoft YaHei. There is no missing active public-art dependency or copied full core. Five runtime files join the shared owner's 41-asset variant:
 
 - `WorkshopNativeTreasureBootstrap.swf`
