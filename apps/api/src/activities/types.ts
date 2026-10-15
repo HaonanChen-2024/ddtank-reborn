@@ -7,6 +7,7 @@ import type { DDPlayNativeEffect, DDPlayNativeView } from "./ddplay-native.js";
 import type { GypsyNativeEffect, GypsyNativeView } from "./gypsy-native.js";
 import type { MoonlightNativeEffect, MoonlightNativeView } from "./moonlight-native.js";
 import type { TreasureNativeEffect, TreasureNativeView } from "./treasure-native.js";
+import type { TreasureCatalog } from "./treasure-catalog.js";
 import type { WheelNativeEffect, WheelNativeView } from "./wheel-native.js";
 import type { CarnivalNativeEffect, CarnivalNativeView, CarnivalNativeRanking } from "./carnival-native.js";
 import type { FirstRechargeNativeEffect, FirstRechargeNativeView } from "./first-recharge-native.js";
@@ -16,7 +17,7 @@ import type { ExchangeNativeView } from "./exchange-native.js";
 import type { DevilProjection, DevilEffect } from "./devil-native.js";
 import type { CaveProjection, CaveEffect } from "./caveloot-native.js";
 
-export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; cardId?: string; recipientName?: string }
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; selection?: number[]; poolVersion?: string; cardId?: string; recipientName?: string }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
 export interface ActivityWallet { points: number; earned: number; revision: number }
 export interface ActivityContext {
@@ -27,6 +28,8 @@ export interface ActivityContext {
   requestId?: string;
   forthrightGroups?: PrivateGroup[];
   forthrightInspectCode?: string;
+  /** Server-built complete catalog from actual local templates and resources, never action input. */
+  treasureCatalog?: TreasureCatalog;
   /** Public local draw-count ranking, loaded only by GET outside wallet transactions. */
   carnivalNativeRanking?: CarnivalNativeRanking;
   /** Committed EventClaims sign/day keys, not a client-provided completion flag. */

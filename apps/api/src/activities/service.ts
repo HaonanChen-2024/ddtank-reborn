@@ -17,6 +17,8 @@ import type { DDPlayNativeEffect } from "./ddplay-native.js";
 import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
 import { prepareTreasureDraw, type TreasureNativeEffect } from "./treasure-native.js";
+import { inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION,
+  type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
 import { advanceCarnivalGlobal, carnivalGlobalKey, readCarnivalGlobalState, viewCarnivalGlobal,
@@ -68,6 +70,32 @@ function wardrobeIcon(app: AppCtx, item: WardrobeRow): string | undefined {
   return file && existsSync(file) ? `/resource/${path.split("/").map(encodeURIComponent).join("/")}` : undefined;
 }
 
+/** Original PathManager.solveGoodsPath icon branches; only indexed files served by /resource count. */
+function treasureIconReady(app: AppCtx, entry: TreasureEntry): boolean {
+  const pic = entry.pic;
+  if (!pic || pic.length > 200 || pic !== pic.trim() || safeKey(pic) !== pic || pic.includes("/") || pic === "." || pic === "..") return false;
+  if (entry.categoryId === 13) return !!wardrobeIcon(app, { TemplateID: entry.templateId, Name: entry.name,
+    CategoryID: entry.categoryId, Pic: pic, NeedSex: entry.needSex });
+  const roots: Record<number, string> = { 7: `arm/${pic}/1`, 8: `equip/armlet/${pic}`, 9: `equip/ring/${pic}`,
+    11: `unfrightprop/${pic}`, 14: `equip/necklace/${pic}`, 17: `equip/offhand/${pic}`, 18: `cardbox/${pic}`,
+    20: `unfrightprop/${pic}`, 34: `unfrightprop/${pic}`, 35: `unfrightprop/${pic}`,
+    50: `petequip/arm/${pic}`, 51: `petequip/hat/${pic}`, 52: `petequip/cloth/${pic}` };
+  const root = roots[entry.categoryId];
+  if (!root) return false;
+  const file = app.resources.resolve(`image/${root}/icon.png`);
+  return !!file && existsSync(file);
+}
+
+async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_IDS, locked = false): Promise<TreasureTemplate[]> {
+  if (!ids.length) return [];
+  return q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2"
+    FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
+    ORDER BY "TemplateID" ${locked ? sql`FOR SHARE` : sql``}`);
+}
+async function treasureCatalog(app: AppCtx, locked = false): Promise<TreasureCatalog> {
+  return inspectTreasureCatalog(await treasureTemplates(app, TREASURE_IDS, locked), entry => treasureIconReady(app, entry));
+}
+
 async function owner(app: AppCtx, claims: Claims, characterId: number, now: Date, locked = false): Promise<Owner> {
   const account = await q1<{ ID: number; UserName: string; IsBanned: boolean }>(app.h, sql`SELECT "ID","UserName","IsBanned" FROM member."Accounts"
     WHERE "ID"=${claims.sub} AND lower("UserName")=lower(${claims.name}) ${locked ? sql`FOR SHARE` : sql``}`);
@@ -99,16 +127,17 @@ async function forthrightGroups(app: AppCtx, characterId: number, now: Date, ins
   }
   return [...groups.values()];
 }
-async function context(app: AppCtx, characterId: number, now: Date): Promise<ActivityContext> {
-  const [signs, owned, wardrobe] = await Promise.all([
+async function context(app: AppCtx, characterId: number, now: Date, catalog?: TreasureCatalog): Promise<ActivityContext> {
+  const [signs, owned, wardrobe, actualCatalog] = await Promise.all([
     q<{ Key: string }>(app.h, sql`SELECT "Key" FROM app."EventClaims" WHERE "UserID"=${characterId} AND "Kind"='sign' ORDER BY "Key"`),
     q<{ TemplateID: number }>(app.h, sql`SELECT DISTINCT "TemplateID" FROM player."Sys_Users_Goods" WHERE "UserID"=${characterId} AND "IsExist"=true AND "Count">0
       AND ("ValidDate"=0 OR "IsUsed"=false OR "BeginDate" + "ValidDate" * interval '1 day' > ${now}) ORDER BY "TemplateID"`),
     q<WardrobeRow>(app.h, sql`SELECT t."TemplateID",COALESCE(tr."text",t."Name") AS "Name",t."CategoryID",t."Pic",t."NeedSex" FROM game."Shop_Goods" t
       LEFT JOIN app."Translations" tr ON tr."table"='Shop_Goods' AND tr."column"='Name' AND tr."rowId"=t."TemplateID"::text AND tr."lang"='zh-CN'
       WHERE t."CategoryID" IN (1,2,3,4,5,6,13,15) ORDER BY t."TemplateID"`),
+    catalog ?? treasureCatalog(app),
   ]);
-  return { now, characterId, forthrightGroups: await forthrightGroups(app, characterId, now), signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
+  return { now, characterId, treasureCatalog: actualCatalog, forthrightGroups: await forthrightGroups(app, characterId, now), signDays: signs.map((s) => s.Key), ownedTemplateIds: owned.map((i) => i.TemplateID),
     wardrobeItems: wardrobe.map((i) => {
       const icon = wardrobeIcon(app, i);
       return { templateId: i.TemplateID, name: i.Name, category: i.CategoryID, ...(icon ? { icon } : {}) };
@@ -237,7 +266,7 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
   return result;
 }
 
-/** One delivery rule for temporary-bag preflight and actual mail; ordinary activities do not lock templates. */
+/** Ordinary activities retain their original four-material delivery allowlist. */
 async function rewardTemplate(app: AppCtx, who: Owner, reward: ActivityReward, moonlightShopBuy = false, locked = false) {
   const validDays = reward.validDays ?? 0;
   const potion = moonlightShopBuy && reward.templateId === 40002;
@@ -248,19 +277,41 @@ async function rewardTemplate(app: AppCtx, who: Owner, reward: ActivityReward, m
   return template;
 }
 
-/** Reject known undeliverable outcomes before RNG or spending, holding candidate rows until draw commit. */
-async function preflightTreasureDraw(app: AppCtx, who: Owner, value: unknown, action: ActivityAction, ctx: Pick<ActivityContext, "now">, wallet: ActivityWallet, native: boolean) {
-  const { candidates } = prepareTreasureDraw(value, action, ctx, wallet, native);
-  // Global template order prevents two roles with different category selections from inverting locks.
-  for (const reward of candidates.sort((a, b) => a.templateId - b.templateId)) await rewardTemplate(app, who, reward, false, true);
+/** Every original target is locked in global ID order, including unselected and special categories. */
+async function preflightTreasureDraw(app: AppCtx, value: unknown, action: ActivityAction, ctx: Pick<ActivityContext, "now">, wallet: ActivityWallet, native: boolean) {
+  const catalog = await treasureCatalog(app, true);
+  prepareTreasureDraw(value, action, { ...ctx, treasureCatalog: catalog }, wallet, native);
+  return catalog;
+}
+
+type CatalogReward = ActivityReward & { origin?: unknown; entryKey?: unknown; sourceOriginalIndex?: unknown; poolVersion?: unknown };
+/** Private take-only delivery. Mixed-sex prizes remain valid entitlements; actor sex is not a pool filter. */
+async function treasureTakeTemplates(app: AppCtx, rewards: ActivityReward[]): Promise<Map<number, TreasureTemplate>> {
+  const originals = rewards.filter(reward => (reward as CatalogReward).origin === "original-catalog") as CatalogReward[];
+  for (const reward of originals) {
+    const entry = TREASURE_ENTRIES.find(row => row.entryKey === reward.entryKey);
+    if (!entry || entry.templateId !== reward.templateId || entry.count !== reward.count || entry.sourceOriginalIndex !== reward.sourceOriginalIndex
+      || reward.poolVersion !== TREASURE_POOL_VERSION || (reward.validDays ?? 0) !== 0) throw new ActivityError("寻宝原目录奖励身份无效。", 503);
+  }
+  const ids = [...new Set(originals.map(reward => reward.templateId))].sort((a, b) => a - b);
+  const templates = await treasureTemplates(app, ids, true), byId = new Map(templates.map(item => [item.TemplateID, item]));
+  const catalog = inspectTreasureCatalog(templates, entry => treasureIconReady(app, entry));
+  for (const reward of originals) {
+    if (!byId.has(reward.templateId) || catalog.preview.find(entry => entry.entryKey === reward.entryKey)?.status !== "ready")
+      throw new ActivityError("寻宝原目录奖励暂不可交付，请保留临时包。", 503);
+  }
+  return byId;
 }
 
 /** Keep all ordinary attachments in the claim transaction; sendMail itself truncates after five. */
-async function rewardMail(app: AppCtx, characterId: number, who: Owner, rewards: ActivityReward[], moonlightShopBuy = false): Promise<number> {
+async function rewardMail(app: AppCtx, characterId: number, who: Owner, rewards: ActivityReward[], moonlightShopBuy = false, treasureTake = false): Promise<number> {
   const items: { templateId: number; count: number; validDays: number }[] = [];
+  const originals = treasureTake ? await treasureTakeTemplates(app, rewards) : new Map<number, TreasureTemplate>();
   for (const reward of rewards) {
     const validDays = reward.validDays ?? 0;
-    const template = await rewardTemplate(app, who, reward, moonlightShopBuy);
+    const original = (reward as CatalogReward).origin === "original-catalog";
+    if (original && !treasureTake) throw new ActivityError("寻宝原目录奖励仅能从临时包领取。", 503);
+    const template = original ? originals.get(reward.templateId)! : await rewardTemplate(app, who, reward, moonlightShopBuy);
     const stacks = Math.ceil(reward.count / template.MaxCount);
     if (items.length + stacks > 1000) throw new ActivityError("活动奖励数量超过交付上限。", 503);
     for (let left = reward.count; left > 0; left -= template.MaxCount) items.push({ templateId: reward.templateId, count: Math.min(left, template.MaxCount), validDays });
@@ -493,19 +544,23 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
       if (activityId === "carnival-native" && sharedCarnival) replay.nativeCarnival.global = viewCarnivalGlobal(await carnivalGlobalValue(txApp), characterId, row!.Revision);
       return replay;
     }
+    if ((action.selection !== undefined || action.poolVersion !== undefined) && !["treasure", "treasure-native"].includes(activityId))
+      throw new ActivityError("原奖池分类与版本参数仅用于迷宫寻宝。", 400);
     const wallet = walletOf(row);
     const state = await stateOf(txApp, characterId, now);
     let businessNow = now;
+    let catalog: TreasureCatalog | undefined;
     if ((activityId === "treasure" || activityId === "treasure-native") && action.type === "draw") {
-      await preflightTreasureDraw(txApp, who, state.games.treasure, action, { now }, wallet, activityId === "treasure-native");
+      catalog = await preflightTreasureDraw(txApp, state.games.treasure, action, { now }, wallet, activityId === "treasure-native");
       // New template locks can also wait across UTC midnight; use one post-lock business date.
       businessNow = new Date();
     }
-    const ctx = { ...await context(txApp, characterId, businessNow), requestId };
+    const ctx = { ...await context(txApp, characterId, businessNow, catalog), requestId };
     const changed = transitionActivity(state, activityId, action, ctx, wallet);
     const next: ActivityWallet = { points: wallet.points + changed.pointsDelta, earned: wallet.earned + changed.earnedDelta, revision: wallet.revision + 1 };
     if (![changed.pointsDelta, changed.earnedDelta].every(Number.isInteger) || changed.earnedDelta < 0 || ![next.points, next.earned, next.revision].every(int)) throw new ActivityError("活动积分不足或结算配置无效。", 409);
-    let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards, activityId === "moonlight-native" && action.type === "buy");
+    let mailedCount = await rewardMail(txApp, characterId, who, changed.rewards, activityId === "moonlight-native" && action.type === "buy",
+      (activityId === "treasure" || activityId === "treasure-native") && action.type === "take");
     if (changed.rewards.length) notices.add(characterId);
     let worldEffects: CarnivalRoundResult[] = [], global: CarnivalNativeGlobal | null = null;
     if (activityId === "carnival-native" && sharedCarnival) {

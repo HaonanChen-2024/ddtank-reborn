@@ -229,7 +229,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     if (id === "moonlight-native") nativeMoonlightEffects = result.effects;
     message = result.message;
   } else if (id === "treasure" || id === "treasure-native") {
-    const result = advanceTreasure(s.games.treasure, action, ctx, wallet, (guaranteed, choices) => rollPrize(rng, guaranteed, choices), id === "treasure-native");
+    const result = advanceTreasure(s.games.treasure, action, ctx, wallet, rng, id === "treasure-native");
     s.games.treasure = result.state; pointsDelta += result.pointsDelta; grossCost += result.cost; rewards.push(...result.rewards);
     if (result.completed) s.completed.treasure = (s.completed.treasure ?? 0) + 1;
     if (result.draws) count("draws", result.draws);
@@ -341,13 +341,27 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
         v.cells = b.cards.map(c => ({ label: c.value ?? "？", tone: c.matched ? "success" : c.faceUp ? "gold" : "hidden", action: c.faceUp ? undefined : { type: "flip", index: c.index } }));
         button("合上未配对卡牌", { type: "hide" }, !b.canHide); button("再开一局", { type: "restart" }, b.status !== "won" || (s.daily["pair:rounds"] ?? 0) >= 3);
       }
-    } else if (["treasure", "moon", "cave"].includes(id)) {
+    } else if (id === "treasure") {
+      const b = viewTreasureNative(s.games.treasure, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions);
+      v.rules = [b.localRules.description, b.readiness.description, "高级分类选择请在游戏原寻宝窗口完成。"];
+      v.stats = [{ label: "临时背包", value: `${b.bagSlotsUsed}/${b.bagCapacity}` }, { label: "进度", value: b.progressScore },
+        { label: "碎片", value: b.fragments }, { label: "完整奖池", value: `${b.readiness.readyRows}/${b.readiness.totalRows}` }];
+      for (const count of [1, 5]) button(count === 1 ? "普通寻宝一次" : "普通寻宝五次", {
+        type: "draw", mode: "normal", count, selection: [], poolVersion: b.poolVersion, choice: b.bagToken,
+      }, !b.drawChoices.find(x => x.mode === "normal" && x.count === count)!.canDraw);
+      button("全部领取", { type: "take", choice: b.bagToken }, !b.canTake);
+      button("全部回收旧材料", { type: "recycle", choice: b.bagToken }, !b.canRecycle);
+      button("10碎片兑换", { type: "exchange", choice: b.bagToken }, !b.exchange.canExchange);
+      for (const p of b.progress) button(`${p.target}进度奖励`, { type: "progress", tier: p.tier, choice: b.bagToken }, !p.canClaim);
+      v.cells = b.bag.map(r => ({ label: r.origin === "original-catalog" ? b.preview.find(x => x.entryKey === r.entryKey)!.name : prizeName(r.templateId),
+        detail: `×${r.itemCount}`, tone: "gold" })); v.columns = 4;
+    } else if (["moon", "cave"].includes(id)) {
       // A malformed cave save must not prevent the other 16 activity projections.
       // Preserve it for maintenance; this guard never repairs it or changes old POST rules.
       const savedCave = s.games.cave as Partial<BagState> | null | undefined;
       if (id === "cave" && savedCave !== undefined && (!savedCave || !Array.isArray(savedCave.bag) || !Array.isArray(savedCave.claimed)
         || savedCave.bag.some(r => !r || typeof r !== "object"))) return { ...v, rules: ["矿洞存档暂不兼容，数据已保留；其他活动仍可使用。"] };
-      const b = bagState(s, id); const cost = id === "treasure" ? 30 : id === "moon" ? 20 : 15;
+      const b = bagState(s, id); const cost = id === "moon" ? 20 : 15;
       v.rules = [`本地奖池：强化石1级55%、朱雀石1级25%、强化石2级15%、朱雀石2级5%。第10抽必得强化石2级×2。`, "奖品先存临时背包（最多30格）；领取寄邮件，回收换积分，两者只能选一种。10碎片可换强化石2级×2。", id === "cave" ? "基础开矿每天前3次免费；基础15积分、高级35积分且奖品数量翻倍。" : `普通每次${cost}积分。`];
       v.stats = [{ label: "临时背包", value: `${b.bag.length}/30` }, { label: "进度", value: b.score }, { label: "碎片", value: b.fragments }, { label: "距离保底", value: 10 - b.pity }];
       if (id === "cave") v.stats.push({ label: "今日免费", value: Math.max(0, 3 - (s.daily["cave:free"] ?? 0)) });
@@ -356,8 +370,6 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
       button("全部领取", { type: "take" }, b.bag.length === 0); button("全部回收", { type: "recycle" }, b.bag.length === 0); button("10碎片兑换", { type: "exchange" }, b.fragments < 10);
       for (const tier of [1, 2, 3]) button(`${tier * 10}进度奖励`, { type: "progress", tier }, b.score < tier * 10 || b.claimed.includes(tier));
       v.cells = b.bag.map(r => ({ label: prizeName(r.templateId), detail: `×${r.count}`, tone: "gold" })); v.columns = 4;
-      if (id === "treasure") { v.rules.push("普通寻宝只抽已选材料，概率按原权重重新分配；保底固定强化石2级×2。高级寻宝需全选4类，数量翻倍。");
-        for (const c of PRIZES.map(p => p.name)) button(`${b.choices.includes(c) ? "✓ " : ""}${c}`, { type: "category", choice: c }); }
     } else if (id === "gypsy" || id === "exchange") {
       const shop = s.games.gypsy as GypsyState | undefined;
       const offers = id === "gypsy" ? shop?.offers ?? [] : C.shop;

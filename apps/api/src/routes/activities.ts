@@ -12,6 +12,8 @@ const action = z.object({
   count: z.number().int().positive().max(1000).optional(), marked: z.boolean().optional(),
   items: z.array(z.object({ index: z.number().int().min(0).max(3), count: z.number().int().min(1).max(60) }).strict()).min(1).max(4).optional(),
   mode: z.enum(["normal", "advanced"]).optional(),
+  selection: z.array(z.number().int().min(1).max(14)).max(4).optional(),
+  poolVersion: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   cardId: z.string().uuid().optional(), recipientName: z.string().min(1).max(64).optional(),
 }).strict();
 const command = z.object({ characterId, requestId: z.string().uuid().transform((s) => s.toLowerCase()), action }).strict();
@@ -32,7 +34,7 @@ export async function activityRoutes(f: FastifyInstance, ctx: AppCtx): Promise<v
     const body = command.safeParse(req.body);
     const params = z.object({ activityId: z.string().min(1).max(32) }).safeParse(req.params);
     if (!body.success || !params.success || body.data.action.items !== undefined && params.data.activityId !== "moonlight-native"
-      || body.data.action.mode !== undefined && params.data.activityId !== "treasure-native"
+      || body.data.action.mode !== undefined && !["treasure", "treasure-native"].includes(params.data.activityId)
       || (body.data.action.cardId !== undefined || body.data.action.recipientName !== undefined) && params.data.activityId !== "first-recharge-native") return reply.code(400).send({ message: "活动操作参数或请求编号无效。" });
     try { return await activityAction(ctx, userOf(req), body.data.characterId, params.data.activityId, body.data.requestId, body.data.action); } catch (err) { return failure(reply, err); }
   });

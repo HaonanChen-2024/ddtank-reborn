@@ -13,11 +13,12 @@ const selected={
  'treasureHunting/views/TreasureHuntingFrame':['initData','initEvent','removeEvents','updateRank','__onUpdateHuntInfo','__getConverteds','_responseII','onExchangeBtnClick','_responseIII','__getRemainScore','__onBuyCardBox','updateHuntTimesTxt','updateView','checkInActTime','onHuntingBtnClick','checkTicketEnough','onClickBuyCardBox','__clickCloseHandler','__onResponse','payForHunting','onTimer','movieComplete','lightUpItemArr','lightUpItem','checkDoNext','onAlertResponse','__onExTreasureCbClick','__onLxTreasureCbClick'],
  'treasureHunting/views/TreasureBagView':['initialize','initData','updateBagFrame','onItemClick','onGetAllBtnClick','onConvertBtnClick','onAlertResponse'],
  'treasureHunting/views/TreasureAwardPreview':['show','__onCloseBtn'],
- 'treasureHunting/items/TreasureHuntAwardListCell':['setInfo','dispose']
+ 'treasureHunting/items/TreasureHuntAwardListCell':['setInfo','__onRenderList','dispose']
 };
 const helper='WorkshopNativeTreasureBootstrap';
 const replacements=new Map([['ddt.manager::LanguageMgr',helper],['treasureHunting.views::TreasureRankView','Object'],['treasureHunting.views::TreasureRecordView','morn.core.components::View']]);
 const exposed={
+ 'treasureHunting/items/TreasureHuntAwardCell':['_bagCell'],
  'treasureHunting/TreasureManager':['_exSelectArr','_drawCount','_pointCount','_normalTicketNum','_exTicketNum'],
  'treasureHunting/items/TreasureItem':['_index'],
  'treasureHunting/views/TreasureHuntingFrame':['_itemArr','_content','_itemList','_glint','_glintTimer','_rankTimer','_timeLineArr','moveCell','luckStoneCell','isHunting','totalScore','_gameTime','onTimer','onTimerComplete','onEnterFrame','removeAllItemLight','initData','initEvent','removeEvents','movieComplete'],

@@ -7,8 +7,9 @@ import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { PRIZES } from "../src/activities/config.js";
+import { createActivityState } from "../src/activities/engine.js";
 import type { ActivityResult } from "../src/activities/service.js";
-import type { ActivityAction } from "../src/activities/types.js";
+import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
 
@@ -54,6 +55,15 @@ const counts = () => q1<{ actions: number; items: number; mails: number }>(h, sq
   (SELECT count(*)::int FROM app."ActivityActions") AS actions,
   (SELECT count(*)::int FROM player."Sys_Users_Goods") AS items,
   (SELECT count(*)::int FROM player."User_Messages") AS mails`);
+/** Previously earned legacy inventory only; HTTP cannot declare a ready catalog. */
+async function seedEarnedTreasure() {
+  const existing = await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`);
+  const state = existing?.State ?? createActivityState(new Date());
+  state.games.treasure = { bag: [{ templateId: 11019, count: 1 }], draws: 1, score: 1, fragments: 1, pity: 1,
+    choices: PRIZES.map(row => row.name), claimed: [] };
+  await h.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${uid},'reference',${JSON.stringify(state)}::jsonb)
+    ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=excluded."State"`);
+}
 
 beforeAll(async () => {
   h = await createDb("pglite:memory");
@@ -157,7 +167,14 @@ describe("reference activities through the actual app and persistence", () => {
     await action("gypsy", { type: "buy", index: 0 }, randomUUID(), 400);
     expect((await action("exchange", { type: "exchange", index: 0 })).points).toBe(bought.points - 15);
 
-    expect(stat(await action("treasure", { type: "draw" }), "treasure", "临时背包")).toBe("1/30");
+    const beforeBlocked = await snapshot(), beforeBlockedCounts = await counts();
+    expect(beforeBlocked.nativeTreasure).toMatchObject({ version: 2, bagCapacity: 100, readiness: { status: "blocked", totalRows: 158 } });
+    expect(beforeBlocked.nativeTreasure.preview).toHaveLength(158); expect(beforeBlocked.nativeTreasure.categories).toHaveLength(15);
+    const blockedDraw = view(beforeBlocked, "treasure").actions.find(button => button.action.type === "draw")!;
+    expect(blockedDraw.disabled).toBe(true); await action("treasure", blockedDraw.action, randomUUID(), 400);
+    expect(await counts()).toEqual(beforeBlockedCounts); expect(await snapshot()).toEqual(beforeBlocked);
+    await seedEarnedTreasure();
+    expect(stat(await snapshot(), "treasure", "临时背包")).toBe("1/100");
     const takeId = randomUUID(), taken = await action("treasure", { type: "take" }, takeId);
     expect(taken.mailedCount).toBe(1);
     await action("treasure", { type: "take" }, randomUUID(), 400);
@@ -170,7 +187,7 @@ describe("reference activities through the actual app and persistence", () => {
     expect(cave.points).toBe(caveBefore.points - 15);
     await action("cave", { type: "take" });
     // Leave a new unclaimed bag to distinguish current replay from an obsolete saved snapshot.
-    await action("treasure", { type: "draw" });
+    await seedEarnedTreasure();
     const saved = await snapshot(), beforeRetry = await counts();
     await built.app.close();
     await rebuild();
@@ -179,7 +196,7 @@ describe("reference activities through the actual app and persistence", () => {
     expect(replayed).toMatchObject({ points: saved.points, earned: saved.earned, revision: saved.revision,
       message: taken.message, mailedCount: taken.mailedCount, replayed: true });
     expect(replayed.activities).toEqual(saved.activities);
-    expect(stat(replayed, "treasure", "临时背包")).toBe("1/30");
+    expect(stat(replayed, "treasure", "临时背包")).toBe("1/100");
     expect(await counts()).toEqual(beforeRetry);
     await action("treasure", { type: "recycle" }, takeId, 409);
     const receipts = await q<{ Result: Record<string, unknown> }>(h, sql`SELECT "Result" FROM app."ActivityActions"`);

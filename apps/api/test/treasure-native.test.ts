@@ -1,140 +1,153 @@
+import { writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { advanceTreasure, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
+import { completeTreasureCatalog, inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
-import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState, type ActivityWallet } from "../src/activities/types.js";
+import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState } from "../src/activities/types.js";
 
-const ctx: ActivityContext = { now: new Date("2026-10-15T12:00:00Z"), signDays: [], ownedTemplateIds: [] };
-const next = { ...ctx, now: new Date("2026-10-16T12:00:00Z") };
+const clock: ActivityContext = { now: new Date("2026-10-15T12:00:00Z"), signDays: [], ownedTemplateIds: [] };
 const wallet = { points: 2000, earned: 40, revision: 0 };
-const noRandom = () => { throw new Error("Unexpected draw during settlement"); };
-function session() {
-  let state = createActivityState(ctx.now), funds = { ...wallet };
-  const view = () => viewActivities(state, funds, ctx).nativeTreasure;
+const noRandom = () => { throw new Error("Unexpected RNG"); };
+// Synthetic internal use evidence for pure transitions, never a production readiness override.
+const readyCatalog = (): TreasureCatalog => ({ poolVersion: TREASURE_POOL_VERSION,
+  preview: TREASURE_ENTRIES.map(x => ({ ...x, status: "ready", reasons: [] })),
+  readiness: { status: "ready", totalRows: 158, readyRows: 158, blocked: [], description: "Synthetic complete test catalog" } });
+const ctx = (): ActivityContext => ({ ...clock, treasureCatalog: readyCatalog() });
+const old = () => ({ bag: [{ templateId: 11019, count: 2 }, { templateId: 11021, count: 4 }], draws: 10, score: 20,
+  fragments: 10, pity: 8, choices: ["强化石1级"], claimed: [1] });
+const token = (value: unknown, context: ActivityContext = ctx()) => viewTreasureNative(value, context, wallet).bagToken;
+function session(value?: unknown, context = ctx()) {
+  let state = createActivityState(context.now), funds = { ...wallet };
+  if (value !== undefined) state.games.treasure = value;
+  const view = () => viewActivities(state, funds, context).nativeTreasure;
   return { get state() { return state; }, get wallet() { return funds; }, view,
     act(action: ActivityAction, id = "treasure-native", rng: () => number = noRandom) {
-      const result = transitionActivity(state, id, action, ctx, funds, rng);
+      const result = transitionActivity(state, id, action, context, funds, rng);
       state = JSON.parse(JSON.stringify(result.state)) as ActivityState;
       funds = { ...funds, points: funds.points + result.pointsDelta, earned: funds.earned + result.earnedDelta, revision: funds.revision + 1 };
       return result;
-    }, draw(count = 1, mode: "normal" | "advanced" = "normal", rng = () => 0) {
-      return this.act({ type: "draw", mode, count, choice: view().bagToken }, "treasure-native", rng);
-    }, choose(index: number, marked: boolean) { return this.act({ type: "choose", index, marked, choice: view().bagToken }); },
-  };
+    }, draw(count = 1, mode: "normal" | "advanced" = "normal", rng = () => 0, selection = mode === "advanced" ? [4, 1, 12, 7] : []) {
+      return this.act({ type: "draw", mode, count, selection, poolVersion: view().poolVersion, choice: view().bagToken }, "treasure-native", rng);
+    } };
 }
-const token = (value: unknown) => viewTreasureNative(value, ctx, wallet).bagToken;
-const advance = (value: unknown, action: ActivityAction, funds: Pick<ActivityWallet, "points"> = wallet) =>
-  advanceTreasure(value, { ...action, choice: token(value) }, ctx, funds, noRandom, true);
+const advance = (value: unknown, action: ActivityAction, context = ctx(), funds = wallet) =>
+  advanceTreasure(value, { ...action, choice: token(value, context) }, context, funds, noRandom, true);
 
-describe("original Treasure window with the existing local per-draw bag", () => {
-  it("keeps projection read-only, shows ten bounded batch choices and only genuine current-role records", () => {
-    const state = readTreasureState(undefined), before = structuredClone(state);
-    const view = viewTreasureNative(undefined, ctx, { points: 100 }, true,
-      ["2026-10-15T12:00:00Z 原生迷宫寻宝：完成1次", "2026-10-15T11:00:00Z 月光宝盒：完成1次", "2026-10-15T10:00:00Z 迷宫寻宝：领取"]);
-    expect(view).toMatchObject({ version: 1, kind: "treasure-native", started: false, day: "2026-10-15", score: 100,
-      normalCost: 30, advancedCost: 60, bagCapacity: 30, bagSlotsUsed: 0, draws: 0, progressScore: 0, fragments: 0,
-      pityRemaining: 10, canDraw: true, canTake: false, canRecycle: false, bag: [], previewTemplateIds: [11019, 11001, 11021, 11002] });
-    expect(view.bagToken).toMatch(/^2026-10-15:[A-Za-z0-9_-]{43}$/); expect(view.bagToken).toHaveLength(54);
-    expect(viewTreasureNative(undefined, ctx, wallet).bagToken).toBe(view.bagToken); expect(viewTreasureNative(undefined, next, wallet).bagToken).not.toBe(view.bagToken);
-    expect(view.drawChoices.map(row => [row.mode, row.count, row.cost, row.canDraw])).toEqual([
-      ["normal", 1, 30, true], ["normal", 2, 60, true], ["normal", 3, 90, true], ["normal", 4, 120, false], ["normal", 5, 150, false],
-      ["advanced", 1, 60, true], ["advanced", 2, 120, false], ["advanced", 3, 180, false], ["advanced", 4, 240, false], ["advanced", 5, 300, false] ]);
-    expect(view.categories.map(row => [row.index, row.sourceOriginalIndex, row.templateId, row.selected])).toEqual([
-      [0, 1, 11019, true], [1, 2, 11001, true], [2, 3, 11021, true], [3, 4, 11002, true] ]);
-    expect(view.records).toHaveLength(2); expect(view.records.join()).not.toContain("月光"); expect(state).toEqual(before);
-    expect(view.localRules.description).toContain("原14类奖池"); expect(view.localRules.description).toContain("不自动重复消费");
+// Both the runtime-data generator and tests use the exact pinned original ordering, never inferred template/category IDs.
+describe("complete original treasure catalog", () => {
+  it("retains 158 original rows, 157 templates, all 15 categories and both 11905 quantities", () => {
+    const view = viewTreasureNative(undefined, clock, wallet);
+    expect(view).toMatchObject({ version: 2, bagCapacity: 100, canDraw: false, readiness: { status: "blocked", totalRows: 158, readyRows: 0 } });
+    expect(view.preview).toHaveLength(158); expect(TREASURE_IDS).toHaveLength(157);
+    expect(view.categories.map(x => x.entryKeys.length)).toEqual([12,12,12,12,12,9,10,12,5,8,12,6,12,12,12]);
+    expect(view.categories.map(x => x.sourceOriginalIndex)).toEqual(Array.from({ length: 15 }, (_, i) => i + 1));
+    expect(view.categories.filter(x => x.selectable)).toHaveLength(14); expect(view.categories[14]).toMatchObject({ special: true, selectable: false });
+    expect(view.preview.filter(x => x.templateId === 11905).map(x => [x.sourceOriginalIndex, x.count])).toEqual([[7,10],[12,5]]);
+    expect(new Set(view.preview.map(x => x.entryKey)).size).toBe(158); expect(view).not.toHaveProperty("previewTemplateIds");
+    if (process.env.TREASURE_V2_SNAPSHOT_OUT) writeFileSync(process.env.TREASURE_V2_SNAPSHOT_OUT, JSON.stringify(view, null, 2));
+  });
+  it("requires actual matching identity, function and local icon without assuming weapons or equipment work", () => {
+    const templates: TreasureTemplate[] = TREASURE_ENTRIES.map(x => ({ TemplateID: x.templateId, CategoryID: x.categoryId,
+      Pic: x.pic, NeedSex: x.needSex, MaxCount: 99, CanEquip: x.categoryId === 7, CanUse: true,
+      Property1: [11560,11561,11562].includes(x.templateId) ? 10 : 21, Property2: 1000 }));
+    const actual = inspectTreasureCatalog(templates, () => true);
+    expect(actual.readiness.status).toBe("blocked"); expect(actual.readiness.readyRows).toBeGreaterThan(0);
+    expect(actual.preview.filter(x => x.status === "ready").every(x => [11560,11561,11562,11901,11902,11903,11904,11906].includes(x.templateId))).toBe(true);
+    expect(actual.preview.find(x => x.categoryId === 7)!.reasons.join()).toContain("官方武器");
+    const candidate = templates.find(x => x.TemplateID === 11904)!; candidate.Pic = "wrong";
+    expect(inspectTreasureCatalog(templates, () => false).preview.find(x => x.templateId === 11904)!.reasons).toEqual(expect.arrayContaining(["同号显示身份冲突", "本地图标尚未就绪"]));
+  });
+  it("refuses ready subsets, forged display identity and inconsistent blocked details", () => {
+    const good = readyCatalog(); expect(completeTreasureCatalog(good)).toBe(good);
+    const partial = inspectTreasureCatalog(); partial.preview[0].status = "ready"; partial.preview[0].reasons = [];
+    expect(() => completeTreasureCatalog(partial)).toThrow(/complete treasure catalog/);
+    const badRow = readyCatalog(); badRow.preview[0].count++;
+    expect(() => completeTreasureCatalog(badRow)).toThrow(/complete treasure catalog/);
+    const wrongBlock = inspectTreasureCatalog(); wrongBlock.readiness.blocked[0].entryKey = wrongBlock.readiness.blocked[1].entryKey;
+    expect(() => completeTreasureCatalog(wrongBlock)).toThrow(/complete treasure catalog/);
+  });
+});
+
+describe("original v2 treasure transitions and legacy entitlements", () => {
+  it("reads old state without writing, retains counters/choices/pity and exposes only public origins", () => {
+    const saved = old(), before = structuredClone(saved), view = viewTreasureNative(saved, clock, wallet, true,
+      ["2026-10-15T12:00:00Z 原生迷宫寻宝：完成1次", "2026-10-15T11:00:00Z 月光宝盒：完成1次"]);
+    expect(saved).toEqual(before); expect(view).toMatchObject({ started: true, bagSlotsUsed: 2, draws: 10, progressScore: 20, fragments: 10, pityRemaining: 2, canTake: true, canRecycle: true });
+    expect(view.bag.every(x => x.origin === "legacy-four-material" && x.recycleUnitPoints === 2)).toBe(true); expect(view.records).toHaveLength(1);
+    expect(view.bagToken).toMatch(/^2026-10-15:[A-Za-z0-9_-]{43}$/);
+    expect(token(saved, { ...clock, now: new Date("2026-10-16T00:00:00Z") })).not.toBe(view.bagToken);
+    expect(readTreasureState(saved)).toMatchObject({ version: 2, pity: 8, choices: saved.choices });
     expect(JSON.stringify(view)).not.toMatch(/"(?:state|games|seed|effects|choices)"\s*:/);
   });
-
-  it("shares category filtering with legacy web, requires four advanced categories and doubles only actual quantities", () => {
-    const run = session(); run.choose(1, false); run.act({ type: "category", choice: "强化石2级" }, "treasure"); run.choose(3, false);
-    expect(run.view().categories.map(row => row.selected)).toEqual([true, false, false, false]);
-    expect(run.view().drawChoices.filter(row => row.mode === "advanced").every(row => !row.canDraw)).toBe(true);
-    expect(() => run.choose(0, false)).toThrow(/至少保留/); expect(() => run.draw(1, "advanced")).toThrow(/4类/);
-    const draw = run.draw(2, "normal", () => 0.99);
-    expect(draw).toMatchObject({ pointsDelta: -60, earnedDelta: 0, rewards: [], state: { completed: { treasure: 1 }, daily: { draws: 2, actions: 1 } },
-      nativeTreasureEffects: [{ type: "drawn", mode: "normal", count: 2, cost: 60, score: 1940, draws: 2,
-        rewards: [{ index: 0, sourceOriginalIndex: 1, templateId: 11019, itemCount: 1 }, { index: 1, sourceOriginalIndex: 1, templateId: 11019, itemCount: 1 }] }] });
-    const old = run.act({ type: "draw", count: 1 }, "treasure", () => 0.99); expect(old.nativeTreasureEffects).toBeUndefined();
-    for (const index of [1, 2, 3]) run.choose(index, true);
-    const advanced = run.draw(2, "advanced", () => 0.99); expect(advanced.pointsDelta).toBe(-120);
-    expect(readTreasureState(run.state.games.treasure).bag.slice(-2)).toEqual([{ templateId: 11002, count: 2 }, { templateId: 11002, count: 2 }]);
-    expect(run.view()).toMatchObject({ draws: 5, progressScore: 7, fragments: 5, bagSlotsUsed: 5 });
-    expect(run.state.games).not.toHaveProperty("treasureNativeV1"); expect(run.view().records).toHaveLength(9);
+  it("blocks all new draws on an incomplete pool, including selected-ready advanced categories and old web calls", () => {
+    const run = session(undefined, clock), before = structuredClone(run.state);
+    expect(run.view().drawChoices.every(x => !x.canDraw)).toBe(true);
+    expect(() => run.draw(1, "advanced", noRandom)).toThrow(/完整奖池/); expect(run.state).toEqual(before);
+    expect(() => run.act({ type: "draw", count: 1 }, "treasure", noRandom)).toThrow(ActivityError);
+    expect(() => run.act({ type: "category", choice: "强化石1级" }, "treasure")).toThrow(/14选4/);
+    expect(() => run.act({ type: "choose", index: 0, marked: true, choice: run.view().bagToken })).toThrow(ActivityError);
+    const web = viewActivities(run.state, wallet, clock).activities.find(x => x.id === "treasure")!;
+    expect(web.actions.filter(x => x.action.type === "draw").every(x => x.disabled)).toBe(true);
+    expect(web.rules.join()).not.toContain("55%");
   });
-
-  it("takes a whole individual draw row, retains duplicate rows and reindexes with a new stale-selection token", () => {
-    const run = session(); run.draw(3, "advanced"); const oldToken = run.view().bagToken;
-    expect(run.view().bag.map(row => [row.index, row.itemCount])).toEqual([[0, 2], [1, 2], [2, 2]]);
-    const take = run.act({ type: "take", index: 1, choice: oldToken });
-    expect(take).toMatchObject({ pointsDelta: 0, rewards: [{ templateId: 11019, count: 2 }],
-      nativeTreasureEffects: [{ type: "taken", itemCount: 2, items: [{ index: 1, templateId: 11019, itemCount: 2 }] }] });
-    expect(run.view().bag.map(row => [row.index, row.itemCount])).toEqual([[0, 2], [1, 2]]);
-    expect(() => run.act({ type: "take", index: 1, choice: oldToken })).toThrow(/已更新/);
-    const oldTake = run.act({ type: "take" }, "treasure"); expect(oldTake.rewards).toEqual([{ templateId: 11019, count: 2 }, { templateId: 11019, count: 2 }]);
-    expect(run.view().bag).toEqual([]); expect(oldTake.nativeTreasureEffects).toBeUndefined();
-    run.draw(3, "advanced"); expect(run.act({ type: "recycle", choice: run.view().bagToken })).toMatchObject({ pointsDelta: 12, earnedDelta: 0,
-      nativeTreasureEffects: [{ type: "recycled", pointsAwarded: 12, score: 1652 }] });
-    expect(run.view().bag).toEqual([]);
+  it("normal draws use original row counts without advanced doubling or the legacy four-material guarantee", () => {
+    const run = session(old()), before = old();
+    run.draw(5, "normal", () => 0); run.draw(5, "advanced", () => 0.999999);
+    expect(run.wallet.points).toBe(1550); expect(readTreasureState(run.state.games.treasure)).toMatchObject({ draws: 20, score: 35, fragments: 20, pity: before.pity, choices: before.choices });
+    expect(run.view().bag[2]).toMatchObject({ templateId: TREASURE_ENTRIES[0].templateId, itemCount: TREASURE_ENTRIES[0].count, sourceOriginalIndex: 1 });
+    const last = TREASURE_ENTRIES.at(-1)!;
+    expect(run.view().bag.at(-1)).toMatchObject({ templateId: last.templateId, itemCount: last.count, sourceOriginalIndex: 15 });
+    expect(run.view().bag.slice(2).every(x => x.origin === "original-catalog" && x.recycleUnitPoints === null && x.poolVersion === TREASURE_POOL_VERSION)).toBe(true);
   });
-
-  it("binds the complete state and UTC day, rejects forged templates, partial quantities and misplaced action fields", () => {
-    const run = session(); run.draw(2); const state = readTreasureState(run.state.games.treasure), before = structuredClone(state), choice = token(state);
-    for (const action of [null, [], {}, { type: "draw", choice }, { type: "draw", mode: "normal", count: 0, choice },
-      { type: "draw", mode: "normal", count: "1", choice }, { type: "draw", mode: "paid", count: 1, choice }, { type: "draw", mode: "normal", count: 1, choice, price: 0 },
-      { type: "choose", index: 0, choice }, { type: "choose", index: 0, marked: "false", choice }, { type: "choose", index: 4, marked: true, choice },
-      { type: "take", index: 2, choice }, { type: "take", index: 0, count: 1, choice }, { type: "take", choice, items: [{ index: 0, count: 1 }] },
-      { type: "take", index: "0", choice }, { type: "recycle", index: 0, choice }, { type: "progress", tier: "1", choice },
-      { type: "exchange", count: 1, choice }, { type: "category", index: 0, marked: true, choice }, Object.create({ type: "take", choice })]) {
-      expect(() => advanceTreasure(state, action as ActivityAction, ctx, wallet, noRandom, true)).toThrow(ActivityError);
-    }
-    expect(state).toEqual(before); expect(() => advanceTreasure(state, { type: "take", index: 0, choice }, next, wallet, noRandom, true)).toThrow(/日期已更新/);
-    for (const key of ["draws", "score", "fragments", "pity"] as const) expect(token({ ...state, [key]: state[key] + 1 })).not.toBe(choice);
-    expect(token({ ...state, choices: state.choices.slice(1) })).not.toBe(choice); expect(token({ ...state, claimed: [1] })).not.toBe(choice);
-    for (const bad of [{ ...state, bag: [{ templateId: 1001, count: 1 }] }, { ...state, bag: [{ templateId: 11019, count: 4 }] },
-      { ...state, bag: [{ templateId: 11021, count: 3 }] }, { ...state, bag: [{ templateId: 11019, count: 1, validDays: 7 }] },
-      { ...state, bag: Array(30) }, { ...state, choices: [] }, { ...state, choices: ["fake"] }, { ...state, pity: 10 }, { ...state, claimed: [1, 1] }]) {
-      expect(() => viewTreasureNative(bad, ctx, wallet)).toThrow(ActivityError);
+  it("uses the submitted four categories plus 15, keeps selection order and distinguishes repeated template source rows", () => {
+    for (const sourceOriginalIndex of [7,12]) {
+      const selection = sourceOriginalIndex === 7 ? [7,4,1,2] : [12,4,1,2];
+      const candidates = TREASURE_ENTRIES.filter(x => x.sourceOriginalIndex === 15 || selection.includes(x.sourceOriginalIndex));
+      const index = candidates.findIndex(x => x.templateId === 11905), run = session();
+      const actionSelection = [...selection]; const result = run.draw(1, "advanced", () => (index + 0.1) / candidates.length, actionSelection);
+      expect(actionSelection).toEqual(selection);
+      expect(result.nativeTreasureEffects![0]).toMatchObject({ type: "drawn", count: 1, cost: 60,
+        rewards: [{ templateId: 11905, sourceOriginalIndex, itemCount: sourceOriginalIndex === 7 ? 10 : 5, entryKey: candidates[index].entryKey }] });
     }
   });
-
-  it("keeps the ten-draw guarantee outside the filtered pool, advanced progress and one-time exchange/tiers", () => {
-    const run = session(); run.draw(5, "advanced", () => 0.99); run.draw(5, "advanced", () => 0.99);
-    const state = readTreasureState(run.state.games.treasure);
-    expect(state).toMatchObject({ draws: 10, score: 20, fragments: 10, pity: 0 }); expect(state.bag[9]).toEqual({ templateId: 11021, count: 4 });
-    expect(run.act({ type: "exchange", choice: run.view().bagToken })).toMatchObject({ rewards: [{ templateId: 11021, count: 2 }],
-      nativeTreasureEffects: [{ type: "exchanged", fragmentsSpent: 10, fragments: 0, templateId: 11021, itemCount: 2 }] });
-    const claim = run.act({ type: "progress", tier: 2, choice: run.view().bagToken });
-    expect(claim).toMatchObject({ rewards: [{ templateId: 11019, count: 4 }], nativeTreasureEffects: [{ type: "progress-claimed", tier: 2, templateId: 11019, itemCount: 4 }] });
-    expect(() => run.act({ type: "progress", tier: 2, choice: run.view().bagToken })).toThrow(/已经领取/);
-    expect(() => run.act({ type: "exchange", choice: run.view().bagToken })).toThrow(/10枚/);
-    const filtered = session(); for (const index of [1, 2, 3]) filtered.choose(index, false);
-    filtered.draw(5, "normal", () => 0.99); filtered.draw(5, "normal", () => 0.99);
-    expect(readTreasureState(filtered.state.games.treasure).bag[9]).toEqual({ templateId: 11021, count: 2 });
+  it("rejects malformed/stale/foreign draw selection before RNG and retains the complete state", () => {
+    const run = session(old()), before = structuredClone(run.state);
+    const valid = { type: "draw", mode: "advanced" as const, count: 1, selection: [4,1,7,12], poolVersion: TREASURE_POOL_VERSION, choice: run.view().bagToken };
+    for (const invalid of [{...valid,selection:[]}, {...valid,selection:[1,2,3,15]}, {...valid,selection:[1,1,2,3]}, {...valid,selection:[1,2,3,4,5]},
+      {...valid,selection:[0,1,2,3]}, {...valid,selection:[1,2,3,4.5]}, {...valid,poolVersion:"0".repeat(64)}, {...valid,choice:"stale"},
+      {...valid,mode:"normal",selection:[1,2,3,4]}, {...valid,count:6}, {...valid,count:0}, {...valid,index:0}]) {
+      expect(() => run.act(invalid as ActivityAction, "treasure-native", noRandom)).toThrow(ActivityError); expect(run.state).toEqual(before);
+    }
   });
-
-  it("bounds batch cost, per-draw capacity, counters and the entire recycled-wallet budget", () => {
-    const state = readTreasureState(undefined); state.bag = Array.from({ length: 28 }, () => ({ templateId: 11019, count: 2 }));
-    expect(viewTreasureNative(state, ctx, wallet).drawChoices.filter(row => row.mode === "normal").map(row => row.canDraw)).toEqual([true, true, false, false, false]);
-    expect(() => advance(state, { type: "draw", mode: "normal", count: 3 })).toThrow(/已满/);
-    expect(() => advance(state, { type: "draw", mode: "advanced", count: 2 }, { points: 119 })).toThrow(/积分不足/);
-    expect(viewTreasureNative({ ...state, score: 999_999_999 }, ctx, wallet).drawChoices.filter(row => row.mode === "advanced").every(row => !row.canDraw)).toBe(true);
-    expect(() => advance({ ...state, score: 999_999_999 }, { type: "draw", mode: "advanced", count: 1 })).toThrow(/已达上限/);
-    const points = 2_147_483_647 - 112;
-    expect(viewTreasureNative(state, ctx, { points })).toMatchObject({ canTake: true, canRecycle: true });
-    expect(advance(state, { type: "recycle" }, { points }).pointsDelta).toBe(112);
-    expect(viewTreasureNative(state, ctx, { points: points + 1 }).canRecycle).toBe(false);
-    expect(() => advance(state, { type: "recycle" }, { points: points + 1 })).toThrow(/超过上限/);
-    expect(advance(state, { type: "take", index: 0 }, { points: 2_147_483_647 }).rewards).toEqual([{ templateId: 11019, count: 2 }]);
+  it("takes a single full original row, reindexes safely, preserves mixed old items and rejects all mixed recycling", () => {
+    const run = session(old()); run.draw(2); const before = structuredClone(run.state), stale = run.view().bagToken;
+    expect(run.view().canRecycle).toBe(false); expect(() => run.act({ type: "recycle", choice: stale })).toThrow(/混合包/); expect(run.state).toEqual(before);
+    const take = run.act({ type: "take", index: 2, choice: stale });
+    expect(take.rewards).toEqual([{ ...readTreasureState(before.games.treasure).bag[2] }]); expect(take.nativeTreasureEffects![0]).toMatchObject({ type: "taken", items: [{ index: 2 }] });
+    expect(run.view().bag.map(x => x.index)).toEqual([0,1,2]); expect(() => run.act({ type: "take", index: 2, choice: stale })).toThrow(/已更新/);
+    const all = run.act({ type: "take" }, "treasure"); expect(all.rewards).toHaveLength(3); expect(run.view().bag).toEqual([]);
   });
-
-  it("rolls back invalid multi-draw RNG and keeps choices and all earned settlements available at daily 500", () => {
-    const state = createActivityState(ctx.now), before = structuredClone(state); let rolls = 0;
-    expect(() => transitionActivity(state, "treasure-native", { type: "draw", mode: "normal", count: 5, choice: token(undefined) }, ctx, wallet,
-      () => ++rolls === 4 ? NaN : 0)).toThrow(/随机源/); expect(state).toEqual(before); expect(rolls).toBe(4);
-    const run = session(); run.draw(5, "advanced"); run.draw(5, "advanced"); run.state.daily.actions = 500;
-    expect(run.view().drawChoices.every(row => !row.canDraw)).toBe(true); expect(() => run.draw()).toThrow(/今日玩法次数/);
-    for (const action of [{ type: "choose", index: 0, marked: false }, { type: "progress", tier: 1 }, { type: "exchange" }, { type: "take", index: 0 }, { type: "recycle" }]) {
-      const result = run.act({ ...action, choice: run.view().bagToken }); expect(result.state.daily.actions).toBe(500); expect(result.earnedDelta).toBe(0);
+  it("settles legacy take/recycle/exchange/progress despite blocked new pool and daily 500", () => {
+    const run = session(old(), clock); run.state.daily.actions = 500;
+    expect(run.act({ type: "progress", tier: 2, choice: run.view().bagToken }).rewards).toEqual([{ templateId: 11019, count: 4 }]);
+    expect(run.act({ type: "exchange", choice: run.view().bagToken }).rewards).toEqual([{ templateId: 11021, count: 2 }]);
+    expect(run.act({ type: "take", index: 0, choice: run.view().bagToken }).rewards[0]).toMatchObject({ templateId: 11019, count: 2 });
+    expect(run.act({ type: "recycle", choice: run.view().bagToken }).pointsDelta).toBe(8);
+    expect(run.state.daily.actions).toBe(500); expect(run.state.games.treasure).toMatchObject({ version: 2, bag: [], pity: 8, claimed: [1,2], fragments: 0 });
+  });
+  it("bounds 100 per-draw slots, counters, wallet headroom and atomic invalid RNG", () => {
+    const state = readTreasureState(old()); state.bag = Array.from({ length: 98 }, () => ({ templateId: 11019, count: 2, origin: "legacy-four-material" }));
+    expect(viewTreasureNative(state, ctx(), wallet).drawChoices.filter(x => x.mode === "normal").map(x => x.canDraw)).toEqual([true,true,false,false,false]);
+    expect(() => advance(state, {type:"draw",mode:"normal",count:3,selection:[],poolVersion:TREASURE_POOL_VERSION})).toThrow(/已满/);
+    expect(() => advance(state, {type:"recycle"}, ctx(), {...wallet,points:2147483647})).toThrow(/超过上限/);
+    expect(() => advance({...state,score:999999999}, {type:"draw",mode:"advanced",count:1,selection:[1,2,3,4],poolVersion:TREASURE_POOL_VERSION})).toThrow(/已达上限/);
+    const run = session(), before = structuredClone(run.state); let calls = 0;
+    expect(() => run.draw(5,"normal",()=>++calls===4?NaN:0)).toThrow(/随机源/); expect(calls).toBe(4); expect(run.state).toEqual(before);
+  });
+  it("refuses damaged/unknown saves without resetting or fabricating rewards", () => {
+    for (const saved of [{...old(),version:3}, {...old(),bag:Array(30)}, {...old(),choices:[]}, {...old(),claimed:[1,1]}, {...old(),pity:10},
+      {...old(),bag:[{templateId:11019,count:3}]}, {...readTreasureState(old()),bag:[{templateId:11905,count:5,origin:"original-catalog",entryKey:TREASURE_ENTRIES[0].entryKey,sourceOriginalIndex:12,poolVersion:TREASURE_POOL_VERSION}]}]) {
+      const before = structuredClone(saved); expect(() => readTreasureState(saved)).toThrow(ActivityError); expect(saved).toEqual(before);
     }
   });
 });

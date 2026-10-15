@@ -28,14 +28,34 @@ const rebuild = async () => { built = await buildApp({ db: h, logger: false, ski
 const headers = () => ({ authorization: `Bearer ${signJwt({ sub: 1, name: "charge-native-test", role: "player" }, secret, 3600)}` });
 const post = (id: string, action: ActivityAction, requestId: string = randomUUID(), characterId = uid) => built.app.inject({
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
+function noPrivatePayload(body: string) {
+  const publicStates: Record<string, readonly string[]> = {
+    "root.nativeChristmasSnowfield.scene": ["outside", "loading", "inside", "fighting", "settling"],
+    "root.nativeChristmasSnowfield.attempt": ["none", "admitted", "launching", "fighting", "settling"],
+    "root.nativeChristmasSnowfield.challenges[]": ["unavailable", "alive", "reserved", "fighting", "dead"],
+  };
+  const visit = (value: unknown, path: string) => {
+    if (Array.isArray(value)) { for (const child of value) visit(child, `${path}[]`); return; }
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if (key === "state") expect(publicStates[path] ?? [], `${path}.state`).toContain(child);
+      else if (key === "origin") {
+        expect(path, `${path}.origin`).toBe("root.nativeTreasure.bag[]");
+        expect(["legacy-four-material", "original-catalog"], `${path}.origin`).toContain(child);
+      } else expect(["nativeChargeEffects", "games", "seed"], `${path}.${key}`).not.toContain(key);
+      visit(child, `${path}.${key}`);
+    }
+  };
+  visit(JSON.parse(body), "root");
+}
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  expect(result).not.toHaveProperty("nativeChargeAction"); expect(response.body).not.toMatch(/nativeChargeEffects|"(?:games|state|seed)"\s*:/); return result;
+  expect(result).not.toHaveProperty("nativeChargeAction"); noPrivatePayload(response.body); return result;
 }
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeChargeEffects|"(?:games|state|seed)"\s*:/); return response.json();
+  noPrivatePayload(response.body); return response.json();
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("charge-native", value, requestId, status);
 const request = async (value: ActivityAction, requestId: string = randomUUID()) => native({ ...value, choice: (await snapshot()).nativeCharge.stateToken }, requestId);
@@ -83,6 +103,14 @@ async function seedState(edit: (s: ActivityState) => void) {
 }
 
 describe("native charge through atomic account HTTP", () => {
+  it("permits only exact public scene states and treasure bag origins while rejecting private payload fields", () => {
+    noPrivatePayload(JSON.stringify({ nativeChristmasSnowfield: { scene: { state: "outside" }, attempt: { state: "none" }, challenges: [{ state: "dead" }] },
+      nativeTreasure: { bag: [{ origin: "legacy-four-material" }, { origin: "original-catalog" }] } }));
+    for (const invalid of [{ games: {} }, { seed: 1 }, { nativeChargeEffects: [] }, { nested: { state: "outside" } },
+      { nativeChristmasSnowfield: { scene: { state: "dead" } } }, { nativeChristmasSnowfield: { challenges: { state: "dead" } } },
+      { origin: "legacy-four-material" }, { nativeTreasure: { preview: [{ origin: "original-catalog" }] } },
+      { nativeTreasure: { bag: [{ origin: "unknown" }] } }]) expect(() => noPrivatePayload(JSON.stringify(invalid))).toThrow();
+  });
   it("keeps GET read-only and rejects foreign roles, fake prices, counts and malformed full tokens", async () => {
     await h.db.execute(sql`DELETE FROM app."ActivityWallet"`); const before=await persisted(),choice=(await snapshot()).nativeCharge.stateToken;
     expect((await built.app.inject({url:`/api/account/activities?characterId=${uid}`})).statusCode).toBe(401);
@@ -150,10 +178,15 @@ describe("native charge through atomic account HTTP", () => {
     const old=await action("ddplay",{type:"spin"}); expect(old.points).toBeGreaterThan(1000); expect(old.nativeCharge.grossSpent).toBe(10);
     const moon=await action("moon",{type:"draw",count:1}); expect(moon.nativeCharge.grossSpent).toBe(30);
     await action("moon",{type:"recycle"}); expect((await snapshot()).nativeCharge.grossSpent).toBe(30);
-    const snap=await snapshot(),value={type:"draw",mode:"advanced" as const,count:1,choice:snap.nativeTreasure.bagToken},requestId=randomUUID();
-    const treasure=await action("treasure-native",value,requestId); expect(treasure.nativeCharge.grossSpent).toBe(90);
-    const replay=await action("treasure-native",value,requestId); expect(replay.replayed).toBe(true); expect(replay.nativeCharge.grossSpent).toBe(90);
-    await action("treasure",{type:"recycle"}); expect((await snapshot()).nativeCharge.grossSpent).toBe(90);
+    const snap=await snapshot(), beforeBlocked=await persisted();
+    expect(snap.nativeTreasure.readiness.status).toBe("blocked");
+    await action("treasure-native",{type:"draw",mode:"advanced",count:1,selection:[14,7,12,1],poolVersion:snap.nativeTreasure.poolVersion,
+      choice:snap.nativeTreasure.bagToken},randomUUID(),400);
+    expect(await persisted()).toEqual(beforeBlocked); expect((await snapshot()).nativeCharge.grossSpent).toBe(30);
+    const value={type:"draw",count:3,choice:snap.nativeMoonlight.bagToken},requestId=randomUUID();
+    const moonlight=await action("moonlight-native",value,requestId); expect(moonlight.nativeCharge.grossSpent).toBe(90);
+    const replay=await action("moonlight-native",value,requestId); expect(replay.replayed).toBe(true); expect(replay.nativeCharge.grossSpent).toBe(90);
+    await action("moon",{type:"recycle"}); expect((await snapshot()).nativeCharge.grossSpent).toBe(90);
     const exchange={type:"exchange",index:0,count:1,choice:(await snapshot()).nativeCharge.stateToken},before=await persisted();
     await h.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT charge_native_receipt_failure CHECK ("Signature"='cannot-pass-test') NOT VALID`);
     expect((await post("charge-native",exchange)).statusCode).toBe(500); expect(await persisted()).toEqual(before);

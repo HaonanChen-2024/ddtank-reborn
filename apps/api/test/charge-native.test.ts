@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { readChargeNativeState, recordChargeNativeSpending, type ChargeNativeState } from "../src/activities/charge-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState, type ActivityWallet } from "../src/activities/types.js";
+import { inspectTreasureCatalog } from "../src/activities/treasure-catalog.js";
 
 const ctx: ActivityContext = { now: new Date("2026-10-15T12:00:00Z"), signDays: ["2026-10-15"], ownedTemplateIds: [] };
 const wallet: ActivityWallet = { points: 1000, earned: 600, revision: 0 };
@@ -10,6 +11,12 @@ const view = (s: ActivityState, w = wallet, c = ctx) => viewActivities(s, w, c).
 const act = (s: ActivityState, a: ActivityAction, w = wallet, c = ctx) => transitionActivity(s, "charge-native", { ...a, choice: view(s,w,c).stateToken }, c,w);
 const charge = (s: ActivityState) => s.games.chargeNativeV1 as ChargeNativeState;
 const rejects = (s: ActivityState, a: ActivityAction, w = wallet) => { const before = structuredClone(s); expect(() => act(s,a,w)).toThrow(ActivityError); expect(s).toEqual(before); };
+function readyTreasureContext(): ActivityContext {
+  const treasureCatalog = inspectTreasureCatalog();
+  treasureCatalog.preview = treasureCatalog.preview.map(row => ({ ...row, status: "ready", reasons: [] }));
+  treasureCatalog.readiness = { status: "ready", totalRows: 158, readyRows: 158, blocked: [], description: "Synthetic full-catalog engine fixture only" };
+  return { ...ctx, treasureCatalog };
+}
 
 describe("native charge explicit local tasks and gross spending", () => {
   it("projects three pages, four real-or-hidden reward cells and seven recipes without creating a save", () => {
@@ -51,8 +58,10 @@ describe("native charge explicit local tasks and gross spending", () => {
     expect(dd.pointsDelta).toBeGreaterThan(0); expect(charge(dd.state).grossSpent).toBe(10);
     let s=transitionActivity(dd.state,"moon",{type:"draw",count:1},ctx,wallet,()=>0).state;
     expect(charge(s).grossSpent).toBe(30); s=transitionActivity(s,"moon",{type:"recycle"},ctx,wallet).state;
-    expect(charge(s).grossSpent).toBe(30); s=transitionActivity(s,"treasure",{type:"draw",count:1,choice:"advanced"},ctx,wallet,()=>0).state;
-    expect(charge(s).grossSpent).toBe(90); s=transitionActivity(s,"treasure",{type:"recycle"},ctx,wallet).state;
+    expect(charge(s).grossSpent).toBe(30);
+    const treasureCtx=readyTreasureContext(), treasure=viewActivities(s,wallet,treasureCtx).nativeTreasure;
+    s=transitionActivity(s,"treasure",{type:"draw",mode:"advanced",count:1,selection:[14,7,12,1],poolVersion:treasure.poolVersion,choice:treasure.bagToken},treasureCtx,wallet,()=>0).state;
+    expect(charge(s).grossSpent).toBe(90); s=transitionActivity(s,"treasure",{type:"take"},ctx,wallet).state;
     expect(charge(s).grossSpent).toBe(90); s=transitionActivity(s,"tasks",{type:"claim",choice:"sign"},ctx,wallet).state;
     expect(charge(s).grossSpent).toBe(90); expect(charge(s).trackingStartedAt).toBe(ctx.now.toISOString());
   });
@@ -63,7 +72,8 @@ describe("native charge explicit local tasks and gross spending", () => {
     const token=viewActivities(s,wallet,ctx).nativeMoonlight.bagToken;
     s=transitionActivity(s,"moonlight-native",{type:"draw",count:3,choice:token},ctx,wallet,()=>0).state;
     expect(charge(s).grossSpent).toBe(80); expect((s.games.moon as {draws:number}).draws).toBe(4);
-    const before=structuredClone(s); expect(()=>transitionActivity(s,"treasure",{type:"draw",count:5},ctx,{...wallet,points:0})).toThrow(ActivityError); expect(s).toEqual(before);
+    const before=structuredClone(s), treasureCtx=readyTreasureContext(), treasure=viewActivities(s,wallet,treasureCtx).nativeTreasure;
+    expect(()=>transitionActivity(s,"treasure",{type:"draw",mode:"normal",count:5,selection:[],poolVersion:treasure.poolVersion,choice:treasure.bagToken},treasureCtx,{...wallet,points:0})).toThrow(ActivityError); expect(s).toEqual(before);
     expect(s.games.unrelated).toEqual({keep:true});
   });
 

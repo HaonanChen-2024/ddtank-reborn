@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState, type ActivityWallet } from "../src/activities/types.js";
 import type { MinesweeperState } from "../src/activities/minesweeper.js";
+import { PRIZES } from "../src/activities/config.js";
+import { inspectTreasureCatalog } from "../src/activities/treasure-catalog.js";
 
 const first = () => 0, last = () => 0.999999;
 const restore = <T>(value: T): T => JSON.parse(JSON.stringify(value));
@@ -11,6 +13,15 @@ function freeze<T>(value: T): T {
 }
 const context = (when = "2026-10-14T12:00:00Z", signDays: string[] = []): ActivityContext => ({ now: new Date(when), signDays, ownedTemplateIds: [] });
 const wallet = (points = 1000, earned = 0): ActivityWallet => ({ points, earned, revision: 0 });
+// Previously earned unversioned A01 inventory, not a replacement draw pool.
+const earnedTreasure = (count: number) => ({ bag: Array.from({ length: count }, () => ({ templateId: 11019, count: 1 })),
+  draws: count, score: count, fragments: count, pity: count % 10, choices: PRIZES.map(row => row.name), claimed: [] });
+function readyTreasureContext(): ActivityContext {
+  const treasureCatalog = inspectTreasureCatalog();
+  treasureCatalog.preview = treasureCatalog.preview.map(row => ({ ...row, status: "ready", reasons: [] }));
+  treasureCatalog.readiness = { status: "ready", totalRows: 158, readyRows: 158, blocked: [], description: "Synthetic full-catalog engine fixture only" };
+  return { ...context(), treasureCatalog };
+}
 function session(ctx = context(), funds = wallet()) {
   let state = createActivityState(ctx.now), currentWallet = { ...funds };
   return {
@@ -34,9 +45,11 @@ function rejected(state: ActivityState, id: string, action: ActivityAction, fund
 describe("activity engine atomic state and wallet boundary", () => {
   it("rejects insufficient funds without consuming state, daily counts, rewards or the supplied wallet", () => {
     const state = createActivityState(context().now), funds = wallet(0);
-    for (const [id, action] of [["moon", { type: "draw" }], ["treasure", { type: "draw" }],
+    for (const [id, action] of [["moon", { type: "draw" }],
       ["ddplay", { type: "spin" }], ["exchange", { type: "exchange", index: 0 }]] as const)
       rejected(state, id, action, funds);
+    const ready = readyTreasureContext(), treasure = viewActivities(state, funds, ready).nativeTreasure;
+    rejected(state, "treasure", { type: "draw", mode: "normal", count: 1, selection: [], poolVersion: treasure.poolVersion, choice: treasure.bagToken }, funds, ready);
     expect(state).toEqual(createActivityState(context().now));
   });
 
@@ -57,8 +70,8 @@ describe("activity engine atomic state and wallet boundary", () => {
   it("makes temporary-bag take and recycle mutually exclusive, including after JSON reload", () => {
     for (const id of ["treasure", "moon", "cave"]) for (const choice of ["take", "recycle"]) {
       const run = session();
-      const draw = run.act(id, { type: "draw", count: 2 });
-      expect(draw.rewards).toEqual([]);
+      if (id === "treasure") run.state.games.treasure = earnedTreasure(2);
+      else expect(run.act(id, { type: "draw", count: 2 }).rewards).toEqual([]);
       const resolved = run.act(id, { type: choice });
       expect(resolved.earnedDelta).toBe(0);
       if (choice === "take") { expect(resolved.rewards.map(reward => [reward.templateId, reward.count])).toEqual([[11019, 1], [11019, 1]]); expect(resolved.pointsDelta).toBe(0); }
@@ -147,7 +160,7 @@ describe("daily play limit never strands earned rewards", () => {
     const saved = restore(state); saved.daily.actions = actions; return saved;
   };
 
-  it("does not count 499 wardrobe page changes, set browsing or mode/category switches as play", () => {
+  it("does not count 499 wardrobe page changes, set browsing or mode switches as play and rejects obsolete treasure categories", () => {
     const run = session();
     run.act("cave", { type: "draw" });
     for (let i = 0; i < 499; i++) run.act("wardrobe", { type: "page", index: i % 2, choice: "sets" });
@@ -156,21 +169,24 @@ describe("daily play limit never strands earned rewards", () => {
     run.act("wardrobe", select);
     run.act("wardrobe", { type: "directory" });
     for (const choice of ["mark", "open"]) run.act("mines", { type: "mode", choice });
-    run.act("treasure", { type: "category", choice: "强化石1级" });
+    rejected(run.state, "treasure", { type: "category", choice: "强化石1级" }, run.wallet);
     expect(run.state.daily.actions).toBe(1);
     expect(run.act("cave", { type: "take" })).toMatchObject({ pointsDelta: 0, rewards: [{ templateId: 11019, count: 1 }] });
     expect(run.state.daily.actions).toBe(1);
     const atLimit = capped(run.state);
     for (const [id, action] of [["wardrobe", { type: "page", index: 0, choice: "owned" }],
-      ["mines", { type: "mode", choice: "mark" }], ["treasure", { type: "category", choice: "强化石1级" }]] as const) {
+      ["mines", { type: "mode", choice: "mark" }]] as const) {
       const result = transitionActivity(freeze(atLimit), id, action, context(), freeze(run.wallet));
       expect(result).toMatchObject({ pointsDelta: 0, earnedDelta: 0, rewards: [], state: { daily: { actions: 500 } } });
     }
+    rejected(atLimit, "treasure", { type: "category", choice: "强化石1级" }, run.wallet);
   });
 
   it("can take or recycle each existing bag at or above the old cap, but cannot do either twice", () => {
     for (const id of ["treasure", "moon", "cave"]) for (const type of ["take", "recycle"]) {
-      const run = session(); run.act(id, { type: "draw", count: 2 });
+      const run = session();
+      if (id === "treasure") run.state.games.treasure = earnedTreasure(2);
+      else run.act(id, { type: "draw", count: 2 });
       const saved = capped(run.state, 501), before = restore(saved);
       const result = transitionActivity(freeze(saved), id, { type }, context(), freeze(run.wallet));
       expect(saved).toEqual(before);
@@ -185,7 +201,8 @@ describe("daily play limit never strands earned rewards", () => {
   it("settles only the fragments and progress already earned, with their original depletion checks", () => {
     for (const id of ["treasure", "moon", "cave"]) {
       const run = session();
-      run.act(id, { type: "draw", count: 5 }); run.act(id, { type: "draw", count: 5 });
+      if (id === "treasure") run.state.games.treasure = earnedTreasure(10);
+      else { run.act(id, { type: "draw", count: 5 }); run.act(id, { type: "draw", count: 5 }); }
       const progress = transitionActivity(capped(run.state), id, { type: "progress", tier: 1 }, context(), run.wallet);
       expect(progress.rewards).toEqual([{ templateId: 11019, count: 2 }]);
       rejected(progress.state, id, { type: "progress", tier: 1 }, run.wallet);
@@ -312,18 +329,28 @@ describe("activity view is playable without revealing server secrets", () => {
     expect((run.state.games.mines as MinesweeperState).opened).toContain(6);
   });
 
-  it("uses the selected treasure category to constrain the actual draw pool", () => {
+  it("shows the full original treasure catalog while globally blocking unready draws and rejecting old server categories", () => {
     const run = session();
-    const categories = run.view().activities.find(activity => activity.id === "treasure")!.actions
-      .filter(button => button.action.type === "category").map(button => button.action.choice!);
-    expect(categories).toHaveLength(4);
-    expect(categories).toContain("强化石1级");
-    for (const choice of categories.filter(choice => choice !== "强化石1级")) run.act("treasure", { type: "category", choice });
-    run.act("treasure", { type: "draw" }, () => 0.6);
-    const bag = run.state.games.treasure as { choices: string[]; bag: { templateId: number }[] };
-    expect(bag.choices).toEqual(["强化石1级"]);
-    expect(bag.bag[0].templateId).toBe(11019);
-    rejected(run.state, "treasure", { type: "draw", choice: "advanced" }, run.wallet);
+    const view = run.view(), actions = view.activities.find(activity => activity.id === "treasure")!.actions;
+    expect(view.nativeTreasure.categories).toHaveLength(15); expect(view.nativeTreasure.preview).toHaveLength(158);
+    expect(view.nativeTreasure.readiness.status).toBe("blocked");
+    expect(actions.filter(button => button.action.type === "category")).toEqual([]);
+    expect(actions.filter(button => button.action.type === "draw").every(button => button.disabled)).toBe(true);
+    for (const button of actions.filter(button => button.action.type === "draw")) rejected(run.state, "treasure", button.action, run.wallet,
+      context(), () => { throw new Error("Blocked catalog must not consume randomness"); });
+    rejected(run.state, "treasure", { type: "category", choice: "强化石1级" }, run.wallet);
+  });
+
+  it("constrains a synthetic complete-catalog advanced draw to its four original classes and preserves row quantities", () => {
+    const ctx = readyTreasureContext(), run = session(ctx), view = run.view().nativeTreasure, selection = [14, 7, 12, 1];
+    const candidates = view.preview.filter(row => selection.includes(row.sourceOriginalIndex) || row.sourceOriginalIndex === 15);
+    const index = candidates.findIndex(row => row.sourceOriginalIndex === 12 && row.sourceTemplateId === 11905);
+    const result = run.act("treasure", { type: "draw", choice: view.bagToken, mode: "advanced", count: 1, selection, poolVersion: view.poolVersion },
+      () => (index + 0.25) / candidates.length);
+    expect(result.pointsDelta).toBe(-60); expect(result.rewards).toEqual([]);
+    expect(run.state.games.treasure).toMatchObject({ version: 2, pity: 0, choices: PRIZES.map(row => row.name),
+      bag: [{ templateId: 11905, count: 5, origin: "original-catalog", entryKey: candidates[index].entryKey, sourceOriginalIndex: 12, poolVersion: view.poolVersion }] });
+    rejected(run.state, "treasure", { type: "draw", choice: "advanced" }, run.wallet, ctx);
   });
 });
 
