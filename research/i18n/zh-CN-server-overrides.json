@@ -52,5 +52,12 @@
   "UserBuyItemHandler.SystemError": "系统错误，操作已中止。",
   "UserItemContineueHandler.InvalidShopItem": "续费请求异常，操作已中止。",
   "UserEquipListHandler.InvalidPlayer": "玩家信息无效。",
-  "GameTakeTempItemsHandler.MailTitle": "背包已满，物品退回"
+  "GameTakeTempItemsHandler.MailTitle": "背包已满，物品退回",
+  "Game.Server.Quests.FinishQuest.RewardGold": "{0} 金币",
+  "Game.Server.Quests.FinishQuest.RewardMoney": "{0} 点券",
+  "Game.Server.Quests.FinishQuest.RewardMedal": "{0} 勋章",
+  "Game.Server.Quests.FinishQuest.RewardGiftToken": "{0} 礼金",
+  "Game.Server.Quests.FinishQuest.RewardGB1": "{0} 经验",
+  "GameUserDailyAward.Success": "每日奖励领取成功。",
+  "GameUserDailyAward.Fail1": "今日每日奖励已领取。"
 }

@@ -6,12 +6,12 @@ import { createDb, migrateDb, seedDatabase, player, type DbHandle } from "@ddt/d
 import { GSPacket } from "@ddt/protocol";
 import { Templates } from "../src/db/templates.js";
 import { loadPlayerInfo } from "../src/db/characters.js";
-import { EventData } from "../src/game/events.js";
+import { EventData, grantRewards } from "../src/game/events.js";
 import { GamePlayer } from "../src/game/player.js";
 import { defaultMatch } from "../src/game/player-info.js";
 import { ItemInfo } from "../src/game/item.js";
 import { startOnlineBoxTimer } from "../src/game/online-box.js";
-import { eventsRuntime, timeBox } from "../src/handlers/events.js";
+import { dailyAward, eventsRuntime, timeBox } from "../src/handlers/events.js";
 import { mailItems } from "../src/handlers/items.js";
 import { World, type ServerContext } from "../src/session/context.js";
 import { LanguageMgr } from "../src/util/lang.js";
@@ -22,7 +22,7 @@ const strings: Record<string, string> = JSON.parse(readFileSync(new URL("../../.
 let h: DbHandle, templates: Templates, data: EventData, seq = 0;
 beforeAll(async () => {
   h = await createDb("pglite:memory"); // No live DB, network server or elapsed-time changes outside the fixture.
-  await migrateDb(h); await seedDatabase(h, { only: ["Shop_Goods", "Shop_Goods_Box", "User_Box", "LoadUserBox"] });
+  await migrateDb(h); await seedDatabase(h, { only: ["Shop_Goods", "Shop_Goods_Box", "User_Box", "LoadUserBox", "Daily_Award"] });
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", namesFile);
   templates = await new Templates().load(h.db, 1);
   data = new EventData(); await data.load(h.db);
@@ -38,6 +38,7 @@ async function fixture(full = false) {
   }
   const lang = LanguageMgr.fromFile(fileURLToPath(new URL("../../../data/i18n/pt-BR/server-language.txt", import.meta.url)));
   for (const [key, value] of Object.entries(strings)) lang.set(key, value);
+  p.lang = (key, ...args) => lang.t(key, ...args); // Same binding as the production login path, also copied by reward staging.
   let now = new Date("2026-10-13T01:00:00Z");
   const ctx = { db: h, templates, lang, world: new World(), now: () => now } as unknown as ServerContext;
   ctx.world.add(p); eventsRuntime(ctx).data = data; startOnlineBoxTimer(p, now); sent.length = 0;
@@ -69,7 +70,7 @@ it("uses translated success/final/failure messages and all 13 real rewards, reta
     expect(await request(f)).toEqual({ ok: false, progression: minutes, text: strings["UserGetTimeBoxHandler.fail"] });
     expect(f.p.propBag.getItems().map((item) => item.toRow())).toEqual(snapshot);
   }
-  expect(f.p.propBag.getItems().map((item) => item.TemplateID).sort((a, b) => a - b)).toEqual(Object.keys(names).map(Number).sort((a, b) => a - b));
+  expect(f.p.propBag.getItems().map((item) => item.TemplateID).sort((a, b) => a - b)).toEqual([11001, 11002, 11003, 11005, 11006, 11007, 11009, 11010, 11011, 11013, 11014, 11015, 11233]);
   for (const item of f.p.propBag.getItems()) expect(item).toMatchObject({ Count: 1, IsBinds: true, ValidDate: 0, StrengthenLevel: 0 });
   expect(await mails(f)).toEqual([]);
 });
@@ -98,4 +99,36 @@ it.each([undefined, "Legacy title"])("keeps old mailItems body/type/grouping whe
   for (const mail of result) expect(mail).toMatchObject({ Title: expected, Content: expected, Type: 8, Gold: 0, Money: 0, ReceiverID: f.p.id });
   expect(result[0]!.Annex5).toBeTruthy(); expect(result[1]!.Annex1).toBeTruthy(); expect(result[1]!.Annex2 ?? "").toBe("");
   expect(f.sent.filter((pkt) => pkt.code === 117)).toHaveLength(1);
+});
+
+const currencies = [{ templateId: -100, count: 7 }, { templateId: -200, count: 11 }, { templateId: -300, count: 13 },
+  { templateId: -1100, count: 17 }, { templateId: 11107, count: 19 }, { templateId: -800, count: 23 }];
+it.each(["Chinese", "original", "missing"] as const)("uses the %s reward summaries while preserving currency, medal and experience delivery", async locale => {
+  const f = await fixture(), before = structuredClone(f.p.info);
+  if (locale === "original") {
+    const lang = LanguageMgr.fromFile(fileURLToPath(new URL("../../../data/i18n/pt-BR/server-language.txt", import.meta.url)));
+    f.p.lang = (key, ...args) => lang.t(key, ...args);
+  } else if (locale === "missing") f.p.lang = key => key;
+  const result = grantRewards(f.p, currencies, templates.findItem, f.ctx.now());
+  expect(result.summary).toEqual(locale === "Chinese" ? ["7 金币", "11 点券", "13 勋章", "17 礼金", "19 经验"] : locale === "original"
+    ? ["  7 de ouro", " 11 pontos de cupom", " 13 medalha(s)", " 17 Moedas bloqueadas", " 19 de experiência"]
+    : ["7 ouro", "11 xu", "13 medalha", "17 Cupons", "19 exp"]);
+  expect(result.overflow).toEqual([]);
+  expect(f.p.info).toMatchObject({ Gold: before.Gold + 7, Money: before.Money + 11, GiftToken: before.GiftToken + 17,
+    GP: before.GP + 19, myHonor: before.myHonor + 23 });
+  expect(f.p.propBag.getItemByTemplateID(0, 11408)).toMatchObject({ Count: 13 });
+});
+
+it("shows the translated daily buff reward and duplicate rejection without granting it twice", async () => {
+  const f = await fixture();
+  await dailyAward(f.ctx, f.p, 0);
+  const notice = f.sent.find(packet => packet.code === 3)!; notice.clearOffset();
+  expect(notice.readInt()).toBe(0); expect(notice.readString()).toBe("每日奖励领取成功。 双倍经验卡"); expect(notice.dataLeft).toBe(0);
+  expect(f.p.buffs).toMatchObject([{ Type: 13, Value: 2, ValidDate: 60, TemplateID: 11998 }]);
+  const before = structuredClone(f.p.buffs); f.sent.length = 0;
+  await dailyAward(f.ctx, f.p, 0);
+  expect(f.p.buffs).toEqual(before); expect(f.sent).toHaveLength(1);
+  const duplicate = f.sent[0]!; duplicate.clearOffset();
+  expect(duplicate.code).toBe(3); expect(duplicate.readInt()).toBe(0);
+  expect(duplicate.readString()).toBe("今日每日奖励已领取。"); expect(duplicate.dataLeft).toBe(0);
 });

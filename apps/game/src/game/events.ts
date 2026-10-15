@@ -202,17 +202,21 @@ export interface Reward {
 export function grantRewards(p: GamePlayer, rewards: Reward[], find: (id: number) => ItemTemplate | undefined, now: Date): { overflow: ItemInfo[]; summary: string[] } {
   const overflow: ItemInfo[] = [];
   const summary: string[] = [];
+  const label = (kind: string, count: number, fallback: string) => {
+    const key = `Game.Server.Quests.FinishQuest.Reward${kind}`, translated = p.lang(key, count);
+    return translated === key ? `${count} ${fallback}` : translated;
+  };
   p.beginChanges();
   try {
     for (const r of rewards) {
       if (r.count <= 0) continue;
       switch (r.templateId) {
-        case -100: p.addGold(r.count); summary.push(`${r.count} ouro`); continue;
-        case -200: p.addMoney(r.count); summary.push(`${r.count} xu`); continue;
-        case -300: p.addMedal(r.count, find); summary.push(`${r.count} medalha`); continue;
+        case -100: p.addGold(r.count); summary.push(label("Gold", r.count, "ouro")); continue;
+        case -200: p.addMoney(r.count); summary.push(label("Money", r.count, "xu")); continue;
+        case -300: p.addMedal(r.count, find); summary.push(label("Medal", r.count, "medalha")); continue;
         case -800: p.addHonor(r.count); continue;
-        case -1100: p.addGiftToken(r.count); summary.push(`${r.count} Cupons`); continue;
-        case 11107: p.addGP(r.count, false); summary.push(`${r.count} exp`); continue;
+        case -1100: p.addGiftToken(r.count); summary.push(label("GiftToken", r.count, "Cupons")); continue;
+        case 11107: p.addGP(r.count, false); summary.push(label("GB1", r.count, "exp")); continue;
       }
       const t = find(r.templateId);
       if (!t) continue;
