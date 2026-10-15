@@ -73,12 +73,12 @@ function validate(ctx: ServerContext, key: string, rewards: Reward[]): void {
  * World-boss rules stay in its caller; packet 90 supplies its own monthly claim. */
 export async function grantClaimRewards(ctx: ServerContext, p: GamePlayer, rewards: Reward[], title: string,
   claim: (db: Database, now: Date) => Promise<boolean>): Promise<string | null> {
-  const now = ctx.now();
   const committed = await ctx.db.db.transaction(async (tx) => {
     const db = tx as unknown as Database;
     const [owner] = await tx.select({ id: player.Sys_Users_Detail.UserID }).from(player.Sys_Users_Detail)
       .where(eq(player.Sys_Users_Detail.UserID, p.id)).for("update");
     if (!owner) throw new Error("World boss recipient missing");
+    const now = ctx.now();
     if (!(await claim(db, now))) return null;
     const plan = stage(ctx, p), { staged, original } = plan;
     const grant = grantRewards(staged, rewards, ctx.templates.findItem, now);

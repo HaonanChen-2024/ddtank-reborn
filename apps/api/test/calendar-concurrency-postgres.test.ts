@@ -173,6 +173,28 @@ describe.skipIf(!url || !token)("Calendar opt-in fresh PostgreSQL cross-owner se
     expect(await signIn(context(), { id: uid } as GamePlayer)).toBe(false);
   });
 
+  check("packet-90 eligibility uses the current month after waiting for the real owner lock", async () => {
+    const uid = await character(); clock.now = "2026-10-31T23:59:59Z";
+    await monitor.db.insert(player.DailyLogList).values({ UserID: uid, DayLog: "True,True,True", UserAwardLog: 3, LastDate: new Date(clock.now) });
+    const info = (await loadPlayerInfo(game.db, uid))!;
+    const sent: unknown[] = [];
+    const p = new GamePlayer({ send: packet => { sent.push(packet); }, disconnect: () => {}, remoteAddress: "calendar-test" }, info, defaultMatch(uid), 1, "test");
+    const ctx = { ...context(), templates: new Templates(), world: new World() } as ServerContext; ctx.world.add(p);
+    eventsRuntime(ctx).data.dailyAward = [{ ID: 1, Type: 7, TemplateID: -1100, Count: 9, AwardDays: 3, Sex: 0 }] as never;
+    const before = p.info.GiftToken;
+    const { firstResult, secondResult } = await interleave("queued-date-sign-award", () => calendar(apiA, uid, true),
+      connectionPids[3]!, () => signAward(ctx, p, 3), () => { clock.now = "2026-11-01T00:00:01Z"; });
+    success((firstResult as Awaited<ReturnType<typeof calendar>>).text);
+    expect(secondResult).toBe(false);
+    expect(await hasClaim(monitor.db, uid, "signaward", "2026-10:3")).toBe(false);
+    expect(await hasClaim(monitor.db, uid, "signaward", "2026-11:3")).toBe(false);
+    expect(p.info.GiftToken).toBe(before);
+    expect((await q1<{ GiftToken: number }>(monitor, sql`SELECT "GiftToken" FROM player."Sys_Users_Detail" WHERE "UserID"=${uid}`))!.GiftToken).toBe(before);
+    expect(sent).toEqual([]);
+    expect(await q(monitor, sql`SELECT 1 FROM player."User_Messages" WHERE "ReceiverID"=${uid}`)).toEqual([]);
+    expect(await q(monitor, sql`SELECT 1 FROM player."Sys_Users_Goods" WHERE "UserID"=${uid}`)).toEqual([]);
+  });
+
   check("retains compressed legacy GET and authenticated XML contracts and leaves failed calendar writes uncommitted", async () => {
     const uid = await character();
     await monitor.db.execute(sql`CREATE FUNCTION public.calendar_write_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'injected calendar failure'; END; $$`);
