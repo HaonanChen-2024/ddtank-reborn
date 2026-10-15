@@ -40,6 +40,31 @@ attributes, delivery preflight and synchronized server/native-client rules.
 Existing installed manifests, source pins and four-material gameplay remain
 unchanged by this offline preparation command.
 
+An optional `weaponInputs` object adds a `weapon-mappings.json` report through
+the same preparation command. It contains `localTemplates` with the four display
+fields plus `Attack`, `Defence`, `Agility`, `Luck` and `Property1` through
+`Property8`, and an explicit `mappings` array of
+`{sourceTemplateId, localTemplateId}`. An empty array preserves every local
+mapping as unresolved; neither the same ID nor the same picture selects one.
+Full local rows must agree with the supplied local display snapshot, and their
+XML derivation still needs independent verification.
+
+`weapon-catalog.mjs` pins the saved 2026-10-12 official DIY catalog and all six
+original response pages, verifies their receipts, pagination and ordered
+records, and selects official fields only by the original weapon ID. The
+saved snapshot covers 12 of the original 15 weapon IDs; the other three remain
+missing. The pure resolver accepts caller data for offline analysis; only the
+preparation command's pinned loader verifies official snapshot provenance.
+An explicit mapping with different display or any of the 12 fields remains a
+conflict. Accepted field mappings are still proposals: they do not install or
+rewrite old templates, enable rewards, or prove BallConfig, physics, resources
+or in-game effects. Actual installation continues to belong to
+`scripts/workshop-weapon.ts` with complete item and projectile packages.
+
+```powershell
+& '..\..\runtime\tools\node-v24.21.0-win-x64\node.exe' --test scripts/native-treasure/catalog.test.mjs scripts/native-treasure/weapon-catalog.test.mjs
+```
+
 `extract-resources.mjs` decodes all 11 original Morn layouts, selects the six actually used layouts and validates their skin/scroll references against the 76 symbols in the dedicated art. It retains 22 required ComponentFactory nodes from the original 109-node style entry, replacing only the selected style font with Microsoft YaHei. There is no missing active public-art dependency or copied full core. Five runtime files join the shared owner's 41-asset variant:
 
 - `WorkshopNativeTreasureBootstrap.swf`

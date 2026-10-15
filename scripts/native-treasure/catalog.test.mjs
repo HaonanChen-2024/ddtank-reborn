@@ -7,6 +7,7 @@ import test from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {loadTreasureCatalog, parseTreasureCatalog, resolveTreasureDisplayIdentities} from './catalog.mjs';
 import {prepareTreasureCatalog} from './prepare-catalog.mjs';
+import {loadOfficialWeaponSnapshot, WEAPON_FIELDS} from './weapon-catalog.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const xml = readFileSync(resolve(project, 'runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/NewLotteryItem.xml'), 'utf8');
@@ -205,5 +206,70 @@ test('preparation refuses changed source bytes before creating output', t => {
   writeFileSync(changedPath, Buffer.concat([readFileSync(input.templateSources[0].path), Buffer.from('\n')]));
   const templateSources = input.templateSources.map((source, index) => index ? source : {...source, path: changedPath});
   assert.throws(() => prepareTreasureCatalog({...input, templateSources}), /template source bytes changed/);
+  assert.equal(existsSync(input.outputDir), false);
+});
+
+function weaponPreparationFixture(t) {
+  const {input} = preparationFixture(t);
+  const official = loadOfficialWeaponSnapshot(project).records.find(row => row.templateId === 7024);
+  const fields = Object.fromEntries(WEAPON_FIELDS.map(field => [field, official[field[0].toLowerCase() + field.slice(1)]]));
+  const local = {...display(7024, 'boomerang'), ...fields};
+  return {input: {...input, localTemplates: [display(7024, 'boomerang')],
+    weaponInputs: {localTemplates: [local], mappings: [{sourceTemplateId: 7024, localTemplateId: 7024}]}}, fields};
+}
+
+test('optional weapon preparation uses the pinned official snapshot and preserves all original rows', t => {
+  const {input, fields} = weaponPreparationFixture(t);
+  const before = JSON.stringify(input);
+  const manifest = prepareTreasureCatalog(input);
+  assert.equal(JSON.stringify(input), before);
+  assert.equal(manifest.outputs.length, 3);
+  const weapons = JSON.parse(readFileSync(resolve(input.outputDir, 'weapon-mappings.json'), 'utf8'));
+  assert.equal(weapons.entries.length, 15);
+  assert.equal(weapons.officialProvenanceVerified, true);
+  assert.equal(weapons.officialSnapshotSources.length, 6);
+  assert.equal(weapons.officialSnapshotSummary.records, 670);
+  assert.equal(weapons.officialSnapshotSummary.sha256, '2d5deb59f0387b7c82c335dc3c1b3eb8c343fc94665af54bfb3049ca25458683');
+  assert.equal(weapons.localMetadataDerivationVerified, false);
+  assert.equal(weapons.installed, false);
+  assert.equal(weapons.runtimeReady, false);
+  assert.equal(weapons.officialBallConfig, false);
+  const mapped = weapons.entries.find(row => row.sourceTemplateId === 7024);
+  assert.equal(mapped.status, 'explicitly-mapped');
+  assert.deepEqual(mapped.officialFields, fields);
+  assert.equal(mapped.runtimeMapping, null);
+  assert.equal(weapons.entries.filter(row => row.status === 'missing-official').length, 3);
+  const artifact = manifest.outputs.find(row => row.file === 'weapon-mappings.json');
+  const bytes = readFileSync(resolve(input.outputDir, artifact.file));
+  assert.equal(artifact.sha256, createHash('sha256').update(bytes).digest('hex'));
+  assert.equal(manifest.sources.length, 3);
+});
+
+test('optional weapon preparation rejects caller official overrides and local display drift before output', t => {
+  const {input} = weaponPreparationFixture(t);
+  assert.throws(() => prepareTreasureCatalog({...input, weaponInputs: {...input.weaponInputs, officialRecords: []}}), /unknown weaponInputs fields/);
+  assert.equal(existsSync(input.outputDir), false);
+  const localTemplates = input.weaponInputs.localTemplates.map(row => ({...row, Pic: 'other-weapon'}));
+  assert.throws(() => prepareTreasureCatalog({...input, weaponInputs: {...input.weaponInputs, localTemplates}}), /display metadata differs/);
+  assert.equal(existsSync(input.outputDir), false);
+});
+
+test('local weapon stat drift is retained as a conflict instead of rewriting the old template', t => {
+  const {input, fields} = weaponPreparationFixture(t);
+  input.weaponInputs.localTemplates[0].Attack += 1;
+  const before = JSON.stringify(input);
+  prepareTreasureCatalog(input);
+  const weapons = JSON.parse(readFileSync(resolve(input.outputDir, 'weapon-mappings.json'), 'utf8'));
+  const row = weapons.entries.find(entry => entry.sourceTemplateId === 7024);
+  assert.equal(row.status, 'mapping-field-conflict');
+  assert.equal(row.officialFields.Attack, fields.Attack);
+  assert.equal(row.runtimeMapping, null);
+  assert.equal(JSON.stringify(input), before);
+});
+
+test('unserializable caller fields are rejected before creating any preparation output', t => {
+  const {input} = weaponPreparationFixture(t);
+  input.weaponInputs.localTemplates[0].Attack = BigInt(145);
+  assert.throws(() => prepareTreasureCatalog(input), /BigInt/);
   assert.equal(existsSync(input.outputDir), false);
 });
