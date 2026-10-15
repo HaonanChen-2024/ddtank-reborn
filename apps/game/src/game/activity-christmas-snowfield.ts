@@ -139,7 +139,7 @@ export interface SnowfieldTerminal {
 import { createHash, randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { app, member, player, activityUtcDay, validActivityDay, type Database } from "@ddt/db";
-import { GSPacket } from "@ddt/protocol";
+import { GSPacket, ProtocolRangeError } from "@ddt/protocol";
 import type { GameClient } from "../session/client.js";
 import type { ServerContext } from "../session/context.js";
 import type { GamePlayer, RoomMember } from "./player.js";
@@ -247,11 +247,15 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   private free(p: GamePlayer) { return !(p.info.HasBagPassword && p.info.IsLocked) && !p.currentRoom; }
   private templatesReady() { return rewards.every(r => { const t = this.ctx.templates.findItem(r.templateId); return t && t.CategoryID === 11 && !t.CanEquip && t.NeedSex === 0 && integer(t.MaxCount, 1); }); }
   private people() { return this.members.size + [...this.reservations.entries()].filter(([id, r]) => !this.members.has(id) && r.until > this.ctx.now().getTime()).length; }
-  private position(m: Member): Point {
-    let distance = Math.max(0, this.ctx.now().getTime() - m.movedAt) * 0.16, from = m.position;
-    for (const end of m.route) { const length = Math.hypot(end.x - from.x, end.y - from.y); if (distance <= length) return length ? { x: from.x + (end.x - from.x) * distance / length, y: from.y + (end.y - from.y) * distance / length } : { ...end }; distance -= length; from = end; }
-    return { ...from };
+  private trajectory(m: Member, now: number): { position: Point; remaining: Point[] } {
+    let distance = Math.max(0, now - m.movedAt) * 0.16, from = m.position;
+    for (let i = 0; i < m.route.length; i++) { const end = m.route[i]!, length = Math.hypot(end.x - from.x, end.y - from.y);
+      if (distance < length) return { position: { x: from.x + (end.x - from.x) * distance / length, y: from.y + (end.y - from.y) * distance / length }, remaining: m.route.slice(i) };
+      distance -= length; from = end;
+    }
+    return { position: { ...from }, remaining: [] };
   }
+  private position(m: Member, now = this.ctx.now().getTime()): Point { return this.trajectory(m, now).position; }
   private pair(req: SnowfieldRead, saved: Awaited<ReturnType<typeof christmasOwnerSaved>>, w: ChristmasWallet, now: Date, c?: GameClient): SnowfieldPair {
     const snowman = christmasOwnerView(this.ctx, req, saved, w, now, c), p = c?.player;
     let state = readSnowfieldState(undefined, now), compatible = true, why = "请登录游戏后使用雪场。", reference = readChristmasReference(undefined, now);
@@ -379,7 +383,7 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   private send(p: GamePlayer, packet: GSPacket) { try { p.send(packet); } catch { this.ctx.log.warn("snowfield scene notification failed"); } }
   private broadcast(packet: GSPacket, except?: GamePlayer) { for (const m of this.members.values()) if (m.p !== except && this.online(m.p, m.c)) this.send(m.p, packet); }
   private packet(sub: number) { const b = new GSPacket(145); b.writeByte(sub); return b; }
-  private playersPacket(ms: Member[]) { const b = this.packet(18); b.writeInt(ms.length); for (const m of ms) { const i = m.p.info, pos = this.position(m);
+  private playersPacket(ms: Member[], now = this.ctx.now().getTime()) { const b = this.packet(18); b.writeInt(ms.length); for (const m of ms) { const i = m.p.info, pos = this.position(m, now);
     for (const n of [i.Grade, i.Hide, i.Repute, m.p.id]) b.writeInt(n); b.writeString(i.NickName ?? ""); b.writeByte(i.typeVIP); b.writeInt(i.VIPLevel); b.writeBoolean(i.Sex);
     for (const s of [i.Style, i.Colors, i.Skin]) b.writeString(s ?? ""); for (const n of [i.FightPower, i.Win, i.Total, i.Offer]) b.writeInt(Number(n ?? 0)); b.writeInt(Math.round(pos.x)); b.writeInt(Math.round(pos.y)); b.writeByte(m.state); } return b; }
   private monsterPacket(op = 0, one?: Monster) { const b = this.packet(22); b.writeByte(op); if (op === 3 && one) { b.writeInt(one.id); b.writeInt(one.state); }
@@ -393,13 +397,26 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
     if (this.reservations.get(p.id)?.c === c) { this.reservations.delete(p.id); this.changed(); }
     this.send(p, this.playersPacket([...this.members.values()])); this.send(p, this.monsterPacket());
   }
+  private rejectMovement(c: GameClient, p: GamePlayer, error: unknown): never {
+    if (error instanceof ChristmasError || error instanceof ProtocolRangeError) {
+      const m = this.members.get(p.id);
+      if (this.online(p, c) && this.ready() && m?.p === p && m.c === c && m.state === 0 && !p.currentRoom && !this.leases.has(p) && !this.creating.has(p)) {
+        const now = this.ctx.now().getTime(), { position, remaining } = this.trajectory(m, now), end = remaining.at(-1) ?? position;
+        this.send(p, this.playersPacket([m], now)); const b = this.packet(21); b.writeInt(p.id); b.writeInt(Math.round(end.x)); b.writeInt(Math.round(end.y)); b.writeString(remaining.flatMap(q => [q.x, q.y]).join(",")); this.send(p, b);
+      }
+      if (error instanceof ProtocolRangeError) throw new ChristmasError("雪场移动包无效。", 400);
+    }
+    throw error;
+  }
   move(c: GameClient, p: GamePlayer, end: Point, path: string): void {
+    try {
     const m = this.members.get(p.id); need(this.online(p, c) && this.ready() && m?.c === c && !p.currentRoom && m.state === 0, "当前不能移动。"); need(path.length > 0 && path.length <= 4096, "雪场路径无效。", 400);
     const values = path.split(",").map(Number); need(values.length >= 2 && values.length <= 256 && values.length % 2 === 0 && values.every(n => Number.isFinite(n) && Math.abs(n) <= 4096), "雪场路径无效。", 400);
     const points: Point[] = []; for (let i = 0; i < values.length; i += 2) points.push({ x: values[i]!, y: values[i + 1]! }); const last = points.at(-1)!;
     need(Math.hypot(last.x - end.x, last.y - end.y) <= 2, "雪场目标与路径不一致。", 400); let from = this.position(m), distance = 0;
     for (const next of points) { need(isChristmasSegmentClear(from, next), "路径经过不可通行区域。"); distance += Math.hypot(next.x - from.x, next.y - from.y); from = next; } need(distance <= 5000, "雪场路径过长。", 400);
-    m.position = this.position(m); m.route = points; m.movedAt = this.ctx.now().getTime(); this.changed(); const b = this.packet(21); b.writeInt(p.id); b.writeInt(end.x); b.writeInt(end.y); b.writeString(points.flatMap(q => [q.x, q.y]).join(",")); this.broadcast(b, p);
+    m.position = this.position(m); m.route = points; m.movedAt = this.ctx.now().getTime(); this.changed(); const b = this.packet(21); b.writeInt(p.id); b.writeInt(end.x); b.writeInt(end.y); b.writeString(points.flatMap(q => [q.x, q.y]).join(",")); this.broadcast(b);
+    } catch (e) { this.rejectMovement(c, p, e); }
   }
   canCreateRoom(p: RoomMember) { const a = this.admissions.get(p.id), member = this.members.get(p.id), m = a && this.monsters[a.attempt.type];
     return !p.isBot && this.creating.has(p as GamePlayer) && this.ready() && !!a && a.p === p && this.online(a.p, a.c) && this.free(a.p) && member?.p === p && member.c === a.c &&
@@ -491,7 +508,8 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   async drain() { while (this.pending.size) await Promise.all([...this.pending]); if (this.failures.size) throw new Error("雪场结算尚未持久化，不能关闭数据库。"); }
   async handle(p: GamePlayer, c: GameClient, pkt: GSPacket) { try { const sub = pkt.readByte();
     if (sub === 17) { const phase = pkt.readByte(); if (phase === 2) { const point = { x: pkt.readInt(), y: pkt.readInt() }; need(pkt.dataLeft === 0, "雪场入场包无效。", 400); await this.enterScene(c, p, point); } else if (phase === 1 && pkt.dataLeft === 0) await this.leaveScene(c, p); else need(false, "请使用本地活动窗口确认免费票。", 400); }
-    else if (sub === 21) { const end = { x: pkt.readInt(), y: pkt.readInt() }, path = pkt.readString(); need(pkt.dataLeft === 0, "雪场移动包无效。", 400); this.move(c, p, end, path); }
+    else if (sub === 21) { let delegated = false; try { const end = { x: pkt.readInt(), y: pkt.readInt() }, path = pkt.readString(); need(pkt.dataLeft === 0, "雪场移动包无效。", 400); delegated = true; this.move(c, p, end, path); }
+      catch (e) { if (delegated) throw e; this.rejectMovement(c, p, e); } }
     else if (sub === 22) { const id = pkt.readInt(); need(pkt.dataLeft === 0, "雪场挑战包无效。", 400); await this.handoffChallenge(c, p, id); }
     else if (sub === 29 && pkt.dataLeft === 0) await this.revive(c, p); else need(false, "原服付款和经济操作未接入，请使用本地活动窗口。", 400);
   } catch (e) { if (e instanceof ChristmasError) p.sendMessage(0, e.message); else throw e; } }

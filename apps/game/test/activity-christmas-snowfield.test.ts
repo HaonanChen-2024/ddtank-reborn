@@ -31,6 +31,18 @@ async function tickUntil<T>(work: Promise<T>): Promise<T> { let done = false; vo
 async function queuedHandoff() { const spy = vi.spyOn(f.ctx.rooms, "createSnowfieldRoom"), work = owner.handoffChallenge(f.client, f.p, 1); for (let i = 0; i < 100 && !spy.mock.calls.length; i++) await new Promise<void>(r => setImmediate(r)); expect(spy).toHaveBeenCalledOnce(); spy.mockRestore(); return { work }; }
 async function room() { await admitted(); await tickUntil(owner.handoffChallenge(f.client, f.p, 1)); expect(f.p.currentRoom?.RoomType).toBe(40); return f.p.currentRoom!; }
 async function launch() { const r = await room(); const permit = await owner.prepareStart(f.client, f.p, r); expect(permit.ok).toBe(true); f.ctx.rooms.startGame(r); f.ctx.rooms.tick(); expect(launches).toHaveLength(1); return r; }
+const decodeScene = (sent: GSPacket[]) => sent.map(p => GSPacket.parse(p.encode())).filter(p => p.code === 145).map(packet => ({ sub: packet.readByte(), packet }));
+function movePacket(path = "499,500", x = 499, y = 500) { const b = new GSPacket(145); b.writeByte(21); b.writeInt(x); b.writeInt(y); b.writeUTF(path); return b; }
+function readMove(b: GSPacket) { const value = { id: b.readInt(), x: b.readInt(), y: b.readInt(), path: b.readString() }; expect(b.dataLeft).toBe(0); return value; }
+function readSnapshot(b: GSPacket) {
+  expect(b.readInt()).toBe(1); b.readInt(); b.readInt(); b.readInt(); const id = b.readInt(); b.readString(); b.readByte(); b.readInt(); b.readBoolean();
+  b.readString(); b.readString(); b.readString(); b.readInt(); b.readInt(); b.readInt(); b.readInt(); const value = { id, x: b.readInt(), y: b.readInt(), state: b.readByte() }; expect(b.dataLeft).toBe(0); return value;
+}
+async function enterPeer() {
+  const g = await christmasFixture(db, 932, clock); g.ctx.world = f.ctx.world; g.ctx.rooms = f.ctx.rooms; g.ctx.now = f.ctx.now; f.ctx.world.add(g.p);
+  const choice = ok(await owner.read(g.input, g.client)).snowfield.stateToken!;
+  ok(await owner.command({ ...g.input, requestId: randomUUID(), action: { type: "enter", choice } }, g.client)); await owner.enterScene(g.client, g.p, { x: 500, y: 500 }); return g;
+}
 beforeAll(async () => { db = await createDb("pglite:memory"); await migrateDb(db); await seedChristmasTemplates(db); });
 beforeEach(async () => {
   await db.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS snowfield_tail_failure`);
@@ -78,6 +90,90 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
     f.ctx.rooms.createRoom(f.p, "forged", "", 40, 3); f.ctx.rooms.tick(); expect(f.p.currentRoom).toBeNull();
     await enter(); const before = await stored(); expect(() => owner.move(f.client, f.p, { x: 900, y: 1 }, "900,1")).toThrow(); expect(() => owner.move(f.client, f.p, { x: 500, y: 500 }, "NaN,500")).toThrow();
     expect((await sf()).challenges[1]!.canChallenge).toBe(false); expect(await stored()).toEqual(before);
+  });
+  it("accepted movement acknowledges self with only original21 and keeps the same peer route", async () => {
+    await enter(); const g = await enterPeer(), self = vi.spyOn(f.p, "send"), peer = vi.spyOn(g.p, "send"), before = await stored();
+    await owner.handle(f.p, f.client, GSPacket.parse(movePacket("499,500,500,500,499,500").encode()));
+    for (const sent of [self, peer]) { const packets = decodeScene(sent.mock.calls.map(([p]) => p)); expect(packets.map(p => p.sub)).toEqual([21]);
+      expect(readMove(packets[0]!.packet)).toEqual({ id: f.p.id, x: 499, y: 500, path: "499,500,500,500,499,500" }); }
+    expect(await stored()).toEqual(before);
+  });
+  it("rejection snapshots one instant then resumes only the unwalked old route without changing authority or peers", async () => {
+    await enter(); const g = await enterPeer(), self = vi.spyOn(f.p, "send"), peer = vi.spyOn(g.p, "send");
+    owner.move(f.client, f.p, { x: 499, y: 500 }, "499,500,500,500,499,500"); self.mockClear(); peer.mockClear(); advance(10);
+    const before = await stored(), state = await sf(), now = vi.spyOn(f.ctx, "now");
+    await owner.handle(f.p, f.client, GSPacket.parse(movePacket("NaN,500").encode())); expect(now).toHaveBeenCalledOnce(); now.mockRestore();
+    const packets = decodeScene(self.mock.calls.map(([p]) => p)); expect(packets.map(p => p.sub)).toEqual([18, 21]);
+    expect(readSnapshot(packets[0]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, state: 0 });
+    expect(readMove(packets[1]!.packet)).toEqual({ id: f.p.id, x: 499, y: 500, path: "500,500,499,500" });
+    expect(decodeScene(peer.mock.calls.map(([p]) => p))).toEqual([]); expect(await stored()).toEqual(before);
+    expect(await sf()).toMatchObject({ stateToken: state.stateToken, scene: { revision: state.scene.revision } });
+    self.mockClear(); advance(10); await owner.handle(f.p, f.client, GSPacket.parse(movePacket("NaN,500").encode()));
+    const ended = decodeScene(self.mock.calls.map(([p]) => p)); expect(ended.map(p => p.sub)).toEqual([18, 21]);
+    expect(readSnapshot(ended[0]!.packet)).toEqual({ id: f.p.id, x: 499, y: 500, state: 0 });
+    expect(readMove(ended[1]!.packet)).toEqual({ id: f.p.id, x: 499, y: 500, path: "" }); expect(decodeScene(peer.mock.calls.map(([p]) => p))).toEqual([]);
+    expect(await sf()).toMatchObject({ stateToken: state.stateToken, scene: { revision: state.scene.revision } }); expect(await stored()).toEqual(before);
+  });
+  it("direct move rejection emits one correction and a following acceptance stays last in packet order", async () => {
+    await enter(); const sent = vi.spyOn(f.p, "send"), before = await stored(), state = await sf();
+    expect(() => owner.move(f.client, f.p, { x: 499, y: 500 }, "NaN,500")).toThrow();
+    expect((await sf()).scene.revision).toBe(state.scene.revision);
+    await owner.handle(f.p, f.client, GSPacket.parse(movePacket().encode()));
+    const packets = decodeScene(sent.mock.calls.map(([p]) => p)); expect(packets.map(p => p.sub)).toEqual([18, 21, 21]);
+    expect(readMove(packets[1]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, path: "" });
+    expect(readMove(packets[2]!.packet)).toEqual({ id: f.p.id, x: 499, y: 500, path: "499,500" }); expect(await stored()).toEqual(before);
+  });
+  it("trajectory correction trims exact segment boundaries, samples the last segment and ends with an empty route", async () => {
+    await enter(); const sent = vi.spyOn(f.p, "send"), path = "499,500,500,500,499,500,500,500,499,500,500,500,499,500,500,500";
+    owner.move(f.client, f.p, { x: 500, y: 500 }, path); const state = await sf(), before = await stored();
+    for (const [ms, x, remaining] of [[25, 500, "499,500,500,500,499,500,500,500"], [45, 499, "500,500"], [50, 500, ""]] as const) {
+      setClock(new Date(initial.getTime() + ms)); sent.mockClear(); await owner.handle(f.p, f.client, GSPacket.parse(movePacket("NaN,500").encode()));
+      const packets = decodeScene(sent.mock.calls.map(([p]) => p)); expect(packets.map(p => p.sub)).toEqual([18, 21]);
+      expect(readSnapshot(packets[0]!.packet)).toEqual({ id: f.p.id, x, y: 500, state: 0 });
+      expect(readMove(packets[1]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, path: remaining });
+      expect(await sf()).toMatchObject({ stateToken: state.stateToken, scene: { revision: state.scene.revision } });
+    }
+    expect(await stored()).toEqual(before);
+  });
+  it("invalid route payloads correct once and never echo their forged target or empty inbound path", async () => {
+    await enter(); const sent = vi.spyOn(f.p, "send"), before = await stored(), state = await sf();
+    for (const [path, x, y] of [["", 777, 888], ["NaN,500", 777, 888], ["499,500,498", 777, 888], ["499,500", 777, 888], ["900,1", 900, 1], ["A".repeat(4097), 777, 888], ["4097,500", 4097, 500], [Array(258).fill(500).join(","), 500, 500]] as const) {
+      sent.mockClear(); await owner.handle(f.p, f.client, GSPacket.parse(movePacket(path, x, y).encode()));
+      const packets = decodeScene(sent.mock.calls.map(([p]) => p)); expect(packets.map(p => p.sub)).toEqual([18, 21]);
+      expect(readSnapshot(packets[0]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, state: 0 });
+      expect(readMove(packets[1]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, path: "" });
+    }
+    expect(await sf()).toMatchObject({ stateToken: state.stateToken, scene: { revision: state.scene.revision } }); expect(await stored()).toEqual(before);
+  });
+  it("malformed21 tails and truncated or invalid string bodies correct through the same owner", async () => {
+    await enter(); const sent = vi.spyOn(f.p, "send"), before = await stored(), packets = [movePacket()]; packets[0]!.writeByte(1);
+    const subOnly = new GSPacket(145); subOnly.writeByte(21); packets.push(subOnly);
+    const missingPath = new GSPacket(145); missingPath.writeByte(21); missingPath.writeInt(499); missingPath.writeInt(500); packets.push(missingPath);
+    for (const length of [-1, 32767]) { const b = new GSPacket(145); b.writeByte(21); b.writeInt(499); b.writeInt(500); b.writeShort(length); packets.push(b); }
+    const truncated = new GSPacket(145); truncated.writeByte(21); truncated.writeInt(499); truncated.writeInt(500); truncated.writeShort(7); truncated.writeByte(49); packets.push(truncated);
+    for (const packet of packets) { sent.mockClear(); await owner.handle(f.p, f.client, GSPacket.parse(packet.encode()));
+      const correction = decodeScene(sent.mock.calls.map(([p]) => p)); expect(correction.map(p => p.sub)).toEqual([18, 21]);
+      expect(readSnapshot(correction[0]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, state: 0 });
+      expect(readMove(correction[1]!.packet)).toEqual({ id: f.p.id, x: 500, y: 500, path: "" }); }
+    expect(await stored()).toEqual(before);
+  });
+  it.each(["outside", "left", "wrong-session", "replaced-player", "closed", "inactive", "quitting", "room", "lease", "creating"] as const)("rejected movement cannot revive or correct a %s scene", async mode => {
+    let queued: { work: Promise<void> } | undefined, client = f.client, p = f.p;
+    if (mode === "room" || mode === "lease") { const r = await room(); if (mode === "lease") r.removePlayer(f.p); }
+    else if (mode === "creating") { await admitted(); queued = await queuedHandoff(); }
+    else if (mode !== "outside") await enter();
+    if (mode === "left") await owner.leaveScene(f.client, f.p);
+    else if (mode === "wrong-session") { const g = await christmasFixture(db, 932, clock); client = g.client; client.player = p; }
+    else if (mode === "replaced-player") { p = Object.create(f.p) as typeof f.p; client.player = p; f.ctx.world.add(p); }
+    else if (mode === "closed") f.client.closed = true;
+    else if (mode === "inactive") f.p.isActive = false;
+    else if (mode === "quitting") f.p.quitting = Promise.resolve();
+    const sent = vi.spyOn(p, "send"); await owner.handle(p, client, GSPacket.parse(movePacket("NaN,500").encode())); expect(decodeScene(sent.mock.calls.map(([b]) => b))).toEqual([]);
+    if (queued) await tickUntil(queued.work);
+  });
+  it("unknown movement faults still reject the handler and never produce an authority packet", async () => {
+    await enter(); const sent = vi.spyOn(f.p, "send"), error = new Error("isolated movement fault"); vi.spyOn(f.ctx, "now").mockImplementation(() => { throw error; });
+    await expect(owner.handle(f.p, f.client, GSPacket.parse(movePacket().encode()))).rejects.toBe(error); expect(decodeScene(sent.mock.calls.map(([p]) => p))).toEqual([]);
   });
   it("shared500 never blocks dedicated admission and no task/gross/earned is fabricated", async () => {
     await db.db.update(app.ActivityStates).set({ State: christmasRoot(initial, 500) }); const before = christmasRoot(initial, 500); await admitted();
