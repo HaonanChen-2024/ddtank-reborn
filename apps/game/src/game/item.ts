@@ -117,6 +117,8 @@ export class ItemInfo {
   isGold = false;
   goldValidDate = 0;
   goldBeginTime: Date = new Date();
+  /** Resolved from the exact base-ID gold mapping; never replaces the persisted TemplateID. */
+  goldTemplate: ItemTemplate | null = null;
   Blood = 0;
   latentEnergyCurStr = "0,0,0,0";
   latentEnergyNewStr = "0,0,0,0";
@@ -148,8 +150,9 @@ export class ItemInfo {
     return it;
   }
 
-  static fromRow(row: GoodsRow, t: ItemTemplate): ItemInfo {
+  static fromRow(row: GoodsRow, t: ItemTemplate, goldTemplate: ItemTemplate | null = null): ItemInfo {
     const it = new ItemInfo(t);
+    it.goldTemplate = goldTemplate;
     Object.assign(it, {
       ItemID: row.ItemID,
       UserID: row.UserID,
@@ -233,7 +236,7 @@ export class ItemInfo {
       Hole6Exp: this.Hole6Exp,
       StrengthenTimes: this.StrengthenTimes,
       StrengthenRefineryLevel: this.StrengthenRefineryLevel,
-      isGold: this.isGold,
+      isGold: this.isValidGoldItem(),
       goldValidDate: this.goldValidDate,
       goldBeginTime: this.goldBeginTime,
       Blood: this.Blood,
@@ -300,23 +303,36 @@ export class ItemInfo {
   }
 
   get Pic(): string {
-    return this.template.Pic ?? "";
+    return this.effectiveTemplate().Pic ?? "";
   }
   get RefineryLevel(): number {
-    return this.template.RefineryLevel;
+    return this.effectiveTemplate().RefineryLevel;
   }
-  /** ItemInfo.Attack = AttackCompose + template.Attack (gold-plating override not ported). */
+  /** ItemInfo base-property getters use the gold template only during its valid lifetime. */
   get Attack(): number {
-    return this.AttackCompose + this.template.Attack;
+    return this.AttackCompose + this.effectiveTemplate().Attack;
   }
   get Defence(): number {
-    return this.DefendCompose + this.template.Defence;
+    return this.DefendCompose + this.effectiveTemplate().Defence;
   }
   get Agility(): number {
-    return this.AgilityCompose + this.template.Agility;
+    return this.AgilityCompose + this.effectiveTemplate().Agility;
   }
   get Luck(): number {
-    return this.LuckCompose + this.template.Luck;
+    return this.LuckCompose + this.effectiveTemplate().Luck;
+  }
+
+  /** ItemInfo.IsValidGoldItem (1181): strict positive days and end time > now; no legacy flag gate. */
+  isValidGoldItem(now = new Date()): boolean {
+    return this.goldValidDate > 0 && this.goldBeginTime.getTime() + this.goldValidDate * 86_400_000 > now.getTime();
+  }
+
+  effectiveTemplate(now = new Date()): ItemTemplate {
+    return this.isValidGoldItem(now) && this.goldTemplate ? this.goldTemplate : this.template;
+  }
+
+  displayTemplateId(now = new Date()): number {
+    return this.effectiveTemplate(now).TemplateID;
   }
 
   /** ItemInfo.CanStackedTo (ItemInfo.cs:751). */

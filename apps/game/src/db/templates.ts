@@ -83,6 +83,14 @@ export class Templates {
 
   findItem = (id: number): ItemTemplate | undefined => this.items.get(id);
 
+  /** Weapon appearance is an exact OldTemplateId mapping; armour's category bonus has no replacement template. */
+  findGoldTemplate = (id: number): ItemTemplate | undefined => {
+    const row = this.stats.goldEquip(id, 7);
+    if (!row || row.OldTemplateId !== id || row.NewTemplateId <= 0 || row.NewTemplateId === id) return undefined;
+    const item = this.findItem(row.NewTemplateId);
+    return item?.CategoryID === 7 ? item : undefined;
+  };
+
   /**
    * `lang`: pt-BR overlay for `game` schema text (see packages/db/src/translations.ts +
    * data/i18n/pt-BR/db/*.jsonl, built by scripts/export-texts.ts + import-translations.ts). Only tables that

@@ -77,7 +77,7 @@ export interface DdtFightOptions {
 let gameIdSeq = 1;
 
 /** Item-like shapes we read from the lobby player without importing GamePlayer (bots don't have bags). */
-type ItemLike = { TemplateID: number; StrengthenLevel?: number; RefineryLevel?: number; Hole1?: number; Hole2?: number; Hole3?: number; Hole4?: number; Hole5?: number; Hole6?: number; template: { Property7?: number | null; Property8?: number | null; Name?: string | null } };
+type ItemLike = { TemplateID: number; StrengthenLevel?: number; RefineryLevel?: number; goldValidDate?: number; effectiveTemplate?(): { TemplateID: number; Property8?: number | null; RefineryLevel?: number }; Hole1?: number; Hole2?: number; Hole3?: number; Hole4?: number; Hole5?: number; Hole6?: number; template: { Property7?: number | null; Property8?: number | null; Name?: string | null } };
 type PetLike = { ID: number; Place: number; TemplateID: number; Name: string; UserID: number; Level: number; SkillEquip: string };
 type BagLike = { getItemAt(i: number): (ItemLike & { Count: number }) | null; removeCountFromStack(it: unknown, n: number): boolean; removeItem(it: unknown): boolean };
 type LobbyLike = RoomMember & {
@@ -91,6 +91,7 @@ type LobbyLike = RoomMember & {
   /** GamePlayer.GetBaseAttack / GetBaseDefence (game/stats.ts) */
   baseAttack?: number;
   baseDefence?: number;
+  recalcStats?(): void;
   petBag?: { equipped(): PetLike | null; reduceHunger(): void };
   flushPets?(): void;
 };
@@ -218,10 +219,13 @@ export class DdtFightEngine implements FightEngine {
  * back to the weapon/armour approximation.
  */
 function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtFightOptions["petSkill"]): PlayerSpec {
+  // An online gold item may have expired since the last inventory change; refresh before taking the fight snapshot.
+  if (m.equipBag && Array.from({ length: 31 }, (_, i) => m.equipBag!.getItemAt(i)).some(it => (it?.goldValidDate ?? 0) > 0)) m.recalcStats?.();
   const c = m.info;
   const w = m.mainWeapon ?? null;
-  const wTpl = w ? assets.items.get(w.TemplateID) : undefined;
-  const weaponTemplateId = w?.TemplateID ?? (m.view().weaponTemplateId > 0 ? m.view().weaponTemplateId : 7001);
+  const display = w?.effectiveTemplate?.();
+  const weaponTemplateId = display?.TemplateID ?? w?.TemplateID ?? (m.view().weaponTemplateId > 0 ? m.view().weaponTemplateId : 7001);
+  const wTpl = w ? assets.items.get(weaponTemplateId) : undefined;
   const p7 = (it: ItemLike | null | undefined) => (it ? hertAddition(it.template.Property7 ?? 0, it.StrengthenLevel ?? 0) : 0);
   const real = (m.baseAttack ?? 0) > 0;
   const baseAttack = real ? m.baseAttack! : w ? p7(w) : (assets.items.get(weaponTemplateId)?.property7 ?? 100);
@@ -247,7 +251,7 @@ function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtF
     userId: m.id, nickname: c.NickName ?? `p${m.id}`, team, grade: c.Grade, attack: c.Attack, defence: c.Defence, agility: c.Agility, lucky: c.Luck,
     baseAttack: Math.max(1, baseAttack), baseDefence, hp: Math.max(1, c.hp),
     equipEffects,
-    weapon: { templateId: weaponTemplateId, property8: wTpl?.property8 ?? w?.template.Property8 ?? 0, refineryLevel: w?.RefineryLevel ?? 0 },
+    weapon: { templateId: weaponTemplateId, property8: display?.Property8 ?? wTpl?.property8 ?? w?.template.Property8 ?? 0, refineryLevel: display?.RefineryLevel ?? w?.RefineryLevel ?? 0 },
     deputyWeapon: dep && depTpl ? { template: depTpl, strengthenLevel: dep.StrengthenLevel ?? 0 } : null,
     isBot: m.isBot, isVip: (c.typeVIP ?? 0) > 0, inGuild: (c.ConsortiaID ?? 0) > 0,
     healstone: hs && hs.Count > 0 ? { heal: (hs.template as { Property2?: number | null }).Property2 ?? 0 } : null,

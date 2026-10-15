@@ -163,7 +163,7 @@ export function getBaseAttack(inp: StatInput, t: StatTables): number {
   const w = inp.equip[6];
   if (w) {
     const p7 = w.template.Property7;
-    v += Math.trunc(getHertAddition(p7, w.StrengthenLevel + (w.isGold ? 1 : 0)) + p7);
+    v += Math.trunc(getHertAddition(p7, w.StrengthenLevel + (w.isValidGoldItem(inp.now) ? 1 : 0)) + p7);
   }
   for (const it of [w, inp.equip[0], inp.equip[4]]) if (it) for (const h of holes(it)) v += attrGem(t, h)?.Property7 ?? 0;
   v += getTotemProp(t.totems, inp.totemId, "AddDamage");
@@ -177,7 +177,7 @@ export function getBaseDefence(inp: StatInput, t: StatTables): number {
   for (const it of [inp.equip[0], inp.equip[4]]) {
     if (!it) continue;
     const p7 = it.template.Property7;
-    v += Math.trunc(getHertAddition(p7, it.StrengthenLevel + (it.isGold ? 1 : 0)) + p7);
+    v += Math.trunc(getHertAddition(p7, it.StrengthenLevel + (it.isValidGoldItem(inp.now) ? 1 : 0)) + p7);
   }
   for (const it of [inp.equip[0], inp.equip[4], inp.equip[6]]) if (it) for (const h of holes(it)) v += attrGem(t, h)?.Property8 ?? 0;
   v += getTotemProp(t.totems, inp.totemId, "AddGuard");
@@ -212,12 +212,12 @@ export function computeStats(inp: StatInput, t: StatTables): StatResult {
     const it = inp.equip[i];
     if (!it) continue;
     equipped.push(it);
-    let a = it.AttackCompose + it.template.Attack, d = it.DefendCompose + it.template.Defence;
-    let g = it.AgilityCompose + it.template.Agility, l = it.LuckCompose + it.template.Luck;
-    const gold = it.isGold ? t.goldEquip(it.TemplateID, it.template.CategoryID) : undefined;
+    const base = it.effectiveTemplate(now);
+    let a = it.AttackCompose + base.Attack, d = it.DefendCompose + base.Defence;
+    let g = it.AgilityCompose + base.Agility, l = it.LuckCompose + base.Luck;
+    const gold = it.isValidGoldItem(now) ? t.goldEquip(it.TemplateID, it.template.CategoryID) : undefined;
     if (gold) {
-      // ItemInfo.Attack uses GoldEquip.Attack instead of the template value, then UpdatePlayerProperties adds it again.
-      a = it.AttackCompose + gold.Attack; d = it.DefendCompose + gold.Defence; g = it.AgilityCompose + gold.Agility; l = it.LuckCompose + gold.Luck;
+      // ItemInfo uses the replacement ItemTemplate, then PlayerEquipInventory adds only positive mapping bonuses.
       a += Math.max(0, gold.Attack); d += Math.max(0, gold.Defence); g += Math.max(0, gold.Agility); l += Math.max(0, gold.Luck);
       hp += Math.max(0, gold.Boold);
     }
@@ -276,8 +276,9 @@ export function computeStats(inp: StatInput, t: StatTables): StatResult {
   attack += tA + cA + pA; defence += tD + cD + pD; agility += tG + cG + pG; luck += tL + cL + pL; hp += tH + pH;
   const baseBlood = getBaseBlood(inp);
   const finalHp = Math.trunc((hp + inp.levelBlood + Math.trunc(defence / 10)) * baseBlood);
-  const baseAttack = getBaseAttack(inp, t);
-  const baseDefence = getBaseDefence(inp, t);
+  const timed = { ...inp, now };
+  const baseAttack = getBaseAttack(timed, t);
+  const baseDefence = getBaseDefence(timed, t);
   const s = { attack, defence, agility, luck, hp: finalHp };
   return { ...s, baseAttack, baseDefence, baseBlood, strengthenLevel, fightPower: fightPower(s, baseAttack, baseDefence, inp.equip[15] ?? null) };
 }
@@ -292,7 +293,7 @@ export function emptyStatTables(findItem: (id: number) => ItemTemplate | undefin
  * (category 1/5), units = weapon (category 7/27). +5..8 → 1, +9..11 → 2, +12..14 → 3, +15 → 4, gilded (isGold) → 5. The
  * client (PlayerInfo.Nimbus) draws the strengthen glow/halo from it.
  */
-export function userNimbus(equip: (ItemInfo | null)[]): number {
+export function userNimbus(equip: (ItemInfo | null)[], now = new Date()): number {
   let a = 0, w = 0;
   for (let i = 0; i < 31; i++) {
     const it = equip[i];
@@ -304,7 +305,7 @@ export function userNimbus(equip: (ItemInfo | null)[]): number {
     if (s >= 9 && s <= 11) { if (armour) a = a > 1 ? a : 2; if (weapon) w = w > 1 ? w : 2; }
     if (s >= 12 && s <= 14) { if (armour) a = a > 1 ? a : 3; if (weapon) w = w > 1 ? w : 3; }
     if (s === 15) { if (armour) a = a > 1 ? a : 4; if (weapon) w = w > 1 ? w : 4; }
-    if (it.isGold) { if (armour) a = 5; if (weapon) w = 5; }
+    if (it.isValidGoldItem(now)) { if (armour) a = 5; if (weapon) w = 5; }
   }
   return a * 100 + w;
 }

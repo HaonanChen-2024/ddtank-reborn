@@ -6,6 +6,7 @@
  * alterar, então um pacote repetido nunca consome nem cria duas vezes.
  */
 import { GSPacket } from "@ddt/protocol";
+import type { Database } from "@ddt/db";
 import { ItemInfo, BagType, templateBagType, type ItemTemplate } from "../game/item.js";
 import type { PlayerInventory } from "../game/inventory.js";
 import type { GamePlayer } from "../game/player.js";
@@ -14,6 +15,7 @@ import type { ServerContext } from "../session/context.js";
 import type { HandlerRegistry } from "./registry.js";
 import { mailItems } from "./items.js";
 import { getEquipControl } from "../db/consortia.js";
+import { saveItem } from "../db/items.js";
 import { personalRiches, smithBonusLevel } from "../game/consortia.js";
 import { pushRecords } from "./events.js";
 
@@ -685,6 +687,76 @@ export async function itemTrend(ctx: ServerContext, p: GamePlayer, pkt: GSPacket
   p.sendMessage(0, ctx.lang.t("ItemTrendHandle.Fail"));
 }
 
+/** WishBeadEquipHandler.cs: six ints, one bead per attempt, result106/int (0 success, 1 roll failed, 5 invalid, 6 already gold). */
+export async function wishBead(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+  const reply = (result: number) => { const out = new GSPacket(106, p.id); out.writeInt(result); p.send(out); };
+  // GSPacket.parse zero-pads its backing buffer: validate the actual body before reading six int32 fields.
+  if (pkt.length - pkt.offset !== 24) return reply(5);
+  const place = pkt.readInt(), bagType = pkt.readInt(), templateId = pkt.readInt();
+  const beadPlace = pkt.readInt(), beadBagType = pkt.readInt(), beadId = pkt.readInt();
+  return p.withPersistenceLock(async () => {
+    if (p.currentRoom?.IsPlaying) return reply(5);
+    if (bagLocked(ctx, p)) return reply(5);
+    const itemBag = p.getInventory(bagType), beadBag = p.getInventory(beadBagType);
+    const item = itemBag?.getItemAt(place), bead = beadBag?.getItemAt(beadPlace);
+    const now = ctx.now();
+    if (!itemBag || !beadBag || !itemBag.saveToDb || !beadBag.saveToDb || !item || !bead || item === bead || !item.IsExist || !bead.IsExist || item.Count < 1 || bead.Count < 1 ||
+        item.BagType !== itemBag.bagType || bead.BagType !== beadBag.bagType || item.Place !== place || bead.Place !== beadPlace ||
+        item.cellLocked || bead.cellLocked || (item.TemplateID !== templateId && item.displayTemplateId(now) !== templateId) ||
+        bead.TemplateID !== beadId || !item.isValidItem(now) || !bead.isValidItem(now)) return reply(5);
+    const category = item.template.CategoryID;
+    if (!((bead.TemplateID === 11560 && category === 7) || (bead.TemplateID === 11561 && category === 5) || (bead.TemplateID === 11562 && category === 1))) return reply(5);
+    // The single-argument original GoldEquip lookup is exact; its category fallback belongs to the stats owner.
+    const row = ctx.templates.stats.goldEquip(item.TemplateID, category);
+    const goldTemplate = category === 7 && row?.OldTemplateId === item.TemplateID ? ctx.templates.findItem(row.NewTemplateId) : null;
+    if (category === 7 && (!goldTemplate || goldTemplate.CategoryID !== 7 || goldTemplate.TemplateID <= 0 || goldTemplate.TemplateID === item.TemplateID)) return reply(5);
+    const limited = ctx.templates.serverConfig.get("IsWishBeadLimit")?.trim().toLowerCase() === "true";
+    if (limited && item.StrengthenLevel > ctx.templates.cfgInt("WishBeadLimitLv", 12)) return reply(5);
+    if (item.isValidGoldItem(now)) return reply(6);
+    const probability = ctx.zoneId === 1001 ? 50 : ctx.zoneId === 1002 ? 40 : 8;
+    const success = probability > Math.floor(rnd() * 1000); // Original denominator1000; WishBeadRate is not used here.
+    // saveItem mutates ItemID/dirty state: save detached instances so SQL/COMMIT failure cannot leak inventory changes.
+    const stagedItem = item.clone(), stagedBead = bead.clone();
+    stagedItem.ItemID = item.ItemID; stagedBead.ItemID = bead.ItemID;
+    stagedItem.IsBinds = true;
+    if (success) {
+      stagedItem.isGold = true; stagedItem.goldBeginTime = now; stagedItem.goldValidDate = 3; stagedItem.goldTemplate = goldTemplate ?? null;
+    }
+    if (stagedBead.Count > 1) stagedBead.Count--;
+    else {
+      stagedBead.IsExist = false; stagedBead.Place = -1; stagedBead.BagType = -1;
+      stagedBead.RemoveType = 0; stagedBead.RemoveDate = now;
+    }
+    try {
+      await ctx.db.db.transaction(async tx => {
+        await saveItem(tx as unknown as Database, stagedItem);
+        await saveItem(tx as unknown as Database, stagedBead);
+      });
+    } catch (error) {
+      ctx.log.error("WishBead transaction failed", error);
+      return reply(5);
+    }
+    // Nothing is published before COMMIT; a later sink failure must not roll back an already committed attempt.
+    const bags = [...new Set([itemBag, beadBag])];
+    bags.forEach(bag => bag.beginChanges());
+    try {
+      item.ItemID = stagedItem.ItemID; bead.ItemID = stagedBead.ItemID;
+      if (!beadBag.removeCountFromStack(bead, 1)) throw new Error("WishBead inventory changed after commit");
+      if (!bead.IsExist) bead.RemoveDate = now;
+      item.IsBinds = true;
+      if (success) {
+        item.isGold = true; item.goldBeginTime = now; item.goldValidDate = 3; item.goldTemplate = goldTemplate ?? null;
+      }
+      itemBag.updateItem(item);
+    } finally {
+      const errors: unknown[] = [];
+      for (const bag of bags) { try { bag.commitChanges(); } catch (error) { errors.push(error); } }
+      if (errors.length) throw errors[0];
+    }
+    reply(success ? 0 : 1);
+  });
+}
+
 export function registerForge(r: HandlerRegistry): void {
   r.player(59, "ITEM_STRENGTHEN", (ctx, p, pkt) => strengthen(ctx, p, pkt), "partial");
   r.player(58, "ITEM_COMPOSE", (ctx, p, pkt) => compose(ctx, p, pkt), "partial");
@@ -694,10 +766,11 @@ export function registerForge(r: HandlerRegistry): void {
   r.player(122, "CLEAR_STORE_BAG", (ctx, p) => clearStoreBag(ctx, p));
   r.player(217, "OPEN_FIVE_SIX_HOLE", (ctx, p, pkt) => openFiveSixHole(ctx, p, pkt));
   r.player(120, "ITEM_TREND", (ctx, p, pkt) => itemTrend(ctx, p, pkt));
+  r.player(106, "WISHBEADEQUIP", (ctx, p, pkt) => wishBead(ctx, p, pkt));
   // Confirmed dead in the original vendor/DDTank41 (no [PacketHandler] class anywhere carries these codes — a
   // later-client (6600+) feature set never wired into the 4.1 server): 61 ITEM_TRANSFER, 95 NECKLACE_STRENGTH,
-  // 106 WISHBEADEQUIP, 133 LATENT_ENERGY, 138 ITEM_ADVANCE, 209 FIGHT_SPIRIT, 295 STORE_FINE_SUIT, 391 EQUIP_GHOST.
-  for (const [code, name] of [[61, "ITEM_TRANSFER"], [95, "NECKLACE_STRENGTH"], [106, "WISHBEADEQUIP"], [133, "LATENT_ENERGY"],
+  // 133 LATENT_ENERGY, 138 ITEM_ADVANCE, 209 FIGHT_SPIRIT, 295 STORE_FINE_SUIT, 391 EQUIP_GHOST.
+  for (const [code, name] of [[61, "ITEM_TRANSFER"], [95, "NECKLACE_STRENGTH"], [133, "LATENT_ENERGY"],
     [138, "ITEM_ADVANCE"], [209, "FIGHT_SPIRIT"], [295, "STORE_FINE_SUIT"], [391, "EQUIP_GHOST"]] as [number, string][]) {
     r.player(code, name, () => undefined, "stub");
   }

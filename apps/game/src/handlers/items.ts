@@ -488,7 +488,7 @@ export function registerItems(r: HandlerRegistry): void {
     let items = online ? online.equipBag.getItems(0, 30) : null;
     if (!online) {
       info = byId ? await loadPlayerInfo(ctx.db.db, id) : await loadPlayerInfoByNick(ctx.db.db, nick);
-      if (info) items = await loadEquippedItems(ctx.db.db, info.ID, ctx.templates.findItem);
+      if (info) items = await loadEquippedItems(ctx.db.db, info.ID, ctx.templates.findItem, ctx.templates.findGoldTemplate);
     }
     if (!info || !items) return p.sendMessage(3, ctx.lang.t("UserEquipListHandler.InvalidPlayer"));
     p.send(Out.userEquip(info, items, ctx.now()));

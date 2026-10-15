@@ -80,7 +80,7 @@ describe("VIP", () => {
 });
 
 describe("Nimbus (GetUserNimbus)", () => {
-  const it2 = (cat: number, s: number, gold = false) => ({ StrengthenLevel: s, isGold: gold, template: { CategoryID: cat } }) as never;
+  const it2 = (cat: number, s: number, gold = false) => ({ StrengthenLevel: s, isValidGoldItem: () => gold, template: { CategoryID: cat } }) as never;
   it("aura tiers: armour hundreds, weapon units, gilded = 5", () => {
     expect(userNimbus([it2(1, 12), null, null, null, null, null, it2(7, 9)])).toBe(302);
     expect(userNimbus([it2(1, 4), it2(7, 15, true)])).toBe(5);

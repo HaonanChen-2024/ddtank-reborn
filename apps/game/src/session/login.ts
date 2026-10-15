@@ -98,7 +98,7 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
   if (!info) return null;
   const [match, items, friends, progress] = await Promise.all([
     loadMatchInfo(db, userId),
-    loadUserItems(db, userId, ctx.templates.findItem),
+    loadUserItems(db, userId, ctx.templates.findItem, ctx.templates.findGoldTemplate),
     loadFriends(db, userId),
     loadProgress(db, userId),
   ]);

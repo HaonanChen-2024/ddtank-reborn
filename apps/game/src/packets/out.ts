@@ -177,15 +177,17 @@ export function inventorySlots(ownerId: number, bag: PlayerInventory, slots: num
       continue;
     }
     p.writeBoolean(true);
-    p.writeInt(it.UserID); p.writeInt(it.ItemID); p.writeInt(it.Count); p.writeInt(it.Place); p.writeInt(it.TemplateID);
+    p.writeInt(it.UserID); p.writeInt(it.ItemID); p.writeInt(it.Count); p.writeInt(it.Place); p.writeInt(it.displayTemplateId(now));
     p.writeInt(it.AttackCompose); p.writeInt(it.DefendCompose); p.writeInt(it.AgilityCompose); p.writeInt(it.LuckCompose);
     p.writeInt(it.StrengthenLevel); p.writeInt(it.StrengthenExp); p.writeBoolean(it.IsBinds); p.writeBoolean(it.IsJudge);
     wd(p, it.BeginDate); p.writeInt(it.ValidDate); p.writeString(it.Color ?? ""); p.writeString(it.Skin ?? ""); p.writeBoolean(it.IsUsed);
     for (const h of [it.Hole1, it.Hole2, it.Hole3, it.Hole4, it.Hole5, it.Hole6]) p.writeInt(h);
-    p.writeString(it.Pic); p.writeInt(it.RefineryLevel); wd(p, addDays(now, 5)); p.writeInt(it.StrengthenTimes);
+    const display = it.effectiveTemplate(now);
+    p.writeString(display.Pic ?? ""); p.writeInt(display.RefineryLevel); wd(p, addDays(now, 5)); p.writeInt(it.StrengthenTimes);
     p.writeByte(it.Hole5Level); p.writeInt(it.Hole5Exp); p.writeByte(it.Hole6Level); p.writeInt(it.Hole6Exp);
-    p.writeBoolean(it.isGold);
-    if (it.isGold) {
+    const gold = it.isValidGoldItem(now);
+    p.writeBoolean(gold);
+    if (gold) {
       p.writeInt(it.goldValidDate);
       wd(p, it.goldBeginTime);
     }
@@ -486,14 +488,16 @@ export function userEquip(c: PlayerInfo, items: ItemInfo[], now = new Date()): P
   p.writeBoolean(false); p.writeInt(0); p.writeInt(c.totemId); p.writeInt(c.necklaceExp);
   p.writeInt(items.length);
   for (const it of items) {
-    p.writeByte(it.BagType); p.writeInt(it.UserID); p.writeInt(it.ItemID); p.writeInt(it.Count); p.writeInt(it.Place); p.writeInt(it.TemplateID);
+    p.writeByte(it.BagType); p.writeInt(it.UserID); p.writeInt(it.ItemID); p.writeInt(it.Count); p.writeInt(it.Place); p.writeInt(it.displayTemplateId(now));
     p.writeInt(it.AttackCompose); p.writeInt(it.DefendCompose); p.writeInt(it.AgilityCompose); p.writeInt(it.LuckCompose); p.writeInt(it.StrengthenLevel);
     p.writeBoolean(it.IsBinds); p.writeBoolean(it.IsJudge); wd(p, it.BeginDate); p.writeInt(it.ValidDate); p.writeString(it.Color ?? "");
     p.writeString(it.Skin ?? ""); p.writeBoolean(it.IsUsed);
     for (const h of [it.Hole1, it.Hole2, it.Hole3, it.Hole4, it.Hole5, it.Hole6]) p.writeInt(h);
-    p.writeString(it.Pic); p.writeInt(it.RefineryLevel); wd(p, now); p.writeByte(it.Hole5Level); p.writeInt(it.Hole5Exp);
-    p.writeByte(it.Hole6Level); p.writeInt(it.Hole6Exp); p.writeBoolean(it.isGold);
-    if (it.isGold) {
+    const display = it.effectiveTemplate(now);
+    p.writeString(display.Pic ?? ""); p.writeInt(display.RefineryLevel); wd(p, now); p.writeByte(it.Hole5Level); p.writeInt(it.Hole5Exp);
+    const gold = it.isValidGoldItem(now);
+    p.writeByte(it.Hole6Level); p.writeInt(it.Hole6Exp); p.writeBoolean(gold);
+    if (gold) {
       p.writeInt(it.goldValidDate);
       wd(p, it.goldBeginTime);
     }

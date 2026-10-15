@@ -211,7 +211,7 @@ export class GamePlayer implements RoomMember {
       roomTeam: this.roomTeam,
       inRoom: this.currentRoom != null,
       pingTime: this.pingTime,
-      weaponTemplateId: this.mainWeapon?.TemplateID ?? -1,
+      weaponTemplateId: this.mainWeapon?.displayTemplateId() ?? -1,
       secondWeaponTemplateId: this.secondWeapon?.TemplateID ?? 0,
       medal: this.medal,
     };
@@ -251,10 +251,18 @@ export class GamePlayer implements RoomMember {
   }
 
   /** The computation half of UpdatePlayerProperties (no packets): used before the login burst too. */
-  recalcStats(): void {
+  recalcStats(now = new Date()): void {
+    // A false GRID_GOODS update is needed to clear the original client's cached gold appearance.
+    const expired: { bag: PlayerInventory; item: ItemInfo }[] = [];
+    for (const bag of this.allBags()) for (const item of bag.getItems()) {
+      if (item.isGold && !item.isValidGoldItem(now)) {
+        item.isGold = false;
+        expired.push({ bag, item });
+      }
+    }
     const styleIndex = [1, 2, 3, 4, 5, 6, 11, 13, 14, 15, 16, 17, 18, 19, 20];
     const s0 = this.equipBag.getItemAt(0);
-    let style = s0 ? `${s0.TemplateID}|${s0.Pic}` : "";
+    let style = s0 ? `${s0.displayTemplateId(now)}|${s0.effectiveTemplate(now).Pic}` : "";
     let color = s0 ? s0.Color : "";
     const skin = this.equipBag.getItemAt(5)?.Skin ?? "";
     for (const idx of styleIndex) {
@@ -262,7 +270,7 @@ export class GamePlayer implements RoomMember {
       color += ",";
       const it = this.equipBag.getItemAt(idx);
       if (it) {
-        style += `${it.TemplateID}|${it.Pic}`;
+        style += `${it.displayTemplateId(now)}|${it.effectiveTemplate(now).Pic}`;
         color += it.Color;
       }
     }
@@ -270,7 +278,7 @@ export class GamePlayer implements RoomMember {
     const equip: (ItemInfo | null)[] = [];
     for (let i = 0; i < 31; i++) equip.push(this.equipBag.getItemAt(i));
     const r = computeStats({
-      equip, grade: c.Grade, levelBlood: this.levelBlood(c.Grade), necklaceExpAdd: c.necklaceExpAdd ?? 0, totemId: c.totemId ?? 0,
+      equip, now, grade: c.Grade, levelBlood: this.levelBlood(c.Grade), necklaceExpAdd: c.necklaceExpAdd ?? 0, totemId: c.totemId ?? 0,
       texp: c.Texp ?? { attTexpExp: 0, defTexpExp: 0, spdTexpExp: 0, lukTexpExp: 0, hpTexpExp: 0 },
       cards: this.cardBag.equipped().length ? this.cardBag.equipped() : this.cards, pet: this.petBag.equipped() ?? this.pet, evolutionGrade: c.evolutionGrade ?? 0,
       petEquips: this.petBag.equipped() ? getPetEquips(this.petBag.equipped()!) : [], eat: this.petBag.eat,
@@ -279,8 +287,9 @@ export class GamePlayer implements RoomMember {
     c.FightPower = r.fightPower;
     this.baseAttack = r.baseAttack;
     this.baseDefence = r.baseDefence;
-    c.Nimbus = userNimbus(equip); // GetUserNimbus (strengthen / gilded aura tiers)
+    c.Nimbus = userNimbus(equip, now); // GetUserNimbus (strengthen / gilded aura tiers)
     c.Style = style; c.Colors = color; c.Skin = skin;
+    for (const { bag, item } of expired) bag.updateItem(item);
   }
 
   // -------------------------------------------------------------------- currencies (GamePlayer Add*/Remove*)
