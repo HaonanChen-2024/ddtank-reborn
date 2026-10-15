@@ -151,8 +151,9 @@ describe("original Moonlight through the shared transactional API", () => {
     expect((await snapshot()).nativeMoonlight.ranking!.personalScore).toBe(2);
     await h.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT moonlight_native_receipt_failure`);
     const drawn = await native(value, requestId); expect(drawn.nativeMoonlight.ranking).toBeNull();
-    const delivered = await persisted(), replay = await native(value, requestId);
-    expect(replay.nativeMoonlight.ranking).toBeNull(); expect(await persisted()).toEqual(delivered);
+    const delivered = await persisted(), current = await snapshot(), replay = await native(value, requestId);
+    expect(replay).toEqual({ ...current, message: drawn.message, mailedCount: drawn.mailedCount, replayed: true });
+    expect(replay).not.toHaveProperty("nativeMoonlightAction"); expect(await persisted()).toEqual(delivered);
     const rank = (await snapshot()).nativeMoonlight.ranking!; expect(rank).toMatchObject({ personalScore: 5, personalRank: 1 });
     await action("moon", { type: "take" }); expect((await snapshot()).nativeMoonlight.ranking).toEqual(rank);
     await built.app.close(); await rebuild(); expect((await snapshot()).nativeMoonlight.ranking).toEqual(rank);
@@ -232,11 +233,12 @@ describe("original Moonlight through the shared transactional API", () => {
     const choice = first.nativeMoonlight.bagToken, items = [{ index: 0, count: 3 }];
     const competing = await Promise.all([post("moonlight-native", { type: "take", choice, items }), post("moonlight-native", { type: "recycle", choice, items })]);
     expect(competing.map(response => response.statusCode).sort()).toEqual([200, 400]);
-    const committed = competing.find(response => response.statusCode === 200)!.json<ActivityResult>(), { nativeExchange: _exchange, ...final } = await snapshot(), after = await persisted();
+    const committed = competing.find(response => response.statusCode === 200)!.json<ActivityResult>(), final = await snapshot(), after = await persisted();
     expect(final.nativeMoonlight.bag).toEqual([]); expect(after.receipts).toHaveLength(2);
     const took = committed.nativeMoonlightAction!.effects[0].type === "taken";
     expect(final.points).toBe(took ? 940 : 946); expect(after.goods).toHaveLength(took ? 2 : 0); expect(after.mails).toHaveLength(took ? 1 : 0);
-    const replay = await native(value, requestId); expect(replay).toMatchObject({ points: final.points, earned: final.earned, revision: final.revision, nativeMoonlight: { ...final.nativeMoonlight, ranking: null }, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
+    const receipt = after.receipts.find(row => row.RequestID === requestId)!.Result as Record<string, unknown>;
+    const replay = await native(value, requestId); expect(replay).toEqual({ ...final, ...receipt, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
     await native({ ...value, count: 5 }, requestId, 409); await action("ddplay-native", { type: "spin" }, requestId, 409);
     expect(await persisted()).toEqual(after); expect(after.receipts.every(row => Object.keys(row.Result as object).sort().join(",") === "mailedCount,message")).toBe(true);
   });

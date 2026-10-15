@@ -11,6 +11,7 @@ import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
+import { assertPublicActivityStates } from "./public-activity-state.js";
 
 // Actual HTTP/auth, shared shop owner, in-memory PGlite transaction, UUID receipt and mail.
 // Only Date/RNG are controlled. No existing database or service is opened.
@@ -29,13 +30,15 @@ const post = (id: string, action: ActivityAction, requestId: string = randomUUID
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeGypsyEffects|"(?:games|state|seed|nextOffers)"\s*:/); return response.json();
+  expect(response.body).not.toMatch(/nativeGypsyEffects|"(?:games|seed|nextOffers)"\s*:/);
+  const result = response.json<ActivityResult>(); assertPublicActivityStates(result); return result;
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("gypsy-native", value, requestId, status);
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
-  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeGypsyEffects|"(?:games|state|seed|nextOffers)"\s*:/);
-  const result = response.json<ActivityResult>(); expect(result).not.toHaveProperty("nativeGypsyAction"); return result;
+  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeGypsyEffects|"(?:games|seed|nextOffers)"\s*:/);
+  const result = response.json<ActivityResult>(); assertPublicActivityStates(result);
+  expect(result).not.toHaveProperty("nativeGypsyAction"); return result;
 }
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;
 async function persisted() { return {

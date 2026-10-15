@@ -58,10 +58,11 @@ async function saved() { return {
   mails: await q(monitor, sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`),
 }; }
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
-// A14's clock may advance; A05's independent online projection is optional on older action replies.
-// Keep every older state/effect assertion while comparing only their common response contract.
-const latestView = ({ nativeExchange: _exchange, ...value }: ActivityResult) => ({...value, nativeForthright:{...value.nativeForthright,
-  serverNow:expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)}});
+// UUID replays re-read the complete GET projection; Forthright and Snowfield clocks may advance.
+const latestView = (value: ActivityResult) => ({...value, nativeForthright:{...value.nativeForthright,
+  serverNow:expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)},
+  ...(value.nativeChristmasSnowfield?{nativeChristmasSnowfield:{...value.nativeChristmasSnowfield,
+    serverNow:expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)}}:{})});
 async function wallet() { return (await q1<{ Points: number; Revision: number }>(monitor, sql`SELECT "Points","Revision" FROM app."ActivityWallet" WHERE "UserID"=${uid}`))!; }
 async function snapshot(app = appB, who = uid) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
@@ -249,7 +250,8 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS native_test_receipt_failure`);
     await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" DROP CONSTRAINT IF EXISTS native_test_recipient_failure`);
     await monitor.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false WHERE "TemplateID"=11019`);
-    await monitor.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
+    // Shared actor revisions belong to the same isolated test case as its reset wallets.
+    await monitor.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",app."CarnivalGlobalState",
       member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);
     await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (1,${name},'tests-only')`);
     await monitor.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst")
@@ -438,8 +440,11 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     // Native must reject a stale quote if the unquoted legacy draw obtains the wallet lock first.
     const nativeWon = raced[1].statusCode===200, draws = nativeWon?6:5, current = await snapshot(), after = await saved();
     expect(raced[0].json()).not.toHaveProperty("nativeMoonlightAction");
-    if(nativeWon) expect(raced[1].json()).toHaveProperty("nativeMoonlightAction");
-    else expect(raced[1].json().message).toContain("临时包或日期已更新");
+    if(nativeWon) expect(raced[1].json()).toMatchObject({nativeMoonlightAction:{effects:[{type:"drawn",count:1,cost:20,score:920,draws:4}]}});
+    else {
+      expect(raced[1].json().message).toBe("临时包、商品或日期已更新，请重新查看后再确认。");
+      expect(raced[1].json()).not.toHaveProperty("nativeMoonlightAction");
+    }
     expect(await wallet()).toEqual({Points:nativeWon?880:900,Revision:nativeWon?3:2});
     expect(current.nativeMoonlight).toMatchObject({draws,bagSlotsUsed:draws,bag:[{index:0,templateId:11002,itemCount:draws,recycleUnitPoints:2}]});
     expect(after.receipts).toHaveLength(nativeWon?3:2); expect(after.goods).toEqual([]); expect(after.mails).toEqual([]);

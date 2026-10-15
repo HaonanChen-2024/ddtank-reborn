@@ -11,6 +11,7 @@ import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
+import { assertPublicActivityStates } from "./public-activity-state.js";
 
 // Real HTTP/auth, in-memory PGlite state, wallet, receipts and ordinary mail. No live DB/service.
 const random = vi.hoisted(() => ({ fraction: 0.99 }));
@@ -30,11 +31,13 @@ const post = (id: string, action: ActivityAction, requestId: string = randomUUID
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  expect(result).not.toHaveProperty("nativeWheelAction"); expect(response.body).not.toMatch(/nativeWheelEffects|"(?:games|state|seed)"\s*:/); return result;
+  expect(result).not.toHaveProperty("nativeWheelAction"); expect(response.body).not.toMatch(/nativeWheelEffects|"(?:games|seed)"\s*:/);
+  assertPublicActivityStates(result); return result;
 }
 async function action(id: string, value: ActivityAction, requestId: string = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeWheelEffects|"(?:games|state|seed)"\s*:/); return response.json();
+  expect(response.body).not.toMatch(/nativeWheelEffects|"(?:games|seed)"\s*:/);
+  const result = response.json<ActivityResult>(); assertPublicActivityStates(result); return result;
 }
 const native = (value: ActivityAction, requestId: string = randomUUID(), status = 200) => action("wheel-native", value, requestId, status);
 const play = async (type: string) => native({ type, choice: (await snapshot()).nativeWheel.roundToken });

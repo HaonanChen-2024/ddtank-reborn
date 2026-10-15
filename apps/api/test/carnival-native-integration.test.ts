@@ -225,7 +225,7 @@ describe("native carnival through atomic account API", () => {
     const again = await native(value, requestId); expect(again).toMatchObject({ replayed: true, mailedCount: 2 });
     expect(again).not.toHaveProperty("nativeCarnivalAction"); expect(await persisted()).toEqual(delivered);
     await draw(); const newer = await snapshot(); const replay = await native(value, requestId);
-    expect(replay.nativeCarnival).toEqual({ ...newer.nativeCarnival, ranking: null }); expect(replay).not.toHaveProperty("nativeCarnivalAction");
+    expect(replay).toEqual({ ...newer, message: again.message, mailedCount: 2, replayed: true }); expect(replay).not.toHaveProperty("nativeCarnivalAction");
     const receipt = await q1<{ Result: Record<string, unknown> }>(h, sql`SELECT "Result" FROM app."ActivityActions" WHERE "RequestID"=${requestId}`);
     expect(receipt!.Result).toEqual({ message: again.message, mailedCount: 2 });
   });

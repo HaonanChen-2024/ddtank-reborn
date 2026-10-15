@@ -174,7 +174,7 @@ export function viewMoonlightNative(value: unknown, ctx: Clock, funds: Funds, ac
     canDraw: drawChoices[0].canDraw, drawChoices,
     canTake: bag.length > 0, canRecycle: bag.length > 0 && score <= 2_147_483_645, bag,
     previewTemplateIds: PRIZES.map(item => item.templateId),
-    // Filled only by an authenticated, committed GET; action/replay projections never run ranking reads.
+    // Complete GET/replay snapshots fill this after authentication, outside wallet transactions; fresh actions do not.
     ranking: null as MoonlightNativeRanking | null,
     shop: { ...shopCatalog, token: shopToken(state, ctx), entries: shopCatalog.entries.map(product => {
       const affordableCount = Math.min(shopCatalog.maxCount, Math.floor(state.fragments / product.fragmentCost));

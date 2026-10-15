@@ -30,7 +30,7 @@ export interface ActivityContext {
   forthrightInspectCode?: string;
   /** Server-built complete catalog from actual local templates and resources, never action input. */
   treasureCatalog?: TreasureCatalog;
-  /** Public local draw-count ranking, loaded only by GET outside wallet transactions. */
+  /** Public local draw-count ranking, loaded by complete snapshots outside wallet transactions. */
   carnivalNativeRanking?: CarnivalNativeRanking;
   /** Committed EventClaims sign/day keys, not a client-provided completion flag. */
   signDays: string[];

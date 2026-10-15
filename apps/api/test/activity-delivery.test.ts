@@ -28,6 +28,8 @@ import { viewFirstRechargeNative } from "../src/activities/first-recharge-native
 import { viewChargeNative } from "../src/activities/charge-native.js";
 import { viewForthrightNative } from "../src/activities/forthright-native.js";
 import { viewDevilNative } from "../src/activities/devil-native.js";
+import { PRIZES } from "../src/activities/config.js";
+import { unavailableExchange } from "../src/activities/exchange-native.js";
 
 // These tests exercise auth, actual SQL transactions and original mail delivery, not engine rules.
 vi.mock("../src/activities/engine.js", () => ({
@@ -242,15 +244,17 @@ describe("reference activity API delivery", () => {
   });
 
   it("replays the current page after another action, retaining the original delivery receipt", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date());
     const id = randomUUID();
     const first = await post(id);
     const receipt = await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`);
     vi.mocked(transitionActivity).mockImplementation((state) => ({ state: { ...state, history: [...state.history, "后续进展"] }, pointsDelta: -1, earnedDelta: 0, rewards: [], message: "后续操作" }));
     expect((await post()).statusCode).toBe(200);
-    const { nativeExchange: _exchange, nativeChristmas: _christmas, nativeChristmasSnowfield: _snowfield, ...current } = (await get()).json(); // Optional game authorities are only read outside wallet transactions.
+    const current = (await get()).json();
     const replay = (await post(id)).json();
     expect(first.json().points).toBe(7);
-    expect(replay).toMatchObject({ ...current, nativeCarnival: { ...current.nativeCarnival, ranking: null }, nativeMoonlight: { ...current.nativeMoonlight, ranking: null }, nativeForthright: { ...current.nativeForthright, serverNow: expect.any(String) }, points: 6, revision: 2, history: ["真实提交", "后续进展"], message: "已发送", mailedCount: 2, replayed: true });
+    expect(current).toMatchObject({ points: 6, revision: 2, history: ["真实提交", "后续进展"] });
+    expect(replay).toEqual({ ...current, message: "已发送", mailedCount: 2, replayed: true });
     expect(transitionActivity).toHaveBeenCalledTimes(2);
     expect(await counts()).toEqual({ actions: 2, states: 1, items: 7, mails: 2 });
     expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
@@ -264,11 +268,95 @@ describe("reference activity API delivery", () => {
     const tomorrow = new Date(); tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(tomorrow);
     headers.authorization = `Bearer ${signJwt({ sub: 1, name: "activity-test", role: "player" }, "activity-tests-only", 3600)}`;
-    const { nativeExchange: _exchange, nativeChristmas: _christmas, nativeChristmasSnowfield: _snowfield, ...current } = (await get()).json();
+    const current = (await get()).json();
     const replay = (await post(id)).json();
     expect(replay.day).not.toBe(first.day);
-    expect(replay).toMatchObject({ ...current, nativeCarnival: { ...current.nativeCarnival, ranking: null }, nativeMoonlight: { ...current.nativeMoonlight, ranking: null }, revision: first.revision, message: "已发送", mailedCount: 2, replayed: true });
+    expect(current.revision).toBe(first.revision);
+    expect(replay).toEqual({ ...current, message: "已发送", mailedCount: 2, replayed: true });
     expect(transitionActivity).toHaveBeenCalledTimes(1);
+    expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
+    expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
+  });
+
+  it("reads replay authorities after releasing the transaction and recovers the same UUID without another award", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date());
+    const id = randomUUID();
+    expect((await post(id)).statusCode).toBe(200);
+    const receipt = await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`);
+    const committedWallet = await wallet();
+    const transaction = h.db.transaction.bind(h.db);
+    let activeTransactions = 0, disconnected = true;
+    vi.spyOn(h.db, "transaction").mockImplementation(async (callback, config) => {
+      activeTransactions++;
+      try { return await transaction(callback, config); }
+      finally { activeTransactions--; }
+    });
+    const reads: { path: string; activeTransactions: number }[] = [];
+    const restored = { ...unavailableExchange(1, new Date().toISOString().slice(0, 10)), authority: "offline", reason: "连接已恢复，角色背包离线。",
+      materials: PRIZES.map(p => ({ templateId: p.templateId, name: p.name, eligibleCount: null })),
+      recipes: PRIZES.map((p, index) => ({ index, catalogId: `local-${index}`, title: p.name,
+        inputs: [{ templateId: p.templateId, name: p.name, count: 1 }], outputs: [{ templateId: p.templateId, name: p.name, count: 1, bound: true, validDays: 0 }],
+        dailyLimit: 10, exchanged: 0, remaining: 10, maxCount: 0, canExchange: false, reason: "角色背包离线。" })) };
+    ctx.cfg.GAME_INTERNAL_URL = "http://activity-authority.invalid";
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      const path = new URL(String(input)).pathname;
+      reads.push({ path, activeTransactions });
+      if (disconnected) throw new Error("authority connection lost");
+      return path === "/activity-exchange/read" ? Response.json({ ok: true, value: restored }) : new Response("", { status: 503 });
+    }));
+    const lost = await post(id);
+    expect(lost.statusCode).toBe(200);
+    expect(lost.json()).toMatchObject({ message: "已发送", mailedCount: 2, replayed: true, nativeExchange: { authority: "unavailable" } });
+    disconnected = false;
+    const recovered = await post(id);
+    expect(recovered.statusCode).toBe(200);
+    expect(recovered.json()).toEqual({ ...(await get()).json(), message: "已发送", mailedCount: 2, replayed: true });
+    expect(recovered.json().nativeExchange).toEqual(restored);
+    expect(reads.map(r => r.path)).toEqual(Array.from({ length: 3 }, () => ["/activity-exchange/read", "/activity-christmas-snowfield/read", "/activity-christmas/read"]).flat());
+    expect(reads.every(r => r.activeTransactions === 0)).toBe(true);
+    expect(transitionActivity).toHaveBeenCalledTimes(1);
+    expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
+    expect(await wallet()).toEqual(committedWallet);
+    expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
+  });
+
+  it("keeps a confirmed replay receipt when the complete snapshot fails and recovers the same UUID", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date());
+    const id = randomUUID();
+    expect((await post(id)).statusCode).toBe(200);
+    const receipt = await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`);
+    const committedWallet = await wallet();
+    const transaction = h.db.transaction.bind(h.db), execute = h.db.execute.bind(h.db);
+    let releasedTransactions = 0, failedReads = 0, failSnapshot = true;
+    vi.spyOn(h.db, "transaction").mockImplementation(async (callback, config) => {
+      const result = await transaction(callback, config);
+      releasedTransactions++;
+      return result;
+    });
+    vi.spyOn(h.db, "execute").mockImplementation((query) => {
+      // Arm only after receipt confirmation/COMMIT; transaction-local queries keep their real DB owner.
+      if (releasedTransactions > 0 && failSnapshot) {
+        failedReads++;
+        throw new Error("snapshot SQL read failed: private-board-sentinel");
+      }
+      return execute(query);
+    });
+    const failed = await post(id);
+    expect(failed.statusCode).toBe(500);
+    expect(failed.json()).toEqual({ message: "活动操作暂时失败，请使用同一请求编号重试。" });
+    expect(failed.body).not.toContain("private-board-sentinel");
+    expect(releasedTransactions).toBe(1);
+    expect(failedReads).toBeGreaterThan(0);
+    failSnapshot = false;
+    expect(await wallet()).toEqual(committedWallet);
+    expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
+    expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
+    const recovered = await post(id);
+    expect(recovered.statusCode).toBe(200);
+    expect(recovered.json()).toEqual({ ...(await get()).json(), message: "已发送", mailedCount: 2, replayed: true });
+    expect(releasedTransactions).toBe(2);
+    expect(transitionActivity).toHaveBeenCalledTimes(1);
+    expect(await wallet()).toEqual(committedWallet);
     expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
     expect(await q1(h, sql`SELECT * FROM app."ActivityActions" WHERE "RequestID"=${id}`)).toEqual(receipt);
   });
@@ -313,7 +401,7 @@ describe("reference activity API delivery", () => {
 
   it("notifies only after COMMIT and treats unreachable game notice as a committed success", async () => {
     ctx.cfg.GAME_INTERNAL_URL = "http://activity-notice.invalid";
-    const fetch = vi.fn(async () => {
+    const fetch = vi.fn(async (input: string | URL | Request) => {
       expect(await counts()).toEqual({ actions: 1, states: 1, items: 7, mails: 2 });
       expect((await wallet())?.Points).toBe(7);
       return new Response("", { status: 503 });
@@ -322,6 +410,6 @@ describe("reference activity API delivery", () => {
     const id = randomUUID();
     expect((await post(id)).statusCode).toBe(200);
     expect((await post(id)).json().replayed).toBe(true);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls.filter(([input]) => new URL(String(input)).pathname === "/mail-notice")).toHaveLength(1);
   });
 });

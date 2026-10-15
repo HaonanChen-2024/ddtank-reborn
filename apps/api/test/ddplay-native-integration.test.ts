@@ -10,6 +10,7 @@ import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
+import { assertPublicActivityStates } from "./public-activity-state.js";
 
 // Actual HTTP/auth, engine, in-memory PGlite transaction, UUID receipt and ordinary mail.
 // Only Date and RNG are deterministic; no real service, character or resource directory is modified.
@@ -28,13 +29,15 @@ const post = (id: string, action: ActivityAction, requestId = randomUUID(), char
   method: "POST", url: `/api/account/activities/${id}/action`, headers: headers(), payload: { characterId, requestId, action } });
 async function action(id: string, value: ActivityAction, requestId = randomUUID(), status = 200): Promise<ActivityResult> {
   const response = await post(id, value, requestId); expect(response.statusCode, response.body).toBe(status);
-  expect(response.body).not.toMatch(/nativeDDPlayEffects|"(?:faces|games|state|nextFaces|seed)"\s*:/); return response.json();
+  expect(response.body).not.toMatch(/nativeDDPlayEffects|"(?:faces|games|nextFaces|seed)"\s*:/);
+  const result = response.json<ActivityResult>(); assertPublicActivityStates(result); return result;
 }
 const native = (value: ActivityAction, requestId = randomUUID(), status = 200) => action("ddplay-native", value, requestId, status);
 async function snapshot(): Promise<ActivityResult> {
   const response = await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: headers() });
-  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeDDPlayEffects|"(?:faces|games|state|nextFaces|seed)"\s*:/);
-  const result = response.json<ActivityResult>(); expect(result).not.toHaveProperty("nativeDDPlayAction"); return result;
+  expect(response.statusCode, response.body).toBe(200); expect(response.body).not.toMatch(/nativeDDPlayEffects|"(?:faces|games|nextFaces|seed)"\s*:/);
+  const result = response.json<ActivityResult>(); assertPublicActivityStates(result);
+  expect(result).not.toHaveProperty("nativeDDPlayAction"); return result;
 }
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;
 async function persisted() { return {
@@ -73,6 +76,30 @@ afterAll(async () => {
 });
 
 describe("native DDPlay through the existing transactional API", () => {
+  it("allows only exact public Snowfield state paths and their schema enums", () => {
+    for (const state of ["outside", "loading", "inside", "fighting", "settling"])
+      expect(() => assertPublicActivityStates({ nativeChristmasSnowfield: { scene: { state } } })).not.toThrow();
+    for (const state of ["none", "admitted", "launching", "fighting", "settling"])
+      expect(() => assertPublicActivityStates({ nativeChristmasSnowfield: { attempt: { state } } })).not.toThrow();
+    for (const state of ["unavailable", "alive", "reserved", "fighting", "dead"])
+      expect(() => assertPublicActivityStates({ nativeChristmasSnowfield: { challenges: [{ state }, { state }] } })).not.toThrow();
+    for (const value of [
+      { state: "outside" }, { nativeDDPlay: { state: "outside" } }, { rows: [{ state: "outside" }] },
+      { outer: { nativeChristmasSnowfield: { scene: { state: "outside" } } } },
+      { "nativeChristmasSnowfield.scene": { state: "outside" } },
+      { nativeChristmasSnowfield: { "scene.state": { state: "outside" } } },
+      { nativeChristmasSnowfield: { scene: { state: "none" } } },
+      { nativeChristmasSnowfield: { attempt: { state: "outside" } } },
+      { nativeChristmasSnowfield: { scene: { state: 0 } } },
+      { nativeChristmasSnowfield: { scene: { state: { state: "outside" } } } },
+      { nativeChristmasSnowfield: { scene: { state: "outside", nested: { state: "outside" } } } },
+      { nativeChristmasSnowfield: { challenges: [{ state: "outside" }] } },
+      { nativeChristmasSnowfield: { challenges: { 0: { state: "alive" } } } },
+      { nativeChristmasSnowfield: { "challenges.0": { state: "alive" } } },
+      { nativeChristmasSnowfield: { challenges: [[{ state: "alive" }]] } },
+    ]) expect(() => assertPublicActivityStates(value)).toThrow(/state/);
+  });
+
   it("keeps GET read-only, requires current ownership and rejects invalid actions without creating a save", async () => {
     await h.db.execute(sql`DELETE FROM app."ActivityWallet"`);
     const before = await persisted();

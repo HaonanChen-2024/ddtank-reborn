@@ -251,7 +251,7 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
     context(app, characterId, now),
   ]);
   const result: ActivityResult = { characterId, ...viewActivities(row?.State ?? createActivityState(now), walletOf(row), ctx) };
-  // Committed ranking reads, after ownership. Never join them into a locked POST/mail transaction.
+  // Complete GET/replay snapshots read committed rankings after ownership, outside wallet/mail transactions.
   result.nativeCarnival.ranking = await carnivalRanking(app, characterId, now, result.nativeCarnival.personalScore);
   result.nativeMoonlight.ranking = await moonlightRanking(app, characterId, now, result.nativeMoonlight.draws);
   const shared = await hasCarnivalGlobal(app); carnivalMode(result, shared);
@@ -517,6 +517,15 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     }
     throw new ActivityError("兑换已由原请求编号结算，当前投影暂不一致，请保留同一请求编号重试。", 503);
   }
+  const result = await walletActivityAction(app, claims, characterId, activityId, requestId, action);
+  if (!result.replayed) return result;
+  // The receipt is already confirmed and every wallet lock is released. Read the same complete
+  // current page as GET; partial replay views would erase other modules in the shared UI cache.
+  return { ...await activitySnapshot(app, claims, characterId), message: result.message,
+    mailedCount: result.mailedCount, replayed: true };
+}
+
+async function walletActivityAction(app: AppCtx, claims: Claims, characterId: number, activityId: string, requestId: string, action: ActivityAction): Promise<ActivityResult> {
   const signature = createHash("sha256").update(canonical({ activityId, action })).digest("hex");
   if (activityId === "first-recharge-native" && action.type === "gift-card") return firstRechargeGift(app, claims, characterId, requestId, action, signature);
   if (activityId === "forthright-native" && action.type === "inspect-group") return forthrightInspect(app, claims, characterId, requestId, action, signature);
