@@ -23,7 +23,7 @@ export type TreasureNativeEffect =
   | { type: "exchanged"; fragmentsSpent: number; fragments: number; templateId: number; itemCount: number }
   | { type: "progress-claimed"; tier: number; templateId: number; itemCount: number };
 export interface TreasureResult {
-  state: TreasureState; pointsDelta: number; rewards: ActivityReward[]; completed: boolean; draws: number;
+  state: TreasureState; pointsDelta: number; cost: number; rewards: ActivityReward[]; completed: boolean; draws: number;
   effects: TreasureNativeEffect[]; message: string;
 }
 function need(ok: unknown, message: string): asserts ok { if (!ok) throw new ActivityError(message); }
@@ -81,7 +81,7 @@ export function advanceTreasure(value: unknown, action: ActivityAction, ctx: Clo
   const state = readTreasureState(value); dayOf(ctx); balance(funds);
   if (native) validNativeAction(action, state, ctx);
   const effects: TreasureNativeEffect[] = [], rewards: ActivityReward[] = [];
-  let pointsDelta = 0, completed = false, draws = 0, message = "活动进度已保存。";
+  let pointsDelta = 0, cost = 0, completed = false, draws = 0, message = "活动进度已保存。";
   if (action.type === "draw") {
     const count = action.count ?? 1;
     need(int(count, 1, 5), "每次只能进行1至5次寻宝。");
@@ -91,7 +91,7 @@ export function advanceTreasure(value: unknown, action: ActivityAction, ctx: Clo
     need(state.bag.length + count <= C.bagCapacity, "临时背包已满，请先领取或回收。");
     need(int(state.draws + count, 0, 1_000_000_000) && int(state.score + count * (advanced ? 2 : 1), 0, 1_000_000_000)
       && int(state.fragments + count, 0, 1_000_000_000), "寻宝进度已达上限。");
-    pointsDelta = -C.treasureCost * (advanced ? 2 : 1) * count; const score = balance(funds, pointsDelta);
+    cost = C.treasureCost * (advanced ? 2 : 1) * count; pointsDelta = -cost; const score = balance(funds, pointsDelta);
     const found: (Selection & { sourceOriginalIndex: number })[] = [];
     for (let i = 0; i < count; i++) {
       state.pity++; const guaranteed = state.pity >= C.cavePity;
@@ -137,7 +137,7 @@ export function advanceTreasure(value: unknown, action: ActivityAction, ctx: Clo
     else if (!state.choices.includes(name)) state.choices.push(name);
     if (native) effects.push({ type: "chosen", index: action.index!, selected });
   } else throw new ActivityError("寻宝操作无效。");
-  return { state, pointsDelta, rewards, completed, draws, effects, message };
+  return { state, pointsDelta, cost, rewards, completed, draws, effects, message };
 }
 
 export function viewTreasureNative(value: unknown, ctx: Clock, funds: Funds, actionsRemaining = true, history: string[] = []) {

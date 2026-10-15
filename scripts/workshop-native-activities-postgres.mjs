@@ -23,7 +23,7 @@ const urlFor = name => {
   return `postgres://postgres:${encodeURIComponent(settings.PG_PASSWORD)}@127.0.0.1:55432/${name}`;
 };
 const redact = value => [settings.PG_PASSWORD, encodeURIComponent(settings.PG_PASSWORD)].reduce((s, secret) => s.replaceAll(secret, "[redacted]"), String(value));
-const sources = ["apps/api/test/native-activities-postgres.test.ts", "apps/api/test/first-recharge-native.test.ts", "apps/api/test/first-recharge-native-integration.test.ts", "apps/api/test/carnival-native.test.ts", "apps/api/test/carnival-native-integration.test.ts", "apps/api/test/activity-delivery.test.ts", "apps/api/src/routes/admin.ts", "apps/api/src/routes/activities.ts", "packages/db/src/client.ts", "packages/db/src/migrate.ts", "scripts/workshop-native-activities-postgres.mjs",
+const sources = ["apps/api/test/native-activities-postgres.test.ts", "apps/api/test/charge-native.test.ts", "apps/api/test/charge-native-integration.test.ts", "apps/api/test/first-recharge-native.test.ts", "apps/api/test/first-recharge-native-integration.test.ts", "apps/api/test/carnival-native.test.ts", "apps/api/test/carnival-native-integration.test.ts", "apps/api/test/activity-delivery.test.ts", "apps/api/src/routes/admin.ts", "apps/api/src/routes/activities.ts", "packages/db/src/client.ts", "packages/db/src/migrate.ts", "scripts/workshop-native-activities-postgres.mjs",
   ...readdirSync(join(repo,"apps/api/src/activities")).filter(name=>name.endsWith(".ts")).sort().map(name=>`apps/api/src/activities/${name}`)];
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash("sha256").update(readFileSync(join(repo, path))).digest("hex")]));
 const receipt = { version: 1, database, token, startedAt: new Date().toISOString(), phase: "prepared", source: hashes(),
@@ -64,7 +64,7 @@ try {
   assert.deepEqual(hashes(), receipt.source, "Sources changed while native tests ran; repeat against stable sources");
   const evidence = JSON.parse(readFileSync(join(directory, "test-evidence.json"), "utf8"));
   assert.equal(evidence.database, database); assert.equal(evidence.token, token);
-  assert.equal(evidence.passed, 30); assert.equal(evidence.closedConnections, true);
+  assert.equal(evidence.passed, 36); assert.equal(evidence.closedConnections, true);
   receipt.passed = evidence.passed; receipt.connectionPids = evidence.connectionPids; receipt.lockScenarios = evidence.scenarios.length;
   receipt.phase = "passed";
 } catch (error) {

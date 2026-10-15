@@ -12,6 +12,7 @@ import { attachNativeTreasureHost, type NativeTreasurePlayer } from "@/lib/nativ
 import { attachNativePurrHost, type NativePurrPlayer } from "@/lib/native-purr-host";
 import { attachNativeCarnivalHost, type NativeCarnivalPlayer } from "@/lib/native-carnival-host";
 import { attachNativeFirstRechargeHost, type NativeFirstRechargePlayer } from "@/lib/native-first-recharge-host";
+import { attachNativeChargeHost, type NativeChargePlayer } from "@/lib/native-charge-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -26,7 +27,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -59,8 +60,11 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopStatusCarnival?: () => NativePairStatus;
   workshopCloseCarnival?: () => unknown;
   workshopOpenFirstRecharge?: (characterId: number, generation: string) => boolean;
+  workshopOpenCharge?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
+  workshopStatusCharge?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
+  workshopCloseCharge?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -230,6 +234,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       firstRechargeCharacterId = 0;
       firstRechargeGeneration = "";
     };
+    let chargeRequest: { cancel: () => void } | null = null;
+    let chargeHost: ReturnType<typeof attachNativeChargeHost> | null = null;
+    let chargeCharacterId = 0;
+    let chargeGeneration = "";
+    const detachCharge = () => {
+      chargeRequest?.cancel();
+      chargeHost?.cancel();
+      chargeHost = null;
+      chargeCharacterId = 0;
+      chargeGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -276,6 +291,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachPurr();
           detachCarnival();
           detachFirstRecharge();
+          detachCharge();
           player?.remove();
           player = null;
         };
@@ -838,6 +854,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (firstRechargeRequest === request) firstRechargeRequest = null;
           }
         };
+        window.workshopShowCharge = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenCharge || !owner.workshopStatusCharge || !owner.workshopCloseCharge) return false;
+          try {
+            const initial = owner.workshopStatusCharge();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (chargeHost && chargeCharacterId !== characterId) return false;
+            if (!chargeHost) {
+              chargeCharacterId = characterId;
+              chargeGeneration = crypto.randomUUID();
+              const generation = chargeGeneration;
+              chargeHost = attachNativeChargeHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || chargeCharacterId !== characterId || chargeGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusCharge?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          chargeRequest?.cancel();
+          const request = { cancel: () => {
+            if (chargeRequest !== request) return;
+            chargeRequest = null;
+            try { owner.workshopCloseCharge?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          chargeRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenCharge(characterId, chargeGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (chargeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusCharge();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === chargeGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (chargeRequest === request) chargeRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -865,6 +936,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachPurr();
       detachCarnival();
       detachFirstRecharge();
+      detachCharge();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -884,6 +956,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachPurr();
       detachCarnival();
       detachFirstRecharge();
+      detachCharge();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -898,6 +971,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowPurr;
       delete window.workshopShowCarnival;
       delete window.workshopShowFirstRecharge;
+      delete window.workshopShowCharge;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

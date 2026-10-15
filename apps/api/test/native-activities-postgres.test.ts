@@ -45,7 +45,7 @@ async function wallet() { return (await q1<{ Points: number; Revision: number }>
 async function snapshot(app = appB, who = uid) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});
@@ -85,7 +85,7 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[], 
   if (failure) throw failure;
   return results;
 }
-function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction") {
+function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
   expect(results.filter(r => r.json().replayed)).toHaveLength(results.length - 1);
   expect(results.filter(r => r.json()[key])).toHaveLength(1);
@@ -782,5 +782,94 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     const issued=await recharge({type:"issue-card",tier:3}); await recharge({type:"use-card",cardId:rechargeCard(issued,3).cardId}); await recharge({type:"claim",tier:3});
     const final=await saved(),stored=final.states.find(s=>s.UserID===uid)!.State as ActivityState;
     expect(stored.daily.actions).toBe(500); expect(await wallet()).toEqual({Points:0,Revision:4}); expect(final.mails).toHaveLength(2); passed++;
+  });
+
+  it("deduplicates one confirmed Charge exchange UUID, splits MaxCount5 mail and recovers the latest view without effects",async()=>{
+    await rechargeSeed(); const before=await saved(),id=randomUUID(),value={type:"exchange",index:4,count:1,choice:(await snapshot()).nativeCharge.stateToken};
+    duplicateResults(await race("charge-exchange-same-uuid-one-fee-one-gross",duplicates("charge-native",value,id)),"nativeChargeAction");
+    const after=await saved(); expect(await wallet()).toEqual({Points:965,Revision:1}); expect(after.goods.map(g=>[g.TemplateID,g.Count])).toEqual([[11019,5],[11019,1]]);
+    expect(after.goods.every(g=>g.IsBinds===true&&g.ValidDate===0&&g.UserID===0&&g.Place===-1)).toBe(true);
+    expect(after.mails).toHaveLength(1); expect([after.mails[0].Annex1,after.mails[0].Annex2].map(Number)).toEqual(after.goods.map(g=>g.ItemID));
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeCharge.grossSpent).toBe(35); expect((await snapshot()).nativeCharge.exchange.rows[4].bought).toBe(1);
+    await action("exchange",{type:"exchange",index:0}); const current=await snapshot(),delivered=await saved();
+    const replay=await action("charge-native",value,id,appB); expect(replay).toMatchObject({...current,replayed:true,mailedCount:1}); expect(replay.nativeChargeAction).toBeUndefined();
+    expect(current.nativeCharge.grossSpent).toBe(50); expect(await saved()).toEqual(delivered);
+    expect((await post(appA,"charge-native",{...value,index:5},id)).statusCode).toBe(409); expect(await saved()).toEqual(delivered); passed++;
+  });
+
+  it("serializes native Charge and old points-gift into one permanent canonical claim at daily500",async()=>{
+    await rechargeSeed(); const state=createActivityState(new Date()); state.daily.actions=500;
+    await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(state)}::jsonb WHERE "UserID"=${uid}`);
+    const value={type:"claim",index:1,tier:3,choice:(await snapshot()).nativeCharge.stateToken},before=await saved();
+    const results=await race("charge-native-old-points-gift-one-canonical-at-cap",[
+      ()=>post(appA,"charge-native",value),()=>post(appB,"points-gift",{type:"claim",tier:3})]);
+    expect(results.map(r=>r.statusCode).sort()).toEqual([200,400]); const after=await saved();
+    expect(after.mails.length-before.mails.length).toBe(1); expect(after.goods.map(g=>g.Count)).toEqual([5,4]);
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect(await wallet()).toEqual({Points:1000,Revision:1});
+    const stored=after.states.find(s=>s.UserID===uid)!.State as ActivityState; expect(stored.claims).toEqual(["points-gift:3"]); expect(stored.daily.actions).toBe(500);
+    expect((await snapshot()).nativeCharge.exchange.rows.every(r=>!r.canExchange)).toBe(true); expect((await snapshot()).nativeCharge.grossSpent).toBe(0); passed++;
+  });
+
+  it("shares the actual wallet and gross counter with old exchanges under competing UUIDs and cross-module UUID collisions",async()=>{
+    await rechargeSeed(); await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=15 WHERE "UserID"=${uid}`);
+    const value={type:"exchange",index:0,count:1,choice:(await snapshot()).nativeCharge.stateToken};
+    const results=await race("charge-native-versus-old-exchange-one-wallet",[
+      ()=>post(appA,"charge-native",value),()=>post(appB,"exchange",{type:"exchange",index:0})]);
+    expect(results.map(r=>r.statusCode).sort()).toEqual([200,400]); expect(await wallet()).toEqual({Points:0,Revision:1});
+    expect((await snapshot()).nativeCharge.grossSpent).toBe(15); const after=await saved(); expect(after.receipts).toHaveLength(1); expect(after.mails).toHaveLength(1); expect(after.goods.map(g=>g.Count)).toEqual([3]);
+    await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=100 WHERE "UserID"=${uid}`);
+    const id=randomUUID(),fresh={...value,index:1,choice:(await snapshot()).nativeCharge.stateToken};
+    const common=await race("charge-native-old-exchange-cross-module-same-uuid",[
+      ()=>post(appA,"charge-native",fresh,id),()=>post(appB,"exchange",{type:"exchange",index:0},id)]);
+    expect(common.map(r=>r.statusCode).sort()).toEqual([200,409]); const progress=(await snapshot()).nativeCharge.grossSpent;
+    expect([30,35]).toContain(progress); expect((await saved()).receipts).toHaveLength(2); passed++;
+  });
+
+  it("records gross old and native spending across concurrent owners, ignoring refunds and replays",async()=>{
+    await rechargeSeed(); const moon={type:"draw",count:1,choice:(await snapshot()).nativeMoonlight.bagToken};
+    const results=await race("charge-gross-ddplay-profit-and-native-moon-cost",[
+      ()=>post(appA,"ddplay",{type:"spin"}),()=>post(appB,"moonlight-native",moon)]);
+    expect(results.map(r=>r.statusCode)).toEqual([200,200]); expect(await wallet()).toEqual({Points:1070,Revision:2}); expect((await snapshot()).nativeCharge.grossSpent).toBe(30);
+    await action("moon",{type:"recycle"}); expect((await snapshot()).nativeCharge.grossSpent).toBe(30);
+    const id=randomUUID(),treasure={type:"draw",mode:"advanced" as const,count:1,choice:(await snapshot()).nativeTreasure.bagToken};
+    duplicateResults(await race("charge-gross-native-treasure-retry-one-cost",duplicates("treasure-native",treasure,id)),"nativeTreasureAction");
+    expect((await snapshot()).nativeCharge.grossSpent).toBe(90); await action("treasure",{type:"recycle"}); expect((await snapshot()).nativeCharge.grossSpent).toBe(90);
+    const before=await saved(); expect((await action("treasure-native",treasure,id,appB)).nativeCharge.grossSpent).toBe(90); expect(await saved()).toEqual(before); passed++;
+  });
+
+  it("rolls back Charge costs, gross, quota and all mail on final receipt failure and retries each UUID once",async()=>{
+    await rechargeSeed();
+    for(const phase of ["exchange","daily"] as const) {
+      if(phase==="daily") {
+        const s=(await saved()).states.find(s=>s.UserID===uid)!.State as ActivityState; s.claims.push(`task:${day}:sign`);
+        await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(s)}::jsonb WHERE "UserID"=${uid}`);
+      }
+      const id=randomUUID(),value:ActivityAction=phase==="exchange"?{type:"exchange",index:4,count:1,choice:(await snapshot()).nativeCharge.stateToken}
+        :{type:"claim",index:0,tier:1,choice:(await snapshot()).nativeCharge.stateToken};
+      assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/); const before=await saved();
+      await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${id}') NOT VALID`));
+      const failed=await post(appB,"charge-native",value,id); expect(failed.statusCode,failed.body).toBe(500); expect(failed.body).not.toMatch(/native_test_receipt_failure|INSERT|Annex/);
+      expect(await saved()).toEqual(before); await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+      duplicateResults(await race(`charge-${phase}-five-table-tail-rollback-retry`,duplicates("charge-native",value,id)),"nativeChargeAction");
+      const after=await saved(); expect(after.receipts.length-before.receipts.length).toBe(1); expect(after.mails.length-before.mails.length).toBe(1);
+      expect(after.goods.slice(before.goods.length).map(g=>[g.TemplateID,g.Count])).toEqual(phase==="exchange"?[[11019,5],[11019,1]]:[[11019,1],[11001,1],[11021,1],[11002,1]]);
+      expect((await snapshot()).nativeCharge.grossSpent).toBe(35);
+    }
+    expect(await wallet()).toEqual({Points:965,Revision:2}); passed++;
+  });
+
+  it("projects UTC exchange rollover without writes and settles exact claimed task tiers without historical spending backfill",async()=>{
+    await rechargeSeed(); await action("charge-native",{type:"exchange",index:0,count:1,choice:(await snapshot()).nativeCharge.stateToken});
+    const s=(await saved()).states.find(s=>s.UserID===uid)!.State as ActivityState,oldDay=new Date(Date.parse(day+"T00:00:00Z")-86400000).toISOString().slice(0,10);
+    s.day=oldDay; s.daily.actions=500; const tracking=s.games.chargeNativeV1 as {day:string}; tracking.day=oldDay;
+    s.claims=[`task:${day}:sign`,`task:${day}:mines`,`task:${day}:pair`,`task:${day}:explore`,`task:${day}:sign`,`task:${oldDay}:mines`];
+    await monitor.db.execute(sql`UPDATE app."ActivityStates" SET "State"=${JSON.stringify(s)}::jsonb WHERE "UserID"=${uid}`);
+    const before=await saved(),v=await snapshot(); expect(await saved()).toEqual(before);
+    expect(v.nativeCharge).toMatchObject({todayClaimedTaskPoints:200,grossSpent:15}); expect(v.nativeCharge.exchange.rows[0]).toMatchObject({bought:0,remaining:1,canExchange:true});
+    const value={type:"claim",index:0,tier:3,choice:v.nativeCharge.stateToken};
+    const results=await race("charge-daily-three-qualified-different-uuids",[()=>post(appA,"charge-native",value),()=>post(appB,"charge-native",value)]);
+    expect(results.map(r=>r.statusCode).sort()).toEqual([200,400]); expect((await snapshot()).nativeCharge.pages[0].tiers[2].claimed).toBe(true);
+    const after=await saved(),stored=after.states.find(s=>s.UserID===uid)!.State as ActivityState; expect(stored.daily.actions).toBeUndefined();
+    expect(after.receipts.length-before.receipts.length).toBe(1); expect((await snapshot()).nativeCharge.grossSpent).toBe(15); passed++;
   });
 });

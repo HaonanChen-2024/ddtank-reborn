@@ -128,14 +128,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge" | "charge") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : kind === "charge" ? "原版充值大赠送" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : kind === "charge" ? window.workshopShowCharge : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -268,6 +268,9 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                 {selected.id === "first-gift" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("first-recharge"); }}>试用原版首充大礼</button>
                   <p className="activity-center__hint">本地任务解锁三档奖励；商城使用活动积分。任务凭证可验证、激活或赠送一次，首档与新手任务礼共用领取记录。无真实付款；原充值卡和赠卡美术仍待移植。</p></>}
+                {selected.id === "points-gift" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("charge"); }}>试用原版充值大赠送</button>
+                  <p className="activity-center__hint">本地四页活动：今日任务、累计任务、启用后累计消费、积分兑换。累计任务档与活动积分礼共用领取记录，奖励由游戏邮件送达；兑换仅扣活动积分，消费不补算历史，不接真实付款。原窗口仍待游戏内验收。</p></>}
                 {selected.id === "carnival" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("carnival"); }}>试用原版节日狂欢</button>
                   <p className="activity-center__muted">原12格转盘、动画和红包兑换窗口仍在测试，与旧网页骰盘分别存档，共用活动积分。打开只读取；本地12格等概率，每次10积分，连续模式一次确认最多5次，全部结果一次提交。停止或关闭不会撤销已提交奖励；普通材料直接寄邮件，动画不再次发奖。红包可兑换7种本地配方，不接真实付款。大奖直播原资源、全服奖池和排行尚未接入。</p>

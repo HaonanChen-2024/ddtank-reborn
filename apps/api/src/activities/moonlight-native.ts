@@ -21,7 +21,7 @@ export type MoonlightNativeEffect =
   | { type: "exchanged"; fragmentsSpent: number; fragments: number; templateId: number; itemCount: number }
   | { type: "progress-claimed"; tier: number; templateId: number; itemCount: number };
 export interface MoonlightResult {
-  state: MoonlightState; pointsDelta: number; rewards: ActivityReward[]; completed: boolean; draws: number;
+  state: MoonlightState; pointsDelta: number; cost: number; rewards: ActivityReward[]; completed: boolean; draws: number;
   effects: MoonlightNativeEffect[]; message: string;
 }
 function fail(message: string): never { throw new ActivityError(message); }
@@ -97,14 +97,14 @@ export function advanceMoonlight(value: unknown, action: ActivityAction, ctx: Cl
   const state = readMoonlightState(value); dayOf(ctx); balance(funds);
   if (native) validNativeAction(action, state, ctx);
   const effects: MoonlightNativeEffect[] = [], rewards: ActivityReward[] = [];
-  let pointsDelta = 0, completed = false, draws = 0, message = "活动进度已保存。";
+  let pointsDelta = 0, cost = 0, completed = false, draws = 0, message = "活动进度已保存。";
   if (action.type === "draw") {
     const count = action.count ?? 1;
     need(int(count, 1, 5), "每次只能进行1至5次寻宝。");
     need(native || action.choice === undefined || action.choice === "normal", "月光宝盒没有高级寻宝模式。");
     need(state.bag.length + count <= C.bagCapacity, "临时背包已满，请先领取或回收。");
     need([state.draws, state.score, state.fragments].every(n => int(n + count, 0, 1_000_000_000)), "宝盒进度已达上限。");
-    pointsDelta = -C.moonCost * count; const score = balance(funds, pointsDelta), found: ActivityReward[] = [];
+    cost = C.moonCost * count; pointsDelta = -cost; const score = balance(funds, pointsDelta), found: ActivityReward[] = [];
     for (let i = 0; i < count; i++) {
       state.pity++; const guaranteed = state.pity >= C.moonPity;
       const item = material(roll(guaranteed)); if (guaranteed) state.pity = 0;
@@ -135,7 +135,7 @@ export function advanceMoonlight(value: unknown, action: ActivityAction, ctx: Cl
     need(!state.claimed.includes(action.tier), "这档进度奖励已经领取。"); state.claimed.push(action.tier); rewards.push({ templateId: 11019, count: action.tier * 2 });
     if (native) effects.push({ type: "progress-claimed", tier: action.tier, templateId: 11019, itemCount: action.tier * 2 });
   } else fail("寻宝操作无效。");
-  return { state, pointsDelta, rewards, completed, draws, effects, message };
+  return { state, pointsDelta, cost, rewards, completed, draws, effects, message };
 }
 
 export function viewMoonlightNative(value: unknown, ctx: Clock, funds: Funds, actionsRemaining = true) {
