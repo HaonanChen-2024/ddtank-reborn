@@ -241,6 +241,22 @@ async function start() {
       if (current.database !== databaseName || current.restoreProofSha256 !== restored.restoreProofSha256) throw new Error("恢复证明在启动期间发生变化");
       await confirmRestoredDatabase(current, data, join(runtime, "restored-databases", databaseName + ".json"));
     }
+    if (settings.WORKSHOP_WEAPON_VISUAL_UPGRADE) {
+      const options = { manifestPath: resolve(repo, settings.WORKSHOP_WEAPON_VISUAL_UPGRADE), previousFightPath: resolve(repo, settings.FIGHT_WEAPON_EXTENSION ?? ""),
+        uploadDir: settings.UPLOAD_DIR, runtime, runId, managerPid: process.pid, databaseName };
+      let visual;
+      const upgrade = runNode("weapon-visual-upgrade", `
+        try {
+          const { activateWeaponVisualStartup } = await import(${JSON.stringify(pathToFileURL(join(repo, "scripts/workshop-weapon-visual-startup.ts")).href)});
+          const result = await activateWeaponVisualStartup(${JSON.stringify(options)});
+          await new Promise((res, rej) => process.send({ type: "weapon-visual-ready", fightExtension: result.fightExtension }, error => error ? rej(error) : res()));
+        } catch { console.error("武器原动画升级校验失败；未启动大厅，请核对固定资源、所选数据库与所有权记录。"); process.exitCode = 1; }
+        finally { process.disconnect(); }
+      `, env, repo, true);
+      upgrade.on("message", message => { if (message?.type === "weapon-visual-ready" && typeof message.fightExtension === "string") visual = message; });
+      await waitReady("武器原动画升级", () => upgrade.exitCode === 0 && Boolean(visual));
+      env.FIGHT_WEAPON_EXTENSION = visual.fightExtension;
+    }
     runEntry("api", "apps/api/src/index.ts", env);
     await waitReady("API", () => httpReady(`${env.PUBLIC_URL}/healthz`));
     runEntry("game", "apps/game/src/index.ts", env);

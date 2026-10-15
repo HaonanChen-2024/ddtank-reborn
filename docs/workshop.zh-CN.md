@@ -403,3 +403,13 @@ node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
 后续原图版使用 `scripts/workshop-tooltip-quest-art.mjs candidate-original <新目录>`，按 `research/i18n/tooltip-quest-art/original-resources.json` 移植三份包的332处原位图引用；313个位图tag实际变化、250个其他tag保持，仅92个纯BitmapData构造器默认宽高适配，所有方法体保持。支持从上一版45处绘字覆盖升级，保留旧输出和原始备份；失败补偿恢复旧输出，禁止直接降级。回退不依赖原素材缓存可读，工具/配置/目标/备份仍须匹配。原包不随源码发布，精确输入缺失时不得构建。
 
 配套 `scripts/workshop-bag-layout.mjs install --original-tooltip-layout` 只增改coreI.xml三个提示坐标，沿现有日志保留四项已安装布局。当前三份原图及坐标已安装，完整332映射、升级/失败恢复/回退和无参校验通过；原任务分类、奖励标签、领奖按钮及品质/类型/伤害/角度/绑定等采用原中文图片，动态物品和任务正文仍由模板显示覆盖处理。未移植参考服业务代码或装备属性，AVM2、全界面中文和17活动完整验收仍未完成；详见上述目录README。
+
+### 原始武器音效与视觉升级
+
+`scripts/workshop-weapon-audio-assets.mjs` 仅从固定原包取出奶油熊的 Sound252–257，保留六段原压缩音频，只重分配 CharacterID；扩展本地唯一 SymbolClass，保留132个旧音效、旧ABC及其他旧tag。重编的六个Sound包装类只有父构造调用，不引入参考服业务代码。构建输出须先按哈希核验并放到私有 `client-overlay/audio.swf`，再用 `workshop-literals.mjs install --weapon-audio` 将六项注册合入现有核心覆盖。省略参数保留该补丁；`verify/install` 拒绝缺失或损坏的音频，完整核心回退不依赖音频文件仍在，且不覆盖被外部改动的音频。此音频文件是额外覆盖，回退核心后不自动删除。
+
+泡泡茶的六份原始SWF仅提供原动画资源，尚无权威官方BallConfig。`workshop-weapon-visuals.ts` 只将已归本地所有的9107258从四个只读共享Ball引用升级为四个独占视觉Ball；只改变ID、Name、BombPartical及本武器的四分支绑定，Shop_Goods整行、物理、声音、粒子和原坑形保持。原ownership journal不改；独立prepared升级日志在事务写入前持久化，完整旧态可重试，匹配日志的完整新态无写返回，漂移/占用/共享/部分状态拒绝。官方装备强0属性保留，不将本地兼容弹道称为官方规则。
+
+可选私有配置 `WORKSHOP_WEAPON_VISUAL_UPGRADE` 指向固定部署清单；全局 `FIGHT_WEAPON_EXTENSION` 仍保留旧包。启动器在自身DB ready和恢复证明检查后、API/game之前运行一次升级：逐SHA核对old/new包、原日志、两版FIGHT及实际上传目录的六个SWF，再核本次runId、正PID、真实数据库/目录/端口/UTC。成功或已新态均在本次进程环境中显式选择新FIGHT，避免上次DB已提交而缓存未激活的情况。子进程必须返回成功消息且退出0才继续开放大厅，失败自动停止本次自有进程；LAN监听保持。此部署清单只拥有原ddtank库，恢复副本不满足绑定时在连接/写入及API/game之前拒绝，需另行提供一致性验证，不能静默猜选FIGHT。
+
+原素材与私有配置不随源码发布。当前音频覆盖已安装；泡泡茶资源及启动升级清单已准备，生产数据库尚未激活。奶油熊14301/14302原粒子定义仍缺，保留兼容尾迹，不能宣称原特效全部齐全。隔离音频/动画组件结果、数据库回归与完整游戏验收分别记录，组件通过不代替实战验证。
