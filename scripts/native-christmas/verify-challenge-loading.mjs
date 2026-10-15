@@ -57,6 +57,8 @@ function fixture(methods,index){
   sceneMovePending:null,sceneMoveCorrection:false,sceneSelfSnapshot:true,sceneMembersReady:true,sceneButtons:null,socketOwner:null,
   roomCreateOwner:null,gameLoadOwner:null,challengeIndex:-1,resumeChallengeIndex:-1,challengeRoomCreated:false,challengeTimer:null,challengeNeedsRefresh:false,sceneChallengeRoom:null,
   pending:false,pendingId:'',pendingAction:null,busy:false,phase:'ready',generation:'fixture-generation',expectedId:7,sequence:0,lastRevision:-1,displayArmed:false,snowman:null,quantity:null,help:null,movieOwner:null,movieHandler:null,windowSerial:1,balanceText:null,notice:null,message:'',
+  // This older suite isolates loading/receipts. The separate natural-return suite extracts these actual AS owners.
+  battleReturn:null,returnToSnowfield:false,armBattleReturn(){},cancelBattleReturn(){},completeBattleReturnRead:()=>false,
   bindings:Object.create(null),snowfield:{attempt:{canResume:true,type:index},challenges:[0,1,2].map(i=>({monsterId:300+i,canChallenge:true}))},
   cls(name){assert(classes[name],`fixture host ${name}`);return classes[name];},role(){assert(roleValid,'fixture role changed');},
   out:()=>({sendStartFightWithMonster:(...args)=>{assert.equal(timers.filter(t=>t.running).length,1);assert(timers.at(-1).running,'owned timeout starts before the first send');sent.push({name:'monster',args});},sendLeaveChristmasRoom:(...args)=>sent.push({name:'leave',args})}),say:value=>messages.push(value),lock(){},request:(...args)=>sent.push({name:'business',args}),

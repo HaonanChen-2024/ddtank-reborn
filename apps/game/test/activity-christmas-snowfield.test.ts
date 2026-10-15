@@ -278,11 +278,48 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
     const removed = vi.spyOn(r, "removePlayer"), before = await stored(); f.ctx.rooms.tick();
     expect(f.p.currentRoom).toBe(r); expect(removed).not.toHaveBeenCalled(); expect(await stored()).toEqual(before);
   });
-  it("a result alone or the wrong stopped ID cannot authorize a member-preserving return", async () => {
+  it("a result and early94 wait for the matching stopped ID without holding the client queue", async () => {
     const r = await launch(), permit = owner.checkRoom(r, [f.p]); expect(permit.ok).toBe(true); if (!permit.ok) throw new Error(permit.message);
     launches[0]!.onFinished!(true); owner.fightStopped(permit.lease, 999); await owner.drain();
-    await owner.leaveChallengeRoom(f.client, f.p); f.ctx.rooms.tick(); expect(f.p.currentRoom).toBeNull(); expect((await sf()).scene.people).toBe(0);
+    await owner.leaveChallengeRoom(f.client, f.p); await owner.leaveChallengeRoom(f.client, f.p); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect((await sf()).scene.people).toBe(1);
+    launches[0]!.onStopped(); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBeNull(); expect((await sf()).scene.people).toBe(1);
     expect((await stored()).mail).toHaveLength(1);
+  });
+  it.each(["closed", "inactive", "quitting", "different-client", "different-player", "replacement-room", "scene-exit", "before-quit", "shutdown"] as const)("an early terminal return cannot survive changed %s ownership", async mode => {
+    const r = await launch(); launches[0]!.onFinished!(true); await owner.drain();
+    await owner.leaveChallengeRoom(f.client, f.p); const before = await stored();
+    if (mode === "closed") f.client.closed = true;
+    else if (mode === "inactive") f.p.isActive = false;
+    else if (mode === "quitting") f.p.quitting = Promise.resolve();
+    else if (mode === "different-client") f.client.player = null;
+    else if (mode === "different-player") { f.ctx.world.remove(f.p); f.ctx.world.add(Object.create(f.p) as typeof f.p); }
+    else if (mode === "replacement-room") { const other = f.ctx.rooms.rooms.find(candidate => candidate !== r)!; r.removePlayer(f.p); other.start(); other.updateRoom("replacement", "", 1, 3, 0); other.addPlayer(f.p); }
+    else if (mode === "scene-exit") await owner.leaveScene(f.client, f.p);
+    else if (mode === "before-quit") await owner.beforeQuit(f.p);
+    else owner.beginShutdown();
+    f.ctx.rooms.tick(); const current = f.p.currentRoom, exits = vi.spyOn(f.ctx.rooms, "exitRoom");
+    launches[0]!.onStopped(); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(current); expect(await stored()).toEqual(before);
+    if (["scene-exit", "before-quit", "shutdown"].includes(mode)) expect(exits).not.toHaveBeenCalled();
+  });
+  it("a replacement lease cancels an early return even when it reuses the old room object", async () => {
+    const r = await launch(); launches[0]!.onFinished!(true); await owner.drain(); await owner.leaveChallengeRoom(f.client, f.p);
+    r.removePlayer(f.p); r.stop(); for (const other of f.ctx.rooms.rooms) if (other !== r) other.start();
+    await admitted(); await tickUntil(owner.handoffChallenge(f.client, f.p, 1)); expect(f.p.currentRoom).toBe(r);
+    const before = await stored(), exits = vi.spyOn(f.ctx.rooms, "exitRoom"); launches[0]!.onStopped(); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect(owner.checkRoom(r, [f.p]).ok).toBe(true); expect(exits).not.toHaveBeenCalled(); expect(await stored()).toEqual(before);
+  });
+  it("settlement failure before stop cancels the early return and requires a new explicit retry", async () => {
+    const r = await launch(), before = await stored();
+    await db.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT snowfield_tail_failure CHECK ("Signature"='never') NOT VALID`);
+    launches[0]!.onFinished!(true); await owner.leaveChallengeRoom(f.client, f.p); await expect(owner.drain()).rejects.toThrow(); expect(await stored()).toEqual(before);
+    await db.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT snowfield_tail_failure`);
+    launches[0]!.onStopped(); await expect(owner.drain()).rejects.toThrow(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect((await sf()).scene.people).toBe(1); expect(await stored()).toEqual(before);
+    await owner.leaveChallengeRoom(f.client, f.p); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBeNull(); expect((await sf()).scene.people).toBe(1); expect((await stored()).mail).toHaveLength(1);
   });
   it("technical start rejection refunds once, voluntary exit before start does not", async () => {
     start = () => null; await launch(); await owner.drain(); let s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [0, 0, 0], terminals: [{ quotaReturned: true }] });

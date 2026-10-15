@@ -233,6 +233,7 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   private readonly admissions = new Map<number, { attempt: SnowfieldAttempt; actor: SnowfieldRead["actor"]; p: GamePlayer; c: GameClient; ticketExpiresAt: number }>();
   private readonly leases = new Map<GamePlayer, Lease>();
   private readonly completed = new Map<GamePlayer, Lease>();
+  private readonly returnIntents = new Map<GamePlayer, Lease>();
   private readonly creating = new Set<GamePlayer>();
   private readonly pending = new Set<Promise<void>>();
   private readonly failures = new Map<string, unknown>();
@@ -426,7 +427,7 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   roomCreated(p: GamePlayer, room: BaseRoom) { const a = this.admissions.get(p.id); need(a && this.creating.has(p) && room.MapId === a.attempt.localPveId, "雪场房间准入已失效。");
     const lease: Lease = { player: p, client: a.c, room, attemptId: a.attempt.id, serverInstance: this.serverInstance, originalMissionId: a.attempt.originalMissionId, localPveId: a.attempt.localPveId,
       actor: a.actor, attempt: a.attempt, prepared: false, acceptedId: null, stopped: false, sealed: false, refund: false, outcome: null, pending: null };
-    bindChristmasPveAdmission(room, { player: p, localPveId: lease.localPveId, attemptId: lease.attemptId, serverInstance: this.serverInstance }); this.completed.delete(p); this.leases.set(p, lease); this.changed(); }
+    bindChristmasPveAdmission(room, { player: p, localPveId: lease.localPveId, attemptId: lease.attemptId, serverInstance: this.serverInstance }); this.returnIntents.delete(p); this.completed.delete(p); this.leases.set(p, lease); this.changed(); }
   async handoffChallenge(c: GameClient, p: GamePlayer, id: number): Promise<void> {
     const a = this.admissions.get(p.id), m = a && this.monsters[a.attempt.type]!;
     need(this.online(p, c) && this.ready() && a?.p === p && a.c === c && m?.id === id && m.attempt === a.attempt.id && m.generation === a.attempt.monsterGeneration, "没有可继续的真实雪场准入。");
@@ -460,12 +461,13 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   }
   fightAccepted(value: SnowfieldLease, game: FightGame) { const l = value as Lease; if (l.sealed || this.leases.get(l.player) !== l || l.acceptedId !== null) return; l.acceptedId = game.id; l.attempt.status = "fighting"; l.attempt.fightId = game.id; const m = this.monsters[l.attempt.type]!; m.state = 1; this.changed(); this.broadcast(this.monsterPacket(3, m)); }
   fightFinished(value: SnowfieldLease, id: number, won: boolean) { const l = value as Lease; if (l.acceptedId !== id || l.sealed || l.outcome) return; this.outcome(l, won ? "win" : "loss", false); }
-  fightStopped(value: SnowfieldLease, id: number | null) { const l = value as Lease; if (id === null || l.acceptedId !== id || l.stopped) return; l.stopped = true; if (!l.sealed && !l.outcome) this.outcome(l, "aborted", false); }
+  fightStopped(value: SnowfieldLease, id: number | null) { const l = value as Lease; if (id === null || l.acceptedId !== id || l.stopped) return; l.stopped = true; if (!l.sealed && !l.outcome) this.outcome(l, "aborted", false);
+    if (this.returnIntents.get(l.player) === l) this.continueReturn(l); }
   startFailed(value: SnowfieldLease, _why: string) { const l = value as Lease; if (l.acceptedId === null && !l.sealed && !l.outcome) this.outcome(l, "aborted", true); }
   private outcome(l: Lease, outcome: "win" | "loss" | "aborted", refund: boolean) {
     if (l.outcome || l.sealed) return; l.outcome = outcome; l.refund = refund; l.sealed = true; this.changed();
     const work = this.settle(l, outcome, refund); l.pending = work; this.pending.add(work);
-    void work.then(() => { this.pending.delete(work); this.failures.delete(l.attemptId); }, e => { this.pending.delete(work); this.failures.set(l.attemptId, e); this.ctx.log.error("snowfield outcome persistence failed", e); });
+    void work.then(() => { this.pending.delete(work); this.failures.delete(l.attemptId); }, e => { this.pending.delete(work); this.failures.set(l.attemptId, e); if (this.returnIntents.get(l.player) === l) this.returnIntents.delete(l.player); this.ctx.log.error("snowfield outcome persistence failed", e); });
   }
   private async settle(l: Lease, outcome: "win" | "loss" | "aborted", refund: boolean) {
     const mailed = await l.player.withPersistenceLock(() => this.ctx.db.db.transaction(async tx => {
@@ -506,7 +508,7 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
       this.ctx.rooms.exitRoom(room, p, () => {
         const safe = p.currentRoom === room && room.IsUsing && room.RoomType === 40 && room.MapId === l.localPveId && room.host === p &&
           room.getPlayers().length === 1 && room.getPlayers()[0] === p && !this.leases.has(p) && !this.admissions.has(p.id) &&
-          (!returning || this.completed.get(p) === l && l.stopped && l.acceptedId !== null && this.online(p, c) && this.members.get(p.id)?.p === p && this.members.get(p.id)?.c === c && !room.IsPlaying && !room.game);
+          (!returning || !this.closing && this.completed.get(p) === l && l.stopped && l.acceptedId !== null && this.online(p, c) && this.members.get(p.id)?.p === p && this.members.get(p.id)?.c === c && !room.IsPlaying && !room.game);
         if (safe && this.completed.get(p) === l) this.completed.delete(p);
         return safe;
       });
@@ -514,25 +516,45 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   }
   async leaveChallengeRoom(c: GameClient, p: GamePlayer): Promise<void> {
     const l = this.leases.get(p) ?? this.completed.get(p);
-    if (!l || !l.stopped || l.acceptedId === null || !l.sealed || !l.outcome) return this.leaveScene(c, p);
+    if (!l || l.acceptedId === null || !l.sealed || !l.outcome) return this.leaveScene(c, p);
     if (l.player !== p || l.client !== c || l.serverInstance !== this.serverInstance || p.currentRoom !== l.room) return;
+    if (!l.stopped) {
+      if (l.outcome === "aborted") return this.leaveScene(c, p);
+      // Original119 can publish the real result before the engine's next stop tick. Only an explicit94 waits here.
+      if (!this.closing && this.online(p, c) && this.members.get(p.id)?.p === p && this.members.get(p.id)?.c === c && l.room.game?.id === l.acceptedId)
+        this.returnIntents.set(p, l);
+      return;
+    }
+    this.returnIntents.delete(p);
     this.retrySettlement(l); if (l.pending) await l.pending;
     this.exitLeaseRoom(l, c, p, true);
   }
+  private continueReturn(l: Lease): void {
+    // A microtask runs after RoomMgr clears game/IsPlaying; never hold the client queue waiting for a future stop.
+    const work = Promise.resolve().then(async () => {
+      if (this.returnIntents.get(l.player) !== l) return;
+      this.retrySettlement(l); if (l.pending) await l.pending;
+      if (this.returnIntents.get(l.player) !== l) return;
+      this.returnIntents.delete(l.player); this.exitLeaseRoom(l, l.client, l.player, true);
+    });
+    this.pending.add(work);
+    void work.then(() => this.pending.delete(work), e => { this.pending.delete(work); if (this.returnIntents.get(l.player) === l) this.returnIntents.delete(l.player); this.ctx.log.error("snowfield return settlement failed", e); });
+  }
   async leaveScene(c: GameClient, p: GamePlayer): Promise<void> { if (this.members.get(p.id)?.c !== c && this.reservations.get(p.id)?.c !== c) return;
+    this.returnIntents.delete(p);
     const l = this.leases.get(p) ?? this.completed.get(p); if (l && !l.outcome) { this.outcome(l, "aborted", false); l.room.game?.removePlayer(p); } else if (!l) await this.abortAdmission(p, false);
     if (l) this.retrySettlement(l);
     if (l?.pending) await l.pending;
     if (l) this.exitLeaseRoom(l, c, p);
     this.removeMember(p); }
-  private removeMember(p: GamePlayer) { if (this.members.get(p.id)?.p === p) { this.members.delete(p.id); const b = this.packet(19); b.writeInt(p.id); this.broadcast(b); this.send(p, b); } if (this.reservations.get(p.id)?.p === p) this.reservations.delete(p.id); this.completed.delete(p); this.changed(); }
+  private removeMember(p: GamePlayer) { this.returnIntents.delete(p); if (this.members.get(p.id)?.p === p) { this.members.delete(p.id); const b = this.packet(19); b.writeInt(p.id); this.broadcast(b); this.send(p, b); } if (this.reservations.get(p.id)?.p === p) this.reservations.delete(p.id); this.completed.delete(p); this.changed(); }
   async revive(c: GameClient, p: GamePlayer): Promise<void> { const m = this.members.get(p.id); need(this.online(p, c) && m?.c === c && !p.currentRoom && !this.leases.has(p), "当前不能在雪场复活。"); m.position = { x: 500, y: 500 }; m.route = []; m.state = 0; this.changed(); const b = this.packet(20); b.writeInt(p.id); b.writeByte(0); b.writeInt(500); b.writeInt(500); this.broadcast(b); }
   private retrySettlement(l: Lease): void {
-    if (this.failures.has(l.attemptId) && l.outcome) { this.failures.delete(l.attemptId); const retry = this.settle(l, l.outcome, l.refund); l.pending = retry; this.pending.add(retry); void retry.then(() => this.pending.delete(retry), e => { this.pending.delete(retry); this.failures.set(l.attemptId, e); }); }
+    if (this.failures.has(l.attemptId) && l.outcome) { this.failures.delete(l.attemptId); const retry = this.settle(l, l.outcome, l.refund); l.pending = retry; this.pending.add(retry); void retry.then(() => this.pending.delete(retry), e => { this.pending.delete(retry); this.failures.set(l.attemptId, e); if (this.returnIntents.get(l.player) === l) this.returnIntents.delete(l.player); }); }
   }
-  async beforeQuit(p: GamePlayer): Promise<void> { const l = this.leases.get(p) ?? this.completed.get(p); if (l) { if (!l.outcome) this.outcome(l, "aborted", false); this.retrySettlement(l);
+  async beforeQuit(p: GamePlayer): Promise<void> { this.returnIntents.delete(p); const l = this.leases.get(p) ?? this.completed.get(p); if (l) { if (!l.outcome) this.outcome(l, "aborted", false); this.retrySettlement(l);
     if (l.pending) await l.pending; } else await this.abortAdmission(p, false); this.removeMember(p); }
-  beginShutdown() { this.closing = true; this.changed(); for (const l of this.leases.values()) if (!l.outcome) this.outcome(l, "aborted", false); }
+  beginShutdown() { this.closing = true; this.returnIntents.clear(); this.changed(); for (const l of this.leases.values()) if (!l.outcome) this.outcome(l, "aborted", false); }
   async drain() { while (this.pending.size) await Promise.all([...this.pending]); if (this.failures.size) throw new Error("雪场结算尚未持久化，不能关闭数据库。"); }
   async handle(p: GamePlayer, c: GameClient, pkt: GSPacket) { try { const sub = pkt.readByte();
     if (sub === 17) { const phase = pkt.readByte(); if (phase === 2) { const point = { x: pkt.readInt(), y: pkt.readInt() }; need(pkt.dataLeft === 0, "雪场入场包无效。", 400); await this.enterScene(c, p, point); } else if (phase === 1 && pkt.dataLeft === 0) await this.leaveScene(c, p); else need(false, "请使用本地活动窗口确认免费票。", 400); }

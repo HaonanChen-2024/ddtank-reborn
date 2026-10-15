@@ -50,12 +50,13 @@ function scenePosition(p: GSPacket) {
   for (let i = 0; i < 3; i++) p.readString(); for (let i = 0; i < 4; i++) p.readInt();
   const point = { x: p.readInt(), y: p.readInt() }; p.readByte(); expect(p.dataLeft).toBe(0); return point;
 }
-function drive(fight: FightGame, game: PveGame, shoot: boolean, stopAtPlaying = false) {
+function drive(fight: FightGame, game: PveGame, shoot: boolean, stopAtPlaying = false, stopAtResult = false) {
   const turns = new Set<number>();
   for (let i = 0; i < 50000 && engine.games.has(fight.id); i++) {
     engine.tick(now += 40);
     if (game.state === GameState.Loading) gamePacket(fight, 16, p => p.writeInt(100));
     if (stopAtPlaying && game.state === GameState.Playing) return;
+    if (stopAtResult && game.state === GameState.ALLSessionStopped) return;
     const me = game.players[0], npc = game.livings.find(n => n.isLiving);
     if (me.isAttacking && !turns.has(game.turnIndex)) {
       turns.add(game.turnIndex);
@@ -129,6 +130,29 @@ describe("snowfield actual engine, room and durable outcome", () => {
     expect(state.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0], active: null, terminals: [{ outcome: "aborted", fightId: fight!.id, quotaReturned: false }] });
     await roomPacket(5); f.ctx.rooms.tick(); expect(await stored()).toEqual(state);
   });
+  it.each([true, false])("original119 then early94 waits for real stop before returning with its member and position (shoot=%s)", async shoot => {
+    const { room, fight, game } = await launch();
+    const finish = vi.spyOn(owner, "fightFinished"), stopped = vi.spyOn(owner, "fightStopped"), packets = vi.spyOn(f.p, "send");
+    drive(fight!, game!, shoot, false, true); expect(game!.state).toBe(GameState.ALLSessionStopped); expect(finish).not.toHaveBeenCalled();
+    await gamePacket(fight!, 119, p => { p.writeInt(0); p.writeBoolean(true); p.writeBoolean(true); });
+    expect(finish).toHaveBeenCalledTimes(1); expect(finish.mock.calls[0]!.slice(1)).toEqual([fight!.id, shoot]); expect(stopped).not.toHaveBeenCalled();
+    await roomPacket(5); await roomPacket(5); await owner.drain(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(room); expect(room.game).toBe(fight); expect(room.IsPlaying).toBe(true);
+    expect(packets.mock.calls.map(([p]) => GSPacket.parse(p.encode())).some(p => p.code === 94 && p.readByte() === 5)).toBe(false);
+    engine.tick(now += 40); await owner.drain(); f.ctx.rooms.tick();
+    expect(stopped).toHaveBeenCalledTimes(1); expect(engine.games.size).toBe(0); expect(f.p.currentRoom).toBeNull();
+    expect((await read()).scene).toMatchObject({ state: "inside", people: 1, canResume: false }); expect((await read()).attempt.state).toBe("none");
+    const state = await stored(); expect(state.mail).toHaveLength(shoot ? 1 : 0);
+    expect(state.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ active: null, usedToday: [1, 0, 0], terminals: [{ outcome: shoot ? "win" : "loss", fightId: fight!.id }] });
+    const decoded = packets.mock.calls.map(([p]) => GSPacket.parse(p.encode()));
+    expect(decoded.filter(p => p.code === 94 && p.readByte() === 5)).toHaveLength(1); expect(decoded.some(p => p.code === 145 && p.readByte() === 19)).toBe(false);
+    const entry = await action("enter"); expect(entry.pair.snowfield.scene.canResume).toBe(true);
+    await scenePacket(17, p => { p.writeByte(2); p.writeInt(500); p.writeInt(500); });
+    const players = packets.mock.calls.map(([p]) => GSPacket.parse(p.encode())).filter(p => p.code === 145 && p.readByte() === 18).at(-1)!;
+    expect(scenePosition(players)).toEqual({ x: 501, y: 500 }); expect(await stored()).not.toEqual(state); // Explicit enter has its own receipt, never a quota charge.
+    expect((await stored()).mail).toHaveLength(shoot ? 1 : 0);
+    if (shoot) { expect((await action("npc-claim")).mailedCount).toBe(1); expect((await stored()).mail).toHaveLength(2); }
+  });
   it("a real first-tick technical refusal refunds once and never creates a winning outcome", async () => {
     vi.spyOn(ChristmasLocalGame.prototype, "OnPrepated").mockImplementation(() => { throw new Error("isolated real first tick refusal"); });
     const { room, fight } = await launch(); expect(fight).toBeNull(); await owner.drain();
@@ -140,7 +164,9 @@ describe("snowfield actual engine, room and durable outcome", () => {
   it("a failed real winning settlement preserves room/member and retries on explicit94/5 without duplicating mail", async () => {
     const { room, fight, game } = await launch(), before = await stored();
     await db.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT snowfield_engine_tail_failure CHECK ("Signature"='never') NOT VALID`);
-    drive(fight!, game!, true); await expect(owner.drain()).rejects.toThrow(); f.ctx.rooms.tick();
+    drive(fight!, game!, true, false, true);
+    await gamePacket(fight!, 119, p => { p.writeInt(0); p.writeBoolean(true); p.writeBoolean(true); }); await roomPacket(5);
+    expect(f.p.currentRoom).toBe(room); engine.tick(now += 40); await expect(owner.drain()).rejects.toThrow(); f.ctx.rooms.tick();
     expect(f.p.currentRoom).toBe(room); expect(room.game).toBeNull(); expect((await read()).scene.people).toBe(1); expect(await stored()).toEqual(before);
     await expect(roomPacket(5)).rejects.toThrow(); f.ctx.rooms.tick(); expect(f.p.currentRoom).toBe(room); expect((await read()).scene.people).toBe(1); expect(await stored()).toEqual(before);
     await db.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT snowfield_engine_tail_failure`);

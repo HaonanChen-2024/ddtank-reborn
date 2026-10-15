@@ -140,6 +140,19 @@ package {
   public static function openDevil(id:Number,generation:String):Boolean{return open(devil,id,generation);}
   public static function openCaveLoot(id:Number,generation:String):Boolean{return open(caveloot,id,generation);}
   public static function openChristmas(id:Number,generation:String):Boolean{return open(christmas,id,generation);}
+  public static function routeChristmasNaturalReturn(target:String,room:Object,game:Object):String {
+   if(target!=="dungeonRoom"||sharedPhase!=="ready"||christmas.phase!=="ready"||!domain||!christmas.module||expected<=0||christmas.expected!==expected||!christmas.generation)return target;
+   try {
+    displayDomain();
+    var self:Object=clientClass("ddt.manager.PlayerManager")["Instance"]["Self"];
+    if(!self||int(self["ID"])!==expected||!room||!game||clientClass("room.RoomManager")["Instance"]["current"]!==room||clientClass("game.GameManager")["Instance"]["Current"]!==game)return target;
+    var s:Object=christmas.module.statusNative();
+    if(!s||s.phase!=="ready"||s.ready!==true||s.expectedUserId!==expected||s.characterId!==expected||s.generation!==christmas.generation)return target;
+    var result:*=christmas.module.naturalBattleReturn(target,room,game);
+    return result is String&&(result===target||result==="main")?String(result):target;
+   }catch(ignored:Error){return target;}
+   return target;
+  }
   private static function open(r:Object,id:Number,generation:String):Boolean {
    try {
     verifyRole(id);
