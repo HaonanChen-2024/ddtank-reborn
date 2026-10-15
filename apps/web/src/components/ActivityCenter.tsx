@@ -128,14 +128,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge" | "charge" | "forthright") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge" | "charge" | "forthright" | "exchange") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : kind === "charge" ? "原版充值大赠送" : kind === "forthright" ? "原版至尊豪礼" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : kind === "charge" ? "原版充值大赠送" : kind === "forthright" ? "原版至尊豪礼" : kind === "exchange" ? "原版兑换活动" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : kind === "charge" ? window.workshopShowCharge : kind === "forthright" ? window.workshopShowForthright : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : kind === "charge" ? window.workshopShowCharge : kind === "forthright" ? window.workshopShowForthright : kind === "exchange" ? window.workshopShowExchange : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -268,6 +268,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                 {selected.id === "first-gift" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("first-recharge"); }}>试用原版首充大礼</button>
                   <p className="activity-center__hint">本地任务解锁三档奖励；商城使用活动积分。任务凭证可验证、激活或赠送一次，首档与新手任务礼共用领取记录。无真实付款；原充值卡和赠卡美术仍待移植。</p></>}
+                {selected.id === "exchange" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("exchange"); }}>试用原版兑换活动</button>
+                  <p className="activity-center__muted">原材料预览和数量选择窗口仍在测试。本地4条配方消耗真实背包材料，奖励通过游戏邮件送达，不扣活动积分；每条配方每日最多10份，单次最多10份。请先进入大厅并解锁背包，打开只读取。原服其它分类和未知奖励尚未接入，网页积分兑换仍可使用。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版兑换活动。</p>}</>}
                 {selected.id === "luxury" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("forthright"); }}>试用原版至尊豪礼</button>
                   <p className="activity-center__muted">原四页仍在测试：累计任务礼共用领取记录，任务钥匙可抽三轮，三人拼团由真实角色加入，分期商店按窗口标注的UTC时段开放。未满团可退出，团长可取消；到期款项需手动结清退款。采用本地活动积分和普通材料，不接真实付款，不代表原服全服库存。</p>

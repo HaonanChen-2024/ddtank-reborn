@@ -101,7 +101,7 @@ describe("native DDPlay through the existing transactional API", () => {
     expect(legacy).not.toHaveProperty("nativeDDPlayAction");
     expect((await saved())!.games.ddplay).toEqual({ version: 1, kind: "ddplay", spins: 2, faces: [5, 5, 5] });
     expect((await saved())!.completed.ddplay).toBe(2); expect((await saved())!.games).not.toHaveProperty("ddplayNativeV1");
-    const before = await persisted(), latest = await snapshot(), replay = await native({ type: "spin" }, id);
+    const before = await persisted(), { nativeExchange: _exchange, ...latest } = await snapshot(), replay = await native({ type: "spin" }, id);
     expect(replay).toMatchObject({ ...latest, replayed: true, mailedCount: 0 }); expect(replay).not.toHaveProperty("nativeDDPlayAction");
     await native({ type: "exchange", count: 1 }, id, 409); expect(await persisted()).toEqual(before);
     expect(before.goods).toHaveLength(0); expect(before.mails).toHaveLength(0);

@@ -10,6 +10,7 @@ import type { CarnivalNativeEffect, CarnivalNativeView } from "./carnival-native
 import type { FirstRechargeNativeEffect, FirstRechargeNativeView } from "./first-recharge-native.js";
 import type { ChargeNativeEffect, ChargeNativeView } from "./charge-native.js";
 import type { ForthrightNativeEffect, ForthrightNativeView, PrivateGroup } from "./forthright-native.js";
+import type { ExchangeNativeView } from "./exchange-native.js";
 
 export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; cardId?: string; recipientName?: string }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
@@ -60,6 +61,8 @@ export interface ActivitySnapshot {
   nativeFirstRecharge: FirstRechargeNativeView;
   nativeCharge: ChargeNativeView;
   nativeForthright: ForthrightNativeView;
+  /** Loaded only outside activity transactions from the authoritative game inventory owner. */
+  nativeExchange?: ExchangeNativeView;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;

@@ -118,7 +118,7 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false, withFirstRecharge = false, withCharge = false, withForthright = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false, withFirstRecharge = false, withCharge = false, withForthright = false, withExchange = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
       assert.ok(!withMoonlight || withGypsy);
@@ -128,8 +128,9 @@ function fixture() {
       assert.ok(!withFirstRecharge || withCarnival);
       assert.ok(!withCharge || withFirstRecharge);
       assert.ok(!withForthright || withCharge);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "") + (withFirstRecharge ? "-first-recharge" : "") + (withCharge ? "-charge" : "") + (withForthright ? "-forthright" : "")),
-        tag = Buffer.from(withForthright ? "new forthright bridge" : withCharge ? "new charge bridge" : withFirstRecharge ? "new first recharge bridge" : withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withExchange || withForthright);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "") + (withFirstRecharge ? "-first-recharge" : "") + (withCharge ? "-charge" : "") + (withForthright ? "-forthright" : "") + (withExchange ? "-exchange" : "")),
+        tag = Buffer.from(withExchange ? "new exchange bridge" : withForthright ? "new forthright bridge" : withCharge ? "new charge bridge" : withFirstRecharge ? "new first recharge bridge" : withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -149,6 +150,7 @@ function fixture() {
         .concat(withFirstRecharge ? ["WorkshopNativeFirstRechargeBootstrap.swf", "first-recharge-original-library.swf", "firstrecharge_v3_6_1_u1.swf", "firstrecharge_v3_6_1_u1.ui"].map(file => ["first-recharge", file]) : [])
         .concat(withCharge ? ["WorkshopNativeChargeBootstrap.swf", "charge-original-library.swf", "chargeactivity_v3_6_1_u1.swf", "chargeactivity_v3_6_1_u1.ui"].map(file => ["charge", file]) : [])
         .concat(withForthright ? ["WorkshopNativeForthrightBootstrap.swf", "forthright-original-library.swf", "forthrightactive_v3_6_1_u1.swf", "forthrightactive_v3_6_1_u1.ui"].map(file => ["forthright", file]) : [])
+        .concat(withExchange ? ["WorkshopNativeExchangeBootstrap.swf", "exchange-original-library.swf", "exchange-original-art.swf", "exchange-styles.xml"].map(file => ["exchange", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -156,7 +158,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withForthright ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright" : withCharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge" : withFirstRecharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge" : withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withExchange ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange" : withForthright ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright" : withCharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge" : withFirstRecharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge" : withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -171,6 +173,7 @@ function fixture() {
     firstRechargePath: name => path.join(overlay, "workshop-native/first-recharge", name),
     chargePath: name => path.join(overlay, "workshop-native/charge", name),
     forthrightPath: name => path.join(overlay, "workshop-native/forthright", name),
+    exchangePath: name => path.join(overlay, "workshop-native/exchange", name),
     treasurePath: name => path.join(overlay, "workshop-native/treasure", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
@@ -753,6 +756,73 @@ test("unknown or incomplete Forthright activity manifests, wrong URLs and foreig
     else f.put(forthright, JSON.stringify(manifest));
     const before = f.snapshot();
     assert.throws(() => f.run("install", forthright));
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("all previous variants upgrade to exact sixty-five Exchange resources and fully roll back", () => {
+  const f = fixture(), original = f.snapshot();
+  assert.equal(f.run("install").nativeWardrobe.assets.length, 6);
+  const previousCounts = [18, 24, 28, 32, 36, 41, 45, 49, 53, 57, 61];
+  for (let n = 0; n < previousCounts.length; n++)
+    assert.equal(f.run("install", f.upgradedBuild(...Array(n).fill(true))).nativeWardrobe.assets.length, previousCounts[n]);
+  const exchange = f.upgradedBuild(...Array(11).fill(true)), before = f.snapshot();
+  const dry = f.run("verify", exchange);
+  assert.equal(dry.nativeWardrobeInstalled, false);
+  assert.equal(dry.pendingTransition, true);
+  assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.run("install", exchange).nativeWardrobe.assets.length, 65);
+  assert.equal(f.run("install", exchange).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  for (const file of ["WorkshopNativeExchangeBootstrap.swf", "exchange-original-library.swf", "exchange-original-art.swf", "exchange-styles.xml"])
+    assert.equal(f.fs.existsSync(f.exchangePath(file)), true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial Exchange activity writes restore the sixty-one resource baseline before retry", () => {
+  for (const file of ["WorkshopNativeExchangeBootstrap.swf", "exchange-original-library.swf", "exchange-original-art.swf", "exchange-styles.xml"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(10).fill(true)));
+    const before = f.snapshot(), exchange = f.upgradedBuild(...Array(11).fill(true));
+    f.arm("write", f.exchangePath(file));
+    assert.throws(() => f.run("install", exchange), /ENOSPC/);
+    assert.equal(f.failureCount, 1);
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", exchange).nativeWardrobe.assets.length, 65);
+  }
+});
+
+test("Exchange activity rollback failure compensates sixty-five resources and supports retry", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install", f.upgradedBuild(...Array(11).fill(true)));
+  const installed = f.snapshot();
+  f.arm("unlink", f.exchangePath("exchange-original-art.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.equal(f.failureCount, 1);
+  assert.equal(f.openHandles, 0);
+  assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or incomplete Exchange activity manifests, wrong URLs and foreign files fail before mutation", () => {
+  for (const reason of ["variant", "paths", "url", "foreign"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(10).fill(true)));
+    const exchange = f.upgradedBuild(...Array(11).fill(true));
+    const manifest = JSON.parse(f.fs.readFileSync(exchange, "utf8"));
+    if (reason === "variant") manifest.variant += "-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "url") manifest.assets.at(-1).urlPath = "/flash/workshop-native/exchange-extra/exchange-styles.xml";
+    if (reason === "foreign") f.put(f.exchangePath("exchange-styles.xml"), "user owned");
+    else f.put(exchange, JSON.stringify(manifest));
+    const before = f.snapshot();
+    assert.throws(() => f.run("install", exchange));
     assert.equal(f.openHandles, 0);
     assert.deepEqual(f.snapshot(), before);
   }

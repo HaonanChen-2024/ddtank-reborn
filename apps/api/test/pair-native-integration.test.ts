@@ -196,7 +196,7 @@ describe("native PairBox through the actual activity API and atomic mail", () =>
     expect((await persisted()).goods).toHaveLength(beforeMatch.goods.length + 1);
     expect((await persisted()).mails).toHaveLength(beforeMatch.mails.length + 1);
     await native({ type: "flip", index: 5, choice: "points" });
-    const current = await snapshot(), beforeRetry = await persisted();
+    const { nativeExchange: _exchange, ...current } = await snapshot(), beforeRetry = await persisted();
     const replay = await native({ type: "flip", index: 4, choice: "points" }, matchId);
     expect(replay).toMatchObject({ ...current, replayed: true, message: fresh.message, mailedCount: fresh.mailedCount });
     expect(replay).not.toHaveProperty("nativePairAction");
@@ -269,7 +269,7 @@ describe("native PairBox through the actual activity API and atomic mail", () =>
     expect(await snapshot()).toEqual(old); expect(await persisted()).toEqual(before);
     vi.setSystemTime(new Date("2026-10-16T12:00:00Z"));
     expect((await built.app.inject({ url: `/api/account/activities?characterId=${uid}`, headers: oldToken })).statusCode).toBe(401);
-    const tomorrow = await snapshot(); // Fresh authenticated token, same saved character.
+    const { nativeExchange: _exchange, ...tomorrow } = await snapshot(); // Fresh token; optional A05 read is outside old owner transactions.
     expect(tomorrow).toMatchObject({ day: "2026-10-16", points: 54, revision: old.revision,
       nativePair: { day: "2026-10-16", freeReelCount: 32, reelCount: 3, markCount: 3, todayBuyCount: 0 } });
     expect(active(tomorrow).cards).toEqual(active(old).cards);

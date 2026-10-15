@@ -22,6 +22,7 @@ import { recordChargeNativeSpending, type ChargeNativeEffect } from "./charge-na
 import { advanceForthrightGroup, decodeForthrightCode, forthrightEntityCode, readForthrightNativeState, validateForthrightGroup, validateForthrightNativeAction,
   type ForthrightNativeEffect, type PrivateGroup } from "./forthright-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityWallet } from "./types.js";
+import { commandExchange, readExchangeProjection, type ExchangeEnvelope } from "./exchange-native.js";
 
 interface Owner { NickName: string; Sex: boolean }
 interface WalletRow { Points: number; Earned: number; Revision: number }
@@ -40,6 +41,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeFirstRechargeAction?: { requestId: string; effects: FirstRechargeNativeEffect[] };
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
   nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
+  nativeExchangeAction?: ExchangeEnvelope;
 }
 const int = (n: number) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
 
@@ -110,7 +112,7 @@ async function stateOf(app: AppCtx, characterId: number, now: Date): Promise<Act
   return row?.State ?? createActivityState(now);
 }
 
-export async function activitySnapshot(app: AppCtx, claims: Claims, characterId: number): Promise<ActivityResult> {
+export async function activitySnapshot(app: AppCtx, claims: Claims, characterId: number, loadExchange = true): Promise<ActivityResult> {
   const now = new Date();
   await owner(app, claims, characterId, now);
   // GET is read-only: an unstarted character gets an in-memory default, not a persisted board.
@@ -119,7 +121,10 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
       LEFT JOIN app."ActivityStates" s ON s."UserID"=w."UserID" AND s."Activity"='reference' WHERE w."UserID"=${characterId}`),
     context(app, characterId, now),
   ]);
-  return { characterId, ...viewActivities(row?.State ?? createActivityState(now), walletOf(row), ctx) };
+  const result: ActivityResult = { characterId, ...viewActivities(row?.State ?? createActivityState(now), walletOf(row), ctx) };
+  // Never add internal inventory reads to context(): old actions hold the wallet lock there.
+  if (loadExchange) result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);
+  return result;
 }
 
 /** Keep all ordinary attachments in the claim transaction; sendMail itself truncates after five. */
@@ -291,6 +296,20 @@ async function forthrightGroupAction(app: AppCtx, claims: Claims, characterId: n
 }
 
 export async function activityAction(app: AppCtx, claims: Claims, characterId: number, activityId: string, requestId: string, action: ActivityAction): Promise<ActivityResult> {
+  if (activityId === "exchange-native") {
+    await owner(app, claims, characterId, new Date());
+    // No API transaction/row lock may span an internal game command.
+    const committed = await commandExchange(app, claims, characterId, requestId, action);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const result = await activitySnapshot(app, claims, characterId, false);
+      const view = committed.view.revision === result.revision && committed.view.day === result.day ? committed.view
+        : await readExchangeProjection(app, claims, characterId, result.revision, result.day);
+      if (view.authority === "unavailable" || view.revision !== result.revision) continue;
+      return { ...result, nativeExchange: view, message: committed.message, mailedCount: committed.mailedCount,
+        ...(committed.replayed ? { replayed: true } : { nativeExchangeAction: committed.nativeExchangeAction }) };
+    }
+    throw new ActivityError("兑换已由原请求编号结算，当前投影暂不一致，请保留同一请求编号重试。", 503);
+  }
   const signature = createHash("sha256").update(canonical({ activityId, action })).digest("hex");
   if (activityId === "first-recharge-native" && action.type === "gift-card") return firstRechargeGift(app, claims, characterId, requestId, action, signature);
   if (activityId === "forthright-native" && action.type === "inspect-group") return forthrightInspect(app, claims, characterId, requestId, action, signature);

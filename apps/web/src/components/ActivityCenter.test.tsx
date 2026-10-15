@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -17,6 +17,14 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 }
 
 describe("ActivityCenter native entry contract", () => {
+  it("offers original material exchange with explicit local recipes and no point charge", () => {
+    const html = render("exchange"); expect(html).toContain("试用原版兑换活动"); expect(html).toContain("网页玩法");
+    for (const text of ["真实背包材料", "不扣活动积分", "每日最多10份", "游戏邮件", "解锁背包", "打开只读取", "原服其它分类和未知奖励尚未接入"]) expect(html).toContain(text);
+    expect(html).not.toContain("试用原版至尊豪礼");
+  });
+  it("requires the live game character for original material exchange", () => {
+    expect(render("exchange", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版兑换活动<\/button>/);
+  });
   it("offers all four original forthright pages with local tasks and real-player groups", () => {
     const html = render("luxury"); expect(html).toContain("试用原版至尊豪礼"); expect(html).toContain("网页玩法");
     for (const text of ["原四页", "共用领取记录", "三轮", "真实角色", "分期商店", "UTC", "手动结清退款", "不接真实付款"]) expect(html).toContain(text);

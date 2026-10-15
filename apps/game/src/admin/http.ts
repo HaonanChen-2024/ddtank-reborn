@@ -24,6 +24,8 @@ export interface AdminApi {
   eventsForce(kind: string, minutes: number): Promise<Record<string, unknown>>;
   eventsStop(kind: string): Promise<Record<string, unknown>>;
   mailNotice(userId: number): boolean;
+  activityExchangeRead?(body: unknown): Promise<unknown>;
+  activityExchangeAction?(body: unknown): Promise<unknown>;
 }
 
 function readJson(req: http.IncomingMessage, max = 64 * 1024): Promise<Record<string, unknown>> {
@@ -84,6 +86,14 @@ export function startAdmin(host: string, port: number, token: string | undefined
       if (req.method === "POST" && url.pathname === "/mail-notice") {
         const b = await readJson(req);
         return send(200, { sent: api.mailNotice(Number(b.userId)) });
+      }
+      if (req.method === "POST" && url.pathname === "/activity-exchange/read") {
+        if (!api.activityExchangeRead) return send(503, { error: "activity exchange unavailable" });
+        return send(200, await api.activityExchangeRead(await readJson(req)));
+      }
+      if (req.method === "POST" && url.pathname === "/activity-exchange/action") {
+        if (!api.activityExchangeAction) return send(503, { error: "activity exchange unavailable" });
+        return send(200, await api.activityExchangeAction(await readJson(req)));
       }
       send(404, { error: "not found" });
     } catch (err) {

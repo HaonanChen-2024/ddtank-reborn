@@ -41,14 +41,15 @@ async function saved() { return {
   mails: await q(monitor, sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`),
 }; }
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
-// A14 exposes the fresh response clock; replay state must match while the ISO clock may advance.
-const latestView = (value: ActivityResult) => ({...value, nativeForthright:{...value.nativeForthright,
+// A14's clock may advance; A05's independent online projection is optional on older action replies.
+// Keep every older state/effect assertion while comparing only their common response contract.
+const latestView = ({ nativeExchange: _exchange, ...value }: ActivityResult) => ({...value, nativeForthright:{...value.nativeForthright,
   serverNow:expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)}});
 async function wallet() { return (await q1<{ Points: number; Revision: number }>(monitor, sql`SELECT "Points","Revision" FROM app."ActivityWallet" WHERE "UserID"=${uid}`))!; }
 async function snapshot(app = appB, who = uid) {
   const response = await app.app.inject({ url: `/api/account/activities?characterId=${who}`, headers: headers(who) });
   expect(response.statusCode, response.body).toBe(200); const result = response.json<ActivityResult>();
-  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction"]) expect(result).not.toHaveProperty(key);
+  for (const key of ["nativePairAction", "nativeMinesAction", "nativeDDPlayAction", "nativeGypsyAction", "nativeMoonlightAction", "nativeTreasureAction", "nativeWheelAction", "nativeCarnivalAction", "nativeFirstRechargeAction", "nativeChargeAction", "nativeForthrightAction", "nativeExchangeAction"]) expect(result).not.toHaveProperty(key);
   return result;
 }
 const wheel = async (type: string) => action("wheel-native", {type,choice:(await snapshot()).nativeWheel.roundToken});

@@ -14,6 +14,7 @@ import { attachNativeCarnivalHost, type NativeCarnivalPlayer } from "@/lib/nativ
 import { attachNativeFirstRechargeHost, type NativeFirstRechargePlayer } from "@/lib/native-first-recharge-host";
 import { attachNativeChargeHost, type NativeChargePlayer } from "@/lib/native-charge-host";
 import { attachNativeForthrightHost, type NativeForthrightPlayer } from "@/lib/native-forthright-host";
+import { attachNativeExchangeHost, type NativeExchangePlayer } from "@/lib/native-exchange-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -28,7 +29,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -63,12 +64,15 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenFirstRecharge?: (characterId: number, generation: string) => boolean;
   workshopOpenCharge?: (characterId: number, generation: string) => boolean;
   workshopOpenForthright?: (characterId: number, generation: string) => boolean;
+  workshopOpenExchange?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
   workshopStatusCharge?: () => NativePairStatus;
   workshopStatusForthright?: () => NativePairStatus;
+  workshopStatusExchange?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
   workshopCloseCharge?: () => unknown;
   workshopCloseForthright?: () => unknown;
+  workshopCloseExchange?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -260,6 +264,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       forthrightCharacterId = 0;
       forthrightGeneration = "";
     };
+    let exchangeRequest: { cancel: () => void } | null = null;
+    let exchangeHost: ReturnType<typeof attachNativeExchangeHost> | null = null;
+    let exchangeCharacterId = 0;
+    let exchangeGeneration = "";
+    const detachExchange = () => {
+      exchangeRequest?.cancel();
+      exchangeHost?.cancel();
+      exchangeHost = null;
+      exchangeCharacterId = 0;
+      exchangeGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -308,6 +323,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachFirstRecharge();
           detachCharge();
           detachForthright();
+          detachExchange();
           player?.remove();
           player = null;
         };
@@ -980,6 +996,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (forthrightRequest === request) forthrightRequest = null;
           }
         };
+        window.workshopShowExchange = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenExchange || !owner.workshopStatusExchange || !owner.workshopCloseExchange) return false;
+          try {
+            const initial = owner.workshopStatusExchange();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (exchangeHost && exchangeCharacterId !== characterId) return false;
+            if (!exchangeHost) {
+              exchangeCharacterId = characterId;
+              exchangeGeneration = crypto.randomUUID();
+              const generation = exchangeGeneration;
+              exchangeHost = attachNativeExchangeHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || exchangeCharacterId !== characterId || exchangeGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusExchange?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          exchangeRequest?.cancel();
+          const request = { cancel: () => {
+            if (exchangeRequest !== request) return;
+            exchangeRequest = null;
+            try { owner.workshopCloseExchange?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          exchangeRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenExchange(characterId, exchangeGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (exchangeRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusExchange();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === exchangeGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (exchangeRequest === request) exchangeRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -1009,6 +1080,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachFirstRecharge();
       detachCharge();
       detachForthright();
+      detachExchange();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -1030,6 +1102,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachFirstRecharge();
       detachCharge();
       detachForthright();
+      detachExchange();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -1046,6 +1119,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowFirstRecharge;
       delete window.workshopShowCharge;
       delete window.workshopShowForthright;
+      delete window.workshopShowExchange;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

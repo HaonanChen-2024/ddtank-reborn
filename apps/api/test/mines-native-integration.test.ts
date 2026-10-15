@@ -112,7 +112,7 @@ describe("native 70-cell mines through the real API and atomic reward mail", () 
     expect(results.filter(r => r.json().nativeMinesAction)).toHaveLength(1);
     for (const r of results.filter(r => r.json().replayed)) expect(r.json()).not.toHaveProperty("nativeMinesAction");
     expect((await persisted()).mails).toHaveLength(1); expect((await persisted()).goods).toHaveLength(1);
-    await walk(20, 10); const latest = await snapshot(), before = await persisted();
+    await walk(20, 10); const { nativeExchange: _exchange, ...latest } = await snapshot(), before = await persisted();
     const replay = await native({ type: "claim", tier: 1 }, id); expect(replay).toMatchObject({ ...latest, replayed: true, mailedCount: 1 });
     expect(replay).not.toHaveProperty("nativeMinesAction"); await native({ type: "claim", tier: 2 }, id, 409); expect(await persisted()).toEqual(before);
     const racing = await Promise.all([post("mines-native", { type: "claim", tier: 2 }), post("mines-native", { type: "claim", tier: 2 })]);

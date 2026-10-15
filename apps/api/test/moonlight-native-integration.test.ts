@@ -131,7 +131,7 @@ describe("original Moonlight through the shared transactional API", () => {
     const choice = first.nativeMoonlight.bagToken, items = [{ index: 0, count: 3 }];
     const competing = await Promise.all([post("moonlight-native", { type: "take", choice, items }), post("moonlight-native", { type: "recycle", choice, items })]);
     expect(competing.map(response => response.statusCode).sort()).toEqual([200, 400]);
-    const committed = competing.find(response => response.statusCode === 200)!.json<ActivityResult>(), final = await snapshot(), after = await persisted();
+    const committed = competing.find(response => response.statusCode === 200)!.json<ActivityResult>(), { nativeExchange: _exchange, ...final } = await snapshot(), after = await persisted();
     expect(final.nativeMoonlight.bag).toEqual([]); expect(after.receipts).toHaveLength(2);
     const took = committed.nativeMoonlightAction!.effects[0].type === "taken";
     expect(final.points).toBe(took ? 940 : 946); expect(after.goods).toHaveLength(took ? 2 : 0); expect(after.mails).toHaveLength(took ? 1 : 0);

@@ -114,7 +114,7 @@ describe("native Gypsy through the shared transactional API", () => {
     expect(paid.filter(response => response.json().replayed)).toHaveLength(7);
     expect((await snapshot())).toMatchObject({ points: 95, earned: 40, revision: 2, nativeGypsy: { refreshes: 2, shelfKey: "2026-10-15:2" } });
     const before = await persisted(); await native({ type: "buy", index: 0, choice: "2026-10-15:1" }, randomUUID(), 400); expect(await persisted()).toEqual(before);
-    const latest = await snapshot(), replay = await native({ type: "refresh", choice: "points" }, id);
+    const { nativeExchange: _exchange, ...latest } = await snapshot(), replay = await native({ type: "refresh", choice: "points" }, id);
     expect(replay).toMatchObject({ ...latest, replayed: true }); expect(replay).not.toHaveProperty("nativeGypsyAction"); expect(await persisted()).toEqual(before);
   });
 

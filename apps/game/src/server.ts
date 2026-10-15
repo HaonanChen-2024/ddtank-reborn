@@ -35,6 +35,7 @@ import { scanExpiredAuctions } from "./handlers/auction.js";
 import * as Out from "./packets/out.js";
 import { LanguageMgr } from "./util/lang.js";
 import { createLogger, type Logger } from "./util/log.js";
+import { actNativeExchange, readNativeExchange } from "./game/activity-exchange-native.js";
 
 export interface GameServerOptions {
   /** Pre-opened DB (tests use PGlite memory). Default: createDb(cfg.DATABASE_URL). */
@@ -372,6 +373,10 @@ export class GameServer {
         if (p) p.send(Out.mailResponse(p.id, 1));
         return !!p;
       },
+      activityExchangeRead: (body: unknown) => readNativeExchange(this.ctx, body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
+      activityExchangeAction: (body: unknown) => actNativeExchange(this.ctx, body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
     };
   }
 
