@@ -50,6 +50,30 @@
       }
     },
     {
+      "table": "Shop_Goods",
+      "rowId": "11904",
+      "text": {
+        "Name": "4级经验药水",
+        "Description": "使用后增加10000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "40002",
+      "text": {
+        "Name": "修炼药水2级",
+        "Description": "在背包的修炼界面选择属性使用，增加300点修炼经验。每日使用次数受角色等级和VIP等级限制。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10018",
+      "text": {
+        "Name": "激怒",
+        "Description": "使用后增加100点怒气（怒气上限的50%），最多补至怒气上限。"
+      }
+    },
+    {
       "table": "Quest",
       "rowId": "318",
       "text": {

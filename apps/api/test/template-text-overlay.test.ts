@@ -66,6 +66,7 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   const priorXml = await Promise.all(definitions.map(d => d.build(h)));
   expect(entries.map(e => `${e.table}:${e.rowId}`)).toEqual([
     "Shop_Goods:11028", "Shop_Goods:10008", "Shop_Goods:11001", "Shop_Goods:11005", "Shop_Goods:11009", "Shop_Goods:11013",
+    "Shop_Goods:11904", "Shop_Goods:40002", "Shop_Goods:10018",
     "Quest:318", "Quest_Condiction:318:1", "Quest:341", "Quest_Condiction:341:1", "Quest:346", "Quest_Condiction:346:1", "Quest:347", "Quest_Condiction:347:1",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
@@ -99,6 +100,9 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   }
   expect(currentGame.items.get(11028)).toMatchObject({ Name: "幸运符100%", Description: "合成、强化装备时，成功率提高100%。", Property1: 3, Property2: 100 });
   expect(currentGame.items.get(11028)!.Remark).toBe("Existing remark");
+  expect(currentGame.items.get(11904)).toMatchObject({ Name: "4级经验药水", Description: "使用后增加10000点人物经验。", CategoryID: 11, Property1: 21, Property2: 10000, MaxCount: 1 });
+  expect(currentGame.items.get(40002)).toMatchObject({ Name: "修炼药水2级", Description: "在背包的修炼界面选择属性使用，增加300点修炼经验。每日使用次数受角色等级和VIP等级限制。", CategoryID: 20, Property1: 0, Property2: 300 });
+  expect(currentGame.items.get(10018)).toMatchObject({ Name: "激怒", Description: "使用后增加100点怒气（怒气上限的50%），最多补至怒气上限。", CategoryID: 10, Property1: 11, Property2: 100 });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {
