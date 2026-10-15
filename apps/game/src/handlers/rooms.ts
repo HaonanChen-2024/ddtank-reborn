@@ -99,7 +99,7 @@ export function roomRouter(): SubRouter {
       if (p.currentRoom && p.currentRoom.host === p) ctx.rooms.kickPlayer(p.currentRoom, pkt.readByte());
     })
     .on(5, "GAME_ROOM_REMOVEPLAYER", async (ctx, p, _pkt, c) => {
-      if (p.currentRoom?.RoomType === 40) await christmasSnowfieldOwner(ctx).leaveScene(c, p);
+      if (p.currentRoom?.RoomType === 40) { await christmasSnowfieldOwner(ctx).leaveChallengeRoom(c, p); return; }
       if (p.currentRoom) ctx.rooms.exitRoom(p.currentRoom, p);
     })
     .on(6, "GAME_TEAM", (ctx, p) => {

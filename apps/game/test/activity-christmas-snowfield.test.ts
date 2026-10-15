@@ -234,7 +234,7 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
   it("actual accepted fight ID wins once; late duplicate callbacks and ticket expiry cannot lose earned reward", async () => {
     await launch(); advance(1800001); launches[0]!.onFinished!(true); launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain();
     let s = await stored(); expect(s.mail).toHaveLength(1); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ hasSettledWinToday: true, active: null, terminals: [{ fightId: 701, outcome: "win", rewardMailed: true }] });
-    f.p.currentRoom?.removePlayer(f.p); const c = await cmd("npc-claim"), r = ok(await owner.command(c, f.client)); expect(r.mailedCount).toBe(1);
+    await owner.leaveChallengeRoom(f.client, f.p); f.ctx.rooms.tick(); const c = await cmd("npc-claim"), r = ok(await owner.command(c, f.client)); expect(r.mailedCount).toBe(1);
     expect(ok(await owner.command(c, f.client)).replayed).toBe(true); s = await stored(); expect(s.mail).toHaveLength(2); expect(s.wallet[0]).toMatchObject({ Points: 100, Earned: 200 });
   });
   it("inline finish/stop before startPve returns still latches actual ID and one winning terminal", async () => {
@@ -244,9 +244,49 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
   it("stopped without a winning result never wins and consumed admission stays spent", async () => {
     await launch(); launches[0]!.onStopped(); await owner.drain(); const s = await stored(); expect(s.mail).toEqual([]); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0], hasSettledWinToday: false, terminals: [{ outcome: "aborted", quotaReturned: false }] });
   });
+  it.each(["before-queue", "after-queue"] as const)("a settled return cannot clear a replacement room (%s)", async when => {
+    const r = await launch(), other = f.ctx.rooms.rooms.find(candidate => candidate !== r)!;
+    launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain();
+    const replace = () => { r.removePlayer(f.p); other.start(); other.updateRoom("replacement", "", 1, 3, 0); other.addPlayer(f.p); };
+    if (when === "before-queue") replace();
+    await owner.leaveChallengeRoom(f.client, f.p);
+    if (when === "after-queue") replace();
+    const removed = vi.spyOn(other, "removePlayer"), before = await stored(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(other); expect(other.getPlayers()).toEqual([f.p]); expect(removed).not.toHaveBeenCalled(); expect(await stored()).toEqual(before); expect((await sf()).scene.people).toBe(1);
+  });
+  it("a queued settled return refuses a new lease on the same room object", async () => {
+    const r = await launch(); launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain();
+    const exits = vi.spyOn(f.ctx.rooms, "exitRoom"); await owner.leaveChallengeRoom(f.client, f.p); const guard = exits.mock.calls[0]![2]!;
+    r.removePlayer(f.p); r.stop(); for (const other of f.ctx.rooms.rooms) if (other !== r) other.start();
+    await admitted(); await tickUntil(owner.handoffChallenge(f.client, f.p, 1)); expect(f.p.currentRoom).toBe(r); expect(owner.checkRoom(r, [f.p]).ok).toBe(true);
+    const before = await stored(); f.ctx.rooms.exitRoom(r, f.p, guard); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect(r.getPlayers()).toEqual([f.p]); expect(owner.checkRoom(r, [f.p]).ok).toBe(true); expect(await stored()).toEqual(before);
+  });
+  it.each(["closed", "inactive", "quitting", "different-client", "different-player", "playing", "game", "extra-seat", "different-host", "different-map"] as const)("a queued settled return rejects changed %s proof", async mode => {
+    const r = await launch(); launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain();
+    await owner.leaveChallengeRoom(f.client, f.p);
+    if (mode === "closed") f.client.closed = true;
+    else if (mode === "inactive") f.p.isActive = false;
+    else if (mode === "quitting") f.p.quitting = Promise.resolve();
+    else if (mode === "different-client") f.client.player = null;
+    else if (mode === "different-player") { f.ctx.world.remove(f.p); f.ctx.world.add(Object.create(f.p) as typeof f.p); }
+    else if (mode === "playing") r.IsPlaying = true;
+    else if (mode === "game") r.game = { id: 999, mapId: 1201, processData() {}, removePlayer() {}, stop() {} };
+    else if (mode === "extra-seat") { const peer = await christmasFixture(db, 932, clock); r.addPlayer(peer.p); }
+    else if (mode === "different-host") { const peer = await christmasFixture(db, 932, clock); r.host = peer.p; }
+    else r.MapId = 164002;
+    const removed = vi.spyOn(r, "removePlayer"), before = await stored(); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect(removed).not.toHaveBeenCalled(); expect(await stored()).toEqual(before);
+  });
+  it("a result alone or the wrong stopped ID cannot authorize a member-preserving return", async () => {
+    const r = await launch(), permit = owner.checkRoom(r, [f.p]); expect(permit.ok).toBe(true); if (!permit.ok) throw new Error(permit.message);
+    launches[0]!.onFinished!(true); owner.fightStopped(permit.lease, 999); await owner.drain();
+    await owner.leaveChallengeRoom(f.client, f.p); f.ctx.rooms.tick(); expect(f.p.currentRoom).toBeNull(); expect((await sf()).scene.people).toBe(0);
+    expect((await stored()).mail).toHaveLength(1);
+  });
   it("technical start rejection refunds once, voluntary exit before start does not", async () => {
     start = () => null; await launch(); await owner.drain(); let s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [0, 0, 0], terminals: [{ quotaReturned: true }] });
-    f.p.currentRoom?.removePlayer(f.p); await owner.leaveScene(f.client, f.p); await admitted(); await owner.leaveScene(f.client, f.p); s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0] });
+    await owner.leaveScene(f.client, f.p); f.ctx.rooms.tick(); await admitted(); await owner.leaveScene(f.client, f.p); s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0] });
   });
   it.each([false, true])("raw scene exit releases its unseen CREATE room after settlement (accepted=%s), without refund or duplicate exit", async accepted => {
     const r = accepted ? await launch() : await room();
@@ -360,7 +400,7 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
     owner.move(f.client, f.p, { x: 499, y: 500 }, "499,500"); advance(10); await capture("walked-away-no-resume"); owner.move(f.client, f.p, { x: 500, y: 500 }, "500,500"); advance(10);
     advance(30001); await capture("unstarted-refund-pending"); const replacement = await cmd("challenge"); await capture("replacement-challenged", ok(await owner.command(replacement, f.client)), replacement.action);
     await tickUntil(owner.handoffChallenge(f.client, f.p, 1)); await capture("controlled-room"); const r = f.p.currentRoom!; expect((await owner.prepareStart(f.client, f.p, r)).ok).toBe(true); await capture("launching"); f.ctx.rooms.startGame(r); f.ctx.rooms.tick(); await capture("actual-fighting");
-    launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain(); f.p.currentRoom?.removePlayer(f.p); await capture("win-settled");
+    launches[0]!.onFinished!(true); launches[0]!.onStopped(); await owner.drain(); await owner.leaveChallengeRoom(f.client, f.p); f.ctx.rooms.tick(); await capture("win-settled");
     const npc = await cmd("npc-claim"); await capture("npc-claimed-fresh", ok(await owner.command(npc, f.client)), npc.action); await capture("npc-claimed-replay", ok(await owner.command(npc, f.client)), npc.action);
     advance(1800001); await capture("ticket-expired"); advance(86400000); await capture("utc-next-day");
     const original = (await stored()).states.find(r => r.Activity === "christmas-snowfield")!.State;
