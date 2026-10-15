@@ -103,6 +103,11 @@ export class DdtFightEngine implements FightEngine {
 
   /** GameMgr.StartPVEGame (Games/GameMgr.cs:140-165) */
   startPve(s: StartPveOptions): FightGame | null {
+    // Original layer awards require one atomic ProcessAward/progress/inventory owner before admission.
+    if (s.roomType === 15) {
+      this.o.log?.("pve: Labyrinth room 15 requires the original reward settlement owner; combat start is disabled");
+      return null;
+    }
     const local = christmasPveDefinition(s.pveId);
     // The room protocol is not admission. All room40 starts remain closed until the scene owner binds a permit.
     if ((s.roomType === 40 && (!local || !consumeChristmasPveAdmission(s))) || (local && s.roomType !== 40)) return null;
@@ -418,6 +423,7 @@ class DdtGame implements FightGame {
 
   private dispatch(events: FightEvent[] | void): void {
     for (const e of events ?? []) {
+      if (e.cmd === "LABYRINTH_AWARD") throw new Error(`Labyrinth award ${this.id}/${e.userId}/${e.floor} has no settlement owner`);
       if (e.cmd === "GAME_OVER") this.applyRewards(e);
       if (e.cmd === "GAME_MISSION_OVER") {
         this.applyMissionOver(e);
@@ -554,7 +560,7 @@ class DdtGame implements FightGame {
 
 /** 91 GAME_CMD body writers for every engine event (C# file:line in packages/fight/src/game/events.ts). */
 export function serializeEvent(e: FightEvent): PacketOut | null {
-  if (e.cmd === "PVE_AWARD" || e.cmd === "PVE_STOPPED") return null;
+  if (e.cmd === "PVE_AWARD" || e.cmd === "PVE_STOPPED" || e.cmd === "LABYRINTH_AWARD") return null;
   // BaseGame.SendEquipEffect (BaseGame.cs:2146): not a GAME_CMD — its own packet (code 3: writeInt(3), writeString).
   if (e.cmd === "EQUIP_EFFECT_MSG") {
     const p = new PacketOut(3);

@@ -238,6 +238,10 @@ export interface AllMissionOverEvent extends Ev<"GAME_ALL_MISSION_OVER"> {
 export interface DropItem { templateId: number; count: number; isBind?: boolean; validDate?: number }
 /** not a packet: items/money the server must give (TakeCard TempBag, NPC drop FightBag/TempBag) */
 export interface PveAwardEvent { cmd: "PVE_AWARD"; code: 0; livingId: number; userId: number; items: DropItem[]; bag: "temp" | "fight"; except?: number; to?: number[] }
+/** Internal candidate only: PVEGame.GameOverMovie / ShowBigBox → GamePlayer.UpdateLabyrinth.
+ * A server settlement owner must recheck ProcessAward and commit the award and progress together.
+ * Emission is not proof of a persisted claim; this must never be serialized as a client packet. */
+export interface LabyrinthAwardEvent { cmd: "LABYRINTH_AWARD"; code: 0; livingId: number; userId: number; floor: number; missionId: number; bigAward: boolean; except?: number; to?: number[] }
 /** not a packet: PVEGame.Stop → PlayerDetail.ResetRoom / SetPvePermission */
 export interface PveStoppedEvent { cmd: "PVE_STOPPED"; code: 0; livingId: number; isWin: boolean; hasNextMission: boolean; except?: number; to?: number[] }
 /** BaseGame.SendPlayerPicture (BaseGame.cs:2834) — gem/card/pet effect buff icons (91 GAME_CMD, sub 128). */
@@ -251,6 +255,7 @@ export type FightEvent =
   | MissionOverEvent
   | AllMissionOverEvent
   | PveAwardEvent
+  | LabyrinthAwardEvent
   | PveStoppedEvent
   | GameCreateEvent
   | GameLoadEvent
@@ -285,7 +290,7 @@ export type FightEventInit = DistOmit<Exclude<FightEvent, RawEvent>, "code"> | R
 
 export function withCode(e: FightEventInit): FightEvent {
   if (e.cmd === "RAW") return e as FightEvent;
-  if (e.cmd === "PVE_AWARD" || e.cmd === "PVE_STOPPED" || e.cmd === "EQUIP_EFFECT_MSG") return { ...e, code: 0 } as FightEvent;
+  if (e.cmd === "PVE_AWARD" || e.cmd === "LABYRINTH_AWARD" || e.cmd === "PVE_STOPPED" || e.cmd === "EQUIP_EFFECT_MSG") return { ...e, code: 0 } as FightEvent;
   return { ...e, code: eTankCmdType[e.cmd] } as FightEvent;
 }
 

@@ -33,6 +33,9 @@ export interface PveGameOptions extends Omit<GameOptions, "mapId"> {
   pveInfo: PveInfo;
   hardLevel: number;
   currentFloor?: number;
+  /** Admission-time ProcessAward snapshots for the original Labyrinth candidate filter.
+   * The engine only deduplicates requests in this fight; the server must persistently recheck each award. */
+  labyrinthProcessAwards?: ReadonlyMap<number, string>;
   data: PveData;
   drops?: PveDrops;
   log?: (m: string) => void;
@@ -66,6 +69,8 @@ export class PveGame extends BaseGame {
   private readonly logFn: (m: string) => void;
   readonly strictScripts: boolean;
   private readonly suppressDefaultRewards: boolean;
+  private readonly labyrinthProcessAwards: ReadonlyMap<number, string>;
+  private readonly requestedLabyrinthAwards = new Map<number, Set<number>>();
   /** m_livings: SimpleNpc & other non-turned livings */
   readonly livings: Living[] = [];
   /** m_turnQueue: players + bosses */
@@ -125,6 +130,7 @@ export class PveGame extends BaseGame {
     this.data = o.data;
     this.strictScripts = o.strictScripts === true;
     this.suppressDefaultRewards = o.suppressDefaultRewards === true;
+    this.labyrinthProcessAwards = new Map(o.labyrinthProcessAwards);
     this.worldBossBlood = o.worldBossBlood;
     this.drops = o.drops ?? {};
     this.logFn = o.log ?? (() => {});
@@ -235,7 +241,8 @@ export class PveGame extends BaseGame {
       case GameState.Playing:
         if ((this.currentLiving && this.currentLiving.isAttacking) || this.currentActionCount > 1) break;
         if (this.canGameOver()) {
-          if (this.currentActionCount <= 1) {
+          if (this.roomType === eRoomType.Labyrinth && this.CanEnterGate) this.GameOverMovie();
+          else if (this.currentActionCount <= 1) {
             if (this.isCanPrepareGameOver()) this.prepareGameOver();
             else this.gameOver();
           }
@@ -379,6 +386,8 @@ export class PveGame extends BaseGame {
     for (const p of list) {
       if (!p.isLiving && !this.turnQueue.includes(p)) this.turnQueue.push(p);
       p.reset();
+      // Original Player.Reset clears Ready. The movie path has no ordinary GameOver to do it for us.
+      this.pp.get(p)!.ready = false;
       const pt = this.playerPoint();
       p.place(pt.x, pt.y);
       this.map.addPhysical(p);
@@ -536,6 +545,10 @@ export class PveGame extends BaseGame {
         this.PveGameDelay += this.missionInfo?.IncrementDelay ?? 0;
         this.checkState(0);
       } else {
+        if (this.CanShowBigBox) {
+          this.ShowBigBox();
+          this.CanEnterGate = true;
+        }
         this.minusDelays(cur.delay);
         if (cur instanceof Player) this.updateWind(this.getNextWind(), false);
         cur.prepareSelfTurn();
@@ -584,6 +597,82 @@ export class PveGame extends BaseGame {
   }
 
   // ------------------------------------------------------------------------------------------- game over
+  /** PVEGame.LabyrinthAward (donor PVEGame.cs:1159-1175), with fight-local request deduplication only. */
+  private requestLabyrinthAward(p: Player, bigAward: boolean): boolean {
+    const processAward = this.labyrinthProcessAwards.get(p.spec.userId) ?? "";
+    if (!processAward.split("-").includes(String(this.SessionId))) return false;
+    let requested = this.requestedLabyrinthAwards.get(p.spec.userId);
+    if (!requested) this.requestedLabyrinthAwards.set(p.spec.userId, requested = new Set());
+    if (requested.has(this.SessionId)) return false;
+    requested.add(this.SessionId);
+    this.emit({ cmd: "LABYRINTH_AWARD", livingId: p.id, userId: p.spec.userId, floor: this.SessionId, missionId: this.missionInfo!.Id, bigAward });
+    return true;
+  }
+
+  /** Original donor PVEGame.GameOverMovie (1178-1269). This is GameOver, not enum GameOverMovie. */
+  GameOverMovie(): void {
+    if (this.state !== GameState.Playing) return;
+    this.state = GameState.GameOver;
+    this.clearWaitTimer();
+    this.clearDiedPve();
+    for (const p of this.fightPlayers) this.requestLabyrinthAward(p, false);
+    this.runScript("mission.OnGameOverMovie", () => this.missionAI.OnGameOverMovie());
+    if (!this.hasNextSession()) {
+      const cards = this.BossCardCountValue;
+      const players = this.fightPlayers.map((p) => {
+        const x = this.pp.get(p)!;
+        for (const k of [...p.effects.keys()]) p.stopEffect(k);
+        const exp = this.calculateExperience(p);
+        const score = this.calculateScore(p);
+        this.runScript("mission.CalculateScoreGrade", () => this.missionAI.CalculateScoreGrade(x.totalAllScore));
+        if (p.currentIsHitTarget) p.totalHitTargetCount++;
+        x.totalAllHurt += p.totalHurt;
+        x.totalAllCure += p.totalCure;
+        x.gainGP = exp;
+        x.totalAllExperience += exp;
+        x.totalAllScore += score;
+        x.bossCardCount = cards;
+        return { userId: p.spec.userId, livingId: p.id, grade: p.grade, gainGP: exp, isWin: this.IsWin, bossCardCount: cards, turnNum: p.turnNum };
+      });
+      this.emit({ cmd: "GAME_MISSION_OVER", livingId: 0, bossCardCount: cards, showLarge: false, pic: "", missionId: this.missionInfo!.Id, isWin: this.IsWin, players, resources: cards > 0 ? [...this.gameOverResources] : null });
+      // The donor invokes OnGameStopped here, without the ordinary all-mission card board.
+      this.emit({ cmd: "PVE_STOPPED", livingId: 0, isWin: this.IsWin, hasNextMission: false });
+      this.stop();
+      return;
+    }
+    for (const ph of [...this.map.physics]) ph.prepareNewTurn();
+    const cur = this.currentLiving = this.findNextTurnedLivingPve();
+    if (cur && this.CanEnterGate) {
+      this.turnIndex++;
+      cur.prepareSelfTurn();
+      this.sendNextTurn(cur, []);
+      this.CanEnterGate = false;
+      this.CanShowBigBox = false;
+      this.EnterNextFloor();
+    }
+    this.runScript("mission.OnBeginNewTurn", () => this.missionAI.OnBeginNewTurn());
+  }
+
+  /** Original donor PVEGame.EnterNextFloor (1273-1285): ground the door near a living player. */
+  EnterNextFloor(): void {
+    const player = this.FindRandomPlayer() as Player | null;
+    if (!player) return;
+    const width = this.map.info.foregroundWidth ?? this.map.bound.width;
+    const x = player.x + 150 <= width ? player.x + 150 : player.x - 150;
+    let point = this.map.findYLineNotEmptyPointDown(x, player.y);
+    if (isEmptyPoint(point)) point = { x, y: this.map.bound.height + 1 };
+    this.CreateTransmissionGate(point.x, point.y - 60, "transmitted", "asset.game.transmitted", "out", 1, 1);
+  }
+
+  /** Original donor PVEGame.ShowBigBox (1620-1637), BaseGame.method_34: RAW136 header = living id. */
+  ShowBigBox(): void {
+    const items = this.drops.copyDrop?.(this.missionInfo!.Id, this.SessionId) ?? [];
+    for (const p of this.fightPlayers) {
+      if (!this.requestLabyrinthAward(p, true)) continue;
+      this.raw(136, p.id, [["i32", items.length], ...items.map((it): RawField => ["i32", it.templateId])]);
+    }
+  }
+
   hasNextSession(): boolean {
     if (this.fightPlayers.length === 0 || !this.IsWin || this.isShowLargeCards()) return false;
     return this.Misssions.has(this.SessionId + 1);

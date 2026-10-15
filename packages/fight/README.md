@@ -67,12 +67,18 @@ Extra events: `RAW` (pre-encoded PvE packets: 64 add living, 55-61 NPC actions, 
 `GAME_ALL_MISSION_OVER`, `PVE_AWARD` (items to give), `PVE_STOPPED`. Missing / broken scripts fall back to
 `GenericNpcBrain` / `GenericMission` / `GenericGameControl` — never a frozen mission. Guide (PT-BR): `docs/guides/pve.md`.
 
-Labyrinth currently has two compatibility fixes: a manual `OnCreated` override translates the donor's
-`String.Split` while preserving its 30 mission IDs and inherited scoring, and `CreateGate(bool)` only sets
-`CanEnterGate`, as in SkelletonX/DDTank4.1 `PVEGame.cs:2068-2071` (commit `09f8cdb`). The coordinate overload
-still creates a physical gate. `test/labyrinth-gate.test.ts` exercises the actual first-floor script, NPCs and map
-with explicitly test-only mission headers; production 401/30-floor configuration, `GameOverMovie`, big-box
-settlement and persistent progression remain incomplete. These checks do not establish a playable Labyrinth.
+Labyrinth retains its 30 original mission IDs and scoring through a manual `OnCreated` fix; `CreateGate(bool)`
+only sets `CanEnterGate`, while the coordinate overload creates a physical gate. The original win-movie hook,
+grounded next-floor door, player-turn big box (RAW136) and terminal mission result are ported from
+SkelletonX/DDTank4.1 `PVEGame.cs:1178-1299,1591-1637,2068-2071` (commit `09f8cdb`). New sessions reset Ready;
+the next load still requires the original ready command. `labyrinthProcessAwards` contains admission snapshots;
+`LABYRINTH_AWARD` is an internal candidate event, not a client packet or a committed award. Fight-local request
+deduplication does not replace a database transaction checking ProcessAward, awarding items/GP/currency and
+advancing progress together. The game adapter refuses room 15 until that settlement owner is connected.
+
+`test/labyrinth-gate.test.ts` and `test/labyrinth-lifecycle.test.ts` use explicitly test-only mission headers with
+actual floor 1/2/3/30 scripts, NPCs and maps. Production 401/30-floor configuration, six NPC brains, persistent
+settlement and client acceptance remain incomplete. These checks do not establish a playable Labyrinth.
 
 ## Assets
 
@@ -110,7 +116,7 @@ turn time/delay. All match bit-for-bit.
 
 - `Player.SetXY` energy: the original subtracts `|m_x − x|` after assigning `m_x` (always 0); we charge the real
   distance, and `MOVESTART` is clamped to the remaining energy (the original trusts the client, spec §3.4).
-- Not modelled yet: drop boxes (`CreateBox`/fire drops — need drop tables), PvE extras (Labyrinth gates, effects with
+- Not modelled yet: drop boxes (`CreateBox`/fire drops — need drop tables), PvE extras (Labyrinth persistent settlement, effects with
   real stat changes); world boss dragon scripts are hand-ported from DDT-6600 (`src/pve/scripts/manual/worldboss.ts`,
   players act first), achievements, ghost movement and dead-teammate props. `GAME_CREATE` carries only the fight
   fields (the server adds the lobby fields). Level-up from GP is delegated to the server (`gradeForGp`).
