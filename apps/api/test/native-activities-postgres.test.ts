@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
-import { sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { pairNativeLocalRules } from "../src/activities/pair-native.js";
@@ -15,9 +15,9 @@ import { q, q1 } from "../src/lib/db.js";
 import { signJwt } from "../src/lib/jwt.js";
 
 // No normal-suite DB connection. The dedicated runner creates a NEW template0 DB and ownership marker.
-const random = vi.hoisted(() => ({ fraction: 0.99 }));
+const random = vi.hoisted(() => ({ fraction: 0.99, calls: 0 }));
 vi.mock("node:crypto", async original => ({ ...await original<typeof import("node:crypto")>(),
-  randomInt: (min: number, max?: number) => max === undefined ? Math.floor(random.fraction * min) : min + Math.floor(random.fraction * (max - min)) }));
+  randomInt: (min: number, max?: number) => { random.calls++; return max === undefined ? Math.floor(random.fraction * min) : min + Math.floor(random.fraction * (max - min)); } }));
 const url = process.env.WORKSHOP_NATIVE_ACTIVITIES_URL, token = process.env.WORKSHOP_NATIVE_ACTIVITIES_TOKEN;
 const uid = 601, secret = "native-activity-pg-tests-only", name = "native-activity-pg-test";
 type App = Awaited<ReturnType<typeof buildApp>>;
@@ -88,6 +88,44 @@ async function race(label: string, requests: (() => ReturnType<typeof post>)[], 
   const results = await Promise.all(calls);
   if (failure) throw failure;
   return results;
+}
+async function treasureLockWait(label: string, heldQuery: SQL, request: () => ReturnType<typeof post>, blockedQuery: string,
+  whileBlocked: () => Promise<void> = async () => {}, beforeRelease?: SQL) {
+  const before = await saved();
+  let unlock!: () => void, acquired!: () => void, lockFailed!: (reason: unknown) => void;
+  const released = new Promise<void>(resolve => { unlock = resolve; });
+  const locked = new Promise<void>((resolve, reject) => { acquired = resolve; lockFailed = reject; });
+  const held = holder.db.transaction(async tx => {
+    await tx.execute(heldQuery); acquired(); await released;
+    if (beforeRelease) await tx.execute(beforeRelease);
+  });
+  void held.catch(lockFailed); await locked;
+  const call = request(); void call.catch(() => {});
+  let failure: unknown;
+  try {
+    const deadline = performance.now() + 6000;
+    let observed: { pid: number; blockers: number[]; wait_event_type: string; query: string } | undefined;
+    while (performance.now() < deadline) {
+      observed = await q1(monitor, sql`SELECT pid, pg_blocking_pids(pid) AS blockers, wait_event_type, query FROM pg_stat_activity
+        WHERE datname=${database} AND pid=${connectionPids[2]}`) ?? undefined;
+      if (observed?.wait_event_type === "Lock" && observed.blockers.includes(connectionPids[1]) && observed.query.includes(blockedQuery)) break;
+      await delay(25);
+    }
+    expect(observed).toMatchObject({pid:connectionPids[2],blockers:[connectionPids[1]],wait_event_type:"Lock"});
+    expect(observed!.query).toContain(blockedQuery);
+    expect(await saved()).toEqual(before);
+    scenarios.push({label,observed,beforeDigest:digest(before)});
+    await whileBlocked();
+  } catch (error) { failure = error; }
+  finally { unlock(); await held; }
+  const result = await call;
+  if (failure) throw failure;
+  return result;
+}
+async function treasureSeed(at = new Date(), oldDailyActions = 0) {
+  await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);
+  const state = createActivityState(at); state.daily = {actions:oldDailyActions,draws:77};
+  await monitor.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${uid},'reference',${JSON.stringify(state)}::jsonb)`);
 }
 function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
@@ -168,11 +206,12 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     appB = await buildApp({ db: b, logger: false, skipTemplates: true, env: {}, config });
   });
   beforeEach(async () => {
-    random.fraction = 0.99;
+    random.fraction = 0.99; random.calls = 0;
     expect(new Date().toISOString().slice(0,10)).toBe(day);
     await monitor.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT IF EXISTS native_test_mail_failure`);
     await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT IF EXISTS native_test_receipt_failure`);
     await monitor.db.execute(sql`ALTER TABLE app."ActivityStates" DROP CONSTRAINT IF EXISTS native_test_recipient_failure`);
+    await monitor.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false WHERE "TemplateID"=11019`);
     await monitor.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",
       member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);
     await monitor.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (1,${name},'tests-only')`);
@@ -535,6 +574,77 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(final.receipts.length-recycleBefore.receipts.length).toBe(1); expect((await snapshot()).nativeTreasure.bag).toEqual([]);
     const replay = await action("treasure-native",value,id,appB); expect(replay).toMatchObject({replayed:true,points:344});
     expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await saved()).toEqual(final); passed++;
+  });
+  it("waits for every reachable Treasure template before RNG, rolls back bad configuration and retries the same UUID once", async () => {
+    await treasureSeed();
+    const id = randomUUID(), value = {type:"draw",mode:"normal" as const,count:1,choice:(await snapshot()).nativeTreasure.bagToken}, before = await saved();
+    const failed = await treasureLockWait("treasure-template-update-bad-config",
+      sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE`,
+      () => post(appA,"treasure-native",value,id), "FOR SHARE", async () => { expect(random.calls).toBe(0); },
+      sql`UPDATE game."Shop_Goods" SET "CanEquip"=true WHERE "TemplateID"=11019`);
+    expect(failed.statusCode,failed.body).toBe(503); expect(random.calls).toBe(0); expect(await saved()).toEqual(before);
+    const observed = scenarios.at(-1) as {observed:{query:string}}; expect(observed.observed.query).toContain('game."Shop_Goods"');
+    await monitor.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false WHERE "TemplateID"=11019`);
+    const result = await action("treasure-native",value,id); expect(result.nativeTreasure).toMatchObject({draws:1,bagSlotsUsed:1});
+    expect(await wallet()).toEqual({Points:970,Revision:1}); expect(random.calls).toBe(1);
+    const committed = await saved(); expect(committed.receipts.length-before.receipts.length).toBe(1);
+    expect(committed.goods).toEqual(before.goods); expect(committed.mails).toEqual(before.mails);
+    await monitor.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=true WHERE "TemplateID"=11019`);
+    expect(await action("treasure-native",value,id,appB)).toMatchObject({replayed:true});
+    expect(random.calls).toBe(1); expect(await saved()).toEqual(committed); passed++;
+  });
+  it("rejects an old native Treasure day token after a real template lock wait crosses UTC midnight", async () => {
+    vi.useFakeTimers({toFake:["Date"]}); vi.setSystemTime(new Date(day+"T23:59:59Z"));
+    await treasureSeed(); const id = randomUUID(), value = {type:"draw",mode:"normal" as const,count:1,choice:(await snapshot()).nativeTreasure.bagToken};
+    const before = await saved(), tomorrow = new Date(Date.parse(day+"T00:00:00Z")+86400000).toISOString().slice(0,10);
+    const failed = await treasureLockWait("treasure-native-template-wait-midnight",
+      sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE`,
+      () => post(appA,"treasure-native",value,id), "FOR SHARE", async () => {
+        expect(random.calls).toBe(0); vi.setSystemTime(new Date(tomorrow+"T00:00:01Z"));
+      });
+    expect(failed.statusCode,failed.body).toBe(400); expect(failed.json().message).toContain("日期已更新");
+    expect(random.calls).toBe(0); expect(await saved()).toEqual(before);
+    const fresh = await snapshot(); expect(fresh.nativeTreasure.bagToken.startsWith(tomorrow+":")).toBe(true);
+    const result = await action("treasure-native",{...value,choice:fresh.nativeTreasure.bagToken},id);
+    expect(result.nativeTreasure).toMatchObject({day:tomorrow,draws:1,bagSlotsUsed:1});
+    expect(await wallet()).toEqual({Points:970,Revision:1}); expect(random.calls).toBe(1);
+    const after = await saved(), state = after.states[0].State as ActivityState;
+    expect(state.day).toBe(tomorrow); expect(state.daily).toMatchObject({actions:1,draws:1}); expect(after.receipts).toHaveLength(1); passed++;
+  });
+  it("normalizes legacy Treasure daily limits with the post-template-lock date instead of yesterday's exhausted counter", async () => {
+    vi.useFakeTimers({toFake:["Date"]}); vi.setSystemTime(new Date(day+"T23:59:59Z"));
+    await treasureSeed(new Date(),500);
+    const id = randomUUID(), before = await saved(), tomorrow = new Date(Date.parse(day+"T00:00:00Z")+86400000).toISOString().slice(0,10);
+    const response = await treasureLockWait("treasure-legacy-template-wait-midnight",
+      sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE`,
+      () => post(appA,"treasure",{type:"draw",count:2},id), "FOR SHARE", async () => {
+        expect(random.calls).toBe(0); vi.setSystemTime(new Date(tomorrow+"T00:00:01Z"));
+      });
+    expect(response.statusCode,response.body).toBe(200); expect(response.json()).not.toHaveProperty("nativeTreasureAction");
+    expect(response.json().nativeTreasure).toMatchObject({day:tomorrow,draws:2,bagSlotsUsed:2});
+    expect(await wallet()).toEqual({Points:940,Revision:1}); expect(random.calls).toBe(2);
+    const after = await saved(), state = after.states[0].State as ActivityState;
+    expect(state.day).toBe(tomorrow); expect(state.daily).toMatchObject({actions:1,draws:2});
+    expect(state.history.at(-1)).toContain(tomorrow); expect(after.receipts.length-before.receipts.length).toBe(1);
+    expect(after.goods).toEqual(before.goods); expect(after.mails).toEqual(before.mails); passed++;
+  });
+  it("keeps Treasure template shared locks until the final receipt commits and releases them afterwards", async () => {
+    await treasureSeed(); const id = randomUUID(), value = {type:"draw",mode:"advanced" as const,count:1,choice:(await snapshot()).nativeTreasure.bagToken};
+    const before = await saved();
+    const response = await treasureLockWait("treasure-template-share-held-through-commit",
+      sql`LOCK TABLE app."ActivityActions" IN SHARE MODE`, () => post(appA,"treasure-native",value,id), 'INSERT INTO app."ActivityActions"', async () => {
+        expect(random.calls).toBe(1);
+        // This independent updater must fail while the completed draw is still waiting to write its receipt.
+        await expect(b.db.transaction(tx => tx.execute(sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE NOWAIT`)))
+          .rejects.toMatchObject({cause:{code:"55P03"}});
+      });
+    expect(response.statusCode,response.body).toBe(200); expect(await wallet()).toEqual({Points:940,Revision:1});
+    await b.db.transaction(async tx => {
+      const rows = await tx.execute(sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE NOWAIT`);
+      expect(rows).toHaveLength(1);
+    });
+    const after = await saved(); expect(after.receipts.length-before.receipts.length).toBe(1);
+    expect(after.goods).toEqual(before.goods); expect(after.mails).toEqual(before.mails); passed++;
   });
   it("deduplicates native Wheel start, invalidates protected-failure tokens and preserves both slots under old/native wallet contention", async () => {
     await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);

@@ -76,22 +76,38 @@ function validNativeAction(action: ActivityAction, state: TreasureState, ctx: Cl
   if (action.type === "progress") need(Object.hasOwn(action, "tier") && int(action.tier, 1, 3), "寻宝奖励档位无效。");
 }
 
-/** One rule owner; caller owns the wallet lock, mail, receipt, daily limit and RNG. */
-export function advanceTreasure(value: unknown, action: ActivityAction, ctx: Clock, funds: Funds, roll: PrizeRoll, native = false): TreasureResult {
+/** Pure draw preparation, shared by delivery preflight and the actual RNG transition. */
+export function prepareTreasureDraw(value: unknown, action: ActivityAction, ctx: Clock, funds: Funds, native = false) {
   const state = readTreasureState(value); dayOf(ctx); balance(funds);
   if (native) validNativeAction(action, state, ctx);
+  need(action.type === "draw", "寻宝操作无效。");
+  const count = action.count ?? 1;
+  need(int(count, 1, 5), "每次只能进行1至5次寻宝。");
+  need(native || action.choice === undefined || ["normal", "advanced"].includes(action.choice), "寻宝模式无效。");
+  const mode: "normal" | "advanced" = (native ? action.mode : action.choice) === "advanced" ? "advanced" : "normal", advanced = mode === "advanced";
+  need(!advanced || state.choices.length === PRIZES.length, "高级寻宝需选择4类宝物。");
+  need(state.bag.length + count <= C.bagCapacity, "临时背包已满，请先领取或回收。");
+  need(int(state.draws + count, 0, 1_000_000_000) && int(state.score + count * (advanced ? 2 : 1), 0, 1_000_000_000)
+    && int(state.fragments + count, 0, 1_000_000_000), "寻宝进度已达上限。");
+  const cost = C.treasureCost * (advanced ? 2 : 1) * count; balance(funds, -cost);
+  const guaranteed = Math.floor((state.pity + count) / C.cavePity), candidates = new Map<number, ActivityReward>();
+  if (count > guaranteed) for (const prize of PRIZES) {
+    if (state.choices.includes(prize.name)) candidates.set(prize.templateId, { templateId: prize.templateId, count: prize.count * (advanced ? 2 : 1) });
+  }
+  if (guaranteed) candidates.set(11021, { templateId: 11021, count: advanced ? 4 : 2 });
+  return { state, count, mode, advanced, cost, candidates: [...candidates.values()] };
+}
+
+/** One rule owner; caller owns the wallet lock, mail, receipt, daily limit and RNG. */
+export function advanceTreasure(value: unknown, action: ActivityAction, ctx: Clock, funds: Funds, roll: PrizeRoll, native = false): TreasureResult {
+  const prepared = action?.type === "draw" ? prepareTreasureDraw(value, action, ctx, funds, native) : undefined;
+  const state = prepared?.state ?? readTreasureState(value);
+  if (!prepared) { dayOf(ctx); balance(funds); if (native) validNativeAction(action, state, ctx); }
   const effects: TreasureNativeEffect[] = [], rewards: ActivityReward[] = [];
   let pointsDelta = 0, cost = 0, completed = false, draws = 0, message = "活动进度已保存。";
   if (action.type === "draw") {
-    const count = action.count ?? 1;
-    need(int(count, 1, 5), "每次只能进行1至5次寻宝。");
-    need(native || action.choice === undefined || ["normal", "advanced"].includes(action.choice), "寻宝模式无效。");
-    const mode = (native ? action.mode : action.choice) === "advanced" ? "advanced" : "normal", advanced = mode === "advanced";
-    need(!advanced || state.choices.length === PRIZES.length, "高级寻宝需选择4类宝物。");
-    need(state.bag.length + count <= C.bagCapacity, "临时背包已满，请先领取或回收。");
-    need(int(state.draws + count, 0, 1_000_000_000) && int(state.score + count * (advanced ? 2 : 1), 0, 1_000_000_000)
-      && int(state.fragments + count, 0, 1_000_000_000), "寻宝进度已达上限。");
-    cost = C.treasureCost * (advanced ? 2 : 1) * count; pointsDelta = -cost; const score = balance(funds, pointsDelta);
+    const { count, mode, advanced, cost: drawCost } = prepared!;
+    cost = drawCost; pointsDelta = -cost; const score = balance(funds, pointsDelta);
     const found: (Selection & { sourceOriginalIndex: number })[] = [];
     for (let i = 0; i < count; i++) {
       state.pity++; const guaranteed = state.pity >= C.cavePity;

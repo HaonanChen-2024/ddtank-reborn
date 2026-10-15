@@ -16,7 +16,7 @@ import type { MinesNativeEffect } from "./mines-native.js";
 import type { DDPlayNativeEffect } from "./ddplay-native.js";
 import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
-import type { TreasureNativeEffect } from "./treasure-native.js";
+import { prepareTreasureDraw, type TreasureNativeEffect } from "./treasure-native.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
 import { advanceCarnivalGlobal, carnivalGlobalKey, readCarnivalGlobalState, viewCarnivalGlobal,
@@ -237,16 +237,30 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
   return result;
 }
 
+/** One delivery rule for temporary-bag preflight and actual mail; ordinary activities do not lock templates. */
+async function rewardTemplate(app: AppCtx, who: Owner, reward: ActivityReward, moonlightShopBuy = false, locked = false) {
+  const validDays = reward.validDays ?? 0;
+  const potion = moonlightShopBuy && reward.templateId === 40002;
+  if (!int(reward.templateId) || (!potion && !PRIZES.some((p) => p.templateId === reward.templateId)) || !int(reward.count) || reward.count === 0 || !int(validDays)) throw new ActivityError("活动奖励配置无效。", 503);
+  const template = await q1<{ MaxCount: number; NeedSex: number; CategoryID: number; CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number }>(app.h, sql`SELECT "MaxCount","NeedSex","CategoryID","CanEquip","CanUse","Property1","Property2" FROM game."Shop_Goods" WHERE "TemplateID"=${reward.templateId} ${locked ? sql`FOR SHARE` : sql``}`);
+  if (!template || (potion ? template.CategoryID !== 20 || !template.CanUse || template.Property1 !== 0 || template.Property2 !== 300 : template.CategoryID !== 11)
+    || template.CanEquip || !int(template.MaxCount) || template.MaxCount === 0 || (template.NeedSex !== 0 && template.NeedSex !== (who.Sex ? 1 : 2))) throw new ActivityError("活动奖励模板不可交付。", 503);
+  return template;
+}
+
+/** Reject known undeliverable outcomes before RNG or spending, holding candidate rows until draw commit. */
+async function preflightTreasureDraw(app: AppCtx, who: Owner, value: unknown, action: ActivityAction, ctx: Pick<ActivityContext, "now">, wallet: ActivityWallet, native: boolean) {
+  const { candidates } = prepareTreasureDraw(value, action, ctx, wallet, native);
+  // Global template order prevents two roles with different category selections from inverting locks.
+  for (const reward of candidates.sort((a, b) => a.templateId - b.templateId)) await rewardTemplate(app, who, reward, false, true);
+}
+
 /** Keep all ordinary attachments in the claim transaction; sendMail itself truncates after five. */
 async function rewardMail(app: AppCtx, characterId: number, who: Owner, rewards: ActivityReward[], moonlightShopBuy = false): Promise<number> {
   const items: { templateId: number; count: number; validDays: number }[] = [];
   for (const reward of rewards) {
     const validDays = reward.validDays ?? 0;
-    const potion = moonlightShopBuy && reward.templateId === 40002;
-    if (!int(reward.templateId) || (!potion && !PRIZES.some((p) => p.templateId === reward.templateId)) || !int(reward.count) || reward.count === 0 || !int(validDays)) throw new ActivityError("活动奖励配置无效。", 503);
-    const template = await q1<{ MaxCount: number; NeedSex: number; CategoryID: number; CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number }>(app.h, sql`SELECT "MaxCount","NeedSex","CategoryID","CanEquip","CanUse","Property1","Property2" FROM game."Shop_Goods" WHERE "TemplateID"=${reward.templateId}`);
-    if (!template || (potion ? template.CategoryID !== 20 || !template.CanUse || template.Property1 !== 0 || template.Property2 !== 300 : template.CategoryID !== 11)
-      || template.CanEquip || !int(template.MaxCount) || template.MaxCount === 0 || (template.NeedSex !== 0 && template.NeedSex !== (who.Sex ? 1 : 2))) throw new ActivityError("活动奖励模板不可交付。", 503);
+    const template = await rewardTemplate(app, who, reward, moonlightShopBuy);
     const stacks = Math.ceil(reward.count / template.MaxCount);
     if (items.length + stacks > 1000) throw new ActivityError("活动奖励数量超过交付上限。", 503);
     for (let left = reward.count; left > 0; left -= template.MaxCount) items.push({ templateId: reward.templateId, count: Math.min(left, template.MaxCount), validDays });
@@ -481,7 +495,13 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
     }
     const wallet = walletOf(row);
     const state = await stateOf(txApp, characterId, now);
-    const ctx = { ...await context(txApp, characterId, now), requestId };
+    let businessNow = now;
+    if ((activityId === "treasure" || activityId === "treasure-native") && action.type === "draw") {
+      await preflightTreasureDraw(txApp, who, state.games.treasure, action, { now }, wallet, activityId === "treasure-native");
+      // New template locks can also wait across UTC midnight; use one post-lock business date.
+      businessNow = new Date();
+    }
+    const ctx = { ...await context(txApp, characterId, businessNow), requestId };
     const changed = transitionActivity(state, activityId, action, ctx, wallet);
     const next: ActivityWallet = { points: wallet.points + changed.pointsDelta, earned: wallet.earned + changed.earnedDelta, revision: wallet.revision + 1 };
     if (![changed.pointsDelta, changed.earnedDelta].every(Number.isInteger) || changed.earnedDelta < 0 || ![next.points, next.earned, next.revision].every(int)) throw new ActivityError("活动积分不足或结算配置无效。", 409);
