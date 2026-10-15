@@ -10,6 +10,7 @@ import { RoomType } from "../rooms/room.js";
 import { roomList } from "../packets/out.js";
 import { SubRouter, type HandlerRegistry } from "./registry.js";
 import { parseWorldBossSetup } from "./world-boss-setup.js";
+import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
 
 const NO_WEAPON = "Sem arma equipada, não é possível participar.";
 
@@ -46,6 +47,7 @@ export function roomRouter(): SubRouter {
       const timeType = pkt.readByte();
       const name = pkt.readString();
       const pwd = pkt.readString();
+      if (roomType === 40) return p.sendMessage(0, "请通过本地雪场的已确认准入进入。");
       if (!p.hasMainWeapon) return p.sendMessage(1, NO_WEAPON);
       ctx.rooms.createRoom(p, name, pwd, roomType, timeType);
     })
@@ -83,19 +85,28 @@ export function roomRouter(): SubRouter {
       const hardLevel = pkt.readByte();
       const levelLimits = pkt.readInt();
       const isCrosszone = pkt.readBoolean();
+      if (room.RoomType === 40 || roomType === 40) {
+        if (pkt.dataLeft !== 4) return p.sendMessage(0, "雪场任务尾字段无效。");
+        const originalMissionId = pkt.readInt();
+        const setup = { mapId, roomType, password, name, timeMode, hardLevel, levelLimits, isCrosszone, isOpenBoss, originalMissionId };
+        const permit = christmasSnowfieldOwner(ctx).checkRoom(room, room.getPlayers(), setup);
+        if (!permit.ok) return p.sendMessage(0, permit.message);
+        ctx.rooms.setupChange(room, setup); return;
+      }
       ctx.rooms.setupChange(room, { mapId, roomType, password, name, timeMode, hardLevel, levelLimits, isCrosszone, isOpenBoss });
     }, "partial")
     .on(3, "GAME_ROOM_KICK", (ctx, p, pkt) => {
       if (p.currentRoom && p.currentRoom.host === p) ctx.rooms.kickPlayer(p.currentRoom, pkt.readByte());
     })
-    .on(5, "GAME_ROOM_REMOVEPLAYER", (ctx, p) => {
+    .on(5, "GAME_ROOM_REMOVEPLAYER", async (ctx, p, _pkt, c) => {
+      if (p.currentRoom?.RoomType === 40) await christmasSnowfieldOwner(ctx).leaveScene(c, p);
       if (p.currentRoom) ctx.rooms.exitRoom(p.currentRoom, p);
     })
     .on(6, "GAME_TEAM", (ctx, p) => {
       if (p.currentRoom && p.currentRoom.RoomType !== RoomType.Match) ctx.rooms.switchTeam(p);
     })
     // GameStart.cs: host only; every member needs a weapon (captcha / PvE permission / tickets not ported).
-    .on(7, "GAME_START", (ctx, p) => {
+    .on(7, "GAME_START", async (ctx, p, _pkt, c) => {
       const room = p.currentRoom;
       if (!room || room.host !== p) return;
       for (const m of room.getPlayers()) {
@@ -105,6 +116,10 @@ export function roomRouter(): SubRouter {
           room.sendCancelPickUp();
           return;
         }
+      }
+      if (room.RoomType === 40) {
+        const permit = await christmasSnowfieldOwner(ctx).prepareStart(c, p, room);
+        if (!permit.ok || p.currentRoom !== room) { if (!permit.ok) p.sendMessage(0, permit.message); return; }
       }
       ctx.rooms.startGame(room);
     }, "partial")

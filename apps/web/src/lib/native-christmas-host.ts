@@ -1,5 +1,6 @@
 import type { ActivityAction, ActivityRequest, ActivityResponse } from "./activities";
 import { ActivityRequestError } from "./activities";
+import { parseChristmasSnowfieldAction, validChristmasSnowfieldEffect, validChristmasSnowfieldPublic } from "./native-christmas-snowfield-public";
 import { attachNativeActivityHost, nativeObject, retryNativeActivityRequest,
   type NativeActivityAcknowledgement, type NativeActivityEnvelope, type NativeActivityHost } from "./native-activity-host";
 
@@ -38,7 +39,7 @@ function parseAction(v: unknown): ActivityAction | null {
     return { type: v.type, count: v.count, marked: v.marked, choice: v.choice };
   if (v.type === "claim" && exact(v, ["type", "tier", "index", "choice"]) && integer(v.tier, 1, 4)
     && integer(v.index, 0, v.tier === 4 ? 499_999_998 : 0)) return { type: v.type, tier: v.tier, index: v.index, choice: v.choice };
-  return null;
+  return parseChristmasSnowfieldAction(v);
 }
 function reward(v: unknown, tier: number) {
   const r = record(v, ["templateId", "name", "itemCount", "bound", "validDays"]);
@@ -50,6 +51,7 @@ function progress(v: unknown) {
   return { count: Number(r.count), exp: Number(r.exp) };
 }
 function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
+  if (snapshot.replayed !== undefined && typeof snapshot.replayed !== "boolean") fail();
   const p = record(snapshot.nativeChristmas, ["version", "kind", "rulesVersion", "catalogVersion", "day", "revision", "authority", "available", "reason", "stateToken",
     "activity", "snowfield", "currency", "points", "taskEarned", "dailyActionsRemaining", "snowman", "rewards", "rules", "unavailable"]);
   if (p.version !== 1 || p.kind !== "christmas-native" || p.rulesVersion !== 1 || p.catalogVersion !== "christmas-snowman-local-v1"
@@ -61,7 +63,9 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
     || !integer(p.dailyActionsRemaining, 0, 500)) fail();
   const activity = record(p.activity, ["open", "beginAt", "endAt", "title"]), snowfield = record(p.snowfield, ["available", "reason"]);
   if (activity.open !== true || activity.beginAt !== "1970-01-01T00:00:00.000Z" || activity.endAt !== "2099-12-31T23:59:59.999Z"
-    || !text(activity.title, 1) || snowfield.available !== false || !text(snowfield.reason, 1)) fail();
+    || !text(activity.title, 1) || typeof snowfield.available !== "boolean" || !text(snowfield.reason, 1)) fail();
+  const field = snapshot.nativeChristmasSnowfield;
+  if (field === undefined ? snowfield.available !== false : !validChristmasSnowfieldPublic(field, snapshot, snowfield)) fail();
   if (!array(p.rules, 1, 30).every(v => text(v, 1))) fail();
   const unavailable = array(p.unavailable, 3, 3).map(v => record(v, ["id", "reason"]));
   if (new Set(unavailable.map(v => v.id)).size !== 3 || unavailable.some(v => !["original-economy", "snowfield", "official-snowpacks"].includes(String(v.id)) || !text(v.reason, 1))) fail();
@@ -105,10 +109,14 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
     });
   }
   if (!action || snapshot.replayed) return;
-  if (!p.available || p.authority !== "online") fail();
   const envelope = record(snapshot.nativeChristmasAction, ["requestId", "effects"]);
   if (!text(envelope.requestId, 1)) fail();
   const value = array(envelope.effects, 1, 1)[0];
+  if (action.type === "enter" || action.type === "challenge" || action.type === "npc-claim") {
+    if (!validChristmasSnowfieldPublic(field, snapshot, snowfield) || !validChristmasSnowfieldEffect(value, action, field, snapshot.mailedCount)) fail();
+    return;
+  }
+  if (!p.available || p.authority !== "online") fail();
   if (action.type === "craft") {
     const e = record(value, ["type", "count", "double", "resourceCost", "pointCost", "experienceGained", "before", "after", "isUp", "committedRevision"]);
     const before = progress(e.before), after = progress(e.after), xp = Number(action.count) * (action.marked ? 2 : 1);

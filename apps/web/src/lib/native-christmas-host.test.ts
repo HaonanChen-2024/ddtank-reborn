@@ -3,6 +3,7 @@ vi.mock("./api", () => ({ api: { getToken: () => "test-token" } }));
 import { readPendingActivity, type ActivityResponse } from "./activities";
 import type { NativeActivityHost } from "./native-activity-host";
 import { attachNativeChristmasHost, type NativeChristmasCallbackTarget, type NativeChristmasEnvelope } from "./native-christmas-host";
+import type { ChristmasSnowfieldPublic } from "./native-christmas-snowfield-public";
 
 const fetchMock = vi.fn<typeof fetch>(), hosts: NativeActivityHost[] = [];
 const choice = "2026-10-15." + "A".repeat(43), materials = [11019, 11001, 11021, 11002], quantities = [3, 5, 8, 2];
@@ -40,6 +41,36 @@ const snapshot = (id: number, p = projection(), extra: Partial<ActivityResponse>
   characterId: id, points: p.points, earned: p.taskEarned, revision: p.revision, day: p.day,
   activities: [], tasks: [], history: [], nativeChristmas: p, ...extra,
 });
+const sceneHash = "B".repeat(43);
+const snowPrize = (templateId: number) => ({ templateId, name: "本地材料", itemCount: 1 as const, bound: true as const, validDays: 0 as const });
+function snowfield(): ChristmasSnowfieldPublic {
+  return { version: 1, kind: "christmas-snowfield", rulesVersion: 1, catalogVersion: "christmas-snowfield-local-v1", day: "2026-10-15", revision: 2,
+    serverNow: "2026-10-15T00:05:00.000Z", authority: "online", available: true, reason: "本地雪场", stateToken: choice, currency: "local-task-points", points: 500, taskEarned: 500,
+    entry: { available: true, reason: "可以入场" },
+    ticket: { claimKey: "task:2026-10-15:sign", qualifiedToday: true, issuedToday: true, issuedAt: "2026-10-15T00:00:00.000Z", expiresAt: "2026-10-15T00:30:00.000Z", valid: true, durationSeconds: 1800 },
+    scene: { revision: sceneHash, state: "inside", people: 1, capacity: 20, canResume: false, reason: "雪场中" },
+    challenges: [11019, 11001, 11021].map((id, index) => ({ index, type: index, title: "本地雪人", monsterId: 100 + index, state: "alive",
+      originalMissionId: 40001 + index, localPveId: 164001 + index, battleMapId: 1201, usedToday: 0, remainingToday: 3, limit: 3, canChallenge: true, reason: "可以挑战", reward: snowPrize(id) })),
+    attempt: { state: "none", type: null, canResume: false, refundPending: false, reason: "没有挑战" },
+    npc: { hasSettledWinToday: false, claimed: false, canClaim: false, reason: "等待首胜", reward: snowPrize(11002) }, rules: ["本地规则"],
+    unavailable: [{ id: "original-economy", reason: "本地经济" }, { id: "original-mission-rules", reason: "本地1201地图" }] };
+}
+function snowResult(type: "enter" | "challenge" | "npc-claim", index = 0) {
+  const p = projection(), f = snowfield(), action = type === "challenge" ? { type, index, choice } : { type, choice };
+  let effect: Record<string, unknown>;
+  if (type === "enter") {
+    Object.assign(f.scene, { state: "loading", canResume: true }); f.challenges.forEach(c => { c.canChallenge = false; });
+    effect = { type: "entered", issued: true, issuedAt: f.ticket.issuedAt, expiresAt: f.ticket.expiresAt };
+  } else if (type === "challenge") {
+    const c = f.challenges[index]!; Object.assign(c, { state: "reserved", usedToday: 1, remainingToday: 2, canChallenge: false });
+    Object.assign(f.attempt, { state: "admitted", type: index, canResume: true });
+    effect = { type: "challenged", index, monsterId: c.monsterId, originalMissionId: c.originalMissionId, localPveId: c.localPveId, usedToday: 1 };
+  } else {
+    Object.assign(f.npc, { hasSettledWinToday: true, claimed: true }); effect = { type: "npc-claimed", rewards: [snowPrize(11002)] };
+  }
+  p.snowfield = { ...f.entry }; Object.assign(effect, { committedRevision: 2, committedSceneRevision: sceneHash });
+  return { p, f, action, effect, mailedCount: type === "npc-claim" ? 1 : 0 };
+}
 let idCounter = 3900;
 function setup() {
   const id = ++idCounter, generation = "christmas-" + id, target: NativeChristmasCallbackTarget = {};
@@ -167,5 +198,81 @@ describe("original Christmas host", () => {
         before: { count: 0, exp: 0 }, after: { count: 0, exp: 1 }, isUp: false, committedRevision: 2 }] } })));
     const ack = x.request({ type: "craft", count: 1, marked: false, choice }); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
     expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId); expect(x.host.retry(readPendingActivity(x.id)!)).toBeNull();
+  });
+  it.each(["enter", "challenge", "npc-claim"] as const)("uses the original callback and UUID ledger for fresh %s", async type => {
+    const x = setup(), r = snowResult(type, 1);
+    fetchMock.mockImplementation(async () => response(snapshot(x.id, r.p, { ...staleEffects(), nativeChristmasSnowfield: r.f,
+      mailedCount: r.mailedCount, nativeChristmasAction: { requestId: sent().requestId, effects: [r.effect] } })));
+    const ack = x.request(r.action); expect(ack.accepted).toBe(true); expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/account/activities/christmas-native/action");
+    expect(sent()).toEqual({ characterId: x.id, requestId: ack.requestId, action: r.action });
+    expect(x.reject).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+    expect(x.accept.mock.calls[0][0].snapshot?.nativeChristmasAction?.effects).toEqual([r.effect]);
+    for (const key of Object.keys(staleEffects()).filter(k => k !== "nativeChristmasAction")) expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty(key);
+  });
+  it("rejects malformed snowfield actions before creating any UUID", () => {
+    const x = setup();
+    for (const action of [{ type: "enter", choice, index: 0 }, { type: "npc-claim", choice, tier: 1 }, { type: "challenge", choice },
+      { type: "challenge", choice, index: "1" }, { type: "challenge", choice, index: 3 }, { type: "challenge", choice, index: 0, monsterId: 100 },
+      { type: "enter", choice: choice.slice(0, -1) }, Object.create({ type: "enter", choice })]) expect(x.request(action).accepted).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it.each(["entry", "reason", "wallet", "day", "scene", "private", "missing"])("rejects mismatched optional snowfield %s", async kind => {
+    const x = setup(), r = snowResult("enter");
+    if (kind === "entry") r.p.snowfield.available = false;
+    if (kind === "reason") r.p.snowfield.reason = "旧理由";
+    if (kind === "wallet") r.f.points--;
+    if (kind === "day") r.f.day = "2026-10-14";
+    if (kind === "scene") r.f.scene.revision = "B".repeat(42);
+    if (kind === "private") Object.assign(r.f.attempt, { attemptId: "private" });
+    fetchMock.mockResolvedValue(response(snapshot(x.id, r.p, kind === "missing" ? {} : { nativeChristmasSnowfield: r.f })));
+    x.target.workshopChristmasRead!(x.id, x.generation, 1); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+  });
+  it.each(["enter", "challenge", "npc-claim"] as const)("GET and replay %s resume state never deliver an effect or send another POST", async type => {
+    const x = setup(), r = snowResult(type);
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, r.p, { ...staleEffects(), nativeChristmasSnowfield: r.f })));
+    x.target.workshopChristmasRead!(x.id, x.generation, 1); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledTimes(1));
+    expect(fetchMock.mock.calls[0][1]?.method).toBe("GET"); for (const key of Object.keys(staleEffects())) expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty(key);
+    fetchMock.mockRejectedValueOnce(new Error("lost POST")); const ack = x.request(r.action, 2);
+    await vi.waitFor(() => expect(x.reject).toHaveBeenCalledTimes(1)); expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, r.p, { ...staleEffects(), nativeChristmasSnowfield: r.f, replayed: true, mailedCount: r.mailedCount })));
+    await x.host.retry(readPendingActivity(x.id)!); expect(x.accept).toHaveBeenCalledTimes(2); expect(sent().requestId).toBe(ack.requestId);
+    for (const key of Object.keys(staleEffects())) expect(x.accept.mock.calls[1][0].snapshot).not.toHaveProperty(key);
+    expect(fetchMock).toHaveBeenCalledTimes(3); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it.each(["stale-scene", "stale-revision", "no-resume", "wrong-monster", "wrong-day", "private-effect", "foreign-uuid", "malformed-replay"])("keeps challenge UUID for uncertain %s", async kind => {
+    const x = setup(), r = snowResult("challenge");
+    if (kind === "stale-scene") r.effect.committedSceneRevision = "C".repeat(43);
+    if (kind === "stale-revision") r.effect.committedRevision = 1;
+    if (kind === "no-resume") r.f.attempt.canResume = false;
+    if (kind === "wrong-monster") r.effect.monsterId = 999;
+    if (kind === "wrong-day") r.action.choice = "2026-10-14." + "A".repeat(43);
+    if (kind === "private-effect") r.effect.attemptId = "private";
+    fetchMock.mockImplementation(async () => {
+      const data = snapshot(x.id, r.p, { nativeChristmasSnowfield: r.f, mailedCount: 0,
+        nativeChristmasAction: { requestId: kind === "foreign-uuid" ? crypto.randomUUID() : sent().requestId, effects: [r.effect] } });
+      if (kind === "malformed-replay") Object.assign(data, { replayed: "true" });
+      return response(data);
+    });
+    const ack = x.request(r.action); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
+    expect(x.accept).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+  });
+  it.each(["cancel", "role"])("does not hand off a late challenge after %s", async kind => {
+    const x = setup(), r = snowResult("challenge"); let finish!: (r: Response) => void;
+    fetchMock.mockImplementation(() => new Promise(resolve => { finish = resolve; })); const ack = x.request(r.action);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce()); if (kind === "cancel") x.host.cancel(); else x.cancelRole();
+    finish(response(snapshot(x.id, r.p, { nativeChristmasSnowfield: r.f, mailedCount: 0, nativeChristmasAction: { requestId: ack.requestId!, effects: [r.effect] } })));
+    await new Promise(resolve => setTimeout(resolve, 0)); expect(x.accept).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+  });
+  it("keeps original craft functional while a present snowfield is unavailable", async () => {
+    const x = setup(), p = projection({ used: 1, exp: 1 }), f = snowfield();
+    f.available = false; f.stateToken = null; f.entry.available = false; f.challenges.forEach(c => { c.canChallenge = false; });
+    p.snowfield = { ...f.entry };
+    fetchMock.mockImplementation(async () => response(snapshot(x.id, p, { nativeChristmasSnowfield: f, mailedCount: 0, nativeChristmasAction: {
+      requestId: sent().requestId, effects: [{ type: "crafted", count: 1, double: false, resourceCost: 1, pointCost: 0, experienceGained: 1,
+        before: { count: 0, exp: 0 }, after: { count: 0, exp: 1 }, isUp: false, committedRevision: 2 }] } })));
+    x.request({ type: "craft", count: 1, marked: false, choice }); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(x.reject).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
   });
 });

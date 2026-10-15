@@ -39,5 +39,6 @@ registerScript("GameServerScript.AI.Messions.GCGCT1161", wrapSpawns(GCGCT1161), 
 registerScript("GameServerScript.AI.Messions.GCGCK1161", wrapSpawns(GCGCK1161), "mission", "manual");
 
 import "./worldboss.js";
+import "./christmas.js";
 
 export const MANUAL_SCRIPTS = ["TVS12004", "GCGCT1161", "GCGCK1161", "ACDragon", "AC1243", "WorldAcientDragon"];

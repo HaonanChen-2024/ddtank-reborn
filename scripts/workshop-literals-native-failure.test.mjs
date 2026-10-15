@@ -17,6 +17,61 @@ const assetNames = ["MagicClothList.decoded.xml", "WorkshopNativeWardrobeBootstr
   "magicwardrobe-original-library.swf", "magicwardrobe_v3_6_1_u1.swf",
   "magicwardrobe_v3_6_1_u1.ui", "shared-art.swf"];
 const coreNames = ["2.png", "3.png", "DDT_Loading.swf"];
+const snowfieldUrls = [
+  ...["ChristmasMap.swf", "living1.swf", "living2.swf", "living3.swf"].map(file => "/resource/image/scene/christmas/workshop/" + file),
+  ...["M", "F"].flatMap(sex => ["cloth", "clothF"].flatMap(layer => [1, 2].map(direction => `/resource/image/scene/christmas/workshop/cloth/${sex}/${layer}/${direction}.png`))),
+];
+
+test("snowfield resources upgrade 77 to 89 in the same journal and roll back every owned path", () => {
+  const f = fixture(), original = f.snapshot(), old = f.upgradedBuild(...Array(14).fill(true));
+  assert.equal(f.run("install", old).nativeWardrobe.assets.length, 77);
+  const next = snowfieldBuild(f), before = f.snapshot();
+  assert.equal(f.run("verify", next).pendingTransition, true); assert.deepEqual(f.snapshot(), before);
+  const installed = f.run("install", next); assert.equal(installed.nativeWardrobe.assets.length, 89);
+  assert.equal(f.run("install", next).unchanged, true); assert.equal(f.run("verify").unchanged, true);
+  for (const url of snowfieldUrls) assert(f.fs.existsSync(path.join(path.dirname(f.corePath("2.png")), "native-resources", url.slice("/resource/".length))));
+  assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original); assert.equal(f.openHandles, 0);
+});
+
+for (const url of snowfieldUrls) {
+  test(`snowfield partial write preserves old 77 resources: ${url}`, () => {
+    const f = fixture(); f.run("install", f.upgradedBuild(...Array(14).fill(true))); const before = f.snapshot(), next = snowfieldBuild(f);
+    f.arm("write", path.join(path.dirname(f.corePath("2.png")), "native-resources", url.slice("/resource/".length)));
+    assert.throws(() => f.run("install", next), /ENOSPC/); assert.equal(f.failureCount, 1); assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0);
+    assert.equal(f.run("install", next).nativeWardrobe.assets.length, 89);
+  });
+  test(`snowfield failed rollback is compensated: ${url}`, () => {
+    const f = fixture(), original = f.snapshot(); f.run("install", snowfieldBuild(f)); const before = f.snapshot();
+    f.arm("unlink", path.join(path.dirname(f.corePath("2.png")), "native-resources", url.slice("/resource/".length)));
+    assert.throws(() => f.run("rollback"), /EPERM/); assert.equal(f.failureCount, 1); assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0);
+    assert.equal(f.run("rollback").rolledBack, true); assert.deepEqual(f.snapshot(), original);
+  });
+}
+
+test("snowfield layout requires its exact version and twelve fixed resource URLs before writes", () => {
+  for (const kind of ["unknown-version", "array-version", "missing-version", "other-variant", "missing", "duplicate", "foreign-url", "traversal"]) {
+    const f = fixture(), next = snowfieldBuild(f), m = JSON.parse(f.fs.readFileSync(next, "utf8"));
+    if (kind === "unknown-version") m.christmasSceneVersion = 2;
+    if (kind === "array-version") m.christmasSceneVersion = [1];
+    if (kind === "missing-version") delete m.christmasSceneVersion;
+    if (kind === "other-variant") m.variant = "wardrobe-pair-mines";
+    if (kind === "missing") m.assets.pop();
+    if (kind === "duplicate") m.assets.push(m.assets.at(-1));
+    if (kind === "foreign-url") m.assets.at(-1).urlPath = "/resource/image/scene/christmas/workshop/cloth/F/cloth/3.png";
+    if (kind === "traversal") m.assets.at(-1).urlPath = "/resource/image/scene/christmas/workshop/../escape.png";
+    f.put(next, JSON.stringify(m)); const before = f.snapshot(); assert.throws(() => f.run("install", next)); assert.deepEqual(f.snapshot(), before); assert.equal(f.openHandles, 0);
+  }
+});
+
+function snowfieldBuild(f) {
+  const oldPath = f.upgradedBuild(...Array(14).fill(true)), oldRoot = path.dirname(oldPath), root = oldRoot + "-snowfield";
+  const manifest = JSON.parse(f.fs.readFileSync(oldPath, "utf8"));
+  const tagPath = path.join(root, "bridge.bin"); f.put(tagPath, f.fs.readFileSync(manifest.bridge.tagPath)); manifest.bridge.tagPath = tagPath;
+  for (const asset of manifest.assets) { const old = asset.path; asset.path = path.join(root, path.relative(oldRoot, old)); f.put(asset.path, f.fs.readFileSync(old)); }
+  for (const urlPath of snowfieldUrls) { const file = path.basename(urlPath), source = path.join(root, urlPath.slice(1)), bytes = Buffer.from("isolated scene resource:" + urlPath); f.put(source, bytes); manifest.assets.push({ file, path: source, urlPath, bytes: bytes.length, sha256: digest(bytes) }); }
+  manifest.christmasSceneVersion = 1;
+  const nextPath = path.join(root, "manifest.json"); f.put(nextPath, JSON.stringify(manifest)); return nextPath;
+}
 
 function fixture() {
   // These paths are map keys only. No real filesystem writes are exposed to VM.

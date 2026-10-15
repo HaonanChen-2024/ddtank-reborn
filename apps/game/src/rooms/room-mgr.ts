@@ -9,6 +9,8 @@ import type { FightEngine } from "../fight/types.js";
 import type { BotProvider, VirtualPlayer } from "../bots/bot.js";
 import { BaseRoom, RoomType } from "./room.js";
 import type { WorldBossRoomAccess } from "../game/world-boss-access.js";
+import type { ChristmasSnowfieldRoomAccess, SnowfieldLease } from "../game/activity-christmas-snowfield.js";
+import type { GamePlayer } from "../game/player.js";
 
 export interface RoomMgrOptions {
   maxRooms: number;
@@ -19,6 +21,7 @@ export interface RoomMgrOptions {
   botFallbackSec?: number;
   random?: () => number;
   worldBossAccess?: WorldBossRoomAccess;
+  christmasSnowfield?: ChristmasSnowfieldRoomAccess;
 }
 
 type Action = () => void;
@@ -32,6 +35,8 @@ export class RoomMgr {
   private lastClear = 0;
   private matchQueue: { room: BaseRoom; since: number }[] = [];
   private bossAwardStarts = new Set<BaseRoom>();
+  private stopped = false;
+  private readonly snowfieldCreates = new Set<() => void>();
   private readonly rnd: () => number;
 
   constructor(private readonly o: RoomMgrOptions) {
@@ -41,10 +46,14 @@ export class RoomMgr {
   }
 
   start(): void {
+    this.stopped = false;
     if (!this.timer) this.timer = setInterval(() => this.tick(), 40);
   }
 
   stop(): void {
+    this.stopped = true;
+    for (const cancel of this.snowfieldCreates) cancel();
+    this.snowfieldCreates.clear();
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
   }
@@ -54,11 +63,13 @@ export class RoomMgr {
     this.queue.push(a);
   }
 
-  private addRoomEntry(p: RoomMember, action: Action): void {
+  private addRoomEntry(p: RoomMember, action: Action, skipped?: () => void): void {
     this.addAction(() => {
       if (!p.runRoomEntry) return action(); // Bots retain the synchronous path.
-      const pending = p.runRoomEntry(action);
-      pending?.catch((err) => console.error("RoomMgr entry action error", err));
+      let ran = false;
+      const pending = p.runRoomEntry(() => { ran = true; try { action(); } catch (err) { skipped?.(); throw err; } });
+      if (pending) void pending.then(() => { if (!ran) skipped?.(); }, err => { skipped?.(); console.error("RoomMgr entry action error", err); });
+      else if (!ran) skipped?.();
     });
   }
 
@@ -153,6 +164,7 @@ export class RoomMgr {
   /** EnterWaitingRoomAction. */
   enterWaitingRoom(p: RoomMember): void {
     this.addAction(() => {
+      if (p.currentRoom?.RoomType === 40) return;
       p.currentRoom?.removePlayer(p);
       if (this.waitingAdd(p)) {
         p.send(Out.roomList(this.getAllRooms()));
@@ -172,8 +184,11 @@ export class RoomMgr {
   }
 
   /** CreateRoomAction (Rooms/CreateRoomAction.cs). */
-  createRoom(p: RoomMember, name: string, password: string, roomType: number, timeType: number): void {
+  createRoom(p: RoomMember, name: string, password: string, roomType: number, timeType: number,
+    completed?: (room: BaseRoom | null) => void, snowfieldPveId?: number): void {
     this.addRoomEntry(p, () => {
+      if (p.currentRoom?.RoomType === 40) { completed?.(null); return; }
+      if (roomType === 40 && (this.stopped || !snowfieldPveId || !this.o.christmasSnowfield?.canCreateRoom(p))) { completed?.(null); return; }
       if (roomType === 14) {
         const permit = this.o.worldBossAccess?.check([p]);
         if (!permit || permit.error) { p.sendMessage(0, permit?.error ?? "世界 BOSS 当前不可挑战。"); return; }
@@ -191,6 +206,7 @@ export class RoomMgr {
       room ??= this.rooms.find((r) => !r.IsUsing) ?? null; // C# gives up after N random probes; we fall back to a scan
       if (!room) {
         p.sendMessage(1, this.o.lang("CreateRoomAction.MaxRoom"));
+        completed?.(null);
         return;
       }
       this.waitingRemove(p);
@@ -201,16 +217,33 @@ export class RoomMgr {
         room.maxViewerCnt = 1;
       }
       room.updateRoom(name, password, roomType, timeType, 0);
+      if (roomType === 40) { room.MapId = snowfieldPveId!; room.HardLevel = 0; room.LevelLimits = 0; room.maxViewerCnt = 0; }
       p.send(Out.roomCreate(room));
       room.addPlayer(p);
+      if (roomType === 40) {
+        try { this.o.christmasSnowfield!.roomCreated(p as GamePlayer, room); }
+        catch { room.removePlayer(p); room.stop(); completed?.(null); return; }
+      }
       this.sendUpdateCurrentRoom(room);
       this.sendUpdateRoom();
+      completed?.(room);
+    }, () => completed?.(null));
+  }
+
+  /** Only the server-owned committed handoff may request this controlled room. */
+  createSnowfieldRoom(p: GamePlayer, localPveId: number): Promise<BaseRoom | null> {
+    if (this.stopped) return Promise.resolve(null);
+    return new Promise(resolve => {
+      const cancel = () => { this.snowfieldCreates.delete(cancel); resolve(null); };
+      this.snowfieldCreates.add(cancel);
+      this.createRoom(p, "", "", 40, 3, room => { this.snowfieldCreates.delete(cancel); resolve(room); }, localPveId);
     });
   }
 
   /** GameRoom/Handle/Login.cs (runs inline in the original, here queued to keep room ordering). */
   enterRoom(p: RoomMember, roomId: number, pwd: string, hallType: number): void {
     this.addRoomEntry(p, () => {
+      if (p.currentRoom?.RoomType === 40) return;
       const fail = (key?: string) => {
         if (key) p.sendMessage(1, this.o.lang(key));
         p.send(Out.roomLoginResult(false));
@@ -226,6 +259,7 @@ export class RoomMgr {
         if (!room) return fail("EnterRoomAction.noexist");
       }
       if (!room.IsUsing) return fail("EnterRoomAction.noexist");
+      if (room.RoomType === 40) return fail("EnterRoomAction.noexist");
       if (room.IsPlaying) return fail("EnterRoomAction.start");
       if (room.PlayerCount === room.PlacesCount) {
         if (!room.canAddViewPlayer()) return fail("EnterRoomAction.full");
@@ -285,6 +319,10 @@ export class RoomMgr {
   setupChange(room: BaseRoom, s: { mapId: number; roomType: number; password: string; name: string; timeMode: number; hardLevel: number; levelLimits: number; isCrosszone: boolean; isOpenBoss: boolean }): void {
     const host = room.host;
     this.addAction(() => {
+      if (room.RoomType === 40 || s.roomType === 40) {
+        const permit = this.o.christmasSnowfield?.checkRoom(room, room.getPlayers(), s);
+        if (!permit?.ok) return;
+      }
       if (room.RoomType === 14 || s.roomType === 14) {
         if (!room.IsUsing || !host || room.host !== host || host.currentRoom !== room || room.IsPlaying || room.game) return;
         if (s.roomType === 14) {
@@ -312,6 +350,10 @@ export class RoomMgr {
     const host = room.host;
     const expected = room.getPlayersFight();
     this.addAction(() => {
+      if (room.RoomType === 40) {
+        const permit = this.o.christmasSnowfield?.checkRoom(room, room.getPlayers(), undefined, true);
+        if (!permit?.ok || room.IsPlaying || room.game) return;
+      }
       if (room.RoomType === 14 && (!room.IsUsing || room.IsPlaying || room.game || !host || room.host !== host ||
           host.currentRoom !== room || !expected.length || expected.length !== room.PlayerCount ||
           room.getPlayersFight().some((p, i) => p !== expected[i] || p.currentRoom !== room))) return;
@@ -393,6 +435,7 @@ export class RoomMgr {
 
   /** StartGameAction PvE branch → GameMgr.StartPVEGame (Rooms/StartGameAction.cs:55-75). */
   private launchPve(room: BaseRoom, players: RoomMember[]): void {
+    if (room.RoomType === 40) { this.launchSnowfield(room, players); return; }
     const access = room.RoomType === 14 ? this.o.worldBossAccess : undefined;
     const permit = room.RoomType === 14 ? access?.check(players, room.MapId) : undefined;
     if (room.RoomType === 14 && (!permit || permit.error)) {
@@ -447,6 +490,24 @@ export class RoomMgr {
       for (const id of earlyFinished) finish(id);
     }
     room.startGame(game);
+  }
+
+  private launchSnowfield(room: BaseRoom, players: RoomMember[]): void {
+    const access = this.o.christmasSnowfield, permit = access?.checkRoom(room, players, undefined, true);
+    if (!access || !permit?.ok) return;
+    const lease: SnowfieldLease = permit.lease;
+    let accepted: number | null = null;
+    const early: ({ type: "finish"; won: boolean } | { type: "stop" })[] = [];
+    const finish = (won: boolean) => { if (accepted === null) early.push({ type: "finish", won }); else access.fightFinished(lease, accepted, won); };
+    const stop = () => { if (accepted === null) { early.push({ type: "stop" }); return; } access.fightStopped(lease, accepted); if (room.game?.id === accepted) room.onGameStopped(); };
+    let game: ReturnType<NonNullable<FightEngine["startPve"]>> = null;
+    try { game = this.o.fight.startPve?.({ roomId: room.RoomId, roomType: 40, gameType: room.GameType, timeType: 3, pveId: room.MapId,
+      hardLevel: 0, levelLimits: 0, currentFloor: 0, players, onFinished: finish, onStopped: stop }) ?? null; }
+    catch { access.startFailed(lease, "战斗引擎技术故障，尚未开始。"); }
+    if (!game) { access.startFailed(lease, "战斗引擎未接受挑战。"); room.IsPlaying = false; room.sendCancelPickUp(); return; }
+    accepted = game.id; access.fightAccepted(lease, game);
+    if (!early.some(e => e.type === "stop")) room.startGame(game);
+    for (const e of early) e.type === "finish" ? finish(e.won) : stop();
   }
 
   private launch(rooms: BaseRoom[], red: RoomMember[], blue: RoomMember[], roomType: number, gameType: number, timeType: number, mapId: number): void {

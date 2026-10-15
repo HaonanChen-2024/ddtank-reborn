@@ -1,4 +1,5 @@
-import { commandChristmas, readChristmasProjection, type ChristmasEnvelope } from "./christmas-native.js";
+import { commandChristmas, type ChristmasEnvelope } from "./christmas-native.js";
+import { commandSnowfield, isSnowfieldAction, readSnowfieldPair, type SnowfieldEnvelope } from "./christmas-snowfield.js";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { sql } from "drizzle-orm";
@@ -45,7 +46,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
   nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
   nativeExchangeAction?: ExchangeEnvelope;
-  nativeChristmasAction?: ChristmasEnvelope;
+  nativeChristmasAction?: ChristmasEnvelope | SnowfieldEnvelope;
   nativeDevilAction?: { requestId: string; effects: DevilEffect[] };
   nativeCaveLootAction?: { requestId: string; effects: CaveEffect[] };
 }
@@ -131,7 +132,9 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
   // Never add internal inventory reads to context(): old actions hold the wallet lock there.
   if (loadExchange) {
     result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);
-    result.nativeChristmas = await readChristmasProjection(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+    const christmas = await readSnowfieldPair(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+    result.nativeChristmas = christmas.snowman;
+    result.nativeChristmasSnowfield = christmas.snowfield;
   }
   return result;
 }
@@ -308,14 +311,22 @@ export async function activityAction(app: AppCtx, claims: Claims, characterId: n
   if (activityId === "christmas-native") {
     await owner(app, claims, characterId, new Date());
     // Never hold an API wallet transaction while waiting for the actual game queue.
-    const committed = await commandChristmas(app, claims, characterId, requestId, action);
+    const committed = isSnowfieldAction(action) ? await commandSnowfield(app, claims, characterId, requestId, action)
+      : await commandChristmas(app, claims, characterId, requestId, action);
     for (let attempt = 0; attempt < 2; attempt++) {
       const result = await activitySnapshot(app, claims, characterId, false);
-      const view = committed.view.revision === result.revision && committed.view.day === result.day ? committed.view
-        : await readChristmasProjection(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+      const pair = await readSnowfieldPair(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+      const view = pair.snowman;
       if (view.revision !== result.revision || view.day !== result.day) continue;
-      const synchronizeOnly = committed.replayed || !view.available || committed.view.revision !== view.revision || committed.view.day !== view.day;
-      return { ...result, nativeChristmas: view, message: committed.message, mailedCount: committed.mailedCount,
+      const committedView = "pair" in committed ? committed.pair.snowman : committed.view;
+      let synchronizeOnly = committed.replayed || committedView.revision !== view.revision || committedView.day !== view.day;
+      if ("pair" in committed) {
+        const field = pair.snowfield, effect = committed.nativeChristmasAction?.effects[0];
+        synchronizeOnly ||= !field.available || !effect || effect.committedRevision !== result.revision
+          || effect.committedSceneRevision !== field.scene.revision || committed.pair.snowfield.scene.revision !== field.scene.revision
+          || action.type === "enter" && !field.scene.canResume || action.type === "challenge" && !field.attempt.canResume;
+      } else synchronizeOnly ||= !view.available;
+      return { ...result, nativeChristmas: view, nativeChristmasSnowfield: pair.snowfield, message: committed.message, mailedCount: committed.mailedCount,
         ...(synchronizeOnly ? { replayed: true } : { nativeChristmasAction: committed.nativeChristmasAction }) };
     }
     throw new ActivityError("圣诞已由原请求编号结算，当前投影暂不一致，请保留同一请求编号重试。", 503);

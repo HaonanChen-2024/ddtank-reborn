@@ -40,6 +40,10 @@ export interface PveGameOptions extends Omit<GameOptions, "mapId"> {
   placeholderMapId?: number;
   /** World boss remaining HP (server-wide pool): a boss created with config.IsWorldBoss starts at min(NPC blood, this) — 6600 PVEGame.CreateBoss WorldbossBood. */
   worldBossBlood?: number;
+  /** Opt-in local challenges must fail closed instead of substituting generic scripts. Default preserves donor behavior. */
+  strictScripts?: boolean;
+  /** Activity settlement is the only award owner for these explicitly configured challenges. */
+  suppressDefaultRewards?: boolean;
 }
 
 interface PlayerPve {
@@ -60,6 +64,8 @@ export class PveGame extends BaseGame {
   readonly data: PveData;
   readonly drops: PveDrops;
   private readonly logFn: (m: string) => void;
+  readonly strictScripts: boolean;
+  private readonly suppressDefaultRewards: boolean;
   /** m_livings: SimpleNpc & other non-turned livings */
   readonly livings: Living[] = [];
   /** m_turnQueue: players + bosses */
@@ -117,6 +123,8 @@ export class PveGame extends BaseGame {
     super({ ...o, mapId: placeholder, frozenWind: o.frozenWind ?? false });
     this.info = o.pveInfo;
     this.data = o.data;
+    this.strictScripts = o.strictScripts === true;
+    this.suppressDefaultRewards = o.suppressDefaultRewards === true;
     this.worldBossBlood = o.worldBossBlood;
     this.drops = o.drops ?? {};
     this.logFn = o.log ?? (() => {});
@@ -148,6 +156,7 @@ export class PveGame extends BaseGame {
   }
   reportMissing(kind: string, name: string): void {
     this.missingScripts.push({ kind, name });
+    if (this.strictScripts) throw new Error(`Required ${kind} script missing: ${name}`);
     this.log(`pve: missing ${kind} script ${name} -> generic AI`);
   }
   /** every C# script call site is wrapped in try/catch (PVEGame.cs passim) */
@@ -161,10 +170,15 @@ export class PveGame extends BaseGame {
       const msg = `pve script ${what} error: ${(e as Error)?.message ?? e}${where}`;
       if (this.scriptErrors.length < 200) this.scriptErrors.push(msg);
       this.log(msg);
+      if (this.strictScripts) { this.IsWin = false; this.stop(); throw e; }
       return fallback;
     } finally {
       setScriptRng(null);
     }
+  }
+  override onActionError(e: unknown): void {
+    if (this.strictScripts) { this.IsWin = false; this.stop(); throw e; }
+    super.onActionError(e);
   }
   raw(code: number, livingId: number, body: RawField[]): void {
     this.emit({ cmd: "RAW", code, livingId, body });
@@ -586,6 +600,7 @@ export class PveGame extends BaseGame {
 
   /** PVEGame.CalculateExperience (PVEGame.cs:365) */
   calculateExperience(p: Player): number {
+    if (this.suppressDefaultRewards) return 0;
     if (this.TotalKillCount === 0) return 1;
     const gap = Math.abs(p.grade - this.TotalNpcGrade / this.TotalKillCount);
     if (gap >= 7) return 1;
@@ -619,6 +634,7 @@ export class PveGame extends BaseGame {
     const isEndSession = this.hasNextSession();
     if (!this.IsWin || !isEndSession) cards = 0;
     if (this.IsWin && !isEndSession && !this.isTrainer()) cards = 2; // PVEGame.cs:798 (isEndSession = HasNextSession)
+    if (this.suppressDefaultRewards) cards = 0;
     this.BossCardCountValue = cards;
     this.showCardsSent = false;
     if (cards > 0) this.bossCards = new Array(9).fill(0);
@@ -654,7 +670,7 @@ export class PveGame extends BaseGame {
     if ((this.state as number) !== GameState.GameOver) return;
     this.state = GameState.ALLSessionStopped;
     this.runScript("game.OnGameOverAllSession", () => this.gameAI.OnGameOverAllSession());
-    const n = !this.IsWin ? 0 : this.roomType === eRoomType.Dungeon ? 2 : 1;
+    const n = this.suppressDefaultRewards || !this.IsWin ? 0 : this.roomType === eRoomType.Dungeon ? 2 : 1;
     const players = this.fightPlayers.map((p) => {
       const x = this.pp.get(p)!;
       x.canTakeOut = n;
@@ -730,6 +746,7 @@ export class PveGame extends BaseGame {
 
   /** SimpleNpc.GetDropItemInfo: NPCDrop for the player whose turn it is */
   npcDrop(npc: SimpleNpc): void {
+    if (this.suppressDefaultRewards) return;
     const cur = this.currentLiving;
     if (!(cur instanceof Player) || !npc.npcInfo.DropId) return;
     const items = this.drops.npcDrop?.(npc.npcInfo.DropId) ?? null;
@@ -754,6 +771,7 @@ export class PveGame extends BaseGame {
         }
         return this.drain();
       case "TAKE_CARD":
+        if (this.suppressDefaultRewards) return this.drain();
         this.now = Math.max(this.now, now);
         if (this.pp.get(p)!.canTakeOut > 0) this.takeCard(p, c.index, false);
         else if ((c.index < 0 || c.index >= this.cards.length) && !this.showCardsSent) {
@@ -1144,7 +1162,10 @@ export class PveGame extends BaseGame {
       k++;
       const mi = this.data.mission(id);
       if (mi) this.Misssions.set(k, mi);
-      else this.log(`pve: Mission_Info ${id} not found`);
+      else {
+        if (this.strictScripts) throw new Error(`Required Mission_Info ${id} not found`);
+        this.log(`pve: Mission_Info ${id} not found`);
+      }
     }
   }
   /** BaseGame.SetMap (BaseGame.cs:3037) */
@@ -1167,7 +1188,10 @@ export class PveGame extends BaseGame {
     for (const id of ids ?? []) {
       const n = this.data.npc(id);
       if (n) this.AddLoadingFile(2, n.ResourcesPath, n.ModelID);
-      else this.log(`pve: LoadResources npc ${id} missing`);
+      else {
+        if (this.strictScripts) throw new Error(`Required resource NPC ${id} missing`);
+        this.log(`pve: LoadResources npc ${id} missing`);
+      }
     }
   }
   LoadNpcGameOverResources(ids: number[]): void {
@@ -1207,6 +1231,7 @@ export class PveGame extends BaseGame {
   private npcInfoOrThrow(id: number): NpcInfo {
     const n = this.data.npc(id);
     if (!n) throw new Error(`NPC_Info ${id} not found`);
+    if (this.strictScripts && !n.Script) this.reportMissing("brain", `(NPC_Info ${id})`);
     return n;
   }
   /** CreateNpc(npcId, x, y, type[, direction][, action][, config]) (PVEGame.cs:324-363) */

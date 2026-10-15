@@ -2,6 +2,7 @@ import { updateRank } from "./rank.js";
 import cors from "@fastify/cors";
 import formbody from "@fastify/formbody";
 import multipart from "@fastify/multipart";
+import { join } from "node:path";
 import { app as appTables, createDb, game, migrateDb, seedDatabase, type DbHandle } from "@ddt/db";
 import { parseDotNetRsaXml, rsaKeyFromPem, type RsaPrivateKey } from "@ddt/protocol";
 import { count, eq } from "drizzle-orm";
@@ -70,7 +71,9 @@ export async function buildApp(o: BuildOptions = {}): Promise<{ app: FastifyInst
 
   const storage = createStorage(cfg);
   const overlay = new CiTree(storage.kind === "local" ? cfg.UPLOAD_DIR : "");
-  const resources = new ResourceIndex([overlay, new CiTree(cfg.RESOURCE_DIR)]);
+  // Installer-owned activity scene files share the deployment journal, apart from client SWFs.
+  const nativeResources = new CiTree(cfg.FLASH_OVERLAY_DIR ? join(cfg.FLASH_OVERLAY_DIR, "native-resources") : "");
+  const resources = new ResourceIndex([overlay, nativeResources, new CiTree(cfg.RESOURCE_DIR)]);
   const cache = new TemplateCache(h, { snapshotDir: cfg.REQUEST_SNAPSHOT_DIR, log: (m) => log.info(m) });
 
   const ctx: AppCtx = { cfg, h, cache, rsa, storage, resources, startedAt: new Date(), log };

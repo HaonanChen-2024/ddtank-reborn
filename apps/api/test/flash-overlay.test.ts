@@ -30,6 +30,12 @@ beforeAll(async () => {
   mkdirSync(flashDir, { recursive: true });
   mkdirSync(overlayDir, { recursive: true });
   mkdirSync(resourceDir, { recursive: true });
+  for (const sex of ["M", "F"]) {
+    const rel = `image/scene/christmas/workshop/cloth/${sex}/cloth/1.png`;
+    for (const [root, body] of [[resourceDir, pngWithTail], [join(overlayDir, "native-resources"), png], ...(sex === "F" ? [[join(temp, "uploads"), pngWithTail]] : [])] as const) {
+      const file = join(root as string, rel); mkdirSync(join(file, ".."), { recursive: true }); writeFileSync(file, body as Buffer);
+    }
+  }
   writeFileSync(join(resourceDir, "valid-tail.png"), pngWithTail);
   writeFileSync(join(resourceDir, "truncated.png"), png.subarray(0, png.length - 12));
   const bad = Buffer.from(png); bad[29] = bad[29]! ^ 1;
@@ -70,6 +76,13 @@ afterAll(async () => {
 });
 
 describe("deployment Flash overlay", () => {
+  it("serves journal-owned native scene resources below uploads, without changing the unset-overlay fallback", async () => {
+    const rel = "/resource/image/scene/christmas/workshop/cloth/M/cloth/1.png";
+    expect((await deployed.inject({ url: rel })).rawPayload).toEqual(png);
+    expect((await defaults.inject({ url: rel })).rawPayload).toEqual(pngWithTail);
+    expect((await deployed.inject({ url: rel.replace("/M/", "/F/") })).rawPayload).toEqual(pngWithTail);
+    expect((await deployed.inject({ url: rel.toLowerCase() })).rawPayload).toEqual(png);
+  });
   it("serves a valid donor PNG with trailing bytes and rejects corrupt or unterminated PNG data", async () => {
     expect((await deployed.inject({ url: "/resource/valid-tail.png" })).rawPayload).toEqual(pngWithTail);
     for (const path of ["bad-crc.png", "truncated.png"]) {

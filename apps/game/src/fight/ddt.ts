@@ -13,6 +13,7 @@ import type { FightEngine, FightGame, StartGameOptions, StartPveOptions } from "
 import type { WorldBossAttempt } from "../game/world-boss.js";
 import { WorldBossSettlementGate } from "./world-boss-settlement.js";
 import { unlockDungeonPvePermission } from "../game/pve-permissions.js";
+import { assertChristmasPveReady, christmasPveDefinition, consumeChristmasPveAdmission, createChristmasPveOverlay } from "../game/christmas-pve.js";
 
 export interface DdtFightOptions {
   assets?: FightAssets;
@@ -102,7 +103,11 @@ export class DdtFightEngine implements FightEngine {
 
   /** GameMgr.StartPVEGame (Games/GameMgr.cs:140-165) */
   startPve(s: StartPveOptions): FightGame | null {
-    const pv = this.o.pve;
+    const local = christmasPveDefinition(s.pveId);
+    // The room protocol is not admission. All room40 starts remain closed until the scene owner binds a permit.
+    if ((s.roomType === 40 && (!local || !consumeChristmasPveAdmission(s))) || (local && s.roomType !== 40)) return null;
+    const base = this.o.pve;
+    const pv = base && local ? { ...base, ...createChristmasPveOverlay(base) } : base;
     if (!pv) return null;
     const info = pv.pveInfo(s.pveId, s.roomType, s.levelLimits);
     if (!info) {
@@ -111,6 +116,7 @@ export class DdtFightEngine implements FightEngine {
     }
     let starting: DdtGame | undefined;
     try {
+      if (local) assertChristmasPveReady(local, this.assets);
       const id = gameIdSeq++;
       const boss = s.roomType === 14 ? this.o.worldBossWindow?.(s.pveId) : undefined;
       if (s.roomType === 14 && this.o.worldBossWindow && !boss) return null;
@@ -119,10 +125,12 @@ export class DdtFightEngine implements FightEngine {
       const game = new PveGame({
         id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, assets: this.assets, players: specs, seed: this.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(),
         pveInfo: info, hardLevel: s.hardLevel, currentFloor: s.currentFloor, data: pv.data,
+        ...(local ? { strictScripts: true, suppressDefaultRewards: true, placeholderMapId: local.mapId } : {}),
         worldBossBlood: s.roomType === 14 ? (boss?.blood ?? this.o.worldBossBlood?.()) : undefined,
-        drops: { copyDrop: (mid, user) => pv.drop("copy", mid, user), npcDrop: (did) => pv.drop("npc", did) },
+        drops: local ? {} : { copyDrop: (mid, user) => pv.drop("copy", mid, user), npcDrop: (did) => pv.drop("npc", did) },
         log: (m) => this.o.log?.(m),
         ...gameHooks(this, s.roomType, members),
+        ...(local ? { boxDrop: () => null } : {}),
       });
       const g = new DdtGame(id, game.map.info.id, { roomId: s.roomId, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId: s.pveId, red: s.players, blue: [], onStopped: s.onStopped }, this, game, s, boss ? { windowKey: boss.key, fightId: id } : undefined);
       starting = g;
@@ -132,7 +140,7 @@ export class DdtFightEngine implements FightEngine {
       return g;
     } catch (e) {
       // A first-tick failure is not a successful boss admission. Do not leave an orphan engine game.
-      if (s.roomType === 14 && starting) {
+      if ((s.roomType === 14 || (s.roomType === 40 && local)) && starting) {
         this.games.delete(starting.id);
         try { starting.stop(); } catch { /* Preserve the original startup error below. */ }
       }
@@ -169,6 +177,7 @@ export class DdtFightEngine implements FightEngine {
         g.tick(now);
       } catch (e) {
         this.o.log?.(`fight game ${g.id} update error: ${(e as Error).stack}`);
+        if (g.game instanceof PveGame && g.game.strictScripts) g.stop();
       }
     }
     if (this.games.size === 0 && this.timer) {
@@ -311,6 +320,7 @@ class DdtGame implements FightGame {
     // PaymentTakeCardCommand.cs (114): pay Money for an extra card flip, then TakeCard like a normal pick
     // (index in range) or an auto pick (out of range, same fallback as 98/130).
     if (sub === 114) {
+      if (this.s.roomType === 40 && this.game instanceof PveGame && this.game.strictScripts) return;
       const index = pkt.readByte();
       if (this.engine.o.payTakeCard?.(from)) {
         const left = this.canTakeOut.get(from.id) ?? 0;

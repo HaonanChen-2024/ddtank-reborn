@@ -18,6 +18,7 @@ export interface ActivitySnapshot {
 export interface ActivityResponse extends ActivitySnapshot {
   characterId: number; message?: string; mailedCount?: number; mailIds?: number[]; replayed?: boolean;
   nativeChristmas?: unknown;
+  nativeChristmasSnowfield?: unknown;
   nativeChristmasAction?: { requestId: string; effects: unknown[] };
   nativeCaveLoot?: unknown;
   nativeCaveLootAction?: { requestId: string; effects: unknown[] };

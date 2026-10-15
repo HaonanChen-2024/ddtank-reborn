@@ -17,6 +17,7 @@ import { registerMarriage } from "./marriage.js";
 import { registerFarm } from "./farm.js";
 import { registerAuction } from "./auction.js";
 import { registerActivities } from "./activities.js";
+import { registerChristmasSnowfield } from "../game/activity-christmas-snowfield.js";
 
 export function createRegistry(): HandlerRegistry {
   const r = new HandlerRegistry();
@@ -38,5 +39,6 @@ export function createRegistry(): HandlerRegistry {
   registerFarm(r);
   registerAuction(r);
   registerActivities(r);
+  registerChristmasSnowfield(r);
   return r;
 }

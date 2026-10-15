@@ -1,4 +1,5 @@
 import { actNativeChristmas, readNativeChristmas } from "./game/activity-christmas-native.js";
+import { christmasSnowfieldOwner } from "./game/activity-christmas-snowfield.js";
 /**
  * GameServer (Game.Server/GameServer.cs Start/Stop + Center.Server's online registry): boots caches, listeners,
  * timers (DB autosave, ping, speed-heartbeat watchdog, server heartbeat) and the admin channel.
@@ -213,6 +214,15 @@ export class GameServer {
     const zoneId = templates.server?.ZoneId ?? 1;
     const zoneName = templates.server?.ZoneName ?? cfg.SERVER_NAME ?? "DDTank";
     const rooms = new RoomMgr({ maxRooms: templates.server?.Room ?? cfg.MAX_ROOMS, fight, lang: (k, ...a) => lang.t(k, ...a), bots, botFallbackSec: cfg.BOT_FALLBACK_SEC,
+      christmasSnowfield: {
+        canCreateRoom: p => !!this.ctx && christmasSnowfieldOwner(this.ctx).canCreateRoom(p),
+        roomCreated: (p, r) => christmasSnowfieldOwner(this.ctx).roomCreated(p, r),
+        checkRoom: (r, p, s, start) => christmasSnowfieldOwner(this.ctx).checkRoom(r, p, s, start),
+        fightAccepted: (l, g) => christmasSnowfieldOwner(this.ctx).fightAccepted(l, g),
+        fightFinished: (l, id, won) => christmasSnowfieldOwner(this.ctx).fightFinished(l, id, won),
+        fightStopped: (l, id) => christmasSnowfieldOwner(this.ctx).fightStopped(l, id),
+        startFailed: (l, why) => christmasSnowfieldOwner(this.ctx).startFailed(l, why),
+      },
       worldBossAccess: {
         check: (players, pveId) => this.ctx ? eventsRuntime(this.ctx).bossAccess.check(players, pveId) : { error: "世界 BOSS 当前不可挑战。" },
         started: (key, players, id) => eventsRuntime(this.ctx!).bossAccess.started(key, players, id),
@@ -378,6 +388,10 @@ export class GameServer {
         !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
       activityChristmasAction: (body: unknown) => actNativeChristmas(this.ctx, body, [...this.clients].find(c =>
         !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
+      activityChristmasSnowfieldRead: (body: unknown) => christmasSnowfieldOwner(this.ctx).read(body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
+      activityChristmasSnowfieldAction: (body: unknown) => christmasSnowfieldOwner(this.ctx).command(body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
       activityExchangeRead: (body: unknown) => readNativeExchange(this.ctx, body, [...this.clients].find(c =>
         !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
       activityExchangeAction: (body: unknown) => actNativeExchange(this.ctx, body, [...this.clients].find(c =>
@@ -386,6 +400,7 @@ export class GameServer {
   }
 
   async stop(): Promise<void> {
+    if (this.ctx) { christmasSnowfieldOwner(this.ctx).beginShutdown(); await christmasSnowfieldOwner(this.ctx).drain(); }
     for (const t of this.timers) clearInterval(t);
     if (this.ctx) eventsRuntime(this.ctx).scheduler.stopTimer();
     this.ctx?.rooms.stop();
@@ -398,6 +413,7 @@ export class GameServer {
       new Promise((r) => (this.policy ? this.policy.close(r) : r(null))),
       new Promise((r) => (this.admin ? this.admin.close(r) : r(null))),
     ]);
+    if (this.ctx) await christmasSnowfieldOwner(this.ctx).drain();
     if (this.ownsDb) await this.ctx.db.close();
   }
 }

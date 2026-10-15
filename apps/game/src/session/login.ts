@@ -20,6 +20,7 @@ import { checkVipExpire } from "../game/vip.js";
 import * as Out from "../packets/out.js";
 import { unixSeconds } from "../util/time.js";
 import { withWorldBossAdmission } from "../game/world-boss.js";
+import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
 import type { GameClient } from "./client.js";
 import type { ServerContext, TicketValidator } from "./context.js";
 import type { DbHandle } from "@ddt/db";
@@ -188,6 +189,8 @@ export function quitPlayer(ctx: ServerContext, p: GamePlayer): Promise<void> {
 }
 
 async function doQuit(ctx: ServerContext, p: GamePlayer): Promise<void> {
+  // Seal actual outcome producers and drain their detached ledger before any old-profile final save.
+  await christmasSnowfieldOwner(ctx).beforeQuit(p);
   p.isActive = false;
   const leavingGame = p.currentRoom?.game;
   try {

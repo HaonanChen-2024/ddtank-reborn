@@ -136,7 +136,8 @@ async function wallet(db: Database, id: number, write: boolean): Promise<Christm
 }
 async function saved(db: Database, id: number) {
   const rows = await db.select().from(app.ActivityStates).where(eq(app.ActivityStates.UserID, id));
-  return { native: rows.find(r => r.Activity === CHRISTMAS_ID)?.State, reference: rows.find(r => r.Activity === "reference")?.State };
+  return { native: rows.find(r => r.Activity === CHRISTMAS_ID)?.State, reference: rows.find(r => r.Activity === "reference")?.State,
+    snowfield: rows.find(r => r.Activity === "christmas-snowfield")?.State };
 }
 function view(ctx: ServerContext, req: ChristmasRead, s: Awaited<ReturnType<typeof saved>>, w: ChristmasWallet, now: Date, client?: GameClient) {
   const p = client?.player, online = !!p && !client!.closed && !p.quitting && p.isActive && ctx.world.get(req.characterId) === p;
@@ -195,7 +196,7 @@ export function actNativeChristmas(ctx: ServerContext, value: unknown, client?: 
         await db.insert(app.ActivityStates).values({ UserID: req.characterId, Activity: CHRISTMAS_ID, State: next }).onConflictDoUpdate({ target: [app.ActivityStates.UserID, app.ActivityStates.Activity], set: { State: next } });
         await db.update(app.ActivityWallet).set({ Points: w.Points - cost, Revision: w.Revision + 1 }).where(eq(app.ActivityWallet.UserID, req.characterId));
         await db.insert(app.ActivityActions).values({ UserID: req.characterId, RequestID: req.requestId, Signature: signature, Result: { message, mailedCount } });
-        return { state: { native: next, reference: req.action.type === "craft" ? reference : s.reference }, wallet: { ...w, Points: w.Points - cost, Revision: w.Revision + 1 }, message, mailedCount, replayed: false, effect };
+        return { state: { native: next, reference: req.action.type === "craft" ? reference : s.reference, snowfield: s.snowfield }, wallet: { ...w, Points: w.Points - cost, Revision: w.Revision + 1 }, message, mailedCount, replayed: false, effect };
       });
       const projectedAt = ctx.now(), projected = view(ctx, req, result.state, result.wallet, projectedAt, client);
       if (!result.replayed && result.mailedCount && client?.player) { try { client.player.send(Out.mailResponse(req.characterId, 1)); } catch { ctx.log.warn("native Christmas committed mail notification failed"); } }
@@ -204,3 +205,8 @@ export function actNativeChristmas(ctx: ServerContext, value: unknown, client?: 
     });
   });
 }
+
+// The snowfield owner reads both projections under one queue/persistence/DB snapshot.
+// Existing snowman endpoints retain their original false snowfield projection.
+export { auth as christmasOwnerAuth, wallet as christmasOwnerWallet, saved as christmasOwnerSaved,
+  view as christmasOwnerView, queued as christmasOwnerQueued };

@@ -11,24 +11,37 @@ import { q } from "../src/lib/db.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction } from "../src/activities/types.js";
 import { validChristmasView } from "../src/activities/christmas-native.js";
+import { validSnowfieldPair } from "../src/activities/christmas-snowfield.js";
+import { ChristmasSnowfieldOwner, readSnowfieldState } from "../../game/src/game/activity-christmas-snowfield.js";
+import { ItemInfo } from "../../game/src/game/item.js";
 import { actNativeChristmas, readNativeChristmas, readChristmasState } from "../../game/src/game/activity-christmas-native.js";
 import { christmasFixture, christmasRoot, seedChristmasTemplates } from "../../game/test/native-christmas-fixture.js";
 const temp=mkdtempSync(join(tmpdir(),"ddt-a16-http-")),secret="native-christmas-http-tests-only";
 let h:DbHandle,built:Awaited<ReturnType<typeof buildApp>>,f:Awaited<ReturnType<typeof christmasFixture>>;
 let mode="normal";const calls:string[]=[];
+let snowfield:ChristmasSnowfieldOwner;
 const fixtures:{label:string;snapshot:ActivityResult;action?:ActivityAction}[]=[];
 const headers=()=>({authorization:`Bearer ${signJwt({sub:916,name:"native-exchange-916",role:"player"},secret,3600)}`});
 const post=(action:ActivityAction,requestId=randomUUID(),activity="christmas-native",characterId=916)=>built.app.inject({method:"POST",url:`/api/account/activities/${activity}/action`,headers:headers(),payload:{characterId,requestId,action}});
-async function snapshot(label?:string){const r=await built.app.inject({url:"/api/account/activities?characterId=916",headers:headers()});expect(r.statusCode,r.body).toBe(200);const s=r.json<ActivityResult>();expect(validChristmasView(s.nativeChristmas),JSON.stringify(s.nativeChristmas)).toBe(true);if(label)fixtures.push({label,snapshot:s});return s;}
+async function snapshot(label?:string){const r=await built.app.inject({url:"/api/account/activities?characterId=916",headers:headers()});expect(r.statusCode,r.body).toBe(200);const s=r.json<ActivityResult>();expect(validChristmasView(s.nativeChristmas,true),JSON.stringify(s.nativeChristmas)).toBe(true);expect(validSnowfieldPair({snowman:s.nativeChristmas,snowfield:s.nativeChristmasSnowfield}),JSON.stringify(s.nativeChristmasSnowfield)).toBe(true);if(label)fixtures.push({label,snapshot:s});return s;}
 const craftAction=async(count=1,marked=false):Promise<ActivityAction>=>({type:"craft",count,marked,choice:(await snapshot()).nativeChristmas!.stateToken!});
 async function fresh(a:ActivityAction,label:string){const r=await post(a);expect(r.statusCode,r.body).toBe(200);const s=r.json<ActivityResult>();expect(validChristmasView(s.nativeChristmas),JSON.stringify(s.nativeChristmas)).toBe(true);expect(s.nativeChristmasAction!.effects).toHaveLength(1);fixtures.push({label,snapshot:s,action:a});return s;}
 const setNative=async(value:unknown)=>h.db.insert(app.ActivityStates).values({UserID:916,Activity:"christmas-native",State:value}).onConflictDoUpdate({target:[app.ActivityStates.UserID,app.ActivityStates.Activity],set:{State:value}});
 const stored=async()=>({wallets:await q(h,sql`SELECT * FROM app."ActivityWallet" ORDER BY "UserID"`),states:await q(h,sql`SELECT * FROM app."ActivityStates" ORDER BY "UserID","Activity"`),receipts:await q(h,sql`SELECT * FROM app."ActivityActions" ORDER BY "UserID","RequestID"`),goods:await q(h,sql`SELECT * FROM player."Sys_Users_Goods" ORDER BY "ItemID"`),mails:await q(h,sql`SELECT * FROM player."User_Messages" ORDER BY "ID"`)});
 beforeAll(async()=>{h=await createDb("pglite:memory");await migrateDb(h);await seedChristmasTemplates(h);built=await buildApp({db:h,logger:false,skipTemplates:true,env:{},config:{NODE_ENV:"test",DB_MIGRATE:false,DB_SEED_IF_EMPTY:false,JWT_SECRET:secret,RSA_USE_VENDOR_KEY:false,RSA_PRIVATE_KEY:"",GAME_INTERNAL_URL:"http://a16-tests.invalid",GAME_INTERNAL_TOKEN:"local-tests-only",FLASH_DIR:join(temp,"flash"),FLASH_OVERLAY_DIR:"",RESOURCE_DIR:join(temp,"resource"),UPLOAD_DIR:join(temp,"uploads"),REQUEST_SNAPSHOT_DIR:join(temp,"snapshots"),RUFFLE_DIR:join(temp,"ruffle"),CELEB_REBUILD_MIN:0}});});
 beforeEach(async()=>{mode="normal";calls.length=0;await h.db.execute(sql`TRUNCATE app."ActivityActions",app."ActivityStates",app."ActivityWallet",app."EventClaims",member."Accounts",player."Sys_Users_Detail",player."Sys_Users_Goods",player."User_Messages"`);f=await christmasFixture(h);f.ctx.now=()=>new Date();
+  snowfield=new ChristmasSnowfieldOwner(f.ctx,{isolatedTestFixture:true,ready:true});
   vi.stubGlobal("fetch",async(url:string,options:RequestInit)=>{const path=new URL(url).pathname;calls.push(path);if(path==="/mail-notice")return Response.json({sent:true});if(!path.startsWith("/activity-christmas/"))return new Response("unused",{status:503});if(mode==="timeout")throw new Error("simulated timeout");if(mode==="non200")return new Response("upstream",{status:500});if(mode==="malformed")return Response.json({ok:true,value:{invalid:true}});if(mode==="reject")return Response.json({ok:false,status:409,message:"已确定拒绝"});const body=JSON.parse(options.body as string);const result=path.endsWith("/read")?await readNativeChristmas(f.ctx,body,f.client):await actNativeChristmas(f.ctx,body,f.client);if(mode==="after-commit"&&path.endsWith("/action")){mode="normal";throw new Error("response lost after commit");}if(mode==="concurrent"&&path.endsWith("/action")){await h.db.update(app.ActivityWallet).set({Revision:2}).where(eq(app.ActivityWallet.UserID,916));mode="normal";}if(mode==="private-leak"&&result.ok)Object.assign(result.value,{privateState:{bad:true}});return Response.json(result);});
 });
 afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();vi.restoreAllMocks();});
+function pairedHttp(loseFirstAction=false){
+  const old=globalThis.fetch;let lose=loseFirstAction;
+  vi.stubGlobal("fetch",async(url:string,options:RequestInit)=>{
+    const path=new URL(url).pathname;if(!path.startsWith("/activity-christmas-snowfield/"))return old(url,options);
+    calls.push(path);const body=JSON.parse(String(options.body));const r=path.endsWith("/read")?await snowfield.read(body,f.client):await snowfield.command(body,f.client);
+    if(lose&&path.endsWith("/action")){lose=false;throw Error("committed snowfield response lost");}return Response.json(r);
+  });
+}
 afterAll(async()=>{if(process.env.A16_PUBLIC_FIXTURES)writeFileSync(process.env.A16_PUBLIC_FIXTURES,JSON.stringify({source:"actual API HTTP + real GameClient/PGlite synthetic fixtures",fixtures},null,2)+"\n");await built?.app.close();await h?.close();const base=realpathSync(tmpdir()),target=realpathSync(temp),rel=relative(base,target);if(!rel||rel.startsWith("..")||isAbsolute(rel))throw new Error("Unsafe temporary directory");rmSync(target,{recursive:true,force:true});});
 describe("A16 authenticated API to actual game owner",()=>{
   it("GET is read-only and publishes full original-window state",async()=>{const b=await stored(),s=await snapshot("online-ready");expect(await stored()).toEqual(b);expect(s.nativeChristmas!.snowman.balance).toBe(30);expect(s.nativeChristmas!.snowfield.available).toBe(false);expect(s.activities).toHaveLength(17);});
@@ -50,4 +63,40 @@ describe("A16 authenticated API to actual game owner",()=>{
   });
   it("future/corrupt native is read-only unavailable without affecting old 17",async()=>{for(const [label,value] of [["future",{version:8,keep:true}],["corrupt",{...readChristmasState(undefined,new Date()),freeUsed:31}]] as const){await setNative(value);const before=await stored(),s=await snapshot(label);expect(s.nativeChristmas!.available).toBe(false);expect(await stored()).toEqual(before);expect(s.activities).toHaveLength(17);}});
   it("UTC expires unspent task allowance but keeps count/XP/claim state",async()=>{await fresh(await craftAction(10),"before-UTC-roll");vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date(Date.now()+86400000));const before=await stored(),s=await snapshot("UTC-roll");expect(s.nativeChristmas!.snowman).toMatchObject({count:1,exp:0,balance:0,usedToday:0});expect(s.nativeChristmas!.dailyActionsRemaining).toBe(500);expect(await stored()).toEqual(before);});
+});
+
+describe("F2 HTTP with actual GameClient queue and isolated snowfield owner",()=>{
+  it("GET uses the single paired authority, stays read-only and mirrors entry",async()=>{
+    pairedHttp();const before=await stored(),s=await snapshot("snowfield-online-pair");
+    expect(await stored()).toEqual(before);expect(calls).toEqual(["/activity-exchange/read","/activity-christmas-snowfield/read"]);
+    expect(s.nativeChristmasSnowfield).toMatchObject({available:true,entry:{available:true},ticket:{qualifiedToday:true,issuedToday:false},scene:{state:"outside",people:0},challenges:[{localPveId:164001,battleMapId:1201},{localPveId:164002,battleMapId:1201},{localPveId:164003,battleMapId:1201}]});
+    expect(s.nativeChristmas!.snowfield).toEqual(s.nativeChristmasSnowfield!.entry);
+  });
+  it("lost enter response retries one UUID without second ticket, spend or fresh effect",async()=>{
+    pairedHttp(true);const s=await snapshot(),action={type:"enter",choice:s.nativeChristmasSnowfield!.stateToken!},id=randomUUID();
+    expect((await post(action,id)).statusCode).toBe(503);const before=await stored(),r=await post(action,id);expect(r.statusCode,r.body).toBe(200);
+    const result=r.json<ActivityResult>();expect(result.replayed).toBe(true);expect(result.nativeChristmasAction).toBeUndefined();expect(result.nativeChristmasSnowfield).toMatchObject({ticket:{issuedToday:true,valid:true},scene:{state:"loading",canResume:true,people:1}});expect(await stored()).toEqual(before);fixtures.push({label:"snowfield-enter-replay-resume",snapshot:result,action});
+    await snowfield.enterScene(f.client,f.p,{x:999,y:999});const entered=await snapshot("snowfield-inside");expect(entered.nativeChristmasSnowfield!.scene).toMatchObject({state:"inside",canResume:false,people:1});
+  });
+  it("real entry and timed movement allow a durable challenge, with explicit resume only",async()=>{
+    // A real inventory seat with an explicit synthetic weapon template; this test does not run a fight.
+    const weapon=ItemInfo.createFromTemplate({...f.ctx.templates.findItem(11019)!,TemplateID:7001,CategoryID:7,CanEquip:true},1,0,new Date());
+    expect(f.p.equipBag.addItemTo(weapon,6)).toBe(true);
+    pairedHttp();let time=Date.now();f.ctx.now=()=>new Date(time);let s=await snapshot();const enter={type:"enter",choice:s.nativeChristmasSnowfield!.stateToken!};
+    const admitted=await post(enter);expect(admitted.statusCode,admitted.body).toBe(200);expect(admitted.json<ActivityResult>().nativeChristmasAction!.effects[0]).toMatchObject({type:"entered"});
+    fixtures.push({label:"snowfield-enter-fresh",snapshot:admitted.json<ActivityResult>(),action:enter});
+    await snowfield.enterScene(f.client,f.p,{x:500,y:500});snowfield.move(f.client,f.p,{x:650,y:500},"650,500");time+=1100;
+    s=await snapshot();expect(s.nativeChristmasSnowfield!.challenges[0].canChallenge,s.nativeChristmasSnowfield!.challenges[0].reason).toBe(true);
+    const action={type:"challenge",index:0,choice:s.nativeChristmasSnowfield!.stateToken!},id=randomUUID(),r=await post(action,id);expect(r.statusCode,r.body).toBe(200);
+    const result=r.json<ActivityResult>();expect(result.nativeChristmasAction!.effects[0]).toMatchObject({type:"challenged",index:0,originalMissionId:40001,localPveId:164001,usedToday:1});expect(result.nativeChristmasSnowfield!.attempt).toMatchObject({state:"admitted",canResume:true});
+    const before=await stored();expect((await post(action,id)).json()).toMatchObject({replayed:true,nativeChristmasSnowfield:{attempt:{canResume:true}}});expect(await stored()).toEqual(before);fixtures.push({label:"snowfield-challenge-fresh",snapshot:result,action});
+  });
+  it("preexisting settled first-win qualification can claim after ticket expiry without shared500 or points",async()=>{
+    pairedHttp();const now=new Date(),state={...readSnowfieldState(undefined,now),hasSettledWinToday:true,ticket:{issuedDay:now.toISOString().slice(0,10),issuedAt:new Date(now.getTime()-3600000).toISOString(),expiresAt:new Date(now.getTime()-1800000).toISOString()}};
+    await h.db.insert(app.ActivityStates).values({UserID:916,Activity:"christmas-snowfield",State:state});
+    await h.db.update(app.ActivityStates).set({State:christmasRoot(now,500)}).where(eq(app.ActivityStates.Activity,"reference"));
+    const s=await snapshot("snowfield-expired-earned-npc"),action={type:"npc-claim",choice:s.nativeChristmasSnowfield!.stateToken!},id=randomUUID();expect(s.nativeChristmasSnowfield).toMatchObject({entry:{available:false},ticket:{valid:false},npc:{canClaim:true}});
+    const r=await post(action,id);expect(r.statusCode,r.body).toBe(200);const result=r.json<ActivityResult>();expect(result.nativeChristmasAction!.effects[0]).toMatchObject({type:"npc-claimed",rewards:[{templateId:11002,itemCount:1,bound:true,validDays:0}]});expect(result).toMatchObject({points:100,earned:200,mailedCount:1});
+    expect(result.nativeChristmas!.dailyActionsRemaining).toBe(0);const before=await stored();expect((await post(action,id)).json()).toMatchObject({replayed:true,mailedCount:1});expect(await stored()).toEqual(before);fixtures.push({label:"snowfield-npc-fresh",snapshot:result,action});
+  });
 });

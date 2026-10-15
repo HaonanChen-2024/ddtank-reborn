@@ -1,4 +1,5 @@
 import type { ChristmasNativeView } from "./christmas-native.js";
+import type { SnowfieldView } from "./christmas-snowfield.js";
 /** Local reference activities. Never expose RootState, board layouts, or RNG seeds through HTTP. */
 import type { PairNativeEffect, PairNativeView } from "./pair-native.js";
 import type { MinesNativeEffect, MinesNativeView } from "./mines-native.js";
@@ -68,6 +69,7 @@ export interface ActivitySnapshot {
   nativeExchange?: ExchangeNativeView;
   /** Game authoritative, additive and omitted from ordinary old POST responses. */
   nativeChristmas?: ChristmasNativeView;
+  nativeChristmasSnowfield?: SnowfieldView;
   nativeDevil: DevilProjection;
   nativeCaveLoot: CaveProjection;
 }

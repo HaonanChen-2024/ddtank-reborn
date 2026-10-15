@@ -267,6 +267,8 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
 function readNativeWardrobe(manifestPath, overlay) {
   const path = resolve(manifestPath), bytes = readFileSync(path), manifest = JSON.parse(bytes);
   assert.ok(["workshop-native-wardrobe", "workshop-native-activities"].includes(manifest.module)); assert.equal(manifest.version, 1);
+  const christmasVariant = "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas";
+  assert.ok(manifest.christmasSceneVersion === undefined || manifest.module === "workshop-native-activities" && manifest.variant === christmasVariant && manifest.christmasSceneVersion === 1, "unknown native Christmas scene layout");
   assert.ok(manifest.variant === undefined || manifest.module === "workshop-native-activities" && ["wardrobe-pair-mines", "wardrobe-pair-mines-ddplay", "wardrobe-pair-mines-ddplay-gypsy", "wardrobe-pair-mines-ddplay-gypsy-moonlight", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot", "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas"].includes(manifest.variant), "unknown native activity variant");
   const root = dirname(path), within = file => {
     const target = resolve(file); assert.ok(target.startsWith(root + "/") || target.startsWith(root + "\\"), "native build path escaped"); return target;
@@ -320,11 +322,17 @@ function readNativeWardrobe(manifestPath, overlay) {
   if (manifest.variant === "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas") expected.push(...[
     "WorkshopNativeChristmasBootstrap.swf", "christmas-original-library.swf", "christmas-original-art.swf", "christmas-styles.xml",
   ].map(file => "/flash/workshop-native/christmas/" + file));
+  if (manifest.christmasSceneVersion === 1) expected.push(
+    ...["ChristmasMap.swf", "living1.swf", "living2.swf", "living3.swf"].map(file => "/resource/image/scene/christmas/workshop/" + file),
+    ...["M", "F"].flatMap(sex => ["cloth", "clothF"].flatMap(layer => [1, 2].map(direction => `/resource/image/scene/christmas/workshop/cloth/${sex}/${layer}/${direction}.png`))),
+  );
   assert.deepEqual(manifest.assets.map(a => a.urlPath).sort(), expected.sort());
   const assets = manifest.assets.map(asset => {
     assert.equal(asset.file, asset.urlPath.slice(asset.urlPath.lastIndexOf("/") + 1));
     const data = readFileSync(within(asset.path)); assert.equal(hash(data), asset.sha256); assert.equal(data.length, asset.bytes);
-    return { target: join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
+    return { target: asset.urlPath.startsWith("/resource/")
+      ? join(overlay, "native-resources", asset.urlPath.slice("/resource/".length))
+      : join(overlay, asset.urlPath.slice("/flash/".length)), bytes: data, sha256: asset.sha256 };
   });
   const receipt = { manifestPath: path, manifestSha256: hash(bytes), bridgeSha256: hash(bridge), assets: assets.map(({ target, sha256 }) => ({ target, sha256 })) };
   return { bridge, assets, receipt };

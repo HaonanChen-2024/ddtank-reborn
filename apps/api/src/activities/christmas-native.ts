@@ -21,7 +21,7 @@ export interface ChristmasNativeView {
   version: 1; kind: "christmas-native"; rulesVersion: 1; catalogVersion: "christmas-snowman-local-v1";
   day: string; revision: number; authority: ChristmasAuthority; available: boolean; reason: string; stateToken: string | null;
   activity: { open: true; beginAt: "1970-01-01T00:00:00.000Z"; endAt: "2099-12-31T23:59:59.999Z"; title: string };
-  snowfield: { available: false; reason: string };
+  snowfield: { available: boolean; reason: string };
   currency: "local-task-points"; points: number; taskEarned: number; dailyActionsRemaining: number;
   snowman: {
     resource: "local-task-snowpacks"; resourceLabel: string; balance: number; entitlement: number; usedToday: number;
@@ -62,12 +62,12 @@ export function unavailableChristmas(revision: number, date: string, points: num
     snowman: { resource: "local-task-snowpacks", resourceLabel: "本地任务雪包", balance: 0, entitlement: 0, usedToday: 0, count: 0, exp: 0, totalExp: 10, maxCount: 0, maxDoubleCount: 0, tasks: [], quotes: [] }, rewards: [], rules: ["服务暂不可用，未取得权威堆雪人状态。"],
     unavailable: [{ id: "original-economy", reason: "当前为明确本地任务规则。" }, { id: "snowfield", reason: "真实雪场未开放。" }, { id: "official-snowpacks", reason: "不伪造原背包雪包。" }] };
 }
-export function validChristmasView(v: unknown): v is ChristmasNativeView {
+export function validChristmasView(v: unknown, pairedSnowfield = false): v is ChristmasNativeView {
   if (!obj(v) || !exact(v, ["version","kind","rulesVersion","catalogVersion","day","revision","authority","available","reason","stateToken","activity","snowfield","currency","points","taskEarned","dailyActionsRemaining","snowman","rewards","rules","unavailable"]) ||
-    v.version !== 1 || v.kind !== "christmas-native" || v.rulesVersion !== 1 || v.catalogVersion !== "christmas-snowman-local-v1" || !day(v.day) || !int(v.revision) || !["online","offline","unavailable"].includes(String(v.authority)) || typeof v.available !== "boolean" || !text(v.reason) ||
+    v.version !== 1 || v.kind !== "christmas-native" || v.rulesVersion !== 1 || v.catalogVersion !== "christmas-snowman-local-v1" || !day(v.day) || !int(v.revision) || !["online","offline","unavailable"].includes(v.authority as string) || typeof v.available !== "boolean" || !text(v.reason) ||
     (v.available ? v.authority !== "online" || !token(v.stateToken) || !v.stateToken.startsWith(`${v.day}.`) : v.stateToken !== null) || v.currency !== "local-task-points" || !int(v.points) || !int(v.taskEarned) || !int(v.dailyActionsRemaining,0,500) ||
     !obj(v.activity) || !exact(v.activity,["open","beginAt","endAt","title"]) || v.activity.open !== true || v.activity.beginAt !== "1970-01-01T00:00:00.000Z" || v.activity.endAt !== "2099-12-31T23:59:59.999Z" || !text(v.activity.title) ||
-    !obj(v.snowfield) || !exact(v.snowfield,["available","reason"]) || v.snowfield.available !== false || !text(v.snowfield.reason) || !Array.isArray(v.rules) || v.rules.length<1 || v.rules.length>10 || !v.rules.every(text) ||
+    !obj(v.snowfield) || !exact(v.snowfield,["available","reason"]) || typeof v.snowfield.available !== "boolean" || (!pairedSnowfield && v.snowfield.available) || !text(v.snowfield.reason) || !Array.isArray(v.rules) || v.rules.length<1 || v.rules.length>10 || !v.rules.every(text) ||
     !Array.isArray(v.unavailable) || v.unavailable.length !== 3 || !v.unavailable.every((u,i)=>obj(u)&&exact(u,["id","reason"])&&u.id===["original-economy","snowfield","official-snowpacks"][i]&&text(u.reason)) || !Array.isArray(v.rewards)) return false;
   const s = v.snowman;
   if (!obj(s) || !exact(s,["resource","resourceLabel","balance","entitlement","usedToday","count","exp","totalExp","maxCount","maxDoubleCount","tasks","quotes"]) || s.resource !== "local-task-snowpacks" || !text(s.resourceLabel) || !int(s.balance,0,30) || !int(s.entitlement,0,30) || !int(s.usedToday,0,30) || !int(s.count,0,1000000000) || !int(s.exp,0,9) || s.totalExp !== 10 || !int(s.maxCount,0,10) || !int(s.maxDoubleCount,0,10) || !Array.isArray(s.tasks) || !Array.isArray(s.quotes)) return false;
@@ -82,7 +82,7 @@ async function internal(app: AppCtx,path:string,body:unknown) {
   if (!app.cfg.GAME_INTERNAL_URL) return uncertain();
   try { const res=await fetch(`${app.cfg.GAME_INTERNAL_URL.replace(/\/+$/,"")}/activity-christmas/${path}`,{method:"POST",signal:AbortSignal.timeout(5000),headers:{"content-type":"application/json",...(app.cfg.GAME_INTERNAL_TOKEN?{authorization:`Bearer ${app.cfg.GAME_INTERNAL_TOKEN}`}:{})},body:JSON.stringify(body)});
     if (!res.ok) return uncertain(); const v:unknown=await res.json(); if(!obj(v)||typeof v.ok!=="boolean")return uncertain();
-    if(!v.ok){if(!exact(v,["ok","status","message"])||![400,401,403,409,503].includes(Number(v.status))||!text(v.message))return uncertain();throw new ActivityError(v.message,Number(v.status));}
+    if(!v.ok){if(!exact(v,["ok","status","message"])||typeof v.status!=="number"||![400,401,403,409,503].includes(v.status)||!text(v.message))return uncertain();throw new ActivityError(v.message,v.status);}
     if(!exact(v,["ok","value"])||!obj(v.value))return uncertain(); return v.value;
   }catch(e){if(e instanceof ActivityError)throw e;return uncertain();}
 }

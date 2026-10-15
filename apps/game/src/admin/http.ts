@@ -26,6 +26,8 @@ export interface AdminApi {
   mailNotice(userId: number): boolean;
   activityChristmasRead?(body: unknown): Promise<unknown>;
   activityChristmasAction?(body: unknown): Promise<unknown>;
+  activityChristmasSnowfieldRead?(body: unknown): Promise<unknown>;
+  activityChristmasSnowfieldAction?(body: unknown): Promise<unknown>;
   activityExchangeRead?(body: unknown): Promise<unknown>;
   activityExchangeAction?(body: unknown): Promise<unknown>;
 }
@@ -100,6 +102,14 @@ export function startAdmin(host: string, port: number, token: string | undefined
       if (req.method === "POST" && url.pathname === "/activity-christmas/read") {
         if (!api.activityChristmasRead) return send(503, { error: "activity Christmas unavailable" });
         return send(200, await api.activityChristmasRead(await readJson(req)));
+      }
+      if (req.method === "POST" && url.pathname === "/activity-christmas-snowfield/read") {
+        if (!api.activityChristmasSnowfieldRead) return send(503, { error: "snowfield unavailable" });
+        return send(200, await api.activityChristmasSnowfieldRead(await readJson(req)));
+      }
+      if (req.method === "POST" && url.pathname === "/activity-christmas-snowfield/action") {
+        if (!api.activityChristmasSnowfieldAction) return send(503, { error: "snowfield unavailable" });
+        return send(200, await api.activityChristmasSnowfieldAction(await readJson(req)));
       }
       if (req.method === "POST" && url.pathname === "/activity-christmas/action") {
         if (!api.activityChristmasAction) return send(503, { error: "activity Christmas unavailable" });

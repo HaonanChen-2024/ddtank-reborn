@@ -19,7 +19,7 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 describe("ActivityCenter native entry contract", () => {
   it("offers the original snowman entry with actual local qualifications and an unavailable snowfield", () => {
     const html = render("christmas");
-    for (const text of ["试用原版圣诞活动", "网页玩法", "本日任务雪包", "双倍每包另耗2活动积分", "UTC跨日失效", "雪人进度永久保留", "循环礼", "游戏邮件", "雪场战斗尚未移植", "原窗口仍待游戏内验收"]) expect(html).toContain(text);
+    for (const text of ["试用原版圣诞活动", "网页玩法", "本日任务雪包", "双倍每包另耗2活动积分", "UTC跨日失效", "雪人进度永久保留", "循环礼", "游戏邮件", "雪场入口暂未开放", "入场、挑战和首胜礼仍待游戏内验收"]) expect(html).toContain(text);
     expect(html).not.toContain("试用原版矿洞寻宝");
   });
   it("requires the live game character for original Christmas entry", () => {

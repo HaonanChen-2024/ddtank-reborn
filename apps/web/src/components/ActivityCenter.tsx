@@ -270,7 +270,7 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                   <p className="activity-center__hint">本地任务解锁三档奖励；商城使用活动积分。任务凭证可验证、激活或赠送一次，首档与新手任务礼共用领取记录。无真实付款；原充值卡和赠卡美术仍待移植。</p></>}
                 {selected.id === "christmas" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("christmas"); }}>试用原版圣诞活动</button>
-                  <p className="activity-center__muted">原选择框和堆雪人窗口仍在测试。领取签到、扫雷、翻牌、探索任务后获得本日任务雪包，普通堆雪人不耗积分，双倍每包另耗2活动积分；未用雪包于UTC跨日失效。雪人进度永久保留，三档进度礼和循环礼寄游戏邮件。雪场战斗尚未移植；原窗口仍待游戏内验收。</p>
+                  <p className="activity-center__muted">原选择框和堆雪人窗口仍在测试。领取签到、扫雷、翻牌、探索任务后获得本日任务雪包，普通堆雪人不耗积分，双倍每包另耗2活动积分；未用雪包于UTC跨日失效。雪人进度永久保留，三档进度礼和循环礼寄游戏邮件。雪场入口暂未开放，入场、挑战和首胜礼仍待游戏内验收。</p>
                   {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版圣诞活动。</p>}</>}
                 {selected.id === "cave" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("caveloot"); }}>试用原版矿洞寻宝</button>
