@@ -498,7 +498,14 @@ export class ChristmasSnowfieldOwner implements ChristmasSnowfieldRoomAccess {
   }
   async leaveScene(c: GameClient, p: GamePlayer): Promise<void> { if (this.members.get(p.id)?.c !== c && this.reservations.get(p.id)?.c !== c) return;
     const l = this.leases.get(p); if (l && !l.outcome) { this.outcome(l, "aborted", false); l.room.game?.removePlayer(p); } else if (!l) await this.abortAdmission(p, false);
-    if (l?.pending) await l.pending; this.removeMember(p); }
+    if (l?.pending) await l.pending;
+    if (l?.player === p && l.client === c && l.serverInstance === this.serverInstance) {
+      const room = l.room;
+      // A CREATE response may still be unseen. Release only this settled lease's room, rechecking after the room queue wait.
+      this.ctx.rooms.exitRoom(room, p, () => p.currentRoom === room && room.IsUsing && room.RoomType === 40 && room.MapId === l.localPveId && room.host === p &&
+        room.getPlayers().length === 1 && room.getPlayers()[0] === p && !this.leases.has(p) && !this.admissions.has(p.id));
+    }
+    this.removeMember(p); }
   private removeMember(p: GamePlayer) { if (this.members.get(p.id)?.p === p) { this.members.delete(p.id); const b = this.packet(19); b.writeInt(p.id); this.broadcast(b); this.send(p, b); } if (this.reservations.get(p.id)?.p === p) this.reservations.delete(p.id); this.changed(); }
   async revive(c: GameClient, p: GamePlayer): Promise<void> { const m = this.members.get(p.id); need(this.online(p, c) && m?.c === c && !p.currentRoom && !this.leases.has(p), "当前不能在雪场复活。"); m.position = { x: 500, y: 500 }; m.route = []; m.state = 0; this.changed(); const b = this.packet(20); b.writeInt(p.id); b.writeByte(0); b.writeInt(500); b.writeInt(500); this.broadcast(b); }
   async beforeQuit(p: GamePlayer): Promise<void> { const l = this.leases.get(p); if (l) { if (!l.outcome) this.outcome(l, "aborted", false);

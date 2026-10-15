@@ -248,6 +248,51 @@ describe("Christmas real-scene admission owner with synthetic ledger", () => {
     start = () => null; await launch(); await owner.drain(); let s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [0, 0, 0], terminals: [{ quotaReturned: true }] });
     f.p.currentRoom?.removePlayer(f.p); await owner.leaveScene(f.client, f.p); await admitted(); await owner.leaveScene(f.client, f.p); s = await stored(); expect(s.states.find(r => r.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0] });
   });
+  it.each([false, true])("raw scene exit releases its unseen CREATE room after settlement (accepted=%s), without refund or duplicate exit", async accepted => {
+    const r = accepted ? await launch() : await room();
+    const leave = () => { const packet = new GSPacket(145); packet.writeByte(17); packet.writeByte(1); return owner.handle(f.p, f.client, GSPacket.parse(packet.encode())); };
+    await leave(); expect(f.p.currentRoom).toBe(r); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBeNull(); expect(r.IsUsing).toBe(false); expect((await sf()).scene).toMatchObject({ state: "outside", people: 0 });
+    const settled = await stored(); expect(settled.mail).toEqual([]);
+    expect(settled.states.find(row => row.Activity === "christmas-snowfield")!.State).toMatchObject({ active: null, usedToday: [1, 0, 0], terminals: [{ outcome: "aborted", fightId: accepted ? 701 : null, quotaReturned: false }] });
+    await leave(); const exit = new GSPacket(94); exit.writeInt(5); await roomRouter().handler(f.ctx, f.p, GSPacket.parse(exit.encode()), f.client); f.ctx.rooms.tick();
+    expect(await stored()).toEqual(settled); expect(f.p.currentRoom).toBeNull();
+    const resumed = ok(await owner.command(await cmd("enter"), f.client)); expect(resumed.pair.snowfield.scene.canResume).toBe(true);
+    await owner.enterScene(f.client, f.p, { x: 500, y: 500 }); expect((await sf()).scene.state).toBe("inside");
+  });
+  it("original94/5 and the owned scene exit share one successful room removal and one settlement", async () => {
+    const r = await room(), removed = vi.spyOn(r, "removePlayer");
+    const exit = () => { const packet = new GSPacket(94); packet.writeInt(5); return roomRouter().handler(f.ctx, f.p, GSPacket.parse(packet.encode()), f.client); };
+    await exit(); f.ctx.rooms.tick(); expect(f.p.currentRoom).toBeNull(); expect(removed.mock.results.filter(result => result.value === true)).toHaveLength(1);
+    const settled = await stored(); await exit(); f.ctx.rooms.tick(); expect(await stored()).toEqual(settled);
+    expect(settled.states.find(row => row.Activity === "christmas-snowfield")!.State).toMatchObject({ usedToday: [1, 0, 0], terminals: [{ outcome: "aborted", quotaReturned: false }] });
+  });
+  it.each(["before-leave", "after-queue"] as const)("an owned exit cannot clear a replacement current room (%s)", async when => {
+    const r = await room(), other = f.ctx.rooms.rooms.find(candidate => candidate !== r)!;
+    const changeRoom = () => { r.removePlayer(f.p); other.start(); other.updateRoom("replacement", "", 1, 3, 0); other.addPlayer(f.p); };
+    if (when === "before-leave") changeRoom();
+    await owner.leaveScene(f.client, f.p);
+    if (when === "after-queue") changeRoom();
+    const removed = vi.spyOn(other, "removePlayer"); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(other); expect(other.getPlayers()).toEqual([f.p]); expect(removed).not.toHaveBeenCalled();
+  });
+  it("a stale queued exit refuses a new lease even when the same room object and single player are reused", async () => {
+    const r = await room(), exits = vi.spyOn(f.ctx.rooms, "exitRoom"); await owner.leaveScene(f.client, f.p);
+    const canExit = exits.mock.calls[0]![2]!; expect(canExit).toBeTypeOf("function");
+    r.removePlayer(f.p); r.stop(); for (const other of f.ctx.rooms.rooms) if (other !== r) other.start();
+    await admitted(); await tickUntil(owner.handoffChallenge(f.client, f.p, 1)); expect(f.p.currentRoom).toBe(r); expect(owner.checkRoom(r, [f.p]).ok).toBe(true);
+    const before = await stored(); f.ctx.rooms.exitRoom(r, f.p, canExit); f.ctx.rooms.tick();
+    expect(f.p.currentRoom).toBe(r); expect(r.getPlayers()).toEqual([f.p]); expect(owner.checkRoom(r, [f.p]).ok).toBe(true); expect(await stored()).toEqual(before);
+  });
+  it.each([false, true])("a failed exit settlement preserves room/member and the beforeQuit retry proof (accepted=%s)", async accepted => {
+    const r = accepted ? await launch() : await room(), before = await stored();
+    await db.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT snowfield_tail_failure CHECK ("Signature"='never') NOT VALID`);
+    const exit = vi.spyOn(f.ctx.rooms, "exitRoom"); await expect(owner.leaveScene(f.client, f.p)).rejects.toThrow(); f.ctx.rooms.tick();
+    expect(exit).not.toHaveBeenCalled(); expect(f.p.currentRoom).toBe(r); expect(r.getPlayers()).toEqual([f.p]); expect((await sf()).scene.people).toBe(1); expect(await stored()).toEqual(before);
+    await db.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT snowfield_tail_failure`); await owner.beforeQuit(f.p); await owner.drain();
+    const final = await stored(); expect(final.mail).toEqual([]); expect(final.states.find(row => row.Activity === "christmas-snowfield")!.State).toMatchObject({ active: null, usedToday: [1, 0, 0], terminals: [{ fightId: accepted ? 701 : null, outcome: "aborted", quotaReturned: false }] });
+    expect((await sf()).scene.people).toBe(0);
+  });
   it("receipt-tail failure rolls back mail/goods/state/wallet, pending win retries before quit", async () => {
     await launch(); const before = await stored(); await db.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT snowfield_tail_failure CHECK ("Signature"='never') NOT VALID`);
     launches[0]!.onFinished!(true); await expect(owner.drain()).rejects.toThrow(); expect(await stored()).toEqual(before);

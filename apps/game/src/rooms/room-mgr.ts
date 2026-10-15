@@ -284,8 +284,9 @@ export class RoomMgr {
   }
 
   /** ExitRoomAction. */
-  exitRoom(room: BaseRoom, p: RoomMember): void {
+  exitRoom(room: BaseRoom, p: RoomMember, canExit?: () => boolean): void {
     this.addAction(() => {
+      if (canExit && !canExit()) return;
       room.removePlayer(p);
       room.sendPlaceState();
       this.sendUpdateCurrentRoom(room);
