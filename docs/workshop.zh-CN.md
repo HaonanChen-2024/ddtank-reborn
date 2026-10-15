@@ -183,11 +183,13 @@ node scripts/workshop-language.mjs rollback
 
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML默认只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
-服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。配置保留世界BOSS及蚁后共用的四条喊话，并新增在线宝箱反馈、溢出邮件和附件前缀六键；新增六键已实现，尚待部署及原客户端验收，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
+服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。覆盖包含世界BOSS及蚁后喊话、在线宝箱、背包/交易和领取提示。当前65个原键覆盖及7个内部附加键共72键/80行，覆盖文件已生成并保留旧版备份；源码仍须正常加载及原客户端验收，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
 
-道具显示名另有可选 `ITEM_NAME_OVERRIDES_FILE`，由 API 与 Game 共用模板翻译层读取。新配置 `research/i18n/zh-CN-item-names.json` 仅含四类1～3级石头及11233金币宝箱共13个名称；格式严格为 `{"schemaVersion":1,"table":"Shop_Goods","names":{"模板ID":"显示名"}}`。仅覆盖内存中的 `Shop_Goods.Name`，优先于原语言的数据库Name翻译，其他字段和既有翻译保持；不写数据库，不修改历史邮件。未设置或设为空时完全沿用旧加载行为；文件缺失或结构错误会报错，不能当作已应用。
+仅 `--server` 模式可另外读取可选的 `research/i18n/zh-CN-server-additions.json`，格式为平面映射，如 `{"Workshop.Events.Example":"反馈 {0}"}`。它供没有准确原词典键的本地服务端显示文字使用：键必须位于 `Workshop.Events.` 命名空间，不能含冒号、换行或TAB，也不能与任一原键或override键重名；值必须为非空字符串，不含CR/LF/TAB。合法条目以CRLF追加到原覆盖结果之后，原词典文件不写入，原override未知键与占位符校验保持。未提供该文件时输出及元数据沿用旧行为；有新增条目时 `keys`、`translatedRows` 包含新增条目数，并另报 `addedKeys`。验证不写文件，安装仍沿原账本/哈希/备份与回退规则，客户端和滚动提示模式不读取此文件。附加词典只改变已有消息中的显示文本，不增加Game90回执或日历字段；新公开领奖契约仍须单独确认。源码和隔离安装器检查不等同于已部署或原客户端验收。
 
-该名称配置已实现但尚未部署。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。物品描述、等级/VIP礼包文案及全界面中文仍不在本批验收范围。
+道具显示名另有可选 `ITEM_NAME_OVERRIDES_FILE`，由 API 与 Game 共用模板翻译层读取。当前配置 `research/i18n/zh-CN-item-names.json` 包含四类1～3级石头、11233金币宝箱及11998双倍经验卡共14个名称；格式严格为 `{"schemaVersion":1,"table":"Shop_Goods","names":{"模板ID":"显示名"}}`。仅覆盖内存中的 `Shop_Goods.Name`，优先于原语言的数据库Name翻译，其他字段和既有翻译保持；不写数据库，不修改历史邮件。未设置或设为空时完全沿用旧加载行为；文件缺失或结构错误会报错，不能当作已应用。
+
+名称覆盖已接入共同加载入口；配置须在实际API与Game中正常加载后验收。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。每日彩蛋、VIP、累计签到和等级礼包的成功/拒绝及新溢出邮件标题已接入服务端词典；等级提示显示本次实际领取档位。四条链路仍有23个可达奖励模板的Name未覆盖中文，物品描述和全界面中文、字体布局仍须另行验收。
 
 ### 物品描述与任务文字
 

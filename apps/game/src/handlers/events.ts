@@ -347,6 +347,11 @@ async function give(ctx: ServerContext, p: GamePlayer, rewards: Reward[], title:
   return g.summary.join(", ");
 }
 
+function eventText(ctx: ServerContext, key: string, fallback: string, ...args: unknown[]): string {
+  const translated = ctx.lang.t(key, ...args);
+  return translated === key ? fallback : translated;
+}
+
 // ------------------------------------------------------------------ handlers
 export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number): Promise<void> {
   const rt = eventsRuntime(ctx);
@@ -376,26 +381,26 @@ export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number
       return p.sendMessage(0, `${t("GameUserDailyAward.Success", "Prêmio diário recebido!")}${tpl ? ` ${tpl.Name}` : ""}`);
     }
     case 2: {
-      if (!(await claimOnce(db, p.id, "egg", day))) return p.sendMessage(0, "Você já recebeu 1 vez hoje!");
+      if (!(await claimOnce(db, p.id, "egg", day))) return p.sendMessage(0, t("DailyAwardHandler.Msg2", "Você já recebeu 1 vez hoje!"));
       p.info.LastGetEgg = now;
-      const s = await give(ctx, p, [{ templateId: 112059, count: 1 }], "Ovo diário");
-      return p.sendMessage(0, `${t("GameServer.DailyEggReceive.Success", "Ovo diário recebido:")} ${s}`);
+      const s = await give(ctx, p, [{ templateId: 112059, count: 1 }], t("Workshop.Events.Egg.Title", "Ovo diário"));
+      return p.sendMessage(0, eventText(ctx, "Workshop.Events.Egg.Success", `${t("GameServer.DailyEggReceive.Success", "Ovo diário recebido:")} ${s}`, s));
     }
     case 3: {
       // VIP daily box: ItemMgr.FindItemBoxTypeAndLv(2, VIPLevel) = LoadUserBox Type 2, Level = VIP level
       const box = rt.data.userBox.find((b) => b.Type === 2 && b.Level === p.info.VIPLevel);
-      if (!p.info.VIPLevel || !box) return p.sendMessage(0, "Apenas para VIP.");
+      if (!p.info.VIPLevel || !box) return p.sendMessage(0, t("Workshop.Events.Vip.Required", "Apenas para VIP."));
       if (!(await claimOnce(db, p.id, "vip", day))) {
         p.info.CanTakeVipReward = false;
         p.send(Out.openVip(p.info));
-        return p.sendMessage(0, "Você já recebeu a recompensa de hoje!");
+        return p.sendMessage(0, t("DailyAwardHandler.Msg4", "Você já recebeu a recompensa de hoje!"));
       }
-      const s = await openBoxRewards(ctx, p, box.TemplateID, "Caixa VIP");
+      const s = await openBoxRewards(ctx, p, box.TemplateID, t("Workshop.Events.Vip.Title", "Caixa VIP"));
       // the client pops the VIP gift frame while CanTakeVipReward is set (ChecVipkExpireDay re-opens it the next day)
       p.info.CanTakeVipReward = false;
       p.info.LastVIPPackTime = ctx.now();
       p.send(Out.openVip(p.info));
-      return p.sendMessage(0, `Caixa VIP: ${s}`);
+      return p.sendMessage(0, eventText(ctx, "AwardMgr.AddVIPPack.Title", `Caixa VIP: ${s}`, s));
     }
     case 5:
       return void (await signIn(ctx, p));
@@ -436,7 +441,7 @@ export async function signAward(ctx: ServerContext, p: GamePlayer, count: number
         const tiers = rt.data.signTiers();
         const rewards: Reward[] = rt.data.dailyAward.filter((d) => d.AwardDays === count && (d.Type === 1 || d.Type === 7) && (d.Sex === 0 || d.Sex === (p.info.Sex ? 1 : 2)))
           .map((d) => (d.Type === 7 ? { templateId: -1100, count: d.Count } : { templateId: d.TemplateID, count: d.Count, validDate: d.ValidDate, isBind: d.IsBinds }));
-        const s = await grantClaimRewards(ctx, p, rewards, "Prêmio de presença", async (db, now) => {
+        const s = await grantClaimRewards(ctx, p, rewards, eventText(ctx, "Workshop.Events.SignAward.Title", "Prêmio de presença"), async (db, now) => {
           if (!tiers.includes(count)) return false;
           // The shared owner row is locked before this read, as in signIn.
           const [row] = await db.select().from(P.DailyLogList).where(eq(P.DailyLogList.UserID, p.id)).limit(1).for("update");
@@ -444,7 +449,7 @@ export async function signAward(ctx: ServerContext, p: GamePlayer, count: number
           return signed >= count && claimOnce(db, p.id, "signaward", `${monthKey(now)}:${count}`);
         });
         if (s === null) return false;
-        p.sendMessage(0, `Presente de presença diária recebido com sucesso! ${s}`);
+        p.sendMessage(0, eventText(ctx, "Workshop.Events.SignAward.Success", `Presente de presença diária recebido com sucesso! ${s}`, s));
         return true;
       } finally { release?.(); }
     }).finally(() => release?.());
@@ -493,8 +498,8 @@ export async function timeBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket):
     if (box && c.Grade >= box.Level && (await claimOnce(ctx.db.db, p.id, "levelbox", String(box.Level)))) { c.GetBoxLevel = box.Level; ok = true; }
   }
   if (ok && box) {
-    const s = await openBoxRewards(ctx, p, box.TemplateID, "Caixa de tempo");
-    p.sendMessage(0, `${ctx.lang.t("UserGetTimeBoxHandler.level")} ${s}`);
+    const s = await openBoxRewards(ctx, p, box.TemplateID, eventText(ctx, "Workshop.Events.LevelBox.Title", "Caixa de tempo"));
+    p.sendMessage(0, `${eventText(ctx, "ActivityPackageHandler.ChickActivation.LevelAward.Msg", `Pacote de nível ${box.Level} recebido.`, box.Level)} ${s}`);
   } else if (boxType !== 0) p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
   if (boxType === 0) {
     const out = new GSPacket(53, p.id);

@@ -59,5 +59,9 @@
   "Game.Server.Quests.FinishQuest.RewardGiftToken": "{0} 礼金",
   "Game.Server.Quests.FinishQuest.RewardGB1": "{0} 经验",
   "GameUserDailyAward.Success": "每日奖励领取成功。",
-  "GameUserDailyAward.Fail1": "今日每日奖励已领取。"
+  "GameUserDailyAward.Fail1": "今日每日奖励已领取。",
+  "DailyAwardHandler.Msg2": "今日每日彩蛋已领取。",
+  "DailyAwardHandler.Msg4": "今日VIP礼包已领取。",
+  "AwardMgr.AddVIPPack.Title": "VIP礼包领取成功。 {0}",
+  "ActivityPackageHandler.ChickActivation.LevelAward.Msg": "已领取{0}级礼包。"
 }

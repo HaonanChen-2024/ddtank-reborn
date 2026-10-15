@@ -55,7 +55,7 @@ if (command === "rollback") {
     for (const line of overrides.lines) assert.ok(typeof line === "string" && line.trim() && !/[\r\n{}]/.test(line), "invalid plain scroll-notice line");
   }
   const seen = new Set(); let changedRows = 0;
-  const output = notifications ? overrides.lines.join("\r\n") + "\r\n" : text.split("\r\n").map(line => {
+  let output = notifications ? overrides.lines.join("\r\n") + "\r\n" : text.split("\r\n").map(line => {
     const boundary = line.indexOf(":");
     if (boundary < 1 || line.startsWith("##")) return line;
     const key = line.slice(0, boundary).replace(/^\uFEFF/, "");
@@ -69,8 +69,23 @@ if (command === "rollback") {
     return line.slice(0, boundary + 1) + translated;
   }).join("\r\n");
   if (!notifications) assert.equal(seen.size, Object.keys(overrides).length, "translation keys missing from original dictionary");
+  let addedKeys = 0;
+  const additionsFile = join(repo, "research/i18n/zh-CN-server-additions.json");
+  if (server && existsSync(additionsFile)) {
+    const additions = JSON.parse(readFileSync(additionsFile, "utf8"));
+    assert.ok(additions && typeof additions === "object" && !Array.isArray(additions), "server additions need a flat key/string map");
+    const originalKeys = new Set(text.split("\r\n").filter(line => line.indexOf(":") > 0).map(line => line.slice(0, line.indexOf(":")).replace(/^\uFEFF/, "")));
+    const lines = Object.entries(additions).map(([key, value]) => {
+      assert.ok(key.startsWith("Workshop.Events.") && key.length > "Workshop.Events.".length && !/[:\r\n\t]/.test(key), `invalid server addition key: ${key}`);
+      assert.ok(!Object.hasOwn(overrides, key) && !originalKeys.has(key), `server addition collides with an existing key: ${key}`);
+      assert.ok(typeof value === "string" && value.trim() && !/[\r\n\t]/.test(value), `invalid server addition value: ${key}`);
+      return `${key}:${value}\r\n`;
+    });
+    addedKeys = lines.length;
+    if (addedKeys) output += (output.endsWith("\r\n") ? "" : "\r\n") + lines.join("");
+  }
   const bytes = notifications ? Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(output, "utf16le")]) : Buffer.from(output, "utf8");
-  const summary = { sourceSha256: hash(source), sha256: hash(bytes), ...(notifications ? { notifications: overrides.lines.length, encoding: "utf16le-bom" } : { keys: seen.size, translatedRows: changedRows }), bytes: bytes.length, renderingAccepted: false };
+  const summary = { sourceSha256: hash(source), sha256: hash(bytes), ...(notifications ? { notifications: overrides.lines.length, encoding: "utf16le-bom" } : { keys: seen.size + addedKeys, translatedRows: changedRows + addedKeys, ...(addedKeys ? { addedKeys } : {}) }), bytes: bytes.length, renderingAccepted: false };
   if (command === "install") {
     const previous = existsSync(journalFile) ? JSON.parse(readFileSync(journalFile, "utf8")) : null;
     if (existsSync(target)) {

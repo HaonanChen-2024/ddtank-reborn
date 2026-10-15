@@ -1,0 +1,9 @@
+{
+  "Workshop.Events.Egg.Title": "每日彩蛋奖励",
+  "Workshop.Events.Egg.Success": "每日彩蛋领取成功。 {0}",
+  "Workshop.Events.Vip.Required": "当前VIP礼包不可领取。",
+  "Workshop.Events.Vip.Title": "每日VIP礼包",
+  "Workshop.Events.SignAward.Title": "累计签到奖励",
+  "Workshop.Events.SignAward.Success": "累计签到奖励领取成功。 {0}",
+  "Workshop.Events.LevelBox.Title": "等级礼包奖励"
+}

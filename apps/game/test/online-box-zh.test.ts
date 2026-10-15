@@ -11,7 +11,7 @@ import { GamePlayer } from "../src/game/player.js";
 import { defaultMatch } from "../src/game/player-info.js";
 import { ItemInfo } from "../src/game/item.js";
 import { startOnlineBoxTimer } from "../src/game/online-box.js";
-import { dailyAward, eventsRuntime, timeBox } from "../src/handlers/events.js";
+import { dailyAward, eventsRuntime, signAward, timeBox } from "../src/handlers/events.js";
 import { mailItems } from "../src/handlers/items.js";
 import { World, type ServerContext } from "../src/session/context.js";
 import { LanguageMgr } from "../src/util/lang.js";
@@ -19,6 +19,7 @@ import { LanguageMgr } from "../src/util/lang.js";
 const namesFile = fileURLToPath(new URL("../../../research/i18n/zh-CN-item-names.json", import.meta.url));
 const names = (JSON.parse(readFileSync(namesFile, "utf8")) as { names: Record<string, string> }).names;
 const strings: Record<string, string> = JSON.parse(readFileSync(new URL("../../../research/i18n/zh-CN-server-overrides.json", import.meta.url), "utf8"));
+const additions: Record<string, string> = JSON.parse(readFileSync(new URL("../../../research/i18n/zh-CN-server-additions.json", import.meta.url), "utf8"));
 let h: DbHandle, templates: Templates, data: EventData, seq = 0;
 beforeAll(async () => {
   h = await createDb("pglite:memory"); // No live DB, network server or elapsed-time changes outside the fixture.
@@ -28,7 +29,7 @@ beforeAll(async () => {
   data = new EventData(); await data.load(h.db);
 });
 afterAll(async () => { vi.unstubAllEnvs(); await h?.close(); });
-async function fixture(full = false) {
+async function fixture(full = false, locale: "Chinese" | "original" | "missing" = "Chinese") {
   const [owner] = await h.db.insert(player.Sys_Users_Detail).values({ UserName: `zh_box_${++seq}`, NickName: `Box ${seq}`, Password: "test", IsFirst: 1, Grade: 9 }).returning();
   const info = (await loadPlayerInfo(h.db, owner!.UserID))!, sent: GSPacket[] = [];
   const p = new GamePlayer({ send: (pkt) => sent.push(pkt), disconnect: () => {}, remoteAddress: "test" }, info, defaultMatch(info.ID), 1, "test");
@@ -36,8 +37,8 @@ async function fixture(full = false) {
     const rows = await h.db.insert(player.Sys_Users_Goods).values(Array.from({ length: 96 }, (_, Place) => ({ UserID: p.id, BagType: 1, Place, TemplateID: 11001, Count: templates.findItem(11001)!.MaxCount, IsBinds: true }))).returning();
     p.propBag.loadItems(rows.map((row) => ItemInfo.fromRow(row, templates.findItem(row.TemplateID)!)));
   }
-  const lang = LanguageMgr.fromFile(fileURLToPath(new URL("../../../data/i18n/pt-BR/server-language.txt", import.meta.url)));
-  for (const [key, value] of Object.entries(strings)) lang.set(key, value);
+  const lang = locale === "missing" ? new LanguageMgr() : LanguageMgr.fromFile(fileURLToPath(new URL("../../../data/i18n/pt-BR/server-language.txt", import.meta.url)));
+  if (locale === "Chinese") for (const [key, value] of Object.entries({ ...strings, ...additions })) lang.set(key, value);
   p.lang = (key, ...args) => lang.t(key, ...args); // Same binding as the production login path, also copied by reward staging.
   let now = new Date("2026-10-13T01:00:00Z");
   const ctx = { db: h, templates, lang, world: new World(), now: () => now } as unknown as ServerContext;
@@ -131,4 +132,105 @@ it("shows the translated daily buff reward and duplicate rejection without grant
   const duplicate = f.sent[0]!; duplicate.clearOffset();
   expect(duplicate.code).toBe(3); expect(duplicate.readInt()).toBe(0);
   expect(duplicate.readString()).toBe("今日每日奖励已领取。"); expect(duplicate.dataLeft).toBe(0);
+});
+
+function notices(f: Fixture): string[] {
+  return f.sent.filter(packet => packet.code === 3).map(packet => {
+    packet.clearOffset(); expect(packet.readInt()).toBe(0);
+    const text = packet.readString(); expect(packet.dataLeft).toBe(0); return text;
+  });
+}
+const inventory = (f: Fixture) => f.p.allBags().map(bag => bag.getItems().map(item => item.toRow()));
+async function levelRequest(f: Fixture) {
+  const packet = new GSPacket(53, f.p.id); packet.writeInt(1); packet.writeInt(1); packet.clearOffset();
+  await timeBox(f.ctx, f.p, packet);
+  expect(f.sent.some(packet => packet.code === 53)).toBe(false); // Level requests have no 53 response in the original handler.
+}
+async function allowSign(f: Fixture) {
+  await h.db.insert(player.DailyLogList).values({ UserID: f.p.id, DayLog: "True,True,True", UserAwardLog: 3, LastDate: f.ctx.now() });
+}
+async function historicMail(f: Fixture) {
+  return (await h.db.insert(player.User_Messages).values({ ReceiverID: f.p.id, Title: "Historic reward", Content: "Original content", Annex1Name: "Original attachment", Type: 12 }).returning())[0]!;
+}
+async function newMailTitles(f: Fixture, historic: Awaited<ReturnType<typeof historicMail>>, title: string, full: boolean) {
+  const [old, ...created] = await mails(f); expect(old).toEqual(historic);
+  if (full) {
+    expect(created.length).toBeGreaterThan(0);
+    for (const mail of created) expect(mail).toMatchObject({ Title: title, Content: title, Type: 12, ReceiverID: f.p.id });
+  } else expect(created).toEqual([]);
+}
+
+it.each([false, true])("translates daily egg success, duplicate and only new overflow mail (full=%s)", async full => {
+  const f = await fixture(full), historic = await historicMail(f);
+  await dailyAward(f.ctx, f.p, 2);
+  expect(notices(f)).toEqual([`每日彩蛋领取成功。 ${templates.findItem(112059)!.Name} x1`]);
+  await newMailTitles(f, historic, "每日彩蛋奖励", full);
+  const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
+  await dailyAward(f.ctx, f.p, 2);
+  expect(notices(f)).toEqual(["今日每日彩蛋已领取。"]);
+  expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
+});
+
+it.each([false, true])("translates the real VIP box and duplicate without changing rewards or old mail (full=%s)", async full => {
+  const f = await fixture(full), historic = await historicMail(f); f.p.info.VIPLevel = 1;
+  await dailyAward(f.ctx, f.p, 3);
+  const ids = [11011, 11003, 11007, 11015, 11101, 11997, 11998, 112109];
+  expect(notices(f)).toEqual([`VIP礼包领取成功。 ${ids.map(id => `${templates.findItem(id)!.Name} x1`).join(", ")}`]);
+  expect(f.p.info).toMatchObject({ CanTakeVipReward: false, LastVIPPackTime: f.ctx.now() });
+  await newMailTitles(f, historic, "每日VIP礼包", full);
+  const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
+  await dailyAward(f.ctx, f.p, 3);
+  expect(notices(f)).toEqual(["今日VIP礼包已领取。"]);
+  expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
+});
+
+it.each([0, 99])("uses a truthful unavailable message for VIP level %s and grants nothing", async level => {
+  const f = await fixture(); f.p.info.VIPLevel = level;
+  const before = inventory(f), beforeInfo = structuredClone(f.p.info);
+  await dailyAward(f.ctx, f.p, 3);
+  expect(notices(f)).toEqual(["当前VIP礼包不可领取。"]); expect(f.sent).toHaveLength(1);
+  expect(inventory(f)).toEqual(before); expect(f.p.info).toEqual(beforeInfo); expect(await mails(f)).toEqual([]);
+});
+
+it.each([false, true])("reports the actually received level for the current seed and sex=%s", async sex => {
+  const f = await fixture(true), historic = await historicMail(f); f.p.info.Sex = sex; f.p.info.Grade = 100;
+  const box = data.findBox(1, f.p.info.GetBoxLevel ?? 0, sex ? 1 : 0)!;
+  expect(box).toMatchObject({ Level: 100, TemplateID: sex ? 1120075 : 1120081 });
+  await levelRequest(f);
+  expect(notices(f)).toHaveLength(1); expect(notices(f)[0]).toMatch(/^已领取100级礼包。 /);
+  expect(notices(f)[0]).not.toContain("{0}"); expect(f.p.info.GetBoxLevel).toBe(100);
+  await newMailTitles(f, historic, "等级礼包奖励", true);
+  const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
+  await levelRequest(f);
+  expect(notices(f)).toEqual([strings["UserGetTimeBoxHandler.fail"]]);
+  expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
+});
+
+it.each([false, true])("translates cumulative-sign rewards while retaining the no-90-reply contract (full=%s)", async full => {
+  const f = await fixture(full), historic = await historicMail(f); await allowSign(f);
+  expect(await signAward(f.ctx, f.p, 3)).toBe(true);
+  expect(notices(f)).toEqual([`累计签到奖励领取成功。 ${templates.findItem(11023)!.Name} x5, ${templates.findItem(11035)!.Name} x3`]);
+  expect(f.sent.some(packet => packet.code === 90)).toBe(false);
+  await newMailTitles(f, historic, "累计签到奖励", full);
+  const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
+  expect(await signAward(f.ctx, f.p, 3)).toBe(false); expect(f.sent).toEqual([]);
+  expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
+});
+
+it.each(["original", "missing"] as const)("retains usable %s-language fallbacks when the new overlay is absent", async locale => {
+  const f = await fixture(true, locale); f.p.info.VIPLevel = 1; f.p.info.Grade = 100; await allowSign(f);
+  const actions = [
+    { run: () => dailyAward(f.ctx, f.p, 2), title: "Ovo diário", prefix: "Ovo diário recebido:" },
+    { run: () => dailyAward(f.ctx, f.p, 3), title: "Caixa VIP", prefix: locale === "original" ? "Recebeu o pacote VIP" : "Caixa VIP:" },
+    { run: () => signAward(f.ctx, f.p, 3), title: "Prêmio de presença", prefix: "Presente de presença diária recebido com sucesso!" },
+    { run: () => levelRequest(f), title: "Caixa de tempo", prefix: locale === "original" ? "Presente de nível 100 recebido com sucesso" : "Pacote de nível 100 recebido." },
+  ];
+  for (const action of actions) {
+    const before = (await mails(f)).length; f.sent.length = 0; await action.run();
+    const message = notices(f); expect(message).toHaveLength(1); expect(message[0]!.startsWith(action.prefix)).toBe(true);
+    expect(message[0]).not.toMatch(/Workshop\.Events\.|\{0\}/);
+    const created = (await mails(f)).slice(before); expect(created.length).toBeGreaterThan(0);
+    for (const mail of created) expect(mail).toMatchObject({ Title: action.title, Content: action.title, Type: 12 });
+  }
+  expect(f.sent.some(packet => packet.code === 90 || packet.code === 53)).toBe(false);
 });
