@@ -432,9 +432,9 @@ function sendLuckyAllGoods(p: GamePlayer, s: LuckyState): void {
 }
 
 // ------------------------------------------------------------------ 131 LABYRINTH (administrative/economy layer)
-/** Sys_Users_Labyrinth row (UpdateLabyrinthTime's per-second climb is settled instantly on CLEAN_OUT/TRY_AGAIN here —
+/** Sys_Users_Labyrinth row (UpdateLabyrinthTime's per-second climb is settled instantly on CLEAN_OUT/SPEEDED_UP here —
  *  no per-player timer thread — since `myProgress` (floors cleared by real combat) has nothing to settle until the
- *  Labyrinth PvE room type is wired; see HANDLERS.md). */
+ *  Labyrinth combat-to-progress lifecycle is wired; see HANDLERS.md). */
 export type LabyrinthRow = typeof P.Sys_Users_Labyrinth.$inferSelect;
 async function loadLabyrinth(ctx: ServerContext, p: GamePlayer): Promise<LabyrinthRow> {
   const [row] = await ctx.db.db.select().from(P.Sys_Users_Labyrinth).where(eq(P.Sys_Users_Labyrinth.UserID, p.id)).limit(1);
@@ -465,6 +465,9 @@ export function labyrinthTryAgainMoney(ctx: ServerContext, l: LabyrinthRow): num
   for (let i = 0; i < l.myProgress; i += 2) if (l.currentFloor === i) return big;
   return small;
 }
+function hasPendingLabyrinthFloors(l: LabyrinthRow): boolean {
+  return l.completeChallenge && l.myProgress > 0 && l.currentFloor <= l.myProgress;
+}
 /** "Clean out": collect every 2-floor checkpoint reward from currentFloor..myProgress at once (see header note). */
 function settleCleanOut(ctx: ServerContext, p: GamePlayer, l: LabyrinthRow): { exp: number; hardCurrency: number } {
   let exp = 0, hardCurrency = 0;
@@ -476,6 +479,8 @@ function settleCleanOut(ctx: ServerContext, p: GamePlayer, l: LabyrinthRow): { e
   }
   l.accumulateExp += exp;
   l.currentFloor = l.myProgress;
+  // PlayerActives.UpdateLabyrinthTime / SpeededUp clamp the cursor but close the run.
+  l.completeChallenge = false;
   l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0; l.isCleanOut = false; l.isInGame = false;
   if (exp) { p.addGP(exp, false); }
   if (hardCurrency) p.addHardCurrency(hardCurrency);
@@ -489,6 +494,7 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
   const today = ctx.now().toISOString().slice(0, 10);
   if (today !== l.LastDate.toISOString().slice(0, 10)) {
     l.completeChallenge = true; l.accumulateExp = 0; l.isInGame = false; l.currentFloor = 1; l.tryAgainComplete = true; l.LastDate = ctx.now(); l.ProcessAward = initProcessAward();
+    l.isCleanOut = false; l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0;
   }
   switch (sub) {
     case 1: { // DOUBLE_REWARD
@@ -500,11 +506,12 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
     }
     case 2: { // REQUEST_UPDATE
       let left = 0;
-      for (let i = l.currentFloor; i <= l.myProgress; i++) left += 2;
+      if (hasPendingLabyrinthFloors(l)) for (let i = l.currentFloor; i <= l.myProgress; i++) left += 2;
       l.remainTime = left * 60; l.currentRemainTime = l.remainTime; l.cleanOutAllTime = l.remainTime;
       break;
     }
     case 3: { // CLEAN_OUT
+      if (!hasPendingLabyrinthFloors(l)) break;
       const price = num(ctx, "labyrinth", "cleanOutGiftToken", 100);
       if (p.info.GiftToken < price) { p.sendMessage(0, "Cupons de presente insuficientes."); l.isCleanOut = false; break; }
       p.removeGiftToken(price);
@@ -515,6 +522,7 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
     }
     case 4: { // SPEEDED_UP_CLEAN_OUT
       if (!l.isCleanOut) { p.sendMessage(0, "O Labirinto ainda não foi limpo."); break; }
+      if (!hasPendingLabyrinthFloors(l)) break;
       const mins = Math.abs(Math.floor(l.currentRemainTime / 60));
       const price = num(ctx, "labyrinth", "pricePerMin", 10) * mins;
       if (p.info.Money < price) break;
@@ -526,7 +534,13 @@ export async function labyrinthHandler(ctx: ServerContext, p: GamePlayer, pkt: G
       l.isCleanOut = false;
       break;
     case 6: // RESET_LABYRINTH
-      if (l.tryAgainComplete) { l.currentFloor = 1; l.accumulateExp = 0; l.tryAgainComplete = false; l.ProcessAward = initProcessAward(); p.sendMessage(0, "O Labirinto foi reiniciado."); }
+      if (l.tryAgainComplete) {
+        l.currentFloor = 1; l.accumulateExp = 0; l.tryAgainComplete = false; l.ProcessAward = initProcessAward();
+        // The shipped frame also requires completeChallenge to open a reset run.
+        l.completeChallenge = true; l.isCleanOut = false; l.isInGame = false;
+        l.remainTime = 0; l.currentRemainTime = 0; l.cleanOutAllTime = 0;
+        p.sendMessage(0, "O Labirinto foi reiniciado.");
+      }
       else p.sendMessage(0, "Ainda não é possível atualizar.");
       break;
     case 9: { // TRY_AGAIN
