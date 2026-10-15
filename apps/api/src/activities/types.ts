@@ -12,6 +12,7 @@ import type { ChargeNativeEffect, ChargeNativeView } from "./charge-native.js";
 import type { ForthrightNativeEffect, ForthrightNativeView, PrivateGroup } from "./forthright-native.js";
 import type { ExchangeNativeView } from "./exchange-native.js";
 import type { DevilProjection, DevilEffect } from "./devil-native.js";
+import type { CaveProjection, CaveEffect } from "./caveloot-native.js";
 
 export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; cardId?: string; recipientName?: string }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
@@ -65,6 +66,7 @@ export interface ActivitySnapshot {
   /** Loaded only outside activity transactions from the authoritative game inventory owner. */
   nativeExchange?: ExchangeNativeView;
   nativeDevil: DevilProjection;
+  nativeCaveLoot: CaveProjection;
 }
 export interface ActivityTransition {
   state: ActivityState; pointsDelta: number; earnedDelta: number;
@@ -83,6 +85,7 @@ export interface ActivityTransition {
   nativeForthrightEffects?: ForthrightNativeEffect[];
   nativeForthrightNotification?: string;
   nativeDevilEffects?: DevilEffect[];
+  nativeCaveLootEffects?: CaveEffect[];
 }
 export class ActivityError extends Error {
   constructor(message: string, public statusCode = 400) { super(message); this.name = "ActivityError"; }

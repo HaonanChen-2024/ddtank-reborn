@@ -128,14 +128,14 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
     }
   };
 
-  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge" | "charge" | "forthright" | "exchange" | "devil") => {
+  const openNative = async (kind: "wardrobe" | "pair" | "mines" | "ddplay" | "gypsy" | "moonlight" | "treasure" | "purr" | "carnival" | "first-recharge" | "charge" | "forthright" | "exchange" | "devil" | "caveloot") => {
     if (locked || !matchesGameCharacter || nativeRequestRef.current) return;
     const request = new AbortController();
     nativeRequestRef.current = request;
-    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : kind === "charge" ? "原版充值大赠送" : kind === "forthright" ? "原版至尊豪礼" : kind === "exchange" ? "原版兑换活动" : kind === "devil" ? "原版恶魔宝藏" : "魔法衣橱";
+    const label = kind === "pair" ? "原版32格翻牌" : kind === "mines" ? "原版70格扫雷" : kind === "ddplay" ? "原版弹弹乐" : kind === "gypsy" ? "原版吉普赛商人" : kind === "moonlight" ? "原版月光宝盒" : kind === "treasure" ? "原版迷宫寻宝" : kind === "purr" ? "原版啵咕大转盘" : kind === "carnival" ? "原版节日狂欢" : kind === "first-recharge" ? "原版首充大礼" : kind === "charge" ? "原版充值大赠送" : kind === "forthright" ? "原版至尊豪礼" : kind === "exchange" ? "原版兑换活动" : kind === "devil" ? "原版恶魔宝藏" : kind === "caveloot" ? "原版矿洞寻宝" : "魔法衣橱";
     setOpeningNative(label); setActionError("");
     try {
-      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : kind === "charge" ? window.workshopShowCharge : kind === "forthright" ? window.workshopShowForthright : kind === "exchange" ? window.workshopShowExchange : kind === "devil" ? window.workshopShowDevil : window.workshopShowWardrobe;
+      const open = kind === "pair" ? window.workshopShowPair : kind === "mines" ? window.workshopShowMines : kind === "ddplay" ? window.workshopShowDDPlay : kind === "gypsy" ? window.workshopShowGypsy : kind === "moonlight" ? window.workshopShowMoonlight : kind === "treasure" ? window.workshopShowTreasure : kind === "purr" ? window.workshopShowPurr : kind === "carnival" ? window.workshopShowCarnival : kind === "first-recharge" ? window.workshopShowFirstRecharge : kind === "charge" ? window.workshopShowCharge : kind === "forthright" ? window.workshopShowForthright : kind === "exchange" ? window.workshopShowExchange : kind === "devil" ? window.workshopShowDevil : kind === "caveloot" ? window.workshopShowCaveLoot : window.workshopShowWardrobe;
       const opened = await open?.(characterId, request.signal);
       if (!mountedRef.current || request.signal.aborted) return;
       if (opened) onClose();
@@ -268,6 +268,10 @@ export function ActivityCenter({ onClose, initialCharacterId }: { onClose: () =>
                 {selected.id === "first-gift" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("first-recharge"); }}>试用原版首充大礼</button>
                   <p className="activity-center__hint">本地任务解锁三档奖励；商城使用活动积分。任务凭证可验证、激活或赠送一次，首档与新手任务礼共用领取记录。无真实付款；原充值卡和赠卡美术仍待移植。</p></>}
+                {selected.id === "cave" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
+                  onClick={() => { void openNative("caveloot"); }}>试用原版矿洞寻宝</button>
+                  <p className="activity-center__muted">普通与高级洞窟、寻宝动画、临时背包、11档进度礼和矿币商店仍在测试。与网页共用物品包及前三档领取记录；历史混合包整体领取或回收，新物品按洞窟分类。每日普通免费3次，其后15积分，高级35积分；一次最多5抽。新版分类回收只得同档矿币，旧版整体回收只得活动积分，不能重复回收。材料领取寄游戏邮件；第二页为本人新进度，原服全服进度、排行与未知奖池未接入。原窗口仍待游戏内验收。</p>
+                  {!matchesGameCharacter && <p className="activity-center__muted">请从这个角色的游戏大厅点击“活动”，再打开原版矿洞寻宝。</p>}</>}
                 {selected.id === "devil" && <><button type="button" className="activity-center__button" disabled={locked || !matchesGameCharacter}
                   onClick={() => { void openNative("devil"); }}>试用原版恶魔宝藏</button>
                   <p className="activity-center__muted">原八格探险、五色珠换三类宝箱、双骰五阶段、次数礼和印记商店仍在测试。采用明确的本地活动积分规则，不接真实付款；箱子永久，珠、箱和印记属于活动计数，普通材料奖励寄游戏邮件。关闭后可恢复骰局，连续探险每次最多10次；全服奖池排行与原时限箱尚未接入。原窗口仍待游戏内验收。</p>

@@ -16,6 +16,7 @@ import { advanceChargeNative, recordChargeNativeSpending, viewChargeNative } fro
 import { advanceForthrightNative, viewForthrightNative } from "./forthright-native.js";
 import { advanceChanceGame, viewChanceGame } from "./chance-games.js";
 import { advanceDevilNative, viewDevilNative } from "./devil-native.js";
+import { advanceCaveLoot, advanceLegacyCave, viewCaveLoot } from "./caveloot-native.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivitySnapshot, type ActivityState, type ActivityTask, type ActivityTransition, type ActivityView, type ActivityWallet } from "./types.js";
 
 const random = () => randomInt(0x100000000) / 0x100000000;
@@ -63,6 +64,7 @@ function taskList(s: ActivityState, ctx: ActivityContext): ActivityTask[] {
 }
 
 function countsDailyAction(id: string, type: string): boolean {
+  if (id === "caveloot-native") return type === "draw";
   // This owner counts an actual finite batch, paid continuation or purchase itself.
   if (id === "devil-native") return false;
   // Navigation neither earns rewards nor advances a game. Keep this list explicit so
@@ -106,6 +108,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   let nativeChargeEffects: ActivityTransition["nativeChargeEffects"];
   let nativeForthrightEffects: ActivityTransition["nativeForthrightEffects"];
   let nativeDevilEffects: ActivityTransition["nativeDevilEffects"];
+  let nativeCaveLootEffects: ActivityTransition["nativeCaveLootEffects"];
   let nativeForthrightNotification: string | undefined;
   const charge = (n: number) => { need(wallet.points + pointsDelta >= n, "活动积分不足，先完成上方本地任务。"); pointsDelta -= n; grossCost += n; };
   const earn = (n: number, task = false) => { pointsDelta += n; if (task) earnedDelta += n; };
@@ -113,7 +116,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
-  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || id === "charge-native" || id === "forthright-native" || id === "devil-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
+  need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || id === "charge-native" || id === "forthright-native" || id === "devil-native" || id === "caveloot-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   let countedActions = counted ? 1 : 0;
   need(!counted || (s.daily.actions ?? 0) < C.maxDailyActions, "今日玩法次数已达上限，仍可浏览和领取已有奖励，明日可继续游玩。");
@@ -232,34 +235,10 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
     if (result.draws) count("draws", result.draws);
     if (id === "treasure-native") nativeTreasureEffects = result.effects;
     message = result.message;
-  } else if (id === "cave") {
-    const b = bagState(s, id); s.games[id] = b;
-    if (action.type === "draw") {
-      const n = action.count ?? 1; need(integer(n, 1, 5), "每次只能进行1至5次寻宝。");
-      need(b.bag.length + n <= C.bagCapacity, "临时背包已满，请先领取或回收。");
-      need(action.choice === undefined || ["normal", "advanced"].includes(action.choice), "寻宝模式无效。");
-      const advanced = action.choice === "advanced";
-      for (let i = 0; i < n; i++) {
-        const free = id === "cave" && !advanced && (s.daily["cave:free"] ?? 0) < C.caveDailyFree;
-        if (free) count("cave:free");
-        else charge(advanced ? C.caveAdvancedCost : C.caveCost);
-        b.pity++; const pity = b.pity >= C.cavePity;
-        const item = rollPrize(rng, pity); if (pity) b.pity = 0;
-        if (advanced) item.count *= 2;
-        b.bag.push(item); b.draws++; b.score += advanced ? 2 : 1; b.fragments++; count("draws");
-      }
-      done(); message = `完成${n}次${ACTIVITY_TITLES[id]}，奖品留在临时背包。`;
-    } else if (action.type === "take" || action.type === "recycle") {
-      need(b.bag.length > 0, "临时背包为空。");
-      if (action.type === "take") { rewards.push(...b.bag); message = "临时背包已全部寄往游戏邮箱。"; }
-      else { const n = b.bag.reduce((a, r) => a + r.count * 2, 0); earn(n); message = `已回收临时背包，获得${n}活动积分。`; }
-      b.bag = [];
-    } else if (action.type === "exchange") {
-      need(b.fragments >= 10, "需要10枚活动碎片。"); b.fragments -= 10; rewards.push({ templateId: 11021, count: 2 }); message = "10枚碎片已兑换，奖励已寄出。";
-    } else if (action.type === "progress") {
-      need(integer(action.tier, 1, 3) && b.score >= action.tier * 10, "尚未达到该档寻宝进度。");
-      need(!b.claimed.includes(action.tier), "这档进度奖励已经领取。"); b.claimed.push(action.tier); rewards.push(reward(action.tier * 2));
-    } else throw new ActivityError("寻宝操作无效。");
+  } else if (id === "cave" || id === "caveloot-native") {
+    const hooks = { charge, earn, count, done: () => { s.completed.cave = (s.completed.cave ?? 0) + 1; }, roll: (guaranteed: boolean) => rollPrize(rng, guaranteed) };
+    const result = id === "cave" ? advanceLegacyCave(s, action, hooks) : advanceCaveLoot(s, action, ctx, wallet, hooks);
+    rewards.push(...result.rewards); message = result.message; nativeCaveLootEffects = result.effects;
   } else if (id === "gypsy" || id === "gypsy-native") {
     const result = advanceGypsy(s.games.gypsy, action, ctx, wallet, rng, id === "gypsy-native");
     charge(result.cost); s.games.gypsy = result.state; rewards.push(...result.rewards);
@@ -314,7 +293,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   if (countedActions) count("actions", countedActions);
   if (grossCost > 0) s.games.chargeNativeV1 = recordChargeNativeSpending(s.games.chargeNativeV1, ctx, grossCost);
   s.history = [`${ctx.now.toISOString()} ${id === "pair-native" ? "原生欧皇秘宝" : id === "mines-native" ? "原生弹弹扫雷" : id === "ddplay-native" ? "原生弹弹乐" : id === "gypsy-native" ? "原生吉普赛商人" : id === "moonlight-native" ? "原生月光宝盒" : id === "treasure-native" ? "原生迷宫寻宝" : id === "wheel-native" ? "原生啵咕大转盘" : id === "carnival-native" ? "原生节日狂欢" : ACTIVITY_TITLES[id] ?? "本地任务"}：${message}`, ...s.history].slice(0, 20);
-  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}), ...(nativeFirstRechargeEffects ? { nativeFirstRechargeEffects } : {}), ...(nativeChargeEffects ? { nativeChargeEffects } : {}), ...(nativeForthrightEffects ? { nativeForthrightEffects } : {}), ...(nativeDevilEffects ? { nativeDevilEffects } : {}), ...(nativeForthrightNotification ? { nativeForthrightNotification } : {}) };
+  return { state: s, pointsDelta, earnedDelta, rewards, message, ...(nativePairEffects ? { nativePairEffects } : {}), ...(nativeMinesEffects ? { nativeMinesEffects } : {}), ...(nativeDDPlayEffects ? { nativeDDPlayEffects } : {}), ...(nativeGypsyEffects ? { nativeGypsyEffects } : {}), ...(nativeMoonlightEffects ? { nativeMoonlightEffects } : {}), ...(nativeTreasureEffects ? { nativeTreasureEffects } : {}), ...(nativeWheelEffects ? { nativeWheelEffects } : {}), ...(nativeCarnivalEffects ? { nativeCarnivalEffects } : {}), ...(nativeFirstRechargeEffects ? { nativeFirstRechargeEffects } : {}), ...(nativeChargeEffects ? { nativeChargeEffects } : {}), ...(nativeForthrightEffects ? { nativeForthrightEffects } : {}), ...(nativeDevilEffects ? { nativeDevilEffects } : {}), ...(nativeCaveLootEffects ? { nativeCaveLootEffects } : {}), ...(nativeForthrightNotification ? { nativeForthrightNotification } : {}) };
 }
 
 /** Called only after the service owns BOTH wallets in ascending character-ID order. */
@@ -363,6 +342,11 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
         button("合上未配对卡牌", { type: "hide" }, !b.canHide); button("再开一局", { type: "restart" }, b.status !== "won" || (s.daily["pair:rounds"] ?? 0) >= 3);
       }
     } else if (["treasure", "moon", "cave"].includes(id)) {
+      // A malformed cave save must not prevent the other 16 activity projections.
+      // Preserve it for maintenance; this guard never repairs it or changes old POST rules.
+      const savedCave = s.games.cave as Partial<BagState> | null | undefined;
+      if (id === "cave" && savedCave !== undefined && (!savedCave || !Array.isArray(savedCave.bag) || !Array.isArray(savedCave.claimed)
+        || savedCave.bag.some(r => !r || typeof r !== "object"))) return { ...v, rules: ["矿洞存档暂不兼容，数据已保留；其他活动仍可使用。"] };
       const b = bagState(s, id); const cost = id === "treasure" ? 30 : id === "moon" ? 20 : 15;
       v.rules = [`本地奖池：强化石1级55%、朱雀石1级25%、强化石2级15%、朱雀石2级5%。第10抽必得强化石2级×2。`, "奖品先存临时背包（最多30格）；领取寄邮件，回收换积分，两者只能选一种。10碎片可换强化石2级×2。", id === "cave" ? "基础开矿每天前3次免费；基础15积分、高级35积分且奖品数量翻倍。" : `普通每次${cost}积分。`];
       v.stats = [{ label: "临时背包", value: `${b.bag.length}/30` }, { label: "进度", value: b.score }, { label: "碎片", value: b.fragments }, { label: "距离保底", value: 10 - b.pity }];
@@ -410,5 +394,5 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
     nativeCarnival: viewCarnivalNative(s.games.carnivalNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))), nativeFirstRecharge,
     nativeCharge: viewChargeNative(s.games.chargeNativeV1, ctx, wallet, s.claims, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0))),
     nativeForthright: viewForthrightNative(s, ctx, wallet),
-    nativeDevil: viewDevilNative(s.games.devilNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)), s.claims) };
+    nativeDevil: viewDevilNative(s.games.devilNativeV1, ctx, wallet, Math.max(0, C.maxDailyActions - (s.daily.actions ?? 0)), s.claims), nativeCaveLoot: viewCaveLoot(s, ctx, wallet) };
 }

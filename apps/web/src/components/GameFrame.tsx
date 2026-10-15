@@ -16,6 +16,7 @@ import { attachNativeChargeHost, type NativeChargePlayer } from "@/lib/native-ch
 import { attachNativeForthrightHost, type NativeForthrightPlayer } from "@/lib/native-forthright-host";
 import { attachNativeExchangeHost, type NativeExchangePlayer } from "@/lib/native-exchange-host";
 import { attachNativeDevilHost, type NativeDevilPlayer } from "@/lib/native-devil-host";
+import { attachNativeCaveLootHost, type NativeCaveLootPlayer } from "@/lib/native-caveloot-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -30,7 +31,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer, NativeCaveLootPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -67,16 +68,19 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenForthright?: (characterId: number, generation: string) => boolean;
   workshopOpenExchange?: (characterId: number, generation: string) => boolean;
   workshopOpenDevil?: (characterId: number, generation: string) => boolean;
+  workshopOpenCaveLoot?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
   workshopStatusCharge?: () => NativePairStatus;
   workshopStatusForthright?: () => NativePairStatus;
   workshopStatusExchange?: () => NativePairStatus;
   workshopStatusDevil?: () => NativePairStatus;
+  workshopStatusCaveLoot?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
   workshopCloseCharge?: () => unknown;
   workshopCloseForthright?: () => unknown;
   workshopCloseExchange?: () => unknown;
   workshopCloseDevil?: () => unknown;
+  workshopCloseCaveLoot?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -290,6 +294,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       devilCharacterId = 0;
       devilGeneration = "";
     };
+    let cavelootRequest: { cancel: () => void } | null = null;
+    let cavelootHost: ReturnType<typeof attachNativeCaveLootHost> | null = null;
+    let cavelootCharacterId = 0;
+    let cavelootGeneration = "";
+    const detachCaveLoot = () => {
+      cavelootRequest?.cancel();
+      cavelootHost?.cancel();
+      cavelootHost = null;
+      cavelootCharacterId = 0;
+      cavelootGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -340,6 +355,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachForthright();
           detachExchange();
           detachDevil();
+          detachCaveLoot();
           player?.remove();
           player = null;
         };
@@ -1122,6 +1138,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (devilRequest === request) devilRequest = null;
           }
         };
+        window.workshopShowCaveLoot = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenCaveLoot || !owner.workshopStatusCaveLoot || !owner.workshopCloseCaveLoot) return false;
+          try {
+            const initial = owner.workshopStatusCaveLoot();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (cavelootHost && cavelootCharacterId !== characterId) return false;
+            if (!cavelootHost) {
+              cavelootCharacterId = characterId;
+              cavelootGeneration = crypto.randomUUID();
+              const generation = cavelootGeneration;
+              cavelootHost = attachNativeCaveLootHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || cavelootCharacterId !== characterId || cavelootGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusCaveLoot?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          cavelootRequest?.cancel();
+          const request = { cancel: () => {
+            if (cavelootRequest !== request) return;
+            cavelootRequest = null;
+            try { owner.workshopCloseCaveLoot?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          cavelootRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenCaveLoot(characterId, cavelootGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (cavelootRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusCaveLoot();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === cavelootGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (cavelootRequest === request) cavelootRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -1153,6 +1224,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachForthright();
       detachExchange();
       detachDevil();
+      detachCaveLoot();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -1176,6 +1248,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachForthright();
       detachExchange();
       detachDevil();
+      detachCaveLoot();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -1194,6 +1267,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowForthright;
       delete window.workshopShowExchange;
       delete window.workshopShowDevil;
+      delete window.workshopShowCaveLoot;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

@@ -38,6 +38,7 @@ package {
   private static var forthright:Object=record("forthright");
   private static var exchange:Object=record("exchange");
   private static var devil:Object=record("devil");
+  private static var caveloot:Object=record("caveloot");
   // Exact public names from the pinned 82 ABC inventory; private helper classes are not probed.
   private static const SHARED_CLASSES:Array=["App","Config","morn.editor.core::IComponent","morn.core.components::Component","morn.editor.core::IBox","morn.core.components::Box","morn.core.components::View","com.pickgliss.events::LoaderResourceEvent","com.pickgliss.loader::LoadInterfaceEvent","com.pickgliss.loader::LoadInterfaceManager","com.pickgliss.loader::LoadResourceManager","morn.core.components::AutoBitmap","morn.core.components::ISelect","morn.core.components::Button","morn.core.components::CheckBox","morn.editor.core::IClip","morn.core.components::Clip","morn.core.components::ColorPicker","morn.core.components::ComboBox","morn.core.components::Container","morn.core.components::Dialog","morn.core.components::FrameClip","morn.core.components::IItem","morn.core.components::Group","morn.core.components::LayoutBox","morn.core.components::HBox","morn.core.components::ScrollBar","morn.core.components::HScrollBar","morn.core.components::Slider","morn.core.components::HSlider","morn.core.components::Image","morn.core.components::Label","morn.core.components::LinkButton","morn.editor.core::IRender","morn.core.components::List","morn.editor.core::IContent","morn.core.components::Panel","morn.core.components::ProgressBar","morn.core.components::ProxyItem","morn.core.components::RadioButton","morn.core.components::RadioGroup","morn.core.components::Styles","morn.core.components::Tab","morn.core.components::TextInput","morn.core.components::TextArea","morn.core.components::Tree","morn.core.components::VBox","morn.core.components::VScrollBar","morn.core.components::VSlider","morn.core.components::ViewStack","morn.core.events::DragEvent","morn.core.events::UIEvent","morn.core.ex::ButtonEx","morn.core.ex::GroupEx","morn.core.ex::HBoxEx","morn.core.ex::LabelEx","morn.core.ex::LevelIconEx","morn.core.ex::NameTextEx","morn.core.ex::NumberImageEx","morn.core.ex::NumericStepper","morn.core.ex::PageNavigaterEx","morn.core.ex::ProgressBarEx","morn.core.ex::ScaleLeftRightImageEx","morn.core.ex::SelectButtonEx","morn.core.ex::SelectPageEx","morn.core.ex::TabButtonEx","morn.core.ex::TabEx","morn.core.ex::TabListEx","morn.core.handlers::Handler","morn.core.managers::AssetManager","morn.core.managers::DialogManager","morn.core.managers::DragManager","morn.core.managers::LangManager","morn.core.managers::LogManager","morn.core.managers::RenderManager","morn.core.managers::TimerManager","morn.core.utils::BitmapUtils","morn.core.utils::ObjectUtils","morn.core.utils::StringUtils","morn.editor::Builder","morn.editor::BuilderResManager","morn.editor::Sys"];
   public function WorkshopNativeWardrobeBridge(){super();}
@@ -88,6 +89,9 @@ package {
    ExternalInterface.addCallback("workshopOpenDevil",openDevil);
    ExternalInterface.addCallback("workshopStatusDevil",statusDevil);
    ExternalInterface.addCallback("workshopCloseDevil",closeDevil);
+   ExternalInterface.addCallback("workshopOpenCaveLoot",openCaveLoot);
+   ExternalInterface.addCallback("workshopStatusCaveLoot",statusCaveLoot);
+   ExternalInterface.addCallback("workshopCloseCaveLoot",closeCaveLoot);
    registered=true;
   }
   private static function clientClass(name:String):Class {
@@ -130,6 +134,7 @@ package {
   public static function openForthright(id:Number,generation:String):Boolean{return open(forthright,id,generation);}
   public static function openExchange(id:Number,generation:String):Boolean{return open(exchange,id,generation);}
   public static function openDevil(id:Number,generation:String):Boolean{return open(devil,id,generation);}
+  public static function openCaveLoot(id:Number,generation:String):Boolean{return open(caveloot,id,generation);}
   private static function open(r:Object,id:Number,generation:String):Boolean {
    try {
     verifyRole(id);
@@ -171,7 +176,7 @@ package {
     sharedLoader.contentLoaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR,function(e:UncaughtErrorEvent):void{sharedFail("shared-uncaught",String(e.error));});
     sharedLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,function(e:Event):void {
      if(sharedPhase!="loading")return;
-     try{verifyRole(expected);if(sharedCount()!=SHARED_CLASSES.length)throw new Error("共享库载入后类清单不完整。");sharedPhase="ready";stopSharedTimer();if(wardrobe.wantOpen)loadModule(wardrobe);if(pair.wantOpen)loadModule(pair);if(mines.wantOpen)loadModule(mines);if(ddplay.wantOpen)loadModule(ddplay);if(gypsy.wantOpen)loadModule(gypsy);if(moonlight.wantOpen)loadModule(moonlight);if(treasure.wantOpen)loadModule(treasure);if(purr.wantOpen)loadModule(purr);if(carnival.wantOpen)loadModule(carnival);if(firstRecharge.wantOpen)loadModule(firstRecharge);if(charge.wantOpen)loadModule(charge);if(forthright.wantOpen)loadModule(forthright);if(exchange.wantOpen)loadModule(exchange);if(devil.wantOpen)loadModule(devil);}
+     try{verifyRole(expected);if(sharedCount()!=SHARED_CLASSES.length)throw new Error("共享库载入后类清单不完整。");sharedPhase="ready";stopSharedTimer();if(wardrobe.wantOpen)loadModule(wardrobe);if(pair.wantOpen)loadModule(pair);if(mines.wantOpen)loadModule(mines);if(ddplay.wantOpen)loadModule(ddplay);if(gypsy.wantOpen)loadModule(gypsy);if(moonlight.wantOpen)loadModule(moonlight);if(treasure.wantOpen)loadModule(treasure);if(purr.wantOpen)loadModule(purr);if(carnival.wantOpen)loadModule(carnival);if(firstRecharge.wantOpen)loadModule(firstRecharge);if(charge.wantOpen)loadModule(charge);if(forthright.wantOpen)loadModule(forthright);if(exchange.wantOpen)loadModule(exchange);if(devil.wantOpen)loadModule(devil);if(caveloot.wantOpen)loadModule(caveloot);}
      catch(error:Error){sharedFail("shared-complete",error.message);}
     });
     sharedTimer=new Timer(60000,1);sharedTimer.addEventListener(TimerEvent.TIMER_COMPLETE,function(e:TimerEvent):void{sharedFail("shared-timeout","共享组件加载超时。");});sharedTimer.start();
@@ -181,12 +186,12 @@ package {
   private static function stopSharedTimer():void {if(sharedTimer)sharedTimer.stop();}
   private static function sharedFail(at:String,text:String):void {
    if(sharedPhase=="failed")return;stopSharedTimer();sharedPhase="failed";sharedError="共享组件加载失败，请重新进入游戏："+text;
-   fail(wardrobe,at,sharedError);fail(pair,at,sharedError);fail(mines,at,sharedError);fail(ddplay,at,sharedError);fail(gypsy,at,sharedError);fail(moonlight,at,sharedError);fail(treasure,at,sharedError);fail(purr,at,sharedError);fail(carnival,at,sharedError);fail(firstRecharge,at,sharedError);fail(charge,at,sharedError);fail(forthright,at,sharedError);fail(exchange,at,sharedError);fail(devil,at,sharedError);
+   fail(wardrobe,at,sharedError);fail(pair,at,sharedError);fail(mines,at,sharedError);fail(ddplay,at,sharedError);fail(gypsy,at,sharedError);fail(moonlight,at,sharedError);fail(treasure,at,sharedError);fail(purr,at,sharedError);fail(carnival,at,sharedError);fail(firstRecharge,at,sharedError);fail(charge,at,sharedError);fail(forthright,at,sharedError);fail(exchange,at,sharedError);fail(devil,at,sharedError);fail(caveloot,at,sharedError);
   }
   private static function loadModule(r:Object):void {
    if(!r.wantOpen||r.loader||r.module||r.phase=="failed"||sharedPhase!="ready")return;
    try {
-    verifyRole(r.expected);var base:String=root+r.kind+"/",file:String=r.kind=="wardrobe"?"WorkshopNativeWardrobeBootstrap.swf":r.kind=="pair"?"WorkshopNativePairBootstrap.swf":r.kind=="mines"?"WorkshopNativeMinesBootstrap.swf":r.kind=="ddplay"?"WorkshopNativeDDPlayBootstrap.swf":r.kind=="gypsy"?"WorkshopNativeGypsyBootstrap.swf":r.kind=="moonlight"?"WorkshopNativeMoonlightBootstrap.swf":r.kind=="treasure"?"WorkshopNativeTreasureBootstrap.swf":r.kind=="purr"?"WorkshopNativePurrBootstrap.swf":r.kind=="carnival"?"WorkshopNativeCarnivalBootstrap.swf":r.kind=="first-recharge"?"WorkshopNativeFirstRechargeBootstrap.swf":r.kind=="charge"?"WorkshopNativeChargeBootstrap.swf":r.kind=="forthright"?"WorkshopNativeForthrightBootstrap.swf":r.kind=="exchange"?"WorkshopNativeExchangeBootstrap.swf":"WorkshopNativeDevilBootstrap.swf";
+    verifyRole(r.expected);var base:String=root+r.kind+"/",file:String=r.kind=="wardrobe"?"WorkshopNativeWardrobeBootstrap.swf":r.kind=="pair"?"WorkshopNativePairBootstrap.swf":r.kind=="mines"?"WorkshopNativeMinesBootstrap.swf":r.kind=="ddplay"?"WorkshopNativeDDPlayBootstrap.swf":r.kind=="gypsy"?"WorkshopNativeGypsyBootstrap.swf":r.kind=="moonlight"?"WorkshopNativeMoonlightBootstrap.swf":r.kind=="treasure"?"WorkshopNativeTreasureBootstrap.swf":r.kind=="purr"?"WorkshopNativePurrBootstrap.swf":r.kind=="carnival"?"WorkshopNativeCarnivalBootstrap.swf":r.kind=="first-recharge"?"WorkshopNativeFirstRechargeBootstrap.swf":r.kind=="charge"?"WorkshopNativeChargeBootstrap.swf":r.kind=="forthright"?"WorkshopNativeForthrightBootstrap.swf":r.kind=="exchange"?"WorkshopNativeExchangeBootstrap.swf":r.kind=="devil"?"WorkshopNativeDevilBootstrap.swf":"WorkshopNativeCaveLootBootstrap.swf";
     r.phase="loading-bootstrap";r.notice="正在加载原活动窗口。";r.loader=new Loader();var loader:Loader=r.loader as Loader;
     loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,function(e:IOErrorEvent):void{fail(r,"bootstrap-io",e.text);});
     loader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR,function(e:SecurityErrorEvent):void{fail(r,"bootstrap-security",e.text);});
@@ -246,6 +251,8 @@ package {
   public static function statusExchange():Object{return status(exchange);}
   public static function closeDevil():void{close(devil);}
   public static function statusDevil():Object{return status(devil);}
+  public static function closeCaveLoot():void{close(caveloot);}
+  public static function statusCaveLoot():Object{return status(caveloot);}
   public static function statusWardrobe():Object{return status(wardrobe);}
   public static function statusPair():Object{return status(pair);}
   private static function status(r:Object):Object {
@@ -258,7 +265,7 @@ package {
     sharedPhase:sharedPhase,sharedImports:sharedImports,sharedClassCount:SHARED_CLASSES.length,wantOpen:r.wantOpen,
     notice:r.notice,message:String(s&&s.message?s.message:r.notice),errors:r.errors.concat(s&&s.errors?s.errors:[]),
     originalSetCount:s?s.originalSetCount:0,readySetCount:s?s.readySetCount:0,missingSets:s?s.missingSets:[],viewState:s?s.viewState:null};
-   if(r.kind=="pair"||r.kind=="mines"||r.kind=="ddplay"||r.kind=="gypsy"||r.kind=="moonlight"||r.kind=="treasure"||r.kind=="purr"||r.kind=="carnival"||r.kind=="first-recharge"||r.kind=="charge"||r.kind=="forthright"||r.kind=="exchange"||r.kind=="devil"){result.open=Boolean(s&&s.open);result.pending=Boolean(s&&s.pending);result.requestId=s?s.requestId:"";result.sequence=s?s.sequence:0;result.revision=s?s.revision:-1;result.animating=Boolean(s&&s.animating);result.experimental=true;}
+   if(r.kind=="pair"||r.kind=="mines"||r.kind=="ddplay"||r.kind=="gypsy"||r.kind=="moonlight"||r.kind=="treasure"||r.kind=="purr"||r.kind=="carnival"||r.kind=="first-recharge"||r.kind=="charge"||r.kind=="forthright"||r.kind=="exchange"||r.kind=="devil"||r.kind=="caveloot"){result.open=Boolean(s&&s.open);result.pending=Boolean(s&&s.pending);result.requestId=s?s.requestId:"";result.sequence=s?s.sequence:0;result.revision=s?s.revision:-1;result.animating=Boolean(s&&s.animating);result.experimental=true;}
    return result;
   }
   private static function fail(r:Object,at:String,text:String):void {
@@ -267,6 +274,6 @@ package {
    if(r.module){try{r.module.abortNative(text);}catch(ignored:Error){}}
    report(r);
   }
-  private static function report(r:Object):void{if(ExternalInterface.available){try{ExternalInterface.call(r.kind=="wardrobe"?"workshopWardrobeReport":r.kind=="pair"?"workshopPairReport":r.kind=="mines"?"workshopMinesReport":r.kind=="ddplay"?"workshopDDPlayReport":r.kind=="gypsy"?"workshopGypsyReport":r.kind=="moonlight"?"workshopMoonlightReport":r.kind=="treasure"?"workshopTreasureReport":r.kind=="purr"?"workshopPurrReport":r.kind=="carnival"?"workshopCarnivalReport":r.kind=="first-recharge"?"workshopFirstRechargeReport":r.kind=="charge"?"workshopChargeReport":r.kind=="forthright"?"workshopForthrightReport":r.kind=="exchange"?"workshopExchangeReport":"workshopDevilReport",status(r));}catch(ignored:Error){}}}
+  private static function report(r:Object):void{if(ExternalInterface.available){try{ExternalInterface.call(r.kind=="wardrobe"?"workshopWardrobeReport":r.kind=="pair"?"workshopPairReport":r.kind=="mines"?"workshopMinesReport":r.kind=="ddplay"?"workshopDDPlayReport":r.kind=="gypsy"?"workshopGypsyReport":r.kind=="moonlight"?"workshopMoonlightReport":r.kind=="treasure"?"workshopTreasureReport":r.kind=="purr"?"workshopPurrReport":r.kind=="carnival"?"workshopCarnivalReport":r.kind=="first-recharge"?"workshopFirstRechargeReport":r.kind=="charge"?"workshopChargeReport":r.kind=="forthright"?"workshopForthrightReport":r.kind=="exchange"?"workshopExchangeReport":r.kind=="devil"?"workshopDevilReport":"workshopCaveLootReport",status(r));}catch(ignored:Error){}}}
  }
 }
