@@ -37,6 +37,8 @@ package {
   private var projection:Object;
   private var sceneRoot:Sprite;
   private var main:Object;
+  private var rankView:Object;
+  private var rankingRefreshQueued:Boolean=false;
   private var bag:Object;
   private var popup:Object;
   private var confirmation:Object;
@@ -79,7 +81,7 @@ package {
    loader.addEventListener(IOErrorEvent.IO_ERROR,function(e:Event):void{fail("原宝盒布局读取失败。");});loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,function(e:Event):void{fail("原宝盒布局访问失败。");});
    loader.addEventListener(Event.COMPLETE,function(e:Event):void{if(phase==="failed")return;try{
     role();var b:ByteArray=loader.data as ByteArray;b.uncompress();b.position=0;var layouts:Object=b.readObject();if(b.bytesAvailable)throw new Error("原布局含多余字节。");
-    var required:Array=["MoonlightTreasureMain.xml","MoonlightTreasureDraw.xml","MoonlightBag.xml","item/MoonlightBagItem.xml","MoonlightHelp.xml","MoonlightRewardItem.xml","MoonlightRewardsShow.xml","MoonlightShow.xml","item/MoonlightShowItem.xml","MoonlightExchange.xml"];
+    var required:Array=["MoonlightTreasureMain.xml","MoonlightTreasureDraw.xml","MoonlightBag.xml","item/MoonlightBagItem.xml","MoonlightHelp.xml","MoonlightRewardItem.xml","MoonlightRewardsShow.xml","MoonlightShow.xml","item/MoonlightShowItem.xml","MoonlightExchange.xml","MoonlightRank.xml"];
     for each(var key:String in required){if(!(layouts[key] is XML))throw new Error("缺少原布局："+key);var xml:XML=layouts[key];
      for each(var node:XML in xml.descendants()){
       var kind:String=String(node.name());if(["Label","LabelEx","TextInput"].indexOf(kind)>=0)node.@font="Microsoft YaHei";if(kind==="Button"||kind==="TabButtonEx")node.@labelFont="Microsoft YaHei";
@@ -91,10 +93,14 @@ package {
       for(var d:int=xml.Image.length()-1;d>=0;d--)if(String(xml.Image[d].attribute("var"))==="redDot")delete xml.Image[d];
      }
      if(key==="MoonlightHelp.xml"){
-      var lines:Array=["1.本地常驻活动：三档开1／3／5盒，每盒20活动积分。","2.四种普通材料以本地接口规则抽取，第10盒保底强化石2级×2。","3.奖品暂存共用临时包，最多30抽取记录；勾选数量寄邮件。","4.选中材料每单位回收2活动积分，剩余数量保留。","5.本地进度10／20／30，各领强化石1级×2／4／6。","6.每10碎片兑换强化石2级×2，不接真实付款或钥匙购买。","7.原全服排行与未知兑换商店尚未移植；关闭不自动消费。"];
+      var lines:Array=["1.本地常驻活动：三档开1／3／5盒，每盒20活动积分。","2.四种普通材料以本地接口规则抽取，第10盒保底强化石2级×2。","3.奖品暂存共用临时包，最多30抽取记录；勾选数量寄邮件。","4.选中材料每单位回收2活动积分，剩余数量保留。","5.本地进度10／20／30，各领强化石1级×2／4／6。","6.每10碎片兑换强化石2级×2，不接真实付款或钥匙购买。","7.原榜布局显示本地累计寻宝次数；无排行奖，原兑换商店待移植。"];
       var i:int=0;for each(node in xml.LabelEx){node.@text=lines[i];node.@x=22;node.@y=56+i*42;node.@size=14;node.@width=462;node.@height=40;node.@multiline=true;node.@wordWrap=true;node.@leading=3;i++;}if(i!==7)throw new Error("帮助原布局条数不符。");
      }
      if(key==="MoonlightBag.xml")for each(node in xml.LabelEx)if(String(node.@text)==="拆分可得：")node.@text="回收积分：";
+     if(key==="MoonlightRank.xml"){
+      for each(node in xml.descendants())if(String(node.@text)==="个人积分")node.@text="累计寻宝";else if(String(node.@text)==="我的积分：")node.@text="我的次数：";
+      for each(node in xml.LabelEx)if(String(node.attribute("var"))==="rankDesTxt"){node.@text="本地真实角色 · 累计寻宝榜";node.@x=498;node.@y=-18;node.@width=360;node.@height=24;node.@size=14;node.@color="0x8dddff";}
+     }
      cls("morn.core.components.View").uiMap[key]=xml;
     }
     cls("App").stage=cls("com.pickgliss.toplevel.StageReferance").stage;cls("App").asset.setDomain(domain);
@@ -109,6 +115,18 @@ package {
   }
   private function integer(v:*,lo:int,hi:int):Boolean {return typeof v==="number"&&isFinite(v)&&v===Math.floor(v)&&v>=lo&&v<=hi;}
   private function material(v:*):Boolean {return [11019,11001,11021,11002].indexOf(v)>=0;}
+  private function validateRanking(r:Object,score:int):void {
+   if(r==null)return; // Old receipt snapshots may predate the optional read-only board.
+   if(!r||r.version!==1||r.kind!=="moonlight-native-ranking"||r.scope!=="local"||r.metric!=="cumulative-box-draws"||r.personalScore!==score||!(r.entries is Array)||r.entries.length>10)throw new Error("本地寻宝榜投影无效。");
+   if(score===0?r.personalRank!==null:!integer(r.personalRank,1,2147483647))throw new Error("本地寻宝榜本人名次无效。");
+   var previous:Object=null,seen:Object={},own:Object=null,above:int=0,sameScore:Boolean=false;
+   for(var i:int=0;i<r.entries.length;i++){var row:Object=r.entries[i];if(!row||!integer(row.rank,1,10)||!integer(row.characterId,1,2147483647)||typeof row.nickName!=="string"||!row.nickName.replace(/\s/g,"")||row.nickName.length>200||!integer(row.score,1,1000000000)||seen[row.characterId])throw new Error("本地寻宝榜角色行无效。");
+    if(previous&&(previous.score<row.score||(previous.score===row.score&&previous.characterId>=row.characterId)))throw new Error("本地寻宝榜顺序无效。");if(row.rank!==(previous&&previous.score===row.score?previous.rank:i+1))throw new Error("本地寻宝榜同分名次无效。");
+    if(row.score>score)above++;if(row.score===score)sameScore=true;if(row.characterId===expectedId)own=row;seen[row.characterId]=true;previous=row;
+   }
+   if(own&&(own.score!==score||own.rank!==r.personalRank))throw new Error("本地寻宝榜本人数据不符。");
+   if(score>0){if(!previous)throw new Error("本地寻宝榜缺少已参与角色。");if(r.entries.length<10||score>=previous.score){if(!sameScore||r.personalRank!==above+1)throw new Error("本地寻宝榜本人同分位置无效。");if(!own&&(r.entries.length<10||score>previous.score||expectedId<=previous.characterId))throw new Error("本地寻宝榜遗漏当前角色。");}else if(r.personalRank<=10||own)throw new Error("本地寻宝榜榜外名次无效。");}
+  }
   private function validate(p:Object):void {
    if(!p||p.version!==1||p.kind!=="moonlight-native"||typeof p.started!=="boolean"||!integer(p.score,0,2147483647)||p.drawCost!==20||p.bagCapacity!==30||!integer(p.bagSlotsUsed,0,30)||!integer(p.draws,0,1000000000)||!integer(p.progressScore,0,1000000000)||!integer(p.fragments,0,1000000000)||!integer(p.pityRemaining,1,10))throw new Error("宝盒公开投影无效。");
    if(typeof p.day!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(p.day)||typeof p.bagToken!=="string"||!new RegExp("^"+p.day+":[A-Za-z0-9_-]{43}$").test(p.bagToken)||!p.localRules||p.localRules.version!==1||typeof p.localRules.description!=="string")throw new Error("宝盒包版本或本地规则无效。");
@@ -117,6 +135,7 @@ package {
    if(!(p.bag is Array)||p.bag.length>4||!(p.previewTemplateIds is Array)||p.previewTemplateIds.join(",")!=="11019,11001,11021,11002")throw new Error("材料目录无效。");var seen:Array=[];var total:int=0;for(i=0;i<p.bag.length;i++){var o:Object=p.bag[i];if(o.index!==i||!material(o.templateId)||seen.indexOf(o.templateId)>=0||!integer(o.itemCount,1,60)||o.recycleUnitPoints!==2)throw new Error("临时包材料无效。");seen.push(o.templateId);total+=o.itemCount;}if(total>60||(p.bagSlotsUsed===0)!==(p.bag.length===0)||p.canTake!==(p.bag.length>0)||(p.canRecycle&&p.bag.length===0))throw new Error("临时包总量无效。");
    if(!p.exchange||p.exchange.fragmentCost!==10||p.exchange.templateId!==11021||p.exchange.itemCount!==2||p.exchange.maxCount!==10||p.exchange.affordableCount!==Math.min(10,Math.floor(p.fragments/10))||p.exchange.canExchange!==(p.fragments>=10)||!(p.progress is Array)||p.progress.length!==3)throw new Error("奖励配置无效。");
    for(i=0;i<3;i++){o=p.progress[i];if(o.tier!==i+1||o.target!==(i+1)*10||o.templateId!==11019||o.itemCount!==(i+1)*2||typeof o.claimed!=="boolean"||typeof o.canClaim!=="boolean"||(o.claimed&&o.canClaim))throw new Error("进度奖励无效。");}
+   validateRanking(p.ranking,p.draws);
   }
   private function effects(value:Object,action:Object):Object {
    var envelope:Object=value.nativeMoonlightAction;if(!envelope||envelope.requestId!==pendingId||!(envelope.effects is Array)||envelope.effects.length!==1)throw new Error("宝盒动作效果缺失。");var e:Object=envelope.effects[0],p:Object=value.nativeMoonlight;
@@ -153,9 +172,25 @@ package {
    for(var i:int=0;i<3;i++){var box:Object=draw.getChildByName("openBox"+i);box.getChildByName("needKeyCount").text=projection.drawChoices[i].cost+"积分";var b:Object=box.getChildByName("drawBtn");b.label="开启"+projection.drawChoices[i].count+"盒";b.labelSize=18;b.disabled=pending||animating||!projection.drawChoices[i].canDraw;var reward:Object=draw.getChildByName("rewardItem"+i);reward.desTxt.text=projection.progress[i].target+"进度";}
    main.timeTxt.text="本地常驻 · 每盒20积分 · 第10盒保底";main.timeTxt.x=565;main.timeTxt.width=370;main.timeTxt.size=13;
    if(notice)notice.text="本地1／3／5盒：20／60／100积分；临时包记录 "+projection.bagSlotsUsed+"／30；每单位回收2积分。";
+   renderRanking();
+  }
+  private function showRanking():void {
+   if(!main||!projection)return;
+   if(!rankView){var C:Object=cls("activity.moonlightbox.mornui.MoonlightRankUI");rankView=new C();rankView.x=39;rankView.y=104;main.addChild(rankView as DisplayObject);rankView.viewTab.visible=false;rankView.rewardBox.visible=false;rankView.rankBox.visible=true;rankView.playerBox.visible=false;rankView.rankClip.visible=false;rankView.bgClip.index=0;rankView.rankList.renderHandler=handler(renderRankRow);
+    var explanation:TextField=text(44,104,360,150,"本地累计寻宝榜\n按真实累计开启盒数排序，同分同名次。\n同分角色按角色编号排序展示。\n只展示本地角色，不发放排行奖励。\n原私服积分、跨服和排行奖尚未复刻。",0xe9f5ff);explanation.multiline=true;explanation.wordWrap=true;rankView.addChild(explanation);
+    var button:Sprite=new Sprite();button.x=80;button.y=270;button.graphics.lineStyle(1,0x8dddff);button.graphics.beginFill(0x293c7a);button.graphics.drawRoundRect(0,0,220,40,10,10);button.graphics.endFill();button.buttonMode=true;var caption:TextField=text(0,9,220,25,"刷新本地累计榜",0xffffff);var format:TextFormat=caption.defaultTextFormat;format.align="center";caption.setTextFormat(format);button.addChild(caption);rankView.addChild(button);bind(rankView,button,MouseEvent.CLICK,function(e:Event):void{queueRankingRefresh();});
+   }
+   rankView.visible=true;renderRanking();queueRankingRefresh();
+  }
+  private function queueRankingRefresh():void {if(main&&wantedOpen&&rankView&&rankView.visible&&!pending&&!animating)rankingRefreshQueued=true;}
+  private function renderRanking():void {
+   if(!rankView||!projection)return;var r:Object=projection.ranking;rankView.rankList.array=r?r.entries:[];rankView.myRankTxt.text=r&&r.personalRank!==null?String(r.personalRank):"暂无";rankView.myScoreTxt.text=String(projection.draws);rankView.myScoreTxt.width=100;rankView.myScoreTxt.size=14;rankView.rankDesTxt.text=r?"本地真实角色 · 累计寻宝榜":"本地累计榜待刷新，未展示旧榜单";
+  }
+  private function renderRankRow(row:Object,index:int):void {
+   if(!rankView)return;var data:Array=rankView.rankList.array;if(index<0||index>=data.length){row.visible=false;return;}var entry:Object=data[index];row.visible=true;row.getChildByName("nickNameTxt").text=entry.nickName.length>9?entry.nickName.substr(0,8)+"…":entry.nickName;row.getChildByName("scoreTxt").text=String(entry.score);row.getChildByName("rankTxt").text=String(entry.rank);row.getChildByName("rankTxt").visible=entry.rank>3;row.getChildByName("rankClip").visible=entry.rank<=3;if(entry.rank<=3)row.getChildByName("rankClip").index=entry.rank-1;row.tipStyle="ddt.view.tips.OneLineTip";row.tipData=entry.nickName;
   }
   private function constructWindow():void {
-   role();sceneRoot=new Sprite();sceneRoot.graphics.beginFill(0x000000,0.7);sceneRoot.graphics.drawRect(0,0,1000,600);sceneRoot.graphics.endFill();var C:Object=cls("activity.moonlightbox.MoonlightTreasureMain");main=new C();main.x=12;main.y=66;sceneRoot.addChild(main as DisplayObject);main.viewTab.cells[2].disabled=true;main.viewTab.cells[2].label="排行待移植";main.viewTab.cells[1].label="本地碎片兑换";
+   role();sceneRoot=new Sprite();sceneRoot.graphics.beginFill(0x000000,0.7);sceneRoot.graphics.drawRect(0,0,1000,600);sceneRoot.graphics.endFill();var C:Object=cls("activity.moonlightbox.MoonlightTreasureMain");main=new C();main.x=12;main.y=66;sceneRoot.addChild(main as DisplayObject);main.viewTab.cells[2].label="本地累计榜";main.viewTab.cells[1].label="本地碎片兑换";
    notice=text(24,578,956,21,"",0xe9f5ff);sceneRoot.addChild(notice);var host:Object=cls("com.pickgliss.ui.LayerManager").Instance;host.addToLayer(sceneRoot,3,true,1);
    sceneRoot.addEventListener(Event.ENTER_FRAME,tick);sceneRoot.addEventListener(MouseEvent.CLICK,stopBubble);sceneRoot.addEventListener(MouseEvent.MOUSE_DOWN,stopBubble);sceneRoot.addEventListener(KeyboardEvent.KEY_DOWN,onKey);cls("com.pickgliss.toplevel.StageReferance").stage.focus=sceneRoot;
   }
@@ -163,6 +198,7 @@ package {
   private function lock():void {
    var blocked:Boolean=pending||animating||confirmation!==null||popup!==null||bag!==null;
    if(main){main.drawView.mouseChildren=!blocked;main.drawView.mouseEnabled=!blocked;main.viewTab.mouseChildren=!blocked;main.viewTab.mouseEnabled=!blocked;main.helpBtn.disabled=pending||animating;}
+   if(rankView){rankView.mouseChildren=!blocked;rankView.mouseEnabled=!blocked;}
    if(bag){bag.list.mouseChildren=!pending;bag.checkBtn.disabled=pending;bag.getBtn.disabled=pending||!projection.canTake;bag.backBtn.disabled=pending||!projection.canRecycle;}
    if(popup){popup.mouseChildren=!pending&&!confirmation;popup.mouseEnabled=!pending&&!confirmation;}if(notice&&message)notice.text=message;
   }
@@ -205,10 +241,10 @@ package {
   private function unbind(owner:Object):void {var rows:Array=bindings[owner] as Array;if(rows)for each(var r:Array in rows)r[0].removeEventListener(r[1],r[2]);delete bindings[owner];}
   private function stopBubble(e:Event):void {e.stopPropagation();}
   private function onKey(e:KeyboardEvent):void {if(e.keyCode===27)closeNative();e.stopPropagation();}
-  private function tick(e:Event):void {try{role();}catch(error:Error){fail(error.message);}}
+  private function tick(e:Event):void {try{role();if(rankingRefreshQueued&&main&&wantedOpen&&rankView&&rankView.visible&&!pending&&!animating){rankingRefreshQueued=false;read();}}catch(error:Error){fail(error.message);}}
   public function closeNative():Object {
    wantedOpen=false;animating=false;settledRewards=null;var failed:String="";
-   try{clearConfirm();closeBag();closePopup();if(main){var view:Object=main;main=null;if(view.drawView._movie)view.drawView._movie.stop();if(view.drawView._autoShowTimer)view.drawView._autoShowTimer.stop();view.dispose();}}catch(error:Error){failed=error.message;}
+   rankingRefreshQueued=false;try{clearConfirm();closeBag();closePopup();if(rankView){var board:Object=rankView;rankView=null;unbind(board);board.rankList.renderHandler=null;board.rankList.dispose();board.dispose();}if(main){var view:Object=main;main=null;if(view.drawView._movie)view.drawView._movie.stop();if(view.drawView._autoShowTimer)view.drawView._autoShowTimer.stop();view.dispose();}}catch(error:Error){failed=error.message;}
    if(sceneRoot){sceneRoot.removeEventListener(Event.ENTER_FRAME,tick);sceneRoot.removeEventListener(KeyboardEvent.KEY_DOWN,onKey);sceneRoot.removeEventListener(MouseEvent.CLICK,stopBubble);sceneRoot.removeEventListener(MouseEvent.MOUSE_DOWN,stopBubble);if(sceneRoot.parent)sceneRoot.parent.removeChild(sceneRoot);sceneRoot=null;}notice=null;if(failed){phase="failed";message="原宝盒关闭未完成："+failed;}report();return statusNative();
   }
   public function abortNative(reason:String):void {closeNative();fail(reason);}
@@ -233,7 +269,7 @@ package {
    }
    if(owner==="activity/moonlightbox/MoonlightTreasureMain"){
     if(name==="__closeHandler"){closeNative();return;}if(name==="__showHelp"){openHelp();return;}if(name==="__helpDispose"){closePopup();return;}
-    if(name==="updateTab"){o.drawView.visible=true;if(o.viewTab.selectedIndex!==0){var tab:int=o.viewTab.selectedIndex;o.viewTab.selectedIndex=0;if(tab===1)openExchange();else say("原全服排行尚未移植。");}return;}
+    if(name==="updateTab"){var tab:int=o.viewTab.selectedIndex;o.drawView.visible=tab!==2;o.bgClip.index=tab===2?1:0;if(rankView)rankView.visible=tab===2;if(tab===2)showRanking();else{rankingRefreshQueued=false;if(tab===1){o.viewTab.selectedIndex=0;openExchange();}}return;}
    }
    if(owner==="activity/moonlightbox/view/MoonlightTreasureDraw"){
     if(name==="__drawClick"){draw(int(args[0]));return;}if(name==="__addKeyHandler"){openHelp();return;}if(name==="__showBagHandler"){openBag();return;}if(name==="__showAllRewards"){openShow();return;}if(name==="showDrawResult"){showDrawResult(o);return;}if(name==="__drawHandler"){startMovie(o,args[0]);return;}if(name==="__standBComplate"){endMovie(o,args[0]);return;}

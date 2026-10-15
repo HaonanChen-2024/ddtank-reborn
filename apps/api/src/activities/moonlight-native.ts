@@ -6,13 +6,18 @@ import { ActivityError, type ActivityAction, type ActivityContext, type Activity
 export interface MoonlightState {
   bag: ActivityReward[]; draws: number; score: number; fragments: number; pity: number; choices: string[]; claimed: number[];
 }
+export interface MoonlightNativeRanking {
+  version: 1; kind: "moonlight-native-ranking"; scope: "local"; metric: "cumulative-box-draws";
+  entries: { rank: number; characterId: number; nickName: string; score: number }[];
+  personalScore: number; personalRank: number | null;
+}
 type Clock = Pick<ActivityContext, "now">;
 type Funds = Pick<ActivityWallet, "points">;
 type Selection = { index: number; templateId: number; itemCount: number };
 type PrizeRoll = (guaranteed: boolean) => ActivityReward;
 export const moonlightNativeLocalRules = Object.freeze({ version: 1, drawCost: C.moonCost, bagCapacity: C.bagCapacity,
   recycleUnitPoints: 2, exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, maxCount: 10 },
-  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。每包10碎片兑换强化石2级×2，原窗口每次可选1至10包；旧网页保留单包兑换。10/20/30进度各领一次普通材料。私服开盒档位、钥匙价、概率和全服排行未复刻，不产生钥匙货币或真实付款。",
+  description: "本地规则：原窗口三档分别开启1/3/5盒，每盒20活动积分，共20/60/100积分；四种普通材料按55/25/15/5本地权重抽取，第10次保底强化石2级×2。奖品先存共用临时包，最多30抽取记录；原窗口可勾选材料与数量取出邮件或回收，每个材料数量回收2积分。旧网页仍支持1至5次开启和全取/全回收。每包10碎片兑换强化石2级×2，原窗口每次可选1至10包；旧网页保留单包兑换。10/20/30进度各领一次普通材料。本地榜按旧网页与原窗口共用的真实累计寻宝次数排名，显示前十及本人名次，同分并列，不发排名奖励。私服开盒档位、钥匙价、概率和原服排名及奖励未复刻，不产生钥匙货币或真实付款。",
 });
 export type MoonlightNativeEffect =
   | { type: "drawn"; count: number; cost: number; score: number; draws: number; rewards: { templateId: number; itemCount: number }[] }
@@ -151,6 +156,8 @@ export function viewMoonlightNative(value: unknown, ctx: Clock, funds: Funds, ac
     canDraw: drawChoices[0].canDraw, drawChoices,
     canTake: bag.length > 0, canRecycle: bag.length > 0 && score <= 2_147_483_645, bag,
     previewTemplateIds: PRIZES.map(item => item.templateId),
+    // Filled only by an authenticated, committed GET; action/replay projections never run ranking reads.
+    ranking: null as MoonlightNativeRanking | null,
     exchange: { ...moonlightNativeLocalRules.exchange, affordableCount: Math.min(moonlightNativeLocalRules.exchange.maxCount, Math.floor(state.fragments / 10)), canExchange: state.fragments >= 10 },
     progress: [1, 2, 3].map(tier => ({ tier, target: tier * 10, templateId: 11019, itemCount: tier * 2,
       claimed: state.claimed.includes(tier), canClaim: state.score >= tier * 10 && !state.claimed.includes(tier) })),

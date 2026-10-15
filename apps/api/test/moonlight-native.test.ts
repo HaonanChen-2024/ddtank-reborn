@@ -34,6 +34,8 @@ describe("original Moonlight shared bag and local three-draw contract", () => {
     expect(viewMoonlightNative(undefined, ctx, wallet).bagToken).toBe(view.bagToken); // Token binds bag state, not unrelated wallet changes.
     expect(viewMoonlightNative(undefined, next, wallet).bagToken).not.toBe(view.bagToken);
     expect(view.localRules.description).toContain("私服开盒档位"); expect(view.localRules.description).toContain("本地权重");
+    expect(view.ranking).toBeNull(); expect(view.localRules.description).toContain("真实累计寻宝次数");
+    expect(view.localRules.description).toContain("不发排名奖励");
     expect(JSON.stringify(view)).not.toMatch(/"(?:state|games|seed|effects|choices)"\s*:/);
   });
 

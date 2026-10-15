@@ -117,7 +117,7 @@ package {
     if(row.score>score)above++;if(row.score===score)sameScore=true;if(row.characterId===expectedId)own=row;seen[row.characterId]=true;previous=row;
    }
    if(own&&(own.score!==score||own.rank!==r.personalRank))throw new Error("本地累计榜本人数据不符。");
-   if(score>0){if(!previous)throw new Error("本地累计榜缺少已参与角色。");if(r.entries.length<10||score>=previous.score){if(!sameScore||r.personalRank!==above+1)throw new Error("本地累计榜本人同分位置无效。");if(r.entries.length<10&&!own)throw new Error("本地累计榜遗漏当前角色。");}else if(r.personalRank<=10||own)throw new Error("本地累计榜榜外名次无效。");}
+   if(score>0){if(!previous)throw new Error("本地累计榜缺少已参与角色。");if(r.entries.length<10||score>=previous.score){if(!sameScore||r.personalRank!==above+1)throw new Error("本地累计榜本人同分位置无效。");if(!own&&(r.entries.length<10||score>previous.score||expectedId<=previous.characterId))throw new Error("本地累计榜遗漏当前角色。");}else if(r.personalRank<=10||own)throw new Error("本地累计榜榜外名次无效。");}
   }
   private function validate(p:Object):void {
    if(!p||p.version!==1||p.kind!=="carnival-native"||typeof p.started!=="boolean"||typeof p.day!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(p.day)||typeof p.stateToken!=="string"||!/^\d{4}-\d{2}-\d{2}:[A-Za-z0-9_-]{43}$/.test(p.stateToken)||p.stateToken.indexOf(p.day+":")!==0||p.activityState!==1)throw new Error("无效的狂欢投影或完整令牌。");

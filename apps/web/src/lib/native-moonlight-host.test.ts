@@ -42,6 +42,73 @@ beforeEach(() => {
 });
 afterEach(() => { for (const host of hosts.splice(0)) host.cancel(); vi.unstubAllGlobals(); });
 describe("original Moonlight host", () => {
+  const ranking = (id: number) => ({ version: 1, kind: "moonlight-native-ranking", scope: "local", metric: "cumulative-box-draws",
+    entries: [{ rank: 1, characterId: 2, nickName: "甲", score: 9 }, { rank: 1, characterId: 3, nickName: "乙", score: 9 },
+      { rank: 3, characterId: id, nickName: "本人", score: 3 }], personalScore: 3, personalRank: 3 });
+  it("reads the real local cumulative-box board with competition ranks without submitting an action", async () => {
+    const x = setup(), p = { ...stocked(), ranking: ranking(x.id), ordinaryFutureCaption: "compatible" };
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeMoonlight: p })));
+    x.target.workshopMoonlightRead!(x.id, x.generation, 1);
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(x.accept.mock.calls[0][0].snapshot?.nativeMoonlight).toEqual(p);
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(fetchMock.mock.calls[0][1]?.method).toBe("GET");
+    expect(x.reject).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("accepts legacy omission, null, a genuine zero board, tie cutoff, outside rank and the billion-draw ceiling", async () => {
+    for (const kind of ["legacy", "null", "zero", "tie", "outside", "ceiling"] as const) {
+      const x = setup(), board = ranking(x.id), p: Record<string, unknown> = kind === "zero" ? projection() : stocked();
+      if (kind === "null") p.ranking = null;
+      if (kind === "zero") p.ranking = { ...board, entries: [], personalScore: 0, personalRank: null };
+      if (kind === "tie") p.ranking = { ...board, personalRank: 1, entries: Array.from({ length: 10 }, (_, i) => ({
+        rank: 1, characterId: i + 1, nickName: `角色${i + 1}`, score: 3 })) };
+      if (kind === "outside") p.ranking = { ...board, personalRank: 11, entries: Array.from({ length: 10 }, (_, i) => ({
+        rank: i + 1, characterId: i + 1, nickName: `角色${i + 1}`, score: 20 - i })) };
+      if (kind === "ceiling") { p.draws = 1_000_000_000; p.ranking = { ...board, personalScore: p.draws, personalRank: 1,
+        entries: [{ rank: 1, characterId: x.id, nickName: "本人", score: 1_000_000_000 }] }; }
+      fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeMoonlight: p })));
+      x.target.workshopMoonlightRead!(x.id, x.generation, 1);
+      await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce()); expect(x.reject).not.toHaveBeenCalled(); x.host.cancel();
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+  });
+  it("rejects private ranking data, stale personal scores, bad ties and a missing actor who belongs in the top ten", async () => {
+    const mutations: ((r: ReturnType<typeof ranking>) => unknown)[] = [
+      r => ({ ...r, version: 2 }), r => ({ ...r, kind: "carnival-native-ranking" }), r => ({ ...r, scope: "cross-server" }),
+      r => ({ ...r, metric: "payment" }), r => ({ ...r, personalScore: 2 }), r => ({ ...r, personalRank: null }),
+      r => ({ ...r, personalRank: 2 }), r => ({ ...r, entries: [] }), r => ({ ...r, entries: Array(11).fill(r.entries[0]) }),
+      r => ({ ...r, seed: "private" }), r => ({ ...r, entries: [{ ...r.entries[0], accountId: 99 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], state: {} }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], score: 0 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], score: 1_000_000_001 }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [{ ...r.entries[0], nickName: " " }, ...r.entries.slice(1)] }),
+      r => ({ ...r, entries: [r.entries[0], { ...r.entries[1], characterId: 2 }, r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[1], r.entries[0], r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], { ...r.entries[1], rank: 2 }, r.entries[2]] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], rank: 2 }] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], score: 2 }] }),
+      r => ({ ...r, entries: [r.entries[0], r.entries[1], { ...r.entries[2], characterId: 900000 }] }),
+      r => ({ ...r, personalRank: 2, entries: Array.from({ length: 10 }, (_, i) => ({ rank: i < 2 ? i + 1 : 3,
+        characterId: i + 1, nickName: `角色${i + 1}`, score: i === 0 ? 9 : i === 1 ? 3 : 2 })) }),
+      r => ({ ...r, personalRank: 1, entries: Array.from({ length: 10 }, (_, i) => ({ rank: 1,
+        characterId: 900000 + i, nickName: `角色${i + 1}`, score: 3 })) }),
+    ];
+    for (const mutate of mutations) {
+      const x = setup(); fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeMoonlight: { ...stocked(), ranking: mutate(ranking(x.id)) } })));
+      x.target.workshopMoonlightRead!(x.id, x.generation, 1);
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled(); x.host.cancel();
+    }
+  });
+  it("accepts a null POST ranking without weakening the original exchange count or reward effect contract", async () => {
+    const x = setup(); fetchMock.mockImplementationOnce(async () => response(snapshot(x.id, {
+      nativeMoonlight: { ...stocked(), ranking: null, fragments: 0 },
+      nativeMoonlightAction: { requestId: sent().requestId, effects: [{ type: "exchanged", count: 2,
+        fragmentsSpent: 20, fragments: 0, templateId: 11021, itemCount: 4 }] } })));
+    const ack = x.request({ type: "exchange", choice: bagToken, count: 2 });
+    await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce()); expect(x.reject).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledOnce(); expect(sent()).toMatchObject({ requestId: ack.requestId, action: { count: 2 } });
+    expect(x.accept.mock.calls[0][0].snapshot?.nativeMoonlight).toMatchObject({ ranking: null, draws: 3 });
+    expect(readPendingActivity(x.id)).toBeNull();
+  });
   it("opens with GET only and strips all five effects without opening a box", async () => {
     const x = setup(), stale = { requestId: "old", effects: ["old"] };
     fetchMock.mockResolvedValue(response(snapshot(x.id, { nativePairAction: stale, nativeMinesAction: stale,
@@ -84,7 +151,7 @@ describe("original Moonlight host", () => {
       { type: "progress", choice: bagToken, tier: 4 },
       ...[0,-1,11,1.5,"2",null,undefined].map(count => ({ type: "exchange", choice: bagToken, count })),
       { type: "exchange", choice: bagToken, count: 2, price: 1 },
-      { type: "buy", choice: bagToken }, { type: "draw", choice: "2026-10-15:short", count: 1 },
+      { type: "buy", choice: bagToken }, { type: "rank", choice: bagToken }, { type: "draw", choice: "2026-10-15:short", count: 1 },
       Object.create({ type: "draw", choice: bagToken, count: 1 }),
       Object.assign(Object.create({ choice: bagToken }), { type: "draw", count: 1 })])
       expect(x.request(action)).toEqual({ accepted: false });

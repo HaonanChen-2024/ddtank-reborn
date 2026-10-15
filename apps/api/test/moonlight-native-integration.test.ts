@@ -4,9 +4,12 @@ import { tmpdir } from "node:os";
 import { isAbsolute, join, relative } from "node:path";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { PRIZES } from "../src/activities/config.js";
+import { advanceMoonlight } from "../src/activities/moonlight-native.js";
+import { createActivityState } from "../src/activities/engine.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
@@ -42,6 +45,24 @@ async function snapshot(): Promise<ActivityResult> {
 }
 const draw = async (count: number) => native({ type: "draw", count, choice: (await snapshot()).nativeMoonlight.bagToken });
 const saved = async () => (await q1<{ State: ActivityState }>(h, sql`SELECT "State" FROM app."ActivityStates" WHERE "UserID"=${uid} AND "Activity"='reference'`))?.State;
+async function storeScore(characterId: number, score: number, activity = "reference", corrupt = false) {
+  const state = createActivityState(new Date());
+  // Build the shared save through its real owner, never a fabricated public ranking result.
+  for (let left = score; left > 0; left -= 5) state.games.moon = advanceMoonlight(state.games.moon,
+    { type: "draw", count: Math.min(left, 5) }, { now: new Date() }, { points: 1000 }, guaranteed => ({ templateId: guaranteed ? 11021 : 11019, count: guaranteed ? 2 : 1 })).state;
+  if (corrupt) (state.games.moon as { draws: number }).draws = -1;
+  state.games.privateOtherActivity = { seed: "must-never-be-public", board: [7, 8, 9] };
+  await h.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${characterId},1000,40) ON CONFLICT DO NOTHING`);
+  await h.db.execute(sql`INSERT INTO app."ActivityStates" ("UserID","Activity","State") VALUES (${characterId},${activity},${JSON.stringify(state)}::jsonb)
+    ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
+}
+async function addRankRole(characterId: number, score: number, account = true) {
+  const userName = `rank-role-${characterId}`;
+  if (account) await h.db.execute(sql`INSERT INTO member."Accounts" ("ID","UserName","PasswordHash") VALUES (${characterId},${userName},'tests-only')`);
+  await h.db.execute(sql`INSERT INTO player."Sys_Users_Detail" ("UserID","UserName","NickName","Sex","ForbidDate","IsFirst")
+    VALUES (${characterId},${userName},${`榜单角色${characterId}`},true,'2000-01-01',1)`);
+  await storeScore(characterId, score);
+}
 async function persisted() { return {
   wallets: await q(h, sql`SELECT * FROM app."ActivityWallet" ORDER BY "UserID"`),
   states: await q(h, sql`SELECT * FROM app."ActivityStates" ORDER BY "UserID","Activity"`),
@@ -79,6 +100,78 @@ afterAll(async () => {
 });
 
 describe("original Moonlight through the shared transactional API", () => {
+  it("reads a genuine local top ten with competition ties, deterministic ids and the actor's rank outside the slice without writes", async () => {
+    await storeScore(uid, 2);
+    const scores = [12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5];
+    for (let index = scores.length - 1; index >= 0; index--) await addRankRole(900 + index, scores[index]);
+    const before = await persisted(), rank = (await snapshot()).nativeMoonlight.ranking!;
+    expect(rank).toMatchObject({ version: 1, kind: "moonlight-native-ranking", scope: "local", metric: "cumulative-box-draws", personalScore: 2, personalRank: 12 });
+    expect(rank.entries.map(row => [row.characterId, row.rank, row.score])).toEqual(scores.slice(0, 10).map((score, index) => [900 + index, index === 1 ? 1 : index === 9 ? 9 : index + 1, score]));
+    expect(rank.entries.every(row => Object.keys(row).sort().join(",") === "characterId,nickName,rank,score")).toBe(true);
+    expect(JSON.stringify(rank)).not.toMatch(/must-never-be-public|rank-role-|fragments|claimed|wallet|seed|board/);
+    expect(await persisted()).toEqual(before);
+  });
+
+  it("excludes banned, deleted, forbidden, unnamed, orphaned, zero, malformed and other-activity roles, respecting account ownership", async () => {
+    await storeScore(uid, 1); await storeScore(otherUid, 2);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "NickName"='2026-10-15 12:00:00' WHERE "UserID"=${otherUid}`);
+    for (let id = 900; id <= 906; id++) await addRankRole(id, 5, id !== 904);
+    await h.db.execute(sql`UPDATE member."Accounts" SET "IsBanned"=true WHERE "ID"=900`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "IsExist"=false WHERE "UserID"=901`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "ForbidDate"='2099-01-01' WHERE "UserID"=902`);
+    await h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "NickName"='  ' WHERE "UserID"=903`);
+    await storeScore(905, 5, "reference", true);
+    await h.db.execute(sql`DELETE FROM app."ActivityStates" WHERE "UserID"=906`); await storeScore(906, 5, "different-activity");
+    await addRankRole(907, 0);
+    const before = await persisted(), rank = (await snapshot()).nativeMoonlight.ranking!;
+    expect(rank.entries.map(row => [row.characterId, row.score])).toEqual([[otherUid, 2], [uid, 1]]);
+    expect(rank.personalRank).toBe(2); expect(rank.entries[0].nickName).toBe("2026-10-15 12:00:00");
+    const foreign = await built.app.inject({ url: `/api/account/activities?characterId=${otherUid}`, headers: headers() });
+    expect(foreign.statusCode).toBe(403); expect(foreign.body).not.toMatch(/entries|Other test|ranking|seed|board/);
+    expect(await persisted()).toEqual(before);
+  });
+
+  it("counts old and native committed draws once, excludes settlements, leaves POST ranking null and persists across restart and midnight", async () => {
+    const unstarted = await snapshot(), before = await persisted();
+    expect(unstarted.nativeMoonlight.ranking).toMatchObject({ entries: [], personalScore: 0, personalRank: null });
+    expect(await persisted()).toEqual(before);
+    await storeScore(otherUid, 1); const first = await snapshot(); await storeScore(otherUid, 2); const fresh = await snapshot();
+    expect(fresh.nativeMoonlight.bagToken).toBe(first.nativeMoonlight.bagToken); expect(fresh.nativeMoonlight.ranking!.entries[0].score).toBe(2);
+    const old = await action("moon", { type: "draw", count: 2 }); expect(old.nativeMoonlight.ranking).toBeNull();
+    const choice = (await snapshot()).nativeMoonlight.bagToken, requestId = randomUUID(), value = { type: "draw", count: 3, choice };
+    const beforeDraw = await persisted();
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" ADD CONSTRAINT moonlight_native_receipt_failure CHECK ("Signature"='cannot-pass-test') NOT VALID`);
+    expect((await post("moonlight-native", value, requestId)).statusCode).toBe(500); expect(await persisted()).toEqual(beforeDraw);
+    expect((await snapshot()).nativeMoonlight.ranking!.personalScore).toBe(2);
+    await h.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT moonlight_native_receipt_failure`);
+    const drawn = await native(value, requestId); expect(drawn.nativeMoonlight.ranking).toBeNull();
+    const delivered = await persisted(), replay = await native(value, requestId);
+    expect(replay.nativeMoonlight.ranking).toBeNull(); expect(await persisted()).toEqual(delivered);
+    const rank = (await snapshot()).nativeMoonlight.ranking!; expect(rank).toMatchObject({ personalScore: 5, personalRank: 1 });
+    await action("moon", { type: "take" }); expect((await snapshot()).nativeMoonlight.ranking).toEqual(rank);
+    await built.app.close(); await rebuild(); expect((await snapshot()).nativeMoonlight.ranking).toEqual(rank);
+    vi.setSystemTime(new Date("2026-10-16T12:00:00Z")); expect((await snapshot()).nativeMoonlight.ranking).toEqual(rank);
+    expect((await persisted()).receipts).toHaveLength(3);
+  });
+
+  it("withholds a ranking when a real draw commit crosses the actor snapshot and its later ranking read", async () => {
+    await storeScore(uid, 2);
+    const execute = h.db.execute.bind(h.db), dialect = new PgDialect(); let changed = false;
+    const reader = vi.spyOn(h.db, "execute").mockImplementation((...args) => {
+      const statement = typeof args[0] === "string" ? args[0] : dialect.sqlToQuery(args[0].getSQL()).sql, query = execute(...args);
+      if (!changed && statement.includes('AS "Public"') && statement.includes("->'moon'")) {
+        changed = true; const run = query.execute.bind(query);
+        query.execute = async () => { await storeScore(uid, 3); return run(); };
+      }
+      return query;
+    });
+    try {
+      const crossed = await snapshot(); expect(changed).toBe(true);
+      expect(crossed.nativeMoonlight.draws).toBe(2); expect(crossed.nativeMoonlight.ranking).toBeNull();
+    } finally { reader.mockRestore(); }
+    expect((await snapshot()).nativeMoonlight.ranking).toMatchObject({ personalScore: 3, personalRank: 1 });
+  });
+
   it("keeps an absent bag read-only, verifies account ownership and reserves nested selections for the native route", async () => {
     await h.db.execute(sql`DELETE FROM app."ActivityWallet"`); const before = await persisted(), view = await snapshot();
     expect(view.nativeMoonlight).toMatchObject({ started: false, score: 0, canDraw: false, bag: [], bagSlotsUsed: 0 });
@@ -137,7 +230,7 @@ describe("original Moonlight through the shared transactional API", () => {
     expect(final.nativeMoonlight.bag).toEqual([]); expect(after.receipts).toHaveLength(2);
     const took = committed.nativeMoonlightAction!.effects[0].type === "taken";
     expect(final.points).toBe(took ? 940 : 946); expect(after.goods).toHaveLength(took ? 2 : 0); expect(after.mails).toHaveLength(took ? 1 : 0);
-    const replay = await native(value, requestId); expect(replay).toMatchObject({ points: final.points, earned: final.earned, revision: final.revision, nativeMoonlight: final.nativeMoonlight, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
+    const replay = await native(value, requestId); expect(replay).toMatchObject({ points: final.points, earned: final.earned, revision: final.revision, nativeMoonlight: { ...final.nativeMoonlight, ranking: null }, replayed: true }); expect(replay).not.toHaveProperty("nativeMoonlightAction");
     await native({ ...value, count: 5 }, requestId, 409); await action("ddplay-native", { type: "spin" }, requestId, 409);
     expect(await persisted()).toEqual(after); expect(after.receipts.every(row => Object.keys(row.Result as object).sort().join(",") === "mailedCount,message")).toBe(true);
   });
