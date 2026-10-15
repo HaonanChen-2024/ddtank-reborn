@@ -5,3 +5,4 @@ export { hashPassword, verifyPassword } from "./password.js";
 export { loadTranslations, applyTranslations, type TranslationOverlay } from "./translations.js";
 export { upsertAccount, findAccount, checkLogin, createDevAccounts } from "./accounts.js";
 export * from "./schema/index.js";
+export { ActivityAccountingError, ACTIVITY_GROSS_LIMIT, CHARGE_BUY_LIMITS, activityUtcDay, validActivityDay, readChargePersistentState, recordActivitySpending, type ChargePersistentState } from "./activity-accounting.js";

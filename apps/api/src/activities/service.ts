@@ -1,3 +1,4 @@
+import { commandChristmas, readChristmasProjection, type ChristmasEnvelope } from "./christmas-native.js";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { sql } from "drizzle-orm";
@@ -44,6 +45,7 @@ export interface ActivityResult extends ActivitySnapshot {
   nativeChargeAction?: { requestId: string; effects: ChargeNativeEffect[] };
   nativeForthrightAction?: { requestId: string; effects: ForthrightNativeEffect[] };
   nativeExchangeAction?: ExchangeEnvelope;
+  nativeChristmasAction?: ChristmasEnvelope;
   nativeDevilAction?: { requestId: string; effects: DevilEffect[] };
   nativeCaveLootAction?: { requestId: string; effects: CaveEffect[] };
 }
@@ -127,7 +129,10 @@ export async function activitySnapshot(app: AppCtx, claims: Claims, characterId:
   ]);
   const result: ActivityResult = { characterId, ...viewActivities(row?.State ?? createActivityState(now), walletOf(row), ctx) };
   // Never add internal inventory reads to context(): old actions hold the wallet lock there.
-  if (loadExchange) result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);
+  if (loadExchange) {
+    result.nativeExchange = await readExchangeProjection(app, claims, characterId, result.revision, result.day);
+    result.nativeChristmas = await readChristmasProjection(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+  }
   return result;
 }
 
@@ -300,6 +305,21 @@ async function forthrightGroupAction(app: AppCtx, claims: Claims, characterId: n
 }
 
 export async function activityAction(app: AppCtx, claims: Claims, characterId: number, activityId: string, requestId: string, action: ActivityAction): Promise<ActivityResult> {
+  if (activityId === "christmas-native") {
+    await owner(app, claims, characterId, new Date());
+    // Never hold an API wallet transaction while waiting for the actual game queue.
+    const committed = await commandChristmas(app, claims, characterId, requestId, action);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const result = await activitySnapshot(app, claims, characterId, false);
+      const view = committed.view.revision === result.revision && committed.view.day === result.day ? committed.view
+        : await readChristmasProjection(app, claims, characterId, result.revision, result.day, result.points, result.earned);
+      if (view.revision !== result.revision || view.day !== result.day) continue;
+      const synchronizeOnly = committed.replayed || !view.available || committed.view.revision !== view.revision || committed.view.day !== view.day;
+      return { ...result, nativeChristmas: view, message: committed.message, mailedCount: committed.mailedCount,
+        ...(synchronizeOnly ? { replayed: true } : { nativeChristmasAction: committed.nativeChristmasAction }) };
+    }
+    throw new ActivityError("圣诞已由原请求编号结算，当前投影暂不一致，请保留同一请求编号重试。", 503);
+  }
   if (activityId === "exchange-native") {
     await owner(app, claims, characterId, new Date());
     // No API transaction/row lock may span an internal game command.

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api", () => ({ api: { getToken: () => null }, meQuery: { queryKey: ["account", "me"], queryFn: () => null } }));
 import { ActivityCenter } from "./ActivityCenter";
 
-function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange" | "devil" | "cave", initialCharacterId = 40) {
+function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" | "treasure" | "wheel" | "carnival" | "first-gift" | "points-gift" | "luxury" | "exchange" | "devil" | "cave" | "christmas", initialCharacterId = 40) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnMount: false } } });
   client.setQueryData(["account", "me"], { characters: [{ id: 40, nickname: "测试角色", level: 20 }] });
   client.setQueryData(["account", "activities", 40], {
@@ -17,6 +17,14 @@ function render(id: "pair" | "wardrobe" | "mines" | "ddplay" | "gypsy" | "moon" 
 }
 
 describe("ActivityCenter native entry contract", () => {
+  it("offers the original snowman entry with actual local qualifications and an unavailable snowfield", () => {
+    const html = render("christmas");
+    for (const text of ["试用原版圣诞活动", "网页玩法", "本日任务雪包", "双倍每包另耗2活动积分", "UTC跨日失效", "雪人进度永久保留", "循环礼", "游戏邮件", "雪场战斗尚未移植", "原窗口仍待游戏内验收"]) expect(html).toContain(text);
+    expect(html).not.toContain("试用原版矿洞寻宝");
+  });
+  it("requires the live game character for original Christmas entry", () => {
+    expect(render("christmas", 41)).toMatch(/<button[^>]*disabled=""[^>]*>试用原版圣诞活动<\/button>/);
+  });
   it("offers original cave windows with one shared bag and disclosed local currencies", () => {
     const html = render("cave");
     for (const text of ["试用原版矿洞寻宝", "网页玩法", "共用物品包", "历史混合包", "只得同档矿币", "旧版整体回收", "本人新进度", "原窗口仍待游戏内验收"]) expect(html).toContain(text);

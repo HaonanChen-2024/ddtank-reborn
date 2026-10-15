@@ -118,7 +118,7 @@ function fixture() {
   return {
     run: (command, candidate) => context.runLiteralOverlay({ command, repoRoot, runtimeRoot,
       ...(candidate || command === "install" ? { nativeWardrobeManifest: candidate ?? manifestPath } : {}) }),
-    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false, withFirstRecharge = false, withCharge = false, withForthright = false, withExchange = false, withDevil = false, withCaveLoot = false) {
+    upgradedBuild(withMines = false, withDDPlay = false, withGypsy = false, withMoonlight = false, withTreasure = false, withPurr = false, withCarnival = false, withFirstRecharge = false, withCharge = false, withForthright = false, withExchange = false, withDevil = false, withCaveLoot = false, withChristmas = false) {
       assert.ok(!withDDPlay || withMines);
       assert.ok(!withGypsy || withDDPlay);
       assert.ok(!withMoonlight || withGypsy);
@@ -131,8 +131,9 @@ function fixture() {
       assert.ok(!withExchange || withForthright);
       assert.ok(!withDevil || withExchange);
       assert.ok(!withCaveLoot || withDevil);
-      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "") + (withFirstRecharge ? "-first-recharge" : "") + (withCharge ? "-charge" : "") + (withForthright ? "-forthright" : "") + (withExchange ? "-exchange" : "") + (withDevil ? "-devil" : "") + (withCaveLoot ? "-caveloot" : "")),
-        tag = Buffer.from(withCaveLoot ? "new caveloot bridge" : withDevil ? "new devil bridge" : withExchange ? "new exchange bridge" : withForthright ? "new forthright bridge" : withCharge ? "new charge bridge" : withFirstRecharge ? "new first recharge bridge" : withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
+      assert.ok(!withChristmas || withCaveLoot);
+      const root = path.resolve("memory-only-native-test/upgraded" + (withMines ? "-mines" : "") + (withDDPlay ? "-ddplay" : "") + (withGypsy ? "-gypsy" : "") + (withMoonlight ? "-moonlight" : "") + (withTreasure ? "-treasure" : "") + (withPurr ? "-purr" : "") + (withCarnival ? "-carnival" : "") + (withFirstRecharge ? "-first-recharge" : "") + (withCharge ? "-charge" : "") + (withForthright ? "-forthright" : "") + (withExchange ? "-exchange" : "") + (withDevil ? "-devil" : "") + (withCaveLoot ? "-caveloot" : "") + (withChristmas ? "-christmas" : "")),
+        tag = Buffer.from(withChristmas ? "new christmas bridge" : withCaveLoot ? "new caveloot bridge" : withDevil ? "new devil bridge" : withExchange ? "new exchange bridge" : withForthright ? "new forthright bridge" : withCharge ? "new charge bridge" : withFirstRecharge ? "new first recharge bridge" : withCarnival ? "new carnival bridge" : withPurr ? "new purr bridge" : withTreasure ? "new treasure bridge" : withMoonlight ? "new moonlight bridge" : withGypsy ? "new gypsy bridge" : withDDPlay ? "new ddplay bridge" : withMines ? "new mines bridge" : "new shared bridge");
       const tagPath = path.join(root, "bridge.bin"); put(tagPath, tag);
       const nextAssets = [...assetNames.map(file => ["wardrobe", file]), ["shared", "native-shared-library.swf"],
         ...["WorkshopNativePairBootstrap.swf", "pair-original-library.swf", "pairbox_v3_6_1_u1.swf", "pairbox_v3_6_1_u1.ui",
@@ -155,6 +156,7 @@ function fixture() {
         .concat(withExchange ? ["WorkshopNativeExchangeBootstrap.swf", "exchange-original-library.swf", "exchange-original-art.swf", "exchange-styles.xml"].map(file => ["exchange", file]) : [])
         .concat(withDevil ? ["WorkshopNativeDevilBootstrap.swf", "devil-original-library.swf", "devilturn_v3_6_1_u1.swf", "devilturn.ui"].map(file => ["devil", file]) : [])
         .concat(withCaveLoot ? ["WorkshopNativeCaveLootBootstrap.swf", "caveloot-original-library.swf", "caveloot.swf", "caveloot.ui"].map(file => ["caveloot", file]) : [])
+        .concat(withChristmas ? ["WorkshopNativeChristmasBootstrap.swf", "christmas-original-library.swf", "christmas-original-art.swf", "christmas-styles.xml"].map(file => ["christmas", file]) : [])
         .map(([module, file]) => {
           const bytes = Buffer.from(`upgraded resource:${module}/${file}`), source = path.join(root, module, file);
           put(source, bytes);
@@ -162,7 +164,7 @@ function fixture() {
         });
       const nextPath = path.join(root, "manifest.json");
       put(nextPath, JSON.stringify({ module: "workshop-native-activities", version: 1,
-        ...(withMines ? { variant: withCaveLoot ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot" : withDevil ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil" : withExchange ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange" : withForthright ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright" : withCharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge" : withFirstRecharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge" : withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
+        ...(withMines ? { variant: withChristmas ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot-christmas" : withCaveLoot ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil-caveloot" : withDevil ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange-devil" : withExchange ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright-exchange" : withForthright ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge-forthright" : withCharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge-charge" : withFirstRecharge ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival-first-recharge" : withCarnival ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr-carnival" : withPurr ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure-purr" : withTreasure ? "wardrobe-pair-mines-ddplay-gypsy-moonlight-treasure" : withMoonlight ? "wardrobe-pair-mines-ddplay-gypsy-moonlight" : withGypsy ? "wardrobe-pair-mines-ddplay-gypsy" : withDDPlay ? "wardrobe-pair-mines-ddplay" : "wardrobe-pair-mines" } : {}),
         bridge: { tagPath, tagSha256: digest(tag) }, assets: nextAssets }));
       return nextPath;
     },
@@ -180,6 +182,7 @@ function fixture() {
     exchangePath: name => path.join(overlay, "workshop-native/exchange", name),
     devilPath: name => path.join(overlay, "workshop-native/devil", name),
     cavelootPath: name => path.join(overlay, "workshop-native/caveloot", name),
+    christmasPath: name => path.join(overlay, "workshop-native/christmas", name),
     treasurePath: name => path.join(overlay, "workshop-native/treasure", name),
     sharedPath: path.join(overlay, "workshop-native/shared/native-shared-library.swf"),
     arm(operation, file) { fault = { operation, file: key(file), count: 0 }; },
@@ -963,6 +966,73 @@ test("unknown or incomplete CaveLoot activity manifests, wrong URLs and foreign 
     else f.put(caveloot, JSON.stringify(manifest));
     const before = f.snapshot();
     assert.throws(() => f.run("install", caveloot));
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+  }
+});
+
+test("all previous variants upgrade to exact seventy-seven Christmas resources and fully roll back", () => {
+  const f = fixture(), original = f.snapshot();
+  assert.equal(f.run("install").nativeWardrobe.assets.length, 6);
+  const previousCounts = [18, 24, 28, 32, 36, 41, 45, 49, 53, 57, 61, 65, 69, 73];
+  for (let n = 0; n < previousCounts.length; n++)
+    assert.equal(f.run("install", f.upgradedBuild(...Array(n).fill(true))).nativeWardrobe.assets.length, previousCounts[n]);
+  const christmas = f.upgradedBuild(...Array(14).fill(true)), before = f.snapshot();
+  const dry = f.run("verify", christmas);
+  assert.equal(dry.nativeWardrobeInstalled, false);
+  assert.equal(dry.pendingTransition, true);
+  assert.deepEqual(f.snapshot(), before);
+  assert.equal(f.run("install", christmas).nativeWardrobe.assets.length, 77);
+  assert.equal(f.run("install", christmas).unchanged, true);
+  assert.equal(f.run("verify").unchanged, true);
+  for (const file of ["WorkshopNativeChristmasBootstrap.swf", "christmas-original-library.swf", "christmas-original-art.swf", "christmas-styles.xml"])
+    assert.equal(f.fs.existsSync(f.christmasPath(file)), true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("partial Christmas activity writes restore the seventy-three resource baseline before retry", () => {
+  for (const file of ["WorkshopNativeChristmasBootstrap.swf", "christmas-original-library.swf", "christmas-original-art.swf", "christmas-styles.xml"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(13).fill(true)));
+    const before = f.snapshot(), christmas = f.upgradedBuild(...Array(14).fill(true));
+    f.arm("write", f.christmasPath(file));
+    assert.throws(() => f.run("install", christmas), /ENOSPC/);
+    assert.equal(f.failureCount, 1);
+    assert.equal(f.openHandles, 0);
+    assert.deepEqual(f.snapshot(), before);
+    assert.equal(f.run("verify").unchanged, true);
+    assert.equal(f.run("install", christmas).nativeWardrobe.assets.length, 77);
+  }
+});
+
+test("Christmas activity rollback failure compensates seventy-seven resources and supports retry", () => {
+  const f = fixture(), original = f.snapshot();
+  f.run("install", f.upgradedBuild(...Array(14).fill(true)));
+  const installed = f.snapshot();
+  f.arm("unlink", f.christmasPath("christmas-original-art.swf"));
+  assert.throws(() => f.run("rollback"), /EPERM/);
+  assert.equal(f.failureCount, 1);
+  assert.equal(f.openHandles, 0);
+  assert.deepEqual(f.snapshot(), installed);
+  assert.equal(f.run("verify").unchanged, true);
+  assert.equal(f.run("rollback").rolledBack, true);
+  assert.deepEqual(f.snapshot(), original);
+});
+
+test("unknown or incomplete Christmas activity manifests, wrong URLs and foreign files fail before mutation", () => {
+  for (const reason of ["variant", "paths", "url", "foreign"]) {
+    const f = fixture();
+    f.run("install", f.upgradedBuild(...Array(13).fill(true)));
+    const christmas = f.upgradedBuild(...Array(14).fill(true));
+    const manifest = JSON.parse(f.fs.readFileSync(christmas, "utf8"));
+    if (reason === "variant") manifest.variant += "-extra";
+    if (reason === "paths") manifest.assets.pop();
+    if (reason === "url") manifest.assets.at(-1).urlPath = "/flash/workshop-native/christmas-extra/christmas-styles.xml";
+    if (reason === "foreign") f.put(f.christmasPath("christmas-styles.xml"), "user owned");
+    else f.put(christmas, JSON.stringify(manifest));
+    const before = f.snapshot();
+    assert.throws(() => f.run("install", christmas));
     assert.equal(f.openHandles, 0);
     assert.deepEqual(f.snapshot(), before);
   }

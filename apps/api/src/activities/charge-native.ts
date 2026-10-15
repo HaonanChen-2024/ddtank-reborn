@@ -1,3 +1,4 @@
+import { ActivityAccountingError, readChargePersistentState, recordActivitySpending, type ChargePersistentState } from "@ddt/db";
 import { createHash } from "node:crypto";
 import { LOCAL_RULES, PRIZES } from "./config.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityWallet } from "./types.js";
@@ -34,10 +35,8 @@ export type ChargeNativeEffect =
   | { type: "claimed"; index: ChargePage; tier: ChargeTier; claimKey: string; rewards: ChargeMaterialReward[] }
   | { type: "exchanged"; index: number; catalogId: string; count: 1; cost: number; points: number; rewards: ChargeMaterialReward[] };
 /** Independent progress, never reconstructed from balance, truncated history or old receipts. */
-export interface ChargeNativeState {
-  version: 1; kind: "charge-native"; rulesVersion: 1; grossSpent: number; grossCapped: boolean; trackingStartedAt: string | null;
-  day: string; catalogVersion: "charge-material-v1"; bought: [number, number, number, number, number, number, number];
-}
+export interface ChargeNativeState extends ChargePersistentState {}
+
 const LIMIT = 2_147_483_647, CATALOG = "charge-material-v1" as const;
 type Clock = Pick<ActivityContext, "now">;
 type Funds = Pick<ActivityWallet, "points" | "earned">;
@@ -62,30 +61,15 @@ const descriptions = [
 ];
 function need(ok: unknown, message: string): asserts ok { if (!ok) throw new ActivityError(message); }
 function int(n: unknown, min = 0, max = LIMIT): n is number { return typeof n === "number" && Number.isSafeInteger(n) && n >= min && n <= max; }
-function validDay(n: unknown): n is string {
-  return typeof n === "string" && /^\d{4}-\d{2}-\d{2}$/.test(n) && Number.isFinite(new Date(n + "T00:00:00Z").getTime())
-    && new Date(n + "T00:00:00Z").toISOString().slice(0, 10) === n;
-}
 function today(ctx: Clock) { need(ctx.now instanceof Date && Number.isFinite(ctx.now.getTime()), "任务活动日期无效。"); return ctx.now.toISOString().slice(0, 10); }
-const empty = (day: string): ChargeNativeState => ({ version: 1, kind: "charge-native", rulesVersion: 1, grossSpent: 0, grossCapped: false,
-  trackingStartedAt: null, day, catalogVersion: CATALOG, bought: [0, 0, 0, 0, 0, 0, 0] });
-export function readChargeNativeState(value: unknown, ctx: Clock): ChargeNativeState {
-  const day = today(ctx); if (value === undefined) return empty(day);
-  need(value && typeof value === "object" && !Array.isArray(value), "任务活动存档无效。");
-  const s = value as ChargeNativeState;
-  need(s.version === 1 && s.kind === "charge-native" && s.rulesVersion === 1 && s.catalogVersion === CATALOG
-    && validDay(s.day) && int(s.grossSpent) && typeof s.grossCapped === "boolean" && (!s.grossCapped || s.grossSpent === LIMIT)
-    && (s.trackingStartedAt === null || typeof s.trackingStartedAt === "string" && Number.isFinite(new Date(s.trackingStartedAt).getTime())
-      && new Date(s.trackingStartedAt).toISOString() === s.trackingStartedAt)
-    && (s.grossSpent === 0 || s.trackingStartedAt !== null)
-    && Array.isArray(s.bought) && s.bought.length === 7 && s.bought.every((n, i) => int(n, 0, chargeNativeRecipes[i].limit)), "任务活动进度或目录无效。");
-  const next = structuredClone(s); if (next.day !== day) { next.day = day; next.bought = [0, 0, 0, 0, 0, 0, 0]; } return next;
+function accounting<T>(read: () => T): T {
+  try { return read(); } catch (e) { if (e instanceof ActivityAccountingError) throw new ActivityError(e.message); throw e; }
 }
-/** Costs are explicit owner metadata. Saturation must never reject an otherwise valid legacy purchase. */
+export function readChargeNativeState(value: unknown, ctx: Clock): ChargeNativeState {
+  return accounting(() => readChargePersistentState(value, ctx.now));
+}
 export function recordChargeNativeSpending(value: unknown, ctx: Clock, cost: number): ChargeNativeState {
-  const s = readChargeNativeState(value, ctx);
-  if (cost > 0) { s.trackingStartedAt ??= ctx.now.toISOString(); s.grossCapped ||= cost >= LIMIT - s.grossSpent; s.grossSpent = Math.min(LIMIT, s.grossSpent + cost); }
-  return s;
+  return accounting(() => recordActivitySpending(value, ctx.now, cost));
 }
 export function chargeNativeTodayPoints(claims: string[], day: string) {
   return [["sign", 40], ["mines", 60], ["pair", 60], ["explore", 40]].reduce((sum, [id, points]) => sum + (claims.includes(`task:${day}:${id}`) ? Number(points) : 0), 0);

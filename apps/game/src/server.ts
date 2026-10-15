@@ -1,3 +1,4 @@
+import { actNativeChristmas, readNativeChristmas } from "./game/activity-christmas-native.js";
 /**
  * GameServer (Game.Server/GameServer.cs Start/Stop + Center.Server's online registry): boots caches, listeners,
  * timers (DB autosave, ping, speed-heartbeat watchdog, server heartbeat) and the admin channel.
@@ -373,6 +374,10 @@ export class GameServer {
         if (p) p.send(Out.mailResponse(p.id, 1));
         return !!p;
       },
+      activityChristmasRead: (body: unknown) => readNativeChristmas(this.ctx, body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
+      activityChristmasAction: (body: unknown) => actNativeChristmas(this.ctx, body, [...this.clients].find(c =>
+        !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
       activityExchangeRead: (body: unknown) => readNativeExchange(this.ctx, body, [...this.clients].find(c =>
         !c.closed && c.player && c.player.id === (body as { characterId?: number })?.characterId && this.ctx.world.get(c.player.id) === c.player)),
       activityExchangeAction: (body: unknown) => actNativeExchange(this.ctx, body, [...this.clients].find(c =>

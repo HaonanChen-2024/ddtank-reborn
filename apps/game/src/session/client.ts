@@ -131,6 +131,11 @@ export class GameClient implements PacketSink {
     return result;
   }
 
+  /** Christmas commands share the real socket packet chain. */
+  enqueueActivityChristmas<T>(work: () => Promise<T>): Promise<T> {
+    const result = this.chain.then(work); this.chain = result.then(() => {}, () => {}); return result;
+  }
+
   send(pkt: GSPacket): void {
     if (this.closed) return;
     this.transport.write(encodeFrame(pkt, this.cipher));

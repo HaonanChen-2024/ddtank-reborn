@@ -17,6 +17,7 @@ import { attachNativeForthrightHost, type NativeForthrightPlayer } from "@/lib/n
 import { attachNativeExchangeHost, type NativeExchangePlayer } from "@/lib/native-exchange-host";
 import { attachNativeDevilHost, type NativeDevilPlayer } from "@/lib/native-devil-host";
 import { attachNativeCaveLootHost, type NativeCaveLootPlayer } from "@/lib/native-caveloot-host";
+import { attachNativeChristmasHost, type NativeChristmasPlayer } from "@/lib/native-christmas-host";
 import { useI18n } from "@/i18n";
 
 /* Minimal typings for the bits of the Ruffle JS API we use. */
@@ -31,7 +32,7 @@ interface NativePairStatus {
   phase?: string; visible?: boolean; open?: boolean; actualUserId?: number;
   expectedUserId?: number; generation?: string; errors?: unknown[];
 }
-interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer, NativeCaveLootPlayer {
+interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMinesPlayer, NativeDDPlayPlayer, NativeGypsyPlayer, NativeMoonlightPlayer, NativeTreasurePlayer, NativePurrPlayer, NativeCarnivalPlayer, NativeFirstRechargePlayer, NativeChargePlayer, NativeForthrightPlayer, NativeExchangePlayer, NativeDevilPlayer, NativeCaveLootPlayer, NativeChristmasPlayer {
   load?: (opts: RuffleLoadOptions) => Promise<void>;
   ruffle?: () => { load: (opts: RuffleLoadOptions) => Promise<void>; callExternalInterface?: (name: string, ...args: unknown[]) => unknown };
   workshopOpenActivation?: () => unknown;
@@ -69,18 +70,21 @@ interface RufflePlayerElement extends HTMLElement, NativePairPlayer, NativeMines
   workshopOpenExchange?: (characterId: number, generation: string) => boolean;
   workshopOpenDevil?: (characterId: number, generation: string) => boolean;
   workshopOpenCaveLoot?: (characterId: number, generation: string) => boolean;
+  workshopOpenChristmas?: (characterId: number, generation: string) => boolean;
   workshopStatusFirstRecharge?: () => NativePairStatus;
   workshopStatusCharge?: () => NativePairStatus;
   workshopStatusForthright?: () => NativePairStatus;
   workshopStatusExchange?: () => NativePairStatus;
   workshopStatusDevil?: () => NativePairStatus;
   workshopStatusCaveLoot?: () => NativePairStatus;
+  workshopStatusChristmas?: () => NativePairStatus;
   workshopCloseFirstRecharge?: () => unknown;
   workshopCloseCharge?: () => unknown;
   workshopCloseForthright?: () => unknown;
   workshopCloseExchange?: () => unknown;
   workshopCloseDevil?: () => unknown;
   workshopCloseCaveLoot?: () => unknown;
+  workshopCloseChristmas?: () => unknown;
 }
 interface RuffleSource {
   createPlayer: () => RufflePlayerElement;
@@ -305,6 +309,17 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       cavelootCharacterId = 0;
       cavelootGeneration = "";
     };
+    let christmasRequest: { cancel: () => void } | null = null;
+    let christmasHost: ReturnType<typeof attachNativeChristmasHost> | null = null;
+    let christmasCharacterId = 0;
+    let christmasGeneration = "";
+    const detachChristmas = () => {
+      christmasRequest?.cancel();
+      christmasHost?.cancel();
+      christmasHost = null;
+      christmasCharacterId = 0;
+      christmasGeneration = "";
+    };
     const detachPair = () => {
       pairRequest?.cancel();
       pairHost?.cancel();
@@ -356,6 +371,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
           detachExchange();
           detachDevil();
           detachCaveLoot();
+      detachChristmas();
           player?.remove();
           player = null;
         };
@@ -1193,6 +1209,61 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             else if (cavelootRequest === request) cavelootRequest = null;
           }
         };
+        window.workshopShowChristmas = async (characterId, signal) => {
+          const owner = player;
+          if (cancelled || signal?.aborted || !Number.isSafeInteger(characterId) || characterId <= 0
+            || !owner?.workshopOpenChristmas || !owner.workshopStatusChristmas || !owner.workshopCloseChristmas) return false;
+          try {
+            const initial = owner.workshopStatusChristmas();
+            if (initial.actualUserId !== characterId || initial.phase === "failed"
+              || initial.phase === "error" || initial.errors?.length) return false;
+            // A loaded AS module binds its generation until the game player is recreated.
+            if (christmasHost && christmasCharacterId !== characterId) return false;
+            if (!christmasHost) {
+              christmasCharacterId = characterId;
+              christmasGeneration = crypto.randomUUID();
+              const generation = christmasGeneration;
+              christmasHost = attachNativeChristmasHost({ player: owner, characterId, generation,
+                isCurrent: () => {
+                  if (cancelled || player !== owner || christmasCharacterId !== characterId || christmasGeneration !== generation) return false;
+                  try {
+                    const state = owner.workshopStatusChristmas?.();
+                    return state?.actualUserId === characterId && state.expectedUserId === characterId
+                      && state.generation === generation && state.phase !== "failed" && state.phase !== "error";
+                  } catch { return false; }
+                },
+                onSnapshot: (snapshot) => queryClient.setQueryData<ActivityResponse>(["account", "activities", characterId], old =>
+                  old && old.revision > snapshot.revision ? old : snapshot),
+              });
+            }
+          } catch { return false; }
+          christmasRequest?.cancel();
+          const request = { cancel: () => {
+            if (christmasRequest !== request) return;
+            christmasRequest = null;
+            try { owner.workshopCloseChristmas?.(); } catch { /* Preserve an unresolved POST on the surviving host. */ }
+          } };
+          christmasRequest = request;
+          signal?.addEventListener("abort", request.cancel, { once: true });
+          let opened = false;
+          try {
+            if (owner.workshopOpenChristmas(characterId, christmasGeneration) !== true) return false;
+            const deadline = Date.now() + 60_000;
+            while (christmasRequest === request && !cancelled && !signal?.aborted && player === owner && Date.now() < deadline) {
+              const state = owner.workshopStatusChristmas();
+              if (state?.errors?.length || state?.phase === "failed" || state?.phase === "error") return false;
+              if (state?.open && state.actualUserId === characterId && state.expectedUserId === characterId
+                && state.generation === christmasGeneration) { opened = true; return true; }
+              await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            return false;
+          } catch { return false; }
+          finally {
+            signal?.removeEventListener("abort", request.cancel);
+            if (!opened) request.cancel();
+            else if (christmasRequest === request) christmasRequest = null;
+          }
+        };
         setPhase("swf");
 
         const opts: RuffleLoadOptions = {
@@ -1225,6 +1296,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachExchange();
       detachDevil();
       detachCaveLoot();
+      detachChristmas();
         setError(err.message);
         setPhase("error");
         onError?.(err);
@@ -1249,6 +1321,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachExchange();
       detachDevil();
       detachCaveLoot();
+      detachChristmas();
       player?.remove();
       delete window.game_interruption;
       delete window.workshopShowActivation;
@@ -1268,6 +1341,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       delete window.workshopShowExchange;
       delete window.workshopShowDevil;
       delete window.workshopShowCaveLoot;
+      delete window.workshopShowChristmas;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey, attempt]);

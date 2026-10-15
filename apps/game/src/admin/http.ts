@@ -24,6 +24,8 @@ export interface AdminApi {
   eventsForce(kind: string, minutes: number): Promise<Record<string, unknown>>;
   eventsStop(kind: string): Promise<Record<string, unknown>>;
   mailNotice(userId: number): boolean;
+  activityChristmasRead?(body: unknown): Promise<unknown>;
+  activityChristmasAction?(body: unknown): Promise<unknown>;
   activityExchangeRead?(body: unknown): Promise<unknown>;
   activityExchangeAction?(body: unknown): Promise<unknown>;
 }
@@ -94,6 +96,14 @@ export function startAdmin(host: string, port: number, token: string | undefined
       if (req.method === "POST" && url.pathname === "/activity-exchange/action") {
         if (!api.activityExchangeAction) return send(503, { error: "activity exchange unavailable" });
         return send(200, await api.activityExchangeAction(await readJson(req)));
+      }
+      if (req.method === "POST" && url.pathname === "/activity-christmas/read") {
+        if (!api.activityChristmasRead) return send(503, { error: "activity Christmas unavailable" });
+        return send(200, await api.activityChristmasRead(await readJson(req)));
+      }
+      if (req.method === "POST" && url.pathname === "/activity-christmas/action") {
+        if (!api.activityChristmasAction) return send(503, { error: "activity Christmas unavailable" });
+        return send(200, await api.activityChristmasAction(await readJson(req)));
       }
       send(404, { error: "not found" });
     } catch (err) {
