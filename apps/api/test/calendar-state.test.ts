@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { inflateSync } from "node:zlib";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { q } from "../src/lib/db.js";
 import { pullDown } from "../src/request/endpoints/events.js";
@@ -52,6 +52,18 @@ async function counts() {
 }
 
 describe("authenticated Calendar claim snapshot", () => {
+  it("keeps the legacy compressed failure XML when its transaction cannot start", async () => {
+    const before = await counts();
+    const transaction = vi.spyOn(h.db, "transaction").mockRejectedValueOnce(new Error("calendar transaction unavailable"));
+    try {
+      const response = await built.app.inject({ url: "/request/dailyloglist.ashx?selfid=111&key=x" });
+      const text = inflateSync(response.rawPayload).toString("utf8");
+      expect(response.statusCode).toBe(200);
+      expect(text).toMatch(/^<Result value="false" message="Fail!" nowDate="[^"]+" \/>$/);
+      expect(await counts()).toEqual(before);
+    } finally { transaction.mockRestore(); }
+  });
+
   it("returns unclaimed, claimed and rotated-session state without a second reward", async () => {
     expect(entry((await request()).text, 103)).toContain('isAttend="false"');
     expect(await pullDown(built.ctx, 103, "", 111)).toBe(0);

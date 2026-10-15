@@ -9,7 +9,7 @@ import { t } from "../../lib/lang.js";
 import { item } from "../../lib/spec.js";
 import { CONSORTIA_ORDER, SPECS } from "../../templates/defs.js";
 import { userById } from "../players.js";
-import { define, xml } from "../types.js";
+import { define, xml, type ReqCtx } from "../types.js";
 import { nickByteLength } from "./VisualizeRegister.js";
 
 const and = (parts: (SQL | undefined | false)[]) => sql.join(parts.filter(Boolean) as SQL[], sql` AND `);
@@ -205,42 +205,50 @@ export const MailSenderList = define("/MailSenderList.ashx", async ({ app, int }
  * the client's startup QueueLoader (StartupResourceLoader.startLoadRelatedInfo) stops at a failed analyzer, so
  * LoadUserMail.ashx / MailSenderList.ashx were never requested and the mail window stayed empty.
  */
-export const DailyLogList = define("/dailyloglist.ashx", async ({ app, int }) => {
-  let ok = false;
-  const kids: XEl[] = [];
-  const now = wallNow();
+export const DailyLogList = define("/dailyloglist.ashx", async (ctx) => {
+  let now = wallNow();
   try {
-    const userId = int("selfid");
-    const row = await q1<{ ID: number; UserAwardLog: number; DayLog: string | null; LastDate: Date }>(
-      app.h,
-      sql`SELECT "ID","UserAwardLog","DayLog","LastDate" FROM player."DailyLogList" WHERE "UserID" = ${userId} LIMIT 1`,
-    );
-    let dayLog = row?.DayLog ?? "";
-    let award = row?.UserAwardLog ?? 0;
-    let last = row?.LastDate ?? now;
-    const y = now.getUTCFullYear();
-    const m = now.getUTCMonth();
-    const d = now.getUTCDate();
-    if (m !== last.getUTCMonth() || y !== last.getUTCFullYear()) {
-      dayLog = "";
-      award = 0;
-      last = now;
-    }
-    const len = dayLog.split(",").length;
-    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-    if (len < days) {
-      if (!dayLog && len > 1) dayLog = "False";
-      for (let i = len; i < d - 1; i++) dayLog += ",False";
-    }
-    if (row) await q(app.h, sql`UPDATE player."DailyLogList" SET "DayLog" = ${dayLog}, "UserAwardLog" = ${award}, "LastDate" = ${last} WHERE "ID" = ${row.ID}`);
-    else await q(app.h, sql`INSERT INTO player."DailyLogList" ("UserID","UserAwardLog","DayLog","LastDate") VALUES (${userId}, ${award}, ${dayLog}, ${last})`);
-    kids.push(el("DailyLogList", [["UserAwardLog", award], ["DayLog", dayLog], ["luckyNum", 0], ["myLuckyNum", 0]]));
-    ok = true;
+    return await ctx.app.h.db.transaction(async (tx) => {
+      const scoped: ReqCtx = { ...ctx, app: { ...ctx.app, h: { ...ctx.app.h, db: tx } } };
+      // Match game signIn and UserCalendar: serialize before reading, including first calendar creation.
+      await q(scoped.app.h, sql`SELECT "UserID" FROM player."Sys_Users_Detail" WHERE "UserID" = ${ctx.int("selfid")} FOR UPDATE`);
+      now = wallNow(); // The wait may have crossed a UTC day/month boundary.
+      return normalizeDailyCalendar(scoped, now);
+    });
   } catch {
-    /* Fail! like the original catch */
+    return xml(result(false, "Fail!", [], [["nowDate", fmtDate(now)]]), true);
   }
-  return xml(result(ok, ok ? "Success!" : "Fail!", kids, [["nowDate", fmtDate(now)]]), true);
 }, "Tank.Request/dailyloglist.ashx.cs");
+
+/** Callers lock an existing character's owner row in the same transaction. SQL failures must roll it back. */
+export async function normalizeDailyCalendar({ app, int }: ReqCtx, now: Date) {
+  const userId = int("selfid");
+  const row = await q1<{ ID: number; UserAwardLog: number; DayLog: string | null; LastDate: Date }>(
+    app.h,
+    sql`SELECT "ID","UserAwardLog","DayLog","LastDate" FROM player."DailyLogList" WHERE "UserID" = ${userId} LIMIT 1`,
+  );
+  let dayLog = row?.DayLog ?? "";
+  let award = row?.UserAwardLog ?? 0;
+  let last = row?.LastDate ?? now;
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+  if (m !== last.getUTCMonth() || y !== last.getUTCFullYear()) {
+    dayLog = "";
+    award = 0;
+    last = now;
+  }
+  const len = dayLog.split(",").length;
+  const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  if (len < days) {
+    if (!dayLog && len > 1) dayLog = "False";
+    for (let i = len; i < d - 1; i++) dayLog += ",False";
+  }
+  if (row) await q(app.h, sql`UPDATE player."DailyLogList" SET "DayLog" = ${dayLog}, "UserAwardLog" = ${award}, "LastDate" = ${last} WHERE "ID" = ${row.ID}`);
+  else await q(app.h, sql`INSERT INTO player."DailyLogList" ("UserID","UserAwardLog","DayLog","LastDate") VALUES (${userId}, ${award}, ${dayLog}, ${last})`);
+  const daily = el("DailyLogList", [["UserAwardLog", award], ["DayLog", dayLog], ["luckyNum", 0], ["myLuckyNum", 0]]);
+  return xml(result(true, "Success!", [daily], [["nowDate", fmtDate(now)]]), true);
+}
 
 const RANK_DATE =
   "UserID ConsortiaID FightPower PrevFightPower GP PrevGP AchievementPoint PrevAchievementPoint charmGP PrecharmGP LeagueAddWeek PrevLeagueAddWeek ConsortiaFightPower ConsortiaPrevFightPower ConsortiaLevel ConsortiaPrevLevel ConsortiaRiches ConsortiaPrevRiches ConsortiacharmGP ConsortiaPrevcharmGP";
