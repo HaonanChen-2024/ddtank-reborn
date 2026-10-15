@@ -144,7 +144,7 @@ export function buildNativeActivities({outputDir,projectRoot=resolve(repo,'../..
   const christmasAudit=reused?isolatedReuseAudit({kind:'christmas',repo,out:christmas.outputDir,projectRoot,sharedPath:resolve(shared.outputDir,common.file)}):auditChristmas({projectRoot,outputDir:christmas.outputDir,sharedPath:resolve(shared.outputDir,common.file)});assert.deepEqual(christmasAudit.missingHostClasses,[]);
   const assets=[];
   const add=(source,urlPath,hash)=>{
-    assert(/^\/flash\/workshop-native\/(shared|wardrobe|pair|mines|ddplay|gypsy|moonlight|treasure|purr|carnival|first-recharge|charge|forthright|exchange|devil|caveloot|christmas)\/[A-Za-z0-9_.-]+$/.test(urlPath)||christmasSceneUrls.includes(urlPath));assert(!assets.some(a=>a.urlPath===urlPath));
+    assert(/^\/flash\/workshop-native\/(shared|wardrobe|pair|mines|ddplay|gypsy|moonlight|treasure|purr|carnival|first-recharge|charge|forthright|exchange|devil|caveloot|christmas)\/[A-Za-z0-9_.-]+$/.test(urlPath)||urlPath==='/flash/workshop-native/menu/hall-activity-original-art.swf'||christmasSceneUrls.includes(urlPath));assert(!assets.some(a=>a.urlPath===urlPath));
     const path=resolve(out,urlPath.slice(1)),bytes=copyChecked(source,path,hash);assets.push({file:basename(path),path,urlPath,bytes,sha256:hash,source});
   };
   for(const a of wardrobe.assets)add(a.path,a.urlPath,a.sha256);

@@ -129,6 +129,29 @@ describe("shared carnival through real account HTTP and isolated PGlite", () => 
     expect(foreign.statusCode).toBe(403); expect(await persisted()).toEqual(before); expect(notice.ids).toEqual([]);
   });
 
+  it("refreshes another participant's committed rounds, pool and rank without advancing the reader or replaying rewards", async () => {
+    await seed99(); const before = await get();
+    expect(before.nativeCarnival.global).toMatchObject({ totalDraws: 99, roundId: 1, roundDraws: 99 });
+    await draw(bob);
+    const settled = await persisted(), notices = [...notice.ids], round = await get();
+    expect(round.revision).toBe(before.revision);
+    expect(round.nativeCarnival.personalScore).toBe(before.nativeCarnival.personalScore);
+    expect(round.nativeCarnival.global).toMatchObject({ actorRevision: before.revision, totalDraws: 100,
+      roundId: 2, roundDraws: 0, pool: { itemCount: 0 }, recentRounds: [{ roundId: 1, globalRevision: 100 }] });
+    expect(round.nativeCarnival.ranking!.entries).toContainEqual({ rank: 2, characterId: bob, nickName: "Bob", score: 1 });
+    expect(round).not.toHaveProperty("nativeCarnivalAction");
+    expect(await persisted()).toEqual(settled); expect(notice.ids).toEqual(notices);
+    await draw(bob, 2);
+    const advanced = await persisted(), nextNotices = [...notice.ids], current = await get();
+    expect(current.revision).toBe(before.revision);
+    expect(current.nativeCarnival.global).toMatchObject({ actorRevision: before.revision, totalDraws: 102,
+      roundId: 2, roundDraws: 2, pool: { itemCount: 2 }, myRoundDraws: 0 });
+    expect(current.nativeCarnival.ranking!.entries).toContainEqual({ rank: 2, characterId: bob, nickName: "Bob", score: 3 });
+    expect(current).not.toHaveProperty("nativeCarnivalAction");
+    expect((await get()).nativeCarnival).toEqual(current.nativeCarnival);
+    expect(await persisted()).toEqual(advanced); expect(notice.ids).toEqual(nextNotices);
+  });
+
   it("settles two real participants into three bound material mails without changing another wallet", async () => {
     await seed99(); const aliceWallet = await q1(h, sql`SELECT * FROM app."ActivityWallet" WHERE "UserID"=${alice}`);
     const { result } = await draw(bob);

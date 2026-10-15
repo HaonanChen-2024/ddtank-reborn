@@ -16,6 +16,28 @@ const functionSource=name=>{const node=ast.statements.find(n=>ts.isFunctionDecla
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const exchangeSourceFiles=['scripts/workshop-native-exchange.mjs','scripts/native-exchange/WorkshopNativeExchangeBootstrap.as','scripts/native-exchange/build-library.mjs','scripts/native-exchange/audit-candidate.mjs','scripts/native-exchange/extract-resources.mjs'];
 
+test('aggregate accepts the installed menu art while retaining URL, duplicate and copy hash gates',()=>{
+  const owner=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='buildNativeActivities');
+  let add;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(ast)==='add')add=node.initializer;ts.forEachChild(node,visit);};
+  visit(owner);assert(add&&ts.isArrowFunction(add));
+  const out=resolve(tmpdir(),'ddt-native-add-owner'),assets=[],copies=[];
+  const context={assert,assets,out,resolve,basename,christmasSceneUrls:['/resource/scene/christmas/test.swf'],
+    copyChecked:(source,path,hash)=>{assert.equal(hash,'verified-source-sha');copies.push({source,path,hash});return 123;}};
+  const run=runInNewContext('('+add.getText(ast)+')',context);
+  const menu='/flash/workshop-native/menu/hall-activity-original-art.swf';
+  run('original-menu.swf',menu,'verified-source-sha');
+  assert.equal(assets.length,1);assert.equal(assets[0].urlPath,menu);
+  assert.equal(assets[0].path,resolve(out,menu.slice(1)));assert.equal(assets[0].bytes,123);
+  assert.throws(()=>run('original-menu.swf',menu,'verified-source-sha'));
+  for(const url of ['/flash/workshop-native/menu/unknown.swf','/flash/workshop-native/menu/../outside.swf','/flash/workshop-native/menu/../../outside.swf','/flash/workshop-native/menu/hall-activity-original-art.swf?x=1','https://example.com/menu.swf'])assert.throws(()=>run('bad.swf',url,'verified-source-sha'));
+  assert.equal(copies.length,1,'rejected URLs do not copy files');
+  assert.throws(()=>run('scene.swf',context.christmasSceneUrls[0],'bad-sha'));
+  assert.equal(assets.length,1,'failed copy must not enter manifest');
+  run('scene.swf',context.christmasSceneUrls[0],'verified-source-sha');
+  assert.equal(assets.length,2,'existing scene exception remains available');
+});
+
 function fixture(t,mode='success',afterChild){
   const root=mkdtempSync(resolve(tmpdir(),'ddt-exchange-isolation-'));
   t.after(()=>{assert(root.startsWith(resolve(tmpdir(),'ddt-exchange-isolation-')));assert(root!==resolve(tmpdir()));rmSync(root,{recursive:true,force:true});});
