@@ -67,6 +67,13 @@ Extra events: `RAW` (pre-encoded PvE packets: 64 add living, 55-61 NPC actions, 
 `GAME_ALL_MISSION_OVER`, `PVE_AWARD` (items to give), `PVE_STOPPED`. Missing / broken scripts fall back to
 `GenericNpcBrain` / `GenericMission` / `GenericGameControl` — never a frozen mission. Guide (PT-BR): `docs/guides/pve.md`.
 
+Labyrinth currently has two compatibility fixes: a manual `OnCreated` override translates the donor's
+`String.Split` while preserving its 30 mission IDs and inherited scoring, and `CreateGate(bool)` only sets
+`CanEnterGate`, as in SkelletonX/DDTank4.1 `PVEGame.cs:2068-2071` (commit `09f8cdb`). The coordinate overload
+still creates a physical gate. `test/labyrinth-gate.test.ts` exercises the actual first-floor script, NPCs and map
+with explicitly test-only mission headers; production 401/30-floor configuration, `GameOverMovie`, big-box
+settlement and persistent progression remain incomplete. These checks do not establish a playable Labyrinth.
+
 ## Assets
 
 `pnpm --filter @ddt/fight pack-assets` converts the original files into `data/` (≈3 MB, committed):

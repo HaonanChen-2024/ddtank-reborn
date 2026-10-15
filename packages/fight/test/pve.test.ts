@@ -89,10 +89,13 @@ describe("PvE engine", () => {
 
   it("dungeon floor chaining also works via GAME_CMD 137 DELIVER (the gate), not just 116 MISSION_PREPARE", () => {
     const { game, bots } = newGame(2, 4, [spec(1, { grade: 10, hp: 3000, attack: 400 }), spec(2, { grade: 10, hp: 3000, attack: 400 })], 11, 0);
-    const { all } = playViaGate(game, bots, (e) => e.filter((x) => x.cmd === "GAME_MISSION_OVER").length >= 1, 3_600_000);
+    const { all } = playViaGate(game, bots, (e) => e.filter((x) => x.cmd === "GAME_LOAD").length >= 2, 3_600_000);
     expect(game.Misssions.size).toBeGreaterThan(1);
-    const over = all.find((e) => e.cmd === "GAME_MISSION_OVER");
-    expect(over, "DELIVER never readied players past the gate into floor 2").toBeDefined();
+    expect(game.SessionId, "DELIVER never readied players past the gate into floor 2").toBe(2);
+    expect(all.filter((e) => e.cmd === "GAME_LOAD")).toHaveLength(2);
+    expect(all.find((e) => e.cmd === "GAME_MISSION_OVER" && e.missionId === game.Misssions.get(1)!.Id && e.isWin)).toBeDefined();
+    expect(game.missingScripts).toEqual([]);
+    expect(game.scriptErrors).toEqual([]);
   });
 
   it("missing scripts fall back to the generic AI and never freeze", () => {

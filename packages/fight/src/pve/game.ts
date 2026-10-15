@@ -1315,9 +1315,15 @@ export class PveGame extends BaseGame {
     this.AddPhysicalObj(o, true);
     return o;
   }
-  /** donor-only Game.Logic: CreateGate → transmission gate */
-  CreateGate(x: number, y: number, name = "gate", model = "game.asset.Gate", action = "start"): TransmissionGate {
-    return this.CreateTransmissionGate(x, y, name, model, action, 1, 1);
+  /** SkelletonX/DDTank4.1 PVEGame.cs:2068-2071: permission only; GameOverMovie creates the physical gate later. */
+  CreateGate(isEnter: boolean): void;
+  CreateGate(x: number, y: number, name?: string, model?: string, action?: string): TransmissionGate;
+  CreateGate(x: number | boolean, y?: number, name = "gate", model = "game.asset.Gate", action = "start"): TransmissionGate | void {
+    if (typeof x === "boolean") {
+      this.CanEnterGate = x;
+      return;
+    }
+    return this.CreateTransmissionGate(x, y!, name, model, action, 1, 1);
   }
   /** donor-only: CreateTip (physical tip, packet 68) */
   CreateTip(x: number, y: number, name: string, model: string, action: string, scale: number, rotation: number): PhysicalObj {
