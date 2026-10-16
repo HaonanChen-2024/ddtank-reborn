@@ -18,6 +18,7 @@ import { getEquipControl } from "../db/consortia.js";
 import { saveItem } from "../db/items.js";
 import { personalRiches, smithBonusLevel } from "../game/consortia.js";
 import { pushRecords } from "./events.js";
+import { commitPlayerMutation, PlayerMutationCommittedError } from "../game/player-transaction.js";
 
 /** StrengthenMgr.RateItems (StrengthenMgr.cs:29): rate per strengthen stone level 1..6. */
 export const STRENGTHEN_RATE_ITEMS = [0.75, 3.0, 12.0, 48.0, 240.0, 768.0];
@@ -236,82 +237,111 @@ async function guildSmith(ctx: ServerContext, p: GamePlayer, useGuild: boolean):
  * - `original`: referência ao `item` antes de possível troca de `TemplateID` (arma re-templada vira outra linha).
  * - `isBinds`: `true` quando equipamento, pedras, sorte ou divina têm `IsBinds`; resultado herda amarração.
  * - `out`: `GSPacket(59, p.id)` de resposta com `[byte, boolean]`.
- * - `roll`: sorteio `Math.floor(rnd()*10000)` (conta guerreira `isWarrior` força `0` = sucesso garantido).
+ * - `roll`: sorteio `Math.floor(rnd()*10000)` (conta guerreira `isWarrior` força `0`; a chance ainda deve ser positiva).
  * - `sg`: linha de `findStrengthenGoods/findRealStrengthenGoods` com `GainEquip` (evolução/devolução da arma).
  * - `t`: novo `ItemTemplate` de `sg.GainEquip` usado em `ItemInfo.cloneFromTemplate`.
  */
-export async function strengthen(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
-  const useGuild = pkt.readBoolean();
+/** Re-read the real workbench after both the player save lock and SQL owner lock. */
+function strengthenInputs(ctx: ServerContext, p: GamePlayer, now: Date) {
   const store = p.storeBag;
-  let item = store.getItemAt(5);
-  if (!item || !item.template.CanStrengthen || item.Count !== 1) return p.sendMessage(0, ctx.lang.t("ItemStrengthenHandler.Success"));
+  const item = store.getItemAt(5);
+  const valid = (it: ItemInfo, slot: number) => it.IsExist && it.UserID === p.id && it.BagType === store.bagType && it.Place === slot &&
+    !it.cellLocked && it.isValidItem(now) && Number.isSafeInteger(it.Count) && it.Count > 0 && it.Count <= 2_147_483_647 && ctx.templates.findItem(it.TemplateID) === it.template;
+  if (!Number.isFinite(now.getTime()) || !store.saveToDb || !item || !valid(item, 5) || !item.template.CanStrengthen || item.Count !== 1 ||
+      !Number.isInteger(item.StrengthenLevel) || item.StrengthenLevel < 0 || !Number.isInteger(item.StrengthenTimes) || item.StrengthenTimes < 0 || item.StrengthenTimes >= 2_147_483_647) return "强化装备状态无效，请保留物品并重试。";
   const stones: ItemInfo[] = [];
   for (const s of [0, 1, 2]) {
     const st = store.getItemAt(s);
-    if (st && st.template.CategoryID === 11 && (st.template.Property1 === 2 || st.template.Property1 === 35)) stones.push(st);
+    if (st && st.template.CategoryID === 11 && (st.template.Property1 === 2 || st.template.Property1 === 35)) {
+      if (!valid(st, s) || !Number.isInteger(st.template.Level) || st.template.Level < 1 || st.template.Level > STRENGTHEN_RATE_ITEMS.length) return "强化石状态无效，请保留物品并重试。";
+      stones.push(st);
+    }
   }
   const luckIt = store.getItemAt(4);
   const luck = luckIt && luckIt.template.CategoryID === 11 && luckIt.template.Property1 === 3 ? luckIt : null;
   const godIt = store.getItemAt(3);
   const god = godIt && godIt.template.CategoryID === 11 && godIt.template.Property1 === 7 ? godIt : null;
-  if (stones.length < 1) return p.sendMessage(0, `${ctx.lang.t("ItemStrengthenHandler.Content1")}1${ctx.lang.t("ItemStrengthenHandler.Content2")}`);
+  if (stones.length < 1) return `${ctx.lang.t("ItemStrengthenHandler.Content1")}1${ctx.lang.t("ItemStrengthenHandler.Content2")}`;
+  if ((luck && (!valid(luck, 4) || !Number.isInteger(luck.template.Property2))) || (god && !valid(god, 3))) return "强化辅助材料状态无效，请保留物品并重试。";
   const needRate = ctx.templates.strengthenNeedRate(item.StrengthenLevel, item.template.CategoryID);
-  if (!ctx.templates.strengthen.has(item.StrengthenLevel + 1)) return p.sendMessage(0, ctx.lang.t("ItemStrengthenHandler.Success"));
-  // ItemStrengthenHandler.cs:88-103: guild smith +10 %/level of the stone rate when personal riches >= Equip_Control Type 2
-  const smith = await guildSmith(ctx, p, useGuild);
-  const chance = strengthenChance({ stoneLevels: stones.map((s) => s.template.Level), luckP2: luck ? luck.template.Property2 : null, needRate, smithLevel: smith, vip: p.info.typeVIP > 0 });
-  const original = item;
-  const isBinds = item.IsBinds || stones.some((s) => s.IsBinds) || !!luck?.IsBinds || !!god?.IsBinds;
-  item.StrengthenTimes++;
-  item.IsBinds = isBinds;
-  // StoreBag.ClearBag(): the stones, luck and god stone in the workbench are consumed (whole slots, like the C#).
-  store.beginChanges();
-  const out = new GSPacket(59, p.id);
-  try {
-    // C# StoreBag.ClearBag() destroys the whole workbench (every stacked stone). Port: one unit per used slot
-    // (stones 0..2, luck 4, god 3) — the success rate never depended on the stack size; the item leaves slot 5.
-    for (const s of [...stones, luck, god]) if (s) store.removeCountFromStack(s, 1);
-    store.takeOutItem(item);
-    item.IsExist = true;
-    const roll = isWarrior(p) ? 0 : Math.floor(rnd() * 10000);
-    if (chance > roll) {
-      out.writeByte(0); out.writeBoolean(true);
-      item.StrengthenLevel++;
-      const sg = ctx.templates.findStrengthenGoods(item.StrengthenLevel, item.TemplateID);
-      if (sg && item.template.CategoryID === 7 && sg.GainEquip > item.TemplateID) {
-        const t = ctx.templates.findItem(sg.GainEquip);
-        if (t) item = ItemInfo.cloneFromTemplate(t, item);
-      }
-      item.openHole();
-      store.addItemTo(item, 5);
-      p.questInv?.onItemStrengthen(item.template.CategoryID, item.StrengthenLevel);
-      pushRecords(p, new Map([[32, 1]])); // AchievementCondition type 32 ItemStrengthenCondition: successful-strengthen counter
-    } else {
-      out.writeByte(1); out.writeBoolean(false);
-      if (!god) {
-        if (item.template.Level === 3) {
-          item.StrengthenLevel = item.StrengthenLevel < 5 ? item.StrengthenLevel : item.StrengthenLevel - 1;
-          const sg = ctx.templates.findRealStrengthenGoods(item.StrengthenLevel, item.TemplateID);
-          if (sg && item.template.CategoryID === 7 && item.TemplateID !== sg.GainEquip) {
-            const t = ctx.templates.findItem(sg.GainEquip);
-            if (t) item = ItemInfo.cloneFromTemplate(t, item);
+  if (!ctx.templates.strengthen.has(item.StrengthenLevel + 1)) return ctx.lang.t("ItemStrengthenHandler.Success");
+  if (!Number.isFinite(needRate) || needRate <= 0) return "强化需求配置无效，请保留物品并检查配置。";
+  return { item, stones, luck, god, needRate };
+}
+
+export async function strengthen(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+  const reject = (message = "强化保存失败，装备和材料未改变，请稍后重试。") => p.sendMessage(0, message);
+  if (pkt.length - pkt.offset !== 1) return reject("强化请求无效。");
+  const useGuild = pkt.readBoolean();
+  return p.withPersistenceLock(async () => {
+    if (!p.isActive || p.quitting || p.currentRoom?.IsPlaying) return reject("当前不能强化，请返回大厅后重试。");
+    if (bagLocked(ctx, p)) return;
+    const initial = strengthenInputs(ctx, p, ctx.now());
+    if (typeof initial === "string") return reject(initial);
+    // Original denied guild bonus is a notice, not a rejected strengthening attempt.
+    const smith = await guildSmith(ctx, p, useGuild);
+    if (!Number.isSafeInteger(smith) || smith < 0) return reject("公会强化配置无效。");
+    let message: string | undefined, result: { success: boolean; category: number; level: number } | null = null;
+    let notificationError: unknown;
+    try {
+      result = await commitPlayerMutation(ctx, p, async (_db, staged, now) => {
+        if (p.currentRoom?.IsPlaying || (staged.info.HasBagPassword && staged.info.IsLocked)) return null;
+        const input = strengthenInputs(ctx, staged, now);
+        if (typeof input === "string") { message = input; return null; }
+        let { item } = input;
+        const { stones, luck, god, needRate } = input, store = staged.storeBag;
+        const chance = strengthenChance({ stoneLevels: stones.map(s => s.template.Level), luckP2: luck?.template.Property2 ?? null, needRate, smithLevel: smith, vip: staged.info.typeVIP > 0 });
+        const sample = isWarrior(p) ? 0 : rnd();
+        if (!Number.isFinite(sample) || sample < 0 || sample >= 1) { message = "强化随机结果无效，请重试。"; return null; }
+        const success = chance > Math.floor(sample * 10000), original = item;
+        item.StrengthenTimes++;
+        item.IsBinds ||= stones.some(s => s.IsBinds) || !!luck?.IsBinds || !!god?.IsBinds;
+        // Keep the existing local contract: exactly one unit per USED slot, even in a 9999 stack.
+        for (const material of [...stones, luck, god]) if (material && !store.removeCountFromStack(material, 1)) throw new Error("Strengthen material changed");
+        if (!store.takeOutItem(item)) throw new Error("Strengthen equipment changed");
+        if (success) {
+          item.StrengthenLevel++;
+          const row = ctx.templates.findStrengthenGoods(item.StrengthenLevel, item.TemplateID);
+          if (row && item.template.CategoryID === 7 && row.GainEquip > item.TemplateID) {
+            const template = ctx.templates.findItem(row.GainEquip);
+            if (!template) throw new Error("Strengthen replacement template missing");
+            item = ItemInfo.cloneFromTemplate(template, item);
           }
-          store.addItemTo(item, 5);
-        } else {
-          // C#: Count-- and puts the 0-count item back; port: the item is destroyed (removed from the bag).
-          item.Count--;
-          if (item.Count > 0) store.addItemTo(item, 5);
-          else { item.IsExist = false; item.RemoveType = 14; item.isDirty = true; }
+        } else if (!god) {
+          if (item.template.Level === 3) {
+            if (item.StrengthenLevel >= 5) item.StrengthenLevel--;
+            const row = ctx.templates.findRealStrengthenGoods(item.StrengthenLevel, item.TemplateID);
+            if (row && item.template.CategoryID === 7 && row.GainEquip !== item.TemplateID) {
+              const template = ctx.templates.findItem(row.GainEquip);
+              if (!template) throw new Error("Strengthen replacement template missing");
+              item = ItemInfo.cloneFromTemplate(template, item);
+            }
+          } else { item.Count--; item.IsExist = false; item.RemoveType = 14; item.RemoveDate = now; item.isDirty = true; }
         }
-      } else store.addItemTo(item, 5);
-      item.openHole();
+        item.openHole();
+        if (item !== original) {
+          original.IsExist = false; original.RemoveDate = now; original.isDirty = true;
+          // Gold is derived from the NEW base identity; lifetime/base TemplateID remain durable and unchanged in meaning.
+          item.goldTemplate = ctx.templates.findGoldTemplate(item.TemplateID) ?? null;
+        }
+        if (item.IsExist && !store.addItemTo(item, 5)) throw new Error("Strengthen result slot changed");
+        return { value: { success, category: item.template.CategoryID, level: item.StrengthenLevel } };
+      });
+    } catch (error) {
+      if (error instanceof PlayerMutationCommittedError) { result = error.value as NonNullable<typeof result>; notificationError = error; }
+      else { ctx.log.error("Strengthen transaction failed", error); return reject(); }
     }
-    if (item !== original) { original.IsExist = false; original.isDirty = true; } // re-templated weapon: old row deleted
-  } finally {
-    store.commitChanges();
-  }
-  p.send(out);
-  p.updatePlayerProperties();
+    if (!result) return reject(message);
+    const committed = result;
+    const notify = (work: () => void) => { try { work(); } catch (error) { notificationError ??= error; } };
+    if (committed.success) {
+      notify(() => p.questInv?.onItemStrengthen(committed.category, committed.level));
+      notify(() => pushRecords(p, new Map([[32, 1]])));
+    }
+    notify(() => { const out = new GSPacket(59, p.id); out.writeByte(committed.success ? 0 : 1); out.writeBoolean(committed.success); p.send(out); });
+    notify(() => p.updatePlayerProperties());
+    if (notificationError) throw notificationError;
+  });
 }
 
 /**

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { LOCAL_RULES as C, PRIZES } from "./config.js";
-import { completeTreasureCatalog, originalTreasureCategories, TREASURE_CAPACITY, TREASURE_ENTRIES, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION } from "./treasure-catalog.js";
+import { completeTreasureCatalog, isKnownTreasurePoolVersion, originalTreasureCategories, TREASURE_CAPACITY, TREASURE_ENTRIES, TREASURE_POOL_VERSION } from "./treasure-catalog.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityReward, type ActivityWallet } from "./types.js";
 
 export interface TreasureBagItem extends ActivityReward {
@@ -56,7 +56,7 @@ function readBagItem(value: unknown, legacy: boolean): TreasureBagItem {
     return { templateId:item.templateId,count:item.count,...(item.validDays===0 ? {validDays:0}:{}),origin:"legacy-four-material" };
   }
   const row = TREASURE_ENTRIES.find(x=>x.entryKey===item.entryKey);
-  need(item.origin === "original-catalog" && (item.poolVersion === TREASURE_POOL_VERSION || item.poolVersion === TREASURE_PREVIOUS_POOL_VERSION) && row
+  need(item.origin === "original-catalog" && isKnownTreasurePoolVersion(item.poolVersion) && row
     && row.templateId===item.templateId && row.count===item.count && row.sourceOriginalIndex===item.sourceOriginalIndex, "寻宝原目录奖品版本或身份无效，请保留存档。");
   return { templateId:item.templateId,count:item.count,...(item.validDays===0 ? {validDays:0}:{}),origin:"original-catalog",
     entryKey:row.entryKey,sourceOriginalIndex:row.sourceOriginalIndex,poolVersion:item.poolVersion };
