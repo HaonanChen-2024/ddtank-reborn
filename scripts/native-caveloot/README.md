@@ -1,6 +1,10 @@
 # Original CaveLoot adapter (A17)
 
-This is an offline compiled candidate for the original four-page mine, two mine-coin shops, eleven progress rewards, bag quantity/whole-bag settlement, help, and result windows. It is not installed or accepted in the real AVM2 client.
+This adapts the original four-page mine, two mine-coin shops, eleven progress rewards, bag quantity/whole-bag settlement, help, and result windows. The normal daily-free draw, original result animation, take-all mail delivery, and relogin persistence were verified in the real AVM2 client on 2026-10-16. Other pages and the full original equipment pool are not yet accepted.
+
+The host `ShopItemInfo` constructor requires `GoodsID` and `TemplateID`; it has no `personalBuyCnt` slot. Local shop limits remain in the server projection. The original `createChildren` and `initialize` overrides retain their protected namespaces to match the shared Morn `Component` hooks. Making them public prevents AVM2 from loading the original windows.
+
+`node --test scripts/native-caveloot/shop-item-host.test.mjs` checks these contracts against the local original/installed assets. Set `CAVELOOT_CANDIDATE` to a compiled candidate directory to check its actual bootstrap and library too. These are local asset checks; they require the cached original client resources.
 
 `buildNativeCaveLoot` and `auditCaveLoot` emit exactly four files under `/flash/workshop-native/caveloot/`:
 
