@@ -132,6 +132,14 @@
       "text": {
         "CondictionTitle": "使用礼金购买任意1件物品"
       }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10016",
+      "text": {
+        "Name": "传送",
+        "Description": "不受武器限制，将自己传送到本回合攻击的落点。"
+      }
     }
   ]
 }
