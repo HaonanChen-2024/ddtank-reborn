@@ -192,6 +192,7 @@ export class GameServer {
               return d ? [d] : null;
             },
             petSkill: (id) => templates.pets.skills.get(id),
+            cardSets: templates.cardSets,
             onPlayerFlee: (m, g) => {
               // PVPGame.RemovePlayer (PVPGame.cs:647): −grade×12 GP; Match: −5 offer (−15 guild war)
               const p = m as GamePlayer;

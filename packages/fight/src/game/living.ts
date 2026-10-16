@@ -9,6 +9,7 @@ import { hertAddition, turnDelay, turnEnergy } from "./formulas.js";
 import type { BaseGame } from "./game.js";
 import { BasePlayerEffect, EffectListOf, HookBus, type DamageRef, type EffectLike } from "./effects.js";
 import { applyEquipEffects, type EquipEffectTemplate } from "./equipEffects.js";
+import { applyCardEffects, type CardSetTables } from "./cardEffects.js";
 
 /** Game.Logic/LivingConfig.cs — PascalCase on purpose: donor scripts set these fields directly. */
 export class LivingConfig {
@@ -372,6 +373,8 @@ export interface PlayerSpec {
   guildBuffs?: { attack?: number; defence?: number; agility?: number; lucky?: number; maxBloodPercent?: number; critical?: number };
   /** Ordered templates from positive equipment holes (PlayerEquipInventory.EquipBuffer / Player.InitBuffer). */
   equipEffects?: EquipEffectTemplate[];
+  /** Equipped card template ids plus the 1000 + minimum equipped-card level sentinel (PlayerDetail.CardBuff). */
+  cardEffects?: { cards: number[]; tables: CardSetTables };
 }
 
 export interface PetSkillSpec { id: number; costMP: number; coldDown: number; newBallId: number; ballType: number; delay: number; pic?: string; effectPic?: string }
@@ -418,6 +421,12 @@ export class Player extends TurnedLiving {
   constructor(id: number, game: BaseGame, spec: PlayerSpec) {
     super(id, game, spec.team, spec.nickname, spec.hp, 1);
     this.spec = spec;
+    if (spec.cardEffects) {
+      const { cards, tables } = spec.cardEffects;
+      const groups = new Map([...tables.groups].map(([id, members]) => [id, [...members]]));
+      const buffs = new Map([...groups.keys()].map(id => [id, tables.buffs(id)?.map(row => ({ ...row }))]));
+      this.spec = { ...spec, cardEffects: { cards: [...cards], tables: { groups, buffs: id => buffs.get(id) } } };
+    }
     this.setRect(-15, -20, 30, 30);
     this.grade = spec.grade;
     this.vaneOpen = !!spec.isBot || spec.grade >= 9;
@@ -431,7 +440,9 @@ export class Player extends TurnedLiving {
    * buffs are resolved to flat deltas by the caller (apps/game), not re-implemented inside the pure engine. */
   reset(): void {
     this.effectList.stopAll(); // Player.Reset: detach the previous battle effects before InitBuffer.
+    this.cardEffectList.stopAll(); // Player.cs:2216 — remove old card hooks before InitCardBuffer.
     const s = this.spec;
+    if (s.cardEffects) applyCardEffects(this, s.cardEffects.cards, s.cardEffects.tables);
     this.attack = s.attack;
     this.defence = s.defence;
     this.agility = s.agility;

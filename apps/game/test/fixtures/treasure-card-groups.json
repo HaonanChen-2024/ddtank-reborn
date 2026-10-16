@@ -1,0 +1,120 @@
+{
+  "groups": [
+    {
+      "ID": 21,
+      "CardID": 5,
+      "TemplateID": 314120
+    },
+    {
+      "ID": 22,
+      "CardID": 5,
+      "TemplateID": 314119
+    },
+    {
+      "ID": 23,
+      "CardID": 5,
+      "TemplateID": 314118
+    },
+    {
+      "ID": 24,
+      "CardID": 5,
+      "TemplateID": 314117
+    },
+    {
+      "ID": 25,
+      "CardID": 5,
+      "TemplateID": 0
+    },
+    {
+      "ID": 41,
+      "CardID": 9,
+      "TemplateID": 314139
+    },
+    {
+      "ID": 42,
+      "CardID": 9,
+      "TemplateID": 314138
+    },
+    {
+      "ID": 43,
+      "CardID": 9,
+      "TemplateID": 314137
+    },
+    {
+      "ID": 44,
+      "CardID": 9,
+      "TemplateID": 314136
+    },
+    {
+      "ID": 45,
+      "CardID": 9,
+      "TemplateID": 314135
+    }
+  ],
+  "buffs": [
+    {
+      "ID": 17,
+      "CardID": 5,
+      "condition": 2,
+      "PropertiesDscripID": 5,
+      "value": "1|2|3|4",
+      "Description": "Trong chiến đấu và khiêu chiến,khi đánh trúng tăng {0} điểm POW"
+    },
+    {
+      "ID": 18,
+      "CardID": 5,
+      "condition": 4,
+      "PropertiesDscripID": 7,
+      "value": "10|20|30|40",
+      "Description": "Trong chiến đấu tự do,tăng {0} điểm thuộc tính tấn công, phòng thủ, may mắn, nhanh nhẹn."
+    },
+    {
+      "ID": 19,
+      "CardID": 5,
+      "condition": 0,
+      "PropertiesDscripID": 0,
+      "value": "0|0|0|0",
+      "Description": "0"
+    },
+    {
+      "ID": 20,
+      "CardID": 5,
+      "condition": 0,
+      "PropertiesDscripID": 0,
+      "value": "0|0|0|0",
+      "Description": "0"
+    },
+    {
+      "ID": 33,
+      "CardID": 9,
+      "condition": 2,
+      "PropertiesDscripID": 18,
+      "value": "2|4|6|8",
+      "Description": "Sử dụng trong chiến đấu và khiêu chiến, khi công kích chuyển {0}% sát thương thành máu cho mình."
+    },
+    {
+      "ID": 34,
+      "CardID": 9,
+      "condition": 5,
+      "PropertiesDscripID": 19,
+      "value": "5|7|9|11",
+      "Description": "Sử dụng trong chiến đấu và khiêu chiến,chuyển {0}% sát thương bắn trả lại đối thủ."
+    },
+    {
+      "ID": 35,
+      "CardID": 9,
+      "condition": 0,
+      "PropertiesDscripID": 0,
+      "value": "0|0|0|0",
+      "Description": "0"
+    },
+    {
+      "ID": 36,
+      "CardID": 9,
+      "condition": 0,
+      "PropertiesDscripID": 0,
+      "value": "0|0|0|0",
+      "Description": "0"
+    }
+  ]
+}

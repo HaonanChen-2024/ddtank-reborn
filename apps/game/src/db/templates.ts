@@ -7,6 +7,7 @@ import { applyTranslations, game, loadTranslations, player, type Database } from
 import type { ItemTemplate } from "../game/item.js";
 import { emptyPetTables, type PetTables, type PetTemplate } from "../game/pets.js";
 import type { CardUpdateCond, CardUpdateRowFull } from "../game/cards.js";
+import type { CardSetTables } from "@ddt/fight";
 import type { StatTables, ExerciseRow, TotemRow, GoldEquipRow, CardUpdateRow, PetFightRow, SuitInfoRow } from "../game/stats.js";
 
 export type StrengthenRow = typeof game.Item_Strengthen.$inferSelect;
@@ -218,16 +219,19 @@ export class Templates {
   /** CardMgr: CardUpdateCondition by level, CardUpdateInfo (full row) by template:level. */
   cardConditions = new Map<number, CardUpdateCond>();
   cardUpdates = new Map<string, CardUpdateRowFull>();
+  /** Original treasure-box decks5/9 only; other decks await their own usage validation. */
+  cardSets: CardSetTables = { groups: new Map(), buffs: () => undefined };
   get cardMaxLevel(): number {
     return Math.max(0, ...this.cardConditions.keys());
   }
 
   async loadPetsCards(db: Database, lang = "pt-BR"): Promise<void> {
-    const [tpl, lv, cfg, sk, skt, cc, cu, starExp, moe] = await Promise.all([
+    const [tpl, lv, cfg, sk, skt, cc, cu, starExp, moe, groups, buffs] = await Promise.all([
       db.select().from(game.Pet_Template_Info), db.select().from(game.Pet_Level), db.select().from(game.Pet_Config),
       db.select().from(game.Pet_Skill_Info), db.select().from(game.Pet_Skill_Template_Info),
       db.select().from(game.CardUpdateCondition), db.select().from(game.CardUpdateInfo),
       db.select().from(game.Pet_Star_Exp), db.select().from(game.Pet_Moe_Property),
+      db.select().from(game.Card_Group).orderBy(game.Card_Group.ID), db.select().from(game.Card_Buff).orderBy(game.Card_Buff.ID),
     ]);
     const [petTplOverlay, petSkillOverlay] = await Promise.all([
       loadTranslations(db, "Pet_Template_Info", lang),
@@ -244,6 +248,20 @@ export class Templates {
     };
     this.cardConditions = new Map((cc as unknown as CardUpdateCond[]).map((c) => [c.Level, c]));
     this.cardUpdates = new Map((cu as unknown as CardUpdateRowFull[]).map((c) => [`${c.Id}:${c.Level}`, c]));
+    const members = new Map<number, number[]>();
+    const tiers = new Map<number, { condition: number; value: string }[]>();
+    for (const row of groups) if (row.CardID === 5 || row.CardID === 9) {
+      const deck = members.get(row.CardID) ?? [];
+      deck.push(row.TemplateID); members.set(row.CardID, deck);
+    }
+    // CardBuffMgr.FindCardBuffs filters positive tiers and returns descending condition order.
+    // InitCardBuffer's later matching tier overwrites the earlier one; keep that original behavior.
+    for (const row of buffs) if ((row.CardID === 5 || row.CardID === 9) && row.condition > 0) {
+      const deck = tiers.get(row.CardID) ?? [];
+      deck.push({ condition: row.condition, value: row.value ?? "" }); tiers.set(row.CardID, deck);
+    }
+    for (const deck of tiers.values()) deck.sort((a, b) => b.condition - a.condition);
+    this.cardSets = { groups: members, buffs: id => tiers.get(id) };
   }
 
   /** StrengthenMgr.GetNeedRate (StrengthenMgr.cs:360): rock column by category of the NEXT level. */

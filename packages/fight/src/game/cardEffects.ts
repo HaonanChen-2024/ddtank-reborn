@@ -1,9 +1,11 @@
 /**
  * Card set bonuses: `Game.Logic/CardEffect/Effects/*.cs` (30 classes), dispatched by `Player.InitCardBuffer(cards)`
  * (Player.cs:1534-1850) — for each card *group* (deck), count how many of its member cards the player has equipped
- * (Place 0..4), take the highest-condition `CardBuffInfo` tier the count satisfies, then the switch on
+ * (Place 0..4), retain the last eligible `CardBuffInfo` visited, then the switch on
  * `CardBuffInfo.CardID` (1..15) instantiates one-or-more tiered effect classes, each reading its own `Value`
- * (a `|`-joined per-"index" number list; `index` = the account level bracket of the lowest deck card, 0..3).
+ * (a `|`-joined per-"index" number list; `index` = the lowest equipped-card level bracket, 0..3, encoded in a
+ * 1000 + level sentinel by PlayerDetail.CardBuff). Original positive-condition rows are visited descending;
+ * later eligible rows overwrite earlier ones, so the lowest satisfied tier wins, not the highest.
  *
  * `AresDeck`/`HappinessDeck`/`LegendaryWeaponDeck` have an `eCardEffectType` id but `CardID` 1..15 never selects
  * them (same in the original — not a porting gap); kept here for completeness, not wired into `applyCardEffects`.
@@ -20,7 +22,7 @@
  */
 import type { Living, Player } from "./living.js";
 import { AbstractCardEffect, type HookName } from "./effects.js";
-import { RoomType } from "./game.js";
+import { PvpGame, RoomType } from "./game.js";
 
 const T = {
   AntCave: 0, GuluKingdom2: 1, GuluKingdom4: 2, EvilTribe3: 3, EvilTribe5: 4, ShadowDevil2: 5, ShadowDevil4: 6,
@@ -34,6 +36,8 @@ const T = {
 const pveId = (game: Living["game"]): number | undefined => (game as unknown as { info?: { ID: number } }).info?.ID;
 /** AbstractGame.IsMatchOrFreedom (AbstractGame.cs:46) */
 const isMatchOrFreedom = (game: Living["game"]): boolean => game.roomType === RoomType.Match || game.roomType === RoomType.Freedom;
+/** Groups 5/9 also require the original concrete PVPGame type, not only its room number. */
+const isPvpMatchOrFreedom = (game: Living["game"]): boolean => game instanceof PvpGame && isMatchOrFreedom(game);
 /** `SimpleBoss.NpcInfo.ID`, duck-typed for the same reason as `pveId`. */
 const bossNpcId = (l: Living): number | undefined => (l as unknown as { npcInfo?: { ID: number } }).npcInfo?.ID;
 /** `CardBuffInfo.Value.Split('|')[index]`, 0 when out of range (matches the C# "if index < length" guard). */
@@ -111,17 +115,17 @@ export const ShadowDevil4Effect = (index: number, value: string) => (living: Liv
     if (pveId(l.game) === 4 && critical > 0) void valueAt(value, index);
   }));
 
-/** case 5 (cond ≥2): FourArtifacts2Effect — dander on kill in Match/Freedom (real: AddDander is a live side effect). */
+/** case 5 (cond ≥2): FourArtifacts2Effect — dander per landed hit in Match/Freedom (AfterKillingLiving also fires on nonlethal hits). */
 export const FourArtifacts2Effect = (index: number, value: string) => (living: Living) =>
   startOnce(living, T.FourArtifacts2, () => {
     const v = valueAt(value, index);
     return new HookCardEffect(T.FourArtifacts2, "afterKillingLiving", (l: Living) => {
-      if (isMatchOrFreedom(l.game)) (l as Player).addDander(v);
+      if (isPvpMatchOrFreedom(l.game)) (l as Player).addDander(v);
     });
   });
 /** case 5 (cond ≥4): FourArtifacts4Effect — ±stat flat on reset, Match/Freedom. */
 export const FourArtifacts4Effect = (index: number, value: string) => (living: Living) =>
-  startOnce(living, T.FourArtifacts4, () => resetStatFlat(T.FourArtifacts4, valueAt(value, index), isMatchOrFreedom));
+  startOnce(living, T.FourArtifacts4, () => resetStatFlat(T.FourArtifacts4, valueAt(value, index), isPvpMatchOrFreedom));
 
 /** case 6 (cond ≥2): Goblin2Effect — dander += value exactly once (the very first eligible BeginNextTurn while
  * attached), PVE mission 5 — the C# gates on `m_added == 0`, which is only ever true before the first proc. */
@@ -176,7 +180,7 @@ export const GuluSportsMeeting5Effect = (index: number, value: string) => (livin
 /** case 9 (cond ≥2): FiveGodSoldier2Effect — dead code, see file header (self-heal gate can never pass). */
 export const FiveGodSoldier2Effect = (index: number, value: string) => (living: Living) =>
   startOnce(living, T.FiveGodSoldier2, () => new HookCardEffect(T.FiveGodSoldier2, "afterKillingLiving", (l: Living) => {
-    if (isMatchOrFreedom(l.game)) void valueAt(value, index); // m_added > 0.0 gate is always false — no heal.
+    if (isPvpMatchOrFreedom(l.game)) void valueAt(value, index); // m_added > 0.0 gate is always false — no heal.
   }));
 /** case 9 (cond ≥5): FiveGodSoldier5Effect — thorns: reflect value% of the hit you just took back at the attacker,
  * Match/Freedom (`AfterKilledByLiving` fires on the victim; `source` here is that attacker). */
@@ -185,7 +189,7 @@ export const FiveGodSoldier5Effect = (index: number, value: string) => (living: 
     const v = valueAt(value, index);
     return new HookCardEffect(T.FiveGodSoldier5, "afterTakenHit", (l: Living, source: Living, damage: number) => {
       const added = Math.trunc((damage * v) / 100);
-      if (isMatchOrFreedom(l.game) && added > 0) source.addBlood(-added, 1);
+      if (isPvpMatchOrFreedom(l.game) && added > 0) source.addBlood(-added, 1);
     });
   });
 
@@ -292,7 +296,8 @@ export interface CardSetTables {
   buffs(cardId: number): { condition: number; value: string }[] | undefined;
 }
 
-/** Player.InitCardBuffer(cards) (Player.cs:1534-1850). `cards` = equipped card template ids (Place 0..4). */
+/** Player.InitCardBuffer(cards) (Player.cs:1534-1850). `cards` = equipped template ids plus the 1000 + minimum
+ * equipped-card level sentinel. Preserve group/row iteration and overwrite order from CardBuffMgr. */
 export function applyCardEffects(player: Player, cards: number[], tables: CardSetTables): void {
   let minLv = 30;
   for (const c of cards) if (c < 1100) minLv = c - 1000;
@@ -303,7 +308,8 @@ export function applyCardEffects(player: Player, cards: number[], tables: CardSe
   let finalCondition = -1;
   let finalBuffs: { condition: number; value: string }[] = [];
   for (const [cardId, members] of tables.groups) {
-    const counter = members.filter((id) => cards.includes(id)).length;
+    let counter = 0;
+    for (const member of members) for (const card of cards) if (member === card) counter++;
     const buffs = tables.buffs(cardId);
     if (!buffs) continue;
     for (const b of buffs) if (counter >= b.condition) { finalCardId = cardId; finalCondition = b.condition; finalValue = b.value; finalBuffs = buffs; }

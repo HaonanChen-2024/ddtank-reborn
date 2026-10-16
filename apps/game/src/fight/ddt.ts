@@ -3,7 +3,7 @@
  * (GameMgr.THREAD_INTERVAL); engine events are serialized to 91 GAME_CMD packets exactly as the C# writers cited in
  * packages/fight/src/game/events.ts. Bots (VirtualPlayer seats) are played server-side by @ddt/fight's BotRunner.
  */
-import { type BaseGame, type FightAssets, type FightCommand, type FightEvent, GameState, type PlayerSpec, type EquipEffectTemplate, PvpGame, PveGame, type PveData, type PveInfo, type DropItem, BotRunner, type BotProfile, hertAddition, setTranslator } from "@ddt/fight";
+import { type BaseGame, type FightAssets, type FightCommand, type FightEvent, GameState, type PlayerSpec, type EquipEffectTemplate, type CardSetTables, PvpGame, PveGame, type PveData, type PveInfo, type DropItem, BotRunner, type BotProfile, hertAddition, setTranslator } from "@ddt/fight";
 import "@ddt/fight/pve-scripts";
 import { loadPackedAssets } from "@ddt/fight/node";
 import { type GSPacket, PacketOut } from "@ddt/protocol";
@@ -15,6 +15,7 @@ import type { WorldBossAttempt } from "../game/world-boss.js";
 import { WorldBossSettlementGate } from "./world-boss-settlement.js";
 import { unlockDungeonPvePermission } from "../game/pve-permissions.js";
 import { assertChristmasPveReady, christmasPveDefinition, consumeChristmasPveAdmission, createChristmasPveOverlay } from "../game/christmas-pve.js";
+import type { UserCardRow } from "../game/cards.js";
 
 /** Server-owned run identity and durable settlement; never supplied by a room packet. */
 export interface LabyrinthFightBinding {
@@ -69,6 +70,8 @@ export interface DdtFightOptions {
   onPlayerFlee?: (member: RoomMember, g: { roomType: number; gameType: number }) => void;
   /** Pet_Skill_Info row (battle pet skills) */
   petSkill?: (id: number) => { CostMP: number; ColdDown: number; NewBallID: number; BallType: number; Delay: number; Pic: number; EffectPic: string | null } | undefined;
+  /** Server-loaded original card deck tables; captured with worn cards at fight creation. */
+  cardSets?: CardSetTables;
   /** test hook: manual clock instead of setInterval */
   manualClock?: boolean;
   seed?: () => number;
@@ -84,6 +87,7 @@ type LobbyLike = RoomMember & {
   mainWeapon?: ItemLike | null;
   equipBag?: BagLike;
   statTables?: Pick<StatTables, "findItem">;
+  cardBag?: { getItemAt(slot: number): Pick<UserCardRow, "CardID" | "TemplateID" | "Level"> | null };
   propBag?: BagLike;
   fightBag?: BagLike;
   addGiftToken?(v: number): void;
@@ -139,7 +143,7 @@ export class DdtFightEngine implements FightEngine {
       if (s.roomType === 15 && !(labyrinth = this.o.labyrinth!.admit(s, id))) return null;
       const boss = s.roomType === 14 ? this.o.worldBossWindow?.(s.pveId) : undefined;
       if (s.roomType === 14 && this.o.worldBossWindow && !boss) return null;
-      const specs = s.players.map((m) => specOf(m as LobbyLike, 1, this.assets, this.o.petSkill));
+      const specs = s.players.map((m) => specOf(m as LobbyLike, 1, this.assets, this.o.petSkill, this.o.cardSets));
       const members = new Map(s.players.map((m) => [m.id, m as LobbyLike]));
       const game = new PveGame({
         id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, assets: this.assets, players: specs, seed: this.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(),
@@ -218,7 +222,7 @@ export class DdtFightEngine implements FightEngine {
  * from game/stats.ts (items, strengthen, gems, cards, pet, suits, totem — GamePlayer.UpdateProperties); bots (no bags) fall
  * back to the weapon/armour approximation.
  */
-function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtFightOptions["petSkill"]): PlayerSpec {
+function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtFightOptions["petSkill"], cardSets?: CardSetTables): PlayerSpec {
   // An online gold item may have expired since the last inventory change; refresh before taking the fight snapshot.
   if (m.equipBag && Array.from({ length: 31 }, (_, i) => m.equipBag!.getItemAt(i)).some(it => (it?.goldValidDate ?? 0) > 0)) m.recalcStats?.();
   const c = m.info;
@@ -247,10 +251,21 @@ function specOf(m: LobbyLike, team: number, assets: FightAssets, petSkill?: DdtF
       if (t) equipEffects.push({ templateId: t.TemplateID, property3: t.Property3, property4: t.Property4, property5: t.Property5 });
     }
   }
+  // PlayerEquipInventory.cs:304-341: all resolvable worn cards lower the level bracket,
+  // even CardID0 copies; only persisted identities contribute templates. Equipped Count0 is valid.
+  const cards: number[] = [];
+  let minLevel = 30;
+  if (cardSets) for (let slot = 0; slot < 5; slot++) {
+    const card = m.cardBag?.getItemAt(slot);
+    if (!card || !m.statTables?.findItem(card.TemplateID)) continue;
+    minLevel = Math.min(minLevel, card.Level);
+    if (card.CardID !== 0) cards.push(card.TemplateID);
+  }
   return {
     userId: m.id, nickname: c.NickName ?? `p${m.id}`, team, grade: c.Grade, attack: c.Attack, defence: c.Defence, agility: c.Agility, lucky: c.Luck,
     baseAttack: Math.max(1, baseAttack), baseDefence, hp: Math.max(1, c.hp),
     equipEffects,
+    cardEffects: cardSets && cards.length >= 2 ? { cards: [...cards, minLevel + 1000], tables: cardSets } : undefined,
     weapon: { templateId: weaponTemplateId, property8: display?.Property8 ?? wTpl?.property8 ?? w?.template.Property8 ?? 0, refineryLevel: display?.RefineryLevel ?? w?.RefineryLevel ?? 0 },
     deputyWeapon: dep && depTpl ? { template: depTpl, strengthenLevel: dep.StrengthenLevel ?? 0 } : null,
     isBot: m.isBot, isVip: (c.typeVIP ?? 0) > 0, inGuild: (c.ConsortiaID ?? 0) > 0,
@@ -331,7 +346,7 @@ class DdtGame implements FightGame {
       for (const m of list) {
         this.members.set(m.id, m as LobbyLike);
         this.teamOf.set(m.id, team);
-        specs.push(specOf(m as LobbyLike, team, engine.assets, engine.o.petSkill));
+        specs.push(specOf(m as LobbyLike, team, engine.assets, engine.o.petSkill, engine.o.cardSets));
       }
     this.game = pveGame ?? new PvpGame({ id, roomType: s.roomType, gameType: s.gameType, timeType: s.timeType, mapId, assets: engine.assets, players: specs, seed: engine.o.seed?.() ?? (Date.now() ^ (id * 7919)) | 0, now: Date.now(), ...gameHooks(engine, s.roomType, this.members) });
     const profiles = new Map<number, BotProfile>();

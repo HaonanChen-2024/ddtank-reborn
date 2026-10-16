@@ -133,12 +133,14 @@ describe("card set bonuses (CardEffect/Effects/*.cs via Player.InitCardBuffer)",
     ShadowDevil2Effect(0, "20")(a);
     const base = { atk: a.attack, agi: a.agility, luk: a.lucky, def: a.defence };
     a.powerRatio = 55;
-    a.reset();
+    a.hooks.emit("playerAfterReset", a);
     expect(a.attack).toBe(base.atk + 20);
     expect(a.agility).toBe(base.agi + 20);
     expect(a.lucky).toBe(base.luk + 20);
     expect(a.defence).toBe(base.def + 20);
     expect(a.powerRatio).toBe(0);
+    a.reset();
+    expect([a.attack, a.agility, a.lucky, a.defence]).toEqual([base.atk, base.agi, base.luk, base.def]);
   });
 
   it("FourArtifacts2Effect grants dander on kill only in Match/Freedom rooms", () => {
@@ -181,8 +183,10 @@ describe("card set bonuses (CardEffect/Effects/*.cs via Player.InitCardBuffer)",
     const tables: CardSetTables = { groups: new Map([[13, [2101, 2102]]]), buffs: (id) => (id === 13 ? [{ condition: 2, value: "99|99|99|99" }] : undefined) };
     const base = { atk: a.attack, agi: a.agility, luk: a.lucky, def: a.defence };
     applyCardEffects(a, [2101, 2102], tables);
-    a.reset();
+    a.hooks.emit("playerAfterReset", a);
     expect(a.attack).toBe(base.atk + 99);
+    a.reset(); // Reset rebuilds only the fight snapshot, removing manually attached card effects.
+    expect(a.attack).toBe(base.atk);
   });
 });
 
