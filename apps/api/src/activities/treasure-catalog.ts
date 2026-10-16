@@ -13,20 +13,26 @@ export interface TreasureReadiness {
 export interface TreasureCatalog { poolVersion: string; readiness: TreasureReadiness; preview: TreasurePreview[] }
 export interface TreasureTemplate {
   TemplateID: number; CategoryID: number; Pic: string | null; NeedSex: number; MaxCount: number;
-  CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number;
+  CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number; Property7?: number; Property8?: number;
 }
 export const TREASURE_CAPACITY = 100;
 export const TREASURE_ENTRIES: readonly TreasureEntry[] = treasureEntries;
 export const TREASURE_IDS = [...new Set(treasureEntries.map(x => x.templateId))].sort((a,b) => a-b);
 // The version includes the delivery policy: changing mappings/evidence needs a distinct catalog version.
+// Only the verified v1 catalog is compatible: its display identities/counts are unchanged by this owner-evidence update.
+export const TREASURE_PREVIOUS_POOL_VERSION = "0fef67b607c95434765a44660093ce2ec76635835f7146a971b4a81b9da0b31f";
 export const TREASURE_POOL_VERSION = createHash("sha256").update(JSON.stringify({ source: treasureCatalogSource,
-  entries: treasureEntries, policy: "verified-use-routes-v1", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+  entries: treasureEntries, policy: "verified-use-routes-v2-drill217", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
 export const originalTreasureCategories = () => treasureCategories.map(x => ({ ...x, entryKeys: [...x.entryKeys] }));
 
 /** Only verified current owners are admitted. An existing template or matching icon alone is not use evidence. */
 function functionReady(entry: TreasureEntry, item: TreasureTemplate): boolean {
-  if ([11560,11561,11562].includes(entry.templateId)) return item.CategoryID === 11 && item.CanUse && item.Property1 === 10;
-  if ([11901,11902,11903,11904,11906].includes(entry.templateId)) return item.CategoryID === 11 && item.CanUse && item.Property1 === 21 && item.Property2 > 0;
+  // 106 and 217 are dedicated forge routes: their genuine templates intentionally have CanUse=false.
+  if ([11560,11561,11562].includes(entry.templateId)) return item.CategoryID === 11 && item.Property1 === 10;
+  if ([11901,11902,11903,11904,11905,11906].includes(entry.templateId)) return item.CategoryID === 11 && item.CanUse
+    && item.Property1 === 21 && Number.isSafeInteger(item.Property2) && item.Property2 > 0;
+  const drill = [11035,11036,11026,11027,11034].indexOf(entry.templateId);
+  if (drill >= 0) return item.CategoryID === 11 && item.Property1 === 16 && item.Property7 === 2+drill*3 && item.Property8 === 5+drill*3;
   return false;
 }
 /** A projection of actual local templates; reference statistics never enter this module or Shop_Goods. */

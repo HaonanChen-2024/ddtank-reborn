@@ -601,42 +601,93 @@ export async function embedBackout(ctx: ServerContext, p: GamePlayer, pkt: GSPac
  * current level) spent on the StoreBag[slot] equip's hole 5 or 6, Property7..8 random exp; a 100 ms cooldown per
  * player (LastOpenHole) matches the throttle, not an anti-cheat.
  */
-const HOLE_LEVEL_UP_EXP = [400, 600, 700, 800, 800];
+function holeLevelUpExp(ctx: ServerContext): number[] | null {
+  // GameProperties' default applies only when the setting is absent; the real seed's fifth tier is 1200.
+  const configured = ctx.templates.serverConfig.get("HoleLevelUpExpList");
+  const setting = configured === undefined ? "400|600|700|800|800" : configured;
+  if (typeof setting !== "string") return null;
+  const values = setting.split("|").map(value => value.trim());
+  if (values.length !== 5 || values.some(value => !/^\+?\d+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) < 1 || Number(value) > 2_147_483_647)) return null;
+  return values.map(Number);
+}
 export async function openFiveSixHole(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+  const reject = (message = "开孔请求或物品状态无效，请刷新后重试。") => p.sendMessage(0, message);
+  // Parsed packets have zero-filled backing storage: require the actual three-int body, not padded overreads.
+  if (pkt.length - pkt.offset !== 12) return reject();
   const slot = pkt.readInt();
   const hole = pkt.readInt(); // 5 or 6
   const drillTemplateId = pkt.readInt();
-  const now = ctx.now().getTime();
-  if (p.lastOpenHole + 100 > now) return p.sendMessage(0, ctx.lang.t("GameServer.OpenHole.TooQuickly"));
-  p.lastOpenHole = now;
-  const item = p.storeBag.getItemAt(slot);
-  if (!item || ![7, 1, 5].includes(item.template.CategoryID)) return p.sendMessage(0, "Não é possível abrir o furo.");
-  const drill = p.propBag.getItemByTemplateID(0, drillTemplateId);
-  if (!drill || drill.Count <= 0 || (hole !== 5 && hole !== 6)) return;
-  if (drill.IsBinds && !item.IsBinds) p.storeBag.updateItem(item);
-  const lvKey = (hole === 6 ? "Hole6Level" : "Hole5Level") as "Hole5Level" | "Hole6Level";
-  const expKey = (hole === 6 ? "Hole6Exp" : "Hole5Exp") as "Hole5Exp" | "Hole6Exp";
-  const holeKey = (hole === 6 ? "Hole6" : "Hole5") as "Hole5" | "Hole6";
-  let leveledUp = false;
-  if (drill.isDrill(item[lvKey])) {
-    p.propBag.removeCountFromStack(drill, 1);
-    item[expKey] += Math.trunc(drill.template.Property7 + rnd() * (drill.template.Property8 - drill.template.Property7));
-    const needExp = HOLE_LEVEL_UP_EXP[item[lvKey]];
-    if (needExp !== undefined && item[expKey] >= needExp) {
-      item[lvKey]++;
-      item[expKey] = 0;
-      if (item[lvKey] > 0 && item[holeKey] < 0) item[holeKey] = 0;
-      leveledUp = true;
+  const reply = (leveledUp: boolean) => {
+    const out = new GSPacket(217, p.id); out.writeByte(0); out.writeBoolean(leveledUp); out.writeInt(hole); p.send(out);
+  };
+  return p.withPersistenceLock(async () => {
+    const now = ctx.now(), time = now.getTime();
+    if (!Number.isFinite(time)) return reject();
+    if (p.lastOpenHole + 100 > time) return reject(ctx.lang.t("GameServer.OpenHole.TooQuickly"));
+    p.lastOpenHole = time;
+    if (p.currentRoom?.IsPlaying) return reject("战斗中不能开孔。");
+    if (bagLocked(ctx, p)) return;
+    const itemBag = p.storeBag, drillBag = p.propBag;
+    const item = itemBag.getItemAt(slot), drill = drillBag.getItemByTemplateID(0, drillTemplateId);
+    if ((hole !== 5 && hole !== 6) || !item || !drill || item === drill || !itemBag.saveToDb || !drillBag.saveToDb ||
+        !item.IsExist || !drill.IsExist || !Number.isSafeInteger(item.Count) || item.Count < 1 || item.Count > 2_147_483_647 || !Number.isSafeInteger(drill.Count) || drill.Count < 1 || drill.Count > 2_147_483_647 ||
+        item.UserID !== p.id || drill.UserID !== p.id || item.Place !== slot || item.BagType !== itemBag.bagType ||
+        drill.BagType !== drillBag.bagType || drillBag.getItemAt(drill.Place) !== drill || drill.TemplateID !== drillTemplateId ||
+        item.cellLocked || drill.cellLocked || ![7, 1, 5].includes(item.template.CategoryID) || !item.isValidItem(now) || !drill.isValidItem(now)) return reject();
+    const lvKey = hole === 6 ? "Hole6Level" : "Hole5Level";
+    const expKey = hole === 6 ? "Hole6Exp" : "Hole5Exp";
+    const holeKey = hole === 6 ? "Hole6" : "Hole5";
+    if (!Number.isInteger(item[lvKey]) || item[lvKey] < 0 || item[lvKey] > 4 || !Number.isInteger(item[expKey]) || item[expKey] < 0 || item[expKey] > 2_147_483_647 ||
+        !Number.isInteger(item[holeKey]) || item[holeKey] < -2_147_483_648 || item[holeKey] > 2_147_483_647) return reject();
+    if (!drill.isDrill(item[lvKey])) { reject("钻头等级与当前宝珠孔等级不匹配。"); return reply(false); }
+    const thresholds = holeLevelUpExp(ctx), min = drill.template.Property7, max = drill.template.Property8;
+    if (!thresholds || !Number.isInteger(min) || !Number.isInteger(max) || min < 0 || max < min || max > 2_147_483_647) return reject("开孔经验配置无效，请保留物品并检查配置。");
+    let sample: number;
+    try { sample = rnd(); } catch (error) {
+      ctx.log.error("OpenHole random failed", error);
+      return reject("开孔随机结果无效，请重试。");
     }
-  } else {
-    p.sendMessage(0, "O nível da broca não é adequado para abrir o furo.");
-  }
-  p.storeBag.updateItem(item);
-  const out = new GSPacket(217, p.id);
-  out.writeByte(0);
-  out.writeBoolean(leveledUp);
-  out.writeInt(hole);
-  p.send(out);
+    if (!Number.isFinite(sample) || sample < 0 || sample >= 1) return reject("开孔随机结果无效，请重试。");
+    const experience = item[expKey] + Math.floor(min + sample * (max - min)); // C# Random.Next(min,max), upper bound excluded.
+    if (!Number.isSafeInteger(experience) || experience > 2_147_483_647) return reject();
+    const stagedItem = item.clone(), stagedDrill = drill.clone();
+    stagedItem.ItemID = item.ItemID; stagedDrill.ItemID = drill.ItemID;
+    stagedItem[expKey] = experience;
+    const leveledUp = experience >= thresholds[item[lvKey]]!;
+    if (leveledUp) {
+      stagedItem[lvKey]++; stagedItem[expKey] = 0;
+      if (stagedItem[holeKey] < 0) stagedItem[holeKey] = 0;
+    }
+    // Original handler computes a local isBinds but never assigns it; keep both actual binding flags unchanged.
+    if (stagedDrill.Count > 1) stagedDrill.Count--;
+    else {
+      stagedDrill.IsExist = false; stagedDrill.Place = -1; stagedDrill.BagType = -1;
+      stagedDrill.RemoveType = 0; stagedDrill.RemoveDate = now;
+    }
+    try {
+      await ctx.db.db.transaction(async tx => {
+        await saveItem(tx as unknown as Database, stagedItem);
+        await saveItem(tx as unknown as Database, stagedDrill);
+      });
+    } catch (error) {
+      ctx.log.error("OpenHole transaction failed", error);
+      return reject("开孔保存失败，装备和钻头未改变，请稍后重试。");
+    }
+    const bags = [itemBag, drillBag]; bags.forEach(bag => bag.beginChanges());
+    try {
+      item.ItemID = stagedItem.ItemID; drill.ItemID = stagedDrill.ItemID;
+      if (!drillBag.removeCountFromStack(drill, 1)) throw new Error("OpenHole inventory changed after commit");
+      if (!drill.IsExist) drill.RemoveDate = now;
+      item[lvKey] = stagedItem[lvKey]; item[expKey] = stagedItem[expKey]; item[holeKey] = stagedItem[holeKey];
+      itemBag.updateItem(item);
+    } finally {
+      // A disconnected first sink must not leave the second bag's change batch open after SQL already committed.
+      const errors: unknown[] = [];
+      for (const bag of bags) { try { bag.commitChanges(); } catch (error) { errors.push(error); } }
+      if (errors.length) throw errors[0];
+    }
+    reply(leveledUp);
+  });
 }
 
 /**

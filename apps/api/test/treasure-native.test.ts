@@ -1,7 +1,10 @@
-import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { advanceTreasure, prepareTreasureTicketPurchase, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
-import { completeTreasureCatalog, inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
+import { completeTreasureCatalog, inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
+import { treasureCatalogSource, treasureEntries } from "../src/activities/treasure-catalog-data.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState } from "../src/activities/types.js";
 
@@ -52,7 +55,7 @@ describe("complete original treasure catalog", () => {
       Property1: [11560,11561,11562].includes(x.templateId) ? 10 : 21, Property2: 1000 }));
     const actual = inspectTreasureCatalog(templates, () => true);
     expect(actual.readiness.status).toBe("blocked"); expect(actual.readiness.readyRows).toBeGreaterThan(0);
-    expect(actual.preview.filter(x => x.status === "ready").every(x => [11560,11561,11562,11901,11902,11903,11904,11906].includes(x.templateId))).toBe(true);
+    expect(actual.preview.filter(x => x.status === "ready").every(x => [11560,11561,11562,11901,11902,11903,11904,11905,11906].includes(x.templateId))).toBe(true);
     expect(actual.preview.find(x => x.categoryId === 7)!.reasons.join()).toContain("官方武器");
     const candidate = templates.find(x => x.TemplateID === 11904)!; candidate.Pic = "wrong";
     expect(inspectTreasureCatalog(templates, () => false).preview.find(x => x.templateId === 11904)!.reasons).toEqual(expect.arrayContaining(["同号显示身份冲突", "本地图标尚未就绪"]));
@@ -65,6 +68,28 @@ describe("complete original treasure catalog", () => {
     expect(() => completeTreasureCatalog(badRow)).toThrow(/complete treasure catalog/);
     const wrongBlock = inspectTreasureCatalog(); wrongBlock.readiness.blocked[0].entryKey = wrongBlock.readiness.blocked[1].entryKey;
     expect(() => completeTreasureCatalog(wrongBlock)).toThrow(/complete treasure catalog/);
+  });
+  it("admits only fifteen original rows with verified dedicated forge or experience owners from genuine seed templates", () => {
+    const seed = JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString("utf8")) as TreasureTemplate[];
+    const catalog = inspectTreasureCatalog(seed, () => true);
+    const expected = [11026,11027,11034,11035,11036,11560,11561,11562,11901,11902,11903,11904,11905,11905,11906];
+    expect(catalog.preview.filter(x => x.status === "ready").map(x => x.templateId).sort((a,b) => a-b)).toEqual(expected);
+    expect(catalog.readiness).toMatchObject({ status: "blocked", readyRows: 15 });
+    expect(seed.filter(x => [11026,11027,11034,11035,11036,11560,11561,11562].includes(x.TemplateID)).every(x => !x.CanUse)).toBe(true);
+    expect(catalog.preview.filter(x => x.templateId === 11905).map(x => x.count)).toEqual([10,5]);
+    expect(inspectTreasureCatalog(seed, () => false).readiness.readyRows).toBe(0);
+    const previous = createHash("sha256").update(JSON.stringify({ source:treasureCatalogSource,entries:treasureEntries,
+      policy:"verified-use-routes-v1",rule:"local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+    expect(TREASURE_PREVIOUS_POOL_VERSION).toBe(previous); expect(TREASURE_POOL_VERSION).not.toBe(previous);
+  });
+  it("does not admit altered drill experience ranges, missing properties or forged dedicated owners", () => {
+    const row = TREASURE_ENTRIES.find(x => x.templateId === 11034)!;
+    const drill: TreasureTemplate = { TemplateID:11034,CategoryID:11,Pic:row.pic,NeedSex:row.needSex,MaxCount:99,
+      CanEquip:false,CanUse:false,Property1:16,Property2:0,Property7:14,Property8:17 };
+    expect(inspectTreasureCatalog([drill], () => true).preview.find(x => x.templateId === 11034)!.status).toBe("ready");
+    for (const patch of [{Property1:21},{Property7:undefined},{Property8:undefined},{Property7:15},{Property8:18},{Property7:NaN},{CategoryID:7},{Pic:"wrong"},{MaxCount:0}]) {
+      expect(inspectTreasureCatalog([{...drill,...patch}], () => true).preview.find(x => x.templateId === 11034)!.status).toBe("blocked");
+    }
   });
 });
 
@@ -149,6 +174,39 @@ describe("original v2 treasure transitions and legacy entitlements", () => {
       {...old(),bag:[{templateId:11019,count:3}]}, {...readTreasureState(old()),bag:[{templateId:11905,count:5,origin:"original-catalog",entryKey:TREASURE_ENTRIES[0].entryKey,sourceOriginalIndex:12,poolVersion:TREASURE_POOL_VERSION}]}]) {
       const before = structuredClone(saved); expect(() => readTreasureState(saved)).toThrow(ActivityError); expect(saved).toEqual(before);
     }
+  });
+  it("preserves verified v1 prize identities and tokens through the owner-evidence upgrade without accepting unknown versions", () => {
+    const entry = TREASURE_ENTRIES.find(x => x.templateId === 11905 && x.sourceOriginalIndex === 7)!;
+    const saved = readTreasureState(undefined);
+    saved.bag = [{templateId:entry.templateId,count:entry.count,origin:"original-catalog",entryKey:entry.entryKey,
+      sourceOriginalIndex:entry.sourceOriginalIndex,poolVersion:TREASURE_PREVIOUS_POOL_VERSION}];
+    const before = structuredClone(saved), {tickets:_tickets,...oldV2} = saved;
+    const previousToken = `${clock.now.toISOString().slice(0,10)}:${createHash("sha256").update(JSON.stringify(oldV2)).digest("base64url")}`;
+    const view = viewTreasureNative(saved,clock,wallet);
+    expect(readTreasureState(saved)).toEqual(before); expect(saved).toEqual(before);
+    expect(view.bagToken).toBe(previousToken); expect(view.poolVersion).toBe(TREASURE_POOL_VERSION);
+    expect(view.bag[0].poolVersion).toBe(TREASURE_PREVIOUS_POOL_VERSION);
+    for (const poolVersion of ["a".repeat(64),"",undefined]) {
+      expect(() => readTreasureState({...saved,bag:[{...saved.bag[0],poolVersion}]})).toThrow(ActivityError);
+    }
+    expect(() => readTreasureState({...saved,bag:[{...saved.bag[0],count:5}]})).toThrow(ActivityError);
+    const result = advanceTreasure(saved,{type:"take",choice:view.bagToken,index:0},clock,wallet,noRandom,true);
+    expect(result.rewards).toEqual([{...before.bag[0]}]); expect(result.state.bag).toEqual([]);
+    expect(saved).toEqual(before);
+  });
+  it("keeps existing v1 prizes while new draws require the current evidence version and never mutate stale requests", () => {
+    const entry = TREASURE_ENTRIES.find(x => x.templateId === 11905 && x.sourceOriginalIndex === 12)!;
+    const saved = readTreasureState(undefined);
+    saved.bag = [{templateId:entry.templateId,count:entry.count,origin:"original-catalog",entryKey:entry.entryKey,
+      sourceOriginalIndex:entry.sourceOriginalIndex,poolVersion:TREASURE_PREVIOUS_POOL_VERSION}];
+    const run = session(saved), before = structuredClone(run.state);
+    for (const action of [{type:"draw",mode:"normal",count:1,selection:[]},{type:"buy-tickets",mode:"normal",count:1}] as ActivityAction[]) {
+      expect(() => run.act({...action,poolVersion:TREASURE_PREVIOUS_POOL_VERSION,choice:run.view().bagToken},"treasure-native",noRandom)).toThrow(/版本已更新/);
+      expect(run.state).toEqual(before);
+    }
+    run.draw(1,"normal",()=>0);
+    expect(run.view().bag.map(x => x.poolVersion)).toEqual([TREASURE_PREVIOUS_POOL_VERSION,TREASURE_POOL_VERSION]);
+    expect(run.view().bag[0]).toMatchObject({templateId:11905,itemCount:5,sourceOriginalIndex:12});
   });
 });
 

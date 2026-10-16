@@ -17,7 +17,7 @@ import type { DDPlayNativeEffect } from "./ddplay-native.js";
 import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
 import { prepareTreasureDraw, prepareTreasureTicketPurchase, type TreasureNativeEffect } from "./treasure-native.js";
-import { inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION,
+import { inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION,
   type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
@@ -88,7 +88,7 @@ function treasureIconReady(app: AppCtx, entry: TreasureEntry): boolean {
 
 async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_IDS, locked = false): Promise<TreasureTemplate[]> {
   if (!ids.length) return [];
-  return q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2"
+  return q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2","Property7","Property8"
     FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
     ORDER BY "TemplateID" ${locked ? sql`FOR SHARE` : sql``}`);
 }
@@ -293,7 +293,8 @@ async function treasureTakeTemplates(app: AppCtx, rewards: ActivityReward[]): Pr
   for (const reward of originals) {
     const entry = TREASURE_ENTRIES.find(row => row.entryKey === reward.entryKey);
     if (!entry || entry.templateId !== reward.templateId || entry.count !== reward.count || entry.sourceOriginalIndex !== reward.sourceOriginalIndex
-      || reward.poolVersion !== TREASURE_POOL_VERSION || (reward.validDays ?? 0) !== 0) throw new ActivityError("寻宝原目录奖励身份无效。", 503);
+      || (reward.poolVersion !== TREASURE_POOL_VERSION && reward.poolVersion !== TREASURE_PREVIOUS_POOL_VERSION)
+      || (reward.validDays ?? 0) !== 0) throw new ActivityError("寻宝原目录奖励身份无效。", 503);
   }
   const ids = [...new Set(originals.map(reward => reward.templateId))].sort((a, b) => a - b);
   const templates = await treasureTemplates(app, ids, true), byId = new Map(templates.map(item => [item.TemplateID, item]));

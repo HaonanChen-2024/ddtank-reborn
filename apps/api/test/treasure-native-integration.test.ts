@@ -1,13 +1,15 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, relative } from "node:path";
+import { gunzipSync } from "node:zlib";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
 import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
 import { PRIZES } from "../src/activities/config.js";
-import { TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION } from "../src/activities/treasure-catalog.js";
+import { TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION } from "../src/activities/treasure-catalog.js";
+import type { TreasureState } from "../src/activities/treasure-native.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
@@ -230,6 +232,144 @@ async function legacyBag(bag = [{ templateId: 11019, count: 2 }, { templateId: 1
     ON CONFLICT ("UserID","Activity") DO UPDATE SET "State"=EXCLUDED."State"`);
   return state;
 }
+async function previousCatalogBag(count = 2) {
+  const row = TREASURE_ENTRIES.find(entry => entry.templateId === 11901)!;
+  await h.db.insert(game.Shop_Goods).values({ ...templates[0], TemplateID: row.templateId, Name: row.name,
+    CategoryID: row.categoryId, Pic: row.pic, NeedSex: row.needSex, CanEquip: false, CanUse: true, Property1: 21, Property2: 300 });
+  const state = await legacyBag();
+  const treasure: Omit<TreasureState, "tickets"> = { version: 2, bag: Array.from({ length: count }, () => ({
+    templateId: row.templateId, count: row.count, validDays: 0, origin: "original-catalog", entryKey: row.entryKey,
+    sourceOriginalIndex: row.sourceOriginalIndex, poolVersion: TREASURE_PREVIOUS_POOL_VERSION })),
+    draws: 10, score: 20, fragments: 10, pity: 8, choices: [PRIZES[0].name], claimed: [] };
+  state.games.treasure = treasure; await store(state); return { state, treasure, row };
+}
+
+describe("previous issued treasure policy HTTP compatibility", () => {
+  it("takes both original 11905 categories as fifteen genuine MaxCount=1 attachments in three mails without changing the template or replaying delivery", async () => {
+    type SeedTemplate = Omit<typeof game.Shop_Goods.$inferSelect, "AddTime"> & { AddTime: string | null };
+    const seed = (JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString("utf8")) as SeedTemplate[])
+      .find(item => item.TemplateID === 11905)!;
+    expect(seed).toMatchObject({ TemplateID: 11905, CategoryID: 11, Pic: "exp5", MaxCount: 1, CanUse: true, Property1: 21, Property2: 20000 });
+    const template = { ...seed, AddTime: seed.AddTime === null ? null : new Date(seed.AddTime + "Z") };
+    await h.db.insert(game.Shop_Goods).values(template);
+    const readTemplate = () => h.db.select().from(game.Shop_Goods).where(sql`${game.Shop_Goods.TemplateID}=11905`);
+    const originalTemplate = await readTemplate(); expect(originalTemplate).toEqual([template]);
+    const dir = join(config.RESOURCE_DIR, "image", "unfrightprop", seed.Pic!);
+    mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, "icon.png"), Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64"));
+    await built.app.close(); await rebuild(); // Resolve the new test-only icon through the actual resource index.
+    const entries = TREASURE_ENTRIES.filter(row => row.templateId === 11905);
+    expect(entries.map(row => [row.sourceOriginalIndex, row.count])).toEqual([[7, 10], [12, 5]]);
+    const state = await legacyBag();
+    state.games.treasure = { version: 2, bag: entries.map(row => ({ templateId: row.templateId, count: row.count, validDays: 0,
+      origin: "original-catalog", entryKey: row.entryKey, sourceOriginalIndex: row.sourceOriginalIndex, poolVersion: TREASURE_PREVIOUS_POOL_VERSION })),
+      draws: 10, score: 20, fragments: 10, pity: 8, choices: [PRIZES[0].name], claimed: [] };
+    await store(state); const before = await persisted(), view = await snapshot();
+    expect(view.nativeTreasure).toMatchObject({ canTake: true, bagSlotsUsed: 2, readiness: { status: "blocked", totalRows: 158 } });
+    expect(view.nativeTreasure.bag.map(item => [item.sourceOriginalIndex, item.itemCount, item.poolVersion]))
+      .toEqual([[7, 10, TREASURE_PREVIOUS_POOL_VERSION], [12, 5, TREASURE_PREVIOUS_POOL_VERSION]]);
+    expect(await persisted()).toEqual(before); expect(futureTreasureEvidence.ready).toBe(false);
+    const take = { type: "take", choice: view.nativeTreasure.bagToken }, id = randomUUID(), delivered = await native(take, id);
+    expect(delivered).toMatchObject({ points: 1000, earned: 40, revision: 1, mailedCount: 3, nativeCharge: { grossSpent: 0 },
+      nativeTreasure: { draws: 10, progressScore: 20, fragments: 10, bag: [], readiness: { status: "blocked" } } });
+    const final = await persisted();
+    expect(final.goods.map(item => [item.TemplateID, item.Count, item.IsBinds, item.ValidDate])).toEqual(Array.from({ length: 15 }, () => [11905, 1, true, 0]));
+    expect(final.mails).toHaveLength(3);
+    const attachments = final.mails.map(mail => [mail.Annex1, mail.Annex2, mail.Annex3, mail.Annex4, mail.Annex5].filter(Boolean).map(Number));
+    expect(attachments.map(items => items.length)).toEqual([5, 5, 5]);
+    expect(attachments.flat()).toEqual(final.goods.map(item => item.ItemID)); expect(new Set(attachments.flat()).size).toBe(15);
+    expect(final.receipts).toHaveLength(1); expect(await readTemplate()).toEqual(originalTemplate);
+    const replay = await native(take, id.toUpperCase()); expect(replay).toMatchObject({ replayed: true, mailedCount: 3, revision: 1, nativeTreasure: { bag: [] } });
+    expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await persisted()).toEqual(final); expect(await readTemplate()).toEqual(originalTemplate);
+    expect(random.calls).toBe(0); expect(futureTreasureEvidence.ready).toBe(false); expect(futureTreasureEvidence.locks).toEqual([[11905]]);
+  });
+  it("keeps the issued v1 bag token and save read-only, then takes real original rows while the full pool is blocked", async () => {
+    expect(TREASURE_PREVIOUS_POOL_VERSION).toBe("0fef67b607c95434765a44660093ce2ec76635835f7146a971b4a81b9da0b31f");
+    expect(TREASURE_POOL_VERSION).not.toBe(TREASURE_PREVIOUS_POOL_VERSION);
+    const { treasure, row } = await previousCatalogBag(), before = await persisted(), view = await snapshot();
+    const token = "2026-10-15:" + createHash("sha256").update(JSON.stringify(treasure)).digest("base64url");
+    expect(view.nativeTreasure).toMatchObject({ poolVersion: TREASURE_POOL_VERSION, bagToken: token, bagSlotsUsed: 2,
+      canTake: true, canRecycle: false, readiness: { status: "blocked", totalRows: 158 } });
+    expect(view.nativeTreasure.bag).toEqual([0, 1].map(index => ({ index, templateId: row.templateId, itemCount: row.count,
+      origin: "original-catalog", recycleUnitPoints: null, entryKey: row.entryKey, sourceOriginalIndex: row.sourceOriginalIndex,
+      poolVersion: TREASURE_PREVIOUS_POOL_VERSION })));
+    expect(await persisted()).toEqual(before); expect((await saved())!.games.treasure).not.toHaveProperty("tickets");
+    await built.app.close(); await rebuild(); expect((await snapshot()).nativeTreasure.bagToken).toBe(token); expect(await persisted()).toEqual(before);
+    const take = { type: "take", index: 0, choice: token }, id = randomUUID(), taken = await native(take, id);
+    expect(taken).toMatchObject({ points: 1000, earned: 40, revision: 1, mailedCount: 1, nativeCharge: { grossSpent: 0 },
+      nativeTreasure: { draws: 10, progressScore: 20, fragments: 10, bagSlotsUsed: 1, readiness: { status: "blocked" } } });
+    expect((await saved())!.games.treasure).toEqual({ ...treasure, bag: treasure.bag.slice(1), tickets: { normal: 0, advanced: 0 } });
+    const remaining = await persisted(); expect(remaining.goods.map(item => [item.TemplateID, item.Count, item.IsBinds, item.ValidDate]))
+      .toEqual([[11901, 2, true, 0], [11901, 2, true, 0], [11901, 1, true, 0]]);
+    expect(remaining.mails).toHaveLength(1); expect(remaining.receipts).toHaveLength(1);
+    const partial = await snapshot(); expect(partial.nativeTreasure.bag[0].poolVersion).toBe(TREASURE_PREVIOUS_POOL_VERSION);
+    expect(await persisted()).toEqual(remaining);
+    const replay = await native(take, id.toUpperCase()); expect(replay).toMatchObject({ replayed: true, nativeTreasure: { bagSlotsUsed: 1 } });
+    expect(replay).not.toHaveProperty("nativeTreasureAction"); expect(await persisted()).toEqual(remaining);
+    const finished = await native({ type: "take", choice: partial.nativeTreasure.bagToken });
+    expect(finished).toMatchObject({ points: 1000, earned: 40, revision: 2, mailedCount: 1, nativeTreasure: { bag: [] }, nativeCharge: { grossSpent: 0 } });
+    const final = await persisted(); expect(final.goods).toHaveLength(6); expect(final.mails).toHaveLength(2); expect(final.receipts).toHaveLength(2);
+    expect(random.calls).toBe(0); expect(futureTreasureEvidence.ready).toBe(false);
+  });
+  it("replays committed old-policy draw and purchase UUIDs without charging, RNG, mail or action effects", async () => {
+    const { state, treasure } = await previousCatalogBag(1);
+    state.daily = { actions: 2, draws: 1 }; state.completed.treasure = 1;
+    state.games.treasure = { ...treasure, tickets: { normal: 0, advanced: 1 } };
+    state.games.chargeNativeV1 = { version: 1, kind: "charge-native", rulesVersion: 1, grossSpent: 90, grossCapped: false,
+      trackingStartedAt: "2026-10-15T11:00:00.000Z", day: "2026-10-15", catalogVersion: "charge-material-v1", bought: [0, 0, 0, 0, 0, 0, 0] };
+    await store(state); await h.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=910,"Revision"=2 WHERE "UserID"=${uid}`);
+    // These are already committed historical receipts, not new actions accepted by the current policy.
+    const beforePurchase = { ...treasure, bag: [], draws: 9, score: 19, fragments: 9 };
+    const oldBuyChoice = "2026-10-15:" + createHash("sha256").update(JSON.stringify(beforePurchase)).digest("base64url");
+    const oldDrawChoice = "2026-10-15:" + createHash("sha256").update(JSON.stringify({ ...beforePurchase, tickets: { normal: 0, advanced: 1 } })).digest("base64url");
+    const actions: ActivityAction[] = [{ type: "draw", choice: oldDrawChoice, mode: "normal", count: 1, selection: [], poolVersion: TREASURE_PREVIOUS_POOL_VERSION },
+      { type: "buy-tickets", choice: oldBuyChoice, mode: "advanced", count: 1, poolVersion: TREASURE_PREVIOUS_POOL_VERSION }];
+    const ids = actions.map(() => randomUUID()), messages = ["旧目录已提交寻宝回执", "旧目录已提交购券回执"];
+    for (const [index, value] of actions.entries()) {
+      const canonical = value.type === "draw"
+        ? `{"action":{"choice":${JSON.stringify(value.choice)},"count":1,"mode":"normal","poolVersion":${JSON.stringify(TREASURE_PREVIOUS_POOL_VERSION)},"selection":[],"type":"draw"},"activityId":"treasure-native"}`
+        : `{"action":{"choice":${JSON.stringify(value.choice)},"count":1,"mode":"advanced","poolVersion":${JSON.stringify(TREASURE_PREVIOUS_POOL_VERSION)},"type":"buy-tickets"},"activityId":"treasure-native"}`;
+      const signature = createHash("sha256").update(canonical).digest("hex");
+      await h.db.execute(sql`INSERT INTO app."ActivityActions" ("UserID","RequestID","Signature","Result")
+        VALUES (${uid},${ids[index]},${signature},${JSON.stringify({ message: messages[index], mailedCount: 0 })}::jsonb)`);
+    }
+    const before = await persisted(), view = await snapshot(); expect(view.nativeTreasure.readiness.status).toBe("blocked");
+    for (const [index, value] of actions.entries()) {
+      const replays = await Promise.all(Array.from({ length: 8 }, () => native(value, ids[index].toUpperCase())));
+      for (const replay of replays) {
+        expect(replay).toMatchObject({ replayed: true, message: messages[index], mailedCount: 0, points: 910, earned: 40, revision: 2,
+          nativeCharge: { grossSpent: 90 }, nativeTreasure: { poolVersion: TREASURE_POOL_VERSION, tickets: { normal: 0, advanced: 1 }, readiness: { status: "blocked" } } });
+        expect(replay.nativeTreasure.bag).toEqual(view.nativeTreasure.bag); expect(replay).not.toHaveProperty("nativeTreasureAction");
+      }
+      await native({ ...value, poolVersion: TREASURE_POOL_VERSION }, ids[index], 409);
+      expect(await persisted()).toEqual(before);
+    }
+    expect(random.calls).toBe(0); expect(futureTreasureEvidence.ready).toBe(false); expect(futureTreasureEvidence.locks).toEqual([]);
+  });
+  it("rejects uncommitted old-policy draws and purchases before changing any of the five persisted tables", async () => {
+    await previousCatalogBag(); const view = await snapshot(), before = await persisted();
+    for (const mode of ["normal", "advanced"] as const) {
+      const draw: ActivityAction = { type: "draw", mode, count: 1, choice: view.nativeTreasure.bagToken,
+        poolVersion: TREASURE_PREVIOUS_POOL_VERSION, selection: mode === "normal" ? [] : [4, 1, 12, 7] };
+      for (const value of [draw, { ...draw, funding: "tickets" as const }, { type: "buy-tickets", mode, count: 1,
+        choice: view.nativeTreasure.bagToken, poolVersion: TREASURE_PREVIOUS_POOL_VERSION }]) {
+        const rejected = await native(value, randomUUID(), 400); expect(rejected).toMatchObject({ message: "原奖池版本已更新，请刷新原窗口。" });
+        expect(await persisted()).toEqual(before); expect(random.calls).toBe(0);
+      }
+    }
+    expect(futureTreasureEvidence.ready).toBe(false); expect(futureTreasureEvidence.locks).toEqual(Array.from({ length: 6 }, () => TREASURE_IDS));
+  });
+  it("never broadens issued-v1 compatibility to unknown versions or mismatched original identities and quantities", async () => {
+    const { state, treasure, row } = await previousCatalogBag(1);
+    for (const changed of [{ poolVersion: "f".repeat(64) }, { count: row.count + 1 }, { sourceOriginalIndex: 7 },
+      { templateId: 11902 }, { entryKey: TREASURE_ENTRIES.find(entry => entry.templateId === 11902)!.entryKey }]) {
+      state.games.treasure = { ...treasure, bag: [{ ...treasure.bag[0], ...changed }] }; await store(state);
+      const before = await persisted(), response = await post("treasure-native", { type: "take", choice: "not-a-save-repair" });
+      expect(response.statusCode, response.body).toBe(400); expect(response.json()).toMatchObject({ message: "寻宝原目录奖品版本或身份无效，请保留存档。" });
+      expect(await persisted()).toEqual(before); expect(random.calls).toBe(0);
+    }
+  });
+});
+
 describe("v2 treasure with real legacy transaction and incomplete original catalog", () => {
   it("keeps GET and old normalization read-only and enforces ownership", async () => {
     await legacyBag(); const before = await persisted(), view = await snapshot();
