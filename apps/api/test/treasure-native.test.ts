@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { advanceTreasure, prepareTreasureTicketPurchase, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
-import { completeTreasureCatalog, inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION, TREASURE_DRILL_POOL_VERSION, TREASURE_STRENGTHEN_POOL_VERSION, TREASURE_COMPOSE_HONOR_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
+import { completeTreasureCatalog, inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION, TREASURE_DRILL_POOL_VERSION, TREASURE_STRENGTHEN_POOL_VERSION, TREASURE_COMPOSE_HONOR_POOL_VERSION, TREASURE_TRAINING_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
 import { treasureCatalogSource, treasureEntries } from "../src/activities/treasure-catalog-data.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState } from "../src/activities/types.js";
@@ -13,6 +13,7 @@ const wallet = { points: 2000, earned: 40, revision: 0 };
 const noRandom = () => { throw new Error("Unexpected RNG"); };
 const useFixture = JSON.parse(readFileSync(new URL("./fixtures/treasure-compose-honor.json", import.meta.url), "utf8"));
 const trainingFixture = JSON.parse(readFileSync(new URL("./fixtures/treasure-training.json", import.meta.url), "utf8"));
+const guardFixture = JSON.parse(readFileSync(new URL("./fixtures/treasure-second-weapon.json", import.meta.url), "utf8"));
 // Synthetic internal use evidence for pure transitions, never a production readiness override.
 const readyCatalog = (): TreasureCatalog => ({ poolVersion: TREASURE_POOL_VERSION,
   preview: TREASURE_ENTRIES.map(x => ({ ...x, status: "ready", reasons: [] })),
@@ -71,13 +72,13 @@ describe("complete original treasure catalog", () => {
     const wrongBlock = inspectTreasureCatalog(); wrongBlock.readiness.blocked[0].entryKey = wrongBlock.readiness.blocked[1].entryKey;
     expect(() => completeTreasureCatalog(wrongBlock)).toThrow(/complete treasure catalog/);
   });
-  it("admits only twenty-eight original rows with verified forge, experience, training or exact box owners from genuine seed templates", () => {
+  it("admits only thirty-two original rows with verified original owners from genuine seed templates", () => {
     const seed = JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString("utf8")) as TreasureTemplate[];
     seed.find(item => item.TemplateID === 11917)!.boxRewards = useFixture.boxes;
     const catalog = inspectTreasureCatalog(seed, () => true);
-    const expected = [11019,11021,11022,11023,11024,11026,11027,11030,11031,11032,11033,11034,11035,11036,11560,11561,11562,11901,11902,11903,11904,11905,11905,11906,11917,40001,40002,40003];
+    const expected = [11019,11021,11022,11023,11024,11026,11027,11030,11031,11032,11033,11034,11035,11036,11560,11561,11562,11901,11902,11903,11904,11905,11905,11906,11917,17006,17016,17022,17023,40001,40002,40003];
     expect(catalog.preview.filter(x => x.status === "ready").map(x => x.templateId).sort((a,b) => a-b)).toEqual(expected);
-    expect(catalog.readiness).toMatchObject({ status: "blocked", readyRows: 28 });
+    expect(catalog.readiness).toMatchObject({ status: "blocked", readyRows: 32 });
     expect(seed.filter(x => [11026,11027,11034,11035,11036,11560,11561,11562].includes(x.TemplateID)).every(x => !x.CanUse)).toBe(true);
     expect(catalog.preview.filter(x => x.templateId === 11905).map(x => x.count)).toEqual([10,5]);
     expect(inspectTreasureCatalog(seed, () => false).readiness.readyRows).toBe(0);
@@ -93,7 +94,10 @@ describe("complete original treasure catalog", () => {
     const composeHonorPolicy = createHash("sha256").update(JSON.stringify({ source:treasureCatalogSource,entries:treasureEntries,
       policy:"verified-use-routes-v4-compose58-box63",rule:"local-equal-rows-30-60-no-pity-v2" })).digest("hex");
     expect(TREASURE_COMPOSE_HONOR_POOL_VERSION).toBe(composeHonorPolicy); expect(TREASURE_POOL_VERSION).not.toBe(composeHonorPolicy);
-    for (const version of [previous,drillPolicy,strengthenPolicy,composeHonorPolicy,TREASURE_POOL_VERSION]) expect(isKnownTreasurePoolVersion(version)).toBe(true);
+    const trainingPolicy = createHash("sha256").update(JSON.stringify({ source:treasureCatalogSource,entries:treasureEntries,
+      policy:"verified-use-routes-v5-training99",rule:"local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+    expect(TREASURE_TRAINING_POOL_VERSION).toBe(trainingPolicy); expect(TREASURE_POOL_VERSION).not.toBe(trainingPolicy);
+    for (const version of [previous,drillPolicy,strengthenPolicy,composeHonorPolicy,trainingPolicy,TREASURE_POOL_VERSION]) expect(isKnownTreasurePoolVersion(version)).toBe(true);
     for (const version of [undefined,null,3,"", "a".repeat(64),`${drillPolicy} `]) expect(isKnownTreasurePoolVersion(version)).toBe(false);
   });
   it("requires genuine training potion identities, category and exact experience amounts", () => {
@@ -102,6 +106,21 @@ describe("complete original treasure catalog", () => {
       .map(row => [row.templateId,row.count])).toEqual([[40001,10],[40002,10],[40003,10]]);
     for (const item of templates) for (const patch of [{CategoryID:11},{Property1:21},{Property2:item.Property2+1},
       {CanUse:false},{Pic:"wrong"},{NeedSex:1},{MaxCount:0}]) {
+      const changed = templates.map(row => row.TemplateID === item.TemplateID ? {...row,...patch} : row);
+      expect(inspectTreasureCatalog(changed, () => true).preview.find(row => row.templateId === item.TemplateID)?.status).toBe("blocked");
+    }
+    expect(inspectTreasureCatalog(templates, () => false).readiness.readyRows).toBe(0);
+  });
+  it("admits four genuine shields, preserves the unresolved suit shield and rejects altered stats or combat fields", () => {
+    const templates = guardFixture.goods as TreasureTemplate[];
+    expect(inspectTreasureCatalog(templates, () => true).preview.filter(row => row.status === "ready")
+      .map(row => [row.templateId,row.count])).toEqual([17006,17022,17023,17016].map(id => [id,1]));
+    expect(inspectTreasureCatalog(templates, () => true).preview.find(row => row.templateId === 17012))
+      .toMatchObject({status:"blocked",reasons:expect.arrayContaining(["装备属性或技能尚未核验"])});
+    const changes = [{CategoryID:7},{CanEquip:false},{CanUse:false},{CanStrengthen:false},{MaxCount:2},{NeedLevel:99},
+      {Property1:1},{Property2:-1},{Property3:32},{Property4:0},{Property5:0},{Property6:9},{Property7:9999},{Property8:0},
+      {Attack:9999},{Defence:9999},{Agility:9999},{Luck:9999},{SuitId:-1},{Pic:"wrong"},{NeedSex:1}];
+    for (const item of templates) for (const patch of changes) {
       const changed = templates.map(row => row.TemplateID === item.TemplateID ? {...row,...patch} : row);
       expect(inspectTreasureCatalog(changed, () => true).preview.find(row => row.templateId === item.TemplateID)?.status).toBe("blocked");
     }

@@ -18,7 +18,9 @@ export interface TreasureBoxReward {
 export interface TreasureTemplate {
   TemplateID: number; CategoryID: number; Pic: string | null; NeedSex: number; MaxCount: number;
   CanEquip: boolean; CanUse: boolean; Property1: number; Property2: number; Property7?: number; Property8?: number; Level?: number;
-  Quality?: number; Property3?: number; Property4?: number; boxRewards?: readonly TreasureBoxReward[];
+  Quality?: number; Property3?: number; Property4?: number; Property5?: number; Property6?: number;
+  CanStrengthen?: boolean; NeedLevel?: number; Attack?: number; Defence?: number; Agility?: number; Luck?: number; SuitId?: number;
+  boxRewards?: readonly TreasureBoxReward[];
 }
 export const TREASURE_CAPACITY = 100;
 export const TREASURE_ENTRIES: readonly TreasureEntry[] = treasureEntries;
@@ -29,16 +31,29 @@ export const TREASURE_PREVIOUS_POOL_VERSION = "0fef67b607c95434765a44660093ce2ec
 export const TREASURE_DRILL_POOL_VERSION = "0865704466025c6222181f7bd8eff5234cdd9b30df796e1ed7df1a784b2c4e22";
 export const TREASURE_STRENGTHEN_POOL_VERSION = "81fe46da0487983e3a1995945adb2a22a1591fdc31cbdf158e7a11512266941d";
 export const TREASURE_COMPOSE_HONOR_POOL_VERSION = "43bc186dd4c11d8dc1b60fdf9a2f58bb5b4556c8efdb2c464da598aa66823f0c";
+export const TREASURE_TRAINING_POOL_VERSION = "2dfe8803e62b81696aff8ed27dfe977f16a93f574b5001c906c507e0a98b4861";
 export const TREASURE_POOL_VERSION = createHash("sha256").update(JSON.stringify({ source: treasureCatalogSource,
-  entries: treasureEntries, policy: "verified-use-routes-v5-training99", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+  entries: treasureEntries, policy: "verified-use-routes-v6-secondary-guard", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
 export function isKnownTreasurePoolVersion(value: unknown): value is string {
-  return value === TREASURE_POOL_VERSION || value === TREASURE_COMPOSE_HONOR_POOL_VERSION || value === TREASURE_STRENGTHEN_POOL_VERSION
+  return value === TREASURE_POOL_VERSION || value === TREASURE_TRAINING_POOL_VERSION || value === TREASURE_COMPOSE_HONOR_POOL_VERSION || value === TREASURE_STRENGTHEN_POOL_VERSION
     || value === TREASURE_DRILL_POOL_VERSION || value === TREASURE_PREVIOUS_POOL_VERSION;
 }
 export const originalTreasureCategories = () => treasureCategories.map(x => ({ ...x, entryKeys: [...x.entryKeys] }));
 
+// Original Shop_Goods combat fields match packed-fight rows. Columns: P2, metadata(P6), H(P7), each base stat, SuitId.
+// A matching picture must not admit an inflated same-id private-server substitute.
+const guards: Record<number, readonly [number, number, number, number, number]> = {
+  // 17012's guard is supported, but its SuitId=12 skill 1010810 remains unverified.
+  17006: [300,3,80,30,0], 17022: [300,2,100,30,0],
+  17023: [1000,2,120,50,0], 17016: [1000,2,120,50,0],
+};
 /** Only verified current owners are admitted. An existing template or matching icon alone is not use evidence. */
 function functionReady(entry: TreasureEntry, item: TreasureTemplate): boolean {
+  const guard = guards[entry.templateId];
+  if (guard) return item.CategoryID === 17 && item.CanEquip && item.CanUse && item.CanStrengthen === true && item.MaxCount === 1 && item.NeedLevel === 1
+    && item.Property1 === 0 && item.Property2 === guard[0] && item.Property3 === 31 && item.Property4 === 200
+    && item.Property5 === 2 && item.Property6 === guard[1] && item.Property7 === guard[2] && item.Property8 === 500
+    && [item.Attack,item.Defence,item.Agility,item.Luck].every(stat => stat === guard[3]) && item.SuitId === guard[4];
   // Dedicated forge/box routes accept genuine templates with CanUse=false.
   if ([11560,11561,11562].includes(entry.templateId)) return item.CategoryID === 11 && item.Property1 === 10;
   if ([11901,11902,11903,11904,11905,11906].includes(entry.templateId)) return item.CategoryID === 11 && item.CanUse

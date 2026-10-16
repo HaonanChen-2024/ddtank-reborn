@@ -7,7 +7,7 @@ import { Box } from "./box.js";
 import { SimpleBomb } from "../phy/bomb.js";
 import { hertAddition, turnDelay, turnEnergy } from "./formulas.js";
 import type { BaseGame } from "./game.js";
-import { EffectListOf, HookBus, type EffectLike } from "./effects.js";
+import { BasePlayerEffect, EffectListOf, HookBus, type DamageRef, type EffectLike } from "./effects.js";
 import { applyEquipEffects, type EquipEffectTemplate } from "./equipEffects.js";
 
 /** Game.Logic/LivingConfig.cs — PascalCase on purpose: donor scripts set these fields directly. */
@@ -610,7 +610,6 @@ export class Player extends TurnedLiving {
   }
 
   override prepareSelfTurn(): void {
-    this.addArmor = false;
     super.prepareSelfTurn();
     this.useItemCount = 0;
     this.defaultDelay = this.delay;
@@ -802,7 +801,7 @@ export class Player extends TurnedLiving {
     this.useItemCount++;
     if (!dw || !this.canUseItem(dw.template) || this.deputyWeaponResCount <= 0) return false;
     if (dw.template.property3 === 31) {
-      this.addArmor = true;
+      new AddGuardEquipEffect(int(hertAddition(dw.template.property7, dw.strengthenLevel)), 1).start(this);
     } else {
       this.setCurrentWeapon(dw.template.templateId);
     }
@@ -819,5 +818,33 @@ export class Player extends TurnedLiving {
   armorBonus(): number {
     const dw = this.spec.deputyWeapon;
     return this.addArmor && dw ? hertAddition(dw.template.property7, dw.strengthenLevel) : 0;
+  }
+}
+
+/** Effects/AddGuardEquipEffect.cs: both H deductions are intentional; critical is untouched.
+ * Its unused isArrmor constructor flag has no gameplay branch in the original. */
+class AddGuardEquipEffect extends BasePlayerEffect {
+  constructor(private readonly guard: number, private turns: number) { super(39); }
+  private readonly beforeDamage = (_living: Living, _source: Living, damage: DamageRef) => {
+    damage.damage -= this.guard;
+    if ((damage.damage -= this.guard) <= 0) damage.damage = 1;
+  };
+  private readonly selfTurn = () => { if (--this.turns < 0) this.stop(); };
+  override start(living: Living): boolean {
+    const active = living.effectList.getOfType(this.type) as AddGuardEquipEffect | undefined;
+    if (active) { active.turns = this.turns; return true; }
+    return super.start(living);
+  }
+  protected override onAttachedToPlayer(player: Player): void {
+    player.addArmor = true;
+    player.hooks.on("beginSelfTurn", this.selfTurn);
+    player.hooks.on("beforeTakeDamage", this.beforeDamage);
+    player.game.emit({ cmd: "SEND_PICTURE", livingId: player.id, type: 6, state: true });
+  }
+  protected override onRemovedFromPlayer(player: Player): void {
+    player.addArmor = false;
+    player.hooks.off("beginSelfTurn", this.selfTurn);
+    player.hooks.off("beforeTakeDamage", this.beforeDamage);
+    player.game.emit({ cmd: "SEND_PICTURE", livingId: player.id, type: 6, state: false });
   }
 }

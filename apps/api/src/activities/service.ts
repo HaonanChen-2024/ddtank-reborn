@@ -91,7 +91,7 @@ async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_
   // This configuration heap has no unique key: row locks cannot stop a second reward being inserted.
   // Take the table lock before item rows; ordinary GET remains an unlocked projection.
   if (locked && ids.includes(11917)) await q(app.h, sql`LOCK TABLE game."Shop_Goods_Box" IN SHARE MODE`);
-  const items = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2","Property3","Property4","Property7","Property8","Level","Quality"
+  const items = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","NeedLevel","MaxCount","CanEquip","CanUse","CanStrengthen","Property1","Property2","Property3","Property4","Property5","Property6","Property7","Property8","Level","Quality","Attack","Defence","Agility","Luck","SuitId"
     FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
     ORDER BY "TemplateID" ${locked ? sql`FOR SHARE` : sql``}`);
   // This box's exact recipe is part of its verified use route; a matching item alone proves nothing.
