@@ -28,10 +28,11 @@ export const TREASURE_IDS = [...new Set(treasureEntries.map(x => x.templateId))]
 export const TREASURE_PREVIOUS_POOL_VERSION = "0fef67b607c95434765a44660093ce2ec76635835f7146a971b4a81b9da0b31f";
 export const TREASURE_DRILL_POOL_VERSION = "0865704466025c6222181f7bd8eff5234cdd9b30df796e1ed7df1a784b2c4e22";
 export const TREASURE_STRENGTHEN_POOL_VERSION = "81fe46da0487983e3a1995945adb2a22a1591fdc31cbdf158e7a11512266941d";
+export const TREASURE_COMPOSE_HONOR_POOL_VERSION = "43bc186dd4c11d8dc1b60fdf9a2f58bb5b4556c8efdb2c464da598aa66823f0c";
 export const TREASURE_POOL_VERSION = createHash("sha256").update(JSON.stringify({ source: treasureCatalogSource,
-  entries: treasureEntries, policy: "verified-use-routes-v4-compose58-box63", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+  entries: treasureEntries, policy: "verified-use-routes-v5-training99", rule: "local-equal-rows-30-60-no-pity-v2" })).digest("hex");
 export function isKnownTreasurePoolVersion(value: unknown): value is string {
-  return value === TREASURE_POOL_VERSION || value === TREASURE_STRENGTHEN_POOL_VERSION
+  return value === TREASURE_POOL_VERSION || value === TREASURE_COMPOSE_HONOR_POOL_VERSION || value === TREASURE_STRENGTHEN_POOL_VERSION
     || value === TREASURE_DRILL_POOL_VERSION || value === TREASURE_PREVIOUS_POOL_VERSION;
 }
 export const originalTreasureCategories = () => treasureCategories.map(x => ({ ...x, entryKeys: [...x.entryKeys] }));
@@ -42,6 +43,8 @@ function functionReady(entry: TreasureEntry, item: TreasureTemplate): boolean {
   if ([11560,11561,11562].includes(entry.templateId)) return item.CategoryID === 11 && item.Property1 === 10;
   if ([11901,11902,11903,11904,11905,11906].includes(entry.templateId)) return item.CategoryID === 11 && item.CanUse
     && item.Property1 === 21 && Number.isSafeInteger(item.Property2) && item.Property2 > 0;
+  const training = [40001,40002,40003].indexOf(entry.templateId);
+  if (training >= 0) return item.CategoryID === 20 && item.CanUse && item.Property1 === 0 && item.Property2 === [30,300,900][training];
   const drill = [11035,11036,11026,11027,11034].indexOf(entry.templateId);
   if (drill >= 0) return item.CategoryID === 11 && item.Property1 === 16 && item.Property7 === 2+drill*3 && item.Property8 === 5+drill*3;
   const stone = [11019,11021,11022,11023,11024].indexOf(entry.templateId);

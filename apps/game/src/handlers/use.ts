@@ -223,27 +223,61 @@ export function cardUse(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void 
  * TexpHandler.cs (99): int selectIndex (0 hp, 1 att, 2 def, 3 spd, 4 luk), int templateId, int place. The potion
  * (category 20) sits in StoreBag[0] (TexpView's cell); Property2 = exp. Daily cap = grade × 2 (VIP ≤ 2) or × 3.
  */
-export function texp(ctx: ServerContext, p: GamePlayer, selectIndex: number, templateId: number, place: number): void {
-  const it = p.storeBag.getItemAt(place);
-  const info = p.info.Texp;
-  if (!it || !info || it.TemplateID !== templateId || it.template.CategoryID !== 20) return;
-  const limit = p.info.Grade * (p.info.VIPLevel <= 2 ? 2 : 3);
-  const now = ctx.now();
-  const day = (d: Date) => Math.floor(d.getTime() / 86_400_000);
-  if (day(info.texpTaskDate) + 1 <= day(now) && info.texpCount >= limit) {
-    info.texpCount = 0;
-    info.texpTaskDate = now;
-  }
-  if (info.texpCount >= limit) return p.sendMessage(0, ctx.lang.t("texpSystem.texpCountToplimit"));
-  const key = (["hpTexpExp", "attTexpExp", "defTexpExp", "spdTexpExp", "lukTexpExp"] as const)[selectIndex];
-  if (!key) return; // -1 (BagView quest refresh) changes nothing in the original either, besides eating the potion
-  if (!p.storeBag.removeTemplate(templateId, 1)) return;
-  info[key] += it.template.Property2;
-  info.texpCount++;
-  info.texpTaskCount++;
-  p.questInv?.onUsingItem(templateId);
-  p.questInv?.onUsingItem(45001 + ((selectIndex + 4) % 5)); // OnUsingItem(45005 hp / 45001 att / 45002 def / 45003 spd / 45004 luk)
-  p.updatePlayerProperties();
+export async function texp(ctx: ServerContext, p: GamePlayer, selectIndex: number, templateId: number, place: number): Promise<void> {
+  const keys = ["hpTexpExp", "attTexpExp", "defTexpExp", "spdTexpExp", "lukTexpExp"] as const;
+  if (!Number.isSafeInteger(selectIndex) || selectIndex < 0 || selectIndex >= keys.length || !Number.isSafeInteger(place) || place < 0) return;
+  const key = keys[selectIndex]!;
+  return p.withPersistenceLock(async () => {
+    const permitted = () => p.isActive && !p.quitting && !p.currentRoom?.IsPlaying && !(p.info.HasBagPassword && p.info.IsLocked) && p.extra?.coupleBossBoxNum !== 9;
+    if (!permitted()) return;
+    let limited = false, result: { trained: boolean } | null = null, notificationError: unknown;
+    try {
+      result = await commitPlayerMutation<{ trained: boolean }>(ctx, p, async (_db, staged, now) => {
+        if (!permitted()) return null;
+        const bag = staged.storeBag, it = bag.getItemAt(place), info = staged.info.Texp;
+        const integer = (value: number) => Number.isSafeInteger(value) && value >= 0 && value <= 2_147_483_647;
+        if (!Number.isFinite(now.getTime()) || !it || !info || it.cellLocked || !it.IsExist || it.UserID !== p.id || it.Place !== place || it.BagType !== bag.bagType ||
+            it.TemplateID !== templateId || ctx.templates.findItem(templateId) !== it.template || it.template.CategoryID !== 20 || !it.isValidItem(now) ||
+            !integer(it.Count) || it.Count < 1 || !integer(it.template.MaxCount) || it.Count > it.template.MaxCount ||
+            !integer(it.template.Property2) || it.template.Property2 < 1 || !integer(staged.info.Grade) || staged.info.Grade < 1 || staged.info.Grade < it.template.NeedLevel ||
+            !integer(staged.info.VIPLevel) || !keys.every(k => integer(info[k])) || !integer(info.texpCount) || !integer(info.texpTaskCount) || !Number.isFinite(info.texpTaskDate.getTime())) return null;
+        let limit = staged.info.Grade * (staged.info.VIPLevel <= 2 ? 2 : 3), usedBuff = false;
+        // Original UsePayBuff(Train_Good=71) checks its template and inclusive
+        // expiry, then consumes a limited use before the daily-cap decision.
+        const buff = staged.buffs.find(b => b.Type === 71 && b.IsExist);
+        const buffTemplate = buff && ctx.templates.findItem(buff.TemplateID);
+        if (buff && buffTemplate && buff.BeginDate.getTime() + buff.ValidDate * 60_000 >= now.getTime() &&
+            integer(buff.Value) && integer(buff.ValidCount) && (buffTemplate.Property3 === 0 || (buffTemplate.Property3 > 0 && buff.ValidCount > 0))) {
+          limit += buff.Value;
+          if (buffTemplate.Property3 > 0) { buff.ValidCount--; usedBuff = true; }
+        }
+        if (!integer(limit)) return null;
+        // C# DateTime.Now.Date uses the server's local calendar. Preserve its
+        // conditional reset: a previous-day count below the limit is not reset.
+        const day = (date: Date) => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000;
+        if (day(info.texpTaskDate) + 1 <= day(now) && info.texpCount >= limit) { info.texpCount = 0; info.texpTaskDate = now; }
+        if (info.texpCount >= limit) {
+          limited = true;
+          return usedBuff ? { value: { trained: false } } : null;
+        }
+        if (!integer(info[key] + it.template.Property2) || !integer(info.texpTaskCount + 1) || !bag.removeCountFromStack(it, 1)) return null;
+        info[key] += it.template.Property2; info.texpCount++; info.texpTaskCount++;
+        staged.updatePlayerProperties();
+        return { value: { trained: true } };
+      });
+    } catch (error) {
+      if (error instanceof PlayerMutationCommittedError) { result = error.value as { trained: boolean }; notificationError = error; }
+      else { ctx.log.error("Training potion transaction failed", error); p.sendMessage(0, "修炼保存失败，药水和经验未改变，请稍后重试。"); return; }
+    }
+    if (limited) p.sendMessage(0, ctx.lang.t("texpSystem.texpCountToplimit"));
+    if (result?.trained) {
+      // Quest notifications follow durable profile/material publication.
+      for (const id of [templateId, 45001 + ((selectIndex + 4) % 5)]) {
+        try { p.questInv?.onUsingItem(id); } catch (error) { notificationError ??= error; }
+      }
+    }
+    if (notificationError) throw notificationError;
+  });
 }
 
 /** OpenVipHandler.cs (92): str nick, int days. Price from the VIP card (11992) shop entry, charged first (MoneyDirect). */
@@ -308,7 +342,10 @@ export function registerUse(r: HandlerRegistry): void {
   r.player(63, "ITEM_OPENUP", (ctx, p, pkt) => openBox(ctx, p, pkt));
   r.player(183, "CARD_USE", (ctx, p, pkt) => cardUse(ctx, p, pkt));
   r.player(92, "VIP_RENEWAL", (ctx, p, pkt) => openVip(ctx, p, pkt.readString(), pkt.readInt()));
-  r.player(99, "TEXP", (ctx, p, pkt) => texp(ctx, p, pkt.readInt(), pkt.readInt(), pkt.readInt()));
+  r.player(99, "TEXP", (ctx, p, pkt) => {
+    if (pkt.length - pkt.offset !== 12) return;
+    return texp(ctx, p, pkt.readInt(), pkt.readInt(), pkt.readInt());
+  });
   r.player(124, "CHANGE_PLACE_GOODS_ALL", (_ctx, p, pkt) => {
     const merge = pkt.readBoolean();
     const count = pkt.readInt();

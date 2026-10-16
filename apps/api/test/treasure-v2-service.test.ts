@@ -137,22 +137,23 @@ describe("full original catalog through the transaction owner", () => {
   it("GET uses actual templates and local resources, retains all rows and never saves normalization", async () => {
     await saveTreasure(legacy()); const before = await persisted(), view = await snapshot();
     expect(view.nativeTreasure).toMatchObject({ version: 2, bagCapacity: 100, poolVersion: TREASURE_POOL_VERSION,
-      readiness: { status: "blocked", totalRows: 158, readyRows: 8 }, pityRemaining: 1,
+      readiness: { status: "blocked", totalRows: 158, readyRows: 9 }, pityRemaining: 1,
       bag: [{ origin: "legacy-four-material", templateId: 11019, itemCount: 2 }] });
     expect(view.nativeTreasure.preview).toHaveLength(158); expect(view.nativeTreasure.categories).toHaveLength(15);
     expect(view.nativeTreasure.preview.filter(row => row.templateId === 11905)).toHaveLength(2);
-    expect(view.nativeTreasure.preview.filter(row => row.status === "ready").map(row => row.templateId)).toEqual([11560,11561,11562,11901,11902,11903,11904,11906]);
+    // This synthetic fixture's uniform P2=300 also matches training potion 40002.
+    expect(view.nativeTreasure.preview.filter(row => row.status === "ready").map(row => row.templateId)).toEqual([11560,11561,11562,40002,11901,11902,11903,11904,11906]);
     expect(await persisted()).toEqual(before); expect(control.rngCalls).toBe(0);
   });
   it("a deleted indexed file becomes blocked despite /resource returning a placeholder", async () => {
     const entry = TREASURE_ENTRIES.find(row => row.templateId === 11901)!, path = iconPath(entry); unlinkSync(path);
     try {
-      const view = await snapshot(); expect(view.nativeTreasure.readiness.readyRows).toBe(7);
+      const view = await snapshot(); expect(view.nativeTreasure.readiness.readyRows).toBe(8);
       expect(view.nativeTreasure.preview.find(row => row.entryKey === entry.entryKey)?.reasons).toContain("本地图标尚未就绪");
       for (const tree of built.ctx.resources.trees) tree.remove("image/unfrightprop/exp1/icon.png");
       const placeholder = await built.app.inject({ url: "/resource/image/unfrightprop/exp1/icon.png" });
       expect(placeholder.statusCode).toBe(200); expect(placeholder.headers["x-placeholder"]).toBe("1");
-      expect((await snapshot()).nativeTreasure.readiness.readyRows).toBe(7);
+      expect((await snapshot()).nativeTreasure.readiness.readyRows).toBe(8);
     } finally { writeFileSync(path, png); for (const tree of built.ctx.resources.trees) tree.reindex(); }
   });
   for (const id of ["treasure", "treasure-native"]) for (const mode of ["normal", "advanced"] as const) {

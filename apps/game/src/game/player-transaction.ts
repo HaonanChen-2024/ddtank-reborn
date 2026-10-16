@@ -1,13 +1,14 @@
 /** Atomic online profile/inventory mutation, shared by claims and Labyrinth.
  * Caller owns the player's persistence lock and packet/fight write barriers.
- * Only profile, match and ordinary inventory may be changed: cards/pets are
- * shared read-only for stat calculations, not part of this transaction. */
-import { eq } from "drizzle-orm";
+ * Profile, match, ordinary inventory and existing buff use-count decrements are
+ * supported. Cards/pets remain shared read-only for stat calculations. */
+import { and, eq } from "drizzle-orm";
 import { player, type Database } from "@ddt/db";
 import type { GSPacket } from "@ddt/protocol";
 import type { ServerContext } from "../session/context.js";
 import { savePlayerInfo } from "../db/characters.js";
 import { saveItem } from "../db/items.js";
+import type { BuffRow } from "../db/social.js";
 import { mailItems } from "../handlers/items.js";
 import { GamePlayer } from "./player.js";
 import { ItemInfo } from "./item.js";
@@ -21,6 +22,7 @@ export class PlayerMutationCommittedError<T> extends Error {
 class PlayerChanged extends Error {}
 class PlayerMutationSkipped extends Error {}
 const snapshot = (item: ItemInfo) => JSON.stringify(item.toRow());
+const buffSnapshot = (b: BuffRow) => JSON.stringify([b.UserID,b.Type,b.Value,b.BeginDate,b.ValidDate,b.TemplateID,b.ValidCount,b.Data,b.IsExist]);
 // Quit may mark State=0 while waiting for this same persistence lock.
 const profile = (p: GamePlayer) => JSON.stringify({ info: { ...p.info, State: 0 }, match: p.match });
 const inventory = (p: GamePlayer) => p.allBags().map((bag) => ({ bag, capacity: bag.capacity,
@@ -32,6 +34,8 @@ function stage(ctx: ServerContext, p: GamePlayer) {
     structuredClone(p.info), structuredClone(p.match), p.zoneId, p.zoneName, (g) => ctx.templates.levels.get(g) ?? 0);
   staged.statTables = p.statTables; staged.cards = p.cards; staged.pet = p.pet;
   staged.cardBag = p.cardBag; staged.petBag = p.petBag;
+  const buffs = p.buffs.map((live) => ({ live, copy: structuredClone(live), before: buffSnapshot(live) }));
+  staged.buffs = buffs.map((b) => b.copy);
   staged.gradeForGp = p.gradeForGp; staged.lang = p.lang;
   staged.onGradeUp = (old) => gradeUps.push(old);
   const bags = inventory(p), original = new Map<ItemInfo, { copy: ItemInfo; before: string; dirty: boolean; cellLocked: boolean; existed: boolean }>();
@@ -55,7 +59,7 @@ function stage(ctx: ServerContext, p: GamePlayer) {
   staged.info = structuredClone(p.info); staged.match = structuredClone(p.match);
   staged.baseAttack = p.baseAttack; staged.baseDefence = p.baseDefence;
   sent.length = 0;
-  return { staged, sent, gradeUps, original, bags, profileBefore: profile(p) };
+  return { staged, sent, gradeUps, original, bags, buffs, profileBefore: profile(p) };
 }
 
 /** work executes under the SQL owner-row lock and receives only detached state.
@@ -71,6 +75,21 @@ export async function commitPlayerMutation<T>(ctx: ServerContext, p: GamePlayer,
     const now = ctx.now(), plan = stage(ctx, p), { staged, original } = plan;
     const result = await work(db, staged, now);
     if (!result) throw new PlayerMutationSkipped();
+    // Buff grants, expiry changes and removal retain their existing owners.
+    // A consumable may only spend an existing buff's remaining use count.
+    if (staged.buffs.length !== plan.buffs.length || staged.buffs.some((b, i) => b !== plan.buffs[i]!.copy ||
+      buffSnapshot({ ...b, ValidCount: plan.buffs[i]!.live.ValidCount }) !== plan.buffs[i]!.before))
+      throw new PlayerChanged("Buff mutation is outside the player mutation contract");
+    const buffChanges = plan.buffs.filter((b) => buffSnapshot(b.copy) !== b.before);
+    for (const b of buffChanges) {
+      if (b.copy.UserID !== p.id || !Number.isSafeInteger(b.copy.ValidCount) || b.copy.ValidCount < 0 ||
+        !Number.isSafeInteger(b.live.ValidCount) || b.live.ValidCount > 2_147_483_647 || b.copy.ValidCount > b.live.ValidCount)
+        throw new PlayerChanged("Invalid buff use count");
+      const where = and(eq(player.User_Buff.UserID, p.id), eq(player.User_Buff.Type, b.copy.Type));
+      const [stored] = await tx.select().from(player.User_Buff).where(where).for("update");
+      if (!stored || buffSnapshot(stored) !== b.before) throw new PlayerChanged("Player buff changed before consumption");
+      await tx.update(player.User_Buff).set({ ValidCount: b.copy.ValidCount }).where(where);
+    }
     if (staged.allBags().some((bag, i) => bag.capacity !== plan.bags[i]!.capacity)) throw new PlayerChanged("Inventory capacity is outside the player mutation contract");
     const byCopy = new Map([...original.values()].map((old) => [old.copy, old]));
     const changed = new Set(staged.allBags().flatMap((b) => b.getItems()).filter((item) => {
@@ -94,12 +113,14 @@ export async function commitPlayerMutation<T>(ctx: ServerContext, p: GamePlayer,
     await savePlayerInfo(db, staged.info, staged.match);
     if (result.overflow?.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, staged, result.overflow, result.mailTitle ?? "活动奖励", 12);
     const current = inventory(p);
-    if (profile(p) !== plan.profileBefore || [...original].some(([item, old]) => snapshot(item) !== old.before || item.isDirty !== old.dirty || item.cellLocked !== old.cellLocked) ||
+    if (profile(p) !== plan.profileBefore || p.buffs.length !== plan.buffs.length ||
+        plan.buffs.some((b, i) => p.buffs[i] !== b.live || buffSnapshot(b.live) !== b.before) ||
+        [...original].some(([item, old]) => snapshot(item) !== old.before || item.isDirty !== old.dirty || item.cellLocked !== old.cellLocked) ||
         current.some((b, i) => b.capacity !== plan.bags[i]!.capacity || ["items", "removed", "dirty"].some((key) => {
           const field = key as "items" | "removed" | "dirty", old = plan.bags[i]![field];
           return b[field].length !== old.length || b[field].some((item, n) => item !== old[n]);
         }))) throw new PlayerChanged("Player transaction recipient changed before commit");
-    return { ...plan, pending, changed, value: result.value };
+    return { ...plan, pending, changed, buffChanges, value: result.value };
   }).catch((error: unknown) => { if (error instanceof PlayerMutationSkipped) return null; throw error; });
   if (!committed) return null;
   const { staged, original, pending } = committed;
@@ -133,6 +154,7 @@ export async function commitPlayerMutation<T>(ctx: ServerContext, p: GamePlayer,
   Object.assign(p.info, staged.info); p.info.State = state;
   Object.assign(p.match, staged.match);
   p.baseAttack = staged.baseAttack; p.baseDefence = staged.baseDefence;
+  for (const b of committed.buffChanges) b.live.ValidCount = b.copy.ValidCount;
   // Finish ALL memory publication before any transport callback can fail.
   let notificationError: unknown;
   const notify = (fn: () => void) => { try { fn(); } catch (error) { notificationError ??= error; } };
