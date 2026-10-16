@@ -11,7 +11,7 @@ import { GSPacket } from "@ddt/protocol";
 import { player as P } from "@ddt/db";
 import type { GamePlayer } from "../game/player.js";
 import type { ServerContext } from "../session/context.js";
-import { EventData, canCompleteAchievement, claimOnce, dayKey, grantRewards, insertAchievementData, monthKey, updateRecords, type Reward } from "../game/events.js";
+import { EventData, canCompleteAchievement, claimOnce, dayKey, grantRewards, hasClaim, insertAchievementData, monthKey, updateRecords, type Reward } from "../game/events.js";
 import { EventScheduler, loadScheduledEvents, type ActiveWindow } from "../game/scheduler.js";
 import { createItemBox } from "./use.js";
 import { mailItems } from "./items.js";
@@ -584,11 +584,19 @@ export async function firstRecharge(ctx: ServerContext, p: GamePlayer): Promise<
   const rt = eventsRuntime(ctx);
   const free = String(process.env.FIRST_RECHARGE_FREE ?? "true") !== "false";
   if (!free && !p.info.IsRecharged) return false;
-  if (p.info.IsGetAward || !(await claimOnce(ctx.db.db, p.id, "firstrecharge", "once"))) {
+  if (p.info.IsGetAward || await hasClaim(ctx.db.db, p.id, "firstrecharge", "once")) {
     p.sendMessage(0, ctx.lang.t("FirstRechargeGetAward.AlreadyGetAward"));
     return false;
   }
-  const goods = rt.data.eventGoods.filter((g) => g.ActivityType === 7 && g.SubActivityType === 1);
+  const goods = rt.data.firstRechargeGoods(ctx.templates.findItem);
+  if (!goods) {
+    p.sendMessage(0, eventText(ctx, "Workshop.Events.FirstRecharge.Unavailable", "Presente indisponível no momento."));
+    return false;
+  }
+  if (!(await claimOnce(ctx.db.db, p.id, "firstrecharge", "once"))) {
+    p.sendMessage(0, ctx.lang.t("FirstRechargeGetAward.AlreadyGetAward"));
+    return false;
+  }
   const s = await give(ctx, p, goods.map((g) => ({ templateId: g.TemplateId, count: g.Count ?? 1, validDate: g.ValidDate ?? 0, isBind: g.IsBind ?? true, strengthenLevel: g.StrengthLevel ?? 0, attack: g.AttackCompose ?? 0, defence: g.DefendCompose ?? 0, agility: g.AgilityCompose ?? 0, luck: g.LuckCompose ?? 0 })), eventText(ctx, "Workshop.Events.FirstRecharge.Title", "Presente da primeira recarga"));
   p.info.IsGetAward = true;
   p.send(Out.firstRecharge(true, true));

@@ -13,5 +13,6 @@
   "Workshop.Events.FirstRecharge.Title": "首次礼包奖励",
   "Workshop.Events.FirstRecharge.Success": "礼包领取成功。 {0}",
   "Workshop.Events.AccumulativeLogin.Title": "累计登录{0}天奖励",
-  "Workshop.Events.AccumulativeLogin.Success": "累计登录{0}天奖励领取成功。 {1}"
+  "Workshop.Events.AccumulativeLogin.Success": "累计登录{0}天奖励领取成功。 {1}",
+  "Workshop.Events.FirstRecharge.Unavailable": "当前礼包奖励暂不可领取。"
 }

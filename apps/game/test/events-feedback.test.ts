@@ -30,6 +30,8 @@ beforeAll(async () => {
   // Use an explicit memory-only delivery fixture, independent of production
   // reward configuration; this setup does not establish production availability.
   await h.db.delete(game.Event_Reward_Goods).where(sql`"ActivityType" = 7 AND "SubActivityType" = 1`);
+  await h.db.delete(game.Event_Reward_Info).where(sql`"ActivityType" = 7 AND "SubActivityType" = 1`);
+  await h.db.insert(game.Event_Reward_Info).values({ ActivityType: 7, SubActivityType: 1, Condition: 0 });
   await h.db.insert(game.Event_Reward_Goods).values({ ActivityType: 7, SubActivityType: 1, TemplateId: 11022, Count: 2, IsBind: true, ValidDate: 0 });
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", namesFile);
   vi.stubEnv("FIRST_RECHARGE_FREE", "true");
