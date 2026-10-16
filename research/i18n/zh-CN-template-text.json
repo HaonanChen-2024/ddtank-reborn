@@ -148,6 +148,54 @@
         "Name": "攻击+1",
         "Description": "增加1次攻击，伤害降低10%。"
       }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10001",
+      "text": {
+        "Name": "攻击+2",
+        "Description": "增加2次攻击，伤害降低40%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10003",
+      "text": {
+        "Name": "三叉戟导弹",
+        "Description": "一次发射3发炮弹，伤害降低50%；与必杀技同时使用时无效。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10004",
+      "text": {
+        "Name": "伤害+50%",
+        "Description": "伤害提高50%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10005",
+      "text": {
+        "Name": "伤害+40%",
+        "Description": "伤害提高40%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10006",
+      "text": {
+        "Name": "伤害+30%",
+        "Description": "伤害提高30%。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10007",
+      "text": {
+        "Name": "伤害+20%",
+        "Description": "伤害提高20%。"
+      }
     }
   ]
 }

@@ -70,6 +70,7 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
     "Quest:318", "Quest_Condiction:318:1", "Quest:341", "Quest_Condiction:341:1", "Quest:346", "Quest_Condiction:346:1", "Quest:347", "Quest_Condiction:347:1",
     "Shop_Goods:10016",
     "Shop_Goods:10002",
+    "Shop_Goods:10001", "Shop_Goods:10003", "Shop_Goods:10004", "Shop_Goods:10005", "Shop_Goods:10006", "Shop_Goods:10007",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
   expect([318, 341, 346, 347].map(id => before.quests.find(q => q.ID === id)!.Title)).toEqual([
@@ -107,6 +108,12 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   expect(currentGame.items.get(10018)).toMatchObject({ Name: "激怒", Description: "使用后增加100点怒气（怒气上限的50%），最多补至怒气上限。", CategoryID: 10, Property1: 11, Property2: 100 });
   expect(currentGame.items.get(10016)).toMatchObject({ Name: "传送", Description: "不受武器限制，将自己传送到本回合攻击的落点。" });
   expect(currentGame.items.get(10002)).toMatchObject({ Name: "攻击+1", Description: "增加1次攻击，伤害降低10%。" });
+  expect(currentGame.items.get(10001)).toMatchObject({ Name: "攻击+2", Description: "增加2次攻击，伤害降低40%。" });
+  expect(currentGame.items.get(10003)).toMatchObject({ Name: "三叉戟导弹", Description: "一次发射3发炮弹，伤害降低50%；与必杀技同时使用时无效。" });
+  expect(currentGame.items.get(10004)).toMatchObject({ Name: "伤害+50%", Description: "伤害提高50%。" });
+  expect(currentGame.items.get(10005)).toMatchObject({ Name: "伤害+40%", Description: "伤害提高40%。" });
+  expect(currentGame.items.get(10006)).toMatchObject({ Name: "伤害+30%", Description: "伤害提高30%。" });
+  expect(currentGame.items.get(10007)).toMatchObject({ Name: "伤害+20%", Description: "伤害提高20%。" });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {
