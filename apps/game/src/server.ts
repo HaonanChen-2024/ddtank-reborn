@@ -121,7 +121,7 @@ export function applyFightLabWin(templates: Templates, p: GamePlayer, pveId: num
     if (items.length) {
       giveDropItems(templates, p, items);
       const names = items.map((d) => t("Game.Server.Quests.FinishQuest.RewardProp", templates.findItem(d.templateId)?.Name ?? String(d.templateId), d.count)).join(" ");
-      p.sendMessage?.(0, `${t("Recompensa da sala de treino")}: ${names}`);
+      p.sendMessage?.(0, `训练场奖励：${names}`);
     }
   }
   p.updateProperties?.();

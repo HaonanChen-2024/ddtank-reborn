@@ -5,6 +5,7 @@ export type Locale = "zh-CN" | "pt-BR" | "en";
 const STORAGE_KEY = "ddtank.locale";
 
 function readStoredLocale(fallback: Locale): Locale {
+  if (fallback === "zh-CN") return "zh-CN";
   try {
     const v = localStorage.getItem(STORAGE_KEY);
     return v === "zh-CN" || v === "en" || v === "pt-BR" ? v : fallback;
@@ -17,7 +18,7 @@ type Vars = Record<string, string | number>;
 
 /**
  * Tiny i18n. `pt-BR` is the source dictionary (keys are typed from it); `en` is the fallback.
- * A complete `zh-CN` dictionary makes Chinese the default; saved locale preferences take precedence.
+ * Applications with a `zh-CN` dictionary always use Chinese, including old saved preferences.
  * Lookup: current locale -> en -> pt-BR -> key. `{name}` placeholders are interpolated.
  */
 export function createI18n<K extends string>(dicts: { "pt-BR": Record<K, string>; en: Partial<Record<K, string>>; "zh-CN"?: Record<K, string> }) {
@@ -42,16 +43,22 @@ export function createI18n<K extends string>(dicts: { "pt-BR": Record<K, string>
   });
 
   function I18nProvider({ children, defaultLocale: initialLocale = defaultLocale }: { children: ReactNode; defaultLocale?: Locale }) {
-    const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale(initialLocale));
+    const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale(defaultLocale === "zh-CN" ? defaultLocale : initialLocale));
     const setLocale = useCallback((l: Locale) => {
-      setLocaleState(l);
+      const next = defaultLocale === "zh-CN" ? "zh-CN" : l;
+      setLocaleState(next);
       try {
-        localStorage.setItem(STORAGE_KEY, l);
+        localStorage.setItem(STORAGE_KEY, next);
       } catch {
         /* storage unavailable */
       }
     }, []);
-    useEffect(() => { document.documentElement.lang = locale; }, [locale]);
+    useEffect(() => {
+      document.documentElement.lang = locale;
+      if (locale === "zh-CN") {
+        try { localStorage.setItem(STORAGE_KEY, locale); } catch { /* storage unavailable */ }
+      }
+    }, [locale]);
     const value = useMemo<Ctx>(
       () => ({ locale, setLocale, t: (k: K, v?: Vars) => translate(locale, k, v) }),
       [locale, setLocale],
@@ -63,11 +70,11 @@ export function createI18n<K extends string>(dicts: { "pt-BR": Record<K, string>
   return { I18nProvider, useI18n, translate };
 }
 
-/** Compact Chinese / PT-BR / EN switch. */
+/** Chinese language indicator; the callback remains compatible with existing callers. */
 export function LocaleToggle({ locale, onChange }: { locale: Locale; onChange: (l: Locale) => void }) {
   return (
-    <div className="inline-flex rounded-lg border border-line p-0.5 text-xs font-semibold" role="group" aria-label="语言 / Language / Idioma">
-      {(["zh-CN", "pt-BR", "en"] as const).map((l) => (
+    <div className="inline-flex rounded-lg border border-line p-0.5 text-xs font-semibold" role="group" aria-label="语言">
+      {(["zh-CN"] as const).map((l) => (
         <button
           key={l}
           type="button"
@@ -78,7 +85,7 @@ export function LocaleToggle({ locale, onChange }: { locale: Locale; onChange: (
             (locale === l ? "bg-panel-2 text-ink" : "text-muted hover:text-ink")
           }
         >
-          {l === "zh-CN" ? "中文" : l === "pt-BR" ? "PT" : "EN"}
+          中文
         </button>
       ))}
     </div>

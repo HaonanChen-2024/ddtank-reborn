@@ -1,10 +1,13 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createI18n } from "@ddtank/ui";
+import { createI18n, LocaleToggle, Spinner } from "@ddtank/ui";
 import { translate as adminTranslate } from "../src/i18n";
 import { translate as webTranslate } from "../../web/src/i18n";
 import { resources } from "../src/resources";
+import { SchemaForm } from "../src/crud/SchemaForm";
+import { serverConfigFields } from "../src/pages/ServerConfig";
+import { useText } from "../src/i18n";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -28,10 +31,18 @@ describe("Chinese entry localization", () => {
     expect(renderLocale("invalid")).toBe('<span lang="zh-CN">你好 DDTank</span>');
   });
 
-  it("keeps saved Portuguese/English preferences and the legacy Portuguese default", () => {
-    expect(renderLocale("pt-BR")).toBe('<span lang="pt-BR">Olá DDTank</span>');
-    expect(renderLocale("en")).toBe('<span lang="en">Hello DDTank</span>');
+  it("uses Chinese for old Portuguese/English preferences and keeps legacy dictionaries compatible", () => {
+    expect(renderLocale("pt-BR")).toBe('<span lang="zh-CN">你好 DDTank</span>');
+    expect(renderLocale("en")).toBe('<span lang="zh-CN">你好 DDTank</span>');
     expect(renderLocale(null, false)).toBe('<span lang="pt-BR">Olá DDTank</span>');
+  });
+
+  it("only offers Chinese and labels the shared loading control in Chinese", () => {
+    const toggle = renderToStaticMarkup(createElement(LocaleToggle, { locale: "zh-CN", onChange: () => {} }));
+    expect(toggle).toContain('aria-label="语言"');
+    expect(toggle).toContain(">中文</button>");
+    expect(toggle).not.toMatch(/Language|Idioma|>PT<|>EN</);
+    expect(renderToStaticMarkup(createElement(Spinner))).toContain('aria-label="加载中"');
   });
 
   it("interpolates application dictionaries without changing Portuguese/English text", () => {
@@ -49,5 +60,25 @@ describe("Chinese entry localization", () => {
       if (typeof resource.label !== "string") expect(resource.label["zh-CN"], resource.name).toBeTruthy();
       if (typeof resource.singular !== "string") expect(resource.singular["zh-CN"], resource.name).toBeTruthy();
     }
+  });
+
+  it("renders administration labels, sections, validation hints and row actions in Chinese", () => {
+    const players = resources.find(resource => resource.name === "players")!;
+    const guilds = resources.find(resource => resource.name === "guilds")!;
+    const scheduled = resources.find(resource => resource.name === "scheduled-events")!;
+    const form = renderToStaticMarkup(createElement(SchemaForm, {
+      fields: [...players.fields, ...serverConfigFields], onSubmit: () => {},
+    }));
+    for (const label of ["金币", "封禁截止时间", "公网地址", "网络", "维护模式"]) expect(form).toContain(label);
+    function Actions() {
+      const text = useText();
+      return createElement("div", null, [
+        text(guilds.description),
+        ...players.rowActions!.flatMap(action => [text(action.label), text(action.confirm), text(action.success)]),
+        ...scheduled.fields.find(field => field.name === "kind")!.options!.map(option => text(option.label)),
+      ].join(" / "));
+    }
+    const actions = renderToStaticMarkup(createElement(Actions));
+    for (const label of ["公会", "发放物品", "解除封禁", "世界首领", "小鸡宝箱", "迷宫"]) expect(actions).toContain(label);
   });
 });

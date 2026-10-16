@@ -72,7 +72,7 @@ export class GK1076 extends AMissionControl {
             this.m_king.SetRelateDemagemRect(-21, -87, 72, 59);
             this.m_king.AddDelay(10);
 
-            this.m_king.Say(LanguageMgr.GetTranslation("Plebeus insignificantes, como ousam se exibir no meu palácio!"), 0, 3000);
+            this.m_king.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.PalaceIntruders"), 0, 3000);
             this.m_kingMoive.PlayMovie("in", 9000, 0);
             this.m_kingFront.PlayMovie("in", 9000, 0);
             this.m_kingMoive.PlayMovie("out", 13000, 0);
@@ -124,7 +124,7 @@ export class GK1076 extends AMissionControl {
                 }
                 this.m_secondKing.SetRelateDemagemRect(-21, -87, 72, 59);
 
-                this.m_secondKing.Say(LanguageMgr.GetTranslation("Você me irritou, não vou te perdoar!"), 0, 3000);
+                this.m_secondKing.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.Unforgiven"), 0, 3000);
 
                 let players = this.Game.GetAllFightPlayers();
                 let RandomPlayer = this.Game.FindRandomPlayer();

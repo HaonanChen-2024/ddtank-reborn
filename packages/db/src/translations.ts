@@ -31,10 +31,35 @@ const TEMPLATE_TEXT_COLUMNS: Record<string, readonly string[]> = {
   Shop_Goods: ["Name", "Description", "Remark"],
   Quest: ["Title", "Detail", "Objective"],
   Quest_Condiction: ["CondictionTitle"],
+  Game_Map: ["Name", "Description", "Remark"],
+  Mission_Info_Backup: ["Name", "Title", "Description", "Success", "Failure"],
+  Achievement: ["Title", "Detail"],
+  Pet_Template_Info: ["Name", "Description"],
+  Pet_Skill_Info: ["Name", "Description"],
+  Pet_Skill_Element_Info: ["Name", "Description"],
+  Rune_Template: ["Name"],
+  Card_Info: ["Name", "Description"],
+  Consortia_BuffTemp: ["name", "descript"],
+  New_Title: ["Name", "Desc"],
+  SuitTemplateInfo: ["SuitName", "SkillDescribe1", "SkillDescribe2", "SkillDescribe3", "SkillDescribe4", "SkillDescribe5"],
+  Active: ["Title", "Description", "Content", "AwardContent", "ActionTimeContent"],
+  Event_Live: ["Description"],
+  Card_Buff: ["Description"],
+  ClothPropertyTemplateInfo: ["Name"],
+  Consortia_Badge: ["BadgeName"],
+  DailyLeagueLevel: ["Name"],
+  Daily_Award: ["CountRemark"],
+  Drop_Condiction: ["Name"],
+  Edictum_List: ["Title", "Text"],
+  Fair_Battle_Reward_Temp: ["Name", "Title"],
+  League_Info: ["RankName"],
+  Shop_Goods_Categorys: ["Name"],
+  Suit_TemplateID: ["PartName"],
+  HotSpringRoom: ["roomName", "roomIntroduction"],
 };
 type TemplateTextOverride = { table: string; rowId: string; text: Record<string, string> };
 
-/** Local item/quest display text only. Conditions use the complete QuestID:CondictionID address. */
+/** Local template display text only. Conditions use the complete QuestID:CondictionID address. */
 export function parseTemplateTextOverrides(text: string): TemplateTextOverride[] {
   const value: unknown = JSON.parse(text);
   const object = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -50,8 +75,14 @@ export function parseTemplateTextOverrides(text: string): TemplateTextOverride[]
       throw new Error("Invalid TEMPLATE_TEXT_OVERRIDES_FILE entry");
     }
     const ids = entry.rowId.split(":");
-    if (ids.length !== (entry.table === "Quest_Condiction" ? 2 : 1) ||
-        ids.some(id => !/^[1-9]\d*$/.test(id) || Number(id) > 2147483647)) {
+    // These five existing seed rows name virtual rewards; no other negative item address is accepted.
+    const virtualReward = entry.table === "Shop_Goods" && ["-900", "-800", "-300", "-200", "-100"].includes(entry.rowId);
+    const suitPart = entry.table === "Suit_TemplateID";
+    const validSuitAddress = suitPart && /^[1-9]\d*:[1-9]\d*(?:,[1-9]\d*)*$/.test(entry.rowId) &&
+      entry.rowId.split(/[:,]/).every(id => Number(id) <= 2147483647);
+    const zeroLeague = entry.table === "DailyLeagueLevel" && entry.rowId === "0";
+    if (suitPart ? !validSuitAddress : ids.length !== (entry.table === "Quest_Condiction" ? 2 : 1) ||
+        (!virtualReward && !zeroLeague && ids.some(id => !/^[1-9]\d*$/.test(id) || Number(id) > 2147483647))) {
       throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE rowId: ${entry.table}:${entry.rowId}`);
     }
     const key = `${entry.table}:${entry.rowId}`;

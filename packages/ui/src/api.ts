@@ -55,8 +55,8 @@ export function createApiClient(opts: { baseUrl?: string; tokenKey: string; onUn
     if (!res.ok) {
       if (res.status === 401) opts.onUnauthorized?.();
       const msg =
-        data && typeof data === "object" && "message" in data ? String((data as { message: unknown }).message) : res.statusText;
-      throw new ApiError(res.status, msg || `HTTP ${res.status}`, data);
+        data && typeof data === "object" && "message" in data ? String((data as { message: unknown }).message) : "";
+      throw new ApiError(res.status, res.status >= 500 ? "请求失败，请稍后重试。" : msg || `请求失败（状态码${res.status}）`, data);
     }
     return data as T;
   }

@@ -156,13 +156,13 @@ export function marryCmdRouter(): SubRouter {
       const firstTime = !groom.info.IsGotRing && !bride.info.IsGotRing;
       if (!firstTime) {
         const price = PRICE_PROPOSE(ctx);
-        if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough"));
+        if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, "所需货币不足。");
         p.removeMoney(price);
       } else {
         const ring = ctx.templates.findItem(WEDDING_RING_TEMPLATE);
         if (ring) {
-          await mailItem(ctx, groom.id, groom.info.NickName ?? "", "Anel de casamento", "Anel de casamento", ItemInfo.createFromTemplate(ring, 1, 102));
-          await mailItem(ctx, bride.id, bride.info.NickName ?? "", "Anel de casamento", "Anel de casamento", ItemInfo.createFromTemplate(ring, 1, 102));
+          await mailItem(ctx, groom.id, groom.info.NickName ?? "", "结婚戒指", "结婚戒指", ItemInfo.createFromTemplate(ring, 1, 102));
+          await mailItem(ctx, bride.id, bride.info.NickName ?? "", "结婚戒指", "结婚戒指", ItemInfo.createFromTemplate(ring, 1, 102));
         }
         await setMarried(ctx, groom.id, { IsMarried: true, SpouseID: groom.info.SpouseID, SpouseName: groom.info.SpouseName ?? "", IsGotRing: true });
         await setMarried(ctx, bride.id, { IsMarried: true, SpouseID: bride.info.SpouseID, SpouseName: bride.info.SpouseName ?? "", IsGotRing: true });
@@ -178,7 +178,7 @@ export function marryCmdRouter(): SubRouter {
       const price = PRICE_MARRY_ROOM(hours);
       const half = Math.ceil(price / 2);
       const groom = ctx.world.get(r.groomID), bride = ctx.world.get(r.brideID);
-      if (((groom?.info.Money ?? 0) + (groom?.info.MoneyLock ?? 0)) < half || ((bride?.info.Money ?? 0) + (bride?.info.MoneyLock ?? 0)) < (price - half)) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough"));
+      if (((groom?.info.Money ?? 0) + (groom?.info.MoneyLock ?? 0)) < half || ((bride?.info.Money ?? 0) + (bride?.info.MoneyLock ?? 0)) < (price - half)) return p.sendMessage(0, "所需货币不足。");
       groom?.removeMoney(half); bride?.removeMoney(price - half);
       r.availHours = hours; r.breakTime = new Date(r.breakTime.getTime() + hours * 3_600_000);
       await ctx.db.db.update(MARRY_ROOM).set({ AvailTime: hours, BreakTime: r.breakTime }).where(eq(MARRY_ROOM.ID, r.id));
@@ -200,12 +200,12 @@ export function marryCmdRouter(): SubRouter {
       const r = roomOf(ctx, p);
       if (!r || amount <= 0) return;
       const limit = limitLevel(ctx, 3);
-      if (p.info.Grade < limit) return p.sendMessage(0, ctx.lang.t("Farm.NeedGrade", limit));
-      if (p.info.Money + p.info.MoneyLock < amount) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough"));
+      if (p.info.Grade < limit) return p.sendMessage(0, `需要达到${limit}级才能使用此功能。`);
+      if (p.info.Money + p.info.MoneyLock < amount) return p.sendMessage(0, "所需货币不足。");
       p.removeMoney(amount);
       const half = Math.trunc(amount / 2);
-      if (r.groomID) await mailItem(ctx, r.groomID, r.groomName, ctx.lang.t("MarryCmd.Largess.Title"), ctx.lang.t("MarryCmd.Largess.Content", p.info.NickName ?? ""), undefined, half);
-      if (r.brideID) await mailItem(ctx, r.brideID, r.brideName, ctx.lang.t("MarryCmd.Largess.Title"), ctx.lang.t("MarryCmd.Largess.Content", p.info.NickName ?? ""), undefined, half);
+      if (r.groomID) await mailItem(ctx, r.groomID, r.groomName, "婚礼贺礼", `来自${p.info.NickName ?? ""}的婚礼贺礼，请查收附件。`, undefined, half);
+      if (r.brideID) await mailItem(ctx, r.brideID, r.brideName, "婚礼贺礼", `来自${p.info.NickName ?? ""}的婚礼贺礼，请查收附件。`, undefined, half);
       broadcast(r, (() => { const o = new PacketOut(249, p.id); o.writeByte(5); o.writeInt(amount); return o; })());
     })
     .on(6, "USEFIRECRACKERS", (ctx, p, pkt) => { // int count, int templateId
@@ -215,8 +215,8 @@ export function marryCmdRouter(): SubRouter {
       if (!r) return;
       const shop = findShop(ctx, templateId);
       const price = (shop?.AValue1 ?? 0) * Math.max(1, count);
-      if (shop?.AUnit === -2) { if (p.info.Gold < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeGold(price); }
-      else { if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeMoney(price); }
+      if (shop?.AUnit === -2) { if (p.info.Gold < price) return p.sendMessage(0, "所需货币不足。"); p.removeGold(price); }
+      else { if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, "所需货币不足。"); p.removeMoney(price); }
       broadcast(r, (() => { const o = new PacketOut(249, p.id); o.writeByte(6); o.writeInt(count); o.writeInt(templateId); return o; })());
     })
     .on(7, "KICK", (ctx, p, pkt) => { // int userId

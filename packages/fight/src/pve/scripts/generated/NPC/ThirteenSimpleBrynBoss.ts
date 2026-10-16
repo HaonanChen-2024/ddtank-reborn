@@ -5,16 +5,16 @@ import { registerScript, ABrain, DamageEffect, GuardEffect, LanguageMgr, LockDir
 
 export class ThirteenSimpleBrynBoss extends ABrain {
   static AllAttackChat = __arr([
-            LanguageMgr.GetTranslation("O leão que ruge ..."),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.LionRoaring"),
 
-            LanguageMgr.GetTranslation("O poder do senhor da floresta !"),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.ForestLord"),
 
-            LanguageMgr.GetTranslation("Dor extrema !")
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.ExtremePainSimple")
         ]);
   static ShootChat = __arr([
-            LanguageMgr.GetTranslation("Comprimir impressões digitais de pedra ...!"),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.StonePrint"),
 
-            LanguageMgr.GetTranslation("Armas de deuses tribais !")  
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.TribalWeaponsSimple")  
         ]);
   static KillPlayerChat = __arr([
             LanguageMgr.GetTranslation("GameServerScript.AI.NPC.SimpleQueenAntAi.msg6"),
@@ -22,9 +22,9 @@ export class ThirteenSimpleBrynBoss extends ABrain {
             LanguageMgr.GetTranslation("GameServerScript.AI.NPC.SimpleQueenAntAi.msg7")
         ]);
   static CallChat = __arr([
-            LanguageMgr.GetTranslation("Totem ..."),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.TotemHard"),
 
-            LanguageMgr.GetTranslation("Matar !")
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.KillHard")
 
         ]);
   static JumpChat = __arr([

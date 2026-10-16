@@ -168,16 +168,16 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       // AdoptPet.cs: int place in the current adopt offer -> moved into the first empty pet slot.
       const place = pkt.readInt();
       const slot = bag.findFirstEmptySlot();
-      if (slot === -1) { p.sendMessage(0, "O número de pets atingiu o limite!"); return; }
-      if (place < 0 || place >= bag.adopt.length) { p.sendMessage(0, "Pet não encontrado!"); return; }
+      if (slot === -1) { p.sendMessage(0, "宠物数量已达上限！"); return; }
+      if (place < 0 || place >= bag.adopt.length) { p.sendMessage(0, "未找到宠物！"); return; }
       const picked = bag.adopt[place];
       if (!picked) return;
       if (bag.addPetTo(picked, slot)) {
         const info = T.templates.get(picked.TemplateID);
         if (info && (info.StarLevel > 3 || info.KindID >= 5)) {
-          const msg = `[${p.zoneName}] O jogador [${p.info.NickName}] teve sorte e capturou ${info.Name} de ${info.StarLevel} estrela(s).`;
+          const msg = `[${p.zoneName}]玩家[${p.info.NickName}]幸运地捕获了${info.StarLevel}星宠物${info.Name}。`;
           for (const o of ctx.world.all()) o.sendMessage(0, msg);
-        } else p.sendMessage(0, "Captura bem-sucedida.");
+        } else p.sendMessage(0, "捕获成功。");
       }
       bag.adopt = [];
       p.flushPets();
@@ -238,14 +238,14 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const inv = p.getInventory(bagType);
       const item = inv?.getItemAt(slot);
       const pet = bag.getPetAt(place);
-      if (!item || !pet || ![50, 51, 52].includes(item.template.CategoryID)) return p.sendMessage(0, "AddPetEquip.WrongItem");
-      if (pet.Level < item.template.Property2) return p.sendMessage(0, "AddPetEquip.WrongLevel");
+      if (!item || !pet || ![50, 51, 52].includes(item.template.CategoryID)) return p.sendMessage(0, t("AddPetEquip.WrongItem"));
+      if (pet.Level < item.template.Property2) return p.sendMessage(0, t("AddPetEquip.WrongLevel"));
       const eqType = item.template.CategoryID === 51 ? 1 : item.template.CategoryID === 52 ? 2 : 0;
       if (!bag.addEqPet(place, eqType, item.TemplateID, item.ValidDate, item.IsUsed ? item.BeginDate : ctx.now())) return;
       inv!.takeOutItem(item);
       bag.changed.add(place);
       petsChanged(p, true);
-      p.sendMessage(0, "Item de PET equipado com sucesso!");
+      p.sendMessage(0, "宠物装备穿戴成功！");
       return;
     }
     case 21: {
@@ -270,11 +270,11 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const count = pkt.readInt();
       const petPlace = pkt.readInt();
       const pet = bag.getPetAt(petPlace);
-      if (!pet) return p.sendMessage(0, "PetRisingStar.PetNotFound");
+      if (!pet) return p.sendMessage(0, t("PetRisingStar.PetNotFound"));
       const found = p.propBag.getItemByTemplateID(0, templateId);
-      if (!found || found.TemplateID !== 11162) { p.sendMessage(0, "PetRisingStar.ItemNotFound"); p.send(Out.petRisingStarReply(false)); return; }
+      if (!found || found.TemplateID !== 11162) { p.sendMessage(0, t("PetRisingStar.ItemNotFound")); p.send(Out.petRisingStarReply(false)); return; }
       const r = petRisingStar(T, pet, found.template.Property2, Math.min(count, found.Count), petMaxLevelByGrade(ctx, p), p.info.VIPLevel);
-      if (!r) { p.sendMessage(0, "PetRisingStar.UnSupport"); p.send(Out.petRisingStarReply(false)); return; }
+      if (!r) { p.sendMessage(0, t("PetRisingStar.UnSupport")); p.send(Out.petRisingStarReply(false)); return; }
       if (r.consumed > 0) p.propBag.removeCountFromStack(found, r.consumed);
       bag.changed.add(petPlace);
       petsChanged(p, pet.IsEquip);
@@ -312,9 +312,9 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const type = pkt.readInt();
       const eat = bag.eat;
       const blocked = hungBuCacCho(eat.weaponLevel, eat.clothesLevel, eat.hatLevel);
-      const names = ["Roupa ou Chapéu", "Vũ khí và Nón", "Vũ khí và Áo"] as const;
+      const names = ["衣服或帽子", "武器和帽子", "武器和衣服"] as const;
       if (([eat.weaponLevel, eat.clothesLevel, eat.hatLevel][amor]) === blocked) {
-        return p.sendMessage(0, `Evolua ${names[amor]} primeiro!`);
+        return p.sendMessage(0, `请先升级${names[amor]}！`);
       }
       if (type === 1) {
         const count = pkt.readInt();
@@ -333,12 +333,12 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
         const count = pkt.readInt();
         const eatItemId = 201567;
         const info2 = p.propBag.getItemByTemplateID(0, eatItemId);
-        if (!info2) return p.sendMessage(0, "Pedras de fortalecimento insuficientes!");
+        if (!info2) return p.sendMessage(0, "强化石不足！");
         let totalPoint = count * info2.template.Property2;
         const need = moeNeedExp(T, [eat.weaponExp, eat.clothesExp, eat.hatExp][amor]!, [eat.weaponLevel, eat.clothesLevel, eat.hatLevel][amor]!);
         let realCount = count;
         if (totalPoint > need && info2.template.Property2 > 0) { realCount = Math.ceil(need / info2.template.Property2); totalPoint = info2.template.Property2; }
-        if (!p.propBag.removeCountFromStack(info2, realCount)) return p.sendMessage(0, "Pedras de fortalecimento insuficientes!");
+        if (!p.propBag.removeCountFromStack(info2, realCount)) return p.sendMessage(0, "强化石不足！");
         eatPetsUpgrade(T, eat, amor, totalPoint);
       }
       bag.eatDirty = true;

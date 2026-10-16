@@ -1,0 +1,69 @@
+{
+  "sourceSha256": "3860e5acad82637e21555bc53298065fa582268d9c4bf35e35e005acdbc956e7",
+  "entries": {
+    "ItemFusionHandler.Succeed1": [
+      {
+        "source": " Sucesso! Recebeu {0}",
+        "translation": " 熔炼成功！获得{0}"
+      },
+      {
+        "source": "Fusão concluída com sucesso, recebeu: ",
+        "translation": "熔炼成功，获得： "
+      },
+      {
+        "source": "Parabéns, fusão concluída com sucesso!",
+        "translation": "恭喜，熔炼成功！"
+      }
+    ],
+    "AbstractPacketLib.SendGamePlayerLeave.Msg7": [
+      {
+        "source": " [{0}] saiu de forma irregular, - {1} de experiência, - {2} de mérito",
+        "translation": " [{0}]非正常退出，扣除{1}点经验、{2}点功勋。"
+      },
+      {
+        "source": "O jogador [{0}] saiu da partida de forma irregular, contabilizando uma derrota e deduzindo {0} pontos de experiência e {1} pontos de mérito.",
+        "translation": "玩家[{0}]非正常退出战斗，记为失败并扣除{0}点经验和{1}点功勋。"
+      }
+    ],
+    "UnusableSecondWeapon": [
+      {
+        "source": "",
+        "translation": ""
+      },
+      {
+        "source": "{0}.",
+        "translation": "{0}."
+      }
+    ],
+    "Game.Server.AppSystem.BreakApprenticeShipMsg.Master": [
+      {
+        "source": "O discípulo [{0}] encerrou a relação de mestre e discípulo com você.",
+        "translation": "弟子[{0}]与你解除了师徒关系。"
+      },
+      {
+        "source": "Seu mestre encerrou a relação com você; todas as missões e itens relacionados ao mestre foram removidos.",
+        "translation": "你的师父与你解除了师徒关系；相关的师徒任务和物品已移除。"
+      }
+    ],
+    "GamePlayer.Msg3": [
+      {
+        "source": "No nível máximo, a experiência é convertida em {0} de mérito",
+        "translation": "等级已达上限，经验转换为{0}功勋。"
+      },
+      {
+        "source": "Nível máximo atingido, experiência convertida em mérito.",
+        "translation": "等级已达上限，经验转换为功勋。"
+      }
+    ],
+    "CardUseHandler.MaxExp": [
+      {
+        "source": "No nível máximo, a experiência é convertida em {0} de mérito",
+        "translation": "等级已达上限，经验转换为{0}功勋。"
+      },
+      {
+        "source": "Como seu nível já está no máximo, a experiência obtida em combate é automaticamente convertida em mérito",
+        "translation": "由于等级已达上限，战斗获得的经验将自动转换为功勋。"
+      }
+    ]
+  }
+}

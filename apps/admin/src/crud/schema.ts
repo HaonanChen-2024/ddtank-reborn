@@ -35,7 +35,7 @@ function fieldSchema(f: FieldDef, mode: FormMode, t: Tr, text: TextFn): z.ZodTyp
       );
     }
     case "boolean":
-      return z.boolean();
+      return z.boolean({ error: t("field.invalid") });
     case "select": {
       const values = (f.options ?? []).map((o) => o.value);
       return z.preprocess(
@@ -50,11 +50,11 @@ function fieldSchema(f: FieldDef, mode: FormMode, t: Tr, text: TextFn): z.ZodTyp
       );
     }
     case "tags": {
-      const arr = z.array(z.string());
+      const arr = z.array(z.string({ error: t("field.invalid") }), { error: t("field.invalid") });
       return req ? arr.min(1, t("field.required")) : arr;
     }
     case "json":
-      return z.string().refine(
+      return z.string({ error: t("field.invalid") }).refine(
         (s) => {
           if (!s.trim()) return !req;
           try {
@@ -68,12 +68,12 @@ function fieldSchema(f: FieldDef, mode: FormMode, t: Tr, text: TextFn): z.ZodTyp
       );
     case "password": {
       // On edit, blank means "keep current password".
-      const s = z.string();
+      const s = z.string({ error: t("field.invalid") });
       if (mode === "edit" || !req) return s;
       return s.min(1, t("field.required"));
     }
     default: {
-      let s = z.string();
+      let s = z.string({ error: t("field.invalid") });
       if (f.maxLength) s = s.max(f.maxLength, t("field.maxLength", { max: f.maxLength }));
       if (f.pattern) {
         const p = f.pattern;

@@ -68,11 +68,11 @@ export class BLTTAH1124 extends AMissionControl {
             // hiệu ứng nói bla bla
             ((this.Game)).SendObjectFocus(this.king, 1, 2000, 0);
             this.king.PlayMovie("call", 3000, 0);
-            this.king.Say(LanguageMgr.GetTranslation("GameServer.BLTTT1124.Msg1"), 0, 3300);
+            this.king.Say(LanguageMgr.GetTranslation("Workshop.Pve.Legacy.BltT1124King"), 0, 3300);
 
             ((this.Game)).SendObjectFocus(this.boss, 1, 6200, 0);
             this.boss.PlayMovie("castA", 7000, 0);
-            this.boss.Say(LanguageMgr.GetTranslation("GameServer.BLTTT1124.Msg2"), 0, 7300);
+            this.boss.Say(LanguageMgr.GetTranslation("Workshop.Pve.Legacy.BltT1124Boss"), 0, 7300);
 
             ((this.Game)).SendFreeFocus(827, 534, 1, 10000, 0);
             this.m_moive.PlayMovie("in", 10000, 0);

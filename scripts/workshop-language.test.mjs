@@ -9,6 +9,18 @@ import test from "node:test";
 
 const script = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "workshop-language.mjs"));
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+test("PvE additions use a distinct stable namespace and reject malformed keys without changing a deployment", t => {
+  const f = fixture(t);
+  f.put("research/i18n/zh-CN-server-additions.json", JSON.stringify({ "Workshop.Pve.Dialogue.Example": "中文台词 {0}" }));
+  f.ok("install", "--server");
+  const target = join(f.runtime, "server-language.txt"), before = readFileSync(target);
+  assert.ok(before.toString("utf8").includes("Workshop.Pve.Dialogue.Example:中文台词 {0}\r\n"));
+  for (const key of ["Workshop.Pve.", "Workshop.Pve.Bad Key", "Workshop.Pve.Bad:Key", "Workshop.Pvex.Example", "Workshop.Pve.Bad\nKey"]) {
+    f.put("research/i18n/zh-CN-server-additions.json", JSON.stringify({ [key]: "中文台词" }));
+    assert.notEqual(f.run("install", "--server").status, 0);
+    assert.deepEqual(readFileSync(target), before);
+  }
+});
 function fixture(t) {
   const parent = resolve(tmpdir()), root = mkdtempSync(join(parent, "ddtank-language-"));
   t.after(() => { assert.ok(resolve(root).startsWith(parent + sep)); rmSync(root, { recursive: true, force: true }); });
@@ -46,10 +58,15 @@ test("the online-box Chinese keys install over the real server dictionary withou
   const additionsFile = join(repoRoot, "research/i18n/zh-CN-server-additions.json");
   const additionsText = existsSync(additionsFile) ? readFileSync(additionsFile, "utf8") : null;
   if (additionsText !== null) f.put("research/i18n/zh-CN-server-additions.json", additionsText);
+  const rowFile = join(repoRoot, "research/i18n/zh-CN-server-row-overrides.json");
+  const rowText = existsSync(rowFile) ? readFileSync(rowFile, "utf8") : null;
+  const rowEntries = rowText === null ? {} : JSON.parse(rowText).entries;
+  if (rowText !== null) f.put("research/i18n/zh-CN-server-row-overrides.json", rowText);
   f.ok("verify", "--server"); f.ok("install", "--server");
   let expected = source.split("\r\n").map(line => {
-    const colon = line.indexOf(":"), key = line.slice(0, colon);
-    return colon >= 0 && Object.hasOwn(overrides, key) ? `${key}:${overrides[key]}` : line;
+    const colon = line.indexOf(":"), key = line.slice(0, colon).replace(/^\uFEFF/, "");
+    if (colon >= 0 && Object.hasOwn(rowEntries, key)) return line.slice(0, colon + 1) + rowEntries[key].find(row => row.source === line.slice(colon + 1)).translation;
+    return colon >= 0 && Object.hasOwn(overrides, key) ? line.slice(0, colon + 1) + overrides[key] : line;
   }).join("\r\n");
   const additions = additionsText === null ? [] : Object.entries(JSON.parse(additionsText));
   if (additions.length) expected += (expected.endsWith("\r\n") ? "" : "\r\n") + additions.map(([key, value]) => `${key}:${value}\r\n`).join("");
@@ -165,9 +182,73 @@ function scrollFixture(t) {
   return { ...f, config, noticeSource: source, target: join(f.runtime, "client-overlay/ui/vietnam/movingnotification.txt"), journal: join(f.runtime, "client-overlay-notifications.json") };
 }
 
+function rowFixture(t) {
+  const f = fixture(t), source = "\uFEFF## source\r\nNPC.Variant:Old {0}\r\nNPC.Variant:Other {1:N0}<br/>\r\nNPC.Variant:Old {0}\r\n";
+  const config = { sourceSha256: createHash("sha256").update(source).digest("hex"), entries: {
+    "NPC.Variant": [{ source: "Old {0}", translation: "中文 {0}" }, { source: "Other {1:N0}<br/>", translation: "另一句 {1:N0}<br/>" }],
+  } };
+  f.put("data/i18n/pt-BR/server-language.txt", source);
+  f.put("research/i18n/zh-CN-server-overrides.json", "{}");
+  f.put("research/i18n/zh-CN-server-row-overrides.json", JSON.stringify(config));
+  return { ...f, config, rowSource: source };
+}
+
+test("source-bound duplicate variants retain each row's placeholders, counts and owned rollback", t => {
+  const f = rowFixture(t), result = JSON.parse(f.ok("verify", "--server"));
+  assert.equal(result.keys, 1); assert.equal(result.translatedRows, 3); assert.equal(existsSync(f.runtime), false);
+  f.ok("install", "--server");
+  const target = join(f.runtime, "server-language.txt"), journal = join(f.runtime, "server-language.json"), previous = readFileSync(target);
+  assert.equal(previous.toString(), f.rowSource.replaceAll("Old {0}", "中文 {0}").replace("Other {1:N0}<br/>", "另一句 {1:N0}<br/>"));
+  assert.equal(JSON.parse(f.ok("install", "--server")).unchanged, true);
+  f.config.entries["NPC.Variant"][1].translation = "更新 {1:N0}<br/>";
+  f.put("research/i18n/zh-CN-server-row-overrides.json", JSON.stringify(f.config));
+  f.ok("install", "--server");
+  assert.deepEqual(readFileSync(JSON.parse(readFileSync(journal, "utf8")).backup), previous);
+  f.ok("rollback", "--server"); assert.deepEqual(readFileSync(target), previous);
+  assert.equal(readFileSync(join(f.repo, "data/i18n/pt-BR/server-language.txt"), "utf8"), f.rowSource);
+});
+
+test("unlisted, unused, duplicate or malformed variants and flat collisions fail before deployment", t => {
+  const f = rowFixture(t), variants = f.config.entries["NPC.Variant"];
+  const invalid = [
+    null, [], { ...f.config, entries: null }, { ...f.config, entries: [] },
+    { ...f.config, sourceSha256: "0".repeat(64) },
+    { ...f.config, entries: { "NPC.Variant": [variants[0]] } },
+    { ...f.config, entries: { "NPC.Variant": [...variants, { source: "Unused {2}", translation: "未使用 {2}" }] } },
+    { ...f.config, entries: { "NPC.Variant": [...variants, variants[0]] } },
+    { ...f.config, entries: { "NPC.Variant": [{ ...variants[0], translation: "错误 {1}" }, variants[1]] } },
+    { ...f.config, entries: { "NPC.Variant": [{ ...variants[0], translation: "跨行\n{0}" }, variants[1]] } },
+    { ...f.config, entries: { "NPC.Variant": [{ source: 1, translation: "错误" }] } },
+    { ...f.config, entries: { "NPC.Variant": [] } },
+    { ...f.config, entries: { "Missing.Key": variants } },
+    { ...f.config, entries: { "Bad:Key": variants } },
+  ];
+  for (const config of invalid) {
+    f.put("research/i18n/zh-CN-server-row-overrides.json", JSON.stringify(config));
+    const r = f.run("install", "--server"); assert.notEqual(r.status, 0, JSON.stringify(config)); assert.equal(existsSync(f.runtime), false);
+  }
+  f.put("research/i18n/zh-CN-server-row-overrides.json", JSON.stringify(f.config));
+  f.put("research/i18n/zh-CN-server-overrides.json", JSON.stringify({ "NPC.Variant": "冲突 {0}" }));
+  assert.notEqual(f.run("install", "--server").status, 0); assert.equal(existsSync(f.runtime), false);
+});
+
+test("source drift and incomplete variants preserve the deployment and all prior ownership files", t => {
+  const f = rowFixture(t); f.ok("install", "--server");
+  const deployed = () => readdirSync(f.runtime, { recursive: true }).sort().filter(name => statSync(join(f.runtime, name)).isFile())
+    .map(name => [name, readFileSync(join(f.runtime, name)).toString("base64")]);
+  const before = deployed();
+  f.put("data/i18n/pt-BR/server-language.txt", f.rowSource.replace("Old {0}", "Changed {0}"));
+  assert.notEqual(f.run("install", "--server").status, 0); assert.deepEqual(deployed(), before);
+  f.put("data/i18n/pt-BR/server-language.txt", f.rowSource);
+  f.config.entries["NPC.Variant"].pop();
+  f.put("research/i18n/zh-CN-server-row-overrides.json", JSON.stringify(f.config));
+  assert.notEqual(f.run("install", "--server").status, 0); assert.deepEqual(deployed(), before);
+});
+
 test("client and scroll-notice modes never read optional server additions", t => {
   const f = scrollFixture(t);
   f.put("research/i18n/zh-CN-server-additions.json", "{invalid JSON");
+  f.put("research/i18n/zh-CN-server-row-overrides.json", "{invalid JSON");
   f.ok("verify"); f.ok("verify", "--notifications"); assert.equal(existsSync(f.runtime), false);
   assert.notEqual(f.run("verify", "--server").status, 0); assert.equal(existsSync(f.runtime), false);
   const client = JSON.parse(f.ok("install")), notices = JSON.parse(f.ok("install", "--notifications"));
@@ -283,4 +364,69 @@ test("the 69 bag, card, pet and totem captions preserve real client formatting a
   assert.doesNotMatch(output.toString("utf8"), /(?<!\r)\n/); assert.equal(output.toString("utf8").split("\r\n").length, rows.length);
   assert.equal(result.keys, Object.keys(overrides).length); assert.equal(JSON.parse(f.ok("install")).unchanged, true);
   assert.equal(readFileSync(join(f.repo, "apps/api/assets/flash/ui/vietnam/language.txt"), "utf8"), source);
+});
+
+
+test("the complete server dictionary preserves prior translations and has Chinese text for every prose value", () => {
+  const overrides = JSON.parse(readFileSync(join(repoRoot, "research/i18n/zh-CN-server-overrides.json"), "utf8"));
+  const additions = JSON.parse(readFileSync(join(repoRoot, "research/i18n/zh-CN-server-additions.json"), "utf8"));
+  const rows = JSON.parse(readFileSync(join(repoRoot, "research/i18n/zh-CN-server-row-overrides.json"), "utf8"));
+  const overridesKeys = ["AbstractPacketLib.SendGamePlayerLeave.Msg4","AbstractPacketLib.SendGamePlayerLeave.Msg6","ActivityPackageHandler.ChickActivation.LevelAward.Msg","AttackEffect.Success","AwardMgr.AddVIPPack.Title","Bag.Locked","CardUseHandler.Success","ChangeSexHandlerHandler.Success","CreateRoomAction.MaxRoom","DailyAwardHandler.Msg2","DailyAwardHandler.Msg4","DefenceEffect.Success","EnterRoomAction.EnterPassword","EnterRoomAction.full","EnterRoomAction.level","EnterRoomAction.noexist","EnterRoomAction.noroom","EnterRoomAction.passworderror","EnterRoomAction.start","FatalEffect.Success","FeedPet.Success","FirstRechargeGetAward.AlreadyGetAward","GPDanUser.Success","Game.Server.LoginNext","Game.Server.Quests.BagFull","Game.Server.Quests.FinishQuest.RewardGB1","Game.Server.Quests.FinishQuest.RewardGiftToken","Game.Server.Quests.FinishQuest.RewardGold","Game.Server.Quests.FinishQuest.RewardMedal","Game.Server.Quests.FinishQuest.RewardMoney","Game.Server.SceneGames.KickRoom","Game.Server.SceneGames.NoEquip","Game.Server.SceneGames.PairUp.Failed","GameServerScript.AI.NPC.SimpleNpcAi.msg14","GameServerScript.AI.NPC.SimpleNpcAi.msg15","GameServerScript.AI.NPC.SimpleNpcAi.msg16","GameServerScript.AI.NPC.SimpleNpcAi.msg17","GameServerScript.AI.NPC.SimpleNpcAi.msg18","GameServerScript.AI.NPC.SimpleNpcAi.msg19","GameServerScript.AI.NPC.SimpleNpcAi.msg20","GameServerScript.AI.NPC.SimpleNpcAi.msg21","GameServerScript.AI.NPC.SimpleNpcAi.msg22","GameServerScript.AI.NPC.SimpleNpcAi.msg23","GameServerScript.AI.NPC.SimpleQueenAntAi.msg13","GameServerScript.AI.NPC.SimpleQueenAntAi.msg14","GameServerScript.AI.NPC.SimpleQueenAntAi.msg4","GameServerScript.AI.NPC.SimpleQueenAntAi.msg5","GameTakeTempItemsHandler.MailTitle","GameTakeTempItemsHandler.Msg","GameUserDailyAward.Fail1","GameUserDailyAward.Success","GoodsPresentHandler.AnnexRemark","GoodsPresentHandler.Content","GoodsPresentHandler.NoMoney","GoodsPresentHandler.NoUser","GoodsPresentHandler.Success","ItemReclaimHandler.NoSuccess","ItemReclaimHandler.Success1","ItemReclaimHandler.Success2","MailGetAttachHandler.Falied","MailGetAttachHandler.Success","PetHandler.Msg10","PetHandler.Msg11","PetHandler.Msg23","PetHandler.Msg9","StartGameAction.noBattleServe","UserBuyItemHandler.FailByPermission","UserBuyItemHandler.FailByPermission2","UserBuyItemHandler.GiftToken","UserBuyItemHandler.Mail","UserBuyItemHandler.NoBuyItem","UserBuyItemHandler.NoGold","UserBuyItemHandler.NoMoney","UserBuyItemHandler.NoOffer","UserBuyItemHandler.Save","UserBuyItemHandler.Success","UserBuyItemHandler.SystemError","UserBuyItemHandler.Title","UserBuyItemHandler.boguScore","UserBuyItemHandler.petScore","UserChangeItemColorHandler.Success","UserChangeItemPlaceHandler.full","UserEquipListHandler.InvalidPlayer","UserGetTimeBoxHandler.fail","UserGetTimeBoxHandler.mail","UserGetTimeBoxHandler.success","UserGetTimeBoxHandler.title","UserGetTimeBoxHandler.todayOver","UserGiftSystem.MailTitle","UserItemContineueHandler.CanNotContineu","UserItemContineueHandler.InvalidShopItem","UserItemContineueHandler.NoMoney","UserItemContineueHandler.Success","UserLoginHandler.Forbid","UserLoginHandler.LoginError","UserLoginHandler.OverTime","UserLoginHandler.Register","UserLoginHandler.RsaCryptorError","UserLoginHandler.ServerError","UserReclaimItemHandler.fail","texpSystem.texpCountToplimit"];
+  const approvedPriorText = {
+    "DailyAwardHandler.Msg4": ["今日VIP礼包已领取。", "今日贵宾礼包已领取。"],
+    "AwardMgr.AddVIPPack.Title": ["VIP礼包领取成功。 {0}", "贵宾礼包领取成功。 {0}"],
+    "Workshop.Events.Vip.Required": ["当前VIP礼包不可领取。", "当前贵宾礼包不可领取。"],
+    "Workshop.Events.Vip.Title": ["每日VIP礼包", "每日贵宾礼包"],
+  };
+  const priorValue = (key, value) => {
+    if (!Object.hasOwn(approvedPriorText, key)) return value;
+    assert.equal(value, approvedPriorText[key][1], key + " approved display-only Chinese wording");
+    return approvedPriorText[key][0];
+  };
+  assert.equal(createHash("sha256").update(JSON.stringify(overridesKeys.map(key => [key, priorValue(key, overrides[key])]))).digest("hex"), "774419522e65c6a2d8588cb4dea1765405038b9bc52c7502d2ef010b965f0b0b", "99 earlier overrides remain exact; only the two approved VIP display words change");
+  const additionsKeys = ["Workshop.Events.AccumulativeLogin.Success","Workshop.Events.AccumulativeLogin.Title","Workshop.Events.Egg.Success","Workshop.Events.Egg.Title","Workshop.Events.FirstRecharge.Success","Workshop.Events.FirstRecharge.Title","Workshop.Events.FirstRecharge.Unavailable","Workshop.Events.LevelBox.Title","Workshop.Events.SignAward.AlreadyReceived","Workshop.Events.SignAward.InvalidTier","Workshop.Events.SignAward.NoRewards","Workshop.Events.SignAward.NotReached","Workshop.Events.SignAward.Success","Workshop.Events.SignAward.Title","Workshop.Events.Vip.Required","Workshop.Events.Vip.Title"];
+  assert.equal(createHash("sha256").update(JSON.stringify(additionsKeys.map(key => [key, priorValue(key, additions[key])]))).digest("hex"), "dd95b856d51351a3fe14370f26e2733048036e379e9f26f64614fd507f137906", "14 earlier additions remain exact; only the two approved VIP display words change");
+  for (const [key, value] of Object.entries(additions)) assert.doesNotMatch(value.replace(/\{[^}]*\}/g, ""), /[a-z]/i, key + " visible Chinese additions");
+  const source = readFileSync(join(repoRoot, "data/i18n/pt-BR/server-language.txt"), "utf8"), effective = new Map();
+  for (const line of source.split(/\r?\n/)) {
+    const colon = line.indexOf(":");
+    if (colon > 0 && !line.startsWith("##")) effective.set(line.slice(0, colon).replace(/^\uFEFF/, ""), line.slice(colon + 1));
+  }
+  assert.equal(effective.size, 3568);
+  assert.deepEqual([...Object.keys(overrides), ...Object.keys(rows.entries)].sort(), [...effective.keys()].sort());
+  assert.equal(Object.keys(rows.entries).length, 6); assert.equal(Object.values(rows.entries).flat().length, 13);
+  for (const [key, original] of effective) {
+    const variants = rows.entries[key], translated = variants ? variants.find(row => row.source === original).translation : overrides[key];
+    assert.equal(typeof translated, "string", key);
+    const markers = value => (value.match(/\{[^}]*\}/g) ?? []).sort();
+    // <DDTank> and <Convite ...> are visible labels, not source HTML tags.
+    const htmlTags = /<\/?(?:span|br|font)(?:\s[^>]*|\/?)>/ig;
+    const tags = value => value.match(htmlTags) ?? [];
+    assert.deepEqual(markers(translated), markers(original), key + " complete brace markers");
+    assert.deepEqual(tags(translated), tags(original), key + " display tags");
+    const numbers = value => (value.replace(/\{[^}]*\}/g, "").replace(htmlTags, "").match(/\d+(?:[.,]\d+)*/g) ?? []).sort();
+    const originalNumbers = numbers(original);
+    // These three original Portuguese thousands groups are integers, not decimal probabilities.
+    const thousands = { "Lightriddle.Msg1": "10.000", "Lightriddle.Msg4": "10.000", "Lightriddle.Msg2": "1.000" }[key];
+    if (thousands) originalNumbers[originalNumbers.indexOf(thousands)] = thousands.replace(".", "");
+    // These three earlier, exact-hashed messages already describe the real claim
+    // instead of the shipped dictionary's unrelated reward/count wording.
+    const priorClaimText = ["GameUserDailyAward.Success", "DailyAwardHandler.Msg2", "DailyAwardHandler.Msg4"].includes(key);
+    if (!priorClaimText) assert.deepEqual(numbers(translated), originalNumbers.sort(), key + " numeric content");
+    const plainFormat = original.replace(/\{\d+(?::[^}]*)?\}/g, "").replace(htmlTags, "");
+    if (/^[\s\d×xX.,<>\[\]{}:+\-/%;!?=()]*$/.test(plainFormat)) assert.equal(translated, original, key + " display format");
+    else {
+      assert.match(translated, /[\u3400-\u9fff]/, key + " untranslated prose");
+      let visible = translated.replace(/\{[^}]*\}/g, "").replace(htmlTags, "").replace(/\\[nr]/g, "");
+      // The original highest-level message names its unknown conversion target xxx.
+      if (key === "LevelMax") visible = visible.replace("xxx", "");
+      assert.doesNotMatch(visible, /[a-z]/i, key + " remaining visible foreign letters");
+    }
+  }
+  assert.equal(overrides["OpenUpArkHandler.Money"].trim(), "点券。");
+  assert.equal(overrides["OpenUpArkHandler.Gold"].trim(), "金币。");
+  assert.equal(overrides["OpenUpArkHandler.GiftToken"].trim(), "礼金。");
+  assert.equal(overrides["AuctionUpdateHandler.Msg2"], "点券不足。");
+  assert.equal(overrides["ItemFusionHandler.NoMoney"], "金币不足。");
+  assert.equal(overrides["ItemComposeHandler.NoMoney"], "所需货币不足。");
 });

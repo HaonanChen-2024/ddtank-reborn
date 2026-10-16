@@ -36,7 +36,7 @@ export function DialogContent({ title, description, size = "md", className, chil
               <D.Description className="sr-only">{title}</D.Description>
             )}
           </div>
-          <D.Close className="rounded-lg p-1 text-muted hover:bg-panel-2 hover:text-ink" aria-label="Fechar">
+          <D.Close className="rounded-lg p-1 text-muted hover:bg-panel-2 hover:text-ink" aria-label="关闭">
             <X className="size-5" />
           </D.Close>
         </div>

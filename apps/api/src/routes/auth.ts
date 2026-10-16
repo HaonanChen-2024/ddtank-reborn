@@ -23,7 +23,7 @@ export function authOf(ctx: AppCtx, req: FastifyRequest): Claims | null {
 export function requireUser(ctx: AppCtx) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const c = authOf(ctx, req);
-    if (!c) return reply.code(401).send({ message: "Não autenticado" });
+    if (!c) return reply.code(401).send({ message: "请先登录" });
     (req as FastifyRequest & { user: Claims }).user = c;
   };
 }
@@ -31,8 +31,8 @@ export function requireUser(ctx: AppCtx) {
 export function requireAdmin(ctx: AppCtx) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const c = authOf(ctx, req);
-    if (!c) return reply.code(401).send({ message: "Não autenticado" });
-    if (c.role !== "admin") return reply.code(403).send({ message: "Acesso restrito a administradores" });
+    if (!c) return reply.code(401).send({ message: "请先登录" });
+    if (c.role !== "admin") return reply.code(403).send({ message: "此功能仅限管理员使用" });
     (req as FastifyRequest & { user: Claims }).user = c;
   };
 }
@@ -82,40 +82,40 @@ export async function authRoutes(f: FastifyInstance, ctx: AppCtx) {
 
   f.post("/api/auth/register", async (req, reply) => {
     const b = z.object({ username: z.string(), email: z.string().optional().default(""), password: z.string() }).safeParse(req.body);
-    if (!b.success) return reply.code(400).send({ message: "Dados inválidos" });
+    if (!b.success) return reply.code(400).send({ message: "提交的信息无效" });
     const { username, email, password } = b.data;
-    if (!NAME_RE.test(username)) return reply.code(400).send({ message: "Usuário deve ter 3–32 letras, números, _ ou ." });
-    if (password.length < 6) return reply.code(400).send({ message: "A senha deve ter pelo menos 6 caracteres" });
-    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return reply.code(400).send({ message: "E-mail inválido" });
-    if (await findAccount(ctx.h, username)) return reply.code(409).send({ message: "Este usuário já existe" });
+    if (!NAME_RE.test(username)) return reply.code(400).send({ message: "用户名须由3至32个英文字母、数字、下划线或点组成" });
+    if (password.length < 6) return reply.code(400).send({ message: "密码至少需要6个字符" });
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return reply.code(400).send({ message: "邮箱地址格式不正确" });
+    if (await findAccount(ctx.h, username)) return reply.code(409).send({ message: "该用户名已被使用" });
     const [acc] = await ctx.h.db.insert(Accounts).values({ UserName: username, Email: email || null, PasswordHash: await hashPassword(password) }).returning();
     return reply.code(201).send(await issue(acc!, req.ip));
   });
 
   f.post("/api/auth/login", async (req, reply) => {
     const b = z.object({ username: z.string().min(1), password: z.string().min(1) }).passthrough().safeParse(req.body);
-    if (!b.success) return reply.code(400).send({ message: "Informe usuário e senha" });
+    if (!b.success) return reply.code(400).send({ message: "请输入用户名和密码" });
     const existing = await findAccount(ctx.h, b.data.username);
-    if (existing?.IsBanned) return reply.code(403).send({ message: existing.BanReason ? `Conta banida: ${existing.BanReason}` : "Conta banida" });
+    if (existing?.IsBanned) return reply.code(403).send({ message: existing.BanReason ? `账号已被封禁：${existing.BanReason}` : "账号已被封禁" });
     const acc = await checkLogin(ctx.h, b.data.username, b.data.password);
-    if (!acc) return reply.code(401).send({ message: "Usuário ou senha incorretos." });
+    if (!acc) return reply.code(401).send({ message: "用户名或密码错误" });
     await ctx.h.db.update(Accounts).set({ LastLoginAt: new Date(), LastLoginIP: req.ip }).where(eq(Accounts.ID, acc.ID));
     const out = await issue(acc, req.ip);
     // maintenance: only admins may enter
     const m = await maintenance(ctx);
-    if (m.on && out.user.role !== "admin") return reply.code(503).send({ message: m.message || "Servidor em manutenção" });
+    if (m.on && out.user.role !== "admin") return reply.code(503).send({ message: m.message || "服务器维护中" });
     return out;
   });
 
   f.get("/api/auth/me", { preHandler: requireUser(ctx) }, async (req, reply) => {
     const acc = await findAccount(ctx.h, userOf(req).name);
-    if (!acc) return reply.code(401).send({ message: "Não autenticado" });
+    if (!acc) return reply.code(401).send({ message: "请先登录" });
     return { user: publicUser(acc, await roleOf(ctx, acc)) };
   });
 
   f.get("/api/account/me", { preHandler: requireUser(ctx) }, async (req, reply) => {
     const acc = await findAccount(ctx.h, userOf(req).name);
-    if (!acc) return reply.code(401).send({ message: "Não autenticado" });
+    if (!acc) return reply.code(401).send({ message: "请先登录" });
     const chars = await q(
       ctx.h,
       sql`SELECT "UserID","NickName","Grade","Gold","Money","Sex","ConsortiaName" FROM app."V_Sys_Users_Detail" WHERE lower("UserName") = lower(${acc.UserName}) AND "NickName" <> '' ORDER BY "UserID"`,
@@ -136,9 +136,9 @@ export async function authRoutes(f: FastifyInstance, ctx: AppCtx) {
 
   f.post("/api/account/password", { preHandler: requireUser(ctx) }, async (req, reply) => {
     const b = z.object({ currentPassword: z.string(), newPassword: z.string().min(6) }).safeParse(req.body);
-    if (!b.success) return reply.code(400).send({ message: "A nova senha deve ter pelo menos 6 caracteres" });
+    if (!b.success) return reply.code(400).send({ message: "新密码至少需要6个字符" });
     const acc = await findAccount(ctx.h, userOf(req).name);
-    if (!acc || !(await verifyPassword(b.data.currentPassword, acc.PasswordHash))) return reply.code(400).send({ message: "Senha atual incorreta" });
+    if (!acc || !(await verifyPassword(b.data.currentPassword, acc.PasswordHash))) return reply.code(400).send({ message: "原密码错误" });
     await ctx.h.db.update(Accounts).set({ PasswordHash: await hashPassword(b.data.newPassword) }).where(eq(Accounts.ID, acc.ID));
     return reply.code(204).send();
   });
@@ -146,7 +146,7 @@ export async function authRoutes(f: FastifyInstance, ctx: AppCtx) {
   /** Fresh play config for the logged-in user (new one-time key each call). */
   f.get("/api/play/config", { preHandler: requireUser(ctx) }, async (req, reply) => {
     const acc = await findAccount(ctx.h, userOf(req).name);
-    if (!acc || acc.IsBanned) return reply.code(401).send({ message: "Não autenticado" });
+    if (!acc || acc.IsBanned) return reply.code(401).send({ message: "请先登录" });
     return playConfig(ctx, acc, req.ip);
   });
 }

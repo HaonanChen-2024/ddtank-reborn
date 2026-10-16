@@ -14,7 +14,7 @@ export async function checkSpeedHack(ctx: ServerContext, p: GamePlayer): Promise
   const now = unixSeconds(ctx.now());
   if (cfg.SPEED_CHECK_ENABLED && now - p.timeCheckHack < cfg.SPEED_CHECK_INTERVAL_MIN * 60 - cfg.SPEED_CHECK_TOLERANCE_SEC) {
     ctx.log.warn(`speed hack detected: ${p.info.UserName}`);
-    p.sendMessage(0, `Você foi bloqueado por ${cfg.SPEED_CHECK_BAN_MIN} minuto(s) por usar acelerador de tempo!`);
+    p.sendMessage(0, `因使用时间加速器，你已被封禁${cfg.SPEED_CHECK_BAN_MIN}分钟！`);
     await p.saveIntoDatabase(ctx.db.db);
     await forbidPlayer(ctx.db.db, p.id, new Date(ctx.now().getTime() + cfg.SPEED_CHECK_BAN_MIN * 60_000), true, "Hack speed");
     p.sink.disconnect("speed hack");
@@ -31,7 +31,7 @@ export async function checkMissingHeartbeat(ctx: ServerContext, p: GamePlayer): 
   const cfg = ctx.cfg;
   if (!cfg.SPEED_CHECK_ENABLED) return false;
   if (unixSeconds(ctx.now()) - p.timeCheckHack > cfg.SPEED_CHECK_MISSING_MIN * 60 - 10) {
-    await forbidPlayer(ctx.db.db, p.id, new Date(ctx.now().getTime() + cfg.SPEED_CHECK_MISSING_BAN_MIN * 60_000), true, "Lách check speed");
+    await forbidPlayer(ctx.db.db, p.id, new Date(ctx.now().getTime() + cfg.SPEED_CHECK_MISSING_BAN_MIN * 60_000), true, "绕过速度检测");
     p.sink.disconnect("missing speed heartbeat");
     return true;
   }

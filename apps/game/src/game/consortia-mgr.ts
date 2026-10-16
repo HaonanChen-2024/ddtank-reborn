@@ -138,7 +138,7 @@ export class ConsortiaMgr {
     if (!items.length) return;
     for (const it of items) p.consortiaBag.takeOutItem(it);
     const { mailItems } = await import("../handlers/items.js");
-    await mailItems(this.ctx, p, items, this.t("Game.Server.GameUtils.ConsortiaBag.Title", "Két Guild"), 13);
+    await mailItems(this.ctx, p, items, this.t("Game.Server.GameUtils.ConsortiaBag.Title", "公会保险箱"), 13);
   }
 
   /** Copy a consortia row into a member's PlayerInfo. */
@@ -298,7 +298,7 @@ export class ConsortiaMgr {
     upd.writeByte(22); upd.writeByte(4); upd.writeInt(c.ID); upd.writeInt(c.Value); upd.writeInt(c.Finish);
     for (const m of this.online(t.consortiaId)) m.send(upd);
     if (c.Value >= c.Target) {
-      const msg = ConsortiaMgr.taskChat(this.t("Consortia.TaskCondition.Completed", "Missão do Clã: {0} concluída!", c.Content));
+      const msg = ConsortiaMgr.taskChat(this.t("Consortia.TaskCondition.Completed", "公会任务：{0}已完成！", c.Content));
       for (const m of this.online(t.consortiaId)) m.send(msg);
     }
     void this.saveTask(t);
@@ -332,7 +332,7 @@ export class ConsortiaMgr {
       const members = this.online(t.consortiaId);
       const done = t.conditions.every((c) => c.Value >= c.Target);
       if (t.beginTime.getTime() + t.time * 60_000 < now.getTime()) {
-        const msg = ConsortiaMgr.taskChat(this.t("Consortia.Task.Complete", "A missão do Clã terminou."));
+        const msg = ConsortiaMgr.taskChat(this.t("Consortia.Task.Complete", "公会任务已结束。"));
         for (const m of members) m.send(msg);
         this.tasks.delete(t.consortiaId);
         await this.saveTask(null, t.consortiaId);
@@ -352,13 +352,13 @@ export class ConsortiaMgr {
           m.addOffer(offer);
           m.info.RichesOffer += contrib;
           m.updateProperties();
-          m.sendMessage(2, this.t("Consortia.Task.Reward", "Você recebeu uma recompensa do Clã."));
+          m.sendMessage(2, this.t("Consortia.Task.Reward", "你获得了公会奖励。"));
           await sendMail(this.ctx.db.db, {
-            Content: `Inclui: \n${exp} de experiência.\n${offer} de contribuição`, Title: "Missão do Clã", Gold: 0, Money: 0, Type: 59,
+            Content: `奖励包括：\n${exp}经验。\n${offer}贡献`, Title: "公会任务", Gold: 0, Money: 0, Type: 59,
             Receiver: m.info.NickName ?? "", ReceiverID: m.id, Sender: m.info.ConsortiaName, SenderID: 0,
           });
           m.send(Out.mailResponse(m.id, 1));
-          m.send(ConsortiaMgr.taskChat(this.t("Consortia.Task.Complete", "A missão do Clã terminou.")));
+          m.send(ConsortiaMgr.taskChat(this.t("Consortia.Task.Complete", "公会任务已结束。")));
         }
         await this.refreshRiches(t.consortiaId);
       }

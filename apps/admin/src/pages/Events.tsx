@@ -75,13 +75,13 @@ function Calendar() {
         <div className="mb-3 flex items-center gap-2">
           <h2 className="font-display text-2xl">{monthFmt.format(cursor)}</h2>
           <div className="ml-auto flex gap-1">
-            <Button size="icon" variant="secondary" aria-label="Mês anterior" onClick={() => shift(-1)}>
+            <Button size="icon" variant="secondary" aria-label="上个月" onClick={() => shift(-1)}>
               <ChevronLeft />
             </Button>
             <Button size="sm" variant="secondary" onClick={() => setCursor(new Date(new Date().getFullYear(), new Date().getMonth(), 1))}>
               {t("events.today")}
             </Button>
-            <Button size="icon" variant="secondary" aria-label="Próximo mês" onClick={() => shift(1)}>
+            <Button size="icon" variant="secondary" aria-label="下个月" onClick={() => shift(1)}>
               <ChevronRight />
             </Button>
           </div>
@@ -167,12 +167,12 @@ interface SchedStatus {
 }
 
 const KIND_LABEL: Record<string, string> = {
-  worldboss: "Boss mundial",
-  league: "Liga",
-  elite: "Elite",
-  weekly_reset: "Reset semanal",
-  double_exp: "EXP x2",
-  double_gold: "Ouro x2",
+  worldboss: "世界首领",
+  league: "联赛",
+  elite: "精英赛",
+  weekly_reset: "每周重置",
+  double_exp: "双倍经验",
+  double_gold: "双倍金币",
 };
 
 const fmtUtc = (s: string | null) => (s ? new Date(s).toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—");
@@ -189,50 +189,50 @@ function SchedulerPanel() {
   const act = async (path: string, body: Record<string, unknown>) => {
     try {
       await api.post(path, body);
-      toast.success("OK");
+      toast.success("操作已完成");
       await qc.invalidateQueries({ queryKey: ["events", "status"] });
     } catch {
-      toast.error("Servidor de jogo indisponível");
+      toast.error("游戏服务暂不可用");
     }
   };
   return (
     <Card className="mb-4 p-4">
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <h2 className="font-display text-lg">Agendador do servidor</h2>
+        <h2 className="font-display text-lg">服务器活动调度</h2>
         {data && (
           <span className="text-sm text-muted">
-            EXP x{data.rates.exp} · Ouro x{data.rates.gold} · Elite {data.eliteStatus || "fechado"} · Liga {data.leagueOpen ? "aberta" : "fechada"}
+            经验 ×{data.rates.exp} · 金币 ×{data.rates.gold} · 精英赛 {data.eliteStatus || "已关闭"} · 联赛 {data.leagueOpen ? "已开放" : "已关闭"}
           </span>
         )}
-        {error && <span className="text-sm text-coral">Servidor de jogo indisponível</span>}
+        {error && <span className="text-sm text-coral">游戏服务暂不可用</span>}
         <Button size="sm" variant="outline" className="ml-auto" onClick={() => act("/api/admin/events/reload", {})}>
-          Recarregar no jogo
+          重新加载到游戏
         </Button>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <p className="mb-1 text-sm font-semibold">Abertos agora</p>
+          <p className="mb-1 text-sm font-semibold">当前开放</p>
           <ul className="flex flex-col gap-1 text-sm">
-            {(data?.open ?? []).length === 0 && <li className="text-muted">Nenhum</li>}
+            {(data?.open ?? []).length === 0 && <li className="text-muted">暂无</li>}
             {data?.open.map((w) => (
               <li key={`${w.kind}${w.start}`} className="flex items-center gap-2">
                 <span className="font-semibold">{KIND_LABEL[w.kind] ?? w.kind}</span>
-                <span className="text-muted">até {fmtUtc(w.end)}</span>
+                <span className="text-muted">截止 {fmtUtc(w.end)}</span>
                 <Button size="sm" variant="ghost" onClick={() => act("/api/admin/events/stop", { kind: w.kind })}>
-                  Encerrar
+                  结束
                 </Button>
               </li>
             ))}
           </ul>
           {data?.worldBoss && (
             <p className="mt-2 text-sm">
-              {data.worldBoss.name}: {data.worldBoss.blood.toLocaleString()} / {data.worldBoss.maxBlood.toLocaleString()} HP · {data.worldBoss.players} na sala
-              {data.worldBoss.ranking.length > 0 && ` · 1º ${data.worldBoss.ranking[0]!.nick} (${data.worldBoss.ranking[0]!.damage})`}
+              {data.worldBoss.name}: {data.worldBoss.blood.toLocaleString()} / {data.worldBoss.maxBlood.toLocaleString()} 生命值 · 房间内 {data.worldBoss.players} 人
+              {data.worldBoss.ranking.length > 0 && ` · 第 1 名 ${data.worldBoss.ranking[0]!.nick} (${data.worldBoss.ranking[0]!.damage})`}
             </p>
           )}
         </div>
         <div>
-          <p className="mb-1 text-sm font-semibold">Próximos</p>
+          <p className="mb-1 text-sm font-semibold">即将开放</p>
           <ul className="flex flex-col gap-1 text-sm">
             {data?.next.map((n) => (
               <li key={n.id}>
@@ -243,7 +243,7 @@ function SchedulerPanel() {
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-sm">Iniciar agora por</span>
+        <span className="text-sm">立即开放，持续</span>
         <input
           type="number"
           min={1}
@@ -251,9 +251,9 @@ function SchedulerPanel() {
           value={minutes}
           onChange={(e) => setMinutes(Number(e.target.value) || 30)}
           className="w-20 rounded-lg border border-line bg-transparent px-2 py-1 text-sm"
-          aria-label="minutos"
+          aria-label="分钟"
         />
-        <span className="text-sm">min:</span>
+        <span className="text-sm">分钟：</span>
         {Object.entries(KIND_LABEL).map(([k, l]) => (
           <Button key={k} size="sm" variant="outline" onClick={() => act("/api/admin/events/start", { kind: k, minutes })}>
             {l}
@@ -274,18 +274,18 @@ function CodesPanel() {
     try {
       const r = await api.post<{ codes: string[] }>(`/api/admin/events/${activeId}/codes`, { count });
       setCodes(r.codes);
-      toast.success(`${r.codes.length} códigos`);
+      toast.success(`${r.codes.length} 个兑换码`);
     } catch {
-      toast.error("Erro");
+      toast.error("生成兑换码失败");
     }
   };
   return (
     <Card className="mb-4 flex flex-wrap items-center gap-2 p-4">
-      <span className="text-sm">Gerar códigos para ActiveID (HasKey 1/4)</span>
+      <span className="text-sm">生成活动兑换码（ActiveID，HasKey 为 1 或 4）</span>
       <input type="number" value={activeId} onChange={(e) => setActiveId(Number(e.target.value))} className="w-24 rounded-lg border border-line bg-transparent px-2 py-1 text-sm" aria-label="ActiveID" />
-      <input type="number" value={count} min={1} max={1000} onChange={(e) => setCount(Number(e.target.value))} className="w-20 rounded-lg border border-line bg-transparent px-2 py-1 text-sm" aria-label="quantidade" />
+      <input type="number" value={count} min={1} max={1000} onChange={(e) => setCount(Number(e.target.value))} className="w-20 rounded-lg border border-line bg-transparent px-2 py-1 text-sm" aria-label="数量" />
       <Button size="sm" onClick={gen} disabled={!activeId}>
-        Gerar
+        生成
       </Button>
       {codes.length > 0 && <textarea readOnly className="mt-2 h-24 w-full rounded-lg border border-line bg-transparent p-2 font-mono text-xs" value={codes.join("\n")} />}
     </Card>
@@ -306,7 +306,7 @@ export function EventsPage() {
           <TabsTrigger value="codes">兑换码</TabsTrigger>
           <TabsTrigger value="daily">签到奖励</TabsTrigger>
           <TabsTrigger value="online-boxes">在线宝箱</TabsTrigger>
-          <TabsTrigger value="boxes">等级/VIP与旧数据</TabsTrigger>
+          <TabsTrigger value="boxes">等级/贵宾与旧数据</TabsTrigger>
         </TabsList>
         <TabsContent value="calendar">
           <Calendar />
@@ -337,7 +337,7 @@ export function EventsPage() {
         </TabsContent>
         <TabsContent value="boxes">
           <p className="mb-4 text-sm text-muted">
-            此处编辑 LoadUserBox 的等级（Type 1）和 VIP（Type 2）礼包。旧 Type 0 数据及接口保留兼容，修改它不会影响当前在线宝箱。
+            此处编辑等级礼包（类型1）和贵宾礼包（类型2）。旧类型0数据保留兼容，修改它不会影响当前在线宝箱。
           </p>
           <ResourcePage def={timeBoxes} embedded />
         </TabsContent>

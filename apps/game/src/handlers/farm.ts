@@ -114,14 +114,14 @@ async function giveOrMail(ctx: ServerContext, p: GamePlayer, tpl: ItemTemplate, 
   if (inv.addTemplate(item, count)) return;
   item.UserID = 0; item.BagType = -1; item.Place = -1;
   await saveItem(ctx.db.db, item);
-  await sendMail(ctx.db.db, { Content: "Mochila cheia", Title: "Mochila cheia", Annex1: String(item.ItemID), Annex1Name: tpl.Name ?? "", Gold: 0, Money: 0, Type: 9, Receiver: p.info.NickName ?? "", ReceiverID: p.id, Sender: "Fazenda", SenderID: 0 } as never);
+  await sendMail(ctx.db.db, { Content: "背包已满，道具已放入附件。", Title: "农场道具", Annex1: String(item.ItemID), Annex1Name: tpl.Name ?? "", Gold: 0, Money: 0, Type: 9, Receiver: p.info.NickName ?? "", ReceiverID: p.id, Sender: "农场", SenderID: 0 } as never);
   p.send(Out.mailResponse(p.id, 1));
 }
 
 export function registerFarm(r: HandlerRegistry): void {
   r.player(81, "FARM", async (ctx, p, pkt) => {
     if (isWarrior(p)) return;
-    if (p.info.Grade < MIN_GRADE) return p.sendMessage(0, ctx.lang.t("Farm.NeedGrade", MIN_GRADE));
+    if (p.info.Grade < MIN_GRADE) return p.sendMessage(0, `需要达到${MIN_GRADE}级才能使用此功能。`);
     const type = pkt.readByte();
     const s = await st(ctx, p);
     switch (type) {
@@ -148,7 +148,7 @@ export function registerFarm(r: HandlerRegistry): void {
         if (!t) return;
         const inv = p.getInventory(BagType.FarmBag);
         const seed = inv?.getItemByTemplateID(0, seedTpl);
-        if (!seed || !inv!.removeCountFromStack(seed, 1)) return p.sendMessage(0, ctx.lang.t("Farm.NoSeed"));
+        if (!seed || !inv!.removeCountFromStack(seed, 1)) return p.sendMessage(0, "种子不足。");
         f.SeedID = seedTpl; f.PlantTime = now; f.GainCount = t.Property2; f.FieldValidDate = Math.max(1, t.Property3); f.AccelerateTime = 0;
         await saveField(ctx, p.id, f);
         p.send(fieldPacket(f));
@@ -163,8 +163,8 @@ export function registerFarm(r: HandlerRegistry): void {
         if (!targets.length) return;
         const unit = ctx.templates.cfgInt("FastGrowNeedMoney", 10);
         const cost = unit * targets.length;
-        if (useGiftToken) { if (p.info.GiftToken < cost) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeGiftToken(cost); }
-        else { if (p.info.Money + p.info.MoneyLock < cost) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeMoney(cost); }
+        if (useGiftToken) { if (p.info.GiftToken < cost) return p.sendMessage(0, "所需货币不足。"); p.removeGiftToken(cost); }
+        else { if (p.info.Money + p.info.MoneyLock < cost) return p.sendMessage(0, "所需货币不足。"); p.removeMoney(cost); }
         for (const f of targets) { f.AccelerateTime += FAST_GROW_SUB_MIN; await saveField(ctx, p.id, f); p.send(fieldPacket(f)); }
         return;
       }
@@ -216,7 +216,7 @@ export function registerFarm(r: HandlerRegistry): void {
         const hours = week ? ctx.templates.cfgInt("FarmFieldWeekHours", 168) : ctx.templates.cfgInt("FarmFieldMonthHours", 720);
         const price = week ? ctx.templates.cfgInt("FarmFieldWeekPrice", 5000) : ctx.templates.cfgInt("FarmFieldMonthPrice", 18000);
         const total = price * ids.length;
-        if (p.info.Gold < total) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough"));
+        if (p.info.Gold < total) return p.sendMessage(0, "所需货币不足。");
         const now = ctx.now();
         for (const id of ids) {
           if (id < STARTER_FIELDS || id >= FIELD_CAPACITY) continue;
@@ -235,7 +235,7 @@ export function registerFarm(r: HandlerRegistry): void {
       case 8: { // HELPER_PAY_FIELD: int validity (days) — renews the helper slot itself (not the seed contract)
         const validity = pkt.readInt();
         const price = validity > 1 ? ctx.templates.cfgInt("FarmHelperMonthPrice", 300) : ctx.templates.cfgInt("FarmHelperWeekPrice", 100);
-        if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough"));
+        if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, "所需货币不足。");
         p.removeMoney(price);
         s.farm.VipLimitLevel = validity;
         await saveFarm(ctx, s.farm);
@@ -253,8 +253,8 @@ export function registerFarm(r: HandlerRegistry): void {
         if (on) {
           const perMin = ctx.templates.cfgInt("FarmHelperPricePerMin", 2);
           const price = Math.max(1, perMin * Math.max(1, seedTime)) * Math.max(1, seedCount);
-          if (payType === -2) { if (p.info.GiftToken < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeGiftToken(price); }
-          else { if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, ctx.lang.t("Farm.NotEnough")); p.removeMoney(price); }
+          if (payType === -2) { if (p.info.GiftToken < price) return p.sendMessage(0, "所需货币不足。"); p.removeGiftToken(price); }
+          else { if (p.info.Money + p.info.MoneyLock < price) return p.sendMessage(0, "所需货币不足。"); p.removeMoney(price); }
           for (const f of s.fields.values()) { f.SeedID = 0; f.FieldValidDate = 1; f.AccelerateTime = 0; f.GainCount = 0; await saveField(ctx, p.id, f); }
         }
         s.farm.isFarmHelper = on;

@@ -12,26 +12,26 @@ const URL_RE = /^(https?|wss?):\/\/\S+$/;
 /** Every network/gameplay setting exposed by GET/PUT /api/admin/server-config. */
 export const serverConfigFields: FieldDef[] = [
   // Rede
-  { name: "publicHost", label: "Host público", type: "text", required: true, pattern: HOST, patternMessage: "Use um domínio ou IP", hint: "Domínio ou IP que o cliente usa para conectar", section: "Rede" },
-  { name: "publicIps", label: "IPs públicos", type: "tags", hint: "IPs anunciados pelo servidor (lista de servidores do cliente)", section: "Rede" },
-  { name: "tcpPort", label: "Porta TCP do jogo", type: "number", required: true, min: 1, max: 65535, default: 9200, section: "Rede" },
-  { name: "wsUrl", label: "URL WebSocket", type: "text", required: true, pattern: URL_RE, patternMessage: "Use ws:// ou wss://", placeholder: "wss://jogo.exemplo.com/ws/game", hint: "Usada pelo Ruffle (socketProxy) no navegador", section: "Rede" },
-  { name: "policyPort", label: "Porta do policy server", type: "number", required: true, min: 1, max: 65535, default: 843, hint: "crossdomain policy do Flash (padrão 843)", section: "Rede" },
-  { name: "resourceUrl", label: "URL de recursos (CDN)", type: "text", required: true, pattern: URL_RE, patternMessage: "URL inválida", placeholder: "https://cdn.exemplo.com/resource/", hint: "Base de imagens, SWFs e sons do cliente", section: "Endereços do cliente" },
-  { name: "requestUrl", label: "URL de requisições", type: "text", required: true, pattern: URL_RE, patternMessage: "URL inválida", placeholder: "https://api.exemplo.com/", hint: "Base das chamadas .ashx (Tank.Request)", section: "Endereços do cliente" },
-  { name: "flashUrl", label: "URL do cliente (SWF)", type: "text", pattern: URL_RE, patternMessage: "URL inválida", placeholder: "https://cdn.exemplo.com/flash/", section: "Endereços do cliente" },
+  { name: "publicHost", label: "公网地址", type: "text", required: true, pattern: HOST, patternMessage: "请输入域名或 IP 地址", hint: "客户端连接使用的域名或 IP 地址", section: "网络" },
+  { name: "publicIps", label: "公网 IP 地址", type: "tags", hint: "服务端公布给客户端服务器列表的 IP 地址", section: "网络" },
+  { name: "tcpPort", label: "游戏 TCP 端口", type: "number", required: true, min: 1, max: 65535, default: 9200, section: "网络" },
+  { name: "wsUrl", label: "WebSocket 地址", type: "text", required: true, pattern: URL_RE, patternMessage: "请使用 ws:// 或 wss://", placeholder: "wss://jogo.exemplo.com/ws/game", hint: "浏览器模拟器的套接字代理地址（socketProxy）", section: "网络" },
+  { name: "policyPort", label: "策略服务端口", type: "number", required: true, min: 1, max: 65535, default: 843, hint: "Flash 跨域策略服务，默认端口为 843", section: "网络" },
+  { name: "resourceUrl", label: "资源地址（CDN）", type: "text", required: true, pattern: URL_RE, patternMessage: "地址格式不正确", placeholder: "https://cdn.exemplo.com/resource/", hint: "客户端图片、影片与声音资源的根地址", section: "客户端地址" },
+  { name: "requestUrl", label: "请求地址", type: "text", required: true, pattern: URL_RE, patternMessage: "地址格式不正确", placeholder: "https://api.exemplo.com/", hint: ".ashx 请求的根地址（Tank.Request）", section: "客户端地址" },
+  { name: "flashUrl", label: "客户端影片地址（SWF）", type: "text", pattern: URL_RE, patternMessage: "地址格式不正确", placeholder: "https://cdn.exemplo.com/flash/", section: "客户端地址" },
   // Taxas
-  { name: "expRate", label: "Taxa de EXP", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "Taxas" },
-  { name: "goldRate", label: "Taxa de ouro", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "Taxas" },
-  { name: "dropRate", label: "Taxa de drop", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "Taxas" },
-  { name: "offerRate", label: "Taxa de mérito", type: "number", int: false, step: 0.1, min: 0, max: 100, default: 1, section: "Taxas" },
-  { name: "maxPlayers", label: "Limite de jogadores online", type: "number", min: 1, default: 1000, section: "Taxas" },
+  { name: "expRate", label: "经验倍率", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "倍率与容量" },
+  { name: "goldRate", label: "金币倍率", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "倍率与容量" },
+  { name: "dropRate", label: "掉落倍率", type: "number", int: false, step: 0.1, min: 0, max: 100, required: true, default: 1, section: "倍率与容量" },
+  { name: "offerRate", label: "功勋倍率", type: "number", int: false, step: 0.1, min: 0, max: 100, default: 1, section: "倍率与容量" },
+  { name: "maxPlayers", label: "在线人数上限", type: "number", min: 1, default: 1000, section: "倍率与容量" },
   // Jogo
-  { name: "aimAngles", label: "Ângulos das tabelas de mira", type: "tags", default: ["20", "30", "50", "65"], hint: "Página Jogar: ângulos (graus) mostrados nos painéis de ângulo/força — GET /api/public/aim-tables", section: "Jogo" },
+  { name: "aimAngles", label: "瞄准表角度", type: "tags", default: ["20", "30", "50", "65"], hint: "游戏页面角度与力度表中显示的角度（度），由 GET /api/public/aim-tables 提供", section: "游戏" },
   // Operação
-  { name: "maintenance", label: "Modo manutenção", type: "boolean", hint: "Bloqueia novos logins de não-admins", section: "Operação" },
-  { name: "maintenanceMessage", label: "Mensagem de manutenção", type: "text", section: "Operação" },
-  { name: "motd", label: "Mensagem do dia (MOTD)", type: "textarea", hint: "Exibida no site e no chat do sistema ao entrar", section: "Operação" },
+  { name: "maintenance", label: "维护模式", type: "boolean", hint: "阻止非管理员账号新登录", section: "运行设置" },
+  { name: "maintenanceMessage", label: "维护提示", type: "text", section: "运行设置" },
+  { name: "motd", label: "每日公告（MOTD）", type: "textarea", hint: "在网站以及进入游戏时的系统聊天中显示", section: "运行设置" },
 ];
 
 export function ServerConfigPage() {
