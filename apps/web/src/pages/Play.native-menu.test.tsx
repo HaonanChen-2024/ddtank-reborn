@@ -31,10 +31,13 @@ describe("hall and play-page native menu entry", () => {
     const next = bindNativeActivityEntry(() => true, () => {}), callback = window.workshopOpenActivities;
     old(); expect(window.workshopOpenActivities).toBe(callback); next();
   });
-  it("does not mount the HTML activity hub by default and keeps recovery an explicit maintenance tool", () => {
+  it("exposes activity tasks before the help menu without mounting the HTML hub by default", () => {
     const client = new QueryClient();
     const html = renderToStaticMarkup(<QueryClientProvider client={client}><PlayPage /></QueryClientProvider>);
-    expect(html).toContain("活动中心"); expect(html).toContain("恢复未确认操作（维护工具）");
+    const toolbar = html.split("<details")[0]!;
+    expect(toolbar).toContain("活动中心"); expect(toolbar).toContain(">活动任务</button>");
+    expect(toolbar).toContain("领取活动积分或恢复未确认操作");
+    expect(html).toContain("恢复未确认操作（活动任务）"); expect(html).not.toContain("维护工具");
     expect(html).not.toContain("HTML-ACTIVITY-HUB"); client.clear();
   });
 });
