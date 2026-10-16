@@ -140,6 +140,14 @@
         "Name": "传送",
         "Description": "不受武器限制，将自己传送到本回合攻击的落点。"
       }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "10002",
+      "text": {
+        "Name": "攻击+1",
+        "Description": "增加1次攻击，伤害降低10%。"
+      }
     }
   ]
 }

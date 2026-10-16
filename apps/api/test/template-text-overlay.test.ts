@@ -69,6 +69,7 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
     "Shop_Goods:11904", "Shop_Goods:40002", "Shop_Goods:10018",
     "Quest:318", "Quest_Condiction:318:1", "Quest:341", "Quest_Condiction:341:1", "Quest:346", "Quest_Condiction:346:1", "Quest:347", "Quest_Condiction:347:1",
     "Shop_Goods:10016",
+    "Shop_Goods:10002",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
   expect([318, 341, 346, 347].map(id => before.quests.find(q => q.ID === id)!.Title)).toEqual([
@@ -105,6 +106,7 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   expect(currentGame.items.get(40002)).toMatchObject({ Name: "修炼药水2级", Description: "在背包的修炼界面选择属性使用，增加300点修炼经验。每日使用次数受角色等级和VIP等级限制。", CategoryID: 20, Property1: 0, Property2: 300 });
   expect(currentGame.items.get(10018)).toMatchObject({ Name: "激怒", Description: "使用后增加100点怒气（怒气上限的50%），最多补至怒气上限。", CategoryID: 10, Property1: 11, Property2: 100 });
   expect(currentGame.items.get(10016)).toMatchObject({ Name: "传送", Description: "不受武器限制，将自己传送到本回合攻击的落点。" });
+  expect(currentGame.items.get(10002)).toMatchObject({ Name: "攻击+1", Description: "增加1次攻击，伤害降低10%。" });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {
