@@ -74,6 +74,7 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
     "Shop_Goods:11901", "Shop_Goods:11902", "Shop_Goods:11903", "Shop_Goods:11905", "Shop_Goods:11906",
     "Shop_Goods:40001", "Shop_Goods:40003",
     "Shop_Goods:11002", "Shop_Goods:11019", "Shop_Goods:11021",
+    "Shop_Goods:11023", "Shop_Goods:11024", "Shop_Goods:11029",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
   expect([318, 341, 346, 347].map(id => before.quests.find(q => q.ID === id)!.Title)).toEqual([
@@ -127,6 +128,9 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   expect(currentGame.items.get(11002)).toMatchObject({ Name: "朱雀石2级", Description: "用于铁匠铺合成。成功后装备的合成攻击加成为20点，失败不会损失装备。", CategoryID: 11, Property1: 1, Property3: 1, Property4: 20 });
   expect(currentGame.items.get(11019)).toMatchObject({ Name: "强化石1级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 1 });
   expect(currentGame.items.get(11021)).toMatchObject({ Name: "强化石2级", Description: "用于铁匠铺强化装备，提供的强化概率加成高于1级强化石。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 2 });
+  expect(currentGame.items.get(11023)).toMatchObject({ Name: "强化石4级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 4 });
+  expect(currentGame.items.get(11024)).toMatchObject({ Name: "强化石5级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 5 });
+  expect(currentGame.items.get(11029)).toMatchObject({ Name: "幸运符50%", Description: "可用于铁匠铺合成、强化装备，作为辅助材料参与成功率计算。每次操作消耗1张。", CategoryID: 11, Property1: 3, Property2: 50 });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {
