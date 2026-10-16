@@ -74,5 +74,15 @@
   "EnterRoomAction.EnterPassword": "请输入房间密码。",
   "Game.Server.SceneGames.NoEquip": "未装备武器，无法参加战斗。",
   "Game.Server.SceneGames.PairUp.Failed": "匹配未完成，请重试。",
-  "Game.Server.SceneGames.KickRoom": "你已被移出房间。"
+  "Game.Server.SceneGames.KickRoom": "你已被移出房间。",
+  "StartGameAction.noBattleServe": "战斗服务暂不可用，请稍后重试。",
+  "UserLoginHandler.LoginError": "账号登录状态异常，请重新登录。",
+  "UserLoginHandler.OverTime": "登录已过期，请重新登录。",
+  "UserLoginHandler.Register": "请先创建角色，再进入游戏。",
+  "UserLoginHandler.Forbid": "账号当前无法登录，请联系管理员。",
+  "UserLoginHandler.ServerError": "登录服务器失败，请稍后重试。",
+  "UserLoginHandler.RsaCryptorError": "登录数据解密失败，请重新登录。",
+  "Game.Server.LoginNext": "你的账号已在其他位置登录。",
+  "AbstractPacketLib.SendGamePlayerLeave.Msg4": "非正常退出战斗；惩罚标准：{0}点经验。",
+  "AbstractPacketLib.SendGamePlayerLeave.Msg6": "非正常退出战斗；惩罚标准：{0}点经验、{1}点功勋。"
 }
