@@ -9,5 +9,9 @@
   "Workshop.Events.SignAward.NoRewards": "此档暂无适用奖励。",
   "Workshop.Events.SignAward.NotReached": "本月累计签到天数尚未达到该档要求。",
   "Workshop.Events.SignAward.AlreadyReceived": "本月该档累计签到奖励已领取。",
-  "Workshop.Events.LevelBox.Title": "等级礼包奖励"
+  "Workshop.Events.LevelBox.Title": "等级礼包奖励",
+  "Workshop.Events.FirstRecharge.Title": "首次礼包奖励",
+  "Workshop.Events.FirstRecharge.Success": "礼包领取成功。 {0}",
+  "Workshop.Events.AccumulativeLogin.Title": "累计登录{0}天奖励",
+  "Workshop.Events.AccumulativeLogin.Success": "累计登录{0}天奖励领取成功。 {1}"
 }

@@ -569,9 +569,9 @@ export async function accumulativeLogin(ctx: ServerContext, p: GamePlayer, selec
     const rows = rt.data.loginAward.filter((r) => r.Type === day && (day < 7 || r.RewardItemID === selected));
     if (!rows.length) break;
     if (!(await claimOnce(ctx.db.db, p.id, "accaward", String(day)))) { c.accumulativeAwardDays = day; continue; }
-    const s = await give(ctx, p, rows.map((r) => ({ templateId: r.RewardItemID, count: r.RewardItemCount, validDate: r.RewardItemValid, isBind: r.IsBind, strengthenLevel: r.StrengthenLevel })), `Presente de ${day} dia(s) de login`);
+    const s = await give(ctx, p, rows.map((r) => ({ templateId: r.RewardItemID, count: r.RewardItemCount, validDate: r.RewardItemValid, isBind: r.IsBind, strengthenLevel: r.StrengthenLevel })), eventText(ctx, "Workshop.Events.AccumulativeLogin.Title", `Presente de ${day} dia(s) de login`, day));
     c.accumulativeAwardDays = day;
-    p.sendMessage(0, `Presente de ${day} dia(s) de login: ${s}`);
+    p.sendMessage(0, eventText(ctx, "Workshop.Events.AccumulativeLogin.Success", `Presente de ${day} dia(s) de login: ${s}`, day, s));
   }
   const out = new GSPacket(338, p.id);
   out.writeInt(c.accumulativeLoginDays ?? 0);
@@ -589,10 +589,10 @@ export async function firstRecharge(ctx: ServerContext, p: GamePlayer): Promise<
     return false;
   }
   const goods = rt.data.eventGoods.filter((g) => g.ActivityType === 7 && g.SubActivityType === 1);
-  const s = await give(ctx, p, goods.map((g) => ({ templateId: g.TemplateId, count: g.Count ?? 1, validDate: g.ValidDate ?? 0, isBind: g.IsBind ?? true, strengthenLevel: g.StrengthLevel ?? 0, attack: g.AttackCompose ?? 0, defence: g.DefendCompose ?? 0, agility: g.AgilityCompose ?? 0, luck: g.LuckCompose ?? 0 })), "Presente da primeira recarga");
+  const s = await give(ctx, p, goods.map((g) => ({ templateId: g.TemplateId, count: g.Count ?? 1, validDate: g.ValidDate ?? 0, isBind: g.IsBind ?? true, strengthenLevel: g.StrengthLevel ?? 0, attack: g.AttackCompose ?? 0, defence: g.DefendCompose ?? 0, agility: g.AgilityCompose ?? 0, luck: g.LuckCompose ?? 0 })), eventText(ctx, "Workshop.Events.FirstRecharge.Title", "Presente da primeira recarga"));
   p.info.IsGetAward = true;
   p.send(Out.firstRecharge(true, true));
-  p.sendMessage(0, `Presente recebido! ${s}`);
+  p.sendMessage(0, eventText(ctx, "Workshop.Events.FirstRecharge.Success", `Presente recebido! ${s}`, s));
   return true;
 }
 

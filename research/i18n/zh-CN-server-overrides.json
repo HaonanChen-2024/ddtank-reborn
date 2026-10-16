@@ -98,5 +98,6 @@
   "PetHandler.Msg10": "本次喂养提供{0}点快乐度，恢复后不超过上限。",
   "PetHandler.Msg11": "宠物已达当前等级上限，且快乐度已满，无法继续喂养。",
   "PetHandler.Msg9": "喂养请求无效，请检查宠物和食物后重试。",
-  "PetHandler.Msg23": "宠物功能尚未开放。"
+  "PetHandler.Msg23": "宠物功能尚未开放。",
+  "FirstRechargeGetAward.AlreadyGetAward": "你已领取过此奖励。"
 }
