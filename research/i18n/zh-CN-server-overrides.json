@@ -87,5 +87,6 @@
   "AbstractPacketLib.SendGamePlayerLeave.Msg6": "非正常退出战斗；惩罚标准：{0}点经验、{1}点功勋。",
   "AttackEffect.Success": "本回合触发攻击效果。",
   "DefenceEffect.Success": "本回合触发防御效果。",
-  "FatalEffect.Success": "本回合触发引导效果。"
+  "FatalEffect.Success": "本回合触发引导效果。",
+  "GPDanUser.Success": "获得{0}点人物经验。"
 }

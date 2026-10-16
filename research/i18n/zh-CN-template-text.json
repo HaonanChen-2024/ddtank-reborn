@@ -196,6 +196,62 @@
         "Name": "伤害+20%",
         "Description": "伤害提高20%。"
       }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11901",
+      "text": {
+        "Name": "1级经验药水",
+        "Description": "使用后增加1000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11902",
+      "text": {
+        "Name": "2级经验药水",
+        "Description": "使用后增加2000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11903",
+      "text": {
+        "Name": "3级经验药水",
+        "Description": "使用后增加5000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11905",
+      "text": {
+        "Name": "5级经验药水",
+        "Description": "使用后增加20000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11906",
+      "text": {
+        "Name": "超级经验药水",
+        "Description": "使用后增加100000点人物经验。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "40001",
+      "text": {
+        "Name": "修炼药水1级",
+        "Description": "在背包的修炼界面选择属性使用，增加30点修炼经验。每日使用次数受角色等级和VIP等级限制。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "40003",
+      "text": {
+        "Name": "修炼药水3级",
+        "Description": "在背包的修炼界面选择属性使用，增加900点修炼经验。每日使用次数受角色等级和VIP等级限制。"
+      }
     }
   ]
 }

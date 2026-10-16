@@ -71,6 +71,8 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
     "Shop_Goods:10016",
     "Shop_Goods:10002",
     "Shop_Goods:10001", "Shop_Goods:10003", "Shop_Goods:10004", "Shop_Goods:10005", "Shop_Goods:10006", "Shop_Goods:10007",
+    "Shop_Goods:11901", "Shop_Goods:11902", "Shop_Goods:11903", "Shop_Goods:11905", "Shop_Goods:11906",
+    "Shop_Goods:40001", "Shop_Goods:40003",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
   expect([318, 341, 346, 347].map(id => before.quests.find(q => q.ID === id)!.Title)).toEqual([
@@ -114,6 +116,13 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   expect(currentGame.items.get(10005)).toMatchObject({ Name: "伤害+40%", Description: "伤害提高40%。" });
   expect(currentGame.items.get(10006)).toMatchObject({ Name: "伤害+30%", Description: "伤害提高30%。" });
   expect(currentGame.items.get(10007)).toMatchObject({ Name: "伤害+20%", Description: "伤害提高20%。" });
+  expect(currentGame.items.get(11901)).toMatchObject({ Name: "1级经验药水", Description: "使用后增加1000点人物经验。", CategoryID: 11, Property1: 21, Property2: 1000, MaxCount: 1 });
+  expect(currentGame.items.get(11902)).toMatchObject({ Name: "2级经验药水", Description: "使用后增加2000点人物经验。", CategoryID: 11, Property1: 21, Property2: 2000, MaxCount: 1 });
+  expect(currentGame.items.get(11903)).toMatchObject({ Name: "3级经验药水", Description: "使用后增加5000点人物经验。", CategoryID: 11, Property1: 21, Property2: 5000, MaxCount: 1 });
+  expect(currentGame.items.get(11905)).toMatchObject({ Name: "5级经验药水", Description: "使用后增加20000点人物经验。", CategoryID: 11, Property1: 21, Property2: 20000, MaxCount: 1 });
+  expect(currentGame.items.get(11906)).toMatchObject({ Name: "超级经验药水", Description: "使用后增加100000点人物经验。", CategoryID: 11, Property1: 21, Property2: 100000, MaxCount: 9999 });
+  expect(currentGame.items.get(40001)).toMatchObject({ Name: "修炼药水1级", Description: "在背包的修炼界面选择属性使用，增加30点修炼经验。每日使用次数受角色等级和VIP等级限制。", CategoryID: 20, Property1: 0, Property2: 30 });
+  expect(currentGame.items.get(40003)).toMatchObject({ Name: "修炼药水3级", Description: "在背包的修炼界面选择属性使用，增加900点修炼经验。每日使用次数受角色等级和VIP等级限制。", CategoryID: 20, Property1: 0, Property2: 900 });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {
