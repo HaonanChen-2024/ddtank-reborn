@@ -18,7 +18,7 @@ import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
 import { prepareTreasureDraw, prepareTreasureTicketPurchase, type TreasureNativeEffect } from "./treasure-native.js";
 import { inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS,
-  type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
+  type TreasureBoxReward, type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
 import { advanceCarnivalGlobal, carnivalGlobalKey, readCarnivalGlobalState, viewCarnivalGlobal,
@@ -88,9 +88,18 @@ function treasureIconReady(app: AppCtx, entry: TreasureEntry): boolean {
 
 async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_IDS, locked = false): Promise<TreasureTemplate[]> {
   if (!ids.length) return [];
-  return q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2","Property7","Property8","Level"
+  // This configuration heap has no unique key: row locks cannot stop a second reward being inserted.
+  // Take the table lock before item rows; ordinary GET remains an unlocked projection.
+  if (locked && ids.includes(11917)) await q(app.h, sql`LOCK TABLE game."Shop_Goods_Box" IN SHARE MODE`);
+  const items = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","MaxCount","CanEquip","CanUse","Property1","Property2","Property3","Property4","Property7","Property8","Level","Quality"
     FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
     ORDER BY "TemplateID" ${locked ? sql`FOR SHARE` : sql``}`);
+  // This box's exact recipe is part of its verified use route; a matching item alone proves nothing.
+  const honor = items.find(item => item.TemplateID === 11917);
+  if (honor) honor.boxRewards = await q<TreasureBoxReward>(app.h, sql`SELECT "TemplateId","IsSelect","IsBind","ItemValid","ItemCount",
+    "StrengthenLevel","AttackCompose","DefendCompose","AgilityCompose","LuckCompose","Random"
+    FROM game."Shop_Goods_Box" WHERE "ID"=11917 ORDER BY "TemplateId"`);
+  return items;
 }
 async function treasureCatalog(app: AppCtx, locked = false): Promise<TreasureCatalog> {
   return inspectTreasureCatalog(await treasureTemplates(app, TREASURE_IDS, locked), entry => treasureIconReady(app, entry));

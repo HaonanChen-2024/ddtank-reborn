@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { advanceTreasure, prepareTreasureTicketPurchase, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
-import { completeTreasureCatalog, inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION, TREASURE_DRILL_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
+import { completeTreasureCatalog, inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_PREVIOUS_POOL_VERSION, TREASURE_DRILL_POOL_VERSION, TREASURE_STRENGTHEN_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
 import { treasureCatalogSource, treasureEntries } from "../src/activities/treasure-catalog-data.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState } from "../src/activities/types.js";
@@ -11,6 +11,7 @@ import { ActivityError, type ActivityAction, type ActivityContext, type Activity
 const clock: ActivityContext = { now: new Date("2026-10-15T12:00:00Z"), signDays: [], ownedTemplateIds: [] };
 const wallet = { points: 2000, earned: 40, revision: 0 };
 const noRandom = () => { throw new Error("Unexpected RNG"); };
+const useFixture = JSON.parse(readFileSync(new URL("./fixtures/treasure-compose-honor.json", import.meta.url), "utf8"));
 // Synthetic internal use evidence for pure transitions, never a production readiness override.
 const readyCatalog = (): TreasureCatalog => ({ poolVersion: TREASURE_POOL_VERSION,
   preview: TREASURE_ENTRIES.map(x => ({ ...x, status: "ready", reasons: [] })),
@@ -69,12 +70,13 @@ describe("complete original treasure catalog", () => {
     const wrongBlock = inspectTreasureCatalog(); wrongBlock.readiness.blocked[0].entryKey = wrongBlock.readiness.blocked[1].entryKey;
     expect(() => completeTreasureCatalog(wrongBlock)).toThrow(/complete treasure catalog/);
   });
-  it("admits only twenty original rows with verified dedicated forge or experience owners from genuine seed templates", () => {
+  it("admits only twenty-five original rows with verified forge, experience or exact box owners from genuine seed templates", () => {
     const seed = JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Shop_Goods.json.gz", import.meta.url))).toString("utf8")) as TreasureTemplate[];
+    seed.find(item => item.TemplateID === 11917)!.boxRewards = useFixture.boxes;
     const catalog = inspectTreasureCatalog(seed, () => true);
-    const expected = [11019,11021,11022,11023,11024,11026,11027,11034,11035,11036,11560,11561,11562,11901,11902,11903,11904,11905,11905,11906];
+    const expected = [11019,11021,11022,11023,11024,11026,11027,11030,11031,11032,11033,11034,11035,11036,11560,11561,11562,11901,11902,11903,11904,11905,11905,11906,11917];
     expect(catalog.preview.filter(x => x.status === "ready").map(x => x.templateId).sort((a,b) => a-b)).toEqual(expected);
-    expect(catalog.readiness).toMatchObject({ status: "blocked", readyRows: 20 });
+    expect(catalog.readiness).toMatchObject({ status: "blocked", readyRows: 25 });
     expect(seed.filter(x => [11026,11027,11034,11035,11036,11560,11561,11562].includes(x.TemplateID)).every(x => !x.CanUse)).toBe(true);
     expect(catalog.preview.filter(x => x.templateId === 11905).map(x => x.count)).toEqual([10,5]);
     expect(inspectTreasureCatalog(seed, () => false).readiness.readyRows).toBe(0);
@@ -84,7 +86,10 @@ describe("complete original treasure catalog", () => {
     const drillPolicy = createHash("sha256").update(JSON.stringify({ source:treasureCatalogSource,entries:treasureEntries,
       policy:"verified-use-routes-v2-drill217",rule:"local-equal-rows-30-60-no-pity-v2" })).digest("hex");
     expect(TREASURE_DRILL_POOL_VERSION).toBe(drillPolicy); expect(TREASURE_POOL_VERSION).not.toBe(drillPolicy);
-    for (const version of [previous,drillPolicy,TREASURE_POOL_VERSION]) expect(isKnownTreasurePoolVersion(version)).toBe(true);
+    const strengthenPolicy = createHash("sha256").update(JSON.stringify({ source:treasureCatalogSource,entries:treasureEntries,
+      policy:"verified-use-routes-v3-strengthen59",rule:"local-equal-rows-30-60-no-pity-v2" })).digest("hex");
+    expect(TREASURE_STRENGTHEN_POOL_VERSION).toBe(strengthenPolicy); expect(TREASURE_POOL_VERSION).not.toBe(strengthenPolicy);
+    for (const version of [previous,drillPolicy,strengthenPolicy,TREASURE_POOL_VERSION]) expect(isKnownTreasurePoolVersion(version)).toBe(true);
     for (const version of [undefined,null,3,"", "a".repeat(64),`${drillPolicy} `]) expect(isKnownTreasurePoolVersion(version)).toBe(false);
   });
   it("does not admit altered drill experience ranges, missing properties or forged dedicated owners", () => {
@@ -106,6 +111,21 @@ describe("complete original treasure catalog", () => {
         expect(inspectTreasureCatalog([{...stone,...patch}],()=>true).preview.find(x=>x.templateId===id)!.status).toBe("blocked");
       }
       expect(inspectTreasureCatalog([stone],()=>false).preview.find(x=>x.templateId===id)!.status).toBe("blocked");
+    }
+  });
+  it("requires the four actual compose attributes and Quality, and the full deterministic honor recipe", () => {
+    for (const item of useFixture.goods as TreasureTemplate[]) {
+      const value = { ...item, ...(item.TemplateID === 11917 ? { boxRewards: useFixture.boxes } : {}) };
+      const status = (patch: Partial<TreasureTemplate>, icons = true) => inspectTreasureCatalog([{...value,...patch}],()=>icons)
+        .preview.find(row => row.templateId === item.TemplateID)!.status;
+      expect(status({})).toBe("ready"); expect(status({},false)).toBe("blocked");
+      const patches: Partial<TreasureTemplate>[] = item.TemplateID === 11917
+        ? [{Property1:1},{Property4:0},{boxRewards:undefined},{boxRewards:[]},{boxRewards:[...useFixture.boxes,...useFixture.boxes]},
+          ...[{TemplateId:-200},{IsSelect:false},{IsBind:false},{ItemCount:501},{ItemValid:1},{Random:1},{AttackCompose:1}]
+            .map(patch => ({boxRewards: [{...useFixture.boxes[0],...patch}]}))]
+        : [{Property1:2},{Quality:undefined},{Quality:4},{Property3:undefined},{Property3:item.Property3!+1},
+          {Property4:undefined},{Property4:49}];
+      for (const patch of [...patches,{CategoryID:7},{Pic:"wrong"},{MaxCount:0}]) expect(status(patch)).toBe("blocked");
     }
   });
 });
@@ -192,7 +212,7 @@ describe("original v2 treasure transitions and legacy entitlements", () => {
       const before = structuredClone(saved); expect(() => readTreasureState(saved)).toThrow(ActivityError); expect(saved).toEqual(before);
     }
   });
-  it.each([TREASURE_PREVIOUS_POOL_VERSION,TREASURE_DRILL_POOL_VERSION])("preserves verified prize identities and tokens for policy %s without accepting unknown versions", (poolVersion) => {
+  it.each([TREASURE_PREVIOUS_POOL_VERSION,TREASURE_DRILL_POOL_VERSION,TREASURE_STRENGTHEN_POOL_VERSION])("preserves verified prize identities and tokens for policy %s without accepting unknown versions", (poolVersion) => {
     const entry = TREASURE_ENTRIES.find(x => x.templateId === 11905 && x.sourceOriginalIndex === 7)!;
     const saved = readTreasureState(undefined);
     saved.bag = [{templateId:entry.templateId,count:entry.count,origin:"original-catalog",entryKey:entry.entryKey,
@@ -211,7 +231,7 @@ describe("original v2 treasure transitions and legacy entitlements", () => {
     expect(result.rewards).toEqual([{...before.bag[0]}]); expect(result.state.bag).toEqual([]);
     expect(saved).toEqual(before);
   });
-  it.each([TREASURE_PREVIOUS_POOL_VERSION,TREASURE_DRILL_POOL_VERSION])("keeps existing prizes from %s while new draws require the current evidence version", (poolVersion) => {
+  it.each([TREASURE_PREVIOUS_POOL_VERSION,TREASURE_DRILL_POOL_VERSION,TREASURE_STRENGTHEN_POOL_VERSION])("keeps existing prizes from %s while new draws require the current evidence version", (poolVersion) => {
     const entry = TREASURE_ENTRIES.find(x => x.templateId === 11905 && x.sourceOriginalIndex === 12)!;
     const saved = readTreasureState(undefined);
     saved.bag = [{templateId:entry.templateId,count:entry.count,origin:"original-catalog",entryKey:entry.entryKey,

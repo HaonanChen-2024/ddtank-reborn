@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { buildApp } from "../src/app.js";
 import { pairNativeLocalRules } from "../src/activities/pair-native.js";
 import { createActivityState } from "../src/activities/engine.js";
-import { TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION } from "../src/activities/treasure-catalog.js";
+import { TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, TREASURE_STRENGTHEN_POOL_VERSION } from "../src/activities/treasure-catalog.js";
 import type { ActivityResult } from "../src/activities/service.js";
 import type { ActivityAction, ActivityReward, ActivityState } from "../src/activities/types.js";
 import { q, q1 } from "../src/lib/db.js";
@@ -155,6 +155,24 @@ async function treasureTemplatesFixture() {
     .map(row => row.TemplateID)).toEqual(TREASURE_IDS);
 }
 async function treasureReady() { await treasureTemplatesFixture(); futureTreasureEvidence.ready = true; }
+async function treasureHonorReady(issued = true) {
+  const fixture = JSON.parse(readFileSync(new URL("./fixtures/treasure-compose-honor.json",import.meta.url),"utf8")) as {
+    goods: (Omit<typeof game.Shop_Goods.$inferSelect,"AddTime"> & {AddTime:string|null})[];
+    boxes: typeof game.Shop_Goods_Box.$inferSelect[];
+  };
+  const item = fixture.goods.find(row=>row.TemplateID===11917)!;
+  await monitor.db.delete(game.Shop_Goods).where(sql`${game.Shop_Goods.TemplateID}=11917`);
+  await monitor.db.insert(game.Shop_Goods).values({...item,AddTime:item.AddTime===null?null:new Date(item.AddTime+"Z")});
+  await monitor.db.delete(game.Shop_Goods_Box).where(sql`${game.Shop_Goods_Box.ID}=11917`);
+  await monitor.db.insert(game.Shop_Goods_Box).values(fixture.boxes);
+  const entry=TREASURE_ENTRIES.find(row=>row.templateId===11917)!,dir=join(output,"resource","image","unfrightprop",entry.pic);
+  mkdirSync(dir,{recursive:true});writeFileSync(join(dir,"icon.png"),Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==","base64"));
+  for(const app of [appA,appB])for(const tree of app.ctx.resources.trees)tree.reindex();
+  if(issued)await editState(uid,state=>{state.games.treasure={version:2,bag:[{templateId:11917,count:10,validDays:0,origin:"original-catalog",
+    entryKey:entry.entryKey,sourceOriginalIndex:entry.sourceOriginalIndex,poolVersion:TREASURE_STRENGTHEN_POOL_VERSION}],
+    draws:1,score:1,fragments:1,pity:0,choices:["强化石1级"],claimed:[],tickets:{normal:0,advanced:0}};});
+  return fixture.boxes[0]!;
+}
 async function treasureLegacyBag(bag: ActivityReward[]) {
   await treasureSeed();
   await editState(uid, state => { state.games.treasure = { bag, draws: bag.length, score: bag.length * 2, fragments: bag.length,
@@ -639,6 +657,58 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(final.receipts.length-recycleBefore.receipts.length).toBe(1);expect((await snapshot()).nativeTreasure.bag).toEqual([]);
     const replay=await action("treasure-native",value,id,appB);expect(replay).toMatchObject({replayed:true,points:1004});
     expect(replay).not.toHaveProperty("nativeTreasureAction");expect(await saved()).toEqual(final);expect(random.calls).toBe(0);passed++;
+  });
+  it("waits for a real honor-recipe writer, refuses its changed reward and preserves the same issued UUID for repair",async()=>{
+    await treasureSeed();await treasureHonorReady();
+    const id=randomUUID(),value={type:"take",choice:(await snapshot()).nativeTreasure.bagToken},before=await saved();
+    const failed=await treasureLockWait("treasure-honor-recipe-writer-recheck",
+      sql`UPDATE game."Shop_Goods_Box" SET "ItemCount"=501 WHERE "ID"=11917`,
+      ()=>post(appA,"treasure-native",value,id),'LOCK TABLE game."Shop_Goods_Box" IN SHARE MODE',async()=>{
+        expect(random.calls).toBe(0);
+        await expect(b.db.transaction(tx=>tx.execute(sql`SELECT "UserID" FROM app."ActivityWallet" WHERE "UserID"=${uid} FOR UPDATE NOWAIT`)))
+          .rejects.toMatchObject({cause:{code:"55P03"}});
+      });
+    expect(failed.statusCode,failed.body).toBe(503);expect(await saved()).toEqual(before);
+    await monitor.db.execute(sql`UPDATE game."Shop_Goods_Box" SET "ItemCount"=500 WHERE "ID"=11917`);
+    const retry=await race("treasure-honor-recipe-same-uuid-repaired",duplicates("treasure-native",value,id));
+    duplicateResults(retry,"nativeTreasureAction");const final=await saved();
+    expect(final.goods.map(row=>[row.TemplateID,row.Count])).toEqual([[11917,10]]);
+    expect(final.mails).toHaveLength(1);expect(await wallet()).toEqual({Points:1000,Revision:1});expect(random.calls).toBe(0);passed++;
+  });
+  it("holds the honor configuration table through receipt COMMIT, blocking update, deletion and phantom insertion",async()=>{
+    await treasureSeed();const recipe=await treasureHonorReady();
+    const value={type:"take",choice:(await snapshot()).nativeTreasure.bagToken};
+    const result=await treasureLockWait("treasure-honor-heap-phantom-held-through-commit",sql`LOCK TABLE app."ActivityActions" IN SHARE MODE`,
+      ()=>post(appA,"treasure-native",value),'INSERT INTO app."ActivityActions"',async()=>{
+        const writes=[sql`UPDATE game."Shop_Goods_Box" SET "ItemCount"=501 WHERE "ID"=11917`,
+          sql`DELETE FROM game."Shop_Goods_Box" WHERE "ID"=11917`,
+          sql`INSERT INTO game."Shop_Goods_Box" SELECT * FROM game."Shop_Goods_Box" WHERE "ID"=11917`];
+        for(const write of writes)await expect(b.db.transaction(async tx=>{await tx.execute(sql`SET LOCAL lock_timeout = '100ms'`);await tx.execute(write);}))
+          .rejects.toMatchObject({cause:{code:"55P03"}});
+        expect(await monitor.db.select().from(game.Shop_Goods_Box).where(sql`${game.Shop_Goods_Box.ID}=11917`)).toEqual([recipe]);
+      });
+    expect(result.statusCode,result.body).toBe(200);const final=await saved();expect(final.goods).toHaveLength(1);expect(final.receipts).toHaveLength(1);
+    // All three DML classes can acquire the table only after the action committed; roll them back here.
+    const released=new Error("rollback post-commit probe");
+    await expect(b.db.transaction(async tx=>{await tx.execute(sql`SET LOCAL lock_timeout = '100ms'`);
+      await tx.execute(sql`UPDATE game."Shop_Goods_Box" SET "ItemCount"=501 WHERE "ID"=11917`);
+      await tx.execute(sql`INSERT INTO game."Shop_Goods_Box" SELECT * FROM game."Shop_Goods_Box" WHERE "ID"=11917`);
+      await tx.execute(sql`DELETE FROM game."Shop_Goods_Box" WHERE "ID"=11917`);throw released;})).rejects.toBe(released);
+    expect(await saved()).toEqual(final);expect(random.calls).toBe(0);passed++;
+  });
+  it.each(["draw","buy-tickets"] as const)("refreshes %s business time after the honor table wait crosses UTC",async(type)=>{
+    vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date(day+"T23:59:59Z"));
+    await treasureSeed();await treasureReady();await treasureHonorReady(false);
+    const id=randomUUID(),value=type==="draw"?await treasureDraw():await treasureTicketPurchase(),before=await saved();
+    const tomorrow=new Date(Date.parse(day+"T00:00:00Z")+86400000).toISOString().slice(0,10);
+    const failed=await treasureLockWait(`treasure-honor-table-${type}-midnight`,sql`LOCK TABLE game."Shop_Goods_Box" IN ROW EXCLUSIVE MODE`,
+      ()=>post(appA,"treasure-native",value,id),'LOCK TABLE game."Shop_Goods_Box" IN SHARE MODE',async()=>{
+        expect(random.calls).toBe(0);vi.setSystemTime(new Date(tomorrow+"T00:00:01Z"));});
+    expect(failed.statusCode,failed.body).toBe(400);expect(failed.json().message).toContain("日期已更新");
+    expect(await saved()).toEqual(before);expect(random.calls).toBe(0);
+    const retry=await action("treasure-native",{...value,choice:(await snapshot()).nativeTreasure.bagToken},id);
+    expect(retry.day).toBe(tomorrow);expect(retry.revision).toBe(1);expect(retry.points).toBe(970);
+    expect((await saved()).receipts).toHaveLength(1);expect(random.calls).toBe(type==="draw"?1:0);passed++;
   });
   it("locks the real full 157-target Treasure catalog before RNG and keeps every blocked draw free of charges, mail or receipts", async () => {
     await treasureSeed();await treasureTemplatesFixture();expect(futureTreasureEvidence.ready).toBe(false);

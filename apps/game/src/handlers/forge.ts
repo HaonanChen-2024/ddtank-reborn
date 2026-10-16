@@ -14,7 +14,7 @@ import type { Templates } from "../db/templates.js";
 import type { ServerContext } from "../session/context.js";
 import type { HandlerRegistry } from "./registry.js";
 import { mailItems } from "./items.js";
-import { getEquipControl } from "../db/consortia.js";
+import { getConsortia, getEquipControl } from "../db/consortia.js";
 import { saveItem } from "../db/items.js";
 import { personalRiches, smithBonusLevel } from "../game/consortia.js";
 import { pushRecords } from "./events.js";
@@ -364,54 +364,83 @@ export async function strengthen(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
  * - `ok`: `1`=falha, `0`=sucesso (`prob > rand` grava `item[key]=stone.Property4`).
  * - `out`: `GSPacket(58, p.id)` de resposta com `writeByte(ok)`.
  */
-export async function compose(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+/** Only the selected workbench cells participate; a matching spare stack is not a material. */
+function composeInputs(ctx: ServerContext, p: GamePlayer, now: Date) {
   const mustGold = ctx.templates.cfgInt("PRICE_COMPOSE_GOLD", 1600);
-  if (bagLocked(ctx, p)) return;
-  if (p.info.Gold < mustGold) return p.sendMessage(1, ctx.lang.t("ItemComposeHandler.NoMoney"));
-  const useGuild = pkt.readBoolean();
-  const store = p.storeBag;
-  const item = store.getItemAt(1);
-  const stone = store.getItemAt(2);
-  if (!item || !stone || stone.Count <= 0) return p.sendMessage(1, ctx.lang.t("ItemComposeHandler.Msg"));
+  const store = p.storeBag, item = store.getItemAt(1), stone = store.getItemAt(2);
+  const valid = (it: ItemInfo, slot: number) => it.IsExist && it.UserID === p.id && it.BagType === store.bagType && it.Place === slot &&
+    !it.cellLocked && it.isValidItem(now) && Number.isSafeInteger(it.Count) && it.Count > 0 && it.Count <= 2_147_483_647 && ctx.templates.findItem(it.TemplateID) === it.template;
+  if (!Number.isFinite(now.getTime()) || !store.saveToDb || !Number.isSafeInteger(mustGold) || mustGold < 0 || mustGold > 2_147_483_647 ||
+      !Number.isSafeInteger(p.info.Gold) || p.info.Gold < 0 || p.info.Gold > 2_147_483_647) return "合成金币配置无效，请保留物品并检查配置。";
+  if (p.info.Gold < mustGold) return ctx.lang.t("ItemComposeHandler.NoMoney");
+  if (!item || !stone || stone.Count <= 0) return ctx.lang.t("ItemComposeHandler.Msg");
   // Port: the stone must be a compose stone (cat 11, Property1 1); the C# only checked it for items of category >= 10.
-  if (!item.template.CanCompose || !(stone.template.CategoryID === 11 && stone.template.Property1 === 1)) {
-    return p.sendMessage(0, ctx.lang.t("ItemComposeHandler.Fail"));
-  }
+  if (!item.template.CanCompose || !(stone.template.CategoryID === 11 && stone.template.Property1 === 1)) return ctx.lang.t("ItemComposeHandler.Fail");
   const luckIt = store.getItemAt(0);
   const luck = luckIt && luckIt.template.CategoryID === 11 && luckIt.template.Property1 === 3 ? luckIt : null;
-  const isBinds = item.IsBinds || stone.IsBinds || !!luck?.IsBinds;
-  // ItemComposeHandler.cs:105-130: guild smith multiplies the rate by (1 + 0.1 × SmithLevel); refused without riches
-  let smith = 0;
-  if (useGuild) {
-    const th = p.info.ConsortiaID ? await getEquipControl(ctx.db.db, p.info.ConsortiaID, 0, 2) : undefined;
-    const sb = smithBonusLevel(true, p.info.ConsortiaID !== 0, p.info.SmithLevel, personalRiches(p.info), th);
-    if (sb.denied) return p.sendMessage(1, ctx.lang.t("ItemStrengthenHandler.FailbyPermission"));
-    smith = sb.level;
-  }
-  const prob = composeChance(stone.template.Quality, luck ? luck.template.Property2 : null, smith);
-  const rand = Math.floor(rnd() * 100);
+  if (!valid(item, 1) || item.Count !== 1 || !valid(stone, 2) ||
+      !Number.isInteger(stone.template.Quality) || stone.template.Quality < 1 || stone.template.Quality > COMPOSE_RATE.length ||
+      !Number.isInteger(stone.template.Property4) || stone.template.Property4 < 0 || stone.template.Property4 > 2_147_483_647 ||
+      (luck && (!valid(luck, 0) || !Number.isInteger(luck.template.Property2) || luck.template.Property2 < 0))) return "合成装备或材料状态无效，请保留物品并重试。";
   const key = ({ 1: "AttackCompose", 2: "DefendCompose", 3: "AgilityCompose", 4: "LuckCompose" } as const)[stone.template.Property3 as 1 | 2 | 3 | 4];
-  if (!key || !(stone.template.Property4 > item[key])) return p.sendMessage(0, ctx.lang.t("ItemComposeHandler.NoLevel"));
-  let ok = 1;
-  if (prob > rand) {
-    ok = 0;
-    item[key] = stone.template.Property4;
-  }
-  item.IsBinds = isBinds;
-  store.beginChanges();
-  try {
-    store.removeTemplate(stone.TemplateID, 1);
-    if (luck) store.removeTemplate(luck.TemplateID, 1);
-    store.updateItem(item);
-  } finally {
-    store.commitChanges();
-  }
-  p.removeGold(mustGold);
-  if (ok === 0) p.questInv?.onItemCompose(stone.TemplateID);
-  const out = new GSPacket(58, p.id);
-  out.writeByte(ok);
-  p.send(out);
-  p.updatePlayerProperties();
+  if (!key || !Number.isSafeInteger(item[key]) || item[key] < 0 || !(stone.template.Property4 > item[key])) return ctx.lang.t("ItemComposeHandler.NoLevel");
+  return { item, stone, luck, luckP2: luck?.template.Property2 ?? (luckIt ? 0 : null), key, mustGold };
+}
+
+export async function compose(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+  const reject = (message = "合成保存失败，装备、材料和金币未改变，请稍后重试。", type = 0) => p.sendMessage(type, message);
+  const invalid = (message: string) => reject(message, [ctx.lang.t("ItemComposeHandler.NoMoney"), ctx.lang.t("ItemComposeHandler.Msg")].includes(message) ? 1 : 0);
+  if (pkt.length - pkt.offset !== 1) return reject("合成请求无效。");
+  const useGuild = pkt.readBoolean();
+  return p.withPersistenceLock(async () => {
+    if (!p.isActive || p.quitting || p.currentRoom?.IsPlaying) return reject("当前不能合成，请返回大厅后重试。");
+    if (bagLocked(ctx, p)) return;
+    const initial = composeInputs(ctx, p, ctx.now());
+    if (typeof initial === "string") return invalid(initial);
+    let message: string | undefined, deniedGuild = false, missingGuild = false;
+    let result: { success: boolean; stoneId: number } | null = null, notificationError: unknown;
+    try {
+      result = await commitPlayerMutation(ctx, p, async (db, staged, now) => {
+        if (!p.isActive || p.quitting || p.currentRoom?.IsPlaying || (staged.info.HasBagPassword && staged.info.IsLocked)) return null;
+        const input = composeInputs(ctx, staged, now);
+        if (typeof input === "string") { message = input; return null; }
+        const { item, stone, luck, luckP2, key, mustGold } = input, store = staged.storeBag;
+        let smith = 0;
+        if (useGuild) {
+          const guild = await getConsortia(db, staged.info.ConsortiaID);
+          if (!guild) missingGuild = true; // C#: missing guild is a notice, not a rejected attempt.
+          else {
+            const threshold = await getEquipControl(db, staged.info.ConsortiaID, 0, 2);
+            const bonus = smithBonusLevel(true, true, guild.SmithLevel, personalRiches(staged.info), threshold);
+            if (bonus.denied) { deniedGuild = true; return null; }
+            smith = bonus.level;
+          }
+        }
+        if (!Number.isSafeInteger(smith) || smith < 0) { message = "公会合成配置无效。"; return null; }
+        const sample = rnd();
+        if (!Number.isFinite(sample) || sample < 0 || sample >= 1) { message = "合成随机结果无效，请重试。"; return null; }
+        const success = composeChance(stone.template.Quality, luckP2, smith) > Math.floor(sample * 100);
+        if (success) item[key] = stone.template.Property4;
+        item.IsBinds ||= stone.IsBinds || !!luck?.IsBinds;
+        if (!store.removeCountFromStack(stone, 1) || (luck && !store.removeCountFromStack(luck, 1))) throw new Error("Compose material changed");
+        store.updateItem(item);
+        staged.removeGold(mustGold);
+        return { value: { success, stoneId: stone.TemplateID } };
+      });
+    } catch (error) {
+      if (error instanceof PlayerMutationCommittedError) { result = error.value as NonNullable<typeof result>; notificationError = error; }
+      else { ctx.log.error("Compose transaction failed", error); return reject(); }
+    }
+    if (missingGuild) { try { p.sendMessage(0, ctx.lang.t("ItemStrengthenHandler.Fail")); } catch (error) { notificationError ??= error; } }
+    if (deniedGuild) return reject(ctx.lang.t("ItemStrengthenHandler.FailbyPermission"), 1);
+    if (!result) return message ? invalid(message) : reject();
+    const committed = result;
+    const notify = (work: () => void) => { try { work(); } catch (error) { notificationError ??= error; } };
+    if (committed.success) notify(() => p.questInv?.onItemCompose(committed.stoneId));
+    notify(() => { const out = new GSPacket(58, p.id); out.writeByte(committed.success ? 0 : 1); p.send(out); });
+    notify(() => p.updatePlayerProperties());
+    if (notificationError) throw notificationError;
+  });
 }
 
 /**

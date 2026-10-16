@@ -1,12 +1,13 @@
 /**
  * Using items from the bag: 63 ITEM_OPENUP (boxes), 183 CARD_USE (buff / GP / VIP cards), 124 CHANGE_PLACE_GOODS_ALL
  * (sort), 60 ITEM_HIDE, 42 DELETE_GOODS (no-op like the original). 01 §3/§4.
- * Idempotency: every handler consumes the item it reads before granting anything, and a repeated packet finds the
- * slot empty (or the stack smaller), so it cannot duplicate.
+ * Packet 63 commits consumption and rewards atomically. It has no request UUID: a new packet against a remaining
+ * stack is a new opening, not an idempotent replay. Other handlers retain their separate consumption contracts.
  */
 import { consortiaMgr } from "../game/consortia-mgr.js";
 import { GSPacket } from "@ddt/protocol";
 import { ItemInfo, templateBagType } from "../game/item.js";
+import { commitPlayerMutation, PlayerMutationCommittedError } from "../game/player-transaction.js";
 import type { GamePlayer } from "../game/player.js";
 import type { ItemBoxRow, Templates } from "../db/templates.js";
 import type { BuffRow } from "../db/social.js";
@@ -51,65 +52,103 @@ export function createItemBox(rows: ItemBoxRow[] | undefined, rnd = Math.random)
   return r;
 }
 
-/** OpenUpArkHandler.cs (63): byte bag, int slot, int count. */
-export function openBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): void {
-  const bag = p.getInventory(pkt.readByte());
-  const slot = pkt.readInt();
-  let num = pkt.readInt();
-  const it = bag?.getItemAt(slot);
-  if (!bag || !it || !it.isValidItem(ctx.now()) || it.template.CategoryID !== 11 || it.template.Property1 !== 6 || p.info.Grade < it.template.NeedLevel) return;
-  if (num < 1 || num > it.Count) num = it.Count;
-  const tpl: Templates = ctx.templates;
-  const rows = tpl.itemBoxes.get(it.TemplateID);
-  if (!rows?.length) return p.sendMessage(0, ctx.lang.t("OpenUpArkHandler.NoBox") === "OpenUpArkHandler.NoBox" ? "Esta caixa não tem itens." : ctx.lang.t("OpenUpArkHandler.NoBox"));
-  const name = it.template.Name ?? "";
-  if (!bag.removeCountFromStack(it, num)) return; // consume first (anti-dupe)
-  const tot = { gold: 0, money: 0, giftToken: 0, medal: 0, exp: 0, honor: 0, hardCurrency: 0 };
-  const merged = new Map<number, { row: ItemBoxRow; count: number }>();
-  for (let i = 0; i < num; i++) {
-    const r = createItemBox(rows, rnd);
-    if (!r) continue;
-    for (const k of Object.keys(tot) as (keyof typeof tot)[]) tot[k] += r[k];
-    for (const x of r.items) {
-      const m = merged.get(x.row.TemplateId);
-      if (m) m.count += x.count;
-      else merged.set(x.row.TemplateId, { row: x.row, count: x.count });
+/** OpenUpArkHandler.cs (63): byte bag, int slot, int count; CanUse is deliberately not required. */
+export async function openBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, rnd = Math.random): Promise<void> {
+  const reject = (message = "开箱保存失败，箱子和奖励未改变，请稍后重试。") => p.sendMessage(0, message);
+  if (pkt.length - pkt.offset !== 9) return reject("开箱请求无效。");
+  const bagType = pkt.readByte(), slot = pkt.readInt(), requested = pkt.readInt();
+  return p.withPersistenceLock(async () => {
+    const permitted = () => p.isActive && !p.quitting && !p.currentRoom?.IsPlaying && !(p.info.HasBagPassword && p.info.IsLocked);
+    if (!permitted()) return reject("当前不能打开箱子，请先返回大厅并解锁背包。");
+    let message: string | undefined;
+    type Opened = { templateId: number; name: string; total: number; what: string; items: { row: ItemBoxRow; count: number }[] };
+    let result: Opened | null = null, notificationError: unknown;
+    try {
+      result = await commitPlayerMutation(ctx, p, async (_db, staged, now) => {
+        if (!permitted()) return null;
+        const bag = staged.getInventory(bagType), it = bag?.getItemAt(slot), tpl = ctx.templates;
+        const integer = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= 2_147_483_647;
+        if (!Number.isFinite(now.getTime()) || !bag?.saveToDb || !it || it.cellLocked || !it.IsExist || it.UserID !== p.id || it.Place !== slot || it.BagType !== bagType ||
+            !it.isValidItem(now) || !integer(it.Count) || it.Count < 1 || tpl.findItem(it.TemplateID) !== it.template ||
+            it.template.CategoryID !== 11 || it.template.Property1 !== 6 || staged.info.Grade < it.template.NeedLevel) return null;
+        const rows = tpl.itemBoxes.get(it.TemplateID);
+        if (!rows?.length) { message = "箱子奖励配置缺失，箱子已保留。"; return null; }
+        // Validate every possible award before rolling. Unsupported currencies or
+        // missing item templates must never turn a consumed box into a lost reward.
+        const currency = new Set([-1100, -900, -800, -300, -200, -100, 11107]);
+        if (rows.some(row => row.ID !== it.TemplateID || !integer(row.ItemCount) || !integer(row.Random) ||
+          ![row.ItemValid, row.StrengthenLevel, row.AttackCompose, row.DefendCompose, row.AgilityCompose, row.LuckCompose].every(integer) ||
+          (!currency.has(row.TemplateId) && (row.TemplateId < 0 || !tpl.findItem(row.TemplateId) || !integer(tpl.findItem(row.TemplateId)!.MaxCount) || tpl.findItem(row.TemplateId)!.MaxCount < 1)))) {
+          message = "箱子奖励尚未配置完整，箱子已保留。"; return null;
+        }
+        const num = requested < 1 || requested > it.Count ? it.Count : requested;
+        const tot = { gold: 0, money: 0, giftToken: 0, medal: 0, exp: 0, honor: 0, hardCurrency: 0 };
+        const merged = new Map<number, { row: ItemBoxRow; count: number }>();
+        for (let i = 0; i < num; i++) {
+          const r = createItemBox(rows, () => {
+            const sample = rnd();
+            if (!Number.isFinite(sample) || sample < 0 || sample >= 1) throw new Error("Invalid box random result");
+            return sample;
+          })!;
+          for (const k of Object.keys(tot) as (keyof typeof tot)[]) tot[k] += r[k];
+          for (const x of r.items) {
+            const m = merged.get(x.row.TemplateId);
+            if (m) m.count += x.count;
+            else merged.set(x.row.TemplateId, { row: x.row, count: x.count });
+          }
+        }
+        if (merged.size > 255 || !Object.values(tot).every(integer) || [...merged.values()].some(x => !integer(x.count))) return null;
+        for (const [amount, current] of [[tot.money, staged.info.Money], [tot.gold, staged.info.Gold], [tot.giftToken, staged.info.GiftToken],
+          [tot.honor, staged.info.myHonor], [tot.hardCurrency, staged.info.hardCurrency], [tot.exp, staged.info.GP]]) {
+          if (amount && (!integer(current!) || !integer(current! + amount!))) { message = "奖励数量超过可保存上限，箱子已保留。"; return null; }
+        }
+        if (tot.medal && (!tpl.findItem(11408) || !integer(tpl.findItem(11408)!.MaxCount) || tpl.findItem(11408)!.MaxCount < 1)) { message = "勋章奖励配置缺失，箱子已保留。"; return null; }
+        if (!bag.removeCountFromStack(it, num)) return null;
+        const overflow: ItemInfo[] = [];
+        const grant = (t: NonNullable<ReturnType<Templates["findItem"]>>, count: number, row?: ItemBoxRow) => {
+          for (let remaining = count; remaining > 0;) {
+            const n = Math.min(remaining, t.MaxCount), x = ItemInfo.createFromTemplate(t, n, 101, now);
+            if (row) {
+              x.IsBinds = row.IsBind; x.ValidDate = row.ItemValid; x.StrengthenLevel = row.StrengthenLevel;
+              x.AttackCompose = row.AttackCompose; x.DefendCompose = row.DefendCompose; x.AgilityCompose = row.AgilityCompose; x.LuckCompose = row.LuckCompose;
+            }
+            if (!staged.addTemplateToBag(x, templateBagType(t), n)) overflow.push(x);
+            remaining -= n;
+          }
+        };
+        let total = 0, what = "";
+        if (tot.money) { total += tot.money; what = ctx.lang.t("OpenUpArkHandler.Money"); staged.addMoney(tot.money); }
+        if (tot.gold) { total += tot.gold; what = ctx.lang.t("OpenUpArkHandler.Gold"); staged.addGold(tot.gold); }
+        if (tot.giftToken) { total += tot.giftToken; what = ctx.lang.t("OpenUpArkHandler.GiftToken"); staged.addGiftToken(tot.giftToken); }
+        if (tot.medal) { total += tot.medal; what = ctx.lang.t("OpenUpArkHandler.Medal"); grant(tpl.findItem(11408)!, tot.medal); }
+        if (tot.honor) { total += tot.honor; what = ctx.lang.t("OpenUpArkHandler.honor"); staged.addHonor(tot.honor); }
+        if (tot.hardCurrency) { total += tot.hardCurrency; what = ctx.lang.t("OpenUpArkHandler.hardCurrency"); staged.addHardCurrency(tot.hardCurrency); }
+        if (tot.exp) { total += tot.exp; what = ctx.lang.t("OpenUpArkHandler.Exp"); staged.addGP(tot.exp, false); }
+        for (const x of merged.values()) grant(tpl.findItem(x.row.TemplateId)!, x.count, x.row);
+        return { value: { templateId: it.TemplateID, name: it.template.Name ?? "", total, what, items: [...merged.values()] }, overflow, mailTitle: "开箱奖励" };
+      });
+    } catch (error) {
+      if (error instanceof PlayerMutationCommittedError) { result = error.value as Opened; notificationError = error; }
+      else { ctx.log.error("Open box transaction failed", error); return reject(); }
     }
-  }
-  p.beginChanges();
-  let total = 0;
-  let what = "";
-  if (tot.money) { total += tot.money; what = ctx.lang.t("OpenUpArkHandler.Money"); p.addMoney(tot.money); }
-  if (tot.gold) { total += tot.gold; what = ctx.lang.t("OpenUpArkHandler.Gold"); p.addGold(tot.gold); }
-  if (tot.giftToken) { total += tot.giftToken; what = ctx.lang.t("OpenUpArkHandler.GiftToken"); p.addGiftToken(tot.giftToken); }
-  if (tot.medal) { total += tot.medal; what = ctx.lang.t("OpenUpArkHandler.Medal"); p.addMedal(tot.medal, tpl.findItem); }
-  if (tot.honor) { total += tot.honor; what = ctx.lang.t("OpenUpArkHandler.honor"); p.addHonor(tot.honor); }
-  if (tot.hardCurrency) { total += tot.hardCurrency; what = ctx.lang.t("OpenUpArkHandler.hardCurrency"); p.addHardCurrency(tot.hardCurrency); }
-  if (tot.exp) { total += tot.exp; what = ctx.lang.t("OpenUpArkHandler.Exp"); p.addGP(tot.exp, false); }
-  p.commitChanges();
-  if (total > 0) p.sendMessage(0, `${ctx.lang.t("OpenUpArkHandler.Start")}${total}${what}.`);
-  if (merged.size) {
-    const out = new GSPacket(63, p.id);
-    out.writeString(name);
-    out.writeByte(merged.size);
-    for (const { row, count } of merged.values()) {
-      out.writeInt(row.TemplateId); out.writeInt(count); out.writeBoolean(row.IsBind); out.writeInt(row.ItemValid);
-      out.writeInt(row.StrengthenLevel); out.writeInt(row.AttackCompose); out.writeInt(row.DefendCompose);
-      out.writeInt(row.AgilityCompose); out.writeInt(row.LuckCompose);
-      const t = tpl.findItem(row.TemplateId);
-      if (!t) continue;
-      const make = (n: number) => {
-        const x = ItemInfo.createFromTemplate(t, n, 101, ctx.now());
-        x.IsBinds = row.IsBind; x.ValidDate = row.ItemValid; x.StrengthenLevel = row.StrengthenLevel;
-        x.AttackCompose = row.AttackCompose; x.DefendCompose = row.DefendCompose; x.AgilityCompose = row.AgilityCompose; x.LuckCompose = row.LuckCompose;
-        return x;
-      };
-      if (t.MaxCount < 2) for (let i = 0; i < count; i++) p.addTemplateToBag(make(1), templateBagType(t), 1);
-      else p.addTemplateToBag(make(count), templateBagType(t), count);
-    }
-    p.send(out);
-  }
-  p.questInv?.onUsingItem(it.TemplateID); void consortiaMgr(ctx).then((c) => c.onUseItem(p, it.TemplateID, 1));
+    if (!result) { if (message) reject(message); return; }
+    const committed = result;
+    const notify = (work: () => void) => { try { work(); } catch (error) { notificationError ??= error; } };
+    if (committed.total > 0) notify(() => p.sendMessage(0, `${ctx.lang.t("OpenUpArkHandler.Start")}${committed.total}${committed.what}.`));
+    if (committed.items.length) notify(() => {
+      const out = new GSPacket(63, p.id); out.writeString(committed.name); out.writeByte(committed.items.length);
+      for (const { row, count } of committed.items) {
+        out.writeInt(row.TemplateId); out.writeInt(count); out.writeBoolean(row.IsBind); out.writeInt(row.ItemValid);
+        out.writeInt(row.StrengthenLevel); out.writeInt(row.AttackCompose); out.writeInt(row.DefendCompose); out.writeInt(row.AgilityCompose); out.writeInt(row.LuckCompose);
+      }
+      p.send(out);
+    });
+    // Existing TS quest/guild hooks are post-commit; they are not part of the
+    // ordinary profile/items SQL transaction and must not run on rollback.
+    notify(() => p.questInv?.onUsingItem(committed.templateId));
+    if (p.info.ConsortiaID > 0) void consortiaMgr(ctx).then(c => c.onUseItem(p, committed.templateId, 1)).catch(error => ctx.log.error("Open box guild notification failed", error));
+    if (notificationError) throw notificationError;
+  });
 }
 
 /** BufferList.CreateBuffer(template, validDate) + the per-type Start (GPMultipleBuffer etc.: same type extends time). */
