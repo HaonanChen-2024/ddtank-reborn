@@ -216,7 +216,7 @@ package {
    shopView.visible=true;renderShop();queueShopRefresh();
   }
   private function localShopRows():Array {
-   if(!projection||!projection.shop)return [];var rows:Array=[];for(var i:int=0;i<projection.shop.entries.length;i++){var entry:Object=projection.shop.entries[i];rows.push({index:entry.index,templateId:entry.templateId,sourceGoodsId:entry.sourceGoodsId,fragmentCost:entry.fragmentCost,itemCount:entry.itemCount,affordableCount:entry.affordableCount,canBuy:entry.canBuy,info:null});}return rows;
+   if(!projection||!projection.shop)return [];var rows:Array=[];for(var i:int=0;i<projection.shop.entries.length;i++){var entry:Object=projection.shop.entries[i];rows.push({index:entry.index,templateId:entry.templateId,sourceGoodsId:entry.sourceGoodsId,fragmentCost:entry.fragmentCost,itemCount:entry.itemCount,affordableCount:entry.affordableCount,canBuy:entry.canBuy});}return rows;
   }
   private function renderShop():void {
    if(!shopView||!projection)return;shopRows=localShopRows();var pages:int=Math.ceil(shopRows.length/9);shopPageNumber=pages===0?0:Math.max(1,Math.min(pages,shopPageNumber));shopView.chipCountTxt.text=String(projection.fragments);shopView.chipCountTxt.size=14;shopView.chipCountTxt.width=75;shopView.pageTxt.text=shopPageNumber+"/"+pages;shopView.pageTxt.size=14;
