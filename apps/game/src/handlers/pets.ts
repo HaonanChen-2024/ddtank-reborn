@@ -10,6 +10,7 @@ import {
 } from "../game/pets.js";
 import { moveOrEquipCard, upgradeCard, type CardUpdateRowFull } from "../game/cards.js";
 import { loadUserPets } from "../db/pets-cards.js";
+import { commitPlayerMutation, PlayerMutationCommittedError } from "../game/player-transaction.js";
 import { ItemInfo } from "../game/item.js";
 import { mailItems } from "./items.js";
 import * as Out from "../packets/out.js";
@@ -353,10 +354,70 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
   }
 }
 
+/** Caller owns the card packet, fight settlement and persistence barriers. */
+async function openCardBox(ctx: ServerContext, p: GamePlayer, slot: number, count: number): Promise<void> {
+  let message: string | undefined;
+  try {
+    await commitPlayerMutation(ctx, p, async (_db, staged, now) => {
+      if (ctx.world.get(p.id) !== p || !p.isActive || p.quitting) return null;
+      const it = staged.equipBag.getItemAt(slot);
+      const card = it ? ctx.templates.findItem(it.template.Property5) : undefined;
+      const integer = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= 2_147_483_647;
+      if (!it || !it.IsExist || it.UserID !== p.id || it.Place !== slot || it.BagType !== staged.equipBag.bagType ||
+          it.cellLocked || (staged.info.HasBagPassword && staged.info.IsLocked) || !Number.isFinite(now.getTime()) || !it.isValidItem(now) ||
+          !integer(it.Count) || it.Count < 1 || it.Count > it.template.MaxCount || count <= 0 || count > it.Count ||
+          ctx.templates.findItem(it.TemplateID) !== it.template || !card || card.CategoryID !== 26) {
+        message = "卡盒请求无效，请检查背包和卡片配置。"; return null;
+      }
+      const existing = staged.cardBag.getByTemplate(card.TemplateID);
+      if (!existing && staged.cardBag.findFirstEmptySlot() < 0) {
+        message = "卡片背包已满，请先整理卡片，卡盒已保留。"; return null;
+      }
+      // Original 216/2 validates requested count but opens the entire selected
+      // stack. Random.Next(1,3) adds one or two to each box's initial one card.
+      const n = it.Count;
+      let total = n;
+      for (let i = 0; i < n; i++) {
+        const sample = Math.random();
+        if (!Number.isFinite(sample) || sample < 0 || sample >= 1) throw new Error("Invalid card box random result");
+        total += 1 + Math.floor(sample * 2);
+      }
+      if (!integer(total) || (existing && (!integer(existing.Count) || !integer(existing.Count + total)))) {
+        message = "卡片数量超过可保存上限，卡盒已保留。"; return null;
+      }
+      if (!staged.cardBag.addCard(card.TemplateID, total) || !staged.equipBag.removeCountFromStack(it, n)) return null;
+      return { value: true };
+    }, { cards: true });
+  } catch (error) {
+    // Transport failure after COMMIT must never invite another award attempt.
+    if (error instanceof PlayerMutationCommittedError) throw error;
+    ctx.log.error("Card box transaction failed", error);
+    message = "卡盒保存失败，卡盒和卡片未改变，请稍后重试。";
+  }
+  if (message) p.sendMessage(0, message);
+}
+
 /** CardDataHandler (216): int cmd — 0 move/equip/unequip, 1 open vice slot, 2 open card box, 3 upgrade, 4 sort (no-op). */
-export function cardCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
-  const bag = p.cardBag;
+export function cardCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): Promise<void> {
+  if (pkt.length - pkt.offset < 4) return Promise.resolve();
   const cmd = pkt.readInt();
+  if (cmd === 2 && pkt.length - pkt.offset !== 8) {
+    p.sendMessage(0, "卡盒请求无效。"); return Promise.resolve();
+  }
+  return p.withWorldBossAward(() => {
+    const afterLease = (release?: () => void) => p.withPersistenceLock(async () => {
+      try {
+        if (ctx.world.get(p.id) !== p || !p.isActive || p.quitting) return;
+        await applyCardCommand(ctx, p, pkt, cmd);
+      } finally { release?.(); }
+    }).finally(() => release?.());
+    const game = p.currentRoom?.game;
+    return game?.holdWorldBossSettlement ? game.holdWorldBossSettlement().then(afterLease) : afterLease();
+  });
+}
+
+async function applyCardCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacket, cmd: number): Promise<void> {
+  const bag = p.cardBag;
   let stats = false;
   switch (cmd) {
     case 0: {
@@ -373,21 +434,10 @@ export function cardCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): v
       break;
     }
     case 2: {
-      // open a card box (EquipBag slot): Property5 = card template (category 26); count + rand(1,3) per box
       const slot = pkt.readInt();
       const count = pkt.readInt();
-      const it = p.equipBag.getItemAt(slot);
-      const card = it ? ctx.templates.findItem(it.template.Property5) : undefined;
-      if (!it || count <= 0 || count > it.Count || !card || card.CategoryID !== 26) {
-        p.sendMessage(0, "A carta não existe.");
-        return;
-      }
-      const n = it.Count;
-      if (!p.equipBag.removeCountFromStack(it, n)) return;
-      let total = n;
-      for (let i = 0; i < n; i++) total += 1 + Math.floor(Math.random() * 2);
-      bag.addCard(card.TemplateID, total);
-      break;
+      await openCardBox(ctx, p, slot, count);
+      return;
     }
     case 3: {
       const k = ctx.templates;
