@@ -11,7 +11,7 @@ import { GSPacket } from "@ddt/protocol";
 import { player as P } from "@ddt/db";
 import type { GamePlayer } from "../game/player.js";
 import type { ServerContext } from "../session/context.js";
-import { EventData, canCompleteAchievement, claimOnce, dayKey, grantRewards, insertAchievementData, monthKey, updateRecords, type Reward } from "../game/events.js";
+import { EventData, canCompleteAchievement, claimOnce, dayKey, grantRewards, hasClaim, insertAchievementData, monthKey, updateRecords, type Reward } from "../game/events.js";
 import { EventScheduler, loadScheduledEvents, type ActiveWindow } from "../game/scheduler.js";
 import { createItemBox } from "./use.js";
 import { mailItems } from "./items.js";
@@ -81,7 +81,7 @@ export class EventsRuntime {
         if (b.window?.key === w.key) return; // A failed start notification must not reset admitted damage.
         if (b.window) throw new Error("World boss window is still active or awaiting settlement");
         b.window = structuredClone(w); // Reward definitions cannot drift on a template reload.
-        b.name = String(prm.name ?? "Dragão Divino");
+        b.name = String(prm.name ?? "神龙");
         b.resourceId = String(prm.resourceId ?? "1");
         b.pveId = Number(prm.pveId ?? 1243);
         b.maxBlood = Number(prm.bossHp ?? 20_000_000);
@@ -92,13 +92,13 @@ export class EventsRuntime {
         b.settlement = null;
         this.bossAccess.clear();
         this.broadcast((p) => worldBossOpen(this, p));
-        this.broadcast(Out.message(1, String(prm.notice ?? `Boss mundial ${b.name} apareceu! Entre pelo ícone no hall.`)));
+        this.broadcast(Out.message(1, String(prm.notice ?? `世界首领${b.name}已出现！请通过大厅图标进入。`)));
         break;
       }
       case "league":
         this.leagueOpen = true;
         this.broadcast((p) => Out.leagueNotice(p.id, p.match.restCount ?? 0, Number(prm.maxCount ?? 10), 1));
-        this.broadcast(Out.message(1, "O Deus da Guerra começou, entre logo na sala para lutar!"));
+        this.broadcast(Out.message(1, "战神赛已开启，快进入房间战斗吧！"));
         break;
       case "elite":
         this.eliteStatus = Number(prm.status ?? 5);
@@ -109,7 +109,7 @@ export class EventsRuntime {
         break;
       case "double_exp":
       case "double_gold":
-        this.broadcast(Out.message(1, `${w.ev.title || w.ev.kind}: x${Number(prm.rate ?? 2)} até ${w.end.toISOString().slice(11, 16)} UTC.`));
+        this.broadcast(Out.message(1, `${w.ev.title || (w.ev.kind === "double_exp" ? "双倍经验" : "双倍金币")}：${Number(prm.rate ?? 2)}倍，持续至协调世界时${w.end.toISOString().slice(11, 16)}。`));
         break;
     }
     this.note(`start ${w.ev.kind} #${w.ev.id} ${w.start.toISOString()} → ${w.end.toISOString()}`);
@@ -241,7 +241,7 @@ async function finishWorldBoss(ctx: ServerContext, rt: EventsRuntime, w: ActiveW
     const rewards: Reward[] = [...(tier.items ?? [])];
     if (tier.giftToken) rewards.push({ templateId: -1100, count: tier.giftToken });
     if (tier.gold) rewards.push({ templateId: -100, count: tier.gold });
-    await awardWorldBoss(ctx, r.id, w.key, rewards, `Boss mundial: ${i + 1}º lugar (${r.damage} de dano).`);
+    await awardWorldBoss(ctx, r.id, w.key, rewards, `世界首领：第${i + 1}名（造成${r.damage}点伤害）。`);
   }
   const final = worldBossRanking(rt, true);
   const over = new GSPacket(102);
@@ -362,7 +362,7 @@ export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number
   switch (type) {
     case 0: {
       // AwardMgr.AddDailyAward: first Daily_Award Type 0 row -> buff (CreateBufferMinutes(template, ValidDate))
-      if (!(await claimOnce(db, p.id, "daily", day))) return p.sendMessage(0, t("GameUserDailyAward.Fail1", "Você já recebeu o prêmio de hoje."));
+      if (!(await claimOnce(db, p.id, "daily", day))) return p.sendMessage(0, t("GameUserDailyAward.Fail1", "你今天已领取奖励。"));
       p.info.DayLoginCount = (p.info.DayLoginCount ?? 0) + 1;
       p.info.LastAward = now;
       const row = rt.data.dailyAward.find((d) => d.Type === 0);
@@ -378,13 +378,13 @@ export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number
       }
       p.send(Out.dailyAward(now, now));
       pushRecords(p);
-      return p.sendMessage(0, `${t("GameUserDailyAward.Success", "Prêmio diário recebido!")}${tpl ? ` ${tpl.Name}` : ""}`);
+      return p.sendMessage(0, `${t("GameUserDailyAward.Success", "每日奖励领取成功！")}${tpl ? ` ${tpl.Name}` : ""}`);
     }
     case 2: {
-      if (!(await claimOnce(db, p.id, "egg", day))) return p.sendMessage(0, t("DailyAwardHandler.Msg2", "Você já recebeu 1 vez hoje!"));
+      if (!(await claimOnce(db, p.id, "egg", day))) return p.sendMessage(0, t("DailyAwardHandler.Msg2", "你今天已领取1次！"));
       p.info.LastGetEgg = now;
-      const s = await give(ctx, p, [{ templateId: 112059, count: 1 }], t("Workshop.Events.Egg.Title", "Ovo diário"));
-      return p.sendMessage(0, eventText(ctx, "Workshop.Events.Egg.Success", `${t("GameServer.DailyEggReceive.Success", "Ovo diário recebido:")} ${s}`, s));
+      const s = await give(ctx, p, [{ templateId: 112059, count: 1 }], t("Workshop.Events.Egg.Title", "每日彩蛋"));
+      return p.sendMessage(0, eventText(ctx, "Workshop.Events.Egg.Success", `${t("GameServer.DailyEggReceive.Success", "每日彩蛋领取成功：")} ${s}`, s));
     }
     case 3: {
       // VIP daily box: ItemMgr.FindItemBoxTypeAndLv(2, VIPLevel) = LoadUserBox Type 2, Level = VIP level
@@ -393,7 +393,7 @@ export async function dailyAward(ctx: ServerContext, p: GamePlayer, type: number
       if (!(await claimOnce(db, p.id, "vip", day))) {
         p.info.CanTakeVipReward = false;
         p.send(Out.openVip(p.info));
-        return p.sendMessage(0, t("DailyAwardHandler.Msg4", "Você já recebeu a recompensa de hoje!"));
+        return p.sendMessage(0, t("DailyAwardHandler.Msg4", "你今天已领取奖励！"));
       }
       const s = await openBoxRewards(ctx, p, box.TemplateID, t("Workshop.Events.Vip.Title", "Caixa VIP"));
       // the client pops the VIP gift frame while CanTakeVipReward is set (ChecVipkExpireDay re-opens it the next day)
@@ -442,7 +442,7 @@ export async function signAward(ctx: ServerContext, p: GamePlayer, count: number
         const rewards: Reward[] = rt.data.dailyAward.filter((d) => d.AwardDays === count && (d.Type === 1 || d.Type === 7) && (d.Sex === 0 || d.Sex === (p.info.Sex ? 1 : 2)))
           .map((d) => (d.Type === 7 ? { templateId: -1100, count: d.Count } : { templateId: d.TemplateID, count: d.Count, validDate: d.ValidDate, isBind: d.IsBinds }));
         let rejection: "InvalidTier" | "NoRewards" | "NotReached" | "AlreadyReceived" | undefined;
-        const s = await grantClaimRewards(ctx, p, rewards, eventText(ctx, "Workshop.Events.SignAward.Title", "Prêmio de presença"), async (db, now) => {
+        const s = await grantClaimRewards(ctx, p, rewards, eventText(ctx, "Workshop.Events.SignAward.Title", "签到奖励"), async (db, now) => {
           if (!tiers.includes(count)) { rejection = "InvalidTier"; return false; }
           if (!rewards.length) { rejection = "NoRewards"; return false; }
           // The shared owner row is locked before this read, as in signIn.
@@ -456,16 +456,16 @@ export async function signAward(ctx: ServerContext, p: GamePlayer, count: number
           // Only an eligibility rejection returned by the owner transaction is a notice.
           // SQL/COMMIT/publication errors still propagate without a misleading refusal.
           const fallback = {
-            InvalidTier: "Recompensa de presença indisponível.",
-            NoRewards: "Nenhuma recompensa de presença disponível para este personagem.",
-            NotReached: "Dias de presença insuficientes para esta recompensa.",
-            AlreadyReceived: "Você já recebeu esta recompensa de presença neste mês.",
+            InvalidTier: "该档签到奖励暂不可用。",
+            NoRewards: "当前角色没有可领取的签到奖励。",
+            NotReached: "签到天数不足，无法领取该奖励。",
+            AlreadyReceived: "你本月已领取该档签到奖励。",
           };
           if (rejection && ctx.world.get(p.id) === p && p.isActive && !p.quitting)
             p.sendMessage(0, eventText(ctx, `Workshop.Events.SignAward.${rejection}`, fallback[rejection]));
           return false;
         }
-        p.sendMessage(0, eventText(ctx, "Workshop.Events.SignAward.Success", `Presente de presença diária recebido com sucesso! ${s}`, s));
+        p.sendMessage(0, eventText(ctx, "Workshop.Events.SignAward.Success", `签到奖励领取成功！${s}`, s));
         return true;
       } finally { release?.(); }
     }).finally(() => release?.());
@@ -515,7 +515,7 @@ export async function timeBox(ctx: ServerContext, p: GamePlayer, pkt: GSPacket):
   }
   if (ok && box) {
     const s = await openBoxRewards(ctx, p, box.TemplateID, eventText(ctx, "Workshop.Events.LevelBox.Title", "Caixa de tempo"));
-    p.sendMessage(0, `${eventText(ctx, "ActivityPackageHandler.ChickActivation.LevelAward.Msg", `Pacote de nível ${box.Level} recebido.`, box.Level)} ${s}`);
+    p.sendMessage(0, `${eventText(ctx, "ActivityPackageHandler.ChickActivation.LevelAward.Msg", `${box.Level}级礼包领取成功。`, box.Level)} ${s}`);
   } else if (boxType !== 0) p.sendMessage(0, ctx.lang.t("UserGetTimeBoxHandler.fail"));
   if (boxType === 0) {
     const out = new GSPacket(53, p.id);
@@ -557,7 +557,7 @@ export async function achievementFinish(ctx: ServerContext, p: GamePlayer, id: n
   out.writeInt(id); out.writeInt(now.getUTCFullYear()); out.writeInt(now.getUTCMonth() + 1); out.writeInt(now.getUTCDate());
   p.send(out);
   for (const name of titles) await grantTitle(ctx, p, name);
-  if (titles.length) p.sendMessage(0, `Título obtido: ${titles.join(", ")}`);
+  if (titles.length) p.sendMessage(0, `获得称号：${titles.join("、")}`);
   return true;
 }
 
@@ -569,9 +569,9 @@ export async function accumulativeLogin(ctx: ServerContext, p: GamePlayer, selec
     const rows = rt.data.loginAward.filter((r) => r.Type === day && (day < 7 || r.RewardItemID === selected));
     if (!rows.length) break;
     if (!(await claimOnce(ctx.db.db, p.id, "accaward", String(day)))) { c.accumulativeAwardDays = day; continue; }
-    const s = await give(ctx, p, rows.map((r) => ({ templateId: r.RewardItemID, count: r.RewardItemCount, validDate: r.RewardItemValid, isBind: r.IsBind, strengthenLevel: r.StrengthenLevel })), `Presente de ${day} dia(s) de login`);
+    const s = await give(ctx, p, rows.map((r) => ({ templateId: r.RewardItemID, count: r.RewardItemCount, validDate: r.RewardItemValid, isBind: r.IsBind, strengthenLevel: r.StrengthenLevel })), eventText(ctx, "Workshop.Events.AccumulativeLogin.Title", `Presente de ${day} dia(s) de login`, day));
     c.accumulativeAwardDays = day;
-    p.sendMessage(0, `Presente de ${day} dia(s) de login: ${s}`);
+    p.sendMessage(0, eventText(ctx, "Workshop.Events.AccumulativeLogin.Success", `Presente de ${day} dia(s) de login: ${s}`, day, s));
   }
   const out = new GSPacket(338, p.id);
   out.writeInt(c.accumulativeLoginDays ?? 0);
@@ -584,15 +584,23 @@ export async function firstRecharge(ctx: ServerContext, p: GamePlayer): Promise<
   const rt = eventsRuntime(ctx);
   const free = String(process.env.FIRST_RECHARGE_FREE ?? "true") !== "false";
   if (!free && !p.info.IsRecharged) return false;
-  if (p.info.IsGetAward || !(await claimOnce(ctx.db.db, p.id, "firstrecharge", "once"))) {
+  if (p.info.IsGetAward || await hasClaim(ctx.db.db, p.id, "firstrecharge", "once")) {
     p.sendMessage(0, ctx.lang.t("FirstRechargeGetAward.AlreadyGetAward"));
     return false;
   }
-  const goods = rt.data.eventGoods.filter((g) => g.ActivityType === 7 && g.SubActivityType === 1);
-  const s = await give(ctx, p, goods.map((g) => ({ templateId: g.TemplateId, count: g.Count ?? 1, validDate: g.ValidDate ?? 0, isBind: g.IsBind ?? true, strengthenLevel: g.StrengthLevel ?? 0, attack: g.AttackCompose ?? 0, defence: g.DefendCompose ?? 0, agility: g.AgilityCompose ?? 0, luck: g.LuckCompose ?? 0 })), "Presente da primeira recarga");
+  const goods = rt.data.firstRechargeGoods(ctx.templates.findItem);
+  if (!goods) {
+    p.sendMessage(0, eventText(ctx, "Workshop.Events.FirstRecharge.Unavailable", "礼包暂不可用。"));
+    return false;
+  }
+  if (!(await claimOnce(ctx.db.db, p.id, "firstrecharge", "once"))) {
+    p.sendMessage(0, ctx.lang.t("FirstRechargeGetAward.AlreadyGetAward"));
+    return false;
+  }
+  const s = await give(ctx, p, goods.map((g) => ({ templateId: g.TemplateId, count: g.Count ?? 1, validDate: g.ValidDate ?? 0, isBind: g.IsBind ?? true, strengthenLevel: g.StrengthLevel ?? 0, attack: g.AttackCompose ?? 0, defence: g.DefendCompose ?? 0, agility: g.AgilityCompose ?? 0, luck: g.LuckCompose ?? 0 })), eventText(ctx, "Workshop.Events.FirstRecharge.Title", "Presente da primeira recarga"));
   p.info.IsGetAward = true;
   p.send(Out.firstRecharge(true, true));
-  p.sendMessage(0, `Presente recebido! ${s}`);
+  p.sendMessage(0, eventText(ctx, "Workshop.Events.FirstRecharge.Success", `Presente recebido! ${s}`, s));
   return true;
 }
 

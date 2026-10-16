@@ -54,21 +54,51 @@ if (command === "rollback") {
     assert.ok(Array.isArray(overrides.lines) && overrides.lines.length > 0, "scroll notices need nonempty lines");
     for (const line of overrides.lines) assert.ok(typeof line === "string" && line.trim() && !/[\r\n{}]/.test(line), "invalid plain scroll-notice line");
   }
+  const placeholders = value => [...value.matchAll(/\{\d+(?::[^}]*)?\}/g)].map(match => match[0]).sort();
+  const rowOverrides = new Map(), seenVariants = new Map();
+  const rowFile = join(repo, "research/i18n/zh-CN-server-row-overrides.json");
+  if (server && existsSync(rowFile)) {
+    const config = JSON.parse(readFileSync(rowFile, "utf8"));
+    assert.ok(config && typeof config === "object" && !Array.isArray(config), "server row overrides need a source-bound object");
+    assert.equal(config.sourceSha256, hash(source), "server row override source changed; preserved");
+    assert.ok(config.entries && typeof config.entries === "object" && !Array.isArray(config.entries), "server row overrides need key/variant entries");
+    for (const [key, variants] of Object.entries(config.entries)) {
+      assert.ok(key && !/[:\r\n\t]/.test(key), `invalid server row override key: ${key}`);
+      assert.ok(!Object.hasOwn(overrides, key), `server row override collides with a flat override: ${key}`);
+      assert.ok(Array.isArray(variants) && variants.length > 0, `missing server row variants: ${key}`);
+      const translations = new Map();
+      for (const variant of variants) {
+        assert.ok(variant && typeof variant === "object" && typeof variant.source === "string" && typeof variant.translation === "string", `invalid server row variant: ${key}`);
+        assert.ok(!/[\r\n]/.test(variant.source) && !/[\r\n]/.test(variant.translation), `invalid server row line: ${key}`);
+        assert.ok(!translations.has(variant.source), `duplicate server row variant: ${key}`);
+        assert.deepEqual(placeholders(variant.translation), placeholders(variant.source), `placeholder mismatch: ${key}`);
+        translations.set(variant.source, variant.translation);
+      }
+      rowOverrides.set(key, translations); seenVariants.set(key, new Set());
+    }
+  }
   const seen = new Set(); let changedRows = 0;
   let output = notifications ? overrides.lines.join("\r\n") + "\r\n" : text.split("\r\n").map(line => {
     const boundary = line.indexOf(":");
     if (boundary < 1 || line.startsWith("##")) return line;
     const key = line.slice(0, boundary).replace(/^\uFEFF/, "");
-    if (!Object.hasOwn(overrides, key)) return line;
-    const translated = overrides[key];
+    if (!Object.hasOwn(overrides, key) && !rowOverrides.has(key)) return line;
+    const original = line.slice(boundary + 1);
+    let translated;
+    if (rowOverrides.has(key)) {
+      assert.ok(rowOverrides.get(key).has(original), `unlisted server row variant: ${key}`);
+      translated = rowOverrides.get(key).get(original); seenVariants.get(key).add(original);
+    } else translated = overrides[key];
     assert.equal(typeof translated, "string");
     assert.ok(!/[\r\n]/.test(translated), `invalid translated line: ${key}`);
-    const placeholders = value => [...value.matchAll(/\{\d+(?::[^}]*)?\}/g)].map(match => match[0]).sort();
-    assert.deepEqual(placeholders(translated), placeholders(line.slice(boundary + 1)), `placeholder mismatch: ${key}`);
+    assert.deepEqual(placeholders(translated), placeholders(original), `placeholder mismatch: ${key}`);
     seen.add(key); changedRows++;
     return line.slice(0, boundary + 1) + translated;
   }).join("\r\n");
-  if (!notifications) assert.equal(seen.size, Object.keys(overrides).length, "translation keys missing from original dictionary");
+  if (!notifications) {
+    assert.equal(seen.size, Object.keys(overrides).length + rowOverrides.size, "translation keys missing from original dictionary");
+    for (const [key, variants] of rowOverrides) assert.equal(seenVariants.get(key).size, variants.size, `server row variants missing from original dictionary: ${key}`);
+  }
   let addedKeys = 0;
   const additionsFile = join(repo, "research/i18n/zh-CN-server-additions.json");
   if (server && existsSync(additionsFile)) {
@@ -76,8 +106,10 @@ if (command === "rollback") {
     assert.ok(additions && typeof additions === "object" && !Array.isArray(additions), "server additions need a flat key/string map");
     const originalKeys = new Set(text.split("\r\n").filter(line => line.indexOf(":") > 0).map(line => line.slice(0, line.indexOf(":")).replace(/^\uFEFF/, "")));
     const lines = Object.entries(additions).map(([key, value]) => {
-      assert.ok(key.startsWith("Workshop.Events.") && key.length > "Workshop.Events.".length && !/[:\r\n\t]/.test(key), `invalid server addition key: ${key}`);
-      assert.ok(!Object.hasOwn(overrides, key) && !originalKeys.has(key), `server addition collides with an existing key: ${key}`);
+      const eventKey = key.startsWith("Workshop.Events.") && key.length > "Workshop.Events.".length && !/[:\r\n\t]/.test(key);
+      const pveKey = /^Workshop\.Pve\.[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z][A-Za-z0-9]*)*$/.test(key);
+      assert.ok(eventKey || pveKey, `invalid server addition key: ${key}`);
+      assert.ok(!Object.hasOwn(overrides, key) && !rowOverrides.has(key) && !originalKeys.has(key), `server addition collides with an existing key: ${key}`);
       assert.ok(typeof value === "string" && value.trim() && !/[\r\n\t]/.test(value), `invalid server addition value: ${key}`);
       return `${key}:${value}\r\n`;
     });

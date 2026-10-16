@@ -4,7 +4,7 @@
  * permission / cost rules come from `src/game/consortia.ts`. Original bugs fixed are noted per function.
  */
 import { and, desc, eq, inArray, max, sql } from "drizzle-orm";
-import { game, player, type Database } from "@ddt/db";
+import { applyTranslations, game, loadTranslations, player, type Database } from "@ddt/db";
 import { DEFAULT_DUTIES, Right, checkRemoveMember, dutyMove, gradeChange, hasRight, kickBudget, upgrade, userRemarkAllowed, type GuildBuildings, type LevelRow, type UpgradeKind } from "../game/consortia.js";
 
 const C = player.Consortia;
@@ -50,7 +50,9 @@ export async function loadBuffTemps(db: Database) {
 }
 
 export async function loadBadges(db: Database) {
-  return db.select().from(game.Consortia_Badge);
+  const rows = await db.select().from(game.Consortia_Badge);
+  const overlay = await loadTranslations(db, "Consortia_Badge", "pt-BR");
+  return rows.map(row => applyTranslations(row, "BadgeID", overlay));
 }
 
 export async function getConsortia(db: Database, id: number): Promise<ConsortiaRow | null> {

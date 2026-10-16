@@ -41,7 +41,7 @@ function TagsInput({ id, value, onChange, invalid, placeholder }: { id: string; 
       {value.map((tag) => (
         <span key={tag} className="inline-flex items-center gap-1 rounded-lg bg-panel-2 px-2 py-0.5 font-mono text-xs">
           {tag}
-          <button type="button" aria-label={`Remover ${tag}`} onClick={() => onChange(value.filter((t) => t !== tag))}>
+          <button type="button" aria-label={`移除 ${tag}`} onClick={() => onChange(value.filter((t) => t !== tag))}>
             <X className="size-3" />
           </button>
         </span>

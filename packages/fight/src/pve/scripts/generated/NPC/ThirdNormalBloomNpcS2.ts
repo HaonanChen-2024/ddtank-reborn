@@ -28,7 +28,7 @@ export class ThirdNormalBloomNpcS2 extends ABrain {
             this.m_target = this.Game.FindNearestPlayer(this.Body.X, this.Body.Y);
 			this.m_maxBlood = 49999;
             this.m_blood = 40000;
-			this.Body.Say(LanguageMgr.GetTranslation("Me curem e eu tiro vocês daqui!"), 0, 200, 0);
+			this.Body.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.HealAndEscape"), 0, 200, 0);
 			if (this.m_blood > this.m_maxBlood)
             {
                 this.m_blood = this.m_maxBlood;

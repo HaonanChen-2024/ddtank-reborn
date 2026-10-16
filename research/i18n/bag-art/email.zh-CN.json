@@ -4,7 +4,7 @@
   "sourceAssetSha256": "5f90d36ec54859f5086a6add6c195dc5f997e0045e756cc329ec675747cabe54",
   "fontFamily": "Workshop CJK",
   "fontFile": "msyhbd.ttc",
-  "note": "Offline candidate only: three list tabs, both source states. No permission, transaction, event, XML, script, or deployment changes. Not the whole email UI.",
+  "note": "Chinese captions in the existing email window: list tabs and both button states, sender/subject, unread stamp, help and add-friend. Only reviewed bitmap regions change; original shapes, symbols, scripts, XML, layout and mail transactions remain unchanged. Static pixel checks do not prove original-client interaction.",
   "bitmaps": [
     {
       "id": 36,
@@ -281,6 +281,452 @@
           "inkMargin": 1
         }
       ]
+    },
+    {
+      "id": 11,
+      "className": "asset.email.selectAllBtn1",
+      "width": 78,
+      "height": 19,
+      "sourcePixelsSha256": "4d50ba23b7a6dd7a11e14279d3dd12bcd791ee5ed86892e53e9309c3b0221f40",
+      "originalText": "Marcar tudo",
+      "regions": [
+        {
+          "box": [
+            2,
+            1,
+            74,
+            17
+          ],
+          "text": "全选",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "className": "asset.email.selectAllBtn2",
+      "width": 82,
+      "height": 23,
+      "sourcePixelsSha256": "961903f4c14ad0f784925899afb4bbd07e26ceae79d565908f47a2b0eb3c335e",
+      "originalText": "Marcar tudo",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            74,
+            17
+          ],
+          "text": "全选",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "className": "asset.email.deleteSelectbtn1",
+      "width": 78,
+      "height": 19,
+      "sourcePixelsSha256": "1f46ce84c41ddbf0fd2bb18809415c29064085ee1c7c965d8c24c67a330aa477",
+      "originalText": "Xóa",
+      "regions": [
+        {
+          "box": [
+            2,
+            1,
+            74,
+            17
+          ],
+          "text": "删除",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "className": "asset.email.deleteSelectbtn2",
+      "width": 82,
+      "height": 23,
+      "sourcePixelsSha256": "efdb5e8d5c4b423c0895e35ad151e1de90cd6c6a80a154b21e91bb7d176d7c81",
+      "originalText": "Xóa",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            74,
+            17
+          ],
+          "text": "删除",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "className": "asset.email.reciveMailBtn1",
+      "width": 78,
+      "height": 19,
+      "sourcePixelsSha256": "69763cc444e3b8b14b9a32a86d6da32dae6cb03a28c9ee9d53d46a557ef35141",
+      "originalText": "Receber anexos",
+      "regions": [
+        {
+          "box": [
+            2,
+            1,
+            74,
+            17
+          ],
+          "text": "领取附件",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "className": "asset.email.reciveMailBtn2",
+      "width": 82,
+      "height": 23,
+      "sourcePixelsSha256": "17fc172eb6916113e4f936f340be43cbaedcef649ec0be9fb543c32cdbb2833e",
+      "originalText": "Receber anexos",
+      "regions": [
+        {
+          "box": [
+            4,
+            3,
+            74,
+            17
+          ],
+          "text": "领取附件",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "className": "asset.email.titleTop",
+      "width": 71,
+      "height": 43,
+      "sourcePixelsSha256": "df6a29d61075168e10052c93242cee0decdb3eb5fc9796a669f1f800e6928862",
+      "originalText": "Remetente / Assunto",
+      "regions": [
+        {
+          "box": [
+            3,
+            2,
+            65,
+            16
+          ],
+          "text": "发件人",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              0,
+              0,
+              0
+            ],
+            "max": [
+              115,
+              105,
+              85
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#211909",
+          "preserveAlpha": true,
+          "inkMargin": 1
+        },
+        {
+          "box": [
+            3,
+            24,
+            65,
+            16
+          ],
+          "text": "主题",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              0,
+              0,
+              0
+            ],
+            "max": [
+              115,
+              105,
+              85
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 11.5,
+          "fill": "#211909",
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "className": "asset.email.helpPage",
+      "width": 75,
+      "height": 22,
+      "sourcePixelsSha256": "6097f35f02970b3b4cff109e213665cd60f56dfc9f82be045f628d562f93edde",
+      "originalText": "Guia",
+      "regions": [
+        {
+          "box": [
+            10,
+            2,
+            55,
+            18
+          ],
+          "text": "帮助",
+          "inpaint": true,
+          "inpaintSeed": {
+            "min": [
+              190,
+              185,
+              165
+            ],
+            "max": [
+              255,
+              255,
+              255
+            ]
+          },
+          "sample": [
+            4,
+            2,
+            1,
+            1
+          ],
+          "fontSize": 12,
+          "fill": "#fff0b5",
+          "stroke": "#563908",
+          "strokeWidth": 0.35,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "className": "asset.email.unReadImg",
+      "width": 49,
+      "height": 40,
+      "sourcePixelsSha256": "9d8781919c2a95a3314472a6054d5c2017ad020db03152ba7c4b9a2367e07084",
+      "originalText": "Mới",
+      "preparedImage": {
+        "path": "email/5.png",
+        "sha256": "72a91355191374905f7fee34247288314120c055aba0e508448a5be5b828f498"
+      },
+      "note": "Prepared at the original -30-degree tilt. Only the inner old-caption mask and replacement ink change; surrounding green frame and all pixels outside the reviewed box remain unchanged.",
+      "regions": [
+        {
+          "box": [
+            10,
+            8,
+            29,
+            24
+          ],
+          "text": "未读",
+          "transparent": true,
+          "fontSize": 13,
+          "preserveAlpha": false,
+          "inkMargin": 1
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "tagCode": 35,
+      "inputFormat": "jpeg3-external-alpha",
+      "className": "asset.email.addFriend",
+      "width": 103,
+      "height": 26,
+      "sourceTagSha256": "e0186d168ade56818727893e297b43cdbdc3d231170a30bdde06b6edf1627ac5",
+      "sourcePixelsSha256": "508f31470075a6dfbcc9305cae01c81ede70b6bc197d65cda5ff6632379369a4",
+      "originalText": "Thêm bạn",
+      "preparedImage": {
+        "path": "email/54.png",
+        "sha256": "4016eb5c1ab39306380d41267e8b803464c15a39b544f48cb27ebb1db613800e"
+      },
+      "regions": [
+        {
+          "box": [
+            12,
+            4,
+            80,
+            18
+          ],
+          "text": "添加好友",
+          "sample": [
+            9,
+            13,
+            1,
+            1
+          ],
+          "fontSize": 13,
+          "preserveAlpha": true,
+          "inkMargin": 1
+        }
+      ]
     }
-  ]
+  ],
+  "expectedSwfSha256": "1f5bcda76e4751cd1aa4254552b30007a740ae997631b1f3bbbb1144d9dc0c46"
 }

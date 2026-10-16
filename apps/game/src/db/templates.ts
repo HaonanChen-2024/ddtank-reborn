@@ -118,7 +118,8 @@ export class Templates {
     this.pveInfos = new Map(pveI.map((r) => [r.ID, applyTranslations(r, "ID", pveOverlay)]));
     this.missions = new Map(missI.map((r) => [r.Id, applyTranslations(r, "Id", missionOverlay)]));
     this.npcs = new Map(npcI.map((r) => [r.ID, applyTranslations(r, "ID", npcOverlay)]));
-    this.dropConditions = dropC;
+    const dropOverlay = await loadTranslations(db, "Drop_Condiction", lang);
+    this.dropConditions = dropC.map(r => applyTranslations(r, "DropID", dropOverlay));
     this.dropItems = new Map();
     for (const d of dropI) {
       const l = this.dropItems.get(d.DropId) ?? [];

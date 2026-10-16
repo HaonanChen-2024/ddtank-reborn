@@ -157,7 +157,7 @@ export function registerMail(r: HandlerRegistry): void {
     };
     const t = (k: string) => ctx.lang.t(k);
     if (p.info.Gold < 100) {
-      p.sendMessage(0, t("UserSendMailHandler.GoldNotEnought"));
+      p.sendMessage(0, "金币不足，无法支付邮件费用。");
       return reply(false);
     }
     const nick = pkt.readString().trim();

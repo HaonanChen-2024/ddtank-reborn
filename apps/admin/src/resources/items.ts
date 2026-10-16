@@ -66,7 +66,7 @@ export const items = defineResource({
     { name: "MaxCount", label: { "pt-BR": "Pilha máxima", "zh-CN": "最大堆叠" }, type: "number", required: true, min: 1, default: 1, section: { "pt-BR": "Atributos", "zh-CN": "属性" } },
     { name: "SuitId", label: { "pt-BR": "Conjunto (SuitId)", "zh-CN": "套装编号 (SuitId)" }, type: "number", min: 0, default: 0, section: { "pt-BR": "Atributos", "zh-CN": "属性" } },
     { name: "Hole", label: { "pt-BR": "Buracos (Hole)", "zh-CN": "孔位 (Hole)" }, type: "text", section: { "pt-BR": "Atributos", "zh-CN": "属性" } },
-    { name: "Data", label: "Data", type: "text", hint: { "pt-BR": "Parâmetro específico da categoria", "zh-CN": "分类专用参数" }, section: { "pt-BR": "Atributos", "zh-CN": "属性" } },
+    { name: "Data", label: "分类数据（Data）", type: "text", hint: { "pt-BR": "Parâmetro específico da categoria", "zh-CN": "分类专用参数" }, section: { "pt-BR": "Atributos", "zh-CN": "属性" } },
     ...Array.from({ length: 8 }, (_, i) => ({ name: `Property${i + 1}`, label: `Property${i + 1}`, type: "number" as const, required: true, default: 0, section: { "pt-BR": "Propriedades da categoria", "zh-CN": "分类属性" } })),
 
     { name: "CanEquip", label: { "pt-BR": "Equipável", "zh-CN": "可装备" }, type: "boolean", section: { "pt-BR": "Regras", "zh-CN": "规则" } },

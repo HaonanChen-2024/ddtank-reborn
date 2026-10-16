@@ -124,7 +124,7 @@ export class GT1076 extends AMissionControl {
                 }
                 this.m_secondKing.SetRelateDemagemRect(-21, -87, 72, 59);
 
-               this.m_secondKing.Say(LanguageMgr.GetTranslation("Você me irritou, não vou te perdoar!"), 0, 3000);
+               this.m_secondKing.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.Unforgiven"), 0, 3000);
 
                 let players = this.Game.GetAllFightPlayers();
                 let RandomPlayer = this.Game.FindRandomPlayer();

@@ -60,7 +60,7 @@ function cloneForAuction(src: ItemInfo, count: number, now: Date): ItemInfo {
 
 /** Mail a single detached item (or just currency) — same shape as academy.ts's mailTo, kept local on purpose. */
 async function mailTo(ctx: ServerContext, toId: number, toNick: string, title: string, content: string, item?: ItemInfo, gold = 0, money = 0, type = 2): Promise<void> {
-  const row: Record<string, unknown> = { Content: content, Title: title, Gold: gold, Money: money, Type: type, Receiver: toNick, ReceiverID: toId, Sender: "Casa de Leilões", SenderID: 0 };
+  const row: Record<string, unknown> = { Content: content, Title: title, Gold: gold, Money: money, Type: type, Receiver: toNick, ReceiverID: toId, Sender: "拍卖行", SenderID: 0 };
   if (item) { row.Annex1 = String(item.ItemID); row.Annex1Name = item.template.Name ?? ""; }
   await sendMail(ctx.db.db, row as never);
   ctx.world.get(toId)?.send(Out.mailResponse(toId, 1));
@@ -92,7 +92,7 @@ async function add(ctx: ServerContext, p: GamePlayer, pkt: { readByte(): number;
   const goodsCount = pkt.readInt();
   const fail = (key: string, ...args: unknown[]) => p.sendMessage(0, ctx.lang.t(key, ...args));
 
-  if (isWarrior(p)) return p.sendMessage(0, "Esta conta não tem permissão para usar esta função.");
+  if (isWarrior(p)) return p.sendMessage(0, "此账号无权使用该功能。");
   if (p.info.HasBagPassword && p.info.IsLocked) return p.sendMessage(0, ctx.lang.t("Bag.Locked"));
   if (price < 0 || (mouthful !== 0 && mouthful < price)) return; // silent, like the original
   const needGold = Math.max(1, Math.trunc(price * 0.03 * (durationCode === 0 ? 1 : durationCode === 1 ? 3 : 6)));
@@ -130,9 +130,9 @@ async function update(ctx: ServerContext, p: GamePlayer, pkt: { readInt(): numbe
   const money = pkt.readInt();
   const reply = (ok: boolean) => { const g = new PacketOut(193, p.id); g.writeBoolean(ok); g.writeInt(auctionId); p.send(g); };
 
-  if (isWarrior(p)) { p.sendMessage(0, "Esta conta não tem permissão para usar esta função."); return reply(false); }
+  if (isWarrior(p)) { p.sendMessage(0, "此账号无权使用该功能。"); return reply(false); }
   const limit = limitLevel(ctx, 0);
-  if (p.info.Grade < limit) { p.sendMessage(0, `É necessário nível ${limit} para realizar esta ação!`); return reply(false); }
+  if (p.info.Grade < limit) { p.sendMessage(0, `需要达到${limit}级才能进行此操作！`); return reply(false); }
   if (p.info.HasBagPassword && p.info.IsLocked) { p.sendMessage(0, ctx.lang.t("Bag.Locked")); return reply(false); }
 
   const [row] = await ctx.db.db.select().from(A).where(and(eq(A.AuctionID, auctionId), eq(A.IsExist, true))).limit(1);
@@ -152,7 +152,7 @@ async function update(ctx: ServerContext, p: GamePlayer, pkt: { readInt(): numbe
       ok = true;
       resultRow = upd[0]!;
       p.removeMoney(newPrice);
-      if (row.BuyerID !== 0) await mailTo(ctx, row.BuyerID, row.BuyerName, ctx.lang.t("AuctionUpdateHandler.Msg1b", row.Name), ctx.lang.t("AuctionUpdateHandler.Msg2b", row.Name, p.info.NickName ?? "", String(row.Price)), undefined, 0, row.Price, 5);
+      if (row.BuyerID !== 0) await mailTo(ctx, row.BuyerID, row.BuyerName, `竞价被超过：${row.Name}`, `你对${row.Name}的出价已被${p.info.NickName ?? ""}超过，退还原出价${row.Price}点券。`, undefined, 0, row.Price, 5);
       msg = buyout ? "AuctionUpdateHandler.Msg7" : "AuctionUpdateHandler.Msg6";
       if (buyout) await settle(ctx, resultRow);
     }
@@ -172,7 +172,7 @@ async function remove(ctx: ServerContext, p: GamePlayer, pkt: { readInt(): numbe
     if (upd.length) {
       msg = "AuctionDeleteHandler.Succeed";
       const it = await itemById(ctx, row.ItemID);
-      await mailTo(ctx, p.id, p.info.NickName ?? "", ctx.lang.t("SP_Auction_Delete.Title"), ctx.lang.t("SP_Auction_Delete.Content"), it ?? undefined, 0, 0, 3);
+      await mailTo(ctx, p.id, p.info.NickName ?? "", "拍卖取消", "拍卖已取消，道具已退回附件。", it ?? undefined, 0, 0, 3);
     }
   }
   p.send(auctionRefresh(null, auctionId, false));
@@ -192,12 +192,12 @@ async function itemById(ctx: ServerContext, itemId: number): Promise<ItemInfo | 
 async function settle(ctx: ServerContext, row: AuctionRow): Promise<void> {
   const it = await itemById(ctx, row.ItemID);
   if (row.BuyerID === 0) {
-    await mailTo(ctx, row.AuctioneerID, row.AuctioneerName, ctx.lang.t("SP_Auction_Scan.Msg1", row.Name), ctx.lang.t("SP_Auction_Scan.Msg2", row.Name), it ?? undefined, 0, 0, 3);
+    await mailTo(ctx, row.AuctioneerID, row.AuctioneerName, `拍卖到期：${row.Name}`, `${row.Name}到期未成交，道具已退回附件。`, it ?? undefined, 0, 0, 3);
     return;
   }
   const net = Math.round(row.Price - cess(ctx) * row.Price);
-  await mailTo(ctx, row.BuyerID, row.BuyerName, ctx.lang.t("SP_Auction_Scan.Msg3", row.Name), ctx.lang.t("SP_Auction_Scan.Msg4", row.AuctioneerName, row.Name, String(row.Price)), it ?? undefined, 0, 0, 4);
-  if (row.AuctioneerID !== row.BuyerID) await mailTo(ctx, row.AuctioneerID, row.AuctioneerName, ctx.lang.t("SP_Auction_Scan.Msg5", row.Name), ctx.lang.t("SP_Auction_Scan.Msg6", row.Name, row.BuyerName, String(row.Price)), undefined, 0, net, 2);
+  await mailTo(ctx, row.BuyerID, row.BuyerName, `竞拍成功：${row.Name}`, `你以${row.Price}点券拍得${row.AuctioneerName}出售的${row.Name}，道具已放入附件。`, it ?? undefined, 0, 0, 4);
+  if (row.AuctioneerID !== row.BuyerID) await mailTo(ctx, row.AuctioneerID, row.AuctioneerName, `拍卖成交：${row.Name}`, `${row.BuyerName}以${row.Price}点券拍得你的${row.Name}，扣除手续费后的所得已放入附件。`, undefined, 0, net, 2);
 }
 
 /** SP_Auction_Scan — periodic expiry. Call from a timer; safe to call concurrently/often (idempotent UPDATE). */

@@ -61,7 +61,7 @@ function encodePngBitmap(image, rgba, encode) {
   return Buffer.concat([prefix, encoded, deflateSync(Buffer.alloc(0))]);
 }
 
-// Only these reviewed RoomList JPEG owners may use the prepared PNG conversion.
+// Only these reviewed JPEG owners may use the prepared PNG conversion.
 const ROOMLIST_JPEG = new Map([
   [1, [35, 'asset.roomList.Create', '0e5abf89df6b89660c00b729cc62e1c6499e2d54f0afbae17f39b47a105a3d47']],
   [17, [35, 'asset.roomList.rivalship', 'de11b96102f86b992e6a606ca9ffc65ee0af9f186ee76ce41ccd70c94ab1aaeb']],
@@ -74,8 +74,9 @@ const ROOMLIST_JPEG = new Map([
 function reviewedRoomlistJpeg(entry, config, tagCode) {
   if (entry.inputFormat === undefined) return false;
   const hallActivation = config.asset === 'ui/vietnam/swf/ddthallicon.swf' && entry.id === 24;
-  const expected = hallActivation ? [35, 'assets.hallIcon.chickActivationIcon', '40492a8e7e6304bd861b204fb9f2dc153d4cde39d03fb019db8aebf6ec706bdf'] : ROOMLIST_JPEG.get(entry.id);
-  assert.ok((config.asset === 'ui/vietnam/swf/roomlist.swf' || hallActivation) && expected && tagCode === expected[0] && entry.className === expected[1] && entry.sourceTagSha256 === expected[2], 'unsupported reviewed RoomList JPEG owner');
+  const emailAddFriend = config.asset === 'ui/vietnam/swf/email.swf' && entry.id === 54;
+  const expected = emailAddFriend ? [35, 'asset.email.addFriend', 'e0186d168ade56818727893e297b43cdbdc3d231170a30bdde06b6edf1627ac5'] : hallActivation ? [35, 'assets.hallIcon.chickActivationIcon', '40492a8e7e6304bd861b204fb9f2dc153d4cde39d03fb019db8aebf6ec706bdf'] : ROOMLIST_JPEG.get(entry.id);
+  assert.ok((config.asset === 'ui/vietnam/swf/roomlist.swf' || hallActivation || emailAddFriend) && expected && tagCode === expected[0] && entry.className === expected[1] && entry.sourceTagSha256 === expected[2], 'unsupported reviewed RoomList JPEG owner');
   assert.equal(entry.inputFormat, tagCode === 21 ? 'jpeg2' : 'jpeg3-external-alpha', 'invalid reviewed JPEG format');
   assert.ok(entry.preparedImage, 'reviewed JPEG needs a prepared PNG');
   return true;
@@ -405,7 +406,7 @@ async function main() {
   cc.fillStyle = '#92908a'; cc.fillRect(0, 0, comparison.width, comparison.height); cc.fillStyle = '#171717'; cc.font = `15px "${config.fontFamily}"`; cc.fillText('原资源', 8, 18); cc.fillText('中文替换', main.width * comparisonScale + 8, 18);
   cc.drawImage(await loadImage(main.before), 0, 26, main.width * comparisonScale, main.height * comparisonScale); cc.drawImage(await loadImage(main.after), main.width * comparisonScale, 26, main.width * comparisonScale, main.height * comparisonScale); writeFileSync(join(reportDir, 'main-comparison.png'), comparison.toBuffer('image/png'));
   for (const scale of hiddenControls || chat || hallFeature || hallActivity || gameover || email ? [1.25, 1.5, 2, 4] : [1.25, 1.5, 2]) { const zoom = createCanvas(Math.ceil(main.width * scale), Math.ceil(main.height * scale)); zoom.getContext('2d').drawImage(await loadImage(main.after), 0, 0, zoom.width, zoom.height); writeFileSync(join(reportDir, `main-after-${scale}x.png`), zoom.toBuffer('image/png')); }
-  const buttons = rendered.filter(entry => entry !== main), rowHeight = room ? 240 : roomlist ? 580 : chat ? 190 : 150, columns = roomlist || hall || chat || gameover ? 2 : 4, columnWidth = room ? 360 : roomlist ? 600 : gameover ? 700 : hall || chat ? 520 : 300;
+  const buttons = rendered.filter(entry => entry !== main), rowHeight = email ? 200 : room ? 240 : roomlist ? 580 : chat ? 190 : 150, columns = roomlist || hall || chat || gameover || email ? 2 : 4, columnWidth = email ? 880 : room ? 360 : roomlist ? 600 : gameover ? 700 : hall || chat ? 520 : 300;
   const sheet = createCanvas(columns * columnWidth, Math.max(1, Math.ceil(buttons.length / columns)) * rowHeight), bc = sheet.getContext('2d'); bc.fillStyle = '#aaa'; bc.fillRect(0, 0, sheet.width, sheet.height); bc.font = `13px "${config.fontFamily}"`;
   for (let i = 0; i < buttons.length; i++) { const e = buttons[i], x = i % columns * columnWidth, y = Math.floor(i / columns) * rowHeight; bc.fillStyle = '#111'; bc.fillText(String(e.id), x + 2, y + 17); bc.drawImage(await loadImage(e.before), x + 4, y + 22, e.width * comparisonScale, e.height * comparisonScale); bc.drawImage(await loadImage(e.after), x + columnWidth / 2, y + 22, e.width * comparisonScale, e.height * comparisonScale); }
   writeFileSync(join(reportDir, 'buttons-comparison.png'), sheet.toBuffer('image/png'));

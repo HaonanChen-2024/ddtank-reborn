@@ -27,11 +27,11 @@ export function hasRight(right: number | null | undefined, bit: number): boolean
 
 /** SP_Consortia_Add: the five default duties (Level, translation key, Right). */
 export const DEFAULT_DUTIES: readonly { level: number; key: string; name: string; right: number }[] = [
-  { level: 1, key: "SP_Consortia_Add.Duty1", name: "Líder", right: 4095 },
-  { level: 2, key: "SP_Consortia_Add.Duty2", name: "Vice-líder", right: 6191 },
-  { level: 3, key: "SP_Consortia_Add.Duty3", name: "Quan viên", right: 4103 },
-  { level: 4, key: "SP_Consortia_Add.Duty4", name: "Tinh anh", right: 4096 },
-  { level: 5, key: "SP_Consortia_Add.Duty5", name: "Membro", right: 4096 },
+  { level: 1, key: "SP_Consortia_Add.Duty1", name: "会长", right: 4095 },
+  { level: 2, key: "SP_Consortia_Add.Duty2", name: "副会长", right: 6191 },
+  { level: 3, key: "SP_Consortia_Add.Duty3", name: "官员", right: 4103 },
+  { level: 4, key: "SP_Consortia_Add.Duty4", name: "精英", right: 4096 },
+  { level: 5, key: "SP_Consortia_Add.Duty5", name: "会员", right: 4096 },
 ];
 
 /** ConsortiaCreate.cs: Money >= 500 and Grade >= 5, plus Consortia_Level[1].NeedGold. */

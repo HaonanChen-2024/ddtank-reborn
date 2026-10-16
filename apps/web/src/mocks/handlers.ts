@@ -41,7 +41,7 @@ export const handlers = [
       capacity: 1000,
       rooms: 47,
       version: "4.1.0",
-      motd: "Fim de semana com EXP em dobro!",
+      motd: "周末双倍经验！",
     };
     return HttpResponse.json(body);
   }),
@@ -51,22 +51,22 @@ export const handlers = [
     const body: NewsItem[] = [
       {
         id: 3,
-        title: "Evento: Semana do Vento Forte",
-        summary: "Partidas com vento acima de 3 rendem baú extra. Até domingo.",
+        title: "活动：强风周",
+        summary: "风力超过 3 的对局可额外获得宝箱，持续至周日。",
         category: "event",
         publishedAt: "2026-09-28T12:00:00Z",
       },
       {
         id: 2,
-        title: "Nova masmorra: Ninho dos Formigões",
-        summary: "Masmorra para 4 jogadores a partir do nível 20, com chefes no modo Herói.",
+        title: "新副本：蚂蚁之巢",
+        summary: "20 级起可进入的四人副本，英雄模式包含首领战。",
         category: "update",
         publishedAt: "2026-09-20T15:00:00Z",
       },
       {
         id: 1,
-        title: "Manutenção programada",
-        summary: "Quinta-feira das 04h às 06h para atualização do servidor de batalha.",
+        title: "维护公告",
+        summary: "周四 04:00 至 06:00 更新战斗服务器。",
         category: "maintenance",
         publishedAt: "2026-09-15T09:00:00Z",
       },
@@ -95,14 +95,14 @@ export const handlers = [
     await delay(300);
     const { username, password } = (await request.json()) as { username: string; password: string };
     const rec = users.get(username);
-    if (!rec || rec.password !== password) return HttpResponse.json({ message: "Credenciais inválidas" }, { status: 401 });
+    if (!rec || rec.password !== password) return HttpResponse.json({ message: "用户名或密码错误" }, { status: 401 });
     return HttpResponse.json<AuthResponse>({ token: tokenFor(rec.user), user: rec.user });
   }),
 
   http.post("/api/auth/register", async ({ request }) => {
     await delay(300);
     const { username, email, password } = (await request.json()) as { username: string; email: string; password: string };
-    if (users.has(username)) return HttpResponse.json({ message: "Este usuário já existe" }, { status: 409 });
+    if (users.has(username)) return HttpResponse.json({ message: "用户名已存在" }, { status: 409 });
     const user: User = { id: users.size + 1, username, email, role: "player" };
     users.set(username, { user, password });
     return HttpResponse.json<AuthResponse>({ token: tokenFor(user), user }, { status: 201 });
@@ -110,7 +110,7 @@ export const handlers = [
 
   http.get("/api/account/me", ({ request }) => {
     const u = userFromAuth(request);
-    if (!u) return HttpResponse.json({ message: "Não autenticado" }, { status: 401 });
+    if (!u) return HttpResponse.json({ message: "请先登录" }, { status: 401 });
     const body: Me = {
       user: u,
       characters:
@@ -123,10 +123,10 @@ export const handlers = [
 
   http.post("/api/account/password", async ({ request }) => {
     const u = userFromAuth(request);
-    if (!u) return HttpResponse.json({ message: "Não autenticado" }, { status: 401 });
+    if (!u) return HttpResponse.json({ message: "请先登录" }, { status: 401 });
     const { currentPassword, newPassword } = (await request.json()) as { currentPassword: string; newPassword: string };
     const rec = users.get(u.username)!;
-    if (rec.password !== currentPassword) return HttpResponse.json({ message: "Senha atual incorreta" }, { status: 400 });
+    if (rec.password !== currentPassword) return HttpResponse.json({ message: "当前密码错误" }, { status: 400 });
     rec.password = newPassword;
     return new HttpResponse(null, { status: 204 });
   }),

@@ -95,9 +95,9 @@ export function registerOnlineBoxReadRoutes(f: FastifyInstance, ctx: AppCtx, gua
   f.get<{ Params: { id: string } }>("/api/admin/online-box/:id", { preHandler: guard }, async (req, reply) => {
     const id = Number(req.params.id);
     if (!/^-?\d+$/.test(req.params.id) || !Number.isSafeInteger(id) || id < -2147483648 || id > 2147483647) {
-      return reply.code(404).send({ message: "Not found" });
+      return reply.code(404).send({ message: "未找到相关记录" });
     }
     const [row] = await ctx.h.db.select().from(table).where(and(eq(table.Type, 0), eq(table.ID, id))).limit(1);
-    return row ?? reply.code(404).send({ message: "Not found" });
+    return row ?? reply.code(404).send({ message: "未找到相关记录" });
   });
 }

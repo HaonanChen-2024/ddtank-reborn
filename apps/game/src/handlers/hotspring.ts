@@ -11,6 +11,7 @@
  *  - MinHotSpring (60 free minutes/day) is reset on the first entry of a new UTC day and persisted in Sys_Users_Extra.
  */
 import { sql } from "drizzle-orm";
+import { loadTranslations } from "@ddt/db";
 import { PacketOut } from "@ddt/protocol";
 import type { GamePlayer } from "../game/player.js";
 import * as Out from "../packets/out.js";
@@ -48,11 +49,17 @@ export class HotSpringMgr {
   async load(): Promise<void> {
     const rows = (await this.ctx.db.db.execute(sql`SELECT * FROM game."HotSpringRoom" ORDER BY "roomID"`)) as unknown;
     const list = (Array.isArray(rows) ? rows : ((rows as { rows?: unknown[] }).rows ?? [])) as Record<string, unknown>[];
+    const overlay = await loadTranslations(this.ctx.db.db, "HotSpringRoom", "pt-BR");
     for (const r of list) {
+      const display = overlay.get(String(r.roomID));
+      // Only shipped defaults are translated; player-written room names and introductions keep their text.
+      const defaultRoom = Number(r.playerID) === 0 && Number(r.roomID) >= 1 && Number(r.roomID) <= 13;
+      const roomName = defaultRoom && r.roomName === `Suối Nước Nóng Phòng ${Math.min(Number(r.roomID), 8)}` ? display?.roomName ?? r.roomName : r.roomName;
+      const introduction = defaultRoom && r.roomIntroduction === "Chúc các bạn có những phút giây vui vẻ!" ? display?.roomIntroduction ?? r.roomIntroduction : r.roomIntroduction;
       const info: SpaRoomInfo = {
-        roomID: Number(r.roomID), roomNumber: Number(r.roomNumber), roomName: String(r.roomName ?? ""), roomPassword: (r.roomPassword as string | null) ?? null,
+        roomID: Number(r.roomID), roomNumber: Number(r.roomNumber), roomName: String(roomName ?? ""), roomPassword: (r.roomPassword as string | null) ?? null,
         effectiveTime: Number(r.effectiveTime ?? 0), playerID: Number(r.playerID ?? 0), playerName: String(r.playerName ?? ""),
-        startTime: r.startTime ? new Date(r.startTime as string) : new Date(), roomIntroduction: String(r.roomIntroduction ?? ""),
+        startTime: r.startTime ? new Date(r.startTime as string) : new Date(), roomIntroduction: String(introduction ?? ""),
         roomType: Number(r.roomType ?? 0), maxCount: Number(r.maxCount ?? 10),
       };
       this.rooms.set(info.roomID, new SpaRoom(info));
@@ -130,8 +137,8 @@ export class HotSpringMgr {
   add(p: GamePlayer, r: SpaRoom): boolean {
     const s = this.st(p);
     if (p.currentRoom || s.room) return false;
-    if (r.count >= r.info.maxCount) { p.sendMessage(0, "Sala cheia"); return false; }
-    if (s.min <= 0) { p.sendMessage(0, "Seu tempo de participação de hoje acabou"); return false; }
+    if (r.count >= r.info.maxCount) { p.sendMessage(0, "房间已满"); return false; }
+    if (s.min <= 0) { p.sendMessage(0, "你今天的参与时间已用完"); return false; }
     r.players.push(p);
     s.room = r;
     s.lastTime = this.ctx.now();
@@ -188,14 +195,14 @@ export class HotSpringMgr {
     const s = this.st(p);
     if (!s.room) { this.stopTimer(p); return 0; }
     if (s.min <= 0) {
-      p.sendMessage(0, "Seu tempo nas Termas acabou.");
+      p.sendMessage(0, "你的温泉时间已用完。");
       this.remove(p);
       return 0;
     }
     let gp = Math.trunc(this.expWithLevel(p.info.Grade) / 10);
     if (gp <= 0) return 0;
     s.min--;
-    if (s.min <= 5) p.sendMessage(0, `Restam apenas ${s.min} minuto(s).`);
+    if (s.min <= 5) p.sendMessage(0, `仅剩${s.min}分钟。`);
     const vip = p.info.VIPLevel ?? 0;
     const mul = vip >= 8 ? 4 : vip > 5 ? 3 : vip >= 3 ? 2 : 1;
     gp *= mul;
@@ -205,8 +212,8 @@ export class HotSpringMgr {
     p.addGold(gold);
     p.addGP(gp, false);
     p.sendMessage(0, vip >= 3
-      ? `VIP [${vip}]: você recebe x${mul} de experiência. Você recebeu ${gp} de experiência, ${honor} de honra, ${giftToken} Cupons vinculados e ${gold} de ouro!`
-      : `Você recebeu ${gp} de experiência, ${honor} de honra, ${giftToken} Cupons vinculados e ${gold} de ouro!`);
+      ? `贵宾[${vip}]：享受${mul}倍经验。你获得了${gp}经验、${honor}荣誉、${giftToken}礼金和${gold}金币！`
+      : `你获得了${gp}经验、${honor}荣誉、${giftToken}礼金和${gold}金币！`);
     const pk = new PacketOut(191, p.id);
     pk.writeByte(7);
     pk.writeInt(s.min);
@@ -272,8 +279,8 @@ export function hotSpringCmdRouter(): SubRouter {
       const r = m.st(p).room;
       const o = ctx.world.get(id);
       if (!r || !o) return p.sendMessage(0, ctx.lang.t("FriendAddHandler.Ofline"));
-      o.sendMessage(0, `[${p.info.NickName}] convidou você para a Fonte Termal — sala ${r.info.roomNumber} (${r.info.roomName}).`);
-      p.sendMessage(0, `Convite enviado para [${o.info.NickName}].`);
+      o.sendMessage(0, `[${p.info.NickName}]邀请你进入温泉${r.info.roomNumber}号房间（${r.info.roomName}）。`);
+      p.sendMessage(0, `已向[${o.info.NickName}]发送邀请。`);
     })
     .on(6, "HOTSPRING_ROOM_EDIT", () => {}, "stub")
     .on(9, "HOTSPRING_ROOM_ADMIN_REMOVE_PLAYER", () => {}, "stub")
@@ -340,14 +347,14 @@ export function registerHotSpring(r: HandlerRegistry): SubRouter {
     const m = await hotSpringMgr(ctx);
     if (!m.remove(p)) return;
     const pk = new PacketOut(169);
-    pk.writeString("Você saiu das Termas!");
+    pk.writeString("你已离开温泉！");
     p.send(pk);
   });
   // 12 HOTSPRING_CMD_B: byte 11 = buy SpaPriRoomContinueTime minutes for SpaAddictionMoneyNeeded Xu
   r.player(12, "HOTSPRING_CMD_B", async (ctx, p, pkt) => {
     if (pkt.readByte() !== 11) return;
     const price = ctx.templates.cfgInt("SpaAddictionMoneyNeeded", 1299);
-    if (p.info.Money < price) return p.sendMessage(0, "Seus Cupons não são suficientes.");
+    if (p.info.Money < price) return p.sendMessage(0, "点券不足。");
     const mins = ctx.templates.cfgInt("SpaPriRoomContinueTime", 30);
     const m = await hotSpringMgr(ctx);
     p.info.Money -= price;
@@ -357,7 +364,7 @@ export function registerHotSpring(r: HandlerRegistry): SubRouter {
     const pk = new PacketOut(191);
     pk.writeByte(12);
     p.send(pk);
-    p.sendMessage(0, `Renovado com sucesso! Foram descontados ${price} Cupons e você ganhou mais ${mins} minuto(s)`);
+    p.sendMessage(0, `续时成功！已扣除${price}点券，增加${mins}分钟`);
   });
   r.player(175, "HOTSPRING_ROOM_CREATE", () => {}, "stub");
   const cmd = hotSpringCmdRouter();
