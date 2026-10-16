@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {ByteReader,buildTag,compressSwf,decompressSwf,encodeU30,parseTags} from '../../tools/i18n/abc-strings/lib.mjs';
 import {parseActivityAbc} from '../../tools/i18n/abc-strings/activity-response.mjs';
+import {adaptPageNavigaterDisposal} from '../native-shared/build-library.mjs';
 
 export const sha=b=>createHash('sha256').update(b).digest('hex');
 export const q=(p,i)=>{const n=p.names[i];return n?`${p.strings[p.namespaces[n.ns]?.name]??''}::${p.strings[n.name]??''}`:'';};
@@ -69,7 +70,7 @@ export function buildLibraries({projectRoot,out}){
   const attr=core.tags.find(t=>t.code===69).raw,header=Buffer.from(core.headerPrefix);header.writeUInt16LE(1,header.length-2);
   const result=[];
   for(const [file,owners,patch] of [['pair-shared-library.swf',shared,false],['pair-original-library.swf',pair,true]]){
-    const entries=owners.map(a=>{const r=patch?adapt(a):{bytes:a.abc,changes:[]};return{...a,bytes:r.bytes,changes:r.changes};});
+    const entries=owners.map(a=>{const r=patch?adapt(a):adaptPageNavigaterDisposal({...a,owner:a.name});return{...a,bytes:r.bytes,changes:r.changes};});
     const bytes=compressSwf('CWS',15,Buffer.concat([header,attr,...entries.map(a=>buildTag(82,Buffer.concat([a.prefix,a.bytes]))),buildTag(1,Buffer.alloc(0)),buildTag(0,Buffer.alloc(0))]));
     assert.equal(scan(bytes).abcs.length,owners.length);writeFileSync(resolve(out,file),bytes,{flag:'wx'});
     result.push({file,bytes:bytes.length,sha256:sha(bytes),owners:entries.map(a=>({owner:a.name,originalAbcSha256:sha(a.abc),abcSha256:sha(a.bytes),changes:a.changes}))});
