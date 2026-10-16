@@ -123,7 +123,7 @@ package {
   private function constructWindow():void {
    role();sceneRoot=new Sprite();sceneRoot.addChild(cls("com.pickgliss.ui.ComponentFactory").Instance.creat("boguAdventure.stateView.Bg"));
    control=create("activity.boguAdventure.BoguAdventureControl");bindModel();game=create("activity.boguAdventure.view.BoguAdventureGameView",control,true);sceneRoot.addChild(game as DisplayObject);
-   notice=text(12,7,780,32);sceneRoot.addChild(notice);sceneRoot.addChild(button("关闭扫雷",875,8,function():void{closeNative();}));startButton=button("开始本局",430,270,function():void{request({type:"start"});});sceneRoot.addChild(startButton);
+   notice=text(219,76,590,26);sceneRoot.addChild(notice);sceneRoot.addChild(button("关闭扫雷",875,8,function():void{closeNative();}));startButton=button("开始本局",430,270,function():void{request({type:"start"});});sceneRoot.addChild(startButton);
    cls("com.pickgliss.toplevel.StageReferance").stage.addChild(sceneRoot);cls("com.pickgliss.toplevel.StageReferance").stage.focus=sceneRoot;sceneRoot.addEventListener(Event.ENTER_FRAME,tick);sceneRoot.addEventListener(KeyboardEvent.KEY_DOWN,onKey);sceneRoot.addEventListener(MouseEvent.CLICK,stopBubble);sceneRoot.addEventListener(MouseEvent.MOUSE_DOWN,stopBubble);
    lock();
   }
