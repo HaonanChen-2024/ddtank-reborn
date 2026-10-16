@@ -84,5 +84,8 @@
   "UserLoginHandler.RsaCryptorError": "登录数据解密失败，请重新登录。",
   "Game.Server.LoginNext": "你的账号已在其他位置登录。",
   "AbstractPacketLib.SendGamePlayerLeave.Msg4": "非正常退出战斗；惩罚标准：{0}点经验。",
-  "AbstractPacketLib.SendGamePlayerLeave.Msg6": "非正常退出战斗；惩罚标准：{0}点经验、{1}点功勋。"
+  "AbstractPacketLib.SendGamePlayerLeave.Msg6": "非正常退出战斗；惩罚标准：{0}点经验、{1}点功勋。",
+  "AttackEffect.Success": "本回合触发攻击效果。",
+  "DefenceEffect.Success": "本回合触发防御效果。",
+  "FatalEffect.Success": "本回合触发引导效果。"
 }

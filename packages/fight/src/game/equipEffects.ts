@@ -20,6 +20,7 @@
 import type { Living, Player } from "./living.js";
 import { isSpecialBall } from "../data/types.js";
 import { AbstractEffect, BasePlayerEffect, EQUIP_PROC } from "./effects.js";
+import { LanguageMgr } from "../pve/cs.js";
 
 const T = {
   AddAttack: 101, AddDefence: 102, AddAgility: 103, AddLucky: 104, AddDamage: 105, ReduceDamage: 106, AddBlood: 107,
@@ -34,8 +35,16 @@ const T = {
 const roll = (l: Living, p: number) => l.game.rng.nextMax(100) < p;
 const picture = (l: Living, type: number, state: boolean) => l.game.emit({ cmd: "SEND_PICTURE", livingId: l.id, type, state });
 const msg = (l: Living, text: string) => l.game.emit({ cmd: "EQUIP_EFFECT_MSG", livingId: l.id, message: text });
-/** AttackEffect.Success / DefenceEffect.Success — the two generic proc notices (LanguageMgr keys folded to English). */
-const PROC_MSG = { attack: "Attack gem effect!", defend: "Defence gem effect!" };
+/** Resolve the server translator at proc time; standalone engines keep their English notices. */
+function effectMessage(key: string, fallback: string): string {
+  const text = String(LanguageMgr.GetTranslation(key));
+  return text === key ? fallback : text;
+}
+const PROC_MSG = {
+  get attack() { return effectMessage("AttackEffect.Success", "Attack gem effect!"); },
+  get defend() { return effectMessage("DefenceEffect.Success", "Defence gem effect!"); },
+  get fatal() { return effectMessage("FatalEffect.Success", "First shot: guided!"); },
+};
 
 // ---------------------------------------------------------------------------- status sub-effects (kill-triggered)
 
@@ -365,7 +374,7 @@ export class FatalEffect extends ProcEffect {
     if (p.currentBall.id !== 3) p.controlBall = true;
     if (this.saycount === 1) {
       p.effectTrigger = true;
-      msg(p, free ? "First shot: guided!" : PROC_MSG.attack);
+      msg(p, free ? PROC_MSG.fatal : PROC_MSG.attack);
     }
   };
   private readonly onBeforeTakeDamage = (_l: Living, _s: Living, d: { damage: number; critical: number }) => {

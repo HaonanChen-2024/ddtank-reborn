@@ -85,7 +85,7 @@ export function payTakeCard(m: RoomMember): boolean {
   if (m.isBot) return false;
   const p = m as GamePlayer;
   const cost = (p.info.typeVIP ?? 0) > 0 ? 437 : 486;
-  if (p.info.Money + p.info.MoneyLock < cost) { p.sendMessage?.(1, "Cupons insuficientes."); return false; }
+  if (p.info.Money + p.info.MoneyLock < cost) { p.sendMessage?.(1, p.lang("UserBuyItemHandler.NoMoney")); return false; }
   p.removeMoney(cost);
   return true;
 }
