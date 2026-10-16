@@ -14,6 +14,7 @@ const action = z.object({
   mode: z.enum(["normal", "advanced"]).optional(),
   selection: z.array(z.number().int().min(1).max(14)).max(4).optional(),
   poolVersion: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  funding: z.literal("tickets").optional(),
   cardId: z.string().uuid().optional(), recipientName: z.string().min(1).max(64).optional(),
 }).strict();
 const command = z.object({ characterId, requestId: z.string().uuid().transform((s) => s.toLowerCase()), action }).strict();
@@ -35,6 +36,7 @@ export async function activityRoutes(f: FastifyInstance, ctx: AppCtx): Promise<v
     const params = z.object({ activityId: z.string().min(1).max(32) }).safeParse(req.params);
     if (!body.success || !params.success || body.data.action.items !== undefined && params.data.activityId !== "moonlight-native"
       || body.data.action.mode !== undefined && !["treasure", "treasure-native"].includes(params.data.activityId)
+      || body.data.action.funding !== undefined && !["treasure", "treasure-native"].includes(params.data.activityId)
       || (body.data.action.cardId !== undefined || body.data.action.recipientName !== undefined) && params.data.activityId !== "first-recharge-native") return reply.code(400).send({ message: "活动操作参数或请求编号无效。" });
     try { return await activityAction(ctx, userOf(req), body.data.characterId, params.data.activityId, body.data.requestId, body.data.action); } catch (err) { return failure(reply, err); }
   });

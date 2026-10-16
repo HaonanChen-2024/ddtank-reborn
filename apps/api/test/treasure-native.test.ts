@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { advanceTreasure, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
+import { advanceTreasure, prepareTreasureTicketPurchase, readTreasureState, viewTreasureNative } from "../src/activities/treasure-native.js";
 import { completeTreasureCatalog, inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION, type TreasureCatalog, type TreasureTemplate } from "../src/activities/treasure-catalog.js";
 import { createActivityState, transitionActivity, viewActivities } from "../src/activities/engine.js";
 import { ActivityError, type ActivityAction, type ActivityContext, type ActivityState } from "../src/activities/types.js";
@@ -149,5 +149,155 @@ describe("original v2 treasure transitions and legacy entitlements", () => {
       {...old(),bag:[{templateId:11019,count:3}]}, {...readTreasureState(old()),bag:[{templateId:11905,count:5,origin:"original-catalog",entryKey:TREASURE_ENTRIES[0].entryKey,sourceOriginalIndex:12,poolVersion:TREASURE_POOL_VERSION}]}]) {
       const before = structuredClone(saved); expect(() => readTreasureState(saved)).toThrow(ActivityError); expect(saved).toEqual(before);
     }
+  });
+});
+
+describe("independent local-task treasure tickets", () => {
+  const buy = (run: ReturnType<typeof session>, mode: "normal" | "advanced", count: number) => run.act({ type: "buy-tickets", mode, count,
+    poolVersion: TREASURE_POOL_VERSION, choice: run.view().bagToken });
+  const drawAction = (run: ReturnType<typeof session>, mode: "normal" | "advanced" = "normal", count = 1): ActivityAction => ({
+    type: "draw", mode, count, funding: "tickets", selection: mode === "advanced" ? [4,1,12,7] : [],
+    poolVersion: TREASURE_POOL_VERSION, choice: run.view().bagToken });
+
+  it("defaults old saves to zero without backfill or writes and preserves the exact old token bytes", () => {
+    // Fixed SHA of the pre-ticket normalized JSON (version,bag,draws,score,fragments,pity,choices,claimed).
+    const oldToken = "2026-10-15:-QfxTaCOajyVjmmneSLFDhP3zMT-ZkTaZrFC0LsfZf8", saved = old(), before = structuredClone(saved);
+    const normalized = readTreasureState(saved), { tickets: _tickets, ...oldV2 } = normalized;
+    expect(normalized.tickets).toEqual({ normal: 0, advanced: 0 }); expect(readTreasureState(undefined).tickets).toEqual({ normal: 0, advanced: 0 });
+    expect(token(saved)).toBe(oldToken); expect(token(oldV2)).toBe(oldToken); expect(token(normalized)).toBe(oldToken);
+    expect(viewTreasureNative(saved, clock, wallet).tickets).toEqual({ normal: 0, advanced: 0 }); expect(saved).toEqual(before);
+    const held = { ...normalized, tickets: { normal: 7, advanced: 2 } }, heldBefore = structuredClone(held);
+    expect(readTreasureState(held)).toEqual(held); expect(token(held)).not.toBe(oldToken);
+    expect(token({ ...held, tickets: { normal: 6, advanced: 2 } })).not.toBe(token(held)); expect(held).toEqual(heldBefore);
+  });
+
+  it("rejects damaged, partial or overflowing ticket saves without silently resetting held rights", () => {
+    for (const tickets of [undefined,null,[],{}, { normal: 1 }, { advanced: 1 }, { normal: 1, advanced: 2, extra: 0 },
+      { normal: -1, advanced: 0 }, { normal: 0.5, advanced: 0 }, { normal: "1", advanced: 0 },
+      { normal: NaN, advanced: 0 }, { normal: 0, advanced: Infinity }, { normal: 1_000_000_001, advanced: 0 }]) {
+      const saved = { ...old(), tickets }, before = structuredClone(saved);
+      expect(() => readTreasureState(saved)).toThrow(/寻宝券余额/); expect(saved).toEqual(before);
+    }
+    expect(readTreasureState({ ...old(), tickets: { normal: 1_000_000_000, advanced: 1_000_000_000 } }).tickets)
+      .toEqual({ normal: 1_000_000_000, advanced: 1_000_000_000 });
+  });
+
+  it("exchanges one or 99 tickets at 30/60 points without RNG or fabricating draw progress", () => {
+    const run = session(old()), oldState = readTreasureState(old()); run.wallet.points = 10_000;
+    const first = buy(run, "normal", 1), advanced = buy(run, "advanced", 99);
+    expect(first).toMatchObject({ pointsDelta: -30, earnedDelta: 0, rewards: [], nativeTreasureEffects: [
+      { type: "tickets-bought", mode: "normal", count: 1, cost: 30, score: 9970, tickets: { normal: 1, advanced: 0 } }] });
+    expect(advanced).toMatchObject({ pointsDelta: -5940, earnedDelta: 0, rewards: [], nativeTreasureEffects: [
+      { type: "tickets-bought", mode: "advanced", count: 99, cost: 5940, score: 4030, tickets: { normal: 1, advanced: 99 } }] });
+    expect(readTreasureState(run.state.games.treasure)).toEqual({ ...oldState, tickets: { normal: 1, advanced: 99 } });
+    expect(run.state.completed.treasure).toBeUndefined(); expect(run.state.daily.draws ?? 0).toBe(0); expect(run.state.daily.actions).toBe(2);
+    expect(run.wallet).toMatchObject({ points: 4030, earned: 40 });
+    const action: ActivityAction = { type: "buy-tickets", mode: "normal", count: 1, poolVersion: TREASURE_POOL_VERSION, choice: token(old()) };
+    const saved = old(), before = structuredClone(saved), request = structuredClone(action);
+    expect(prepareTreasureTicketPurchase(saved, action, ctx(), wallet)).toMatchObject({ count: 1, cost: 30, state: { tickets: { normal: 0, advanced: 0 } } });
+    expect(advanceTreasure(saved, action, ctx(), wallet, noRandom, true)).toMatchObject({ cost: 30, completed: false, draws: 0, rewards: [] });
+    expect(saved).toEqual(before); expect(action).toEqual(request);
+  });
+
+  it("spends the matching tickets once per draw without a second points charge or changing old points effects", () => {
+    const run = session(old()); buy(run, "normal", 5); buy(run, "advanced", 5);
+    const before = run.wallet.points, ordinary = run.act(drawAction(run, "normal", 5), "treasure-native", () => 0);
+    const advanced = run.act(drawAction(run, "advanced", 5), "treasure-native", () => 0.999999);
+    expect(before).toBe(1550); expect(run.wallet.points).toBe(before);
+    expect(ordinary).toMatchObject({ pointsDelta: 0, nativeTreasureEffects: [{ type: "drawn", mode: "normal", count: 5, cost: 0,
+      funding: "tickets", ticketsSpent: 5, score: before, tickets: { normal: 0, advanced: 5 } }] });
+    expect(advanced).toMatchObject({ pointsDelta: 0, nativeTreasureEffects: [{ type: "drawn", mode: "advanced", count: 5, cost: 0,
+      funding: "tickets", ticketsSpent: 5, score: before, tickets: { normal: 0, advanced: 0 } }] });
+    expect(readTreasureState(run.state.games.treasure)).toMatchObject({ draws: 20, score: 35, fragments: 20, pity: 8, choices: old().choices });
+    expect(run.view().bag[2]).toMatchObject({ templateId: TREASURE_ENTRIES[0].templateId, itemCount: TREASURE_ENTRIES[0].count });
+    expect(run.view().bag.at(-1)).toMatchObject({ templateId: TREASURE_ENTRIES.at(-1)!.templateId, itemCount: TREASURE_ENTRIES.at(-1)!.count });
+    const points = run.draw(); expect(points.pointsDelta).toBe(-30);
+    expect(Object.keys(points.nativeTreasureEffects![0]).sort()).toEqual(["type","mode","count","cost","score","draws","rewards"].sort());
+  });
+
+  it("allows a ticket draw at zero points but refuses cross-mode substitution, fallback and invalid funding", () => {
+    const run = session({ ...old(), tickets: { normal: 2, advanced: 0 } }); run.wallet.points = 0;
+    expect(run.view().drawChoices.every(row => !row.canDraw)).toBe(true);
+    expect(run.view().ticketDrawChoices.filter(row => row.mode === "normal").map(row => row.canDraw)).toEqual([true,true,false,false,false]);
+    expect(run.view().ticketDrawChoices.filter(row => row.mode === "advanced").every(row => !row.canDraw)).toBe(true);
+    const before = structuredClone(run.state), request = drawAction(run, "advanced");
+    expect(() => run.act(request)).toThrow(/寻宝券不足/); expect(run.state).toEqual(before);
+    run.wallet.points = 2000;
+    for (const funding of ["points","ticket","",null,undefined,0]) {
+      expect(() => run.act({ ...drawAction(run), funding } as ActivityAction)).toThrow(/资金来源/); expect(run.state).toEqual(before);
+    }
+    run.wallet.points = 0; run.act(drawAction(run, "normal", 2), "treasure-native", () => 0);
+    expect(run.wallet.points).toBe(0); expect(run.view().tickets).toEqual({ normal: 0, advanced: 0 });
+    run.wallet.points = 2000; const exhausted = structuredClone(run.state);
+    expect(() => run.act(drawAction(run))).toThrow(/寻宝券不足/); expect(run.state).toEqual(exhausted);
+  });
+
+  it("rejects malformed purchases before RNG and retains the exact input action, wallet and save", () => {
+    const run = session(old()), base: ActivityAction = { type: "buy-tickets", mode: "normal", count: 1,
+      poolVersion: TREASURE_POOL_VERSION, choice: run.view().bagToken }, before = structuredClone(run.state), funds = { ...run.wallet };
+    for (const invalid of [{...base,count:0},{...base,count:100},{...base,count:-1},{...base,count:1.5},{...base,count:"1"},
+      {...base,mode:"other"},{...base,mode:undefined},{...base,poolVersion:undefined},{...base,poolVersion:"0".repeat(64)},
+      {...base,choice:"stale"},{...base,selection:[]},{...base,funding:"tickets"},{...base,index:0},{...base,price:0},{...base,readiness:{status:"ready"}}]) {
+      const request = structuredClone(invalid);
+      expect(() => run.act(invalid as ActivityAction)).toThrow(ActivityError);
+      expect(invalid).toEqual(request); expect(run.state).toEqual(before); expect(run.wallet).toEqual(funds);
+    }
+    run.wallet.points = 29; expect(() => buy(run,"normal",1)).toThrow(/积分不足/); expect(run.state).toEqual(before);
+  });
+
+  it("blocks purchases and both funding paths on any unready row while preserving existing ticket and bag entitlements", () => {
+    const partial = readyCatalog(), row = partial.preview.find(entry => entry.sourceOriginalIndex === 12)!;
+    row.status = "blocked"; row.reasons = ["Unselected owner blocked"];
+    partial.readiness = { status: "blocked", totalRows: 158, readyRows: 157, blocked: [{ entryKey: row.entryKey, reasons: [...row.reasons] }], description: "完整奖池尚未就绪" };
+    for (const context of [clock, { ...clock, treasureCatalog: partial }]) {
+      const run = session({ ...old(), tickets: { normal: 5, advanced: 5 } }, context), before = structuredClone(run.state), funds = { ...run.wallet };
+      expect(run.view().ticketShop.offers.every(offer => !offer.canBuy)).toBe(true);
+      expect(run.view().ticketDrawChoices.every(choice => !choice.canDraw)).toBe(true);
+      for (const mode of ["normal","advanced"] as const) {
+        expect(() => buy(run,mode,1)).toThrow(/完整奖池/);
+        const draw = { ...drawAction(run,mode), selection: mode === "advanced" ? [1,2,3,4] : [] };
+        expect(() => run.act(draw)).toThrow(/完整奖池/);
+        const { funding: _funding, ...points } = draw; expect(() => run.act(points)).toThrow(/完整奖池/);
+        expect(run.state).toEqual(before); expect(run.wallet).toEqual(funds);
+      }
+      run.state.daily.actions = 500;
+      run.act({ type: "progress", tier: 2, choice: run.view().bagToken }); run.act({ type: "exchange", choice: run.view().bagToken });
+      run.act({ type: "take", index: 0, choice: run.view().bagToken }); run.act({ type: "recycle", choice: run.view().bagToken });
+      expect(run.view().tickets).toEqual({ normal: 5, advanced: 5 }); expect(run.view().bag).toEqual([]); expect(run.state.daily.actions).toBe(500);
+    }
+  });
+
+  it("bounds purchase headroom, daily actions and finite ticket batches before RNG", () => {
+    const state = { ...readTreasureState(old()), tickets: { normal: 999_999_998, advanced: 999_999_999 } };
+    const view = viewTreasureNative(state,ctx(),wallet); expect(view.ticketShop).toMatchObject({ currency: "local-task-points", maxPurchase: 99,
+      offers: [{ mode: "normal", unitCost: 30, maxCount: 2, canBuy: true }, { mode: "advanced", unitCost: 60, maxCount: 1, canBuy: true }] });
+    expect(view.localRules).toMatchObject({ version: 2, ticketPrices: { normal: 30, advanced: 60 }, maxTicketPurchase: 99 });
+    expect(view.ticketDrawChoices).toHaveLength(10);
+    expect(() => advance(state,{type:"buy-tickets",mode:"normal",count:3,poolVersion:TREASURE_POOL_VERSION})).toThrow(/余额已达上限/);
+    const held = { ...readTreasureState(old()), tickets: { normal: 5, advanced: 5 } }, run = session(held); run.state.daily.actions = 500;
+    const before = structuredClone(run.state); expect(() => buy(run,"normal",1)).toThrow(/今日玩法次数/);
+    expect(() => run.act(drawAction(run))).toThrow(/今日玩法次数/); expect(run.state).toEqual(before);
+    const exhausted = viewTreasureNative(held,ctx(),wallet,false);
+    expect(exhausted.ticketShop.offers.every(offer => !offer.canBuy)).toBe(true); expect(exhausted.ticketDrawChoices.every(choice => !choice.canDraw)).toBe(true);
+    const full = { ...held, bag: Array.from({ length: 98 }, () => ({ templateId: 11019, count: 2, origin: "legacy-four-material" as const })) }, limited = session(full);
+    expect(limited.view().ticketDrawChoices.filter(row=>row.mode==="normal").map(row=>row.canDraw)).toEqual([true,true,false,false,false]);
+    expect(() => limited.act(drawAction(limited,"normal",3))).toThrow(/已满/);
+    for (const field of ["draws","score","fragments"] as const) {
+      const capped = session({ ...held, [field]: 1_000_000_000 }), saved = structuredClone(capped.state);
+      expect(capped.view().ticketDrawChoices.every(choice => !choice.canDraw)).toBe(true);
+      expect(() => capped.act(drawAction(capped))).toThrow(/已达上限/); expect(capped.state).toEqual(saved);
+    }
+  });
+
+  it("keeps ticket batches atomic after late RNG failure and rejects stale purchase/date tokens without consumption", () => {
+    const context = ctx(), run = session({ ...old(), tickets: { normal: 5, advanced: 5 } },context), before = structuredClone(run.state), funds = { ...run.wallet };
+    const request = drawAction(run,"normal",5), raw = structuredClone(request); let calls = 0;
+    expect(() => run.act(request,"treasure-native",()=>++calls===3?NaN:0)).toThrow(/随机源/);
+    expect(calls).toBe(3); expect(request).toEqual(raw); expect(run.state).toEqual(before); expect(run.wallet).toEqual(funds);
+    const stale = drawAction(run); buy(run,"normal",1); const bought = structuredClone(run.state), paid = { ...run.wallet };
+    expect(() => run.act(stale)).toThrow(/已更新/); expect(run.state).toEqual(bought); expect(run.wallet).toEqual(paid);
+    const purchase: ActivityAction = { type: "buy-tickets", mode: "advanced", count: 1, poolVersion: TREASURE_POOL_VERSION, choice: run.view().bagToken };
+    context.now = new Date("2026-10-16T00:00:00Z"); expect(() => run.act(purchase)).toThrow(/已更新/);
+    expect(run.state).toEqual(bought); expect(run.wallet).toEqual(paid); expect(run.view().tickets).toEqual({ normal: 6, advanced: 5 });
   });
 });

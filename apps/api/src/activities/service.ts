@@ -16,7 +16,7 @@ import type { MinesNativeEffect } from "./mines-native.js";
 import type { DDPlayNativeEffect } from "./ddplay-native.js";
 import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
-import { prepareTreasureDraw, type TreasureNativeEffect } from "./treasure-native.js";
+import { prepareTreasureDraw, prepareTreasureTicketPurchase, type TreasureNativeEffect } from "./treasure-native.js";
 import { inspectTreasureCatalog, TREASURE_ENTRIES, TREASURE_IDS, TREASURE_POOL_VERSION,
   type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
@@ -278,9 +278,11 @@ async function rewardTemplate(app: AppCtx, who: Owner, reward: ActivityReward, m
 }
 
 /** Every original target is locked in global ID order, including unselected and special categories. */
-async function preflightTreasureDraw(app: AppCtx, value: unknown, action: ActivityAction, ctx: Pick<ActivityContext, "now">, wallet: ActivityWallet, native: boolean) {
+async function preflightTreasureAction(app: AppCtx, value: unknown, action: ActivityAction, ctx: Pick<ActivityContext, "now">, wallet: ActivityWallet, native: boolean) {
   const catalog = await treasureCatalog(app, true);
-  prepareTreasureDraw(value, action, { ...ctx, treasureCatalog: catalog }, wallet, native);
+  const preparedContext = { ...ctx, treasureCatalog: catalog };
+  if (action.type === "buy-tickets") prepareTreasureTicketPurchase(value, action, preparedContext, wallet);
+  else prepareTreasureDraw(value, action, preparedContext, wallet, native);
   return catalog;
 }
 
@@ -553,14 +555,14 @@ async function walletActivityAction(app: AppCtx, claims: Claims, characterId: nu
       if (activityId === "carnival-native" && sharedCarnival) replay.nativeCarnival.global = viewCarnivalGlobal(await carnivalGlobalValue(txApp), characterId, row!.Revision);
       return replay;
     }
-    if ((action.selection !== undefined || action.poolVersion !== undefined) && !["treasure", "treasure-native"].includes(activityId))
-      throw new ActivityError("原奖池分类与版本参数仅用于迷宫寻宝。", 400);
+    if ((action.selection !== undefined || action.poolVersion !== undefined || action.funding !== undefined) && !["treasure", "treasure-native"].includes(activityId))
+      throw new ActivityError("原奖池分类、版本与券参数仅用于迷宫寻宝。", 400);
     const wallet = walletOf(row);
     const state = await stateOf(txApp, characterId, now);
     let businessNow = now;
     let catalog: TreasureCatalog | undefined;
-    if ((activityId === "treasure" || activityId === "treasure-native") && action.type === "draw") {
-      catalog = await preflightTreasureDraw(txApp, state.games.treasure, action, { now }, wallet, activityId === "treasure-native");
+    if ((activityId === "treasure" || activityId === "treasure-native") && ["draw", "buy-tickets"].includes(action.type)) {
+      catalog = await preflightTreasureAction(txApp, state.games.treasure, action, { now }, wallet, activityId === "treasure-native");
       // New template locks can also wait across UTC midnight; use one post-lock business date.
       businessNow = new Date();
     }

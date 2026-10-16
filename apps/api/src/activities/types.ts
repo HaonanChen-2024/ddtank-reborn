@@ -17,7 +17,7 @@ import type { ExchangeNativeView } from "./exchange-native.js";
 import type { DevilProjection, DevilEffect } from "./devil-native.js";
 import type { CaveProjection, CaveEffect } from "./caveloot-native.js";
 
-export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; selection?: number[]; poolVersion?: string; cardId?: string; recipientName?: string }
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; marked?: boolean; items?: { index: number; count: number }[]; mode?: "normal" | "advanced"; selection?: number[]; poolVersion?: string; funding?: "tickets"; cardId?: string; recipientName?: string }
 export interface ActivityReward { templateId: number; count: number; validDays?: number }
 export interface ActivityWallet { points: number; earned: number; revision: number }
 export interface ActivityContext {

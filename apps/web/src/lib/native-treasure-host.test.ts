@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 vi.mock("./api", () => ({ api: { getToken: () => "test-token" } }));
-import { performActivity, readPendingActivity, savePendingActivity, type ActivityRequest, type ActivityResponse } from "./activities";
+import { clearPendingActivity, getActivities, performActivity, readPendingActivity, savePendingActivity, type ActivityRequest, type ActivityResponse } from "./activities";
 import type { NativeActivityHost } from "./native-activity-host";
 import { attachNativeTreasureHost, retryNativeTreasureRequest, type NativeTreasureCallbackTarget, type NativeTreasureEnvelope } from "./native-treasure-host";
 import { attachNativeMoonlightHost, type NativeMoonlightCallbackTarget } from "./native-moonlight-host";
@@ -8,7 +11,7 @@ import { attachNativeMoonlightHost, type NativeMoonlightCallbackTarget } from ".
 const fetchMock = vi.fn<typeof fetch>(), hosts: NativeActivityHost[] = [];
 const bagToken = "2026-10-15:" + "B".repeat(43), poolVersion = "a".repeat(64);
 const response = (value: unknown) => new Response(JSON.stringify(value));
-let nextId = 900;
+let nextId = 900, nextGeneration = 0;
 type BagRow = { index: number; templateId: number; itemCount: number; origin: string; recycleUnitPoints: number | null;
   entryKey?: string; sourceOriginalIndex?: number; poolVersion?: string };
 function projection(ready = true) {
@@ -29,12 +32,20 @@ function projection(ready = true) {
     drawChoices: ["normal", "advanced"].flatMap(mode => [1, 2, 3, 4, 5].map(count => ({ mode, count,
       cost: count * (mode === "normal" ? 30 : 60), requiredSelection: mode === "normal" ? 0 : 4, canDraw: ready }))),
     bagCapacity: 100, bagSlotsUsed: 0, bagToken, draws: 0, progressScore: 0, fragments: 0, pityRemaining: 10,
+    tickets: { normal: 0, advanced: 0 },
+    ticketShop: { currency: "local-task-points", maxPurchase: 99, offers: [
+      { mode: "normal", unitCost: 30, maxCount: 33, canBuy: ready },
+      { mode: "advanced", unitCost: 60, maxCount: 16, canBuy: ready },
+    ] },
+    ticketDrawChoices: ["normal", "advanced"].flatMap(mode => [1, 2, 3, 4, 5].map(count => ({ mode, count,
+      ticketsRequired: count, requiredSelection: mode === "normal" ? 0 : 4, canDraw: false }))),
     categories: Array.from({ length: 15 }, (_, index) => ({ index, sourceOriginalIndex: index + 1, name: `原类别${index + 1}`,
       selectable: index < 14, special: index === 14, entryKeys: preview.filter(row => row.sourceOriginalIndex === index + 1).map(row => row.entryKey) })),
     canDraw: ready, canTake: false, canRecycle: false, bag: [] as BagRow[], preview, records: [] as string[],
     exchange: { fragmentCost: 10, templateId: 11021, itemCount: 2, canExchange: false },
     progress: [1, 2, 3].map(tier => ({ tier, target: tier * 10, templateId: 11019, itemCount: tier * 2, claimed: false, canClaim: false })),
-    localRules: { version: 2, description: "本地普通30、高级60积分，原行等权，不使用旧四材料保底" },
+    localRules: { version: 2, ticketPrices: { normal: 30, advanced: 60 }, maxTicketPurchase: 99,
+      description: "本地普通30、高级60积分，原行等权，不使用旧四材料保底" },
   };
 }
 const legacy = (index: number, templateId = 11019, itemCount = 1): BagRow => ({ index, templateId, itemCount, origin: "legacy-four-material", recycleUnitPoints: 2 });
@@ -48,6 +59,7 @@ const drawAction = (mode = "normal", count = 1, selection = mode === "advanced" 
 });
 function drawResult(mode: string, count: number, sources = Array.from({ length: count }, () => 15)) {
   const p = projection(); p.started = true; p.score -= count * (mode === "advanced" ? 60 : 30);
+  p.ticketShop.offers.forEach(offer => { offer.maxCount = Math.floor(p.score / offer.unitCost); });
   p.draws = p.fragments = count; p.progressScore = count * (mode === "advanced" ? 2 : 1);
   p.progress.forEach(row => { row.canClaim = p.progressScore >= row.target; });
   p.bag = sources.map((source, index) => {
@@ -61,8 +73,8 @@ function drawResult(mode: string, count: number, sources = Array.from({ length: 
   return { p, effect };
 }
 const sent = () => JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body));
-function setup(isCurrent: () => boolean = () => true) {
-  const id = ++nextId, generation = "treasure-" + id, target: NativeTreasureCallbackTarget = {};
+function setup(isCurrent: () => boolean = () => true, characterId?: number) {
+  const id = characterId ?? ++nextId, generation = `treasure-${id}-${++nextGeneration}`, target: NativeTreasureCallbackTarget = {};
   const accept = vi.fn((e: NativeTreasureEnvelope): unknown => ({ characterId: id, generation, sequence: e.sequence,
     pending: false, revision: e.snapshot!.revision })), reject = vi.fn();
   const host = attachNativeTreasureHost({ characterId: id, generation, target, isCurrent,
@@ -203,6 +215,7 @@ describe("original Treasure v2 host", () => {
   it("accepts the exact legacy recycle overflow boundary while retaining take", async () => {
     for (const headroom of [13, 14]) {
       const x = setup(), score = 2_147_483_647 - headroom, p = { ...stocked(), score, canRecycle: headroom >= 14 };
+      p.ticketShop.offers.forEach(offer => { offer.maxCount = 99; });
       fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { points: score, nativeTreasure: p }))); x.read();
       await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce()); expect(x.reject).not.toHaveBeenCalled(); x.host.cancel();
     }
@@ -253,15 +266,18 @@ const apiClock = () => ({ now: new Date("2026-10-15T12:00:00.000Z") });
 type TreasureCatalog = Pick<ReturnType<typeof projection>, "poolVersion" | "preview" | "readiness">;
 type ApiClock = ReturnType<typeof apiClock> & { treasureCatalog?: TreasureCatalog };
 type ApiReward = { templateId: number; count: number; validDays?: number; origin?: string; entryKey?: string; sourceOriginalIndex?: number; poolVersion?: string };
-type ApiState = { version: 2; bag: ApiReward[]; draws: number; score: number; fragments: number; pity: number; choices: string[]; claimed: number[] };
+type ApiState = { version: 2; bag: ApiReward[]; draws: number; score: number; fragments: number; pity: number; choices: string[]; claimed: number[];
+  tickets: { normal: number; advanced: number } };
 type ApiEffect = { type: "drawn"; mode: "normal" | "advanced"; count: number; cost: number; score: number; draws: number;
+  funding?: "tickets"; ticketsSpent?: number; tickets?: { normal: number; advanced: number };
   rewards: { index: number; templateId: number; itemCount: number; entryKey: string; sourceOriginalIndex: number }[] }
+  | { type: "tickets-bought"; mode: "normal" | "advanced"; count: number; cost: number; score: number; tickets: { normal: number; advanced: number } }
   | { type: "taken" | "recycled" | "exchanged" | "progress-claimed" };
 type ApiOwner = {
   readTreasureState: (state: unknown) => ApiState;
-  viewTreasureNative: (state: unknown, ctx: ApiClock, funds: { points: number }) => ReturnType<typeof projection>;
+  viewTreasureNative: (state: unknown, ctx: ApiClock, funds: { points: number }, actionsRemaining?: boolean) => ReturnType<typeof projection>;
   advanceTreasure: (state: unknown, action: import("./activities").ActivityAction, ctx: ApiClock, funds: { points: number }, rng: () => number, native?: boolean) =>
-    { state: ApiState; pointsDelta: number; rewards: ApiReward[]; effects: ApiEffect[] };
+    { state: ApiState; pointsDelta: number; cost: number; rewards: ApiReward[]; effects: ApiEffect[] };
 };
 // Execute real API modules while keeping Web tsc and API tsc as separate gates.
 const nativeApiPath = new URL("../../../api/src/activities/treasure-native.ts", import.meta.url).href;
@@ -386,5 +402,208 @@ describe("Treasure API v2 interoperability", () => {
     const accepted = x.accept.mock.calls[0][0].snapshot!;
     expect(accepted.nativeTreasure).toEqual(afterClaim); expect(accepted).not.toHaveProperty("nativeTreasureAction");
     expect(accepted.mailedCount).toBe(1); expect(accepted.message).toBe("原有回执");
+  });
+});
+
+const ticketState = (normal = 0, advanced = 0): ApiState => ({ ...readTreasureState(undefined), tickets: { normal, advanced } });
+const buyAction = (p: ReturnType<typeof projection>, mode: "normal" | "advanced", count: number) =>
+  ({ type: "buy-tickets", choice: p.bagToken, mode, count, poolVersion: p.poolVersion });
+async function confirmProjection(x: ReturnType<typeof setup>, p: ReturnType<typeof projection>) {
+  fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { points: p.score, nativeTreasure: p })));
+  expect(x.read().accepted).toBe(true); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+  expect(x.reject).not.toHaveBeenCalled(); x.accept.mockClear(); fetchMock.mockReset();
+}
+describe("Treasure independent tickets", () => {
+  it.each((["normal", "advanced"] as const).flatMap(mode => [1, 99].map(count => ({ mode, count }))))
+    ("buys $count $mode tickets with exact wire fields and unchanged draw progress", async ({ mode, count }) => {
+      const x = setup(), ctx = readyApiClock(), state = ticketState(3, 7), funds = { points: 10000 };
+      const first = viewTreasureNative(state, ctx, funds); await confirmProjection(x, first);
+      const action = buyAction(first, mode, count), expected = structuredClone(action);
+      fetchMock.mockImplementation(async () => {
+        const result = advanceTreasure(state, sent().action, ctx, funds, () => { throw new Error("Purchase cannot use RNG"); }, true);
+        const points = funds.points + result.pointsDelta, p = viewTreasureNative(result.state, ctx, { points });
+        expect(result.state.draws).toBe(state.draws); expect(result.state.score).toBe(state.score);
+        expect(result.state.fragments).toBe(state.fragments);
+        return response(snapshot(x.id, { points, nativeTreasure: p, nativeTreasureAction: { requestId: sent().requestId, effects: result.effects } }));
+      });
+      const ack = x.request(action, 2); expect(ack.accepted).toBe(true);
+      action.mode = mode === "normal" ? "advanced" : "normal"; action.count = 2;
+      await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+      expect(sent().action).toEqual(expected); expect(sent().action).not.toHaveProperty("selection");
+      expect(sent().action).not.toHaveProperty("funding"); expect(readPendingActivity(x.id)).toBeNull();
+      const p = x.accept.mock.calls[0][0].snapshot!.nativeTreasure as ReturnType<typeof projection>;
+      expect(p.tickets).toEqual({ ...state.tickets, [mode]: state.tickets[mode] + count });
+    });
+  it.each(["normal", "advanced"] as const)("spends only %s tickets and does not charge points again", async mode => {
+    const x = setup(), ctx = readyApiClock(), state = ticketState(5, 8), first = viewTreasureNative(state, ctx, { points: 0 });
+    await confirmProjection(x, first);
+    const action = { ...drawAction(mode, 5), choice: first.bagToken, poolVersion: first.poolVersion, funding: "tickets" };
+    fetchMock.mockImplementation(async () => {
+      const result = advanceTreasure(state, sent().action, ctx, { points: 0 }, () => 0, true);
+      expect(result.cost).toBe(0); expect(result.pointsDelta).toBe(0);
+      return response(snapshot(x.id, { points: 0, nativeTreasure: viewTreasureNative(result.state, ctx, { points: 0 }),
+        nativeTreasureAction: { requestId: sent().requestId, effects: result.effects } }));
+    });
+    expect(x.request(action, 2).accepted).toBe(true); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(sent().action).toEqual(action); expect(readPendingActivity(x.id)).toBeNull();
+    const p = x.accept.mock.calls[0][0].snapshot!.nativeTreasure as ReturnType<typeof projection>;
+    expect(p.tickets).toEqual({ ...state.tickets, [mode]: state.tickets[mode] - 5 });
+  });
+  it("accepts changed authoritative wallet points while matching the unchanged ticket token", async () => {
+    const x = setup(), ctx = readyApiClock(), state = ticketState(1, 2);
+    const first = viewTreasureNative(state, ctx, { points: 1000 }); await confirmProjection(x, first);
+    expect(viewTreasureNative(state, ctx, { points: 1300 }).bagToken).toBe(first.bagToken);
+    fetchMock.mockImplementation(async () => {
+      const result = advanceTreasure(state, sent().action, ctx, { points: 1300 }, () => 0, true), points = 1300 + result.pointsDelta;
+      return response(snapshot(x.id, { points, nativeTreasure: viewTreasureNative(result.state, ctx, { points }),
+        nativeTreasureAction: { requestId: sent().requestId, effects: result.effects } }));
+    });
+    x.request(buyAction(first, "normal", 2), 2); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce());
+    expect(x.accept.mock.calls[0][0].snapshot!.points).toBe(1240); expect(x.reject).not.toHaveBeenCalled();
+  });
+  it("rejects malformed purchase and funding commands before POST", async () => {
+    const x = setup(), p = viewTreasureNative(ticketState(5, 5), readyApiClock(), { points: 10000 }); await confirmProjection(x, p);
+    const buy = buyAction(p, "normal", 1), draw = { ...drawAction(), choice: p.bagToken, poolVersion: p.poolVersion };
+    const invalid: unknown[] = [0, 100, 1.5, "1", null, undefined].map(count => ({ ...buy, count }));
+    invalid.push(...["points", "cash", "normal", null, undefined, 0].map(funding => ({ ...draw, funding })));
+    const extra = [{ ...buy, selection: [] }, { ...buy, funding: "tickets" }, { ...buy, unitCost: 1 },
+      { ...buy, poolVersion: "a" }, { ...buy, mode: "paid" }, { ...draw, funding: "tickets", price: 0 }];
+    for (const action of [...invalid, ...extra]) expect(x.request(action, 2).accepted).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)).toBeNull();
+  });
+  it("requires a confirmed matching window token for new commands", async () => {
+    const x = setup(), p = viewTreasureNative(ticketState(5, 5), readyApiClock(), { points: 1000 });
+    expect(x.request(buyAction(p, "normal", 1)).accepted).toBe(false); await confirmProjection(x, p);
+    expect(x.request({ ...buyAction(p, "normal", 1), choice: bagToken }, 2).accepted).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it.each(["blocked", "daily", "other-mode"] as const)("honors %s limits instead of inferring availability from maxCount or the other ticket", async kind => {
+    const x = setup(), state = ticketState(0, 8), ctx = kind === "blocked" ? apiClock() : readyApiClock();
+    const p = viewTreasureNative(state, ctx, { points: 1000 }, kind !== "daily"); await confirmProjection(x, p);
+    expect(p.ticketShop.offers[0].maxCount).toBe(33);
+    if (kind !== "other-mode") expect(x.request(buyAction(p, "normal", 1), 2).accepted).toBe(false);
+    const action = { ...drawAction(), choice: p.bagToken, poolVersion: p.poolVersion, funding: "tickets" };
+    expect(x.request(action, 2).accepted).toBe(false); expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it.each(["missing-tickets", "partial-tickets", "negative", "overflow", "wrong-price", "wrong-max", "wrong-currency", "ready-bypass", "wrong-required", "cross-mode"] as const)
+    ("rejects %s ticket projection", async kind => {
+      const x = setup(), p = viewTreasureNative(ticketState(0, 8), readyApiClock(), { points: 1000 });
+      if (kind === "missing-tickets") Reflect.deleteProperty(p, "tickets");
+      if (kind === "partial-tickets") Reflect.deleteProperty(p.tickets, "advanced");
+      if (kind === "negative") p.tickets.normal = -1; if (kind === "overflow") p.tickets.advanced = 1_000_000_001;
+      if (kind === "wrong-price") p.localRules.ticketPrices.normal = 1;
+      if (kind === "wrong-max") p.ticketShop.offers[0].maxCount++;
+      if (kind === "wrong-currency") p.ticketShop.currency = "real-money";
+      if (kind === "ready-bypass") Object.assign(p, viewTreasureNative(ticketState(), apiClock(), { points: 1000 }),
+        { ticketShop: { ...p.ticketShop, offers: p.ticketShop.offers.map(row => ({ ...row, canBuy: true })) } });
+      if (kind === "wrong-required") p.ticketDrawChoices[0].ticketsRequired = 0;
+      if (kind === "cross-mode") p.ticketDrawChoices[0].canDraw = true;
+      fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { nativeTreasure: p }))); x.read();
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+    });
+  it.each(["ticket-balance", "other-balance", "effect-balance", "cost", "score", "extra-field", "draw-progress", "old-token"] as const)
+    ("retains the UUID on forged %s purchase confirmation", async kind => {
+      const x = setup(), ctx = readyApiClock(), state = ticketState(3, 8), first = viewTreasureNative(state, ctx, { points: 1000 });
+      await confirmProjection(x, first);
+      fetchMock.mockImplementation(async () => {
+        const result = advanceTreasure(state, sent().action, ctx, { points: 1000 }, () => 0, true);
+        const p = viewTreasureNative(result.state, ctx, { points: 970 }), effect = result.effects[0];
+        if (effect.type !== "tickets-bought") throw new Error("Expected purchase effect");
+        if (kind === "ticket-balance") { p.tickets.normal++; effect.tickets.normal++; }
+        if (kind === "other-balance") { p.tickets.advanced++; effect.tickets.advanced++; }
+        if (kind === "effect-balance") effect.tickets.normal++;
+        if (kind === "cost") effect.cost = 0; if (kind === "score") effect.score--;
+        if (kind === "extra-field") Object.assign(effect, { seed: 1 });
+        if (kind === "draw-progress") { p.draws++; p.progressScore++; p.fragments++; }
+        if (kind === "old-token") p.bagToken = first.bagToken;
+        return response(snapshot(x.id, { points: 970, nativeTreasure: p, nativeTreasureAction: { requestId: sent().requestId, effects: [effect] } }));
+      });
+      const ack = x.request(buyAction(first, "normal", 1), 2); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
+      expect(x.accept).not.toHaveBeenCalled(); expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+    });
+  it.each(["funding", "spent", "cost", "balance", "other-balance", "progress"] as const)
+    ("retains the UUID on forged %s ticket draw confirmation", async kind => {
+      const x = setup(), ctx = readyApiClock(), state = ticketState(3, 8), first = viewTreasureNative(state, ctx, { points: 1000 });
+      await confirmProjection(x, first);
+      fetchMock.mockImplementation(async () => {
+        const result = advanceTreasure(state, sent().action, ctx, { points: 1000 }, () => 0, true);
+        const p = viewTreasureNative(result.state, ctx, { points: 1000 }), effect = result.effects[0];
+        if (effect.type !== "drawn" || !effect.tickets) throw new Error("Expected ticket drawn effect");
+        if (kind === "funding") delete effect.funding; if (kind === "spent") effect.ticketsSpent = 0; if (kind === "cost") effect.cost = 30;
+        if (kind === "balance") { p.tickets.normal++; effect.tickets.normal++; }
+        if (kind === "other-balance") { p.tickets.advanced--; effect.tickets.advanced--; }
+        if (kind === "progress") p.fragments++;
+        return response(snapshot(x.id, { nativeTreasure: p, nativeTreasureAction: { requestId: sent().requestId, effects: [effect] } }));
+      });
+      const ack = x.request({ ...drawAction(), choice: first.bagToken, poolVersion: first.poolVersion, funding: "tickets" }, 2);
+      await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce()); expect(x.accept).not.toHaveBeenCalled();
+      expect(readPendingActivity(x.id)?.requestId).toBe(ack.requestId);
+    });
+  it.each(["buy", "draw"] as const)("replays an uncertain %s UUID without another effect or requiring its old balances", async kind => {
+    const x = setup(), ctx = readyApiClock(), state = ticketState(5, 8), first = viewTreasureNative(state, ctx, { points: 1000 });
+    await confirmProjection(x, first); fetchMock.mockRejectedValueOnce(new TypeError("response lost"));
+    const action = kind === "buy" ? buyAction(first, "normal", 2)
+      : { ...drawAction(), choice: first.bagToken, poolVersion: first.poolVersion, funding: "tickets" };
+    const ack = x.request(action, 2); await vi.waitFor(() => expect(x.reject).toHaveBeenCalledOnce());
+    const pending = readPendingActivity(x.id)!, body = sent(), latest = viewTreasureNative(ticketState(1, 4), apiClock(), { points: 900 });
+    fetchMock.mockResolvedValueOnce(response(snapshot(x.id, { points: 900, replayed: true, nativeTreasure: latest,
+      nativeTreasureAction: { requestId: ack.requestId!, effects: ["stale"] } })));
+    await retryNativeTreasureRequest(pending); expect(sent()).toEqual(body); expect(readPendingActivity(x.id)).toBeNull();
+    expect(x.accept.mock.calls[0][0].snapshot).not.toHaveProperty("nativeTreasureAction");
+  });
+  it("preserves a ticket UUID through host rebuild and character switch, then recovers through the existing Web retry path", async () => {
+    let current = true; const old = setup(() => current), ctx = readyApiClock(), state = ticketState(3, 5);
+    const first = viewTreasureNative(state, ctx, { points: 1000 }); await confirmProjection(old, first);
+    fetchMock.mockRejectedValueOnce(new TypeError("lost after commit"));
+    const ack = old.request(buyAction(first, "normal", 1), 2); await vi.waitFor(() => expect(old.reject).toHaveBeenCalledOnce());
+    const pending = readPendingActivity(old.id)!, body = sent(); current = false; old.host.cancel();
+    const other = setup(); expect(retryNativeTreasureRequest(pending)).toBeNull(); expect(readPendingActivity(old.id)?.requestId).toBe(ack.requestId);
+    other.host.cancel(); const reopened = setup(() => true, old.id);
+    expect(reopened.read().accepted).toBe(false); expect(retryNativeTreasureRequest(pending)).toBeNull();
+    const latest = viewTreasureNative(ticketState(4, 5), apiClock(), { points: 970 });
+    fetchMock.mockResolvedValueOnce(response(snapshot(old.id, { points: 970, nativeTreasure: latest })));
+    expect((await getActivities(old.id)).nativeTreasure).toEqual(latest); expect(readPendingActivity(old.id)?.requestId).toBe(ack.requestId);
+    fetchMock.mockResolvedValueOnce(response(snapshot(old.id, { points: 970, nativeTreasure: latest, replayed: true })));
+    const replay = await (retryNativeTreasureRequest(pending) ?? performActivity(pending));
+    expect(sent()).toEqual(body); expect(replay.replayed).toBe(true); clearPendingActivity(pending);
+    expect(readPendingActivity(old.id)).toBeNull(); await confirmProjection(reopened, latest);
+    expect(reopened.accept.mock.calls).toHaveLength(0); expect(old.accept).not.toHaveBeenCalled();
+  });
+  it("verifies and optionally exports public API fixtures for the offline AS bridge", async () => {
+    const ready = readyApiClock(), state = ticketState(5, 8);
+    const cases: { id: string; syntheticReadiness: boolean; before?: ReturnType<typeof projection>;
+      action?: import("./activities").ActivityAction; snapshot: ActivityResponse }[] = [];
+    for (const [id, ctx, current, points, daily] of [
+      ["blocked-zero", apiClock(), undefined, 1000, true], ["blocked-held", apiClock(), state, 1000, true],
+      ["ready-stocked", ready, state, 1000, true], ["daily-exhausted", ready, state, 1000, false],
+      ["ticket-cap", ready, ticketState(1_000_000_000, 1_000_000_000), 10000, true],
+    ] as const) {
+      const p = viewTreasureNative(current, ctx, { points }, daily), x = setup(); await confirmProjection(x, p); x.host.cancel();
+      cases.push({ id, syntheticReadiness: ctx === ready, snapshot: snapshot(1, { points, nativeTreasure: p }) });
+    }
+    for (const mode of ["normal", "advanced"] as const) for (const type of ["buy-tickets", "draw"] as const) {
+      const points = type === "buy-tickets" ? 10000 : 0, count = type === "buy-tickets" ? 99 : 5;
+      const before = viewTreasureNative(state, ready, { points });
+      const action = type === "buy-tickets" ? buyAction(before, mode, count)
+        : { ...drawAction(mode, count), mode, choice: before.bagToken, poolVersion: before.poolVersion, funding: "tickets" as const };
+      const result = advanceTreasure(state, action, ready, { points }, () => 0, true), afterPoints = points + result.pointsDelta;
+      const p = viewTreasureNative(result.state, ready, { points: afterPoints }), x = setup(); await confirmProjection(x, before);
+      fetchMock.mockImplementation(async () => response(snapshot(x.id, { points: afterPoints, nativeTreasure: p,
+        nativeTreasureAction: { requestId: sent().requestId, effects: result.effects } })));
+      expect(x.request(action, 2).accepted).toBe(true); await vi.waitFor(() => expect(x.accept).toHaveBeenCalledOnce()); x.host.cancel();
+      cases.push({ id: `${mode}-${type}-${count}`, syntheticReadiness: true, before, action,
+        snapshot: snapshot(1, { points: afterPoints, nativeTreasure: p,
+          nativeTreasureAction: { requestId: "00000000-0000-4000-8000-000000000001", effects: result.effects } }) });
+    }
+    const fixture = { version: 1, kind: "treasure-public-ticket-fixtures", productionReady: false,
+      description: "仅离线协议测试；ready目录为隔离注入，不证明真实模板/资源已就绪。无用户存档、账号或真实凭证。", cases };
+    if (process.env.WORKSHOP_TREASURE_WEB_FIXTURES) {
+      const directory = fileURLToPath(new URL("../../../../../../runtime/treasure-tickets-20261016/web/", import.meta.url));
+      expect(resolve(process.env.WORKSHOP_TREASURE_WEB_FIXTURES)).toBe(resolve(directory));
+      mkdirSync(directory, { recursive: true }); const path = resolve(directory, "public-ticket-fixtures.json");
+      writeFileSync(path, JSON.stringify(fixture, null, 2) + "\n", "utf8");
+      expect(JSON.parse(readFileSync(path, "utf8"))).toEqual(fixture);
+    }
+    expect(cases).toHaveLength(9); expect(cases.every(row => row.snapshot.characterId === 1)).toBe(true);
   });
 });

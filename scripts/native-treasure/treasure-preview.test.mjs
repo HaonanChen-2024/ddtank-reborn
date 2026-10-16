@@ -23,7 +23,7 @@ function run(name,args,context){
  return new Function(...params,'with(this){'+code+'}').call(context,...args);
 }
 function fixture(){
- const infos=[],context={previewRows:new Map(),projection:{categories:Array.from({length:15},(_,i)=>({name:'原类'+(i+1)})),preview:[]},int:Number};
+ const infos=[],context={ticketQuote:null,previewRows:new Map(),projection:{categories:Array.from({length:15},(_,i)=>({name:'原类'+(i+1)})),preview:[]},int:Number};
  class Inventory{constructor(){infos.push(this);}}
  context.cls=name=>{assert.equal(name,'ddt.data.goods.InventoryItemInfo');return Inventory;};
  context.clearPreviewCategory=o=>run('clearPreviewCategory',[o],context);context.previewItem=row=>run('previewItem',[row],context);

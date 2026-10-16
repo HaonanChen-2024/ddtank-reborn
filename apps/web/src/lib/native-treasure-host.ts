@@ -31,15 +31,25 @@ const poolVersion = (value: unknown): value is string => typeof value === "strin
 const nonempty = (value: unknown): value is string => typeof value === "string" && value.length > 0;
 const reasons = (value: unknown): value is string[] => Array.isArray(value) && value.every(nonempty);
 const exact = (value: Record<string, unknown>, ...keys: string[]) => Object.keys(value).every(key => keys.includes(key));
+type Tickets = { normal: number; advanced: number };
+const tickets = (value: unknown): value is Tickets => nativeObject(value) && exact(value, "normal", "advanced")
+  && integer(value.normal, 0, 1_000_000_000) && integer(value.advanced, 0, 1_000_000_000);
+const sameTickets = (a: Tickets, b: Tickets) => a.normal === b.normal && a.advanced === b.advanced;
 function nativeAction(value: unknown): ActivityAction | null {
   if (!nativeObject(value) || !Object.hasOwn(value, "type") || !Object.hasOwn(value, "choice") || !token(value.choice)) return null;
   const exact = (...keys: string[]) => Object.keys(value).every(key => ["type", "choice", ...keys].includes(key));
   if (value.type === "draw" && Object.hasOwn(value, "mode") && (value.mode === "normal" || value.mode === "advanced")
-    && Object.hasOwn(value, "count") && integer(value.count, 1, 5) && exact("mode", "count", "selection", "poolVersion")
+    && Object.hasOwn(value, "count") && integer(value.count, 1, 5) && exact("mode", "count", "selection", "poolVersion", "funding")
+    && (!Object.hasOwn(value, "funding") || value.funding === "tickets")
     && Object.hasOwn(value, "poolVersion") && poolVersion(value.poolVersion) && Object.hasOwn(value, "selection")
     && Array.isArray(value.selection) && Array.from(value.selection).every(index => integer(index, 1, 14))
     && new Set(value.selection).size === value.selection.length && value.selection.length === (value.mode === "advanced" ? 4 : 0))
-    return { type: "draw", choice: value.choice, mode: value.mode, count: value.count, selection: [...value.selection], poolVersion: value.poolVersion };
+    return { type: "draw", choice: value.choice, mode: value.mode, count: value.count, selection: [...value.selection], poolVersion: value.poolVersion,
+      ...(Object.hasOwn(value, "funding") ? { funding: "tickets" as const } : {}) };
+  if (value.type === "buy-tickets" && exact("mode", "count", "poolVersion")
+    && Object.hasOwn(value, "mode") && (value.mode === "normal" || value.mode === "advanced")
+    && Object.hasOwn(value, "count") && integer(value.count, 1, 99) && Object.hasOwn(value, "poolVersion") && poolVersion(value.poolVersion))
+    return { type: "buy-tickets", choice: value.choice, mode: value.mode, count: value.count, poolVersion: value.poolVersion };
   if (value.type === "take" && exact("index") && (!Object.hasOwn(value, "index") || integer(value.index, 0, 99)))
     return { type: "take", choice: value.choice, ...(Object.hasOwn(value, "index") ? { index: value.index as number } : {}) };
   if ((value.type === "recycle" || value.type === "exchange") && exact()) return { type: value.type, choice: value.choice };
@@ -47,7 +57,7 @@ function nativeAction(value: unknown): ActivityAction | null {
     return { type: "progress", choice: value.choice, tier: value.tier };
   return null;
 }
-function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
+function validatePublic(snapshot: ActivityResponse, action?: ActivityAction, before?: Record<string, unknown>) {
   const p = snapshot.nativeTreasure;
   const fail = () => { throw new ActivityRequestError("原版迷宫寻宝公开数据不完整，请重试原操作。", true); };
   if (!nativeObject(p) || p.version !== 2 || p.kind !== "treasure-native" || typeof p.started !== "boolean"
@@ -61,6 +71,8 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
     || !Array.isArray(p.categories) || p.categories.length !== 15 || !Array.isArray(p.preview) || p.preview.length !== 158
     || !Array.isArray(p.records) || p.records.length > 20 || p.records.some(record => typeof record !== "string")
     || !nativeObject(p.localRules) || p.localRules.version !== 2 || !nonempty(p.localRules.description)
+    || !tickets(p.tickets) || !nativeObject(p.localRules.ticketPrices) || !exact(p.localRules.ticketPrices, "normal", "advanced")
+    || p.localRules.ticketPrices.normal !== 30 || p.localRules.ticketPrices.advanced !== 60 || p.localRules.maxTicketPurchase !== 99
     || ["state", "games", "seed", "rng", "previewTemplateIds"].some(key => key in p)) return fail();
   const catalog = new Map<string, Record<string, unknown>>();
   const groups: string[][] = Array.from({ length: 15 }, () => []);
@@ -121,6 +133,26 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
         || p.draws + count > 1_000_000_000 || p.fragments + count > 1_000_000_000
         || p.progressScore + count * (advanced ? 2 : 1) > 1_000_000_000)) return fail();
   }
+  if (!nativeObject(p.ticketShop) || !exact(p.ticketShop, "currency", "maxPurchase", "offers")
+    || p.ticketShop.currency !== "local-task-points" || p.ticketShop.maxPurchase !== 99
+    || !Array.isArray(p.ticketShop.offers) || p.ticketShop.offers.length !== 2
+    || !Array.isArray(p.ticketDrawChoices) || p.ticketDrawChoices.length !== 10) return fail();
+  for (const [index, offer] of p.ticketShop.offers.entries()) {
+    const mode = index === 0 ? "normal" : "advanced", unitCost = index === 0 ? 30 : 60;
+    const maxCount = Math.min(99, Math.floor(p.score / unitCost), 1_000_000_000 - p.tickets[mode]);
+    if (!nativeObject(offer) || !exact(offer, "mode", "unitCost", "maxCount", "canBuy") || offer.mode !== mode
+      || offer.unitCost !== unitCost || offer.maxCount !== maxCount || typeof offer.canBuy !== "boolean"
+      || offer.canBuy && (readiness.status !== "ready" || maxCount === 0)) return fail();
+  }
+  for (const [index, option] of p.ticketDrawChoices.entries()) {
+    const mode = index < 5 ? "normal" : "advanced", count = index % 5 + 1, advanced = mode === "advanced";
+    if (!nativeObject(option) || !exact(option, "mode", "count", "ticketsRequired", "requiredSelection", "canDraw")
+      || option.mode !== mode || option.count !== count || option.ticketsRequired !== count
+      || option.requiredSelection !== (advanced ? 4 : 0) || typeof option.canDraw !== "boolean"
+      || option.canDraw && (readiness.status !== "ready" || p.tickets[mode] < count || p.bagSlotsUsed + count > 100
+        || p.draws + count > 1_000_000_000 || p.fragments + count > 1_000_000_000
+        || p.progressScore + count * (advanced ? 2 : 1) > 1_000_000_000)) return fail();
+  }
   if (p.canDraw !== p.drawChoices[0].canDraw || !nativeObject(p.exchange) || p.exchange.fragmentCost !== 10
     || p.exchange.templateId !== 11021 || p.exchange.itemCount !== 2 || typeof p.exchange.canExchange !== "boolean"
     || p.exchange.canExchange !== (p.fragments >= 10) || !Array.isArray(p.progress) || p.progress.length !== 3) return fail();
@@ -136,9 +168,12 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
     const effects = snapshot.nativeTreasureAction?.effects;
     if (!Array.isArray(effects) || effects.length !== 1) return fail();
     const effect = effects[0];
-    if (!nativeObject(effect) || effect.type !== "drawn" || effect.mode !== action.mode || effect.count !== action.count
+    const ticketFunded = action.funding === "tickets";
+    if (!nativeObject(effect) || !exact(effect, "type", "mode", "count", "cost", "score", "draws", "rewards", ...(ticketFunded ? ["funding", "ticketsSpent", "tickets"] : []))
+      || effect.type !== "drawn" || effect.mode !== action.mode || effect.count !== action.count
       || action.poolVersion !== p.poolVersion || readiness.status !== "ready" || effect.score !== p.score || effect.draws !== p.draws
-      || effect.cost !== (action.count ?? 0) * (action.mode === "advanced" ? 60 : 30)
+      || effect.cost !== (ticketFunded ? 0 : (action.count ?? 0) * (action.mode === "advanced" ? 60 : 30))
+      || ticketFunded && (effect.funding !== "tickets" || effect.ticketsSpent !== action.count || !tickets(effect.tickets) || !sameTickets(effect.tickets, p.tickets))
       || !Array.isArray(effect.rewards) || effect.rewards.length !== action.count) return fail();
     for (const [index, reward] of effect.rewards.entries()) {
       if (!nativeObject(reward) || !exact(reward, "index", "templateId", "itemCount", "entryKey", "sourceOriginalIndex") || !nonempty(reward.entryKey)) return fail();
@@ -149,12 +184,36 @@ function validatePublic(snapshot: ActivityResponse, action?: ActivityAction) {
         || action.mode === "advanced" && reward.sourceOriginalIndex !== 15 && !action.selection?.includes(reward.sourceOriginalIndex as number)) return fail();
     }
   }
+  if (action?.type === "buy-tickets" && !snapshot.replayed) {
+    const effects = snapshot.nativeTreasureAction?.effects, effect = effects?.[0];
+    if (!Array.isArray(effects) || effects.length !== 1 || !nativeObject(effect)
+      || !exact(effect, "type", "mode", "count", "cost", "score", "tickets") || effect.type !== "tickets-bought"
+      || effect.mode !== action.mode || effect.count !== action.count || effect.cost !== (action.count ?? 0) * (action.mode === "advanced" ? 60 : 30)
+      || effect.score !== p.score || !tickets(effect.tickets) || !sameTickets(effect.tickets, p.tickets)
+      || action.poolVersion !== p.poolVersion || readiness.status !== "ready") return fail();
+  }
+  if (action && !snapshot.replayed && (action.type === "buy-tickets" || action.funding === "tickets")) {
+    if (!before || before.bagToken !== action.choice || !tickets(before.tickets) || !action.mode || !action.count) return fail();
+    const expected = { ...before.tickets };
+    expected[action.mode] += action.type === "buy-tickets" ? action.count : -action.count;
+    if (!sameTickets(expected, p.tickets) || p.bagToken === before.bagToken) return fail();
+    if (action.type === "buy-tickets" && (p.draws !== before.draws || p.progressScore !== before.progressScore
+      || p.fragments !== before.fragments || p.pityRemaining !== before.pityRemaining
+      || JSON.stringify(p.bag) !== JSON.stringify(before.bag) || JSON.stringify(p.progress) !== JSON.stringify(before.progress))) return fail();
+    if (action.type === "draw" && (p.draws !== (before.draws as number) + action.count
+      || p.progressScore !== (before.progressScore as number) + action.count * (action.mode === "advanced" ? 2 : 1)
+      || p.fragments !== (before.fragments as number) + action.count || p.pityRemaining !== before.pityRemaining
+      || !Array.isArray(before.bag) || p.bag.length !== before.bag.length + action.count
+      || JSON.stringify(p.bag.slice(0, before.bag.length)) !== JSON.stringify(before.bag))) return fail();
+  }
 }
 export const retryNativeTreasureRequest = (request: ActivityRequest) =>
   request.activityId === "treasure-native" ? retryNativeActivityRequest(request) : null;
 export function attachNativeTreasureHost(options: NativeTreasureHostOptions): NativeActivityHost {
   const target = options.target ?? window;
+  let confirmed: Record<string, unknown> | undefined;
   return attachNativeActivityHost({ ...options,
+    onSnapshot: snapshot => { confirmed = structuredClone(snapshot.nativeTreasure) as Record<string, unknown>; options.onSnapshot?.(snapshot); },
     ready: () => typeof options.player.workshopTreasureAcceptSnapshot === "function" && typeof options.player.workshopTreasureRejectRequest === "function",
     accept: envelope => options.player.workshopTreasureAcceptSnapshot?.(envelope),
     reject: envelope => options.player.workshopTreasureRejectRequest?.(envelope),
@@ -166,5 +225,16 @@ export function attachNativeTreasureHost(options: NativeTreasureHostOptions): Na
         if (target.workshopTreasureReport === report) delete target.workshopTreasureReport;
       };
     },
-  }, { activityId: "treasure-native", title: "原版迷宫寻宝", effectKey: "nativeTreasureAction", parseAction: nativeAction, validatePublic });
+  }, { activityId: "treasure-native", title: "原版迷宫寻宝", effectKey: "nativeTreasureAction",
+    parseAction: value => {
+      const action = nativeAction(value);
+      if (action && (action.type === "buy-tickets" || action.funding === "tickets")) {
+        if (!confirmed || confirmed.bagToken !== action.choice || confirmed.poolVersion !== action.poolVersion
+          || !nativeObject(confirmed.readiness) || confirmed.readiness.status !== "ready") return null;
+        const choices = action.type === "buy-tickets" && nativeObject(confirmed.ticketShop) ? confirmed.ticketShop.offers : confirmed.ticketDrawChoices;
+        if (!Array.isArray(choices) || !choices.some(row => nativeObject(row) && row.mode === action.mode
+          && (action.type === "buy-tickets" ? row.canBuy === true && integer(row.maxCount, action.count!, 99) : row.count === action.count && row.canDraw === true))) return null;
+      }
+      return action;
+    }, validatePublic: (snapshot, action) => validatePublic(snapshot, action, confirmed) });
 }

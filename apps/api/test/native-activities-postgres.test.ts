@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createDb, game, migrateDb, type DbHandle } from "@ddt/db";
@@ -163,6 +163,23 @@ async function treasureLegacyBag(bag: ActivityReward[]) {
 async function treasureDraw(count = 1, mode: "normal" | "advanced" = "normal", app = appB): Promise<ActivityAction> {
   return { type: "draw", mode, count, choice: (await snapshot(app)).nativeTreasure.bagToken,
     selection: mode === "advanced" ? [14,7,1,12] : [], poolVersion: TREASURE_POOL_VERSION };
+}
+async function treasureTicketPurchase(mode:"normal"|"advanced"="normal",count=1):Promise<ActivityAction> {
+  return {type:"buy-tickets",mode,count,poolVersion:TREASURE_POOL_VERSION,choice:(await snapshot()).nativeTreasure.bagToken};
+}
+async function treasureTicketDraw(count=1,mode:"normal"|"advanced"="normal"):Promise<ActivityAction> {
+  return {...await treasureDraw(count,mode),funding:"tickets"};
+}
+async function treasureExp1Ready() {
+  await treasureReady();const entry=TREASURE_ENTRIES.find(row=>row.templateId===11901)!,dir=join(output,"resource","image","unfrightprop",entry.pic);
+  mkdirSync(dir,{recursive:true});writeFileSync(join(dir,"icon.png"),Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==","base64"));
+  for(const app of [appA,appB])for(const tree of app.ctx.resources.trees)tree.reindex();
+  // Actual existing experience-potion use owner; the subset take path does not receive simulated evidence.
+  await monitor.db.execute(sql`UPDATE game."Shop_Goods" SET "CanEquip"=false,"CanUse"=true,"Property1"=21,"Property2"=300,"MaxCount"=2 WHERE "TemplateID"=11901`);
+}
+function treasureExp1Random(mode:"normal"|"advanced") {
+  const rows=TREASURE_ENTRIES.filter(row=>mode==="normal"||row.sourceOriginalIndex===15||[14,7,1,12].includes(row.sourceOriginalIndex));
+  random.fraction=(rows.findIndex(row=>row.templateId===11901)+0.1)/rows.length;
 }
 function duplicateResults(results: Awaited<ReturnType<typeof post>>[], key: "nativePairAction" | "nativeMinesAction" | "nativeDDPlayAction" | "nativeGypsyAction" | "nativeMoonlightAction" | "nativeTreasureAction" | "nativeWheelAction" | "nativeCarnivalAction" | "nativeFirstRechargeAction" | "nativeChargeAction" | "nativeForthrightAction") {
   expect(results.map(r => r.statusCode)).toEqual(Array(results.length).fill(200));
@@ -533,6 +550,9 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     expect(same.find(response=>!response.json().replayed)!.json()).toMatchObject({nativeTreasureAction:{requestId:id,
       effects:[{type:"drawn",mode:"advanced",count:5,cost:300,score:700,draws:5,
         rewards:Array.from({length:5},(_,index)=>({index,entryKey:last.entryKey,sourceOriginalIndex:15,templateId:last.templateId,itemCount:last.count}))}]}});
+    expect(Object.keys(same.find(response=>!response.json().replayed)!.json().nativeTreasureAction.effects[0]).sort()).toEqual(["type","mode","count","cost","score","draws","rewards"].sort());
+    const oldCanonical=`{"action":{"choice":${JSON.stringify(value.choice)},"count":5,"mode":"advanced","poolVersion":${JSON.stringify(TREASURE_POOL_VERSION)},"selection":${JSON.stringify(value.selection)},"type":"draw"},"activityId":"treasure-native"}`;
+    expect((await q1<{Signature:string}>(monitor,sql`SELECT "Signature" FROM app."ActivityActions" WHERE "RequestID"=${id}`))!.Signature).toBe(createHash("sha256").update(oldCanonical).digest("hex"));
     const competing = await race("treasure-v2-old-native-stale-token-different-uuids",[
       ()=>post(appA,"treasure",{...value,mode:"normal",selection:[],count:2,choice:first.nativeTreasure.bagToken}),
       ()=>post(appB,"treasure-native",{...value,mode:"normal",selection:[],count:1,choice:first.nativeTreasure.bagToken})]);
@@ -680,6 +700,93 @@ describe.skipIf(!url)("native PostgreSQL activity transactions across independen
     await b.db.transaction(async tx=>{const rows=await q<{TemplateID:number}>({...b,db:tx},sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(TREASURE_IDS.map(id=>sql`${id}`),sql`,`)}) ORDER BY "TemplateID" FOR UPDATE NOWAIT`);
       expect(rows.map(row=>row.TemplateID)).toEqual(TREASURE_IDS);});
     const after=await saved();expect(after.receipts.length-before.receipts.length).toBe(1);expect(after.goods).toEqual(before.goods);expect(after.mails).toEqual(before.mails);passed++;
+  });
+  it("deduplicates each ticket purchase and batch across connections, then takes real exp1 without a second gross charge",async()=>{
+    await treasureSeed();await treasureExp1Ready();
+    for(const mode of ["normal","advanced"] as const){
+      const purchase=await treasureTicketPurchase(mode,2),buyId=randomUUID(),before=await saved(),old=await snapshot();
+      const bought=await race(`treasure-${mode}-ticket-purchase-same-uuid`,duplicates("treasure-native",purchase,buyId));duplicateResults(bought,"nativeTreasureAction");
+      const afterBuy=await snapshot(),root=(await saved()).states[0].State as ActivityState;
+      expect(afterBuy.nativeTreasure).toMatchObject({draws:old.nativeTreasure.draws,progressScore:old.nativeTreasure.progressScore,fragments:old.nativeTreasure.fragments});
+      expect(root.completed.treasure??0).toBe(mode==="normal"?0:1);expect(root.daily.draws).toBe(mode==="normal"?77:79);
+      expect(afterBuy.nativeCharge.grossSpent).toBe(mode==="normal"?60:180);expect(random.calls).toBe(mode==="normal"?0:2);
+      expect((await saved()).receipts.length-before.receipts.length).toBe(1);
+      treasureExp1Random(mode);const value=await treasureTicketDraw(2,mode),id=randomUUID(),draws=await race(`treasure-${mode}-ticket-draw-same-uuid`,duplicates("treasure-native",value,id));
+      duplicateResults(draws,"nativeTreasureAction");expect(draws.find(result=>!result.json().replayed)!.json()).toMatchObject({nativeTreasureAction:{effects:[{type:"drawn",cost:0,funding:"tickets",ticketsSpent:2,tickets:{normal:0,advanced:0}}]}});
+      expect((await snapshot()).nativeCharge.grossSpent).toBe(mode==="normal"?60:180);
+    }
+    const current=await snapshot();expect(current).toMatchObject({points:820,nativeTreasure:{draws:4,progressScore:6,fragments:4,tickets:{normal:0,advanced:0}}});
+    expect(((await saved()).states[0].State as ActivityState).daily).toMatchObject({actions:4,draws:81});expect(random.calls).toBe(4);
+    const take={type:"take",choice:current.nativeTreasure.bagToken},id=randomUUID();duplicateResults(await race("treasure-ticket-earned-exp1-take-same-uuid",duplicates("treasure-native",take,id)),"nativeTreasureAction");
+    const final=await saved();expect(await wallet()).toEqual({Points:820,Revision:5});expect(final.goods.map(row=>[row.TemplateID,row.Count,row.IsBinds,row.ValidDate])).toEqual(Array.from({length:4},()=>[[11901,2,true,0],[11901,2,true,0],[11901,1,true,0]]).flat());
+    expect(final.mails).toHaveLength(3);expect(final.receipts).toHaveLength(5);expect((await snapshot()).nativeCharge.grossSpent).toBe(180);passed++;
+  });
+  it("serializes competing ticket purchases and old/native ticket consumers without overspending either balance",async()=>{
+    await treasureSeed();await treasureReady();await monitor.db.execute(sql`UPDATE app."ActivityWallet" SET "Points"=30 WHERE "UserID"=${uid}`);
+    const purchase=await treasureTicketPurchase(),bought=await race("treasure-ticket-purchases-compete-one-wallet",[
+      ()=>post(appA,"treasure-native",purchase),()=>post(appB,"treasure-native",purchase)]);
+    expect(bought.map(row=>row.statusCode).sort()).toEqual([200,400]);expect(await wallet()).toEqual({Points:0,Revision:1});
+    expect((await snapshot()).nativeTreasure.tickets).toEqual({normal:1,advanced:0});const held=await saved();
+    expect((await post(appB,"treasure-native",await treasureTicketDraw(1,"advanced"))).statusCode).toBe(400);expect(await saved()).toEqual(held);expect(random.calls).toBe(0);
+    const value=await treasureTicketDraw(),raced=await race("treasure-one-normal-ticket-old-native-competition",[
+      ()=>post(appA,"treasure",value),()=>post(appB,"treasure-native",value)]);
+    expect(raced.map(row=>row.statusCode).sort()).toEqual([200,400]);expect(await wallet()).toEqual({Points:0,Revision:2});expect(random.calls).toBe(1);
+    expect((await snapshot()).nativeTreasure).toMatchObject({draws:1,tickets:{normal:0,advanced:0}});
+    const final=await saved();expect(final.receipts).toHaveLength(2);expect(final.goods).toEqual([]);expect(final.mails).toEqual([]);
+    expect(((final.states[0].State as ActivityState).daily)).toMatchObject({actions:2,draws:78});expect((await snapshot()).nativeCharge.grossSpent).toBe(30);passed++;
+  });
+  it("locks all 157 real targets for a blocked purchase and preserves held tickets on both draw modes",async()=>{
+    await treasureSeed();await treasureTemplatesFixture();await editState(uid,state=>{state.games.treasure={bag:[],draws:0,score:0,fragments:0,pity:0,choices:["强化石1级"],claimed:[],tickets:{normal:5,advanced:5}};});
+    expect(futureTreasureEvidence.ready).toBe(false);const value=await treasureTicketPurchase("advanced"),before=await saved();
+    const failed=await treasureLockWait("treasure-ticket-purchase-full-157-real-blocked",sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE`,
+      ()=>post(appA,"treasure-native",value),"FOR SHARE",async()=>{const observed=scenarios.at(-1) as {observed:{query:string}};
+        expect(observed.observed.query).toMatch(/ORDER BY "TemplateID".*FOR SHARE/s);expect(new Set(observed.observed.query.match(/\$\d+/g)).size).toBe(157);expect(random.calls).toBe(0);});
+    expect(failed.statusCode,failed.body).toBe(400);expect(failed.json().message).toContain("完整奖池");expect(await saved()).toEqual(before);
+    for(const mode of ["normal","advanced"] as const)expect((await post(appB,"treasure-native",await treasureTicketDraw(1,mode))).statusCode).toBe(400);
+    expect(random.calls).toBe(0);expect(await saved()).toEqual(before);expect((await snapshot()).nativeTreasure.tickets).toEqual({normal:5,advanced:5});passed++;
+  });
+  it("rejects purchase tokens after a full 157-template wait crosses UTC and retries the same uncommitted UUID",async()=>{
+    vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date(day+"T23:59:59Z"));await treasureSeed();await treasureReady();
+    const id=randomUUID(),value=await treasureTicketPurchase("normal",2),before=await saved(),tomorrow=new Date(Date.parse(day+"T00:00:00Z")+86400000).toISOString().slice(0,10);
+    const failed=await treasureLockWait("treasure-ticket-purchase-full-157-midnight",sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=11019 FOR UPDATE`,
+      ()=>post(appA,"treasure-native",value,id),"FOR SHARE",async()=>{const observed=scenarios.at(-1) as {observed:{query:string}};
+        expect(new Set(observed.observed.query.match(/\$\d+/g)).size).toBe(157);expect(random.calls).toBe(0);vi.setSystemTime(new Date(tomorrow+"T00:00:01Z"));});
+    expect(failed.statusCode,failed.body).toBe(400);expect(failed.json().message).toContain("日期已更新");expect(await saved()).toEqual(before);expect(random.calls).toBe(0);
+    const result=await action("treasure-native",{...value,choice:(await snapshot()).nativeTreasure.bagToken},id);
+    expect(result).toMatchObject({day:tomorrow,points:940,nativeTreasure:{tickets:{normal:2,advanced:0},draws:0,progressScore:0,fragments:0},nativeCharge:{grossSpent:60}});
+    const final=await saved();expect((final.states[0].State as ActivityState).daily).toMatchObject({actions:1});expect((final.states[0].State as ActivityState).daily.draws??0).toBe(0);expect(final.receipts).toHaveLength(1);expect(random.calls).toBe(0);passed++;
+  });
+  it("holds every purchase template share lock through the receipt and releases all 157 only after commit",async()=>{
+    await treasureSeed();await treasureReady();const value=await treasureTicketPurchase("advanced",2),before=await saved();
+    const result=await treasureLockWait("treasure-ticket-purchase-shares-held-to-receipt",sql`LOCK TABLE app."ActivityActions" IN SHARE MODE`,
+      ()=>post(appA,"treasure-native",value),'INSERT INTO app."ActivityActions"',async()=>{
+        expect(random.calls).toBe(0);for(const templateId of TREASURE_IDS)await expect(b.db.transaction(tx=>tx.execute(sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID"=${templateId} FOR UPDATE NOWAIT`))).rejects.toMatchObject({cause:{code:"55P03"}});});
+    expect(result.statusCode,result.body).toBe(200);expect(await wallet()).toEqual({Points:880,Revision:1});expect(result.json().nativeTreasure.tickets).toEqual({normal:0,advanced:2});
+    await b.db.transaction(async tx=>{const rows=await q<{TemplateID:number}>({...b,db:tx},sql`SELECT "TemplateID" FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(TREASURE_IDS.map(id=>sql`${id}`),sql`,`)}) ORDER BY "TemplateID" FOR UPDATE NOWAIT`);expect(rows.map(row=>row.TemplateID)).toEqual(TREASURE_IDS);});
+    const final=await saved();expect(final.receipts.length-before.receipts.length).toBe(1);expect(final.goods).toEqual(before.goods);expect(final.mails).toEqual(before.mails);expect(random.calls).toBe(0);passed++;
+  });
+  it("rolls back purchased tickets and consumed tickets at the receipt tail and all late mail before two-connection UUID retries",async()=>{
+    await treasureSeed();await treasureExp1Ready();const purchase=await treasureTicketPurchase("normal",2),buyId=randomUUID(),before=await saved();
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${buyId}') NOT VALID`));
+    expect((await post(appB,"treasure-native",purchase,buyId)).statusCode).toBe(500);expect(await saved()).toEqual(before);expect(random.calls).toBe(0);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("treasure-ticket-purchase-tail-retry",duplicates("treasure-native",purchase,buyId)),"nativeTreasureAction");
+    const paid=await saved(),value=await treasureTicketDraw(2),drawId=randomUUID();treasureExp1Random("normal");
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${drawId}') NOT VALID`));
+    expect((await post(appB,"treasure-native",value,drawId)).statusCode).toBe(500);expect(await saved()).toEqual(paid);expect(random.calls).toBe(2);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("treasure-ticket-draw-tail-retry",duplicates("treasure-native",value,drawId)),"nativeTreasureAction");expect(random.calls).toBe(4);
+    const drawn=await saved(),take={type:"take",choice:(await snapshot()).nativeTreasure.bagToken},takeId=randomUUID();
+    await monitor.db.execute(sql`ALTER TABLE player."User_Messages" ADD CONSTRAINT native_test_mail_failure CHECK ("Annex2" IS NOT NULL) NOT VALID`);
+    expect((await post(appB,"treasure-native",take,takeId)).statusCode).toBe(500);expect(await saved()).toEqual(drawn);
+    await monitor.db.execute(sql`ALTER TABLE player."User_Messages" DROP CONSTRAINT native_test_mail_failure`);
+    await monitor.db.execute(sql.raw(`ALTER TABLE app."ActivityActions" ADD CONSTRAINT native_test_receipt_failure CHECK ("RequestID" <> '${takeId}') NOT VALID`));
+    expect((await post(appB,"treasure-native",take,takeId)).statusCode).toBe(500);expect(await saved()).toEqual(drawn);
+    await monitor.db.execute(sql`ALTER TABLE app."ActivityActions" DROP CONSTRAINT native_test_receipt_failure`);
+    duplicateResults(await race("treasure-ticket-earned-mail-tail-retry",duplicates("treasure-native",take,takeId)),"nativeTreasureAction");
+    const final=await saved();expect(await wallet()).toEqual({Points:940,Revision:3});expect((await snapshot()).nativeCharge.grossSpent).toBe(60);
+    expect(final.receipts).toHaveLength(3);expect(final.goods.map(row=>[row.TemplateID,row.Count,row.IsBinds,row.ValidDate])).toEqual([[11901,2,true,0],[11901,2,true,0],[11901,1,true,0],[11901,2,true,0],[11901,2,true,0],[11901,1,true,0]]);
+    expect(final.mails).toHaveLength(2);expect(random.calls).toBe(4);passed++;
   });
   it("deduplicates native Wheel start, invalidates protected-failure tokens and preserves both slots under old/native wallet contention", async () => {
     await monitor.db.execute(sql`INSERT INTO app."ActivityWallet" ("UserID","Points","Earned") VALUES (${uid},1000,0)`);

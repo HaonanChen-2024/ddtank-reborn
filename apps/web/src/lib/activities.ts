@@ -2,7 +2,7 @@ import { api } from "./api";
 
 // Public JSON contract mirrored from apps/api/src/activities/types.ts.
 // Private game state, board layouts and RNG seeds never belong in this module.
-export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; cardId?: string; recipientName?: string; marked?: boolean; mode?: "normal" | "advanced"; items?: { index: number; count: number }[]; selection?: number[]; poolVersion?: string }
+export interface ActivityAction { type: string; index?: number; choice?: string; tier?: number; count?: number; cardId?: string; recipientName?: string; marked?: boolean; mode?: "normal" | "advanced"; items?: { index: number; count: number }[]; selection?: number[]; poolVersion?: string; funding?: "tickets" }
 export interface ActivityButton { label: string; action: ActivityAction; disabled?: boolean; help?: string }
 export interface ActivityCell { label: string; detail?: string; tone?: "hidden" | "success" | "danger" | "gold"; action?: ActivityAction; image?: string }
 export interface ActivityView {

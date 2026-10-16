@@ -116,6 +116,7 @@ export function transitionActivity(input: ActivityState, id: string, action: Act
   const done = () => { s.completed[id] = (s.completed[id] ?? 0) + 1; };
   const once = (key: string) => { need(!s.claims.includes(key), "这份奖励已经领取。"); s.claims.push(key); };
   need(action && typeof action.type === "string", "活动操作无效。");
+  need(action.funding === undefined || ["treasure", "treasure-native"].includes(id), "寻宝券参数仅用于迷宫寻宝。");
   need(id === "tasks" || id === "pair-native" || id === "mines-native" || id === "ddplay-native" || id === "gypsy-native" || id === "moonlight-native" || id === "treasure-native" || id === "wheel-native" || id === "carnival-native" || id === "first-recharge-native" || id === "charge-native" || id === "forthright-native" || id === "devil-native" || id === "caveloot-native" || Object.hasOwn(ACTIVITY_TITLES, id), "活动不存在。");
   const counted = countsDailyAction(id, action.type);
   let countedActions = counted ? 1 : 0;
@@ -345,8 +346,15 @@ export function viewActivities(input: ActivityState, wallet: ActivityWallet, ctx
       const b = viewTreasureNative(s.games.treasure, ctx, wallet, (s.daily.actions ?? 0) < C.maxDailyActions);
       v.rules = [b.localRules.description, b.readiness.description, "高级分类选择请在游戏原寻宝窗口完成。"];
       v.stats = [{ label: "临时背包", value: `${b.bagSlotsUsed}/${b.bagCapacity}` }, { label: "进度", value: b.progressScore },
-        { label: "碎片", value: b.fragments }, { label: "完整奖池", value: `${b.readiness.readyRows}/${b.readiness.totalRows}` }];
-      for (const count of [1, 5]) button(count === 1 ? "普通寻宝一次" : "普通寻宝五次", {
+        { label: "碎片", value: b.fragments }, { label: "完整奖池", value: `${b.readiness.readyRows}/${b.readiness.totalRows}` },
+        { label: "普通寻宝券", value: b.tickets.normal }, { label: "高级寻宝券", value: b.tickets.advanced }];
+      for (const offer of b.ticketShop.offers) for (const count of [1, 5]) button(`兑换${count}张${offer.mode === "normal" ? "普通" : "高级"}券 · ${offer.unitCost * count}积分`, {
+        type: "buy-tickets", mode: offer.mode, count, poolVersion: b.poolVersion, choice: b.bagToken,
+      }, !offer.canBuy || offer.maxCount < count);
+      for (const count of [1, 5]) button(`普通券寻宝${count}次`, {
+        type: "draw", mode: "normal", count, selection: [], poolVersion: b.poolVersion, choice: b.bagToken, funding: "tickets",
+      }, !b.ticketDrawChoices.find(x => x.mode === "normal" && x.count === count)!.canDraw);
+      for (const count of [1, 5]) button(`活动积分寻宝${count}次 · ${b.normalCost * count}积分`, {
         type: "draw", mode: "normal", count, selection: [], poolVersion: b.poolVersion, choice: b.bagToken,
       }, !b.drawChoices.find(x => x.mode === "normal" && x.count === count)!.canDraw);
       button("全部领取", { type: "take", choice: b.bagToken }, !b.canTake);
