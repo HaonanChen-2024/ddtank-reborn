@@ -15,4 +15,4 @@ Sound252–257 的有效 DefineSound 数据及 MP3 已与官方战斗音频包�
 
 启动桥可选effects清单固定官方两XML、音频同源收据、资源和形状候选。事务只接受完整旧状态或带有效日志的新状态，保护装备与旧共享Ball，重复启动零更新；差异、额外共享引用或归属不符时停止。旧视觉部署仍兼容。
 
-本次四张PNG已安装并HTTP验证；数据库与战斗配置待用户批准重启后应用。未运行浏览器或进行游戏验收。完整来源URL、候选和本地证据见runtime/official-capture-20261017/SOURCES.json及runtime/feedback-official-bubble-20261017/；不将本机配置、凭证和捕获缓存提交到仓库。
+本次四张PNG已安装；经用户批准正常重启一次后，四Ball事务与战斗配置已应用，21项HTTP回读通过。旧服务全部正常退出、无强制终止；账户、角色、背包、模板、商城和地图六组数据指纹前后一致，服务保持运行。未运行浏览器或进行游戏验收。完整来源URL、候选和本地证据见runtime/official-capture-20261017/SOURCES.json及runtime/feedback-official-bubble-20261017/；不将本机配置、凭证和捕获缓存提交到仓库。
