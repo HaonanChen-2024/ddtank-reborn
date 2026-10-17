@@ -1,0 +1,5 @@
+# Data recipes preserve their exact committed bytes. Code tolerates CRLF/LF via source-only pins.
+*.json -text
+*.txt -text
+*.mjs text eol=lf
+README.md text eol=lf

@@ -1,0 +1,57 @@
+{
+  "nodeVersion": "v24.21.0",
+  "platform": "win32",
+  "arch": "x64",
+  "packages": [
+    {
+      "name": "pngjs",
+      "version": "7.0.0",
+      "packageJsonSha256": "85b17f2f852aece03e71edb4ed4d9fddf6a0a8f0b69ac75d7f00b6592d62d37c",
+      "entrySha256": "e02cecbd36327829758386dc3f0ca4a36a2339ccb5d5e824ca3556e2c3f89726",
+      "path": "<NODE_DEPS>/node_modules/pngjs"
+    },
+    {
+      "name": "@napi-rs/canvas",
+      "version": "0.1.100",
+      "packageJsonSha256": "8379e15beeaecdedc863f8ff0e2548935eed4fb7505b93a207600a212d7bc2c5",
+      "entrySha256": "bbdad32cab670261983ea56d4625fc7d07b1382f8bb7d6d31232bb2834861597",
+      "path": "<NODE_DEPS>/node_modules/@napi-rs/canvas"
+    },
+    {
+      "name": "@napi-rs/canvas-win32-x64-msvc",
+      "version": "0.1.100",
+      "packageJsonSha256": "59e9517011b1bc19b7a001e04d5523437f2d9e4167c08c1f1df8eaf971229185",
+      "entrySha256": "32836f0cec2bbc74aa218fb6790d7e2dbd51cf44a4480211f52301dce539eba7",
+      "path": "<NODE_DEPS>/node_modules/@napi-rs/canvas-win32-x64-msvc"
+    },
+    {
+      "name": "jszip",
+      "version": "3.10.1",
+      "packageJsonSha256": "83569b5b130b5ec27ae281ed80420ad364baf1bf64cb82e6ac8fb891e1b4ec4c",
+      "entrySha256": "0fdb844fcdd6fd8ce8ced5e20b37cdabb629b4c155a1d3fb5df29c69eeb4f228",
+      "path": "<NODE_DEPS>/node_modules/jszip"
+    }
+  ],
+  "fonts": [
+    {
+      "file": "<WINDIR>/Fonts/msyhbd.ttc",
+      "sha256": "4508821b3dffe01f0ef5e5326a3e60df705a44633858811f67b6982dce3f6ee6",
+      "bytes": 16883552,
+      "role": "Configured bold canvas caption font"
+    },
+    {
+      "file": "<WINDIR>/Fonts/msyh.ttc",
+      "sha256": "d79c55e68b1131eea0cc1c47be4f572d964f28c682e143db2ad09c1e4cb07a3f",
+      "bytes": 19704352,
+      "role": "Microsoft YaHei regular font used by text/font compiler environment"
+    }
+  ],
+  "javaVersion": [
+    "openjdk version \"22.0.1\" 2024-04-16",
+    "OpenJDK Runtime Environment (build 22.0.1+8-16)",
+    "OpenJDK 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)"
+  ],
+  "fixedFfdec": "runtime/live/overlay-inputs/tools/ffdec; individual jar SHA256 in pin-sources.json",
+  "installsPerformed": false,
+  "automaticTargetHashRefresh": false
+}

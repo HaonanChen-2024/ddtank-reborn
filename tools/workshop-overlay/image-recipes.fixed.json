@@ -1,0 +1,3562 @@
+[
+  {
+    "name": "room",
+    "kind": "mechanical-PNG-to-SWF",
+    "inputSha256": "265a86ca0f956b23f82ed90c44490b983b3c8b7d8e4e16608fffeb8fdcf6748f",
+    "outputSha256": "11afcd1810ac74db6fe88343f8b2d8cad53e6bc8458f52ac986776435e68ff25",
+    "baseRecipe": "repo research/i18n/room-art/zh-CN.json",
+    "rows": [
+      {
+        "id": 1,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "2f6e62195fca7fe4df7d244a7e86f7ed839d176ee794260dd954c5376d720e18",
+        "afterTagCode": 36,
+        "afterTagSha256": "968fe3c540c79bf887e08af5ef0dd92a6cba80913e40a22714d198fceb79aa2f",
+        "operation": "encode-lossless2",
+        "width": 62,
+        "height": 61,
+        "image": {
+          "sourceId": "sha256:d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378",
+          "path": "runtime/live/overlay-inputs/blobs/d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378.png",
+          "sha256": "d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378",
+          "bytes": 9311
+        },
+        "sourceSize": [
+          62,
+          60
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          62,
+          60
+        ],
+        "drawRect": [
+          0,
+          0.5,
+          62,
+          60
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 2,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ba6a2deefa820f5e659d57adf2c6e0890645005c11d6a625e622eab2e6ccf9a6",
+        "afterTagCode": 36,
+        "afterTagSha256": "b8f2e2f8f30a15635d4083dbd1a02df55ae06d1b34cf12d697671da7aa118a67",
+        "operation": "encode-lossless2",
+        "width": 73,
+        "height": 46,
+        "image": {
+          "sourceId": "sha256:1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8",
+          "path": "runtime/live/overlay-inputs/blobs/1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8.png",
+          "sha256": "1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8",
+          "bytes": 5343
+        },
+        "sourceSize": [
+          72,
+          44
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          72,
+          44
+        ],
+        "drawRect": [
+          0.5,
+          1,
+          72,
+          44
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 3,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "9900dbb60e12a9df9c5d67eb25adabe06326d548e0e222bb9eeafe18a0166baa",
+        "afterTagCode": 36,
+        "afterTagSha256": "40788f982b8404febe5db19d5560645dcefe82d861d375e5e7e066c130a21012",
+        "operation": "encode-lossless2",
+        "width": 398,
+        "height": 188,
+        "image": {
+          "sourceId": "sha256:a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98",
+          "path": "runtime/live/overlay-inputs/blobs/a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98.png",
+          "sha256": "a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98",
+          "bytes": 54649
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          48,
+          32,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 4,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "0b0d713a6753f3a64d3bb73a5f8501f4372f3d2a9c3745d0e88ab6a016cb6791",
+        "afterTagCode": 36,
+        "afterTagSha256": "518be1f355500638f4849145c41e9388fad237e7a911cfca622af4c5f96affc7",
+        "operation": "encode-lossless2",
+        "width": 398,
+        "height": 150,
+        "image": {
+          "sourceId": "sha256:cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c",
+          "path": "runtime/live/overlay-inputs/blobs/cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c.png",
+          "sha256": "cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c",
+          "bytes": 58449
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          48,
+          13,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 5,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "a399e7730b643ac6d0e802d5a1d32b24aa2a9d04bbb1ab6ee61f580460fea7e5",
+        "afterTagCode": 36,
+        "afterTagSha256": "46862ce6db3e63dcdb4ec9271e2810e66dd78e165a1dca8fa9f6175e80c9634b",
+        "operation": "encode-lossless2",
+        "width": 398,
+        "height": 188,
+        "image": {
+          "sourceId": "sha256:1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5",
+          "path": "runtime/live/overlay-inputs/blobs/1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5.png",
+          "sha256": "1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5",
+          "bytes": 54172
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          48,
+          32,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 6,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "29d92c84a69a6786ebeb60fbda56724747f0687b94244df4cecc67ef46f6e40a",
+        "afterTagCode": 36,
+        "afterTagSha256": "408ed76cbedb9752ee092019220b721d190708c5e26d6a5e953cf1241d9ab5aa",
+        "operation": "encode-lossless2",
+        "width": 389,
+        "height": 158,
+        "image": {
+          "sourceId": "sha256:b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e",
+          "path": "runtime/live/overlay-inputs/blobs/b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e.png",
+          "sha256": "b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e",
+          "bytes": 53497
+        },
+        "sourceSize": [
+          355,
+          132
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          355,
+          132
+        ],
+        "drawRect": [
+          17,
+          13,
+          355,
+          132
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 7,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "f9daa99790af1985a5c8c4c3e452574ad8a5c86a5482acdf82d4c96dd9f8304a",
+        "afterTagCode": 36,
+        "afterTagSha256": "b8e7e5639d4f80c5f7d91c1c25f5cdec744a571f3b7680c512912ea2608764c6",
+        "operation": "encode-lossless2",
+        "width": 398,
+        "height": 188,
+        "image": {
+          "sourceId": "sha256:9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1",
+          "path": "runtime/live/overlay-inputs/blobs/9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1.png",
+          "sha256": "9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1",
+          "bytes": 58656
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          48,
+          32,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 8,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "7180b6555f857aca50fb83e0753b9919faac54feb2a9fe04966474f944ee42c6",
+        "afterTagCode": 36,
+        "afterTagSha256": "87635db238b0a2bc7a06bf3829a04ec62d20bd0cc460d005102214c82e68d909",
+        "operation": "encode-lossless2",
+        "width": 389,
+        "height": 146,
+        "image": {
+          "sourceId": "sha256:3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f",
+          "path": "runtime/live/overlay-inputs/blobs/3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f.png",
+          "sha256": "3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f",
+          "bytes": 56776
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          43.5,
+          11,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 9,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "2bb2851f3b6c8d09cbdd21c954d1038353c80f3c5b51d04c94e69a53cc96e4eb",
+        "afterTagCode": 36,
+        "afterTagSha256": "fd30a2f56bce66c0343290d70ddf2356d0d13d6bb8c02ff938508128b14f5d57",
+        "operation": "encode-lossless2",
+        "width": 398,
+        "height": 188,
+        "image": {
+          "sourceId": "sha256:ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a",
+          "path": "runtime/live/overlay-inputs/blobs/ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a.png",
+          "sha256": "ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a",
+          "bytes": 58281
+        },
+        "sourceSize": [
+          302,
+          124
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          302,
+          124
+        ],
+        "drawRect": [
+          48,
+          32,
+          302,
+          124
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 11,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "7356a6fb2c71b2841f3a322235dcbabcae7e3d8d5ac83369ab67c122aea99547",
+        "afterTagCode": 36,
+        "afterTagSha256": "109d9d09a4cddd1f0f06975cb1c8dfe276baf4f2db79ddcb103e3a67154d14e0",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 37,
+        "image": {
+          "sourceId": "sha256:b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1",
+          "path": "runtime/live/overlay-inputs/blobs/b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1.png",
+          "sha256": "b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1",
+          "bytes": 52404
+        },
+        "sourceSize": [
+          336,
+          88
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          336,
+          88
+        ],
+        "drawRect": [
+          0,
+          0,
+          140,
+          37
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 13,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "196847c004c75af4190ffb74a2b774498675935320fd2ab2a8718b410116e672",
+        "afterTagCode": 36,
+        "afterTagSha256": "52e34fa74b637b85ef9a2f303d1304baee8b555dbde002ccf5bd1d640b521bf2",
+        "operation": "encode-lossless2",
+        "width": 85,
+        "height": 67,
+        "image": {
+          "sourceId": "sha256:d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43",
+          "path": "runtime/live/overlay-inputs/blobs/d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43.png",
+          "sha256": "d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43",
+          "bytes": 12787
+        },
+        "sourceSize": [
+          64,
+          67
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          64,
+          67
+        ],
+        "drawRect": [
+          10.5,
+          0,
+          64,
+          67
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 14,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "df5d13b9dce4625e4f326d6e75676ae2ee4662991d470e982b3da1dffd428e04",
+        "afterTagCode": 36,
+        "afterTagSha256": "84b760f2176efcf15876247283960020f74028da7aa9421715a2baa14821a138",
+        "operation": "encode-lossless2",
+        "width": 36,
+        "height": 21,
+        "image": {
+          "sourceId": "sha256:2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592",
+          "path": "runtime/live/overlay-inputs/blobs/2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592.png",
+          "sha256": "2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592",
+          "bytes": 1727
+        },
+        "sourceSize": [
+          40,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          40,
+          21
+        ],
+        "drawRect": [
+          0,
+          1.049999999999999,
+          36,
+          18.900000000000002
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 15,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "077cf31746f3996930a3ff804e2cdc0add574028003f47af78bc27bef3c1e0f9",
+        "afterTagCode": 36,
+        "afterTagSha256": "55fbb7c9fec85035588b7c40bbb244a23657041391794dbcbad8319d4305113f",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3",
+          "path": "runtime/live/overlay-inputs/blobs/1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3.png",
+          "sha256": "1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3",
+          "bytes": 11760
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 16,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "48f0bfdd640a2cb600452414380c7975632778fcbbd370e997a844bfa8cc6aab",
+        "afterTagCode": 36,
+        "afterTagSha256": "f1e536343741ef48dcc03edd5ae583eafeaf2f7da5034092779ec8a0f5fee6f6",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37",
+          "path": "runtime/live/overlay-inputs/blobs/2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37.png",
+          "sha256": "2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37",
+          "bytes": 10926
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 17,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "13a69f1a48aa1c24d65e07530220debec48de14363bf703ac8957648809d0e36",
+        "afterTagCode": 36,
+        "afterTagSha256": "8cdba55638c1c4bc27446f48fae7c23b587303d41f3a837b991713627ebdd7bc",
+        "operation": "encode-lossless2",
+        "width": 62,
+        "height": 21,
+        "image": {
+          "sourceId": "sha256:82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df",
+          "path": "runtime/live/overlay-inputs/blobs/82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df.png",
+          "sha256": "82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df",
+          "bytes": 2195
+        },
+        "sourceSize": [
+          40,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          40,
+          21
+        ],
+        "drawRect": [
+          11,
+          0,
+          40,
+          21
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 22,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "b6301850b7ccaebdcf9025797b611dd8ff9901721316461ff0407389a0260117",
+        "afterTagCode": 36,
+        "afterTagSha256": "6ecc822e1337f5aa0a5cda7014bb656d286dcd14010945554a7ea55def3b491a",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056",
+          "path": "runtime/live/overlay-inputs/blobs/397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056.png",
+          "sha256": "397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056",
+          "bytes": 43830
+        },
+        "sourceSize": [
+          336,
+          80
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          336,
+          80
+        ],
+        "drawRect": [
+          0,
+          0,
+          140,
+          32
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 28,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "61da95e8a088aa8730f44e8e4c31d91a7d3da09ceac917269e538c5ef989c215",
+        "afterTagCode": 36,
+        "afterTagSha256": "dbd90426f0d9b6cf0282283350c136e266360567e3b8d57974d6bcececf67102",
+        "operation": "encode-lossless2",
+        "width": 49,
+        "height": 19,
+        "image": {
+          "sourceId": "sha256:891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575",
+          "path": "runtime/live/overlay-inputs/blobs/891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575.png",
+          "sha256": "891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575",
+          "bytes": 13668
+        },
+        "sourceSize": [
+          115,
+          52
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          115,
+          52
+        ],
+        "drawRect": [
+          1,
+          3,
+          42,
+          14
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 30,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "08cf7305073e0eeacfbe2f88f8dbab0e5cef6df732fa628d5c35d66da23e96a2",
+        "afterTagCode": 36,
+        "afterTagSha256": "a289c201717fe28145364af745ba806a2fc8afe68c611292080078814b5fa6eb",
+        "operation": "encode-lossless2",
+        "width": 20,
+        "height": 16,
+        "image": {
+          "sourceId": "sha256:187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7",
+          "path": "runtime/live/overlay-inputs/blobs/187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7.png",
+          "sha256": "187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7",
+          "bytes": 6585
+        },
+        "sourceSize": [
+          54,
+          51
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          54,
+          51
+        ],
+        "drawRect": [
+          0,
+          0,
+          20,
+          16
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 31,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "97ba42050dc3eb1f0c399a592258ece64b02cda58a4b24a147196be66570045d",
+        "afterTagCode": 36,
+        "afterTagSha256": "9162ca705dc94eabbb13e7210607aa3d98c8d62de0aa02b238403f1c605cca48",
+        "operation": "encode-lossless2",
+        "width": 66,
+        "height": 78,
+        "image": {
+          "sourceId": "sha256:cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228",
+          "path": "runtime/live/overlay-inputs/blobs/cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228.png",
+          "sha256": "cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228",
+          "bytes": 10453
+        },
+        "sourceSize": [
+          66,
+          78
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          66,
+          78
+        ],
+        "drawRect": [
+          0,
+          0,
+          66,
+          78
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 33,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "528afe42f02c2ebd49f4bcba354e23ba4cdc2be4d76d25525e288cd8360c91b8",
+        "afterTagCode": 36,
+        "afterTagSha256": "7dfd13384a84da391a9b103ce384121e8b2b63645eb750156f56671418a77963",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 35,
+        "image": {
+          "sourceId": "sha256:d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205",
+          "path": "runtime/live/overlay-inputs/blobs/d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205.png",
+          "sha256": "d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205",
+          "bytes": 58342
+        },
+        "sourceSize": [
+          362,
+          94
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          362,
+          94
+        ],
+        "drawRect": [
+          0,
+          0,
+          140,
+          35
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 35,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "9664654dd39e784e1aa6453405b36dbe102a93888b01efa10d31193fc7a35384",
+        "afterTagCode": 36,
+        "afterTagSha256": "0f64e1fcacf46278fb6353cc03f373a0d85584150e4f00abc9d886d7a2298475",
+        "operation": "encode-lossless2",
+        "width": 190,
+        "height": 24,
+        "image": {
+          "sourceId": "sha256:47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1",
+          "path": "runtime/live/overlay-inputs/blobs/47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1.png",
+          "sha256": "47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1",
+          "bytes": 5477
+        },
+        "sourceSize": [
+          190,
+          23
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          190,
+          23
+        ],
+        "drawRect": [
+          0,
+          0.5,
+          190,
+          23
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 37,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "17762ac61a59555923a7ed33981abae04b3bce8f8bf2c50ffbb0ba92ef0336b3",
+        "afterTagCode": 36,
+        "afterTagSha256": "e668a8acd82fe5241f396ec9bd6b727a0f3d2912ca4581fc8689ff53aa17b2d0",
+        "operation": "encode-lossless2",
+        "width": 55,
+        "height": 19,
+        "image": {
+          "sourceId": "sha256:f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0",
+          "path": "runtime/live/overlay-inputs/blobs/f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0.png",
+          "sha256": "f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0",
+          "bytes": 1730
+        },
+        "sourceSize": [
+          36,
+          19
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          36,
+          19
+        ],
+        "drawRect": [
+          9.5,
+          0,
+          36,
+          19
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 38,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "cf0a374d437b543e0d22704875a17926408a59cd9fbc468cb01b93da80af3397",
+        "afterTagCode": 36,
+        "afterTagSha256": "86586bf604ec20584183d8f4754b5a48e0bc3e435a3d32f3e16a77816a08f9b9",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710",
+          "path": "runtime/live/overlay-inputs/blobs/1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710.png",
+          "sha256": "1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710",
+          "bytes": 11364
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 39,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "11f13e627f46b8ea9bd8256d52758e7f501df12a896d27a678f1c0c810900761",
+        "afterTagCode": 36,
+        "afterTagSha256": "408b9288cddb13ec46f2a8da3c3818c22dfe55cbb7cd715a54e096e4d1430e20",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd",
+          "path": "runtime/live/overlay-inputs/blobs/1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd.png",
+          "sha256": "1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd",
+          "bytes": 10369
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 40,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "0e4c3b862f819a0c70b67e9295234f7d7fd8e649729bc67924a96d72378feeba",
+        "afterTagCode": 36,
+        "afterTagSha256": "bc3c5f962132bec16602645f3569c5db66cbae615f60e3d791244385f1dc0480",
+        "operation": "encode-lossless2",
+        "width": 59,
+        "height": 21,
+        "image": {
+          "sourceId": "sha256:4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926",
+          "path": "runtime/live/overlay-inputs/blobs/4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926.png",
+          "sha256": "4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926",
+          "bytes": 1904
+        },
+        "sourceSize": [
+          40,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          40,
+          21
+        ],
+        "drawRect": [
+          9.5,
+          0,
+          40,
+          21
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 41,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "2f7ca393b6c3728940d4e3c55bd6ce049aea79b7d24b7a99ed7ebe2baf08cca0",
+        "afterTagCode": 36,
+        "afterTagSha256": "14a029cd8e4a13020f8893b5ef721299ac9be4699b167e6e2497425016afda05",
+        "operation": "encode-lossless2",
+        "width": 72,
+        "height": 40,
+        "image": {
+          "sourceId": "sha256:0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4",
+          "path": "runtime/live/overlay-inputs/blobs/0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4.png",
+          "sha256": "0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4",
+          "bytes": 50509
+        },
+        "sourceSize": [
+          200,
+          112
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          200,
+          112
+        ],
+        "drawRect": [
+          0,
+          0,
+          72,
+          40
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 44,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "8e6e0153c8e466447264e30cc6a3e43bc13fcb8a72a23f46836c223c1d1c29cb",
+        "afterTagCode": 36,
+        "afterTagSha256": "89968587082f2b55f6a09077aee8283a1b48213dd093513161c3a0f989f8625a",
+        "operation": "encode-lossless2",
+        "width": 207,
+        "height": 163,
+        "image": {
+          "sourceId": "sha256:f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675",
+          "path": "runtime/live/overlay-inputs/blobs/f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675.png",
+          "sha256": "f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675",
+          "bytes": 11287
+        },
+        "sourceSize": [
+          199,
+          159
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          199,
+          159
+        ],
+        "drawRect": [
+          4,
+          2,
+          199,
+          159
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 55,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "5d126b3df4f5d2f14748916486b84dbe7778785543048281552626f60f097179",
+        "afterTagCode": 36,
+        "afterTagSha256": "a942c984e8e3e261abe5d5a685d656fc7cadfc9d239950dfa2021efe6b7b4333",
+        "operation": "encode-lossless2",
+        "width": 93,
+        "height": 39,
+        "image": {
+          "sourceId": "sha256:029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca",
+          "path": "runtime/live/overlay-inputs/blobs/029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca.png",
+          "sha256": "029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca",
+          "bytes": 1656275
+        },
+        "sourceSize": [
+          1937,
+          812
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          1937,
+          714
+        ],
+        "drawRect": [
+          0,
+          0,
+          92,
+          38
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 56,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "698c2368303ca1fbcb78371823f2f03f89feb3efc28a45f2b956594f1c3273c1",
+        "afterTagCode": 36,
+        "afterTagSha256": "cc82da4e7da03a5d6bfbd3b0bd8b39adbdd4331c51f853aaf03793bdf67c6022",
+        "operation": "encode-lossless2",
+        "width": 126,
+        "height": 148,
+        "image": {
+          "sourceId": "sha256:8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd",
+          "path": "runtime/live/overlay-inputs/blobs/8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd.png",
+          "sha256": "8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd",
+          "bytes": 32036
+        },
+        "sourceSize": [
+          126,
+          148
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          126,
+          148
+        ],
+        "drawRect": [
+          0,
+          0,
+          126,
+          148
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 57,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "56046ed34ac7d3a1227d39b9124ffbe3a6c3422b8cb7eb6c260df1ce94e9a2ed",
+        "afterTagCode": 36,
+        "afterTagSha256": "f1511e456e967c641859ea6304c2e73421be2f0af87f850433975a87d2617c1c",
+        "operation": "encode-lossless2",
+        "width": 120,
+        "height": 25,
+        "image": {
+          "sourceId": "sha256:4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f",
+          "path": "runtime/live/overlay-inputs/blobs/4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f.png",
+          "sha256": "4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f",
+          "bytes": 3366
+        },
+        "sourceSize": [
+          84,
+          25
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          84,
+          25
+        ],
+        "drawRect": [
+          18,
+          0,
+          84,
+          25
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 58,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "377441f250f65b9bd9824deb1726ccc0fc9d76383d681d8fd4ee05d8ace812df",
+        "afterTagCode": 36,
+        "afterTagSha256": "1476184f91e232db2b7ba4dae9b8f835fbe11476ad376a72d86b545614515ab8",
+        "operation": "encode-lossless2",
+        "width": 53,
+        "height": 72,
+        "image": {
+          "sourceId": "sha256:a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32",
+          "path": "runtime/live/overlay-inputs/blobs/a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32.png",
+          "sha256": "a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32",
+          "bytes": 11699
+        },
+        "sourceSize": [
+          67,
+          74
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          67,
+          74
+        ],
+        "drawRect": [
+          0,
+          6.731343283582092,
+          53,
+          58.537313432835816
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 60,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ec1c08f53f7453830d5258db1b8e376159637cf0198ecd3db3cd8b01a006463e",
+        "afterTagCode": 36,
+        "afterTagSha256": "99d8d1526090d9cd9d8446d0fdb993c1f5b468db6342c6caf7842e7df31b7f6c",
+        "operation": "encode-lossless2",
+        "width": 207,
+        "height": 163,
+        "image": {
+          "sourceId": "sha256:875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9",
+          "path": "runtime/live/overlay-inputs/blobs/875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9.png",
+          "sha256": "875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9",
+          "bytes": 32097
+        },
+        "sourceSize": [
+          204,
+          161
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          204,
+          161
+        ],
+        "drawRect": [
+          1.5,
+          1,
+          204,
+          161
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 63,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "e5765b76d73d77ca59dbe00dd1e7106792ceda9597bba47059aa4e0f7c31ae86",
+        "afterTagCode": 36,
+        "afterTagSha256": "f2ce162ad63750bf7fde66f5dd9a63d86bcc93e177191711a54e32a3ca5834b3",
+        "operation": "encode-lossless2",
+        "width": 143,
+        "height": 36,
+        "image": {
+          "sourceId": "sha256:5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe",
+          "path": "runtime/live/overlay-inputs/blobs/5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe.png",
+          "sha256": "5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe",
+          "bytes": 44694
+        },
+        "sourceSize": [
+          334,
+          87
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          334,
+          87
+        ],
+        "drawRect": [
+          0,
+          0,
+          143,
+          36
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 66,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "bf940b02f2d4c12be6f3ed4f4a31b538e9a5f693fae5b3a2c9e6d5a4decb7ff1",
+        "afterTagCode": 36,
+        "afterTagSha256": "f81c3ced0b9962b425b623f0237a60b04e1f3949ff2f80c5be5b426421dce8a8",
+        "operation": "encode-lossless2",
+        "width": 105,
+        "height": 105,
+        "image": {
+          "sourceId": "sha256:7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8",
+          "path": "runtime/live/overlay-inputs/blobs/7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8.png",
+          "sha256": "7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8",
+          "bytes": 17526
+        },
+        "sourceSize": [
+          105,
+          105
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          105,
+          105
+        ],
+        "drawRect": [
+          0,
+          0,
+          105,
+          105
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 78,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "09b9e01311ebf1d000652219ce1ecd8ca9609cd0c67c6436bade8b571e6cd748",
+        "afterTagCode": 36,
+        "afterTagSha256": "e0a94957c59f929900ef2b535336a83b309a0452cd57978f7972bc54c98f7461",
+        "operation": "encode-lossless2",
+        "width": 93,
+        "height": 39,
+        "image": {
+          "sourceId": "sha256:608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917",
+          "path": "runtime/live/overlay-inputs/blobs/608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917.png",
+          "sha256": "608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917",
+          "bytes": 1694956
+        },
+        "sourceSize": [
+          1937,
+          812
+        ],
+        "sourceCrop": [
+          0,
+          1,
+          1937,
+          728
+        ],
+        "drawRect": [
+          0,
+          0,
+          92,
+          38
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 79,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "5e4eca8b422cba4632c4cd1cd39a7e0632446eb2e9984c0356539da23bf16706",
+        "afterTagCode": 36,
+        "afterTagSha256": "1188b7c25cc5a143abdaf6e61a90c1ef37aafbe2ad0da3179034c943b642b50f",
+        "operation": "encode-lossless2",
+        "width": 63,
+        "height": 74,
+        "image": {
+          "sourceId": "sha256:bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c",
+          "path": "runtime/live/overlay-inputs/blobs/bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c.png",
+          "sha256": "bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c",
+          "bytes": 12157
+        },
+        "sourceSize": [
+          59,
+          71
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          59,
+          71
+        ],
+        "drawRect": [
+          2,
+          1.5,
+          59,
+          71
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 86,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "bbde45ff28e9bf9a0f4446a12e972c8fe4cdd4cd1c06c830ad1a898cea37ae68",
+        "afterTagCode": 36,
+        "afterTagSha256": "73ce34701a474f333c87f303e5d447953f7457333a2390725f4ca40e92266427",
+        "operation": "encode-lossless2",
+        "width": 86,
+        "height": 25,
+        "image": {
+          "sourceId": "sha256:5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83",
+          "path": "runtime/live/overlay-inputs/blobs/5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83.png",
+          "sha256": "5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83",
+          "bytes": 2771
+        },
+        "sourceSize": [
+          69,
+          25
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          25
+        ],
+        "drawRect": [
+          8.5,
+          0,
+          69,
+          25
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 88,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "30907367a34697052f142788b44484e8d45466f99c754aa4ba4a493b4e7988b7",
+        "afterTagCode": 36,
+        "afterTagSha256": "1a2a0953d5efd2e9ee9204648ffb4d5fda9092d415eb892eb118a01cfaa2b933",
+        "operation": "encode-lossless2",
+        "width": 294,
+        "height": 265,
+        "image": {
+          "sourceId": "sha256:33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50",
+          "path": "runtime/live/overlay-inputs/blobs/33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50.png",
+          "sha256": "33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50",
+          "bytes": 87931
+        },
+        "sourceSize": [
+          284,
+          261
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          284,
+          261
+        ],
+        "drawRect": [
+          5,
+          2,
+          284,
+          261
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 89,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "6bbf9c2e958e8bf9070852d9fe266a6b18a1f70c8b844a02b189892459f47e7d",
+        "afterTagCode": 36,
+        "afterTagSha256": "8e93887341dea4ed1793e7b0e95f25e8120fbf7cbe51f8402f34af875620ef5f",
+        "operation": "encode-lossless2",
+        "width": 93,
+        "height": 39,
+        "image": {
+          "sourceId": "sha256:280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5",
+          "path": "runtime/live/overlay-inputs/blobs/280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5.png",
+          "sha256": "280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5",
+          "bytes": 1581895
+        },
+        "sourceSize": [
+          1937,
+          812
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          1937,
+          710
+        ],
+        "drawRect": [
+          0,
+          0,
+          92,
+          38
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 97,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "5bd6b4508190c38bdb1b1b9877cd83c6f0e713a8640a15373ac29537bf521a3d",
+        "afterTagCode": 36,
+        "afterTagSha256": "ca3118d8ad1c1ed5dfbb454ab355b4b6f2b8aaf7ea649f47d47819cc9769c3e3",
+        "operation": "encode-lossless2",
+        "width": 61,
+        "height": 22,
+        "image": {
+          "sourceId": "sha256:5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0",
+          "path": "runtime/live/overlay-inputs/blobs/5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0.png",
+          "sha256": "5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0",
+          "bytes": 2768
+        },
+        "sourceSize": [
+          69,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          21
+        ],
+        "drawRect": [
+          0,
+          1.7173913043478262,
+          61,
+          18.565217391304348
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 100,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "d8b93fa39d8948e7ca57fb830c461e9b7d256f98d03be3b97ee0ba781166eb97",
+        "afterTagCode": 36,
+        "afterTagSha256": "a33c0c7c7d021e22dc9ee5e78dae883e780d231452bde3652db01a9893c5f421",
+        "operation": "encode-lossless2",
+        "width": 61,
+        "height": 22,
+        "image": {
+          "sourceId": "sha256:6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae",
+          "path": "runtime/live/overlay-inputs/blobs/6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae.png",
+          "sha256": "6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae",
+          "bytes": 3183
+        },
+        "sourceSize": [
+          69,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          21
+        ],
+        "drawRect": [
+          0,
+          1.7173913043478262,
+          61,
+          18.565217391304348
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 101,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "cd654a91d9f489ea2c6aea6150c5c5a032e8aea21aed72629f2b258eec0bafa6",
+        "afterTagCode": 36,
+        "afterTagSha256": "a8fb2d62a19f4ff4e80407485fde29d4cfb97f7f086195a7364fa3055d19bb22",
+        "operation": "encode-lossless2",
+        "width": 61,
+        "height": 22,
+        "image": {
+          "sourceId": "sha256:51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51",
+          "path": "runtime/live/overlay-inputs/blobs/51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51.png",
+          "sha256": "51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51",
+          "bytes": 2923
+        },
+        "sourceSize": [
+          69,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          21
+        ],
+        "drawRect": [
+          0,
+          1.7173913043478262,
+          61,
+          18.565217391304348
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 102,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "f4f5b05e077924ed932abacbcc96d49513c3c38c98572cb243d11fe2a01812ae",
+        "afterTagCode": 36,
+        "afterTagSha256": "d2490d1bfa78287297011199af6f5fd1e1e9da0117fe24b8d55d0fb6f94b23a3",
+        "operation": "encode-lossless2",
+        "width": 62,
+        "height": 22,
+        "image": {
+          "sourceId": "sha256:af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c",
+          "path": "runtime/live/overlay-inputs/blobs/af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c.png",
+          "sha256": "af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c",
+          "bytes": 3301
+        },
+        "sourceSize": [
+          69,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          21
+        ],
+        "drawRect": [
+          0,
+          1.5652173913043477,
+          62,
+          18.869565217391305
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 104,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "8619bd88f42d4f4e224ef3cbe81b7b9c7ac780332636b0547cc05c3cc5822da0",
+        "afterTagCode": 36,
+        "afterTagSha256": "ccfb44f056333b340481ff4f7d77cef4e2ba56e65032f794966490440a1de9e5",
+        "operation": "encode-lossless2",
+        "width": 56,
+        "height": 22,
+        "image": {
+          "sourceId": "sha256:849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb",
+          "path": "runtime/live/overlay-inputs/blobs/849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb.png",
+          "sha256": "849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb",
+          "bytes": 2705
+        },
+        "sourceSize": [
+          69,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          69,
+          21
+        ],
+        "drawRect": [
+          0,
+          2.478260869565217,
+          56,
+          17.043478260869566
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 106,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "98fe2ea9ebbb436423166924dc280063939ea6ac8388d1457030e6adcde731ef",
+        "afterTagCode": 36,
+        "afterTagSha256": "ebea65c87815287aca99b57b59d2bf8f01b26fdef4e67698ff0eff77538c9958",
+        "operation": "encode-lossless2",
+        "width": 316,
+        "height": 163,
+        "image": {
+          "sourceId": "sha256:c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7",
+          "path": "runtime/live/overlay-inputs/blobs/c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7.png",
+          "sha256": "c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7",
+          "bytes": 4966
+        },
+        "sourceSize": [
+          308,
+          160
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          308,
+          160
+        ],
+        "drawRect": [
+          4,
+          1.5,
+          308,
+          160
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 110,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ea9d61c2d310e4b2df68781f722980b48412757aef88c3df3c32a849032e29b8",
+        "afterTagCode": 36,
+        "afterTagSha256": "5d3c42db881dc729822088d14393de15e28ae9fd950cb6e7a6b04697be606415",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 61,
+        "image": {
+          "sourceId": "sha256:5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+          "path": "runtime/live/overlay-inputs/blobs/5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a.png",
+          "sha256": "5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+          "bytes": 90301
+        },
+        "sourceSize": [
+          335,
+          153
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          335,
+          153
+        ],
+        "drawRect": [
+          0,
+          0,
+          138,
+          61
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 119,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "240787875c924236ce4261bd3475cd90c3265f8d5197cce0159770beb5c8887e",
+        "afterTagCode": 36,
+        "afterTagSha256": "6035e1269809065036d9613e545e64ed3f9d488201f3ce84aaea8db33935fc5a",
+        "operation": "encode-lossless2",
+        "width": 117,
+        "height": 24,
+        "image": {
+          "sourceId": "sha256:4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe",
+          "path": "runtime/live/overlay-inputs/blobs/4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe.png",
+          "sha256": "4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe",
+          "bytes": 3813
+        },
+        "sourceSize": [
+          84,
+          24
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          84,
+          24
+        ],
+        "drawRect": [
+          16.5,
+          0,
+          84,
+          24
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 120,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "c6764e9992f7956cb20fc74582c61a8414c6d27f2772033dd183c5e77e26673e",
+        "afterTagCode": 36,
+        "afterTagSha256": "cd57d605d1dd99276eaa974a049d787bf1188a78e6181425e2bb9eb6f98210f4",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c",
+          "path": "runtime/live/overlay-inputs/blobs/9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c.png",
+          "sha256": "9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c",
+          "bytes": 51875
+        },
+        "sourceSize": [
+          363,
+          89
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          363,
+          89
+        ],
+        "drawRect": [
+          0,
+          0,
+          140,
+          32
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 121,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "a90175289d0b1e8948047668f6bea1378e4042a4c7b25bf568ceaaca0ffbad14",
+        "afterTagCode": 36,
+        "afterTagSha256": "e66257e06953ded42038e5cf393fe8477addc53b70cdec317a2f9344467aeaa2",
+        "operation": "encode-lossless2",
+        "width": 66,
+        "height": 78,
+        "image": {
+          "sourceId": "sha256:a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982",
+          "path": "runtime/live/overlay-inputs/blobs/a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982.png",
+          "sha256": "a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982",
+          "bytes": 13370
+        },
+        "sourceSize": [
+          66,
+          78
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          66,
+          78
+        ],
+        "drawRect": [
+          0,
+          0,
+          66,
+          78
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 123,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ee30d00b53ff80f51a736356cbf4e69e84499db3336a83df798e7545e6abeca4",
+        "afterTagCode": 36,
+        "afterTagSha256": "03d5c680ebfa9a2c0f3b10d9a614ea2db8089145422593c8ab2636fa74963b04",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561",
+          "path": "runtime/live/overlay-inputs/blobs/0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561.png",
+          "sha256": "0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561",
+          "bytes": 11255
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 124,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "bac7f72ff8df09b0785283f241236cf684e24d8bf262337c95afd8a78d121166",
+        "afterTagCode": 36,
+        "afterTagSha256": "23deee34a3bc289e7cf8c61e1d6660e976247e03fab7760a8c0d085b74906b39",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c",
+          "path": "runtime/live/overlay-inputs/blobs/fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c.png",
+          "sha256": "fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c",
+          "bytes": 10416
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 129,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "5bed5e9614eb47d2f6fdf0942be01c5fad750941a976857d506512fa97c3b218",
+        "afterTagCode": 36,
+        "afterTagSha256": "4b718fd5aac8ef34b1a374fa24d5e9c7b401664bed22bd906951bc8e134c33af",
+        "operation": "encode-lossless2",
+        "width": 311,
+        "height": 56,
+        "image": {
+          "sourceId": "sha256:b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1",
+          "path": "runtime/live/overlay-inputs/blobs/b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1.png",
+          "sha256": "b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1",
+          "bytes": 17164
+        },
+        "sourceSize": [
+          311,
+          56
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          311,
+          56
+        ],
+        "drawRect": [
+          0,
+          0,
+          311,
+          56
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 131,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "470359a02c029f2172c362697240192cdc2c15fd2392285c10459eb23959efae",
+        "afterTagCode": 36,
+        "afterTagSha256": "21f9f028d45d2a0dc92f553c959fb20094e8e16c7034f32f7bef28aeb61a89c4",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 37,
+        "image": {
+          "sourceId": "sha256:0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02",
+          "path": "runtime/live/overlay-inputs/blobs/0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02.png",
+          "sha256": "0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02",
+          "bytes": 58679
+        },
+        "sourceSize": [
+          365,
+          96
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          365,
+          96
+        ],
+        "drawRect": [
+          0,
+          2,
+          140,
+          35
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 132,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "852a53f023eeffe6cf1a6076473874cc60df09d7183afbe7b062f6b147c2a744",
+        "afterTagCode": 36,
+        "afterTagSha256": "d0f2079717a846bc0bfbdbc783847ea96eea6570400bff3e8b9c8a1f18a5acd4",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 63,
+        "image": {
+          "sourceId": "sha256:38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+          "path": "runtime/live/overlay-inputs/blobs/38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e.png",
+          "sha256": "38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+          "bytes": 18979
+        },
+        "sourceSize": [
+          138,
+          63
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          138,
+          63
+        ],
+        "drawRect": [
+          0,
+          0,
+          138,
+          63
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 133,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "226ada023133ef6697a8847b33bdad9f0978a1d3207d6c408ced36fbc0264508",
+        "afterTagCode": 36,
+        "afterTagSha256": "cb63c109eea6a821852d1abaa94cbffe2f53297a1efa6beb63974b90a36c05ee",
+        "operation": "encode-lossless2",
+        "width": 148,
+        "height": 73,
+        "image": {
+          "sourceId": "sha256:23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f",
+          "path": "runtime/live/overlay-inputs/blobs/23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f.png",
+          "sha256": "23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f",
+          "bytes": 21420
+        },
+        "sourceSize": [
+          148,
+          73
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          148,
+          73
+        ],
+        "drawRect": [
+          0,
+          0,
+          148,
+          73
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 134,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "2483d43dc7228fb9b16d72567043163355f5d55e6b971bfd35b8130d954f3c07",
+        "afterTagCode": 36,
+        "afterTagSha256": "a33c4b417859054d369a00b08906bb4a288a4280c975806a889c093416a9d27a",
+        "operation": "encode-lossless2",
+        "width": 52,
+        "height": 21,
+        "image": {
+          "sourceId": "sha256:c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139",
+          "path": "runtime/live/overlay-inputs/blobs/c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139.png",
+          "sha256": "c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139",
+          "bytes": 1931
+        },
+        "sourceSize": [
+          40,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          40,
+          21
+        ],
+        "drawRect": [
+          6,
+          0,
+          40,
+          21
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 135,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "6475b3b28b6947425916263be936677e9adaf9bd0d701a8862e0efc045e7c178",
+        "afterTagCode": 36,
+        "afterTagSha256": "ba91aade0b2547f54747f4d99028b3644cd2e1fe064937d5c1d621f226710b14",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297",
+          "path": "runtime/live/overlay-inputs/blobs/c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297.png",
+          "sha256": "c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297",
+          "bytes": 11476
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 136,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "f16c6a7af936d51bd35968c29e55f07577a2f065edb2862bff1ad282e66e86b2",
+        "afterTagCode": 36,
+        "afterTagSha256": "50c3d14685bb76f7c64bf3903273dd356266e683cb05f2c4700fb3c53e7424a5",
+        "operation": "encode-lossless2",
+        "width": 128,
+        "height": 47,
+        "image": {
+          "sourceId": "sha256:956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9",
+          "path": "runtime/live/overlay-inputs/blobs/956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9.png",
+          "sha256": "956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9",
+          "bytes": 10533
+        },
+        "sourceSize": [
+          128,
+          47
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "drawRect": [
+          0,
+          0,
+          128,
+          47
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 137,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "cb044ec4599ca1e59b27cbdbe6b4395fd3a5c6e33a53f3fccc0b3aeb9ac6f440",
+        "afterTagCode": 36,
+        "afterTagSha256": "952f00466419e096bf8de603e639ec8ac5510bae60071b43cabc3414ea2805b8",
+        "operation": "encode-lossless2",
+        "width": 29,
+        "height": 21,
+        "image": {
+          "sourceId": "sha256:6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f",
+          "path": "runtime/live/overlay-inputs/blobs/6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f.png",
+          "sha256": "6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f",
+          "bytes": 1971
+        },
+        "sourceSize": [
+          40,
+          21
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          40,
+          21
+        ],
+        "drawRect": [
+          0,
+          2.8875,
+          29,
+          15.225
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 138,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "09abf17a103615746787d5dc90d407a0cf08de6e621e89ffbbdd461f960edf73",
+        "afterTagCode": 36,
+        "afterTagSha256": "4fc92dd81abea627325d58f345ba26c7a90be35367ef97fc891a781bd636c8f1",
+        "operation": "encode-lossless2",
+        "width": 310,
+        "height": 111,
+        "image": {
+          "sourceId": "sha256:0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055",
+          "path": "runtime/live/overlay-inputs/blobs/0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055.png",
+          "sha256": "0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055",
+          "bytes": 171047
+        },
+        "sourceSize": [
+          429,
+          235
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          429,
+          235
+        ],
+        "drawRect": [
+          0,
+          0,
+          310,
+          111
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 139,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "b74dbf678a33d23e8eba19e66ad125a7df369ae2d1958a5400718947b7a58687",
+        "afterTagCode": 36,
+        "afterTagSha256": "967e0b85bef78fb638d4c8189580f8068f7636c28bd6852e5f56b23c2e1a1c54",
+        "operation": "encode-lossless2",
+        "width": 62,
+        "height": 61,
+        "image": {
+          "sourceId": "sha256:35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3",
+          "path": "runtime/live/overlay-inputs/blobs/35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3.png",
+          "sha256": "35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3",
+          "bytes": 6085
+        },
+        "sourceSize": [
+          60,
+          59
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          60,
+          59
+        ],
+        "drawRect": [
+          1,
+          1,
+          60,
+          59
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 142,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "bb35953df49dbcba34b06c24aba45ccb9d973ea2b09837aa5d579bb45deaa59e",
+        "afterTagCode": 36,
+        "afterTagSha256": "87eb340fd8211b65d796e3cf5449623cb8e51f686fc7fcddccc108af2ad8abc1",
+        "operation": "encode-lossless2",
+        "width": 140,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d",
+          "path": "runtime/live/overlay-inputs/blobs/c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d.png",
+          "sha256": "c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d",
+          "bytes": 50431
+        },
+        "sourceSize": [
+          363,
+          87
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          363,
+          87
+        ],
+        "drawRect": [
+          0,
+          0,
+          140,
+          32
+        ],
+        "sourceKind": "image_gen"
+      }
+    ]
+  },
+  {
+    "name": "roomlist",
+    "kind": "mechanical-PNG-to-SWF",
+    "inputSha256": "bb6b4b0b156eaff06413ae6e97eb0bacf1113858a519914454fc130e579f7829",
+    "outputSha256": "347482c36b1c10b65dc4676a4415faa0b564c66fe759e36c4e898b7c76d1ebf6",
+    "baseRecipe": "repo research/i18n/roomlist-art/zh-CN.json",
+    "rows": [
+      {
+        "id": 14,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "c646d1380e8f6304adaef1bedd120638382a6ba622d7be07633bab5c3e1d3006",
+        "afterTagCode": 36,
+        "afterTagSha256": "13a6cadee6e471690a7034c6a2dc53f467cfff11f92641fd13ca820664f055a4",
+        "operation": "encode-lossless2",
+        "width": 258,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3",
+          "path": "runtime/live/overlay-inputs/blobs/d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3.png",
+          "sha256": "d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3",
+          "bytes": 15763
+        },
+        "sourceSize": [
+          258,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          258,
+          26
+        ],
+        "drawRect": [
+          0,
+          0,
+          258,
+          26
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 15,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "77819460e245f29c06d231aabe46c2d5c7a8a5f5e0f16a859a6e424e26183eec",
+        "afterTagCode": 36,
+        "afterTagSha256": "c1c6aea2d96d60c1dd1c8a84f154fd5f4d9d24bfbb6f931d44d32edc0e22d38d",
+        "operation": "encode-lossless2",
+        "width": 102,
+        "height": 24,
+        "image": {
+          "sourceId": "sha256:d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21",
+          "path": "runtime/live/overlay-inputs/blobs/d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21.png",
+          "sha256": "d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21",
+          "bytes": 3539
+        },
+        "sourceSize": [
+          76,
+          23
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          76,
+          23
+        ],
+        "drawRect": [
+          13,
+          0.5,
+          76,
+          23
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 16,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "d429bdbc1c1de0839de7cf9ced58a6f4ad3aebb36f47082336a7f6edf19a8930",
+        "afterTagCode": 36,
+        "afterTagSha256": "eed9920e5c9ce72f01f7251849701891aa3baecf76244fb359814025fb297d5b",
+        "operation": "encode-lossless2",
+        "width": 132,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5",
+          "path": "runtime/live/overlay-inputs/blobs/e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5.png",
+          "sha256": "e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5",
+          "bytes": 8855
+        },
+        "sourceSize": [
+          132,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          132,
+          26
+        ],
+        "drawRect": [
+          0,
+          0,
+          132,
+          26
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 21,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "eacb44c0f9666c7647a3c15624a90525489b2575ee3e7751557f6b265e7026dc",
+        "afterTagCode": 36,
+        "afterTagSha256": "25e0725a3b147556b55be82f453d65f325e7b9ac1f4f88788e7cb0b5543f7cfd",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 62,
+        "image": {
+          "sourceId": "sha256:5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+          "path": "runtime/live/overlay-inputs/blobs/5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a.png",
+          "sha256": "5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+          "bytes": 90301
+        },
+        "sourceSize": [
+          335,
+          153
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          335,
+          153
+        ],
+        "drawRect": [
+          0,
+          0,
+          138,
+          62
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 22,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "a28e267e29a9cc8c4f3bd8bb03bc3860b0c7a71b356355a891ce9c7912e4c506",
+        "afterTagCode": 36,
+        "afterTagSha256": "6fd0040d133c95f9d31641e863355f2fe94b8062d9a13d0af76ba75c6924f393",
+        "operation": "encode-lossless2",
+        "width": 107,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116",
+          "path": "runtime/live/overlay-inputs/blobs/273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116.png",
+          "sha256": "273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116",
+          "bytes": 6396
+        },
+        "sourceSize": [
+          107,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          107,
+          26
+        ],
+        "drawRect": [
+          0,
+          0,
+          107,
+          26
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 24,
+        "beforeTagCode": 21,
+        "beforeTagSha256": "b35cdf02bcdd2f635ac33dc5bd5c179b7159d7f3503c8611e44beaf117719bc6",
+        "afterTagCode": 36,
+        "afterTagSha256": "8d4a73d030bc7ad3821a52b371d065fa2aa2a6dfe9725cee92749dcfd1b70fa3",
+        "operation": "encode-lossless2",
+        "width": 232,
+        "height": 549,
+        "image": {
+          "sourceId": "sha256:94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd",
+          "path": "runtime/live/overlay-inputs/blobs/94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd.png",
+          "sha256": "94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd",
+          "bytes": 209219
+        },
+        "sourceSize": [
+          236,
+          549
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          236,
+          549
+        ],
+        "drawRect": [
+          0,
+          4.652542372881328,
+          232,
+          539.6949152542373
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 25,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "6a08b9f57aa5e92b9552ad4f3aed06e0182f0565e4664f95aa23c93b962ca941",
+        "afterTagCode": 36,
+        "afterTagSha256": "e32be9cd03099b4f97baae1ea18837e5440628e263dbc425d0134076b9836fd6",
+        "operation": "encode-lossless2",
+        "width": 142,
+        "height": 25,
+        "image": {
+          "sourceId": "sha256:145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9",
+          "path": "runtime/live/overlay-inputs/blobs/145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9.png",
+          "sha256": "145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9",
+          "bytes": 3815
+        },
+        "sourceSize": [
+          75,
+          25
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          75,
+          25
+        ],
+        "drawRect": [
+          33.5,
+          0,
+          75,
+          25
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 28,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "7a515fd1b75a8b576d0ad9a40f2db81f7607443ae2716134f688ea5c5c952d45",
+        "afterTagCode": 36,
+        "afterTagSha256": "dd2589bbf4280cfc70ab3f9237cf8aacce8ce2b34b3c2cae5c6244cb187e69bc",
+        "operation": "encode-lossless2",
+        "width": 136,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461",
+          "path": "runtime/live/overlay-inputs/blobs/92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461.png",
+          "sha256": "92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461",
+          "bytes": 45042
+        },
+        "sourceSize": [
+          361,
+          76
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          361,
+          76
+        ],
+        "drawRect": [
+          0,
+          0,
+          136,
+          26
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 29,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "60094cfecb96b4bf5fdee2974cfc8a38109ce82d9634e5e5f7fedd678e210e68",
+        "afterTagCode": 36,
+        "afterTagSha256": "6be5a8cd868bfce71686bc04f8a124a3a56be3fcbccd5e2dccf3bfcdadc08c7d",
+        "operation": "encode-lossless2",
+        "width": 52,
+        "height": 18,
+        "image": {
+          "sourceId": "sha256:28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d",
+          "path": "runtime/live/overlay-inputs/blobs/28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d.png",
+          "sha256": "28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d",
+          "bytes": 1003
+        },
+        "sourceSize": [
+          34,
+          24
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          34,
+          24
+        ],
+        "drawRect": [
+          13.25,
+          0,
+          25.5,
+          18
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 30,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "d19c68fb58b9e9281a3d4097ecf11655a6ed5fde56746cc2a694bdaecd4d20d3",
+        "afterTagCode": 36,
+        "afterTagSha256": "a00f5fefb44ba3fde223720be6949e7711102b851b5891cd6b57427b6344c43f",
+        "operation": "encode-lossless2",
+        "width": 41,
+        "height": 20,
+        "image": {
+          "sourceId": "sha256:62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+          "path": "runtime/live/overlay-inputs/blobs/62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518.png",
+          "sha256": "62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+          "bytes": 212
+        },
+        "sourceSize": [
+          35,
+          20
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          35,
+          20
+        ],
+        "drawRect": [
+          3,
+          0,
+          35,
+          20
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 33,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "e32c173ca03b830b3286446655e9cac863210ad15a1b1a53b06f84ae63869987",
+        "afterTagCode": 36,
+        "afterTagSha256": "8c10743b66235b30ee21721322eb53a44391dd73ee5a693ec668585768580c5f",
+        "operation": "encode-lossless2",
+        "width": 107,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6",
+          "path": "runtime/live/overlay-inputs/blobs/c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6.png",
+          "sha256": "c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6",
+          "bytes": 6465
+        },
+        "sourceSize": [
+          107,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          107,
+          26
+        ],
+        "drawRect": [
+          0,
+          0,
+          107,
+          26
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 34,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "f249c7e1fceb378be5389a5499075eaf0ca3ddaaf49bed80f5d523943bb8be95",
+        "afterTagCode": 36,
+        "afterTagSha256": "529e4c0f199ddfb5630e84559fbf81cfe445bf1a9a7da8f5d31743e106a0affa",
+        "operation": "encode-lossless2",
+        "width": 96,
+        "height": 43,
+        "image": {
+          "sourceId": "sha256:3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299",
+          "path": "runtime/live/overlay-inputs/blobs/3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299.png",
+          "sha256": "3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299",
+          "bytes": 11251
+        },
+        "sourceSize": [
+          94,
+          52
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          94,
+          52
+        ],
+        "drawRect": [
+          27,
+          10,
+          35,
+          18
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 37,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "722bbfb483e6ef59b8135bd71973241d48f56b632233f9949ac02c86267b0f50",
+        "afterTagCode": 36,
+        "afterTagSha256": "eb4ec63997d6eb8d0a70faff94670ce6756f3565b7083a86e9bfd303797ec5cc",
+        "operation": "encode-lossless2",
+        "width": 245,
+        "height": 50,
+        "image": {
+          "sourceId": "sha256:1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835",
+          "path": "runtime/live/overlay-inputs/blobs/1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835.png",
+          "sha256": "1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835",
+          "bytes": 26912
+        },
+        "sourceSize": [
+          245,
+          50
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          245,
+          50
+        ],
+        "drawRect": [
+          0,
+          0,
+          245,
+          50
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 38,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "e929b275c535d012b2c4f3aebc28bad1430a4bcb76eb0324e003cc93add79c09",
+        "afterTagCode": 36,
+        "afterTagSha256": "b12956b7f7fbf9e5546fe3f8b86f4d68fba32afd1bd6d5ed945564d43b996dda",
+        "operation": "encode-lossless2",
+        "width": 89,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43",
+          "path": "runtime/live/overlay-inputs/blobs/cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43.png",
+          "sha256": "cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43",
+          "bytes": 4097
+        },
+        "sourceSize": [
+          89,
+          32
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          89,
+          32
+        ],
+        "drawRect": [
+          0,
+          0,
+          89,
+          32
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 39,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "89cdafc0648dd2043e1dad3fa6eb6ed10918b69cbd3b95c4bf6cf22b4d7cfce6",
+        "afterTagCode": 36,
+        "afterTagSha256": "f9d3323f0629bc03f44774020f0bcb61adca4b481a1dc174b46fbc11038a5980",
+        "operation": "encode-lossless2",
+        "width": 90,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112",
+          "path": "runtime/live/overlay-inputs/blobs/898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112.png",
+          "sha256": "898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112",
+          "bytes": 32650
+        },
+        "sourceSize": [
+          173,
+          84
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          173,
+          84
+        ],
+        "drawRect": [
+          0,
+          2,
+          90,
+          28
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 40,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "80296b15a51d6f81ecd7ee90d307ffdf7a6b0523ae80dbaab1a820d712a7f034",
+        "afterTagCode": 36,
+        "afterTagSha256": "a334be8015db12aabf942a69e30efe284fa5ac618da2ae7e796979b74d3e8a7c",
+        "operation": "encode-lossless2",
+        "width": 89,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d",
+          "path": "runtime/live/overlay-inputs/blobs/2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d.png",
+          "sha256": "2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d",
+          "bytes": 5789
+        },
+        "sourceSize": [
+          88,
+          32
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          88,
+          32
+        ],
+        "drawRect": [
+          0.5,
+          0,
+          88,
+          32
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 41,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "6f6ac1376fe375bc10f945ebe75c7ac27275840d206969aabe16cff16b4884b2",
+        "afterTagCode": 36,
+        "afterTagSha256": "b8e0f6dc8dd35a0160d393702d06bccfe0973efe52679b01cee6dff7b7553efd",
+        "operation": "encode-lossless2",
+        "width": 91,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64",
+          "path": "runtime/live/overlay-inputs/blobs/3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64.png",
+          "sha256": "3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64",
+          "bytes": 3648
+        },
+        "sourceSize": [
+          88,
+          32
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          88,
+          32
+        ],
+        "drawRect": [
+          1.5,
+          0,
+          88,
+          32
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 42,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "d893e2ab84914002ddca58d6c11bc93bc8ab4d6b671065fd7ca5e6924aa9c4c3",
+        "afterTagCode": 36,
+        "afterTagSha256": "6382cb21c8866b02effd43fa851e715d2e52b94d6a1729e01db2e1b5cb671075",
+        "operation": "encode-lossless2",
+        "width": 71,
+        "height": 32,
+        "image": {
+          "sourceId": "sha256:be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74",
+          "path": "runtime/live/overlay-inputs/blobs/be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74.png",
+          "sha256": "be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74",
+          "bytes": 5847
+        },
+        "sourceSize": [
+          88,
+          32
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          88,
+          32
+        ],
+        "drawRect": [
+          0,
+          3.0909090909090917,
+          71,
+          25.818181818181817
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 43,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "32ee589f17893ada5c3f6815ec61e0c3adf2d61b87c2cc574fa226859d3c7899",
+        "afterTagCode": 36,
+        "afterTagSha256": "7e75a1aa21c814795a2563518e0533268da8f61723f8582766233a463bb2d8c0",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 62,
+        "image": {
+          "sourceId": "sha256:5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469",
+          "path": "runtime/live/overlay-inputs/blobs/5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469.png",
+          "sha256": "5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469",
+          "bytes": 18783
+        },
+        "sourceSize": [
+          138,
+          62
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          138,
+          62
+        ],
+        "drawRect": [
+          0,
+          0,
+          138,
+          62
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 49,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "592a1a837be41215ab82e55d7d439ce259f0192c0aa59b89d6570ef6c0301593",
+        "afterTagCode": 36,
+        "afterTagSha256": "0532694f38fbbeba6f5ad6e4c91f886715a1c1987153cae2899457733ca5c69c",
+        "operation": "encode-lossless2",
+        "width": 79,
+        "height": 53,
+        "image": {
+          "sourceId": "sha256:f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d",
+          "path": "runtime/live/overlay-inputs/blobs/f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d.png",
+          "sha256": "f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d",
+          "bytes": 4110
+        },
+        "sourceSize": [
+          64,
+          51
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          64,
+          51
+        ],
+        "drawRect": [
+          7.5,
+          1,
+          64,
+          51
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 50,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ffa7927effd9bd5eebdd52f30c09fb0a8e4728e20432bcd137ed041c6d8b1b15",
+        "afterTagCode": 36,
+        "afterTagSha256": "4c4097de2bda2222adf7d29a4a853052b9a0ce5c5db894a32ba28ab7225c7b32",
+        "operation": "encode-lossless2",
+        "width": 44,
+        "height": 20,
+        "image": {
+          "sourceId": "sha256:62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+          "path": "runtime/live/overlay-inputs/blobs/62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518.png",
+          "sha256": "62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+          "bytes": 212
+        },
+        "sourceSize": [
+          35,
+          20
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          35,
+          20
+        ],
+        "drawRect": [
+          4.5,
+          0,
+          35,
+          20
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 52,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "d3dd1e572fbd17d33ae43aa61211bb56679c890e03923cf5f223d2dddd8292d0",
+        "afterTagCode": 36,
+        "afterTagSha256": "507a3ed27182a7f5158e704fb9bcbe941223f821b1f3ccc627e613b644936898",
+        "operation": "encode-lossless2",
+        "width": 106,
+        "height": 20,
+        "image": {
+          "sourceId": "sha256:8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4",
+          "path": "runtime/live/overlay-inputs/blobs/8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4.png",
+          "sha256": "8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4",
+          "bytes": 10849
+        },
+        "sourceSize": [
+          254,
+          36
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          254,
+          36
+        ],
+        "drawRect": [
+          1,
+          5,
+          93,
+          14
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 53,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "c851ac724bf7c25753b44c44b3490d545f677b99994917af52477beec080b9d6",
+        "afterTagCode": 36,
+        "afterTagSha256": "e7306b83774653425e1179b85e6407ad18658f4ee45ea3e959ce437a75685fec",
+        "operation": "encode-lossless2",
+        "width": 58,
+        "height": 29,
+        "image": {
+          "sourceId": "sha256:2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4",
+          "path": "runtime/live/overlay-inputs/blobs/2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4.png",
+          "sha256": "2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4",
+          "bytes": 25567
+        },
+        "sourceSize": [
+          168,
+          84
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          168,
+          84
+        ],
+        "drawRect": [
+          0,
+          0,
+          58,
+          29
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 55,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "bc15fb576f69793178f78d90068a494aa798b0a8bab2c714bab3d1f6aa9e0422",
+        "afterTagCode": 36,
+        "afterTagSha256": "cadaeb6c8da1f1b173c7acb27d41d0e5ffab74e846b2bd3eb0a3e2136af1994d",
+        "operation": "encode-lossless2",
+        "width": 58,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca",
+          "path": "runtime/live/overlay-inputs/blobs/1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca.png",
+          "sha256": "1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca",
+          "bytes": 24905
+        },
+        "sourceSize": [
+          166,
+          79
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          166,
+          79
+        ],
+        "drawRect": [
+          0,
+          0,
+          58,
+          26
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 59,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "2ec851ab0996fa92d18dc78a0c63bbc2dc8c694ce8fe84ce47c770bc5bd9c1a1",
+        "afterTagCode": 36,
+        "afterTagSha256": "a4c94d454b40c7cac90486597dc8d7c775cb3d811451801fb1cde3ea2cd41b59",
+        "operation": "encode-lossless2",
+        "width": 86,
+        "height": 33,
+        "image": {
+          "sourceId": "sha256:ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb",
+          "path": "runtime/live/overlay-inputs/blobs/ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb.png",
+          "sha256": "ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb",
+          "bytes": 1783
+        },
+        "sourceSize": [
+          86,
+          33
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "drawRect": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 60,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ccfe7968948e0b40ccb727bfe0ec6c49a5c3ff17e5739cb995043bc9fc376bdc",
+        "afterTagCode": 36,
+        "afterTagSha256": "4560d28713488324cb93b22090bd307e3a30ffd0ab4491235a528cd0000edac4",
+        "operation": "encode-lossless2",
+        "width": 86,
+        "height": 33,
+        "image": {
+          "sourceId": "sha256:05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd",
+          "path": "runtime/live/overlay-inputs/blobs/05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd.png",
+          "sha256": "05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd",
+          "bytes": 1418
+        },
+        "sourceSize": [
+          86,
+          33
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "drawRect": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 61,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "02d42346824c7767fa60f0008927971a2913121485906ba9af36c933024b29ab",
+        "afterTagCode": 36,
+        "afterTagSha256": "14eb3efca5b5ccaa4df4eba3a420e50733041c4500ef057d0c2033135d895f25",
+        "operation": "encode-lossless2",
+        "width": 86,
+        "height": 33,
+        "image": {
+          "sourceId": "sha256:eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60",
+          "path": "runtime/live/overlay-inputs/blobs/eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60.png",
+          "sha256": "eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60",
+          "bytes": 1492
+        },
+        "sourceSize": [
+          86,
+          33
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "drawRect": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 63,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "c6b2ab007733bf45f19eaec28cb966e972837e1d7fc4155a3848a9d2580125e0",
+        "afterTagCode": 36,
+        "afterTagSha256": "e1442e91b740f108dbea93564725816d39c015a8b6cc1d3db30e6e11c7cb947f",
+        "operation": "encode-lossless2",
+        "width": 86,
+        "height": 33,
+        "image": {
+          "sourceId": "sha256:09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb",
+          "path": "runtime/live/overlay-inputs/blobs/09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb.png",
+          "sha256": "09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb",
+          "bytes": 1470
+        },
+        "sourceSize": [
+          86,
+          33
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "drawRect": [
+          0,
+          0,
+          86,
+          33
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 64,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "20e2731584d81ca254930ff60d1d62a99998e0ca4ff98343e2e204525381a6fc",
+        "afterTagCode": 36,
+        "afterTagSha256": "927ead22b6d26180aadb627950066d92a91bf5322b1c890edcc8a5c04118f7b5",
+        "operation": "encode-lossless2",
+        "width": 102,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330",
+          "path": "runtime/live/overlay-inputs/blobs/1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330.png",
+          "sha256": "1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330",
+          "bytes": 3727
+        },
+        "sourceSize": [
+          128,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          128,
+          26
+        ],
+        "drawRect": [
+          0,
+          2.640625,
+          102,
+          20.71875
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 66,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "f76cb0534c42f3694f85d6fb42badc4304d88049610b88fb30593038c9a050c4",
+        "afterTagCode": 36,
+        "afterTagSha256": "6084a1756f7f740fbcaa9a3444a85e7a6569f08e6408079df0a7f19bfebbdc2e",
+        "operation": "encode-lossless2",
+        "width": 142,
+        "height": 26,
+        "image": {
+          "sourceId": "sha256:00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f",
+          "path": "runtime/live/overlay-inputs/blobs/00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f.png",
+          "sha256": "00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f",
+          "bytes": 9108
+        },
+        "sourceSize": [
+          142,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          142,
+          26
+        ],
+        "drawRect": [
+          0,
+          0,
+          142,
+          26
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 68,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "9f95bcac7420eefe9344667edaa1a97a18e7f2741367f313a375d79b5482cf50",
+        "afterTagCode": 36,
+        "afterTagSha256": "8e014803e91995fc0b0f7d31cb796b17a6cc1ffc59d1a91bb9dcd7d6ca1b6be1",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 63,
+        "image": {
+          "sourceId": "sha256:4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c",
+          "path": "runtime/live/overlay-inputs/blobs/4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c.png",
+          "sha256": "4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c",
+          "bytes": 19748
+        },
+        "sourceSize": [
+          139,
+          63
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          139,
+          63
+        ],
+        "drawRect": [
+          0,
+          0.22661870503597115,
+          138,
+          62.54676258992806
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 69,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "647b9c3107220a9298493ccff6386901b57f8c09bcda25a0dc0b4a55af30103d",
+        "afterTagCode": 36,
+        "afterTagSha256": "f3e79bad1bce863c38944e300885ee95b2280731dea077ec78dac995e6b08849",
+        "operation": "encode-lossless2",
+        "width": 254,
+        "height": 49,
+        "image": {
+          "sourceId": "sha256:ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d",
+          "path": "runtime/live/overlay-inputs/blobs/ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d.png",
+          "sha256": "ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d",
+          "bytes": 9591
+        },
+        "sourceSize": [
+          254,
+          34
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          254,
+          34
+        ],
+        "drawRect": [
+          0,
+          7.5,
+          254,
+          34
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 70,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "b851ff14b343da875334b98949545915f9a44d91d64791cc92e089a08e152257",
+        "afterTagCode": 36,
+        "afterTagSha256": "ad3e14bad2175ce6f1998acff033a1d1a3be76293a3e5b87b2c8f17b9b7b7b65",
+        "operation": "encode-lossless2",
+        "width": 254,
+        "height": 34,
+        "image": {
+          "sourceId": "sha256:a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8",
+          "path": "runtime/live/overlay-inputs/blobs/a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8.png",
+          "sha256": "a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8",
+          "bytes": 8966
+        },
+        "sourceSize": [
+          254,
+          34
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          254,
+          34
+        ],
+        "drawRect": [
+          0,
+          0,
+          254,
+          34
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 71,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "9e8d7b6e38f58a26ba1a4d633c47ecdf9a5cd7fdd1df3d1f8a8665b22ea1fa2a",
+        "afterTagCode": 36,
+        "afterTagSha256": "d44dc7b07355dfc70553333441c14a64ca097fe29418b6f6eb52260e85cbfb31",
+        "operation": "encode-lossless2",
+        "width": 240,
+        "height": 64,
+        "image": {
+          "sourceId": "sha256:4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b",
+          "path": "runtime/live/overlay-inputs/blobs/4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b.png",
+          "sha256": "4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b",
+          "bytes": 64059
+        },
+        "sourceSize": [
+          254,
+          103
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          254,
+          103
+        ],
+        "drawRect": [
+          1,
+          15,
+          201,
+          45
+        ],
+        "sourceKind": "image_gen"
+      },
+      {
+        "id": 73,
+        "beforeTagCode": 35,
+        "beforeTagSha256": "46b09d6ab1d3d02592f057f43e7d1cde8c55e3b5d279793ffff012c3d0bcdb1b",
+        "afterTagCode": 36,
+        "afterTagSha256": "704982c1f7aa79d10da140d581c186a022b2b49404334700d094130f2160345d",
+        "operation": "encode-lossless2",
+        "width": 138,
+        "height": 63,
+        "image": {
+          "sourceId": "sha256:38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+          "path": "runtime/live/overlay-inputs/blobs/38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e.png",
+          "sha256": "38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+          "bytes": 18979
+        },
+        "sourceSize": [
+          138,
+          63
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          138,
+          63
+        ],
+        "drawRect": [
+          0,
+          0,
+          138,
+          63
+        ],
+        "sourceKind": "zh_cn-donor"
+      },
+      {
+        "id": 75,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "5636ec51515fe937e08e94c0eefeccc2f4102a00879f6e381b91df576db7e3bf",
+        "afterTagCode": 36,
+        "afterTagSha256": "ea956544f9270a0b43cc1e72ef4e63340a61b97825d20fa4b5d2fe984965454c",
+        "operation": "encode-lossless2",
+        "width": 100,
+        "height": 24,
+        "image": {
+          "sourceId": "sha256:2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861",
+          "path": "runtime/live/overlay-inputs/blobs/2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861.png",
+          "sha256": "2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861",
+          "bytes": 3411
+        },
+        "sourceSize": [
+          76,
+          23
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          76,
+          23
+        ],
+        "drawRect": [
+          12,
+          0.5,
+          76,
+          23
+        ],
+        "sourceKind": "zh_cn-donor"
+      }
+    ]
+  },
+  {
+    "name": "email",
+    "kind": "donor-payload-or-contained-PNG",
+    "inputSha256": "1f5bcda76e4751cd1aa4254552b30007a740ae997631b1f3bbbb1144d9dc0c46",
+    "outputSha256": "f96c47d8f1e68338c4608d753bccf25454e0de3177513e38c2e8cf94586840cc",
+    "baseRecipe": "repo research/i18n/bag-art/email.zh-CN.json",
+    "rows": [
+      {
+        "id": 2,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "905ada2233c5fdf6795ce9031e70d66eb6a8de77043fe1ef2b11123dab32850a",
+        "afterTagCode": 36,
+        "afterTagSha256": "0959d6ea1a6051f2e84939cce17fa5971fe5dc997740aea8e8059abb7303bf33",
+        "width": 72,
+        "height": 26,
+        "operation": "exact-donor-payload",
+        "donorSwf": {
+          "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+          "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "bytes": 282568
+        },
+        "donorTagCode": 36,
+        "donorId": 2,
+        "donorTagSha256": "0959d6ea1a6051f2e84939cce17fa5971fe5dc997740aea8e8059abb7303bf33"
+      },
+      {
+        "id": 3,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "ed3d4a7557895a93e7d183c5025a1bb8ddae9fd75dce50a1375145f87ea7b747",
+        "afterTagCode": 36,
+        "afterTagSha256": "f5946665e0229f6c9d7db085b58b5f93d81a995311d9770d8281c0e33492e3f3",
+        "width": 71,
+        "height": 43,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542",
+          "path": "runtime/live/overlay-inputs/blobs/f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542.png",
+          "sha256": "f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542",
+          "bytes": 1807
+        },
+        "sourceSize": [
+          71,
+          45
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          71,
+          45
+        ],
+        "drawRect": [
+          1.5777777777777757,
+          0,
+          67.84444444444445,
+          43
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "b44c71319b53069b46928d65d8be9ed5df5a60cfed1cdccc9fbd98a2cb7f0524"
+      },
+      {
+        "id": 7,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "00da97228ff857c13491808f8c954ec1fbd472763c8bbf2fd2989342872ff364",
+        "afterTagCode": 36,
+        "afterTagSha256": "5320cf362a8eb75c332e50dbfd07d95d8dd7b14349ff5433e9cd0134d6cac27b",
+        "width": 36,
+        "height": 18,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5",
+          "path": "runtime/live/overlay-inputs/blobs/eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5.png",
+          "sha256": "eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5",
+          "bytes": 1737
+        },
+        "sourceSize": [
+          42,
+          18
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          42,
+          18
+        ],
+        "drawRect": [
+          0,
+          1.2857142857142865,
+          36,
+          15.428571428571427
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "725b1875564f59d6dcbfff35eed273c5cd20872373df4b01a4acd4024060fa50"
+      },
+      {
+        "id": 17,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "c64d4b2b9a21ddb5c1b63a1c157c24ecc17726a3cb95e30c9a110499481f11bc",
+        "afterTagCode": 36,
+        "afterTagSha256": "c4f595f7e045cf983c635ccea8be74f7c767c2ba445dcee49cbd59e8750f7f2c",
+        "width": 327,
+        "height": 16,
+        "operation": "exact-donor-payload",
+        "donorSwf": {
+          "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+          "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "bytes": 282568
+        },
+        "donorTagCode": 36,
+        "donorId": 17,
+        "donorTagSha256": "c4f595f7e045cf983c635ccea8be74f7c767c2ba445dcee49cbd59e8750f7f2c"
+      },
+      {
+        "id": 22,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "7a27dfa96d67262666693a5d0e54f86c9951ded2097905cbcf895d60ed15de84",
+        "afterTagCode": 36,
+        "afterTagSha256": "6d95bf592be9bbc856d80a719781adf26a8ef825c2f11b4228fab76def9569eb",
+        "width": 71,
+        "height": 26,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230",
+          "path": "runtime/live/overlay-inputs/blobs/3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230.png",
+          "sha256": "3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230",
+          "bytes": 3892
+        },
+        "sourceSize": [
+          83,
+          26
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          83,
+          26
+        ],
+        "drawRect": [
+          0,
+          1.879518072289157,
+          71,
+          22.240963855421686
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "2c0af74784b4bd64b23433a562339c664dabb0919e11ef69fa1b5b40cf3d4a52"
+      },
+      {
+        "id": 23,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "cdbcc008887af0782879db76fdbe59e5d4695ca03e7d9c4b5818c6ed8d278643",
+        "afterTagCode": 36,
+        "afterTagSha256": "332240e67f82916b106d278646479fe220fa628bb7618a3be409a24e2c75a92e",
+        "width": 38,
+        "height": 18,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e",
+          "path": "runtime/live/overlay-inputs/blobs/6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e.png",
+          "sha256": "6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e",
+          "bytes": 1666
+        },
+        "sourceSize": [
+          42,
+          18
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          42,
+          18
+        ],
+        "drawRect": [
+          0,
+          0.8571428571428577,
+          38,
+          16.285714285714285
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "e136a57d507915f91fca7568d911fbfc2608a2d502cb7ee94eeda6f80f3c7a15"
+      },
+      {
+        "id": 27,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "4e2fa724e0b6d42781bc1995249840b2dc20a3bfd072de2abe9b74f9fcf38fb0",
+        "afterTagCode": 36,
+        "afterTagSha256": "d5edf3281c79471d964fb1e52e6fb2265d88e34901b007ff3b21af0e863a400f",
+        "width": 149,
+        "height": 18,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc",
+          "path": "runtime/live/overlay-inputs/blobs/aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc.png",
+          "sha256": "aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc",
+          "bytes": 2316
+        },
+        "sourceSize": [
+          151,
+          18
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          151,
+          18
+        ],
+        "drawRect": [
+          0,
+          0.1192052980132452,
+          149,
+          17.76158940397351
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "0e285609de9dc48244d225b62c6bc5e906430bb6146475cca4487a833b9ca874"
+      },
+      {
+        "id": 30,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "73da82e8bec0b288bb3898eaccdc0d0989dafbb9fd9fad6c1221fc0946155d54",
+        "afterTagCode": 36,
+        "afterTagSha256": "57cd4f2b761ea59de8adbb1a0cdde59927dba4873230b903bc01e926813c0afe",
+        "width": 301,
+        "height": 296,
+        "operation": "exact-donor-payload",
+        "donorSwf": {
+          "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+          "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "bytes": 282568
+        },
+        "donorTagCode": 36,
+        "donorId": 29,
+        "donorTagSha256": "9a44d6011e00f3d0536d66e053a9b984e27ce9fcb31e644ba3c1ff730a98a341"
+      },
+      {
+        "id": 34,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "72338ea059645b6de375d3a332939d5d27126d77a89110811cff2461475680da",
+        "afterTagCode": 36,
+        "afterTagSha256": "e8dafebfd5336114c8ead376238367d3d1af70fbf59cf8329967e3ca914d72ce",
+        "width": 92,
+        "height": 33,
+        "operation": "exact-donor-payload",
+        "donorSwf": {
+          "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+          "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "bytes": 282568
+        },
+        "donorTagCode": 36,
+        "donorId": 33,
+        "donorTagSha256": "1d66a21d10c514e233675910b3a0dc1d97c53ef6e61ad7aba4bf6e0a55212d6e"
+      },
+      {
+        "id": 35,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "a68b25b1a8c2097ec40dec97bff404fdb6939ecd5e676cf924e1e265d6419cf1",
+        "afterTagCode": 36,
+        "afterTagSha256": "57a817e51d74e26a148a3348d4eeca8a9aca2a449020a8da43e70ce7263cbf90",
+        "width": 109,
+        "height": 22,
+        "operation": "encode-existing-lossless",
+        "image": {
+          "sourceId": "sha256:59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b",
+          "path": "runtime/live/overlay-inputs/blobs/59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b.png",
+          "sha256": "59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b",
+          "bytes": 4813
+        },
+        "sourceSize": [
+          133,
+          22
+        ],
+        "sourceCrop": [
+          0,
+          0,
+          133,
+          22
+        ],
+        "drawRect": [
+          0,
+          1.984962406015038,
+          109,
+          18.030075187969924
+        ],
+        "smoothing": "high",
+        "outputPngSha256": "21ef7d01457744a9b3b9775c76138a7f91ef248f666c402210956640dd2a22c7"
+      },
+      {
+        "id": 42,
+        "beforeTagCode": 36,
+        "beforeTagSha256": "cafbecf7868d4ffd824c44318d40616c13e608de2e774994dc22fca0fc6a98b7",
+        "afterTagCode": 36,
+        "afterTagSha256": "3e4c3379c279566ea40ee7ae22255a35b7b99c7c51abe2f93e22fc423ab85e45",
+        "width": 53,
+        "height": 30,
+        "operation": "exact-donor-payload",
+        "donorSwf": {
+          "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+          "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+          "bytes": 282568
+        },
+        "donorTagCode": 36,
+        "donorId": 41,
+        "donorTagSha256": "aed4b94149efd42e402b6fd9d719e4d78eb9e58751ded29cca2e341a8d9792ba"
+      }
+    ]
+  }
+]

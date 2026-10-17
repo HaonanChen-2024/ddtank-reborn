@@ -1,0 +1,244 @@
+[
+  {
+    "name": "DDT_Loading",
+    "inputSha256": "b439b4c58a78a1201c688b483a346b27d993259e54b9bc5d5dc61190b0c7a0bd",
+    "outputSha256": "a6a1f2ab19cb6373dc06812116ed492b382d57c87c6307c78c2d9ec83033c47a",
+    "translations": {
+      "19": [
+        "加载中"
+      ],
+      "40": [
+        "积分",
+        "："
+      ]
+    },
+    "layouts": {
+      "19": {
+        "useoutlines": 1
+      },
+      "40": {
+        "height": 1100,
+        "y": 1050,
+        "x": 100
+      }
+    },
+    "formatted": {
+      "19": {
+        "sourceId": "sha256:ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172",
+        "path": "runtime/live/overlay-inputs/blobs/ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172.txt",
+        "sha256": "ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172",
+        "bytes": 190
+      },
+      "40": {
+        "sourceId": "sha256:21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50",
+        "path": "runtime/live/overlay-inputs/blobs/21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50.txt",
+        "sha256": "21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50",
+        "bytes": 142
+      }
+    },
+    "fontIds": [
+      18,
+      38
+    ],
+    "layoutFontIds": [],
+    "addFontCarriers": true,
+    "changes": [
+      {
+        "code": 75,
+        "id": 18,
+        "beforeSha256": "00e54849312302dcd655dedb6b049878b787d2caf8a8bce9165a697fed553a4b",
+        "afterSha256": "cd0b8d67e2f7d803cff2ef9f1bc8c31bd0ca832b27086024db6aea55b65eb362"
+      },
+      {
+        "code": 88,
+        "id": 18,
+        "beforeSha256": "cd528059bb6a3a31015ba787f6b2c2038d7040e8ec7c92dc99993180a99cc9fb",
+        "afterSha256": "e2a3d7d4ff077d92e9ed639ed2a805e2ff201aa4161fd4937f714e8c9c6a81dc"
+      },
+      {
+        "code": 37,
+        "id": 19,
+        "beforeSha256": "1791c65d85942f7fb75ee58b064f15f5c1c7362b1fbcdc24926421f3d29f2889",
+        "afterSha256": "97023844b0415e015a38333d09cb00ceefe8f161c6e9e469407c66969e959a42"
+      },
+      {
+        "code": 75,
+        "id": 38,
+        "beforeSha256": "891c7d627e0eae901f5eb80374cf6d1bbe16fe7bc40f0712115debc1fd94ac9c",
+        "afterSha256": "43ad50061eb1cd76ddf33f12ef6c13da06aa17ef1b118380b9857b13ce9c60be"
+      },
+      {
+        "code": 88,
+        "id": 38,
+        "beforeSha256": "14a31e016ec82a5ab9e54764ad466bb194607f018849e40c262fb73dffa9d625",
+        "afterSha256": "6fca52c4f0a03a708a2fedd560c4d1adea66e8b318440f9cad37af32dd81976c"
+      },
+      {
+        "code": 33,
+        "id": 40,
+        "beforeSha256": "32adb9c5a05a15a96e5dfa2c66731847fb164985903d8b019b3c98480ea32e60",
+        "afterSha256": "d5232829d6111ecc72a6e36acd2ea9223cb2a364069c715561c58dce1f9a33d5"
+      }
+    ],
+    "noCompiledTagsRead": true
+  },
+  {
+    "name": "quest",
+    "inputSha256": "fa417bf93f1d198aa557be424feb85f4709c44ddb2f8a068fc56c457d4e7d122",
+    "outputSha256": "c75163446f1140ec0edb42f079c4fefb77ec206e4dd1c2ab20f792daa380427d",
+    "translations": {
+      "145": [
+        "新"
+      ],
+      "155": [
+        "您有新的任务！"
+      ]
+    },
+    "layouts": {
+      "145": {
+        "height": 220,
+        "y": 280,
+        "x": 40
+      }
+    },
+    "formatted": {
+      "145": {
+        "sourceId": "sha256:23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed",
+        "path": "runtime/live/overlay-inputs/blobs/23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed.txt",
+        "sha256": "23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed",
+        "bytes": 93
+      },
+      "155": {
+        "sourceId": "sha256:f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba",
+        "path": "runtime/live/overlay-inputs/blobs/f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba.txt",
+        "sha256": "f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba",
+        "bytes": 238
+      }
+    },
+    "fontIds": [
+      144
+    ],
+    "layoutFontIds": [],
+    "addFontCarriers": true,
+    "changes": [
+      {
+        "code": 75,
+        "id": 144,
+        "beforeSha256": "bb6f7fc2527c9ff64262da179e0b16cd0f9163aef6f266b11251aa819cfb8a93",
+        "afterSha256": "b786e8a42bdba9fb274529c5d9b11640fbd797b0f0bc0334e6801679b058c79a"
+      },
+      {
+        "code": 88,
+        "id": 144,
+        "beforeSha256": "8312c75b686c56885a2ba8adceb6c71fbfec760bc6d0a0d05efb21a327f03cdf",
+        "afterSha256": "0472cb536c07859d64998d1dc8eee0863074f61ad8eb42a8cb4584e0c70567e4"
+      },
+      {
+        "code": 11,
+        "id": 145,
+        "beforeSha256": "9bf9c146cd9dd114e99190c0fb1b5fef3034a7690084b8f55fbbfe06ce15c802",
+        "afterSha256": "bc997b5fbb301ef8df47a4e2d78329c04926b08f1d27df2feb5daea26be731e2"
+      },
+      {
+        "code": 37,
+        "id": 155,
+        "beforeSha256": "093840e936797fd086153d9be250a8426afda17b8c57a441b4aba87261f71231",
+        "afterSha256": "a6cf1ab3539163954154d0557d47c6edb074412beca1f813401db3b4be1caad2"
+      }
+    ],
+    "noCompiledTagsRead": true
+  },
+  {
+    "name": "email",
+    "inputSha256": "f96c47d8f1e68338c4608d753bccf25454e0de3177513e38c2e8cf94586840cc",
+    "outputSha256": "e9cccb62af262f27cc05f3f227746d28f04c3b5c0a753e0bd9f1d6bb645bc772",
+    "translations": {
+      "119": [
+        "请选择邮件查看"
+      ]
+    },
+    "layouts": {
+      "119": {
+        "useoutlines": 1
+      }
+    },
+    "formatted": {
+      "119": {
+        "sourceId": "sha256:a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7",
+        "path": "runtime/live/overlay-inputs/blobs/a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7.txt",
+        "sha256": "a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7",
+        "bytes": 224
+      }
+    },
+    "fontIds": [
+      118
+    ],
+    "layoutFontIds": [
+      118
+    ],
+    "addFontCarriers": true,
+    "changes": [
+      {
+        "code": 75,
+        "id": 118,
+        "beforeSha256": "45cf9d5b527eab5f18690104a4ee6fe028446c1725064d8dd05269b939712182",
+        "afterSha256": "de00ba61e9234ecca656981103e58433484df27af829a64625b57337d94a21d4"
+      },
+      {
+        "code": 37,
+        "id": 119,
+        "beforeSha256": "49469c919a19770f5dcff570517fb57a1ad2576e85a190d935af426384a0397a",
+        "afterSha256": "e480c144d086f9c0549cc58f7ad5b53aefe7d414ab3a200f37ec52a73c9a0678"
+      }
+    ],
+    "noCompiledTagsRead": true
+  },
+  {
+    "name": "room",
+    "inputSha256": "11afcd1810ac74db6fe88343f8b2d8cad53e6bc8458f52ac986776435e68ff25",
+    "outputSha256": "0e8d78020b3be6ba7313f340557020295b60eb55e9ca4743c0dae8a7a16c62e2",
+    "fontIds": [
+      162
+    ],
+    "translations": {
+      "163": [
+        "加载中"
+      ]
+    },
+    "changes": [
+      {
+        "id": 162,
+        "code": 75,
+        "beforeSha256": "a35cfd62c766e0caf26c22301fb6145d22382515ddadb5e828f0cb231a644696",
+        "afterSha256": "4011feaee6540fe316c33d63a2f4424788522d7762f38f71e335509f62bad75d"
+      },
+      {
+        "id": 162,
+        "code": 88,
+        "beforeSha256": "7abec227a2804ebf3039040f091e634de27bca25e52751cb947ca3c0a220531c",
+        "afterSha256": "29188f196d687b74e5e775320a71998f2f5d53ed4225a55332fa5264dbad7010"
+      },
+      {
+        "id": 163,
+        "code": 11,
+        "beforeSha256": "90c1c215963791da4e4289c2f1e1734eb8a5d2a738943b590308033441207817",
+        "afterSha256": "111334d01f723ff782174e5a2796b5201a35175b15e50bd03b000465b0735bc0"
+      }
+    ],
+    "addFontCarriers": false,
+    "layoutFontIds": [],
+    "formatted": {
+      "163": {
+        "sourceId": "sha256:7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166",
+        "path": "runtime/live/overlay-inputs/blobs/7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166.txt",
+        "sha256": "7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166",
+        "bytes": 116
+      }
+    },
+    "layouts": {
+      "163": {
+        "x": 24
+      }
+    }
+  }
+]

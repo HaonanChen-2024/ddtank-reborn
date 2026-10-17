@@ -1,0 +1,620 @@
+{
+  "version": 1,
+  "scope": "Only 8 proved vendor originals and 23 proved public original downloads. Source copies are not generated scripts or historical overlay recovery.",
+  "generatedCandidateInput": false,
+  "entries": [
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/F/cloth/1.png",
+      "sourceId": "sha256:2af7478de0f95c0064b594e13e6cb0e7d12f9a0a065077263278412a7a96a211",
+      "path": "runtime/live/overlay-originals/blobs/2af7478de0f95c0064b594e13e6cb0e7d12f9a0a065077263278412a7a96a211.png",
+      "sha256": "2af7478de0f95c0064b594e13e6cb0e7d12f9a0a065077263278412a7a96a211",
+      "bytes": 15433,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/F/cloth/2.png",
+      "sourceId": "sha256:ba853084c89ab4e0a6779db22eec73355b208ddd64b8e28925c78e96dd253b08",
+      "path": "runtime/live/overlay-originals/blobs/ba853084c89ab4e0a6779db22eec73355b208ddd64b8e28925c78e96dd253b08.png",
+      "sha256": "ba853084c89ab4e0a6779db22eec73355b208ddd64b8e28925c78e96dd253b08",
+      "bytes": 1319,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/F/clothF/1.png",
+      "sourceId": "sha256:c007edf2b9fbef25e0e01f79d25b05945bca07550d3eb3221b8e665c42b5863f",
+      "path": "runtime/live/overlay-originals/blobs/c007edf2b9fbef25e0e01f79d25b05945bca07550d3eb3221b8e665c42b5863f.png",
+      "sha256": "c007edf2b9fbef25e0e01f79d25b05945bca07550d3eb3221b8e665c42b5863f",
+      "bytes": 16743,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/F/clothF/2.png",
+      "sourceId": "sha256:8e741dc51fc2b3a7091a25682b5e4beb8ff612dc7c2244eb72500dfd5a31a783",
+      "path": "runtime/live/overlay-originals/blobs/8e741dc51fc2b3a7091a25682b5e4beb8ff612dc7c2244eb72500dfd5a31a783.png",
+      "sha256": "8e741dc51fc2b3a7091a25682b5e4beb8ff612dc7c2244eb72500dfd5a31a783",
+      "bytes": 1025,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/M/cloth/1.png",
+      "sourceId": "sha256:7cfb98e92e725fe5a206b4db13913d6f212e539fd573e53239d63afbe3b995f9",
+      "path": "runtime/live/overlay-originals/blobs/7cfb98e92e725fe5a206b4db13913d6f212e539fd573e53239d63afbe3b995f9.png",
+      "sha256": "7cfb98e92e725fe5a206b4db13913d6f212e539fd573e53239d63afbe3b995f9",
+      "bytes": 13536,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/M/cloth/2.png",
+      "sourceId": "sha256:4c1c32ac41eb5725245e139b180f12e66b694f8642f51759801e8ca2d2346226",
+      "path": "runtime/live/overlay-originals/blobs/4c1c32ac41eb5725245e139b180f12e66b694f8642f51759801e8ca2d2346226.png",
+      "sha256": "4c1c32ac41eb5725245e139b180f12e66b694f8642f51759801e8ca2d2346226",
+      "bytes": 2297,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/M/clothF/1.png",
+      "sourceId": "sha256:e6b47fb8f11001ab5c2d3ece9bcdd880e6aa1e169f4e774bac19bf5fbc3c70d5",
+      "path": "runtime/live/overlay-originals/blobs/e6b47fb8f11001ab5c2d3ece9bcdd880e6aa1e169f4e774bac19bf5fbc3c70d5.png",
+      "sha256": "e6b47fb8f11001ab5c2d3ece9bcdd880e6aa1e169f4e774bac19bf5fbc3c70d5",
+      "bytes": 13935,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "native-resources/image/scene/christmas/workshop/cloth/M/clothF/2.png",
+      "sourceId": "sha256:2e5cdac5d9cc4cc892cc037002ed895cdd6cbbe973e2288c04b5bcf5f5edfa4b",
+      "path": "runtime/live/overlay-originals/blobs/2e5cdac5d9cc4cc892cc037002ed895cdd6cbbe973e2288c04b5bcf5f5edfa4b.png",
+      "sha256": "2e5cdac5d9cc4cc892cc037002ed895cdd6cbbe973e2288c04b5bcf5f5edfa4b",
+      "bytes": 2250,
+      "sourceKind": "vendor-original",
+      "originalPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+      "evidence": {
+        "type": "existing-vendor-original",
+        "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+        "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+        "sourceUrl": null,
+        "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/carnival/carnival_v3_6_1_u1.swf",
+      "sourceId": "sha256:6c216b621380dc7c6116e98534b55c74deac0e1d0260f981d1fc78e3ce7ec872",
+      "path": "runtime/live/overlay-originals/blobs/6c216b621380dc7c6116e98534b55c74deac0e1d0260f981d1fc78e3ce7ec872.swf",
+      "sha256": "6c216b621380dc7c6116e98534b55c74deac0e1d0260f981d1fc78e3ce7ec872",
+      "bytes": 230981,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/carnival_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "d40e7d928077d7fc82db616b5e854be1527786ec7157778cfb1f7fa7ac44e730",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/carnival/carnival_v3_6_1_u1.ui",
+      "sourceId": "sha256:06e558db77d2d85147c4e89de763b9bf5177c4ae68445063ea9a18179527d9c1",
+      "path": "runtime/live/overlay-originals/blobs/06e558db77d2d85147c4e89de763b9bf5177c4ae68445063ea9a18179527d9c1.ui",
+      "sha256": "06e558db77d2d85147c4e89de763b9bf5177c4ae68445063ea9a18179527d9c1",
+      "bytes": 2352,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/carnival_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "d40e7d928077d7fc82db616b5e854be1527786ec7157778cfb1f7fa7ac44e730",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/charge/chargeactivity_v3_6_1_u1.swf",
+      "sourceId": "sha256:9ba7c36d9a30723358c3eb66659e30c947beabfec30c3916fea2baf4ae1c5749",
+      "path": "runtime/live/overlay-originals/blobs/9ba7c36d9a30723358c3eb66659e30c947beabfec30c3916fea2baf4ae1c5749.swf",
+      "sha256": "9ba7c36d9a30723358c3eb66659e30c947beabfec30c3916fea2baf4ae1c5749",
+      "bytes": 125744,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/chargeactivity_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "7e9929a6ce31e59cc4a72df25319c4c40e67894bc7b789fa008911eedeaccf85",
+        "hashField": "entitySha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/charge/chargeactivity_v3_6_1_u1.ui",
+      "sourceId": "sha256:a66f18279e065580a00aa903f69b24d9f6fff66ef09427d5fbf36fd5c6b67f8c",
+      "path": "runtime/live/overlay-originals/blobs/a66f18279e065580a00aa903f69b24d9f6fff66ef09427d5fbf36fd5c6b67f8c.ui",
+      "sha256": "a66f18279e065580a00aa903f69b24d9f6fff66ef09427d5fbf36fd5c6b67f8c",
+      "bytes": 1073,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/chargeactivity_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "7e9929a6ce31e59cc4a72df25319c4c40e67894bc7b789fa008911eedeaccf85",
+        "hashField": "entitySha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/ddplay/ddplay_v3_6_1_u1.swf",
+      "sourceId": "sha256:5c52f584b50e7e69e824450229cc83a62112c569717b73c08476bb354daaf082",
+      "path": "runtime/live/overlay-originals/blobs/5c52f584b50e7e69e824450229cc83a62112c569717b73c08476bb354daaf082.swf",
+      "sha256": "5c52f584b50e7e69e824450229cc83a62112c569717b73c08476bb354daaf082",
+      "bytes": 647959,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/ddplay_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/ddplay_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/download-receipt.json",
+        "receiptSha256": "0841bccea48808e7d8674e22c8b6b2c9c41b0238f25ca7a49719cfc8e063c5a9",
+        "hashField": "sha256",
+        "httpStatus": null,
+        "downloadedAt": "2026-10-14T18:13:18.199Z"
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/first-recharge/firstrecharge_v3_6_1_u1.swf",
+      "sourceId": "sha256:1c3b20c94859f1310d1da495f65a26928eb987774390fde57dd76f79e69dc1b5",
+      "path": "runtime/live/overlay-originals/blobs/1c3b20c94859f1310d1da495f65a26928eb987774390fde57dd76f79e69dc1b5.swf",
+      "sha256": "1c3b20c94859f1310d1da495f65a26928eb987774390fde57dd76f79e69dc1b5",
+      "bytes": 211121,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/firstrecharge_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "f3b779d0d4d8880392620d753b635d9ba4798aaab6302cc8fbe56bc2877e4897",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/first-recharge/firstrecharge_v3_6_1_u1.ui",
+      "sourceId": "sha256:95c1ee3d74dafe7b1f1c11cb0cd6c2c3d48b880a29429cc4a2d30997dd881eef",
+      "path": "runtime/live/overlay-originals/blobs/95c1ee3d74dafe7b1f1c11cb0cd6c2c3d48b880a29429cc4a2d30997dd881eef.ui",
+      "sha256": "95c1ee3d74dafe7b1f1c11cb0cd6c2c3d48b880a29429cc4a2d30997dd881eef",
+      "bytes": 2324,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/firstrecharge_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "f3b779d0d4d8880392620d753b635d9ba4798aaab6302cc8fbe56bc2877e4897",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/forthright/forthrightactive_v3_6_1_u1.swf",
+      "sourceId": "sha256:99c2e1c9099735c07814f4cd79f97a1d84befcfff55535c974d5c935b6c6e859",
+      "path": "runtime/live/overlay-originals/blobs/99c2e1c9099735c07814f4cd79f97a1d84befcfff55535c974d5c935b6c6e859.swf",
+      "sha256": "99c2e1c9099735c07814f4cd79f97a1d84befcfff55535c974d5c935b6c6e859",
+      "bytes": 410429,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/forthrightactive_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "2aa4305f53d021eb8cef1db7a748ea614f6ef9ac57b64f904e1f9e1244068542",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/forthright/forthrightactive_v3_6_1_u1.ui",
+      "sourceId": "sha256:14773a066c39815db458612169700a8149773a3a38995967a8c40cb88656c7f9",
+      "path": "runtime/live/overlay-originals/blobs/14773a066c39815db458612169700a8149773a3a38995967a8c40cb88656c7f9.ui",
+      "sha256": "14773a066c39815db458612169700a8149773a3a38995967a8c40cb88656c7f9",
+      "bytes": 4601,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/forthrightactive_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/download-receipt.json",
+        "receiptSha256": "2aa4305f53d021eb8cef1db7a748ea614f6ef9ac57b64f904e1f9e1244068542",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/gypsy/gypsyshop_v3_6_1_u1.swf",
+      "sourceId": "sha256:1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be",
+      "path": "runtime/live/overlay-originals/blobs/1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be.swf",
+      "sha256": "1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be",
+      "bytes": 105767,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-gypsy-analysis-20261015/gypsyshop_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/gypsyshop_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-gypsy-analysis-20261015/download-receipt.json",
+        "receiptSha256": "2d31359ac1715bafd02b9c5e18dff44c4eaea39826174f305e2041006ab1a33c",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/mines/bogu-player-game.png",
+      "sourceId": "sha256:cc07012615e8fe2c9b8cff59f07b2ed52d06acecba7508ee2d8ca067bedd1a94",
+      "path": "runtime/live/overlay-originals/blobs/cc07012615e8fe2c9b8cff59f07b2ed52d06acecba7508ee2d8ca067bedd1a94.png",
+      "sha256": "cc07012615e8fe2c9b8cff59f07b2ed52d06acecba7508ee2d8ca067bedd1a94",
+      "bytes": 58109,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/image/equip/f/suits/suits638/1/game.png",
+        "receipt": "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/source-receipt.json",
+        "receiptSha256": "45b1cdeb936e300b6bc1df7ad5f00620aef16f1469498644400e68ff7f700164",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/mines/boguadventure_v3_6_1_u1.swf",
+      "sourceId": "sha256:306633351976c16780211629a510b931b9d822a0a656124da4911fbad3cc5204",
+      "path": "runtime/live/overlay-originals/blobs/306633351976c16780211629a510b931b9d822a0a656124da4911fbad3cc5204.swf",
+      "sha256": "306633351976c16780211629a510b931b9d822a0a656124da4911fbad3cc5204",
+      "bytes": 500384,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/boguadventure_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/mines/boguadventure_v3_6_1_u1.ui",
+      "sourceId": "sha256:c9d136840ea8f9a96598ca925514b93436e4c73484bbb62d84ccc3feb7c55bae",
+      "path": "runtime/live/overlay-originals/blobs/c9d136840ea8f9a96598ca925514b93436e4c73484bbb62d84ccc3feb7c55bae.ui",
+      "sha256": "c9d136840ea8f9a96598ca925514b93436e4c73484bbb62d84ccc3feb7c55bae",
+      "bytes": 1366,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/boguadventure_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/moonlight/moonlighttreasure_v3_6_1_u1.swf",
+      "sourceId": "sha256:fbd265fa158117afee2f3ca0386dd1234e33fb5a56403a80cd379a565542b370",
+      "path": "runtime/live/overlay-originals/blobs/fbd265fa158117afee2f3ca0386dd1234e33fb5a56403a80cd379a565542b370.swf",
+      "sha256": "fbd265fa158117afee2f3ca0386dd1234e33fb5a56403a80cd379a565542b370",
+      "bytes": 565506,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/moonlighttreasure_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/download-receipt.json",
+        "receiptSha256": "bbb697d25073ac32072fcd8caa715dd966934822d606fa3ebd237d9ea94660c7",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/moonlight/moonlighttreasure_v3_6_1_u1.ui",
+      "sourceId": "sha256:81a332f63b734f942e9fbc8ac297be9150c3d95456d6ec572202b6831ff5b39e",
+      "path": "runtime/live/overlay-originals/blobs/81a332f63b734f942e9fbc8ac297be9150c3d95456d6ec572202b6831ff5b39e.ui",
+      "sha256": "81a332f63b734f942e9fbc8ac297be9150c3d95456d6ec572202b6831ff5b39e",
+      "bytes": 4622,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/moonlighttreasure_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/download-receipt.json",
+        "receiptSha256": "bbb697d25073ac32072fcd8caa715dd966934822d606fa3ebd237d9ea94660c7",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/pair/pairbox_v3_6_1_u1.swf",
+      "sourceId": "sha256:5878679871121815b6c036946418fd4bb06c74d5c06e50ccb90e574eda2aa0db",
+      "path": "runtime/live/overlay-originals/blobs/5878679871121815b6c036946418fd4bb06c74d5c06e50ccb90e574eda2aa0db.swf",
+      "sha256": "5878679871121815b6c036946418fd4bb06c74d5c06e50ccb90e574eda2aa0db",
+      "bytes": 386695,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/pairbox_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/pair/pairbox_v3_6_1_u1.ui",
+      "sourceId": "sha256:9a937f98a73541fde5c7f6bcafa5faa9a166298ce89dcdfa518b4fe5856ee27c",
+      "path": "runtime/live/overlay-originals/blobs/9a937f98a73541fde5c7f6bcafa5faa9a166298ce89dcdfa518b4fe5856ee27c.ui",
+      "sha256": "9a937f98a73541fde5c7f6bcafa5faa9a166298ce89dcdfa518b4fe5856ee27c",
+      "bytes": 3326,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/pairbox_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/purr/purrturntable_v3_6_1_u1.swf",
+      "sourceId": "sha256:61f70ab275a63c2d30dafb1d8596f6b6a062667cfbf4f27a96496f494f1b2999",
+      "path": "runtime/live/overlay-originals/blobs/61f70ab275a63c2d30dafb1d8596f6b6a062667cfbf4f27a96496f494f1b2999.swf",
+      "sha256": "61f70ab275a63c2d30dafb1d8596f6b6a062667cfbf4f27a96496f494f1b2999",
+      "bytes": 1130171,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/purrturntable_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/download-receipt.json",
+        "receiptSha256": "da28ef7e5b7cca19f58ab4c9f545642863e7d8b0ec3897145db063bcb7cba569",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/purr/purrturntable_v3_6_1_u1.ui",
+      "sourceId": "sha256:702a1e451ca9f3a8c700dcf943c97c6f159988973148083376713d9b2ff59849",
+      "path": "runtime/live/overlay-originals/blobs/702a1e451ca9f3a8c700dcf943c97c6f159988973148083376713d9b2ff59849.ui",
+      "sha256": "702a1e451ca9f3a8c700dcf943c97c6f159988973148083376713d9b2ff59849",
+      "bytes": 3527,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/purrturntable_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/download-receipt.json",
+        "receiptSha256": "da28ef7e5b7cca19f58ab4c9f545642863e7d8b0ec3897145db063bcb7cba569",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/treasure/treasurehunting_v3_6_1_u1.swf",
+      "sourceId": "sha256:8929462943c1da24ae6f6e546120c278306012c24d99a9767f3fb3ce2187ff7f",
+      "path": "runtime/live/overlay-originals/blobs/8929462943c1da24ae6f6e546120c278306012c24d99a9767f3fb3ce2187ff7f.swf",
+      "sha256": "8929462943c1da24ae6f6e546120c278306012c24d99a9767f3fb3ce2187ff7f",
+      "bytes": 580366,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/treasurehunting_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/download-receipt.json",
+        "receiptSha256": "858a966112fe4e4bf5b2e60ab33e2a66e4b60d0276ef0871ff4a4312aadd9f92",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/treasure/treasurehunting_v3_6_1_u1.ui",
+      "sourceId": "sha256:f18f82547d7427eb4681d54f38abbbc212bf1a412e434e6728003883c3ba3dd9",
+      "path": "runtime/live/overlay-originals/blobs/f18f82547d7427eb4681d54f38abbbc212bf1a412e434e6728003883c3ba3dd9.ui",
+      "sha256": "f18f82547d7427eb4681d54f38abbbc212bf1a412e434e6728003883c3ba3dd9",
+      "bytes": 2848,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/treasurehunting_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/download-receipt.json",
+        "receiptSha256": "858a966112fe4e4bf5b2e60ab33e2a66e4b60d0276ef0871ff4a4312aadd9f92",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/wardrobe/magicwardrobe_v3_6_1_u1.swf",
+      "sourceId": "sha256:df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca",
+      "path": "runtime/live/overlay-originals/blobs/df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca.swf",
+      "sha256": "df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca",
+      "bytes": 133593,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.swf",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/magicwardrobe_v3_6_1_u1.swf",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    },
+    {
+      "target": "workshop-native/wardrobe/magicwardrobe_v3_6_1_u1.ui",
+      "sourceId": "sha256:46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145",
+      "path": "runtime/live/overlay-originals/blobs/46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145.ui",
+      "sha256": "46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145",
+      "bytes": 969,
+      "sourceKind": "reference-original",
+      "originalPath": "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.ui",
+      "evidence": {
+        "type": "public-original-download",
+        "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/magicwardrobe_v3_6_1_u1.ui",
+        "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+        "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+        "hashField": "sha256",
+        "httpStatus": 201,
+        "downloadedAt": null
+      },
+      "generation": false,
+      "sourceCopy": true
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "sourceCopies": 31,
+    "bytes": 5180371,
+    "vendorOriginals": 8,
+    "referenceOriginals": 23
+  },
+  "originalsPreserved": true,
+  "liveOverlayUnchanged": true
+}

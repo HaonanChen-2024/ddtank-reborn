@@ -1,0 +1,3531 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-17T10:07:01.088Z",
+  "scope": "119 frozen overlay files",
+  "allowedDataRoots": [
+    "source/ddtank-reborn",
+    "runtime/official-capture-20261017"
+  ],
+  "generatedProductsMayNotBeCopiedAsRebuild": true,
+  "toolchain": {
+    "nodeVersion": "v24.21.0",
+    "fonts": [
+      {
+        "file": "<WINDIR>/Fonts/msyhbd.ttc",
+        "sha256": "4508821b3dffe01f0ef5e5326a3e60df705a44633858811f67b6982dce3f6ee6",
+        "bytes": 16883552,
+        "role": "Configured bold canvas caption font"
+      },
+      {
+        "file": "<WINDIR>/Fonts/msyh.ttc",
+        "sha256": "d79c55e68b1131eea0cc1c47be4f572d964f28c682e143db2ad09c1e4cb07a3f",
+        "bytes": 19704352,
+        "role": "Microsoft YaHei regular font used by text/font compiler environment"
+      }
+    ],
+    "externalPackages": [
+      "pngjs",
+      "@napi-rs/canvas",
+      "jszip"
+    ],
+    "note": "外部字体与已安装软件仅为工具链，不是允许根之外的素材/候选输入；本工具不安装依赖。",
+    "platform": "win32",
+    "arch": "x64",
+    "packages": [
+      {
+        "name": "pngjs",
+        "version": "7.0.0",
+        "packageJsonSha256": "85b17f2f852aece03e71edb4ed4d9fddf6a0a8f0b69ac75d7f00b6592d62d37c",
+        "entrySha256": "e02cecbd36327829758386dc3f0ca4a36a2339ccb5d5e824ca3556e2c3f89726",
+        "path": "<NODE_DEPS>/node_modules/pngjs"
+      },
+      {
+        "name": "@napi-rs/canvas",
+        "version": "0.1.100",
+        "packageJsonSha256": "8379e15beeaecdedc863f8ff0e2548935eed4fb7505b93a207600a212d7bc2c5",
+        "entrySha256": "bbdad32cab670261983ea56d4625fc7d07b1382f8bb7d6d31232bb2834861597",
+        "path": "<NODE_DEPS>/node_modules/@napi-rs/canvas"
+      },
+      {
+        "name": "@napi-rs/canvas-win32-x64-msvc",
+        "version": "0.1.100",
+        "packageJsonSha256": "59e9517011b1bc19b7a001e04d5523437f2d9e4167c08c1f1df8eaf971229185",
+        "entrySha256": "32836f0cec2bbc74aa218fb6790d7e2dbd51cf44a4480211f52301dce539eba7",
+        "path": "<NODE_DEPS>/node_modules/@napi-rs/canvas-win32-x64-msvc"
+      },
+      {
+        "name": "jszip",
+        "version": "3.10.1",
+        "packageJsonSha256": "83569b5b130b5ec27ae281ed80420ad364baf1bf64cb82e6ac8fb891e1b4ec4c",
+        "entrySha256": "0fdb844fcdd6fd8ce8ced5e20b37cdabb629b4c155a1d3fb5df29c69eeb4f228",
+        "path": "<NODE_DEPS>/node_modules/jszip"
+      }
+    ],
+    "javaVersion": [
+      "openjdk version \"22.0.1\" 2024-04-16",
+      "OpenJDK Runtime Environment (build 22.0.1+8-16)",
+      "OpenJDK 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)"
+    ],
+    "fixedFfdec": "runtime/live/overlay-inputs/tools/ffdec; individual jar SHA256 in pin-sources.json",
+    "installsPerformed": false,
+    "automaticTargetHashRefresh": false
+  },
+  "pureRenderer": {
+    "ownerPath": "source/ddtank-reborn/scripts/workshop-bag-art.mjs",
+    "ownerSha256": "378cfbf5f92847108df7d3f58bf6c18f187b65c15370cd6ea39be8fbbfb633a5",
+    "stagedSha256": "a8deb7835b8ea1e5233acb31dec9a13bd6f78f22a2a8a4c54bcc5655d8c6cbf4",
+    "extractedFunction": "inside + inpaintCaption + main caption loop; prepared image reads moved to guarded adapter",
+    "stagedSha256Lf": "1fe2c4f6040ff088bfd9e6692156a933d040820de554469a8a1ff2d4f0c3b1be"
+  },
+  "codeFiles": [
+    {
+      "path": "source/ddtank-reborn/scripts/workshop-bag-art.mjs",
+      "sha256": "378cfbf5f92847108df7d3f58bf6c18f187b65c15370cd6ea39be8fbbfb633a5",
+      "sha256Lf": "eaa687b51e5798f51cc45715979d448d74162fc8ca04e74d4a1e54268d60a8bd"
+    },
+    {
+      "path": "source/ddtank-reborn/scripts/workshop-calendar-art.mjs",
+      "sha256": "0ac0a71ed361760c8534f5aa7023b3add894fa7bba08f38a8370e8af495d2f93",
+      "sha256Lf": "0ac0a71ed361760c8534f5aa7023b3add894fa7bba08f38a8370e8af495d2f93"
+    },
+    {
+      "path": "source/ddtank-reborn/scripts/workshop-bag-layout.mjs",
+      "sha256": "99c628d484827a7ea21de0b1fc0c73b9bf0af68d86240c1ef3f751133fc3995c",
+      "sha256Lf": "99c628d484827a7ea21de0b1fc0c73b9bf0af68d86240c1ef3f751133fc3995c"
+    },
+    {
+      "path": "source/ddtank-reborn/tools/i18n/abc-strings/lib.mjs",
+      "sha256": "d2133473836ec1123dc51655f83af020cad87b6d89a9b3aad59055c6c70f7c74",
+      "sha256Lf": "3fa1e495d1095fd2058737b8a94f6acdae63d5643eea599c073c0481d5343424"
+    }
+  ],
+  "entries": [
+    {
+      "relativePath": "2.png",
+      "expectedSha256": "47632e3f858bb08c9df483520f2e55b8a84b144c2fbc44dc085d915a80f1a8de",
+      "expectedBytes": 4525622,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "COMPOSITE_BASELINE_CHAIN",
+        "reasons": [
+          "缺少允许来源根中的固定旧基底、native manifest/生成桥及完整复合补丁顺序；本次未证明需要 RSA，不将未知私钥依赖冒称已定位，未读取或复制任何私钥。"
+        ],
+        "identifiedPaths": [
+          "runtime/client-overlay-literals.json",
+          "runtime/client-overlay-backups/literals-1791709710333/2.png",
+          "source/ddtank-reborn/apps/api/assets/flash/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "3.png",
+      "expectedSha256": "cedcca4617d87de89ebc73145012643ca2388dc3debb3edaf26313ccb220cd11",
+      "expectedBytes": 206646,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "COMPOSITE_BASELINE_CHAIN",
+        "reasons": [
+          "缺少允许来源根中的固定旧基底、native manifest/生成桥及完整复合补丁顺序；本次未证明需要 RSA，不将未知私钥依赖冒称已定位，未读取或复制任何私钥。"
+        ],
+        "identifiedPaths": [
+          "runtime/client-overlay-literals.json",
+          "runtime/client-overlay-backups/literals-1791709710333/3.png",
+          "source/ddtank-reborn/apps/api/assets/flash/3.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "audio.swf",
+      "expectedSha256": "eb07d14f76d9900abb9358ed064130ef5fb3bd60b3350d0f223682000fb7dc65",
+      "expectedBytes": 1790828,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/audio.swf",
+          "runtime/weapon-original-effects-20261015/cream-reference/audiobattle.swf",
+          "runtime/weapon-original-effects-20261015/cream-reference/candidate-b/manifest.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "DDT_Loading.swf",
+      "expectedSha256": "a6a1f2ab19cb6373dc06812116ed492b382d57c87c6307c78c2d9ec83033c47a",
+      "expectedBytes": 552603,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "COMPOSITE_BASELINE_CHAIN",
+        "reasons": [
+          "缺少允许来源根中的固定旧基底、native manifest/生成桥及完整复合补丁顺序；本次未证明需要 RSA，不将未知私钥依赖冒称已定位，未读取或复制任何私钥。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-remaining-20261017/static-text/original/DDT_Loading.swf",
+          "runtime/feedback-remaining-20261017/static-text/translations.json",
+          "runtime/feedback-remaining-20261017/static-text/layout.json",
+          "runtime/client-overlay-backups/literals-1791709710333/DDT_Loading.swf",
+          "source/ddtank-reborn/apps/api/assets/flash/DDT_Loading.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/ChristmasMap.swf",
+      "expectedSha256": "253b7361189d2bb1d142878c8fd51cc91c94807b4ff601336a6a9ec268a66411",
+      "expectedBytes": 401828,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "HISTORICAL_RESOURCE_INPUT",
+        "reasons": [
+          "精确 living/ChristmasMap 输入是 runtime 的 wire.bin/历史参考包。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/F/cloth/1.png",
+      "expectedSha256": "2af7478de0f95c0064b594e13e6cb0e7d12f9a0a065077263278412a7a96a211",
+      "expectedBytes": 15433,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:2af7478de0f95c0064b594e13e6cb0e7d12f9a0a065077263278412a7a96a211",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/F/cloth/2.png",
+      "expectedSha256": "ba853084c89ab4e0a6779db22eec73355b208ddd64b8e28925c78e96dd253b08",
+      "expectedBytes": 1319,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:ba853084c89ab4e0a6779db22eec73355b208ddd64b8e28925c78e96dd253b08",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/F/clothF/1.png",
+      "expectedSha256": "c007edf2b9fbef25e0e01f79d25b05945bca07550d3eb3221b8e665c42b5863f",
+      "expectedBytes": 16743,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:c007edf2b9fbef25e0e01f79d25b05945bca07550d3eb3221b8e665c42b5863f",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/F/clothF/2.png",
+      "expectedSha256": "8e741dc51fc2b3a7091a25682b5e4beb8ff612dc7c2244eb72500dfd5a31a783",
+      "expectedBytes": 1025,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:8e741dc51fc2b3a7091a25682b5e4beb8ff612dc7c2244eb72500dfd5a31a783",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/M/cloth/1.png",
+      "expectedSha256": "7cfb98e92e725fe5a206b4db13913d6f212e539fd573e53239d63afbe3b995f9",
+      "expectedBytes": 13536,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:7cfb98e92e725fe5a206b4db13913d6f212e539fd573e53239d63afbe3b995f9",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/M/cloth/2.png",
+      "expectedSha256": "4c1c32ac41eb5725245e139b180f12e66b694f8642f51759801e8ca2d2346226",
+      "expectedBytes": 2297,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:4c1c32ac41eb5725245e139b180f12e66b694f8642f51759801e8ca2d2346226",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/M/clothF/1.png",
+      "expectedSha256": "e6b47fb8f11001ab5c2d3ece9bcdd880e6aa1e169f4e774bac19bf5fbc3c70d5",
+      "expectedBytes": 13935,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:e6b47fb8f11001ab5c2d3ece9bcdd880e6aa1e169f4e774bac19bf5fbc3c70d5",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/cloth/M/clothF/2.png",
+      "expectedSha256": "2e5cdac5d9cc4cc892cc037002ed895cdd6cbbe973e2288c04b5bcf5f5edfa4b",
+      "expectedBytes": 2250,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GUNNY30_SOURCE_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "精确原 PNG 位于 source/gunny30-resource，不在 repo/vendor/official-capture 输入根。"
+        ],
+        "identifiedPaths": [
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:2e5cdac5d9cc4cc892cc037002ed895cdd6cbbe973e2288c04b5bcf5f5edfa4b",
+        "sourceKind": "vendor-original",
+        "evidence": {
+          "type": "existing-vendor-original",
+          "path": "runtime/christmas-load-order-20261016/candidate/manifest.json",
+          "vendorPath": "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "sourceUrl": null,
+          "sourceUrlStatus": "No original download URL proven; existing local vendor original only."
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/living1.swf",
+      "expectedSha256": "de5bf855deefce097d3228eeeb08c1876b71409eee9da4a682783212f4fb9573",
+      "expectedBytes": 146558,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "HISTORICAL_RESOURCE_INPUT",
+        "reasons": [
+          "精确 living/ChristmasMap 输入是 runtime 的 wire.bin/历史参考包。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/living2.swf",
+      "expectedSha256": "e2453dbe5d92e60e88ee08b03ee5a828f302971e2da1a1ddc5a33938badeb577",
+      "expectedBytes": 146267,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "HISTORICAL_RESOURCE_INPUT",
+        "reasons": [
+          "精确 living/ChristmasMap 输入是 runtime 的 wire.bin/历史参考包。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "native-resources/image/scene/christmas/workshop/living3.swf",
+      "expectedSha256": "1756bc9639c2cc82de16058787053023d50e122916d802aec6213bc76c7072fa",
+      "expectedBytes": 121139,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "HISTORICAL_RESOURCE_INPUT",
+        "reasons": [
+          "精确 living/ChristmasMap 输入是 runtime 的 wire.bin/历史参考包。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/language.txt",
+      "expectedSha256": "c6cf740aa0363bd76ed25a64abafbb64dc4b450e99d8d0e8280ba1cb204ce84f",
+      "expectedBytes": 229202,
+      "adapter": "dictionary",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/language.txt",
+          "sha256": "ed7bebda3cb6cabcdc8ada6bc98b334d2fe873886b0ee9dc57cd155c30e49fe9",
+          "bytes": 250681
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/zh-CN-overrides.json",
+          "sha256": "5b6fddab3d5c339dd58f178704639c1aa3addc6304c0a35681ffad3919c1cd98",
+          "bytes": 254357
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/zh-CN-dictionary-format-repairs.json",
+          "sha256": "0e5d1fb15dba12c32f174cb817023227935126abd3b61e0061970c75dc24553d",
+          "bytes": 1246
+        }
+      ],
+      "configs": [],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/movingnotification.txt",
+      "expectedSha256": "36c5c59c7b185f60e6e73f9c2596e9887f6e179b084fc982555961211f2243f0",
+      "expectedBytes": 1794,
+      "adapter": "notifications",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/movingnotification.txt",
+          "sha256": "e52ef4e23012aaaae27eb906c50f417aad22df8c9e4bccbfef2e397a8ef8678b",
+          "bytes": 6884
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/zh-CN-moving-notifications.json",
+          "sha256": "e048dc14f9b484b58eed31b1d990cab7864845d60b72a8e70308a1a81033decb",
+          "bytes": 2796
+        }
+      ],
+      "configs": [],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/swf/bagandinfo.swf",
+      "expectedSha256": "fd970e0d6883554b0196d770665d9937b857106e33605838b562ad7f5b49dd44",
+      "expectedBytes": 1125359,
+      "adapter": "bag",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/bagandinfo.swf",
+          "sha256": "795d96b7f861e98309c641adc660fd678de09329bcd0f0cab35a66fa16432911",
+          "bytes": 1196928
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/zh-CN.json",
+          "sha256": "a729228cd04e22719265e9b1022a180085d2996ec382d83dea0e186a12ebfc98",
+          "bytes": 39781
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/bag-help/47.png",
+          "sha256": "7284b7ed73293e4d27c839f1bb71e99c1f435bbc0b28b7c64fe000d70e6392e3",
+          "bytes": 1782
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/bag-help/48.png",
+          "sha256": "32d2eba3211e0ac61f745fcabbac9b4929bc5db0bb9a09947dd2704aa381a398",
+          "bytes": 66306
+        }
+      ],
+      "configs": [
+        "source/ddtank-reborn/research/i18n/bag-art/zh-CN.json"
+      ],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/swf/calendar.swf",
+      "expectedSha256": "63a4538017742f3536c38019356348a35e44b0db870499f14c98d9af6061c686",
+      "expectedBytes": 164996,
+      "adapter": "calendar",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/calendar.swf",
+          "sha256": "b8cef4fba70c09b357a1f3ff6575dde4cd5116576a62ab749120b1668aff2eb1",
+          "bytes": 133262
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/calendar.zh-CN.json",
+          "sha256": "5bb5af8f1f79c9fa55407c5b9a063157201606afcdea1091cc4e59cccd457cef",
+          "bytes": 16830
+        }
+      ],
+      "configs": [
+        "source/ddtank-reborn/research/i18n/bag-art/calendar.zh-CN.json"
+      ],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/swf/chat.swf",
+      "expectedSha256": "8a5f62428cc0a0a9677b76f872948db23c0c555ecba137c0d06f0f2de575bfa1",
+      "expectedBytes": 513259,
+      "adapter": "bag",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/chat.swf",
+          "sha256": "fbccdb8fe72cd75d6e6aebda0a15c5c2dd0d3c2a58c371715b3b0f25f25cd8ef",
+          "bytes": 515906
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/chat.zh-CN.json",
+          "sha256": "8ef91bc3a023d188677ed089ea36f8d8497a8344a85a37a3a97ebb4d03680a31",
+          "bytes": 8412
+        }
+      ],
+      "configs": [
+        "source/ddtank-reborn/research/i18n/bag-art/chat.zh-CN.json"
+      ],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/swf/coreiconandtip.swf",
+      "expectedSha256": "d68f9e515eeae0ce5142d49b9daa19b0fe758fa2fe76d57f8d531c9a62185fc8",
+      "expectedBytes": 381606,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/tooltip-quest-art/original-resources.json",
+          "source/ddtank-reborn/research/i18n/tooltip-quest-art/smooth-labels.zh-CN.json",
+          "runtime/tooltip-label-feedback-20261017/candidate-b/manifest.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/coreiconandtip.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/coreiconandtip1.swf",
+      "expectedSha256": "b12b2937888d8c3da45bef584ab6546e094827bafe9d370eec62da748048bedd",
+      "expectedBytes": 383790,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/tooltip-quest-art/original-resources.json",
+          "source/ddtank-reborn/research/i18n/tooltip-quest-art/smooth-labels.zh-CN.json",
+          "runtime/tooltip-label-feedback-20261017/candidate-b/manifest.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/coreiconandtip1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/coreii.swf",
+      "expectedSha256": "49040a09b07a8113ed0f5bd30ff80ebe3099c81a556dcf59a08f18ff04c6f1a3",
+      "expectedBytes": 1293933,
+      "adapter": "hidden-calendar",
+      "flags": null,
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/coreii.swf",
+          "sha256": "1d2a8d5606995baa3e287608a55e18289b8d44070e137c8e35ee5ca4051e9b3f",
+          "bytes": 1298825
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/hidden-controls.zh-CN.json",
+          "sha256": "c4623b7bb2901f75b3ebce377a795afe1f847cc25ebdefb0b31c3ba5d596adbf",
+          "bytes": 1114
+        },
+        {
+          "path": "source/ddtank-reborn/research/i18n/bag-art/calendar-controls.zh-CN.json",
+          "sha256": "52e12c10b8c6b83135d30541eb64b48d700ba9161467722debc80f9b20397544",
+          "bytes": 1283
+        }
+      ],
+      "configs": [
+        "source/ddtank-reborn/research/i18n/bag-art/hidden-controls.zh-CN.json",
+        "source/ddtank-reborn/research/i18n/bag-art/calendar-controls.zh-CN.json"
+      ],
+      "exception": null
+    },
+    {
+      "relativePath": "ui/vietnam/swf/ddthallicon.swf",
+      "expectedSha256": "4dedd0cda2d063776d6847e9cf682e96d919132876aa468fb7dfb3d9dac36cbe",
+      "expectedBytes": 1411887,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "RUFFLE_BASELINE_PIXELS_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "首轮已实际尝试：hall-feature 产生7a798...而hall-activity必需d4bab1...；缺 tag197 Ruffle 原始像素合成阶段，精确输入 runtime/online-box-followup-20261013/ui-next-20261013/event-compatible-input.png 与旧 prepare-event-compatible.mjs。不能绕过 source pin。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/hall-activity.zh-CN.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/ddthallicon.swf",
+          "source/ddtank-reborn/research/i18n/bag-art/hall-activity/24.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/ddtstore.swf",
+      "expectedSha256": "ea2163c9868fb021da1e8810380312f8aae779f48f6ec7affedd236e9d10c836",
+      "expectedBytes": 1110439,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-forge-20261017/original/ddtstore.swf",
+          "runtime/feedback-forge-20261017/candidate-manifest.json",
+          "runtime/feedback-forge-20261017/texts.zh-CN.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/email.swf",
+      "expectedSha256": "e9cccb62af262f27cc05f3f227746d28f04c3b5c0a753e0bd9f1d6bb645bc772",
+      "expectedBytes": 308940,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/email.zh-CN.json",
+          "runtime/feedback-remaining-20261017/static-text/original/email.swf",
+          "runtime/feedback-remaining-20261017/static-text/translations.json",
+          "runtime/feedback-remaining-20261017/static-text/layout.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/email.swf",
+          "source/ddtank-reborn/research/i18n/bag-art/email/5.png",
+          "source/ddtank-reborn/research/i18n/bag-art/email/54.png"
+        ]
+      },
+      "extendedGeneration": {
+        "entrypoint": "extended-build.mjs",
+        "recipe": "email",
+        "validatedSha256": "e9cccb62af262f27cc05f3f227746d28f04c3b5c0a753e0bd9f1d6bb645bc772",
+        "requires": "runtime/live/overlay-inputs raw historical materials and pinned FFDec",
+        "strictRebuild": false,
+        "evidence": "engineering staging/extended-3/report.json"
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/firstrecharge.swf",
+      "expectedSha256": "9207cdea8cec6a38ad46e51fbab8fb5d601297ff38bd3ff1c429e2bf8728d8ed",
+      "expectedBytes": 149465,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_BUILDER_NOT_YET_EXTRACTED",
+        "reasons": [
+          "早期 runtime 私有 UI 生成链尚未拆成纯构建入口；上轮 owner 分类过宽，hidden-controls 实际只处理 coreii，不能生成本文件。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/hidden-controls.zh-CN.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/firstrecharge.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/game.swf",
+      "expectedSha256": "a2127e9b9ce36f2886fa15c4a8af4508fab4aae8285242f2053307734b0786a6",
+      "expectedBytes": 1892800,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-game-ui-20261017/candidate.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/game.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/gameover.swf",
+      "expectedSha256": "4865e0987ac16c1190b7c70e7c27901288b7ddafcd0ed7dc4662f09a256889b1",
+      "expectedBytes": 570454,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "runtime/pure-zh-gameover-20261016/baseline-live.swf",
+          "runtime/pure-zh-gameover-20261016/gameover-original.swf",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/gameover.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/hall.swf",
+      "expectedSha256": "9ad3b790a6baa23cba2fd78f730c63a7c8ab64d16caf99d856b5454ee675f0ef",
+      "expectedBytes": 5099112,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/hall.zh-CN.json",
+          "source/ddtank-reborn/research/i18n/hall-hover/night.zh-CN.json",
+          "runtime/hall-hover-feedback-20261017/hall.before.swf",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/hall.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/hall_old.swf",
+      "expectedSha256": "26ea1a2d11b6dc51c8ff43b0eedd8f45ceb7972ab653bdefbf539e7fd983ad33",
+      "expectedBytes": 2449562,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "runtime/hall-tutorial-zh-20261017/inspection.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/hall_old.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/quest.swf",
+      "expectedSha256": "c75163446f1140ec0edb42f079c4fefb77ec206e4dd1c2ab20f792daa380427d",
+      "expectedBytes": 277380,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/tooltip-quest-art/original-resources.json",
+          "runtime/feedback-remaining-20261017/static-text/original/quest.swf",
+          "runtime/feedback-remaining-20261017/static-text/translations.json",
+          "runtime/feedback-remaining-20261017/static-text/layout.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/quest.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/room.swf",
+      "expectedSha256": "0e8d78020b3be6ba7313f340557020295b60eb55e9ca4743c0dae8a7a16c62e2",
+      "expectedBytes": 2306729,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-room-20261017/room.before.swf",
+          "runtime/feedback-room-20261017/donor-room.swf",
+          "runtime/feedback-room-20261017/donor-provenance.json",
+          "runtime/feedback-room-20261017/imagegen-provenance.json",
+          "source/ddtank-reborn/research/i18n/room-art/zh-CN.json",
+          "source/ddtank-reborn/research/i18n/room-art/69.png",
+          "source/ddtank-reborn/research/i18n/room-art/62.png",
+          "source/ddtank-reborn/research/i18n/room-art/65.png",
+          "source/ddtank-reborn/research/i18n/room-art/64.png",
+          "source/ddtank-reborn/research/i18n/room-art/71.png",
+          "source/ddtank-reborn/research/i18n/room-art/77.png",
+          "source/ddtank-reborn/research/i18n/room-art/80.png",
+          "source/ddtank-reborn/research/i18n/room-art/96.png",
+          "source/ddtank-reborn/research/i18n/room-art/99.png",
+          "source/ddtank-reborn/research/i18n/room-art/103.png",
+          "source/ddtank-reborn/research/i18n/room-art/105.png",
+          "source/ddtank-reborn/research/i18n/room-art/10.png",
+          "source/ddtank-reborn/research/i18n/room-art/12.png",
+          "source/ddtank-reborn/research/i18n/room-art/140.png",
+          "source/ddtank-reborn/research/i18n/room-art/141.png",
+          "source/ddtank-reborn/research/i18n/room-art/171.png",
+          "source/ddtank-reborn/research/i18n/room-art/173.png",
+          "source/ddtank-reborn/research/i18n/room-art/176.png",
+          "source/ddtank-reborn/research/i18n/room-art/178.png"
+        ]
+      },
+      "extendedGeneration": {
+        "entrypoint": "extended-build.mjs",
+        "recipe": "room",
+        "validatedSha256": "0e8d78020b3be6ba7313f340557020295b60eb55e9ca4743c0dae8a7a16c62e2",
+        "requires": "runtime/live/overlay-inputs raw historical materials and pinned FFDec",
+        "strictRebuild": false,
+        "evidence": "engineering staging/extended-3/report.json"
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/roomlist.swf",
+      "expectedSha256": "347482c36b1c10b65dc4676a4415faa0b564c66fe759e36c4e898b7c76d1ebf6",
+      "expectedBytes": 1445299,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-room-20261017/roomlist.before.swf",
+          "runtime/feedback-room-20261017/donor-roomlist.swf",
+          "runtime/feedback-room-20261017/donor-provenance.json",
+          "runtime/feedback-room-20261017/imagegen-provenance.json"
+        ]
+      },
+      "extendedGeneration": {
+        "entrypoint": "extended-build.mjs",
+        "recipe": "roomlist",
+        "validatedSha256": "347482c36b1c10b65dc4676a4415faa0b564c66fe759e36c4e898b7c76d1ebf6",
+        "requires": "runtime/live/overlay-inputs raw historical materials and pinned FFDec",
+        "strictRebuild": false,
+        "evidence": "engineering staging/extended-3/report.json"
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/shop.swf",
+      "expectedSha256": "10f115ab32e952c75a54cb38e54fdc1e1e49b7da199758d5c32d23381e176b36",
+      "expectedBytes": 699275,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_INPUTS_OR_ADAPTER_NOT_READY",
+        "reasons": [
+          "现有链仍依赖 runtime 历史基底、参考供体或已审核定稿图；未将相关私有脚本拆为只读输入/独立输出纯入口。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/shop.zh-CN.json",
+          "runtime/shop-pure-zh-20261016/shop-original.swf",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/shop.swf",
+          "runtime/shop-pure-zh-20261016/prepared/1.png",
+          "runtime/shop-pure-zh-20261016/prepared/2.png",
+          "runtime/shop-pure-zh-20261016/prepared/4.png",
+          "runtime/shop-pure-zh-20261016/prepared/5.png",
+          "runtime/shop-pure-zh-20261016/prepared/6.png",
+          "runtime/shop-pure-zh-20261016/prepared/7.png",
+          "runtime/shop-pure-zh-20261016/prepared/8.png",
+          "runtime/shop-pure-zh-20261016/prepared/9.png",
+          "runtime/shop-pure-zh-20261016/prepared/10.png",
+          "runtime/shop-pure-zh-20261016/prepared/11.png",
+          "runtime/shop-pure-zh-20261016/prepared/13.png",
+          "runtime/shop-pure-zh-20261016/prepared/16.png",
+          "runtime/shop-pure-zh-20261016/prepared/17.png",
+          "runtime/shop-pure-zh-20261016/prepared/18.png",
+          "runtime/shop-pure-zh-20261016/prepared/19.png",
+          "runtime/shop-pure-zh-20261016/prepared/20.png",
+          "runtime/shop-pure-zh-20261016/prepared/21.png",
+          "runtime/shop-pure-zh-20261016/prepared/22.png",
+          "runtime/shop-pure-zh-20261016/prepared/23.png",
+          "runtime/shop-pure-zh-20261016/prepared/24.png",
+          "runtime/shop-pure-zh-20261016/prepared/26.png",
+          "runtime/shop-pure-zh-20261016/prepared/29.png",
+          "runtime/shop-pure-zh-20261016/prepared/31.png",
+          "runtime/shop-pure-zh-20261016/prepared/33.png",
+          "runtime/shop-pure-zh-20261016/prepared/36.png",
+          "runtime/shop-pure-zh-20261016/prepared/37.png",
+          "runtime/shop-pure-zh-20261016/prepared/38.png",
+          "runtime/shop-pure-zh-20261016/prepared/39.png",
+          "runtime/shop-pure-zh-20261016/prepared/44.png",
+          "runtime/shop-pure-zh-20261016/prepared/45.png",
+          "runtime/shop-pure-zh-20261016/prepared/48.png",
+          "runtime/shop-pure-zh-20261016/prepared/49.png",
+          "runtime/shop-pure-zh-20261016/prepared/50.png",
+          "runtime/shop-pure-zh-20261016/prepared/51.png",
+          "runtime/shop-pure-zh-20261016/prepared/52.png",
+          "runtime/shop-pure-zh-20261016/prepared/53.png",
+          "runtime/shop-pure-zh-20261016/prepared/54.png",
+          "runtime/shop-pure-zh-20261016/prepared/55.png",
+          "runtime/shop-pure-zh-20261016/prepared/56.png",
+          "runtime/shop-pure-zh-20261016/prepared/57.png",
+          "runtime/shop-pure-zh-20261016/prepared/58.png",
+          "runtime/shop-pure-zh-20261016/prepared/59.png",
+          "runtime/shop-pure-zh-20261016/prepared/60.png",
+          "runtime/shop-pure-zh-20261016/prepared/61.png",
+          "runtime/shop-pure-zh-20261016/prepared/62.png",
+          "runtime/shop-pure-zh-20261016/prepared/63.png",
+          "runtime/shop-pure-zh-20261016/prepared/64.png",
+          "runtime/shop-pure-zh-20261016/prepared/65.png",
+          "runtime/shop-pure-zh-20261016/prepared/66.png",
+          "runtime/shop-pure-zh-20261016/prepared/67.png",
+          "runtime/shop-pure-zh-20261016/prepared/68.png",
+          "runtime/shop-pure-zh-20261016/prepared/69.png",
+          "runtime/shop-pure-zh-20261016/prepared/70.png",
+          "runtime/shop-pure-zh-20261016/prepared/71.png",
+          "runtime/shop-pure-zh-20261016/prepared/72.png",
+          "runtime/shop-pure-zh-20261016/prepared/73.png",
+          "runtime/shop-pure-zh-20261016/prepared/74.png",
+          "runtime/shop-pure-zh-20261016/prepared/75.png",
+          "runtime/shop-pure-zh-20261016/prepared/76.png",
+          "runtime/shop-pure-zh-20261016/prepared/77.png",
+          "runtime/shop-pure-zh-20261016/prepared/78.png",
+          "runtime/shop-pure-zh-20261016/prepared/79.png",
+          "runtime/shop-pure-zh-20261016/prepared/80.png",
+          "runtime/shop-pure-zh-20261016/prepared/81.png",
+          "runtime/shop-pure-zh-20261016/prepared/82.png",
+          "runtime/shop-pure-zh-20261016/prepared/83.png",
+          "runtime/shop-pure-zh-20261016/prepared/84.png",
+          "runtime/shop-pure-zh-20261016/prepared/85.png",
+          "runtime/shop-pure-zh-20261016/prepared/86.png",
+          "runtime/shop-pure-zh-20261016/prepared/87.png",
+          "runtime/shop-pure-zh-20261016/prepared/88.png",
+          "runtime/shop-pure-zh-20261016/prepared/89.png",
+          "runtime/shop-pure-zh-20261016/prepared/90.png",
+          "runtime/shop-pure-zh-20261016/prepared/91.png",
+          "runtime/shop-pure-zh-20261016/prepared/92.png",
+          "runtime/shop-pure-zh-20261016/prepared/93.png",
+          "runtime/shop-pure-zh-20261016/prepared/94.png",
+          "runtime/shop-pure-zh-20261016/prepared/95.png",
+          "runtime/shop-pure-zh-20261016/prepared/99.png",
+          "runtime/shop-pure-zh-20261016/prepared/100.png",
+          "runtime/shop-pure-zh-20261016/prepared/101.png",
+          "runtime/shop-pure-zh-20261016/prepared/102.png",
+          "runtime/shop-pure-zh-20261016/prepared/104.png",
+          "runtime/shop-pure-zh-20261016/prepared/105.png",
+          "runtime/shop-pure-zh-20261016/prepared/106.png",
+          "runtime/shop-pure-zh-20261016/prepared/109.png",
+          "runtime/shop-pure-zh-20261016/prepared/110.png",
+          "runtime/shop-pure-zh-20261016/prepared/111.png",
+          "runtime/shop-pure-zh-20261016/prepared/112.png",
+          "runtime/shop-pure-zh-20261016/prepared/115.png",
+          "runtime/shop-pure-zh-20261016/prepared/116.png",
+          "runtime/shop-pure-zh-20261016/prepared/120.png",
+          "runtime/shop-pure-zh-20261016/prepared/121.png",
+          "runtime/shop-pure-zh-20261016/prepared/122.png",
+          "runtime/shop-pure-zh-20261016/prepared/123.png",
+          "runtime/shop-pure-zh-20261016/prepared/124.png",
+          "runtime/shop-pure-zh-20261016/prepared/125.png",
+          "runtime/shop-pure-zh-20261016/prepared/127.png",
+          "runtime/shop-pure-zh-20261016/prepared/128.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/store.swf",
+      "expectedSha256": "87c5fb2c186d54a588be2f2f05aface5e22265c98fca34c0a98507a154112b3c",
+      "expectedBytes": 2760978,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-forge-20261017/original/store.swf",
+          "runtime/feedback-forge-20261017/candidate-manifest.json",
+          "runtime/feedback-forge-20261017/texts.zh-CN.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/storefinebringup.swf",
+      "expectedSha256": "3d9171dda890bf4d3d46c5d6216e4660fe2591cf3245e0d9d099a9452d965d34",
+      "expectedBytes": 185556,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/feedback-forge-20261017/original/storefinebringup.swf",
+          "runtime/feedback-forge-20261017/candidate-manifest.json",
+          "runtime/feedback-forge-20261017/texts.zh-CN.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/toolbar.swf",
+      "expectedSha256": "cd686dc07aeb45fef91d9c3e64c1f17b138910c1076a03d17cd140a6bc34fd47",
+      "expectedBytes": 62670,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "PRIVATE_BUILDER_NOT_YET_EXTRACTED",
+        "reasons": [
+          "早期 runtime 私有 UI 生成链尚未拆成纯构建入口；上轮 owner 分类过宽，hidden-controls 实际只处理 coreii，不能生成本文件。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/research/i18n/bag-art/hidden-controls.zh-CN.json",
+          "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/swf/toolbar.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/swf/wonderfulactivity.swf",
+      "expectedSha256": "ee41a5f9a3946563420f1377ae79c58b6d57cb3ef298d3c822b6560162df084d",
+      "expectedBytes": 1595756,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
+        "reasons": [
+          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+        ],
+        "identifiedPaths": [
+          "runtime/remaining-image-surfaces-20261017/current-extraction.json",
+          "runtime/remaining-image-surfaces-20261017/donors-and-hud.json",
+          "runtime/remaining-image-surfaces-20261017/candidate-manifest.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "ui/vietnam/xml/xml.png",
+      "expectedSha256": "670aebef29c7a0d802b0d4207dc003f19bbc809138919ec9a5382850933c2c0b",
+      "expectedBytes": 289408,
+      "adapter": "layout",
+      "flags": {
+        "gameoverTitle": true,
+        "bagLabelAlignment": true,
+        "calendarExchangeLayout": true,
+        "hallActivityLayout": true,
+        "originalTooltipLayout": true
+      },
+      "inputs": [
+        {
+          "path": "source/ddtank-reborn/apps/api/assets/flash/ui/vietnam/xml/xml.png",
+          "sha256": "ff80654d2e4cac4369b9eba5c8854853621a0d9e766fce1dd39833d924f2579d",
+          "bytes": 289831
+        }
+      ],
+      "configs": [],
+      "exception": null
+    },
+    {
+      "relativePath": "workshop-native/carnival/carnival-original-library.swf",
+      "expectedSha256": "d4918ba2d29c54e8720eec782158a38e83a8b0244ad3f886ee09966667469140",
+      "expectedBytes": 15199,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-carnival/WorkshopNativeCarnivalBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ts_carnivalactivityitems.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ServerConfig.xml.raw"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/carnival/carnival_v3_6_1_u1.swf",
+      "expectedSha256": "6c216b621380dc7c6116e98534b55c74deac0e1d0260f981d1fc78e3ce7ec872",
+      "expectedBytes": 230981,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-carnival/WorkshopNativeCarnivalBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ts_carnivalactivityitems.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ServerConfig.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:6c216b621380dc7c6116e98534b55c74deac0e1d0260f981d1fc78e3ce7ec872",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/carnival_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "d40e7d928077d7fc82db616b5e854be1527786ec7157778cfb1f7fa7ac44e730",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/carnival/carnival_v3_6_1_u1.ui",
+      "expectedSha256": "06e558db77d2d85147c4e89de763b9bf5177c4ae68445063ea9a18179527d9c1",
+      "expectedBytes": 2352,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-carnival/WorkshopNativeCarnivalBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ts_carnivalactivityitems.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ServerConfig.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:06e558db77d2d85147c4e89de763b9bf5177c4ae68445063ea9a18179527d9c1",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/carnival_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "d40e7d928077d7fc82db616b5e854be1527786ec7157778cfb1f7fa7ac44e730",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/carnival/WorkshopNativeCarnivalBootstrap.swf",
+      "expectedSha256": "9d69551e4bc4646ba6a4a98daaa0df53cbe447ad2f4daa689b62830bee4d13c9",
+      "expectedBytes": 17514,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-carnival/WorkshopNativeCarnivalBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-a/carnival_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ts_carnivalactivityitems.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-carnival-analysis-20261015/public-inputs-b/ServerConfig.xml.raw"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/caveloot/caveloot-original-library.swf",
+      "expectedSha256": "1c47b36b7d9bd6820f81d8027cb1a1cbff2388385ef99847bada897fef0de2c3",
+      "expectedBytes": 34496,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-caveloot/WorkshopNativeCaveLootBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-ui.wire.bin"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/caveloot/caveloot.swf",
+      "expectedSha256": "56adcc8ecd09732b968184b234a7fc04e086522f258b349481641e43730cff06",
+      "expectedBytes": 3349093,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-art.wire.bin",
+          "source/ddtank-reborn/scripts/native-caveloot/WorkshopNativeCaveLootBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-ui.wire.bin"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/caveloot/caveloot.ui",
+      "expectedSha256": "cc7cd9c6fcdd9ca6c5eee19ef7c8c9ff9f531d62c6ed528cbb6394c0fa3e56c5",
+      "expectedBytes": 4386,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-ui.wire.bin",
+          "source/ddtank-reborn/scripts/native-caveloot/WorkshopNativeCaveLootBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-art.wire.bin"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/caveloot/WorkshopNativeCaveLootBootstrap.swf",
+      "expectedSha256": "e872d28e5e1d30ae2f989914594fa0f2fe9402528a68cfcf2bb1a37f6f18636c",
+      "expectedBytes": 21827,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-caveloot/WorkshopNativeCaveLootBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/caveloot-ui.wire.bin"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/charge/charge-original-library.swf",
+      "expectedSha256": "443dd5c892f3b158f48e2162d1c12ec54a458c07c2c71213d3a7bd5989c6a3d2",
+      "expectedBytes": 14479,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-charge/WorkshopNativeChargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/NewChargeCopyAwardItems.decoded.xml",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/TS_ChangeItem.decoded.xml"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/charge/chargeactivity_v3_6_1_u1.swf",
+      "expectedSha256": "9ba7c36d9a30723358c3eb66659e30c947beabfec30c3916fea2baf4ae1c5749",
+      "expectedBytes": 125744,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-charge/WorkshopNativeChargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/NewChargeCopyAwardItems.decoded.xml",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/TS_ChangeItem.decoded.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:9ba7c36d9a30723358c3eb66659e30c947beabfec30c3916fea2baf4ae1c5749",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/chargeactivity_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "7e9929a6ce31e59cc4a72df25319c4c40e67894bc7b789fa008911eedeaccf85",
+          "hashField": "entitySha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/charge/chargeactivity_v3_6_1_u1.ui",
+      "expectedSha256": "a66f18279e065580a00aa903f69b24d9f6fff66ef09427d5fbf36fd5c6b67f8c",
+      "expectedBytes": 1073,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-charge/WorkshopNativeChargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/NewChargeCopyAwardItems.decoded.xml",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/TS_ChangeItem.decoded.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:a66f18279e065580a00aa903f69b24d9f6fff66ef09427d5fbf36fd5c6b67f8c",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/chargeactivity_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "7e9929a6ce31e59cc4a72df25319c4c40e67894bc7b789fa008911eedeaccf85",
+          "hashField": "entitySha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/charge/WorkshopNativeChargeBootstrap.swf",
+      "expectedSha256": "6cc4a2fb797712f99c8851ce1dd71ee9ede3c97141f3d4aa71b042e354886cef",
+      "expectedBytes": 12366,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-charge/WorkshopNativeChargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/chargeactivity_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/NewChargeCopyAwardItems.decoded.xml",
+          "runtime/reference-activities-completion-20261014/native-charge-adapter-analysis-20261015/public-inputs-a/TS_ChangeItem.decoded.xml"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/christmas/christmas-original-art.swf",
+      "expectedSha256": "42b865a6fef32217a320177bfd0f6b01b4290562e87507e98c69bd61dddcdfc2",
+      "expectedBytes": 226113,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/christmas/christmas-original-library.swf",
+      "expectedSha256": "d1feaeb84879396e65bb81d17b502c0c5fadf47e4ef35bde2b90e9287a338c9b",
+      "expectedBytes": 71484,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/christmas/christmas-styles.xml",
+      "expectedSha256": "3020f9c43b2b93a57cd2313ede332cf52f81cb1df98355fe14d3890700fb29ea",
+      "expectedBytes": 22153,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/christmas/WorkshopNativeChristmasBootstrap.swf",
+      "expectedSha256": "d9bac4228ea402a1a7f7fb780aedbcaf46fa0a5e3af3b6d075984a3e2e780696",
+      "expectedBytes": 28413,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-christmas/WorkshopNativeChristmasBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-art.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/christmas.xml",
+          "runtime/reference-activities-completion-20261014/native-final-two-readonly-20261015/resource-entry-check-a/public-exact-a/christmas-map.decoded.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living1.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living3.wire.bin",
+          "runtime/native-christmas-resource-closure-20261015/public-exact-a/living2.wire.bin",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/M/cloth/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/clothF/default/2.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/1.png",
+          "source/gunny30-resource/inetpub/wwwroot/Resource/image/virtual/F/cloth/default/2.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/ddplay/ddplay-original-library.swf",
+      "expectedSha256": "d2b91fb0f36136cda37dc6aa08eb91d13bc1a19af66d90aaa8edc35c4ef13f6c",
+      "expectedBytes": 17269,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-ddplay/WorkshopNativeDDPlayBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/ddplay/ddplay-styles.xml",
+      "expectedSha256": "70de35fd0cc0db290c58f1a199cd590f14bfa29d830c94875c469c5b5001d649",
+      "expectedBytes": 8941,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/ddplay_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/ddplay/ddplay_v3_6_1_u1.swf",
+      "expectedSha256": "5c52f584b50e7e69e824450229cc83a62112c569717b73c08476bb354daaf082",
+      "expectedBytes": 647959,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/ddplay_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:5c52f584b50e7e69e824450229cc83a62112c569717b73c08476bb354daaf082",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/ddplay_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/download-receipt.json",
+          "receiptSha256": "0841bccea48808e7d8674e22c8b6b2c9c41b0238f25ca7a49719cfc8e063c5a9",
+          "hashField": "sha256",
+          "httpStatus": null,
+          "downloadedAt": "2026-10-14T18:13:18.199Z"
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/ddplay/WorkshopNativeDDPlayBootstrap.swf",
+      "expectedSha256": "d14c8e2dead4a40726ec13b4dca0cda272e103d074ee58b566e68d974487e1e4",
+      "expectedBytes": 9586,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-ddplay/WorkshopNativeDDPlayBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/devil/devil-original-library.swf",
+      "expectedSha256": "03acda158a3dc08f3b60bcd5a3aff11b39a30a4e5f6275e32365f1e72be8adf6",
+      "expectedBytes": 66467,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-devil/WorkshopNativeDevilBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-a/devilturn_v3_6_1_u1.swf.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-ui-b/devilturn.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/devil/devilturn.ui",
+      "expectedSha256": "ae5631b66cb4669d974b47d1fb8480470a32978e1665f04833440969bd282a94",
+      "expectedBytes": 3803,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-ui-b/devilturn.ui",
+          "source/ddtank-reborn/scripts/native-devil/WorkshopNativeDevilBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-a/devilturn_v3_6_1_u1.swf.wire.bin"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/devil/devilturn_v3_6_1_u1.swf",
+      "expectedSha256": "751bda3fb6c4e8594567a8e7331152c687955fc202ba80bbb05d98a00e53a6b8",
+      "expectedBytes": 425330,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-a/devilturn_v3_6_1_u1.swf.wire.bin",
+          "source/ddtank-reborn/scripts/native-devil/WorkshopNativeDevilBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-ui-b/devilturn.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/devil/WorkshopNativeDevilBootstrap.swf",
+      "expectedSha256": "57c21bf870065d97eabdf3c23ea76bf2621afbd74e6914e652766cf939654315",
+      "expectedBytes": 19390,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-devil/WorkshopNativeDevilBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-a/devilturn_v3_6_1_u1.swf.wire.bin",
+          "runtime/reference-activities-completion-20261014/native-devil-readonly-20261015/public-ui-b/devilturn.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/exchange/exchange-original-art.swf",
+      "expectedSha256": "df53f4d420703d72d57faf971483d34de4eb900e2dac4f79f4469b9d44cc3707",
+      "expectedBytes": 41276,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": []
+      }
+    },
+    {
+      "relativePath": "workshop-native/exchange/exchange-original-library.swf",
+      "expectedSha256": "b00e7c9e6182f564c42f62c8a0e76a06e22fa6e7d59c25022db0a63b3d7b4aee",
+      "expectedBytes": 9171,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-exchange/WorkshopNativeExchangeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/ddtcorescalebitmap_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-wonderful-readonly-20261015/public-calendar-art-a/ddtcalendar_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/exchange/exchange-styles.xml",
+      "expectedSha256": "0c1c24d709cc402aa5950305348c561f2aba075872e1574111b8f75a775585bb",
+      "expectedBytes": 10907,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": []
+      }
+    },
+    {
+      "relativePath": "workshop-native/exchange/WorkshopNativeExchangeBootstrap.swf",
+      "expectedSha256": "231ec945c61158a3f25dcb8cd85c337cf49647dde2f9d205815eaf5d43314555",
+      "expectedBytes": 9825,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-exchange/WorkshopNativeExchangeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-ddplay-analysis-20261015/ddtcorescalebitmap_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-wonderful-readonly-20261015/public-calendar-art-a/ddtcalendar_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/first-recharge/first-recharge-original-library.swf",
+      "expectedSha256": "1b5e2d46cbc99dc22567da7b06bfc8e54ea3a10b86d8d66d018505cc327bc804",
+      "expectedBytes": 43660,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-first-recharge/WorkshopNativeFirstRechargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-b/TS_FirstPayShopTemp.decoded.xml"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/first-recharge/firstrecharge_v3_6_1_u1.swf",
+      "expectedSha256": "1c3b20c94859f1310d1da495f65a26928eb987774390fde57dd76f79e69dc1b5",
+      "expectedBytes": 211121,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-first-recharge/WorkshopNativeFirstRechargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-b/TS_FirstPayShopTemp.decoded.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:1c3b20c94859f1310d1da495f65a26928eb987774390fde57dd76f79e69dc1b5",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/firstrecharge_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "f3b779d0d4d8880392620d753b635d9ba4798aaab6302cc8fbe56bc2877e4897",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/first-recharge/firstrecharge_v3_6_1_u1.ui",
+      "expectedSha256": "95c1ee3d74dafe7b1f1c11cb0cd6c2c3d48b880a29429cc4a2d30997dd881eef",
+      "expectedBytes": 2324,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-first-recharge/WorkshopNativeFirstRechargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-b/TS_FirstPayShopTemp.decoded.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:95c1ee3d74dafe7b1f1c11cb0cd6c2c3d48b880a29429cc4a2d30997dd881eef",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/firstrecharge_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "f3b779d0d4d8880392620d753b635d9ba4798aaab6302cc8fbe56bc2877e4897",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/first-recharge/WorkshopNativeFirstRechargeBootstrap.swf",
+      "expectedSha256": "77e92a4b86996bde03e944c97b840be32f61f1b30675db11cd356903cce64463",
+      "expectedBytes": 14761,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-first-recharge/WorkshopNativeFirstRechargeBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-a/firstrecharge_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-firstrecharge-analysis-20261015/public-inputs-b/TS_FirstPayShopTemp.decoded.xml"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/forthright/forthright-original-library.swf",
+      "expectedSha256": "b1bd010eedee239d2085c3d451e5808b5a56a76a20442cd160b3c1d4905bd0fc",
+      "expectedBytes": 33991,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-forthright/WorkshopNativeForthrightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/forthright/forthrightactive_v3_6_1_u1.swf",
+      "expectedSha256": "99c2e1c9099735c07814f4cd79f97a1d84befcfff55535c974d5c935b6c6e859",
+      "expectedBytes": 410429,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-forthright/WorkshopNativeForthrightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.ui"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:99c2e1c9099735c07814f4cd79f97a1d84befcfff55535c974d5c935b6c6e859",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/forthrightactive_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "2aa4305f53d021eb8cef1db7a748ea614f6ef9ac57b64f904e1f9e1244068542",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/forthright/forthrightactive_v3_6_1_u1.ui",
+      "expectedSha256": "14773a066c39815db458612169700a8149773a3a38995967a8c40cb88656c7f9",
+      "expectedBytes": 4601,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-forthright/WorkshopNativeForthrightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.swf"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:14773a066c39815db458612169700a8149773a3a38995967a8c40cb88656c7f9",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/forthrightactive_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/download-receipt.json",
+          "receiptSha256": "2aa4305f53d021eb8cef1db7a748ea614f6ef9ac57b64f904e1f9e1244068542",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/forthright/WorkshopNativeForthrightBootstrap.swf",
+      "expectedSha256": "758974e03a9c08146c3412048a632b228153be4aaf3a13ff19ddddab4dd3af83",
+      "expectedBytes": 22081,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-forthright/WorkshopNativeForthrightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-forthright-readonly-20261015/public-inputs-a/forthrightactive_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/gypsy/gypsy-original-library.swf",
+      "expectedSha256": "d4fb485ec15f8537024239958759468ec73c40353cc90cfa1187bb47d826b66a",
+      "expectedBytes": 109103,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-gypsy/WorkshopNativeGypsyBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/gypsy/gypsy-styles.xml",
+      "expectedSha256": "2d8b0dcf1054008d544241520600abcd2d1b7d2f0d3b8088afb6de359a031f84",
+      "expectedBytes": 5655,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-gypsy-analysis-20261015/gypsyshop_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/gypsy/gypsyshop_v3_6_1_u1.swf",
+      "expectedSha256": "1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be",
+      "expectedBytes": 105767,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-gypsy-analysis-20261015/gypsyshop_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:1a1f4642e9d3bc5694d7f4ae094787c5d3c193f0e38e8d73a58ac9f8481678be",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/gypsyshop_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-gypsy-analysis-20261015/download-receipt.json",
+          "receiptSha256": "2d31359ac1715bafd02b9c5e18dff44c4eaea39826174f305e2041006ab1a33c",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/gypsy/WorkshopNativeGypsyBootstrap.swf",
+      "expectedSha256": "558ec6b41e857fa1c4eba39678d357d91e25c6a558ccf29b90ef76642047ee1f",
+      "expectedBytes": 9875,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-gypsy/WorkshopNativeGypsyBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/menu/hall-activity-original-art.swf",
+      "expectedSha256": "c8fcdc5789ac6cb7184a85eac4c949dd8c47fb4eeb88e3076a42516d85f49660",
+      "expectedBytes": 76526,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/hall-activity-original-art.swf",
+          "runtime/reference-server-research/hall-language-recon/tounimane1.swf",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "runtime/reference-activities-completion-20261014/native-wonderful-readonly-20261015/export-a/scripts/hall/HallActiveBox.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/boguAdventureBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/boguAdventureBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/DDPlayBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/DDPlayBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/gyshopBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/gyshopBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/treasureBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/treasureBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/wonderfulBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/wonderfulBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/magicWardrobeBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/magicWardrobeBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/moonLightBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/moonLightBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/signinBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/signinBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/chargeActivityBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/chargeActivityBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/pairboxBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/pairboxBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/carnivalBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/carnivalBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/boguturnBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/boguturnBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/shouchongBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/shouchongBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/PDDBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/PDDBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/devilBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/devilBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/chrismasBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/chrismasBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/cavelootBtn.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/cavelootBtn.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/png/activeBg.png",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-classes/scripts/asset/hall/activeBg.as",
+          "runtime/activity-carnival-live-refresh-20261015/unified-refresh-b/menu-art-component/original-menu-contact-sheet.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/bogu-player-game.png",
+      "expectedSha256": "cc07012615e8fe2c9b8cff59f07b2ed52d06acecba7508ee2d8ca067bedd1a94",
+      "expectedBytes": 58109,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/2.png",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/xml.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/extracted/boguadventure.styles.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:cc07012615e8fe2c9b8cff59f07b2ed52d06acecba7508ee2d8ca067bedd1a94",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/image/equip/f/suits/suits638/1/game.png",
+          "receipt": "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/source-receipt.json",
+          "receiptSha256": "45b1cdeb936e300b6bc1df7ad5f00620aef16f1469498644400e68ff7f700164",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/bogu-styles.xml",
+      "expectedSha256": "8bcd590e92be2f3d8557433c487c20410ab93d01274e9c649c639b2d580b8d8f",
+      "expectedBytes": 5982,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/extracted/boguadventure.styles.xml",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/2.png",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/xml.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/boguadventure_v3_6_1_u1.swf",
+      "expectedSha256": "306633351976c16780211629a510b931b9d822a0a656124da4911fbad3cc5204",
+      "expectedBytes": 500384,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/2.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png",
+          "source/ddtank-reborn/vendor/DDTank41/Source Flash/FlashSV1/ui/vietnam/xml/xml.png",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/extracted/boguadventure.styles.xml"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:306633351976c16780211629a510b931b9d822a0a656124da4911fbad3cc5204",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/boguadventure_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/boguadventure_v3_6_1_u1.ui",
+      "expectedSha256": "c9d136840ea8f9a96598ca925514b93436e4c73484bbb62d84ccc3feb7c55bae",
+      "expectedBytes": 1366,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.ui"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:c9d136840ea8f9a96598ca925514b93436e4c73484bbb62d84ccc3feb7c55bae",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/boguadventure_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/mines-original-library.swf",
+      "expectedSha256": "a91304ffee8c85d8a22fe44bdacfbc7e148264a4f828d7660abfa0821119389f",
+      "expectedBytes": 26016,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-mines/WorkshopNativeMinesBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/extracted/boguadventure.styles.xml",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/mines/WorkshopNativeMinesBootstrap.swf",
+      "expectedSha256": "1796ef3cdcbc95e2e966b18c4eaf32ef58b0b645f734285f3bb4a2531dec5c5c",
+      "expectedBytes": 12506,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-mines/WorkshopNativeMinesBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/boguadventure_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/extracted/boguadventure.styles.xml",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/bogu-player-game.png"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/moonlight/moonlight-original-library.swf",
+      "expectedSha256": "88b8a3ae2e1758565b4e6d760e952565818c7d7cffeed33e1333667cff0cf399",
+      "expectedBytes": 26748,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-moonlight/WorkshopNativeMoonlightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/moonlight/moonlighttreasure_v3_6_1_u1.swf",
+      "expectedSha256": "fbd265fa158117afee2f3ca0386dd1234e33fb5a56403a80cd379a565542b370",
+      "expectedBytes": 565506,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/TS_MoonlightBoxTemplate.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:fbd265fa158117afee2f3ca0386dd1234e33fb5a56403a80cd379a565542b370",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/moonlighttreasure_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/download-receipt.json",
+          "receiptSha256": "bbb697d25073ac32072fcd8caa715dd966934822d606fa3ebd237d9ea94660c7",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/moonlight/moonlighttreasure_v3_6_1_u1.ui",
+      "expectedSha256": "81a332f63b734f942e9fbc8ac297be9150c3d95456d6ec572202b6831ff5b39e",
+      "expectedBytes": 4622,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/moonlighttreasure_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/TS_MoonlightBoxTemplate.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:81a332f63b734f942e9fbc8ac297be9150c3d95456d6ec572202b6831ff5b39e",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/moonlighttreasure_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/download-receipt.json",
+          "receiptSha256": "bbb697d25073ac32072fcd8caa715dd966934822d606fa3ebd237d9ea94660c7",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/moonlight/WorkshopNativeMoonlightBootstrap.swf",
+      "expectedSha256": "1ec201ed2306b2987aef9e59e27a799e9b563f35282ad4981dece33d545534e4",
+      "expectedBytes": 17592,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-moonlight/WorkshopNativeMoonlightBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-moonlight-analysis-20261015/uigeneral_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-original-library.swf",
+      "expectedSha256": "7589bf8a537f2e0581537a6c3bd3437eb821089a2bf72916ac3b281903080c49",
+      "expectedBytes": 18752,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/devil-shop-close-20261016/pair-candidate/pair-original-library.swf",
+          "runtime/devil-shop-close-20261016/pair-candidate/pair-shared-library.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-105.swf",
+      "expectedSha256": "baf3c7cc3c5413d5fba69eba872447839f7b5e02d4ef9b448e9ffd3f06235717",
+      "expectedBytes": 2111,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-188.swf",
+      "expectedSha256": "baa17e6181d1a3b812f8e25cfde39cf7da6897f18682dab8d6979ec272e6bc1f",
+      "expectedBytes": 1316,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-56.swf",
+      "expectedSha256": "0d861a3bc80976e0b839fc503655cbac362a5256b5effaf76f68dc56c66c3fc8",
+      "expectedBytes": 2046,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-57.swf",
+      "expectedSha256": "98062417bd1b7fe332d5a3bac4007116e108320b0e0700de44893b8c097719d1",
+      "expectedBytes": 2342,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-88.swf",
+      "expectedSha256": "1b7c118c98020637c048ebbddf45ea61f57fd3f437e82787053747986106790f",
+      "expectedBytes": 1705,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-93.swf",
+      "expectedSha256": "79535f7ffdad6af3011d466984184cbb9ba3160071d54243b1c1248cdeda98a2",
+      "expectedBytes": 19988,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pair-shared-art-94.swf",
+      "expectedSha256": "c1d205d7d6cd1be7c09a9317a83773f5598529295758ffc8ac5cb750a20f447c",
+      "expectedBytes": 696,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pairbox_v3_6_1_u1.swf",
+      "expectedSha256": "5878679871121815b6c036946418fd4bb06c74d5c06e50ccb90e574eda2aa0db",
+      "expectedBytes": 386695,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:5878679871121815b6c036946418fd4bb06c74d5c06e50ccb90e574eda2aa0db",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/pairbox_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/pairbox_v3_6_1_u1.ui",
+      "expectedSha256": "9a937f98a73541fde5c7f6bcafa5faa9a166298ce89dcdfa518b4fe5856ee27c",
+      "expectedBytes": 3326,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:9a937f98a73541fde5c7f6bcafa5faa9a166298ce89dcdfa518b4fe5856ee27c",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/pairbox_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/pair/WorkshopNativePairBootstrap.swf",
+      "expectedSha256": "05e95d95111209385dcb04be61f509d7a00ad2e3facadc71f5ad7bbb58de190b",
+      "expectedBytes": 11080,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-pair/WorkshopNativePairBootstrap.as",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/corei_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/direct-modules/pairbox_v3_6_1_u1.ui"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/purr/purr-original-library.swf",
+      "expectedSha256": "bbd5ba5a21d221e9239c16b507407a4cda13c72108409f0d98bae7848a320588",
+      "expectedBytes": 14865,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-purr/WorkshopNativePurrBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableAwardTemp.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableTemp.xml.raw"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/purr/purrturntable_v3_6_1_u1.swf",
+      "expectedSha256": "61f70ab275a63c2d30dafb1d8596f6b6a062667cfbf4f27a96496f494f1b2999",
+      "expectedBytes": 1130171,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-purr/WorkshopNativePurrBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableAwardTemp.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableTemp.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:61f70ab275a63c2d30dafb1d8596f6b6a062667cfbf4f27a96496f494f1b2999",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/purrturntable_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/download-receipt.json",
+          "receiptSha256": "da28ef7e5b7cca19f58ab4c9f545642863e7d8b0ec3897145db063bcb7cba569",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/purr/purrturntable_v3_6_1_u1.ui",
+      "expectedSha256": "702a1e451ca9f3a8c700dcf943c97c6f159988973148083376713d9b2ff59849",
+      "expectedBytes": 3527,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-purr/WorkshopNativePurrBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableAwardTemp.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableTemp.xml.raw"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:702a1e451ca9f3a8c700dcf943c97c6f159988973148083376713d9b2ff59849",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/purrturntable_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/download-receipt.json",
+          "receiptSha256": "da28ef7e5b7cca19f58ab4c9f545642863e7d8b0ec3897145db063bcb7cba569",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/purr/WorkshopNativePurrBootstrap.swf",
+      "expectedSha256": "e72957764a15ef4517540193e835bf61822861826ec70d0cfc7e7c8616635d8d",
+      "expectedBytes": 14357,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-purr/WorkshopNativePurrBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/purrturntable_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableAwardTemp.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-purr-analysis-20261015/TS_BoGuTurnTableTemp.xml.raw"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/shared/native-shared-library.swf",
+      "expectedSha256": "475102db90d07f31b36d326c6cfeb69a6c87b19cd4f0b12fd64a716b67ca96dc",
+      "expectedBytes": 136712,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/magicwardrobe-original-library.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/treasure/treasure-original-library.swf",
+      "expectedSha256": "ec526860e9bc56f3309061d0274cb24293b9f789be04115f731d9b990fff56d7",
+      "expectedBytes": 25106,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-treasure/WorkshopNativeTreasureBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/treasure/treasure-styles.xml",
+      "expectedSha256": "8085e95f91c0c65d11909312313cd2ad295204dd8c2ee69b6209d6204663a7ea",
+      "expectedBytes": 2312,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-treasure/WorkshopNativeTreasureBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/treasure/treasurehunting_v3_6_1_u1.swf",
+      "expectedSha256": "8929462943c1da24ae6f6e546120c278306012c24d99a9767f3fb3ce2187ff7f",
+      "expectedBytes": 580366,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/NewLotteryItem.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:8929462943c1da24ae6f6e546120c278306012c24d99a9767f3fb3ce2187ff7f",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/treasurehunting_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/download-receipt.json",
+          "receiptSha256": "858a966112fe4e4bf5b2e60ab33e2a66e4b60d0276ef0871ff4a4312aadd9f92",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/treasure/treasurehunting_v3_6_1_u1.ui",
+      "expectedSha256": "f18f82547d7427eb4681d54f38abbbc212bf1a412e434e6728003883c3ba3dd9",
+      "expectedBytes": 2848,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.ui",
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/treasurehunting_v3_6_1_u1.swf",
+          "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/NewLotteryItem.xml.raw",
+          "runtime/reference-activities-completion-20261014/native-mines-resources-20261015/reference-styles-xml_v3_6_1_u5.png"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:f18f82547d7427eb4681d54f38abbbc212bf1a412e434e6728003883c3ba3dd9",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/treasurehunting_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/native-maze-analysis-20261015/download-receipt.json",
+          "receiptSha256": "858a966112fe4e4bf5b2e60ab33e2a66e4b60d0276ef0871ff4a4312aadd9f92",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/treasure/WorkshopNativeTreasureBootstrap.swf",
+      "expectedSha256": "3d9c114c00aa2fd898c8406186cf13dd466cc6cc9e8eb2b6e2cf00d6cc61493c",
+      "expectedBytes": 18301,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-treasure/WorkshopNativeTreasureBootstrap.as",
+          "runtime/reference-activities-completion-20261014/reference-core/2_v3_6_1_u9.png",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/coreii_v3_6_1_u2.swf",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/uicomponent_v3_6_1_u1.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/MagicClothList.decoded.xml",
+      "expectedSha256": "e9aff57becd1a90e53c838e552a3360e0f93779a824f04ab82da275782fa7ad0",
+      "expectedBytes": 9370,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/reference-core/MagicClothList.decoded.xml",
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/magicwardrobe-original-library.swf",
+      "expectedSha256": "400bebfa5a0a83cf824c7c1b9785ae698e3bbbd00311c09ef54bbac3bbf53788",
+      "expectedBytes": 10482,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json",
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/magicwardrobe-original-library.swf"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/magicwardrobe_v3_6_1_u1.swf",
+      "expectedSha256": "df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca",
+      "expectedBytes": 133593,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.swf",
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:df20c834e280aaedc3aa48b9bdf04667d78e5efbf2ebd0674a3d78f074a2c0ca",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/magicwardrobe_v3_6_1_u1.swf",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/magicwardrobe_v3_6_1_u1.ui",
+      "expectedSha256": "46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145",
+      "expectedBytes": 969,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/direct-modules/magicwardrobe_v3_6_1_u1.ui",
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json"
+        ]
+      },
+      "originalCopy": {
+        "sourceId": "sha256:46fb10dc64a049bb6e90b2fd119043f008d05db27dd0492e04ed50970f779145",
+        "sourceKind": "reference-original",
+        "evidence": {
+          "type": "public-original-download",
+          "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/morn/ui/magicwardrobe_v3_6_1_u1.ui",
+          "receipt": "runtime/reference-activities-completion-20261014/direct-modules/download-receipt.json",
+          "receiptSha256": "fbd10f928e8fb269df995ee85a8026bb17a65724cc17f8ad009a1beebc9367b9",
+          "hashField": "sha256",
+          "httpStatus": 201,
+          "downloadedAt": null
+        },
+        "generation": false,
+        "packagePath": "runtime/live/overlay-originals/sources-verified.json"
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/shared-art.swf",
+      "expectedSha256": "a030162b43ce520957ee3a088d69d7c05aaaf47f1623d6107ab5907fa378937c",
+      "expectedBytes": 3597,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/shared-art.swf",
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json"
+        ]
+      }
+    },
+    {
+      "relativePath": "workshop-native/wardrobe/WorkshopNativeWardrobeBootstrap.swf",
+      "expectedSha256": "889c47ad1324c4b940014decee7a6da08c431f481404fdcce08d3ce4067bb4fc",
+      "expectedBytes": 7313,
+      "adapter": null,
+      "flags": null,
+      "inputs": [],
+      "configs": [],
+      "exception": {
+        "code": "REFERENCE_INPUT_OUTSIDE_ALLOWED_ROOTS",
+        "reasons": [
+          "原活动构建需要 runtime/reference-activities-completion-20261014 的参考核心/供体 SWF/UI/styles 及 Flex/AS；官方新版本不等价。"
+        ],
+        "identifiedPaths": [
+          "source/ddtank-reborn/scripts/native-wardrobe/source-spec.json"
+        ]
+      }
+    }
+  ],
+  "codePinPolicy": "Only CRLF is normalized to LF for source code identity. Asset/data inputs and generated outputs always use exact byte SHA256.",
+  "historicalInputPackage": {
+    "path": "runtime/live/overlay-inputs/sources.json",
+    "sha256": "fe8d421760c11abc24c62427788f60070789012bdaffe6ecc40faefa37b2cf0a",
+    "materialCount": 108,
+    "materialBytes": 7373738,
+    "toolchainCount": 40,
+    "toolchainBytes": 22238954,
+    "strictRebuildInput": false,
+    "generatedCandidateInputs": false
+  },
+  "repositoryBasePolicy": {
+    "rule": "repo original bases + pure generated overlay; per-file exceptions remain explicit",
+    "restoredOriginals": [
+      "apps/api/assets/flash/ui/vietnam/swf/room.swf",
+      "apps/api/assets/flash/ui/vietnam/swf/roomlist.swf",
+      "apps/api/assets/flash/ui/vietnam/swf/store.swf",
+      "apps/api/assets/flash/ui/vietnam/swf/ddtstore.swf",
+      "apps/api/assets/flash/ui/vietnam/swf/storefinebringup.swf"
+    ],
+    "temporaryCompatibilityExceptions": [
+      {
+        "path": "apps/api/assets/flash/ui/vietnam/swf/wonderfulactivity.swf",
+        "state": "Chinese mirrored overlay retained in repo working tree by root",
+        "reason": "Current service CiTree indexed the prior repo path. Restoring the original changed HTTP output, so root restored the Chinese mirror. Original may only be restored after user-approved restart and fresh HTTP verification.",
+        "generationInput": false,
+        "originalAvailable": "Repository preexisting LFS object; see project repository-bases plan, never copy current patched mirror as a generated result."
+      }
+    ],
+    "overlayChanged": false
+  },
+  "originalSourcesPackage": {
+    "path": "runtime/live/overlay-originals/sources-verified.json",
+    "sha256": "2880cf11fd6323ce8a4f9bad9724d066e5ee57a9f22fbdaf4760f287f74ea902",
+    "files": 31,
+    "bytes": 5180371,
+    "generation": false,
+    "sourceCopy": true,
+    "strictRebuildInput": false
+  }
+}

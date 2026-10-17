@@ -2,6 +2,8 @@
 
 仅本地提交；未推送任何远程。23个二进制采用现有Git LFS，80个内容相同的文件只刷新索引。未改变 overlay 权威规则。
 
+本页保留第一步完成时的核对结论。第三步随后确定“仓库保存原版，overlay 由脚本生成”的规则：`room`、`roomlist`、`store`、`ddtstore`、`storefinebringup` 的仓库 SWF 恢复为 `1585d30` 原件，中文成品仍在 `8e26d0e` 的 LFS 历史和现用 overlay 中。`wonderfulactivity` 因当前服务启动索引仍指向仓库副本，暂保留中文镜像，待用户批准重启时处理。内容收录不等于 Git 合并祖先关系；这些资源的后续取舍以 `tools/workshop-overlay/README.md` 为准。
+
 - 服务端功能与界面：`53fc4fbaa37142455490e2570dfe9f3a0bae4bf4`，81文件。
 - 战斗引擎：`56341bf47c11481e2f01adb9a7d009d3a0b4d802`，32文件。
 - 翻译数据：`eb18b1132cdf0ad47c37356ae946897f67f3bd30`，26文件。

@@ -1,0 +1,2337 @@
+{
+  "version": 1,
+  "sourceRoot": "<PROJECT>/source/ddtank-reborn",
+  "scope": "All repository inputs read in strict run-2 and extended-4. HEAD LFS pointers are compared by OID and size to actual working bytes, not mistaken for missing binary data.",
+  "codePolicy": "Only CRLF to LF normalization for code; exact SHA256 for all assets and data.",
+  "inputs": [
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/language.txt",
+      "workingSha256": "ed7bebda3cb6cabcdc8ada6bc98b334d2fe873886b0ee9dc57cd155c30e49fe9",
+      "workingBytes": 250681,
+      "headBlobSha256": "fc712287068e7b79acd4b3eb7f896bfd1d97fde45f0261689a75179bedc4eb69",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "fc712287068e7b79acd4b3eb7f896bfd1d97fde45f0261689a75179bedc4eb69",
+      "resolvedHeadBytes": 247152,
+      "bytesEqual": false,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "Add exact-path -text attribute and record existing working bytes in Git without changing translation/source data."
+    },
+    {
+      "path": "research/i18n/zh-CN-overrides.json",
+      "workingSha256": "5b6fddab3d5c339dd58f178704639c1aa3addc6304c0a35681ffad3919c1cd98",
+      "workingBytes": 254357,
+      "headBlobSha256": "b22d59cadb2230d1b0409307546b1c044f73455cddb20c60bedb3c4245b331bc",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "b22d59cadb2230d1b0409307546b1c044f73455cddb20c60bedb3c4245b331bc",
+      "resolvedHeadBytes": 250893,
+      "bytesEqual": false,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "Add exact-path -text attribute and record existing working bytes in Git without changing translation/source data."
+    },
+    {
+      "path": "research/i18n/zh-CN-dictionary-format-repairs.json",
+      "workingSha256": "0e5d1fb15dba12c32f174cb817023227935126abd3b61e0061970c75dc24553d",
+      "workingBytes": 1246,
+      "headBlobSha256": "0e5d1fb15dba12c32f174cb817023227935126abd3b61e0061970c75dc24553d",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "0e5d1fb15dba12c32f174cb817023227935126abd3b61e0061970c75dc24553d",
+      "resolvedHeadBytes": 1246,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/movingnotification.txt",
+      "workingSha256": "e52ef4e23012aaaae27eb906c50f417aad22df8c9e4bccbfef2e397a8ef8678b",
+      "workingBytes": 6884,
+      "headBlobSha256": "e52ef4e23012aaaae27eb906c50f417aad22df8c9e4bccbfef2e397a8ef8678b",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "e52ef4e23012aaaae27eb906c50f417aad22df8c9e4bccbfef2e397a8ef8678b",
+      "resolvedHeadBytes": 6884,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/zh-CN-moving-notifications.json",
+      "workingSha256": "e048dc14f9b484b58eed31b1d990cab7864845d60b72a8e70308a1a81033decb",
+      "workingBytes": 2796,
+      "headBlobSha256": "e048dc14f9b484b58eed31b1d990cab7864845d60b72a8e70308a1a81033decb",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "e048dc14f9b484b58eed31b1d990cab7864845d60b72a8e70308a1a81033decb",
+      "resolvedHeadBytes": 2796,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/bagandinfo.swf",
+      "workingSha256": "795d96b7f861e98309c641adc660fd678de09329bcd0f0cab35a66fa16432911",
+      "workingBytes": 1196928,
+      "headBlobSha256": "a5b2b6b7a11666d75f0779e87387fc63f40af7b22e777dc10cdcf2da8bbea7d8",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "795d96b7f861e98309c641adc660fd678de09329bcd0f0cab35a66fa16432911",
+      "resolvedHeadBytes": 1196928,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/zh-CN.json",
+      "workingSha256": "a729228cd04e22719265e9b1022a180085d2996ec382d83dea0e186a12ebfc98",
+      "workingBytes": 39781,
+      "headBlobSha256": "a729228cd04e22719265e9b1022a180085d2996ec382d83dea0e186a12ebfc98",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "a729228cd04e22719265e9b1022a180085d2996ec382d83dea0e186a12ebfc98",
+      "resolvedHeadBytes": 39781,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/bag-help/47.png",
+      "workingSha256": "7284b7ed73293e4d27c839f1bb71e99c1f435bbc0b28b7c64fe000d70e6392e3",
+      "workingBytes": 1782,
+      "headBlobSha256": "93a331210b4f57cd0d6467d57b94dd9d041437f6ac21e35e33e084145ecd7fc2",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "7284b7ed73293e4d27c839f1bb71e99c1f435bbc0b28b7c64fe000d70e6392e3",
+      "resolvedHeadBytes": 1782,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/bag-help/48.png",
+      "workingSha256": "32d2eba3211e0ac61f745fcabbac9b4929bc5db0bb9a09947dd2704aa381a398",
+      "workingBytes": 66306,
+      "headBlobSha256": "a5aba667f6b94dffdbfd508ed56f99f70228efbd076b2d4f44531b72c22477c4",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "32d2eba3211e0ac61f745fcabbac9b4929bc5db0bb9a09947dd2704aa381a398",
+      "resolvedHeadBytes": 66306,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "scripts/workshop-bag-art.mjs",
+      "workingSha256": "378cfbf5f92847108df7d3f58bf6c18f187b65c15370cd6ea39be8fbbfb633a5",
+      "workingBytes": 40927,
+      "headBlobSha256": "eaa687b51e5798f51cc45715979d448d74162fc8ca04e74d4a1e54268d60a8bd",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "eaa687b51e5798f51cc45715979d448d74162fc8ca04e74d4a1e54268d60a8bd",
+      "resolvedHeadBytes": 40495,
+      "bytesEqual": false,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "LF-normalized code pin; all other edits fail",
+      "recommendation": "CRLF/LF-only differences are accepted by code pins; preserve source content"
+    },
+    {
+      "path": "scripts/workshop-calendar-art.mjs",
+      "workingSha256": "0ac0a71ed361760c8534f5aa7023b3add894fa7bba08f38a8370e8af495d2f93",
+      "workingBytes": 17344,
+      "headBlobSha256": "0ac0a71ed361760c8534f5aa7023b3add894fa7bba08f38a8370e8af495d2f93",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "0ac0a71ed361760c8534f5aa7023b3add894fa7bba08f38a8370e8af495d2f93",
+      "resolvedHeadBytes": 17344,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "LF-normalized code pin; all other edits fail",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "scripts/workshop-bag-layout.mjs",
+      "workingSha256": "99c628d484827a7ea21de0b1fc0c73b9bf0af68d86240c1ef3f751133fc3995c",
+      "workingBytes": 22433,
+      "headBlobSha256": "99c628d484827a7ea21de0b1fc0c73b9bf0af68d86240c1ef3f751133fc3995c",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "99c628d484827a7ea21de0b1fc0c73b9bf0af68d86240c1ef3f751133fc3995c",
+      "resolvedHeadBytes": 22433,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "LF-normalized code pin; all other edits fail",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "tools/i18n/abc-strings/lib.mjs",
+      "workingSha256": "d2133473836ec1123dc51655f83af020cad87b6d89a9b3aad59055c6c70f7c74",
+      "workingBytes": 4243,
+      "headBlobSha256": "3fa1e495d1095fd2058737b8a94f6acdae63d5643eea599c073c0481d5343424",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "3fa1e495d1095fd2058737b8a94f6acdae63d5643eea599c073c0481d5343424",
+      "resolvedHeadBytes": 4104,
+      "bytesEqual": false,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "LF-normalized code pin; all other edits fail",
+      "recommendation": "CRLF/LF-only differences are accepted by code pins; preserve source content"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/calendar.swf",
+      "workingSha256": "b8cef4fba70c09b357a1f3ff6575dde4cd5116576a62ab749120b1668aff2eb1",
+      "workingBytes": 133262,
+      "headBlobSha256": "84e12f21afe6e3a1214393a5a345fab2695ba0bd21cdcc308c98939b96996710",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "b8cef4fba70c09b357a1f3ff6575dde4cd5116576a62ab749120b1668aff2eb1",
+      "resolvedHeadBytes": 133262,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/calendar.zh-CN.json",
+      "workingSha256": "5bb5af8f1f79c9fa55407c5b9a063157201606afcdea1091cc4e59cccd457cef",
+      "workingBytes": 16830,
+      "headBlobSha256": "5bb5af8f1f79c9fa55407c5b9a063157201606afcdea1091cc4e59cccd457cef",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "5bb5af8f1f79c9fa55407c5b9a063157201606afcdea1091cc4e59cccd457cef",
+      "resolvedHeadBytes": 16830,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/chat.swf",
+      "workingSha256": "fbccdb8fe72cd75d6e6aebda0a15c5c2dd0d3c2a58c371715b3b0f25f25cd8ef",
+      "workingBytes": 515906,
+      "headBlobSha256": "3bd3c95ec7bda28bd1510314388418c0bd87f0038a0ce54335acff4b34a0e55c",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "fbccdb8fe72cd75d6e6aebda0a15c5c2dd0d3c2a58c371715b3b0f25f25cd8ef",
+      "resolvedHeadBytes": 515906,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/chat.zh-CN.json",
+      "workingSha256": "8ef91bc3a023d188677ed089ea36f8d8497a8344a85a37a3a97ebb4d03680a31",
+      "workingBytes": 8412,
+      "headBlobSha256": "8ef91bc3a023d188677ed089ea36f8d8497a8344a85a37a3a97ebb4d03680a31",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "8ef91bc3a023d188677ed089ea36f8d8497a8344a85a37a3a97ebb4d03680a31",
+      "resolvedHeadBytes": 8412,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/coreii.swf",
+      "workingSha256": "1d2a8d5606995baa3e287608a55e18289b8d44070e137c8e35ee5ca4051e9b3f",
+      "workingBytes": 1298825,
+      "headBlobSha256": "2e20b9dae212c629a5efcb5599de7bdbd0e3f5a2743b17c6ddcd4f8e92ac1856",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "1d2a8d5606995baa3e287608a55e18289b8d44070e137c8e35ee5ca4051e9b3f",
+      "resolvedHeadBytes": 1298825,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/hidden-controls.zh-CN.json",
+      "workingSha256": "c4623b7bb2901f75b3ebce377a795afe1f847cc25ebdefb0b31c3ba5d596adbf",
+      "workingBytes": 1114,
+      "headBlobSha256": "c4623b7bb2901f75b3ebce377a795afe1f847cc25ebdefb0b31c3ba5d596adbf",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "c4623b7bb2901f75b3ebce377a795afe1f847cc25ebdefb0b31c3ba5d596adbf",
+      "resolvedHeadBytes": 1114,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/calendar-controls.zh-CN.json",
+      "workingSha256": "52e12c10b8c6b83135d30541eb64b48d700ba9161467722debc80f9b20397544",
+      "workingBytes": 1283,
+      "headBlobSha256": "52e12c10b8c6b83135d30541eb64b48d700ba9161467722debc80f9b20397544",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "52e12c10b8c6b83135d30541eb64b48d700ba9161467722debc80f9b20397544",
+      "resolvedHeadBytes": 1283,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/xml/xml.png",
+      "workingSha256": "ff80654d2e4cac4369b9eba5c8854853621a0d9e766fce1dd39833d924f2579d",
+      "workingBytes": 289831,
+      "headBlobSha256": "a4d1a34c2325023c3a5ea289a10f778edd7549da1f0b7bf28fb5358918372b34",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "ff80654d2e4cac4369b9eba5c8854853621a0d9e766fce1dd39833d924f2579d",
+      "resolvedHeadBytes": 289831,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/zh-CN.json",
+      "workingSha256": "161247922a0a6a7e90f2e172ecf05083c6245d9987202d75ffadc7168b971890",
+      "workingBytes": 24917,
+      "headBlobSha256": "161247922a0a6a7e90f2e172ecf05083c6245d9987202d75ffadc7168b971890",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "161247922a0a6a7e90f2e172ecf05083c6245d9987202d75ffadc7168b971890",
+      "resolvedHeadBytes": 24917,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/room.swf",
+      "workingSha256": "a4a33f05dfd77cad4fa237d97a0594e9dc64f32c1266815540603beb8da53aed",
+      "workingBytes": 2211842,
+      "headBlobSha256": "8f4e3f63d8c9999063a08af7ddec590753e6cf49bd90db5ecc662672f3a51a38",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "0e8d78020b3be6ba7313f340557020295b60eb55e9ca4743c0dae8a7a16c62e2",
+      "resolvedHeadBytes": 2306729,
+      "bytesEqual": false,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "Original base restored in working tree; main controller must commit that authorized restore. Preserve original OID and target pins."
+    },
+    {
+      "path": "research/i18n/room-art/69.png",
+      "workingSha256": "4969958c00d46c2d9c107c75d4bdcecfc923959dd2dcd559e3d3ccc1abb56c4a",
+      "workingBytes": 56682,
+      "headBlobSha256": "7723aae1d48687ff134ded35a97509ad1a916c4d7a897c53814e6bf48c090498",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "4969958c00d46c2d9c107c75d4bdcecfc923959dd2dcd559e3d3ccc1abb56c4a",
+      "resolvedHeadBytes": 56682,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/62.png",
+      "workingSha256": "a0c229b74ad13637af59b8694a2f0cb9ab0bc4b0f9fb9e45a907199fd28525a5",
+      "workingBytes": 62574,
+      "headBlobSha256": "155371daaceff571adb8e2075a3f19d2f2e6c446552ad3a6d6a8709208572568",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "a0c229b74ad13637af59b8694a2f0cb9ab0bc4b0f9fb9e45a907199fd28525a5",
+      "resolvedHeadBytes": 62574,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/65.png",
+      "workingSha256": "aee3ead3f97ea1e1172bf9471c7d6989a764ffda9bcce5a823bc95d12a9482cb",
+      "workingBytes": 1275,
+      "headBlobSha256": "36045ac313bae9cbc9d3f52245206a78a69bba29f367c90f13ad32f7b365a357",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "aee3ead3f97ea1e1172bf9471c7d6989a764ffda9bcce5a823bc95d12a9482cb",
+      "resolvedHeadBytes": 1275,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/64.png",
+      "workingSha256": "8a667c1b07047919874fb44944c754eaae3d31dfa09e622a33dae33e8bd5e178",
+      "workingBytes": 797,
+      "headBlobSha256": "f7852acc5cac61e9836ea2738651972342d3aa3947a1e6a73ba071da5ff27fa4",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "8a667c1b07047919874fb44944c754eaae3d31dfa09e622a33dae33e8bd5e178",
+      "resolvedHeadBytes": 797,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/71.png",
+      "workingSha256": "91dc2440fcba7b46f8150940d3c92e03bdca08359e91f558a72229180e95d2e9",
+      "workingBytes": 119471,
+      "headBlobSha256": "2f17a6bf9ff5711efa41ca8d45230b3c8afb2745377176f64feccb9750981b38",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "91dc2440fcba7b46f8150940d3c92e03bdca08359e91f558a72229180e95d2e9",
+      "resolvedHeadBytes": 119471,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/77.png",
+      "workingSha256": "492250663ab4a2575f0f29a7a30546dfa6a695f51dc071d09b6c93c8b51b9e33",
+      "workingBytes": 38396,
+      "headBlobSha256": "0aaa6aeb5ddb654f746ed5ef31935b01ffe3a82db53ad9dd457728689e8cd265",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "492250663ab4a2575f0f29a7a30546dfa6a695f51dc071d09b6c93c8b51b9e33",
+      "resolvedHeadBytes": 38396,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/80.png",
+      "workingSha256": "5cec3d7dca9db1e405911ac4395b8ecfad5d49661a2c3063dbc97fa8221ed9d5",
+      "workingBytes": 1791,
+      "headBlobSha256": "1202f6bef6e1c7af1e91cc4193f282159265bf674dccc88143e62ff23b820890",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "5cec3d7dca9db1e405911ac4395b8ecfad5d49661a2c3063dbc97fa8221ed9d5",
+      "resolvedHeadBytes": 1791,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/96.png",
+      "workingSha256": "2de76302be07bfdd7e4f620ea7fd06db0786f378fa41deef74fbfc6cfe4abf2b",
+      "workingBytes": 934,
+      "headBlobSha256": "ef3097bb3e678a77d855b9e059255a76f252677ecbed9cc077abb2bea5317e68",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "2de76302be07bfdd7e4f620ea7fd06db0786f378fa41deef74fbfc6cfe4abf2b",
+      "resolvedHeadBytes": 934,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/99.png",
+      "workingSha256": "f98cd3ee9faf4790aa3493d4f4ba62ab0186b3b43b2b7b90d62e7526e4fb547d",
+      "workingBytes": 911,
+      "headBlobSha256": "4f204646090c63da72889b99d72b508ccdac75f08d98922b5317d02a33d73575",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "f98cd3ee9faf4790aa3493d4f4ba62ab0186b3b43b2b7b90d62e7526e4fb547d",
+      "resolvedHeadBytes": 911,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/103.png",
+      "workingSha256": "fbbe7f20089d39be8ada8202be6dc89147828d0915480fb3f4ae80332b483ae4",
+      "workingBytes": 738,
+      "headBlobSha256": "767252b6b16bcc9f4fc84225729790c041bd86bd0b005e431438395d2b2a5b3b",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "fbbe7f20089d39be8ada8202be6dc89147828d0915480fb3f4ae80332b483ae4",
+      "resolvedHeadBytes": 738,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/105.png",
+      "workingSha256": "892bdaae6d6cce8f1d79e8509755b824bfcde766b5187c8b63b944ec660b5ab2",
+      "workingBytes": 800,
+      "headBlobSha256": "14b08d4cd00b60bd31da4d07a2436dd059bc31b298104b938e924be7e7c67cfc",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "892bdaae6d6cce8f1d79e8509755b824bfcde766b5187c8b63b944ec660b5ab2",
+      "resolvedHeadBytes": 800,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/10.png",
+      "workingSha256": "893342c7c9ec74a18a138773f281bd601f10d4f28a64b91841c161b5cc5adc71",
+      "workingBytes": 13052,
+      "headBlobSha256": "5a7a85cc437a15b9a15c33ea12010f6228747f726a5c0b9cabff9e6b53b30e14",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "893342c7c9ec74a18a138773f281bd601f10d4f28a64b91841c161b5cc5adc71",
+      "resolvedHeadBytes": 13052,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/12.png",
+      "workingSha256": "fc9546f5e499c23e75d51ef0475144dd3b0adc2de478a0fdd5bbbee10f47b250",
+      "workingBytes": 16391,
+      "headBlobSha256": "eca9f566def4f3ef61bf41942e18863d6be1dac9e059e56f53e4207bc5f4730b",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "fc9546f5e499c23e75d51ef0475144dd3b0adc2de478a0fdd5bbbee10f47b250",
+      "resolvedHeadBytes": 16391,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/140.png",
+      "workingSha256": "3e93858cc3461c8834d9e783a307eaa78d325c3b01ea1e985e7bab27197d57ca",
+      "workingBytes": 12808,
+      "headBlobSha256": "1030bcd9bf090f4feade0a83ed096c0bc9fc7aa2e92e8b8db0624f92ec4e5ebf",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "3e93858cc3461c8834d9e783a307eaa78d325c3b01ea1e985e7bab27197d57ca",
+      "resolvedHeadBytes": 12808,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/141.png",
+      "workingSha256": "cde5a7855cc2e6271e101387330e9ace2482971e76a77a91e089f3439678c263",
+      "workingBytes": 17471,
+      "headBlobSha256": "2838eda34ab3cf379dff13c2724f5c3d044953aaf9b8b980fcc961d5550aa247",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "cde5a7855cc2e6271e101387330e9ace2482971e76a77a91e089f3439678c263",
+      "resolvedHeadBytes": 17471,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/171.png",
+      "workingSha256": "0a752efb8dbfe3a604efe060099f947047acad8543bb80a6c77f41b835be99ae",
+      "workingBytes": 22127,
+      "headBlobSha256": "21e9c25094cb5956338ad72094464ca5f18e02dadee2500578af120c06751404",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "0a752efb8dbfe3a604efe060099f947047acad8543bb80a6c77f41b835be99ae",
+      "resolvedHeadBytes": 22127,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/173.png",
+      "workingSha256": "0b6b5164a5d9e90137c13882f2bdc2fe9cd7675b0e97f6d02f4681142ef448b7",
+      "workingBytes": 23315,
+      "headBlobSha256": "ed76096468df21aa3beb7aed5e4b20c7f37f17a2c0cc4a3180418989b4c9ec72",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "0b6b5164a5d9e90137c13882f2bdc2fe9cd7675b0e97f6d02f4681142ef448b7",
+      "resolvedHeadBytes": 23315,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/176.png",
+      "workingSha256": "590ff72f226f746e475d71d6498afcce2ee5db37833dcedb41adedc41e419061",
+      "workingBytes": 23687,
+      "headBlobSha256": "235a6b2c7b835a0f2bbff2b11eb4a6469f46fa3f8051ebd407149384e3f44713",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "590ff72f226f746e475d71d6498afcce2ee5db37833dcedb41adedc41e419061",
+      "resolvedHeadBytes": 23687,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/room-art/178.png",
+      "workingSha256": "e555c11a13ab3eed5eba88e6fb4ad50b5b5b6b42dd48e67a2833f33ab0935930",
+      "workingBytes": 23637,
+      "headBlobSha256": "124ab1b04e5217ba5e637d796365bfcd234440a46d64cc0104bcbbc1ad8f1d46",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "e555c11a13ab3eed5eba88e6fb4ad50b5b5b6b42dd48e67a2833f33ab0935930",
+      "resolvedHeadBytes": 23637,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/zh-CN.json",
+      "workingSha256": "ad7088ee2b757d333d2264322ddf3ecfb436b632c9df84665a00ee7243532122",
+      "workingBytes": 16227,
+      "headBlobSha256": "ad7088ee2b757d333d2264322ddf3ecfb436b632c9df84665a00ee7243532122",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "ad7088ee2b757d333d2264322ddf3ecfb436b632c9df84665a00ee7243532122",
+      "resolvedHeadBytes": 16227,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/roomlist.swf",
+      "workingSha256": "58fac028f6c484657748e18a1045f9bf658d823c49208369786a622a35c3930a",
+      "workingBytes": 477245,
+      "headBlobSha256": "55c7218d48f4d7fd46b03f10bab4b58f615056d887d7d79b2cc2e996d1a31de7",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "347482c36b1c10b65dc4676a4415faa0b564c66fe759e36c4e898b7c76d1ebf6",
+      "resolvedHeadBytes": 1445299,
+      "bytesEqual": false,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "Original base restored in working tree; main controller must commit that authorized restore. Preserve original OID and target pins."
+    },
+    {
+      "path": "research/i18n/roomlist-art/58.png",
+      "workingSha256": "51c173b1142a8b86cb40678e258617b19d5dbb2a740d2e4b7380f7f1ad52b7fd",
+      "workingBytes": 5407,
+      "headBlobSha256": "bad2c99bc7b0d9fe3dbeb4c1e085e962032d6601d7b092e32d82c783e974c8df",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "51c173b1142a8b86cb40678e258617b19d5dbb2a740d2e4b7380f7f1ad52b7fd",
+      "resolvedHeadBytes": 5407,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/35.png",
+      "workingSha256": "5b2b9b7a8cc43f505dff1b70fa8ccb601a5ced2902901807620a22b7434b7516",
+      "workingBytes": 15645,
+      "headBlobSha256": "45f11678e08ef3cf747b29d268678db7b6654fbec2f43f3ba472e8d7765e615b",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "5b2b9b7a8cc43f505dff1b70fa8ccb601a5ced2902901807620a22b7434b7516",
+      "resolvedHeadBytes": 15645,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/44.png",
+      "workingSha256": "7b95dedba99bc973f001f432e37c56af7db7d5c0b7d864661c20f9570ad57034",
+      "workingBytes": 6803,
+      "headBlobSha256": "145119a65873752c8f5eb328c2e9f8dd0f786913a45c0202993585a9ade6e7a3",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "7b95dedba99bc973f001f432e37c56af7db7d5c0b7d864661c20f9570ad57034",
+      "resolvedHeadBytes": 6803,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/27.png",
+      "workingSha256": "d8817bc7758c01cc99a5589b8fc2869628f0bf9e1b1907c32ae7eb7149316335",
+      "workingBytes": 4815,
+      "headBlobSha256": "08ee168bb91684eaa7ff82c9fa24ae85220233ec73905fb22d851684f0617c9c",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "d8817bc7758c01cc99a5589b8fc2869628f0bf9e1b1907c32ae7eb7149316335",
+      "resolvedHeadBytes": 4815,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/20.png",
+      "workingSha256": "36e0f566c8b68fcf6b526bd38f1434813e147d0ad735ee6c2b3d38281729757a",
+      "workingBytes": 6594,
+      "headBlobSha256": "a081ead019154c66d58b03263d294dc56d8351f76d3e6e6119224ce00b945ad3",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "36e0f566c8b68fcf6b526bd38f1434813e147d0ad735ee6c2b3d38281729757a",
+      "resolvedHeadBytes": 6594,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/54.png",
+      "workingSha256": "502ce87063a0f0af4221fa57f2440f4422aaa8c8f3b3f075b830ca54cb868ac1",
+      "workingBytes": 2138,
+      "headBlobSha256": "ea24ae3269c82b5bfa21601b8d96a4ad93d7a0fa06d32d24dc92ccac343436fb",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "502ce87063a0f0af4221fa57f2440f4422aaa8c8f3b3f075b830ca54cb868ac1",
+      "resolvedHeadBytes": 2138,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/1.png",
+      "workingSha256": "86de257afe81a17a0cd14f6c4235abd127e7b65fd5fb809e76e46ab91f7a1ee6",
+      "workingBytes": 14193,
+      "headBlobSha256": "6e46a38a7e3185fd1b6e9d88d352f04c9003b4e5e66bb178b4381bf5874eb8af",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "86de257afe81a17a0cd14f6c4235abd127e7b65fd5fb809e76e46ab91f7a1ee6",
+      "resolvedHeadBytes": 14193,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/17.png",
+      "workingSha256": "cc7bcbae318f2eadfa198ab2f18239ca37d7025dc086501b282d2f02d631e93a",
+      "workingBytes": 13963,
+      "headBlobSha256": "34cc794e34b72923b990ccb40010bdae3f360e93cff3b70763634bec425c83c0",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "cc7bcbae318f2eadfa198ab2f18239ca37d7025dc086501b282d2f02d631e93a",
+      "resolvedHeadBytes": 13963,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/23.png",
+      "workingSha256": "fe19336cc6ab3947d05b182e6da42d48aba15b637d0f86f5b389a0adcfe71b66",
+      "workingBytes": 157734,
+      "headBlobSha256": "a52f8588109c5b50c7db78ddb801467a75e531c1c0d90061a73446d562bec06f",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "fe19336cc6ab3947d05b182e6da42d48aba15b637d0f86f5b389a0adcfe71b66",
+      "resolvedHeadBytes": 157734,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/31.png",
+      "workingSha256": "a0ae97b6b5f3a0c15ff53d9ff94e10ee4b38b07c26dccefff75f244b4eb95881",
+      "workingBytes": 5481,
+      "headBlobSha256": "07c34562b7aa086eba58ef8f87eab2085802cfbf914fea41c26d202c62eb8320",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "a0ae97b6b5f3a0c15ff53d9ff94e10ee4b38b07c26dccefff75f244b4eb95881",
+      "resolvedHeadBytes": 5481,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/36.png",
+      "workingSha256": "e681f5039dfdf859f0a04de99fc468d349d8d91d0643197470d71375384cf12a",
+      "workingBytes": 7203,
+      "headBlobSha256": "58f88cb870406726e94170330ae23e465d0699aa3e471d2eacd850c94ef91d4c",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "e681f5039dfdf859f0a04de99fc468d349d8d91d0643197470d71375384cf12a",
+      "resolvedHeadBytes": 7203,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/45.png",
+      "workingSha256": "dba6c2d3674ea84ba02d2f6f36574efe2858f69d74d7634271b77d964a29e9e2",
+      "workingBytes": 9430,
+      "headBlobSha256": "59f470689a45e250bc3e9161a4dc33687bf62634405d7841eb3ca07377e63ea3",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "dba6c2d3674ea84ba02d2f6f36574efe2858f69d74d7634271b77d964a29e9e2",
+      "resolvedHeadBytes": 9430,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/roomlist-art/prepared/72.png",
+      "workingSha256": "8cad4e32e877f63760c12ff997fff79a8d996a566772da2f6e6001e7bdff822c",
+      "workingBytes": 535591,
+      "headBlobSha256": "94bd6f14ad86a6d63ccffebff351ca5e708518e93cb2420499cf50d81dda0d64",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "8cad4e32e877f63760c12ff997fff79a8d996a566772da2f6e6001e7bdff822c",
+      "resolvedHeadBytes": 535591,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/email.zh-CN.json",
+      "workingSha256": "c9ad2d0c150482fb9c466ac2d4ddfb1dd01ba1876118680e44c520b64e6055a1",
+      "workingBytes": 16392,
+      "headBlobSha256": "c9ad2d0c150482fb9c466ac2d4ddfb1dd01ba1876118680e44c520b64e6055a1",
+      "headStorage": "git-blob",
+      "resolvedHeadSha256": "c9ad2d0c150482fb9c466ac2d4ddfb1dd01ba1876118680e44c520b64e6055a1",
+      "resolvedHeadBytes": 16392,
+      "bytesEqual": true,
+      "sourceLfEquivalent": true,
+      "attributes": [
+        "text: unspecified",
+        "eol: unspecified",
+        "filter: unspecified"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/email.swf",
+      "workingSha256": "5f90d36ec54859f5086a6add6c195dc5f997e0045e756cc329ec675747cabe54",
+      "workingBytes": 304948,
+      "headBlobSha256": "cadedddaeb2b18cc3ccaa122a05521a7933f70b390b11b23e663a96c7e93520a",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "5f90d36ec54859f5086a6add6c195dc5f997e0045e756cc329ec675747cabe54",
+      "resolvedHeadBytes": 304948,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/email/5.png",
+      "workingSha256": "72a91355191374905f7fee34247288314120c055aba0e508448a5be5b828f498",
+      "workingBytes": 3715,
+      "headBlobSha256": "92eb3b6cd2c9f4ce3a07f1c5ebf20f388a74041e8083e867ff78a75c0fed75f3",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "72a91355191374905f7fee34247288314120c055aba0e508448a5be5b828f498",
+      "resolvedHeadBytes": 3715,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    },
+    {
+      "path": "research/i18n/bag-art/email/54.png",
+      "workingSha256": "4016eb5c1ab39306380d41267e8b803464c15a39b544f48cb27ebb1db613800e",
+      "workingBytes": 5049,
+      "headBlobSha256": "f8c45f3d1c356d938d757c9618ca9b8e65eedbd5a0cb0c6f09779ddb3caccea1",
+      "headStorage": "git-lfs-pointer",
+      "resolvedHeadSha256": "4016eb5c1ab39306380d41267e8b803464c15a39b544f48cb27ebb1db613800e",
+      "resolvedHeadBytes": 5049,
+      "bytesEqual": true,
+      "sourceLfEquivalent": false,
+      "attributes": [
+        "text: unset",
+        "eol: unspecified",
+        "filter: lfs"
+      ],
+      "policy": "exact data bytes",
+      "recommendation": "No byte change needed"
+    }
+  ],
+  "summary": {
+    "checked": 61,
+    "byteEquivalent": 55,
+    "differences": 6
+  },
+  "requiredRootAttributes": [
+    "apps/api/assets/flash/ui/vietnam/language.txt -text",
+    "research/i18n/zh-CN-overrides.json -text"
+  ],
+  "requiredAction": "Main controller may add these exact attributes and archive current raw bytes; do not rewrite frozen source/translation dictionaries or refresh expected hashes.",
+  "additionalRawPackage": {
+    "path": "runtime/live/overlay-inputs/sources.json",
+    "sha256": "fe8d421760c11abc24c62427788f60070789012bdaffe6ecc40faefa37b2cf0a",
+    "strictInput": false,
+    "materials": [
+      {
+        "sourceId": "sha256:d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378",
+        "path": "runtime/live/overlay-inputs/blobs/d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378.png",
+        "sha256": "d4f28b572c5e2f4ed4e55a0ccb8fb4666e701b1627ce2f3bc219e6e848af4378",
+        "bytes": 9311,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/17.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8",
+        "path": "runtime/live/overlay-inputs/blobs/1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8.png",
+        "sha256": "1db5b26a8e6afa7e7d6193bf0fab149edfe041dc6371e3aee18c63b5ae5ef5e8",
+        "bytes": 5343,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/109.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98",
+        "path": "runtime/live/overlay-inputs/blobs/a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98.png",
+        "sha256": "a8844d7700099f5e3e1ec1e02ec7e9d57d05b00641283f4026e56613d03d4f98",
+        "bytes": 54649,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/139.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c",
+        "path": "runtime/live/overlay-inputs/blobs/cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c.png",
+        "sha256": "cb04d797b8d75cb270fcdd3ffcf98afe6b519761f392a6103bb5a474d5b34d7c",
+        "bytes": 58449,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/113.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5",
+        "path": "runtime/live/overlay-inputs/blobs/1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5.png",
+        "sha256": "1fb1019d16811b3217b47f3276f4630cc959fd547995bfe7d16b784caf5172f5",
+        "bytes": 54172,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/100.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e",
+        "path": "runtime/live/overlay-inputs/blobs/b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e.png",
+        "sha256": "b2b16435e3983842a8c4cdee92f5a2c78b8cfd3a70ee79bd787f88737eece94e",
+        "bytes": 53497,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/45.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1",
+        "path": "runtime/live/overlay-inputs/blobs/9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1.png",
+        "sha256": "9e5585b9f6d8a0771f9fd5033081cdaeb5b099fe85836b6239a4fe49fa3caaa1",
+        "bytes": 58656,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/34.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f",
+        "path": "runtime/live/overlay-inputs/blobs/3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f.png",
+        "sha256": "3b8d76d8a46f0d800d5e8facace93c16a37733c98309e6847ab0c21a28ff0f1f",
+        "bytes": 56776,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/23.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a",
+        "path": "runtime/live/overlay-inputs/blobs/ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a.png",
+        "sha256": "ceaca1a4301dadc465ff83796745c882ad94eb154fc4beee2adfdfe28483918a",
+        "bytes": 58281,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/12.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1",
+        "path": "runtime/live/overlay-inputs/blobs/b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1.png",
+        "sha256": "b1a7fd57425452f3d6e80535165b0fd60a6a8aa9c65549acb3399ed110bfa4f1",
+        "bytes": 52404,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-11.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43",
+        "path": "runtime/live/overlay-inputs/blobs/d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43.png",
+        "sha256": "d470badfb11f0eb44ff1ebcf5375089e6698ef3b209460ccfd7db4d738ed2f43",
+        "bytes": 12787,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/97.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592",
+        "path": "runtime/live/overlay-inputs/blobs/2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592.png",
+        "sha256": "2b1c2a489d35772a874e75dc0474a506e7cc9806543b8c2e1dd28934e4f96592",
+        "bytes": 1727,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/94.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3",
+        "path": "runtime/live/overlay-inputs/blobs/1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3.png",
+        "sha256": "1b47e211a2577a9a81b441ccf60569505c1efb18462adfee39b5cd1f5ff304a3",
+        "bytes": 11760,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/92.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37",
+        "path": "runtime/live/overlay-inputs/blobs/2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37.png",
+        "sha256": "2f5d378b0386ea9ec6c58667edabe76ef9672943f62ed84ee87a2a8e13c36f37",
+        "bytes": 10926,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/91.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df",
+        "path": "runtime/live/overlay-inputs/blobs/82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df.png",
+        "sha256": "82774dd0598b42bbf2e1f0ec9a84285e72338d330533381d5cb4f059bc3ab2df",
+        "bytes": 2195,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/90.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056",
+        "path": "runtime/live/overlay-inputs/blobs/397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056.png",
+        "sha256": "397d3b923e700822519039a7e6c5474fc34cbe6f0e8b2b74b47bffd142346056",
+        "bytes": 43830,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-22.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575",
+        "path": "runtime/live/overlay-inputs/blobs/891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575.png",
+        "sha256": "891a0f82545927ea468abc05bfe6a9b78a85e0324fc6217370cc8a8b78c86575",
+        "bytes": 13668,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-28.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7",
+        "path": "runtime/live/overlay-inputs/blobs/187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7.png",
+        "sha256": "187de7b4f41db8203c713e1540cbc3c111ffd73bc214643cdf13b913c3cd15b7",
+        "bytes": 6585,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-30.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228",
+        "path": "runtime/live/overlay-inputs/blobs/cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228.png",
+        "sha256": "cf057e147d2ce2b1df2201f219d81eff184a26e75a6b4c3536285a44ec35b228",
+        "bytes": 10453,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/71.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205",
+        "path": "runtime/live/overlay-inputs/blobs/d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205.png",
+        "sha256": "d86ae611f5bc9adbcbed5881ddbe3eb69c1572778b8beda4b3ed8170dd180205",
+        "bytes": 58342,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-33-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1",
+        "path": "runtime/live/overlay-inputs/blobs/47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1.png",
+        "sha256": "47ebd984b45f2919063370d81fa0359537b8e3f7c748b12434f5dec3593294f1",
+        "bytes": 5477,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/66.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0",
+        "path": "runtime/live/overlay-inputs/blobs/f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0.png",
+        "sha256": "f29024c19ebcafe68a1f99dad6e34ae1837b612c2c611add2046c47e306a1eb0",
+        "bytes": 1730,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/63.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710",
+        "path": "runtime/live/overlay-inputs/blobs/1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710.png",
+        "sha256": "1c6450e09ad8f9c1b80ed80f9ba3b3019ee9fee640df156f88781ee19217d710",
+        "bytes": 11364,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/61.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd",
+        "path": "runtime/live/overlay-inputs/blobs/1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd.png",
+        "sha256": "1169578bb6c1579de35c137e054a87175815457330dac2778fffd52c0751aebd",
+        "bytes": 10369,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/60.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926",
+        "path": "runtime/live/overlay-inputs/blobs/4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926.png",
+        "sha256": "4fb4a55fb5b2388c93a45ad13fc478d2fff5109c8fcec041061e94c00ad1f926",
+        "bytes": 1904,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/59.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4",
+        "path": "runtime/live/overlay-inputs/blobs/0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4.png",
+        "sha256": "0c477392b49d78e5a64a89a75affdb0ebc641fb8a697c40ce6b4b45b3ba5a3a4",
+        "bytes": 50509,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-41.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675",
+        "path": "runtime/live/overlay-inputs/blobs/f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675.png",
+        "sha256": "f50cd37202179833fa9fd0bb94dba811becd4e9c21aaab68e3ad08b38e5cd675",
+        "bytes": 11287,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/67.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca",
+        "path": "runtime/live/overlay-inputs/blobs/029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca.png",
+        "sha256": "029424781db35e420a85b4c29881c0df229a0a0858a3f19dd53f9bb6bf4bdbca",
+        "bytes": 1656275,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-55.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd",
+        "path": "runtime/live/overlay-inputs/blobs/8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd.png",
+        "sha256": "8b73da194b22cefacc69bc8b17ef7ec2eef939f88f8dcca4d1717da39597a6fd",
+        "bytes": 32036,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/39.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f",
+        "path": "runtime/live/overlay-inputs/blobs/4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f.png",
+        "sha256": "4bd5ee72265510abf27c9c33a75e8475b5f1c6af9eee85856eb0317c0be76e3f",
+        "bytes": 3366,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/37.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32",
+        "path": "runtime/live/overlay-inputs/blobs/a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32.png",
+        "sha256": "a0bf3fcc792f508b7582001e6d46146c0b016d7b73a075188bc9db44ad8c7d32",
+        "bytes": 11699,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/36.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9",
+        "path": "runtime/live/overlay-inputs/blobs/875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9.png",
+        "sha256": "875e004b5ef04b5df2f483c0acb24d93eaff231ef979f8e588d8953c701b88d9",
+        "bytes": 32097,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/32.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe",
+        "path": "runtime/live/overlay-inputs/blobs/5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe.png",
+        "sha256": "5389088b98d33e9048c54b42eab62c54347c18bb04cddeaa9405b0e7a0f4dffe",
+        "bytes": 44694,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-63.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8",
+        "path": "runtime/live/overlay-inputs/blobs/7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8.png",
+        "sha256": "7366bdc3406f0c57f88d96bb88827659f727fd6fcdf94dacee42537fdac5a8c8",
+        "bytes": 17526,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/25.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917",
+        "path": "runtime/live/overlay-inputs/blobs/608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917.png",
+        "sha256": "608af999357330a10f4623f7ee89d945945ee54fd36284a94b4b2f3269108917",
+        "bytes": 1694956,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-78.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c",
+        "path": "runtime/live/overlay-inputs/blobs/bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c.png",
+        "sha256": "bffc0e5b8086ff62a50138b12f3c644cc91e59dd842fc459b4ceade2ed409f6c",
+        "bytes": 12157,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/9.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83",
+        "path": "runtime/live/overlay-inputs/blobs/5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83.png",
+        "sha256": "5c2919ff51fd999351b7b18e8566e6da3af011c2160fd1628b5dbeadffccce83",
+        "bytes": 2771,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/74.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50",
+        "path": "runtime/live/overlay-inputs/blobs/33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50.png",
+        "sha256": "33b846c332b081428c107f73dad1cec78e5597f9c342463120e5d31bae8a4c50",
+        "bytes": 87931,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/137.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5",
+        "path": "runtime/live/overlay-inputs/blobs/280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5.png",
+        "sha256": "280afe4234f0ebc94aab0a059b97771fc6e9903b6b644b55cba2b4c33e38fee5",
+        "bytes": 1581895,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-89.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0",
+        "path": "runtime/live/overlay-inputs/blobs/5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0.png",
+        "sha256": "5d2a9fb16c686c8a2400b63a47008efaa826ff03910d63005c4242e396f717b0",
+        "bytes": 2768,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/26.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae",
+        "path": "runtime/live/overlay-inputs/blobs/6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae.png",
+        "sha256": "6ca5984a1d1c11c5c1f7c190bd3eb6b0a337ed4d4995e7922d41d908b92831ae",
+        "bytes": 3183,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/95.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51",
+        "path": "runtime/live/overlay-inputs/blobs/51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51.png",
+        "sha256": "51248d7b2eba5ecf56f85affa62e37a1e85621dd9cdcbc1feb314ad0351faf51",
+        "bytes": 2923,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/138.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c",
+        "path": "runtime/live/overlay-inputs/blobs/af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c.png",
+        "sha256": "af9c1183ce7411bae652f578fd71ac7d0036f28d45611dcd39aacef3f0e1618c",
+        "bytes": 3301,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/136.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb",
+        "path": "runtime/live/overlay-inputs/blobs/849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb.png",
+        "sha256": "849de0bc3cef93f85b88feecbaee1a63e98ff04be10f79b045a8950303dcdedb",
+        "bytes": 2705,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/134.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7",
+        "path": "runtime/live/overlay-inputs/blobs/c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7.png",
+        "sha256": "c4aa8a1709077fdcd3b621572bfbc4c51741a2e1a60854390fd8d77602b75fc7",
+        "bytes": 4966,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/131.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+        "path": "runtime/live/overlay-inputs/blobs/5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a.png",
+        "sha256": "5899b72da073f35d612ce6836f1bedc8978d847a9cc7d567bc317f0cd41ac62a",
+        "bytes": 90301,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-110.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe",
+        "path": "runtime/live/overlay-inputs/blobs/4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe.png",
+        "sha256": "4de22c601566658260a27c43ed438b6fc24db2cd886c78effe081a10c1e885fe",
+        "bytes": 3813,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/114.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c",
+        "path": "runtime/live/overlay-inputs/blobs/9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c.png",
+        "sha256": "9b624c784f226c94c07adccb0b1ecfcd76881276cdecd539991388647c43724c",
+        "bytes": 51875,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-120-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982",
+        "path": "runtime/live/overlay-inputs/blobs/a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982.png",
+        "sha256": "a4d1666a03adc8dd3e84dfbf837f94e82fbbf801aa632e5445c1bfc833891982",
+        "bytes": 13370,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/112.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561",
+        "path": "runtime/live/overlay-inputs/blobs/0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561.png",
+        "sha256": "0d73d92c9a187d4313a330e7d93d24a38aff0ae2ab6fabec045084ffb33ce561",
+        "bytes": 11255,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/110.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c",
+        "path": "runtime/live/overlay-inputs/blobs/fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c.png",
+        "sha256": "fcbca8917ae4566fd17e0bfcf98e9e651d5494f3b87d80fbc8bbc3c11c2e549c",
+        "bytes": 10416,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/106.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1",
+        "path": "runtime/live/overlay-inputs/blobs/b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1.png",
+        "sha256": "b0283dcd40a3d838f52e130525763d01828b950fdca8009f86e967f481f4dea1",
+        "bytes": 17164,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/101.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02",
+        "path": "runtime/live/overlay-inputs/blobs/0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02.png",
+        "sha256": "0fe9360ad9977cbf72671f14632d2770436db890af33382281751a7b4820aa02",
+        "bytes": 58679,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-131-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+        "path": "runtime/live/overlay-inputs/blobs/38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e.png",
+        "sha256": "38bd3c12f63ff21e8307e4604f8b409766a1da3bc6a3594809a233cc283a902e",
+        "bytes": 18979,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/98.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f",
+        "path": "runtime/live/overlay-inputs/blobs/23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f.png",
+        "sha256": "23f65860914892dc49c4ad0d6cbcd59aac784bf1554afe09c56a22a33886347f",
+        "bytes": 21420,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/142.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139",
+        "path": "runtime/live/overlay-inputs/blobs/c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139.png",
+        "sha256": "c839eb093899f3886cf1a91728ac3dbc596d45c61e7bb449121c1d12ef3fb139",
+        "bytes": 1931,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/89.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297",
+        "path": "runtime/live/overlay-inputs/blobs/c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297.png",
+        "sha256": "c7cabc3728126052b566d8432787a790d5f52a1369b6701cca6eb0cf3b70f297",
+        "bytes": 11476,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/2.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9",
+        "path": "runtime/live/overlay-inputs/blobs/956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9.png",
+        "sha256": "956f10dc98d08c40cceaa2cb29432e08d133b0a5be3aa62fcff9984b62a9f5a9",
+        "bytes": 10533,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/108.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f",
+        "path": "runtime/live/overlay-inputs/blobs/6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f.png",
+        "sha256": "6f268ba36837dd8d1678dd55fafb9c6555f2cae645da64225bc6f657b7cbc47f",
+        "bytes": 1971,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/83.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055",
+        "path": "runtime/live/overlay-inputs/blobs/0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055.png",
+        "sha256": "0ef470f33f5a069c35f748efcdd382458132d8301421e41c4869135c7ff09055",
+        "bytes": 171047,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-138-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3",
+        "path": "runtime/live/overlay-inputs/blobs/35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3.png",
+        "sha256": "35af2423a28e835e4c350def698efb3e598302accb208f9f8d252adc1c15f8a3",
+        "bytes": 6085,
+        "originalPath": "runtime/feedback-room-20261017/donor-room/57.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d",
+        "path": "runtime/live/overlay-inputs/blobs/c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d.png",
+        "sha256": "c6232d364ea1efc9873aeb398bb888e9ee08ad9ce3e886f6cef852552ae7d46d",
+        "bytes": 50431,
+        "originalPath": "runtime/feedback-room-20261017/generated/room-142-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3",
+        "path": "runtime/live/overlay-inputs/blobs/d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3.png",
+        "sha256": "d3a5ba0daff94bf45d59bbc3f27be8c0adfcdfb5c4d47510c52bbe07434d5cc3",
+        "bytes": 15763,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/14.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21",
+        "path": "runtime/live/overlay-inputs/blobs/d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21.png",
+        "sha256": "d2bfb6724eaf8f640c87ef839e7984257d0c6f371be4cbab2816a09249a2da21",
+        "bytes": 3539,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/15.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5",
+        "path": "runtime/live/overlay-inputs/blobs/e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5.png",
+        "sha256": "e873e638c1d6432df242938646484e5ce6ed25f2cb2e93d31c03d78ff676d8b5",
+        "bytes": 8855,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/16.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116",
+        "path": "runtime/live/overlay-inputs/blobs/273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116.png",
+        "sha256": "273e88b357a7a355787f1112a78d492d857cc90ac299a7aca8cd7d77067f6116",
+        "bytes": 6396,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/21.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd",
+        "path": "runtime/live/overlay-inputs/blobs/94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd.png",
+        "sha256": "94216228b5bd5e4800b94c27d5969a57c4be93b792f21fddf5431cbb3f4e9dbd",
+        "bytes": 209219,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/23.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9",
+        "path": "runtime/live/overlay-inputs/blobs/145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9.png",
+        "sha256": "145a500c3e036649f27f1c773f10a0e7921f8ac01dd4d1324994745356be32a9",
+        "bytes": 3815,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/7.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461",
+        "path": "runtime/live/overlay-inputs/blobs/92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461.png",
+        "sha256": "92bdf767cdc527cad15670308794fec8206d82b24d5c7699920f657b208de461",
+        "bytes": 45042,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-28-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d",
+        "path": "runtime/live/overlay-inputs/blobs/28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d.png",
+        "sha256": "28aa2b85e31a487f44a20d756f822c47d8293e9564b875a2f85f6ccfa3ff8f5d",
+        "bytes": 1003,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/27.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+        "path": "runtime/live/overlay-inputs/blobs/62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518.png",
+        "sha256": "62ee1ed3755ed3d331d14b6926154825fc03a20532c81add840ad1e6c5a0a518",
+        "bytes": 212,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/28.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6",
+        "path": "runtime/live/overlay-inputs/blobs/c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6.png",
+        "sha256": "c4916e59db54a75f0ac566d5e7afb24587a1d987223fa63642c655ee37c194b6",
+        "bytes": 6465,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/30.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299",
+        "path": "runtime/live/overlay-inputs/blobs/3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299.png",
+        "sha256": "3a2c0da2de087df6fbb0fbe1077f4a9a5a7ea452d2f39eafd70d4e562af65299",
+        "bytes": 11251,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-34.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835",
+        "path": "runtime/live/overlay-inputs/blobs/1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835.png",
+        "sha256": "1ebd1c70a3fbf6fa6342bb7fbe2f6b8fc007ee1f8db0440ce6e6770cebe9e835",
+        "bytes": 26912,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/8.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43",
+        "path": "runtime/live/overlay-inputs/blobs/cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43.png",
+        "sha256": "cc93188767454f8830d60d8c93bce0fcad91d36dc88382f61dffd5cfd511fa43",
+        "bytes": 4097,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/34.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112",
+        "path": "runtime/live/overlay-inputs/blobs/898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112.png",
+        "sha256": "898352f03c74839b0abf06b8f1cdb2236c4cbcca2028a39b731d4f6e3401f112",
+        "bytes": 32650,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-39.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d",
+        "path": "runtime/live/overlay-inputs/blobs/2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d.png",
+        "sha256": "2da5847e99ba0820c224d0f134c7bfa47442c84777d9fb75ed4bb582fa9ab23d",
+        "bytes": 5789,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/36.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64",
+        "path": "runtime/live/overlay-inputs/blobs/3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64.png",
+        "sha256": "3c3e2edee5c741f13989c2b910e426d7448417eee248fa23343246f791207e64",
+        "bytes": 3648,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/37.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74",
+        "path": "runtime/live/overlay-inputs/blobs/be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74.png",
+        "sha256": "be5a865dcb3f0985d781aaac0f2359296b3f2edc570b29c13051febdc404ca74",
+        "bytes": 5847,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/38.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469",
+        "path": "runtime/live/overlay-inputs/blobs/5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469.png",
+        "sha256": "5edc32ee4a94fce4ad1a66e1119790d656d1aa55266babe8b15a050dffb77469",
+        "bytes": 18783,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/71.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d",
+        "path": "runtime/live/overlay-inputs/blobs/f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d.png",
+        "sha256": "f7a5f69bf931103c0dd65d188ffd9dbddb70a65d93f7c7fe5344c4092f8bff4d",
+        "bytes": 4110,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/6.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4",
+        "path": "runtime/live/overlay-inputs/blobs/8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4.png",
+        "sha256": "8b14f794ae24082707bd485982c62216c99b6ed772a879334457a46e728899f4",
+        "bytes": 10849,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-52-state.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4",
+        "path": "runtime/live/overlay-inputs/blobs/2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4.png",
+        "sha256": "2002c0c8702ed17d6eebe481d0f4f265dd1b4ac835c48b69b1dec98ed09ce2c4",
+        "bytes": 25567,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-53.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca",
+        "path": "runtime/live/overlay-inputs/blobs/1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca.png",
+        "sha256": "1680229e0ffb2b9f73ddf2d0690c0b8b332b218331e553828fc555020b5497ca",
+        "bytes": 24905,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-55.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb",
+        "path": "runtime/live/overlay-inputs/blobs/ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb.png",
+        "sha256": "ea6b8b621383c8ea1edfcc136a4a2f456657848db2fc7833c6a0da8d075bf5fb",
+        "bytes": 1783,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/54.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd",
+        "path": "runtime/live/overlay-inputs/blobs/05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd.png",
+        "sha256": "05b2843f549fffed0ce0dd52085896567a2890c56c70ca7e3add1c759938adcd",
+        "bytes": 1418,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/55.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60",
+        "path": "runtime/live/overlay-inputs/blobs/eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60.png",
+        "sha256": "eca816695ed417624919ef768c9601b37b2ad368d4057b0e909a7ca13ffc0e60",
+        "bytes": 1492,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/56.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb",
+        "path": "runtime/live/overlay-inputs/blobs/09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb.png",
+        "sha256": "09d7dfb741f0ae61a3f820cea96c7d9e5d36fc1fa93b4a5f8a3ae0c376006cfb",
+        "bytes": 1470,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/57.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330",
+        "path": "runtime/live/overlay-inputs/blobs/1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330.png",
+        "sha256": "1334663ca7d8f76b843c7913f5c55a0271ba9cfb4970d234138ca28bae55b330",
+        "bytes": 3727,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/58.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f",
+        "path": "runtime/live/overlay-inputs/blobs/00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f.png",
+        "sha256": "00ff68849c69f3efc895ca21e4bf51188753a5fc370db7c586f3038bfb178c8f",
+        "bytes": 9108,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/59.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c",
+        "path": "runtime/live/overlay-inputs/blobs/4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c.png",
+        "sha256": "4039dcab617ce5a2aa662a4ed6e36ce3187f1485e080b7891ee1ae91f30a2e2c",
+        "bytes": 19748,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/62.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d",
+        "path": "runtime/live/overlay-inputs/blobs/ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d.png",
+        "sha256": "ccece574397f849f4dd921834f3ab7f3ff97a72c85e0f870dadd0e726c22ff8d",
+        "bytes": 9591,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/63.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8",
+        "path": "runtime/live/overlay-inputs/blobs/a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8.png",
+        "sha256": "a34b4da6650ddd9e8bd073f4f1c5a1ea23945f0d06bed6bfd335dccdc3f076d8",
+        "bytes": 8966,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/64.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b",
+        "path": "runtime/live/overlay-inputs/blobs/4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b.png",
+        "sha256": "4de00b463f95e567973e17fa65715420b4d96c1401e2a45ffb3f667981757b3b",
+        "bytes": 64059,
+        "originalPath": "runtime/feedback-room-20261017/generated/roomlist-71.png",
+        "sourceKind": "reviewed-imagegen-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861",
+        "path": "runtime/live/overlay-inputs/blobs/2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861.png",
+        "sha256": "2ef1f1e7d2c4ece77512e031c2a166a32efe620cf212c042d4d19a165977e861",
+        "bytes": 3411,
+        "originalPath": "runtime/feedback-room-20261017/donor-roomlist/66.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      },
+      {
+        "sourceId": "sha256:00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+        "path": "runtime/live/overlay-inputs/blobs/00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9.swf",
+        "sha256": "00a855659a035549b3ae22080447d7a6ad752049d56e06101ba0766ded9bd6d9",
+        "bytes": 282568,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor-email-v3_6_1_u1.swf",
+        "sourceKind": "reference-original-swf",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542",
+        "path": "runtime/live/overlay-inputs/blobs/f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542.png",
+        "sha256": "f482ccf3574d3b58f6652d0e8f4930339e837bb4fb06861e9abc250bf03ca542",
+        "bytes": 1807,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/3-writingTopTip.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5",
+        "path": "runtime/live/overlay-inputs/blobs/eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5.png",
+        "sha256": "eead96798122a3a4b76feedfc7a11b760dc34ae81fb73432d7e136eb7fef46c5",
+        "bytes": 1737,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/7-sixHouer.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230",
+        "path": "runtime/live/overlay-inputs/blobs/3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230.png",
+        "sha256": "3d9ae79857129e3d52ef113cf63589e83d43e24dcfa920fd6eb7389d17763230",
+        "bytes": 3892,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/21-payBtn.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e",
+        "path": "runtime/live/overlay-inputs/blobs/6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e.png",
+        "sha256": "6843257c91164106ae15186c17b7628c9370d8b0b204c18f49251c1d5447159e",
+        "bytes": 1666,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/22-oneHouer.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc",
+        "path": "runtime/live/overlay-inputs/blobs/aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc.png",
+        "sha256": "aa7d1beeb205a7f4b4455ef0246356ddcd78a1ad9dffbec0fd8cdc44329f23dc",
+        "bytes": 2316,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/26-moneyBG.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b",
+        "path": "runtime/live/overlay-inputs/blobs/59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b.png",
+        "sha256": "59e82777e0056cd61d58478ab07cb569a01db7e02bcf2ec2d5dc1023826c608b",
+        "bytes": 4813,
+        "originalPath": "runtime/email-remaining-zh-20261017/donor/34-factorage.png",
+        "sourceKind": "reference-exported-png",
+        "sourceEvidence": "runtime/email-remaining-zh-20261017/donor-inspection.json + final-candidate-evidence.json"
+      },
+      {
+        "sourceId": "sha256:ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172",
+        "path": "runtime/live/overlay-inputs/blobs/ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172.txt",
+        "sha256": "ac6a0fe8a0d3ce0f12de1efb69254b29a951c38bd99d3513b1fcbbc289787172",
+        "bytes": 190,
+        "originalPath": "runtime/feedback-remaining-20261017/static-text/formatted/DDT_Loading/19.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-remaining-20261017/static-text/patches/DDT_Loading/receipt.json"
+      },
+      {
+        "sourceId": "sha256:21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50",
+        "path": "runtime/live/overlay-inputs/blobs/21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50.txt",
+        "sha256": "21b895c7599b7aa259e6f7fcdca386199854636af608bf175b230f89ed07ef50",
+        "bytes": 142,
+        "originalPath": "runtime/feedback-remaining-20261017/static-text/formatted/DDT_Loading/40.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-remaining-20261017/static-text/patches/DDT_Loading/receipt.json"
+      },
+      {
+        "sourceId": "sha256:23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed",
+        "path": "runtime/live/overlay-inputs/blobs/23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed.txt",
+        "sha256": "23c7900845eaa43b2da6b5ae6ff821b8dcaed83ab9bf0d614eb355e5bd0e68ed",
+        "bytes": 93,
+        "originalPath": "runtime/feedback-remaining-20261017/static-text/formatted/quest/145.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-remaining-20261017/static-text/patches/quest/receipt.json"
+      },
+      {
+        "sourceId": "sha256:f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba",
+        "path": "runtime/live/overlay-inputs/blobs/f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba.txt",
+        "sha256": "f071a66034591449396e6146c393d6a7fa96caf3e54b44242b34b275d601a6ba",
+        "bytes": 238,
+        "originalPath": "runtime/feedback-remaining-20261017/static-text/formatted/quest/155.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-remaining-20261017/static-text/patches/quest/receipt.json"
+      },
+      {
+        "sourceId": "sha256:a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7",
+        "path": "runtime/live/overlay-inputs/blobs/a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7.txt",
+        "sha256": "a4d93182fdd682f262f1b9b23a2eb2fd0bd2351fb92ff98f8c8e3556225ee1b7",
+        "bytes": 224,
+        "originalPath": "runtime/feedback-remaining-20261017/static-text/formatted/email/119.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-remaining-20261017/static-text/patches/email/receipt.json"
+      },
+      {
+        "sourceId": "sha256:7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166",
+        "path": "runtime/live/overlay-inputs/blobs/7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166.txt",
+        "sha256": "7a887598eadf55175f2dce483a9b88088e2ecc5bd2995b6629021fbf68bbf166",
+        "bytes": 116,
+        "originalPath": "runtime/feedback-room-20261017/formatted/163.txt",
+        "sourceKind": "formatted-text-source",
+        "sourceEvidence": "runtime/feedback-room-20261017/donor-provenance.json + imagegen-provenance.json + room/roomlist-receipt.json"
+      }
+    ],
+    "tools": [
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/ffdec-cli.jar",
+        "sha256": "2e368522ea8ae2b5644851a5dad3ead4053d978b247af3d4a3b1ae152817592d",
+        "bytes": 1580,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/ffdec-cli.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jansi-2.4.0.jar",
+        "sha256": "6cd91991323dd7b2fb28ca93d7ac12af5a86a2f53279e2b35827b30313fd0b9f",
+        "bytes": 221009,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jansi-2.4.0.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/ffdec.jar",
+        "sha256": "1587e60b2ec2c0e4f5721fd5f2aaaf2379f6d416569de99054b5c5d1e9ba841c",
+        "bytes": 5077736,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/ffdec.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/substance-fix.jar",
+        "sha256": "845d08c790bb82712c7b179fbdd3cb39bd608ae2765b854e424405b90c7944b3",
+        "bytes": 179234,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/substance-fix.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/LZMA.jar",
+        "sha256": "2604dab00935023b183d82d9a5c5198ae34d40112c7524e75be20e4528798e95",
+        "bytes": 91320,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/LZMA.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/antlr-runtime-4.11.1.jar",
+        "sha256": "e06c6553c1ccc14d36052ec4b0fc6f13b808cf957b5b1dc3f61bf401996ada59",
+        "bytes": 324039,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/antlr-runtime-4.11.1.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/avi.jar",
+        "sha256": "7b8da48be20447ca3a840ae1136541841e1a44915a6edf924d83529362bd40ff",
+        "bytes": 215818,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/avi.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/cmykjpeg.jar",
+        "sha256": "0ae56cee0cca3f2c54593b08dd2f450f6f8fea5dd9054b9949b9f08f34e98b5a",
+        "bytes": 90166,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/cmykjpeg.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/ddsreader.jar",
+        "sha256": "b64bd5bbb4bad9092c4f4109795c41ce513b24f1fad9f6886492d976482b1603",
+        "bytes": 8058,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/ddsreader.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/decimal.jar",
+        "sha256": "feeb9f89f44cd6a921a9a4701358c8c63e3e677424fb2953ddba6e15872c0e91",
+        "bytes": 43030,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/decimal.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/ffdec_lib.jar",
+        "sha256": "232d5738aac20a16f2cb39318003b014c08c1ccd24266f70103e6f19d54a9321",
+        "bytes": 5704303,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/ffdec_lib.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/flacomdoc.jar",
+        "sha256": "fc0d7e4be9591c6e187258f1b2be6f798ce78831d22cb990ffbf95e99c8f85cf",
+        "bytes": 318704,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/flacomdoc.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/flamingo-6.2.jar",
+        "sha256": "5baee0ef62342a53952116548aa3434db5b629af76c9a267d8c23b34db3a479c",
+        "bytes": 1291349,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/flamingo-6.2.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/flashdebugger.jar",
+        "sha256": "86bb7f0fba4aa7b217f9a276dfa94d1c38dc07e4a69b5cd5f389e29a2e8cf1ba",
+        "bytes": 261421,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/flashdebugger.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/gif.jar",
+        "sha256": "e81c505f104689d4e8d4da2cba09db0a7a8c02c7f8d19de6ed194d8d2cff09bd",
+        "bytes": 25871,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/gif.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/gifreader.jar",
+        "sha256": "2afdcb18d174476ef1e8550acb902ad0e998d6d6bbfb493bba4e7e6c5817f45b",
+        "bytes": 25666,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/gifreader.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/gnujpdf.jar",
+        "sha256": "d7d773f5213fc13e966bda359de9c102ab71bdb1afa797569adb875a48105fa9",
+        "bytes": 209149,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/gnujpdf.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jargs.jar",
+        "sha256": "d488f6c10690597b93767af3b1c35018f02770790e5e3822871ac09f332386c7",
+        "bytes": 11406,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jargs.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jlayer-1.0.2.jar",
+        "sha256": "bf6286c69dabeadab49ba2b5e9322243c23722585faf52452c15593a14d20e36",
+        "bytes": 147964,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jlayer-1.0.2.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jna-3.5.1.jar",
+        "sha256": "3f8889f51d570a26f3ac2c1323e6be828bb73eb5e66cf25e979eb5b109d92021",
+        "bytes": 692603,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jna-3.5.1.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jna-platform-3.5.1.jar",
+        "sha256": "b0b30404f6a9e29d4d9a7b53fd47322e7137cab3846fd5f149d5589fc68c2126",
+        "bytes": 952411,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jna-platform-3.5.1.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jpacker.jar",
+        "sha256": "4eaba3e39d3e8d0eb242534d56bda72b1bbca6599aa949a7876ff6fc2cbfce52",
+        "bytes": 53685,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jpacker.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jpexs-apng.jar",
+        "sha256": "4062e281730f841ff936f7c4f6587dee8024afadde7fe1e849960a2c039c6d50",
+        "bytes": 41017,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jpexs-apng.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/jsyntaxpane-0.9.5.jar",
+        "sha256": "388aa1f63617c83460d46f4635d3e609e58b77c14ceb06b7f08c19f66875d48c",
+        "bytes": 630226,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/jsyntaxpane-0.9.5.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/minimal-json-0.9.5.jar",
+        "sha256": "69ff84463d1d7cc5cfdb8baf2b6e5f7af153d351bf0dbee3bbc8916247afac74",
+        "bytes": 34221,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/minimal-json-0.9.5.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/miterstroke.jar",
+        "sha256": "becca6da411463f872f69f48de2dc50d53974b888da09bae0b27096b9d4d1663",
+        "bytes": 46206,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/miterstroke.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/nellymoser.jar",
+        "sha256": "bf12eb3a4c793e66b4e0c917aaa4091a6bd2b9da446c357f600f2da36f3c36e0",
+        "bytes": 24911,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/nellymoser.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/sfntly.jar",
+        "sha256": "40c9a46afc02479096e68275eb9f40f72ca3e9944d687856b600684dc9acbef7",
+        "bytes": 342808,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/sfntly.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/substance-6.2.jar",
+        "sha256": "376b6ccb53860a78934c92fc732d5c7dc7964aa5dbd8616dba1dead3493cb362",
+        "bytes": 1852224,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/substance-6.2.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/substance-flamingo-6.2.jar",
+        "sha256": "1c4b4427bef2943ac81ed35fd475736287bce53120274f6ac353f5c0e48c7549",
+        "bytes": 164374,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/substance-flamingo-6.2.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/tablelayout.jar",
+        "sha256": "133759470163a1abc3e0b6bbba6c5e6037eac785d313dd229c6adac3a5f013fe",
+        "bytes": 11962,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/tablelayout.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/tga.jar",
+        "sha256": "43d6c7b688953ddc8a7c513b31c63b1597154e917d4e8222581fb7952c5af463",
+        "bytes": 12995,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/tga.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/tomlj-1.1.1.jar",
+        "sha256": "383b7c66966c42ee4913ec977a7b6573631866bddc5318ec4a6215b688dd0d6c",
+        "bytes": 179432,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/tomlj-1.1.1.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/treetable.jar",
+        "sha256": "bfdcb1e2c0947f947fa750780fbd8c137b0a2cdc1439632200f815bf44ea2d5a",
+        "bytes": 26528,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/treetable.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/trident-6.2.jar",
+        "sha256": "b4726f518ccdb40b8da1fac4d78a741b736afd433d903c76f62b7a01090a63f9",
+        "bytes": 105569,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/trident-6.2.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/ttf.jar",
+        "sha256": "25cb6f0bf447edd29c70bb061bf2d7d72e376cda5050252aac949546d3bbd0f4",
+        "bytes": 142030,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/ttf.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/vlcj-4.7.3.jar",
+        "sha256": "3f8e3233809932e9a02e0f0de79a34e0544f8a3c4b779bdcca1e3ce13eee3cea",
+        "bytes": 391844,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/vlcj-4.7.3.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/vlcj-natives-4.7.0.jar",
+        "sha256": "47c300792c248f8708095430136a3aeb7def4695e8d7527d21651973049ea36f",
+        "bytes": 90694,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/vlcj-natives-4.7.0.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/lib/webp4j-core-2.1.1.jar",
+        "sha256": "46d2c3561fce9838cf56881580c954db5ff07df0ca1543b40cf8fb4b93accfcd",
+        "bytes": 2159570,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/lib/webp4j-core-2.1.1.jar"
+      },
+      {
+        "path": "runtime/live/overlay-inputs/tools/ffdec/license.txt",
+        "sha256": "0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b",
+        "bytes": 35821,
+        "originalPath": "runtime/reference-activities-completion-20261014/native-mines-analysis-20261015/tools/ffdec/license.txt"
+      }
+    ]
+  }
+}
