@@ -56,7 +56,10 @@ test('real old SoundManager has private init and public initSound; only six fixe
   assert.deepEqual(after.init.code.subarray(-1), before.init.code.subarray(-1));
   for (const key of ['maxStack', 'localCount', 'initialScope', 'maxScope', 'exceptions']) assert.equal(after.init[key], before.init[key]);
   const currentResult = patchWeaponAudioRegistration(current);
-  assert.deepEqual(inspect(currentResult.out).abc, after.abc);
+  const currentAfter = inspect(currentResult.out);
+  assert.deepEqual(currentAfter.init.code, after.init.code);
+  // A later battle-music patch owns method 28; audio registration must preserve it verbatim.
+  assert.deepEqual(currentAfter.p.bodies.find(b => b.method === 28).code, inspect(current).p.bodies.find(b => b.method === 28).code);
   assert.deepEqual(input, originalInput); assert.deepEqual(readFileSync(path), currentBefore);
 });
 

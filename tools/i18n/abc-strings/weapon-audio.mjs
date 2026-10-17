@@ -8,6 +8,9 @@ import { decodeCalendarCode } from './activity-state.mjs';
 const TAG = 'ddt/manager/SoundManager', IDS = ['252', '253', '254', '255', '256', '257'];
 const ORIGINAL = '806711c62ba971d995a404a7dcf42891bd4c06de82ed3e30c0f20ffa64e7af1a';
 const PATCHED = '82de229f90509fab0c88ff04964c380c2054f6b8e7b1811cad77a0961a6f5324';
+// The same two exact ABCs with the independent playGameBackMusic close-before-play fix.
+const ORIGINAL_MUSIC = '9623c4827d2149d18888997b6f86281e0b7258eedef9f507173d5fb61fa17ed1';
+const PATCHED_MUSIC = '6aa370055d5e9707466d51122271cc5dae708c1e6b84e79298badfbdc39b676a';
 const INIT_CODE = '52bb8aa1e5452235cd1473e84338ed4e4668e3e5a7c5d28ea52c2842addf64a3';
 const INIT_SOUND_CODE = '33efe922508c029f26d802b9209d6be8ff59317d0a43450514c01f2891b07441';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -27,8 +30,9 @@ function methodBody(bytes, target, code) {
     bytes.subarray(target.offset + target.length, target.end));
 }
 function inspect(bytes) {
-  const digest = sha(bytes); assert.ok([ORIGINAL, PATCHED].includes(digest), 'unknown SoundManager ABC; preserve existing client');
-  const patched = digest === PATCHED, p = parseActivityAbc(bytes), text = index => p.strings[p.names[index]?.name];
+  const digest = sha(bytes); assert.ok([ORIGINAL, PATCHED, ORIGINAL_MUSIC, PATCHED_MUSIC].includes(digest), 'unknown SoundManager ABC; preserve existing client');
+  const patched = [PATCHED, PATCHED_MUSIC].includes(digest), battleMusic = [ORIGINAL_MUSIC, PATCHED_MUSIC].includes(digest);
+  const p = parseActivityAbc(bytes), text = index => p.strings[p.names[index]?.name];
   assert.deepEqual([p.strings.length, p.names.length, p.methods.length], [patched ? 452 : 446, 84, 34]);
   assert.deepEqual(p.methodTraits.filter(t => text(t.owner) === 'SoundManager' && text(t.name) === 'init'), [{ owner: 4, name: 39, method: 11, kind: 65 }]);
   assert.equal(p.strings[p.namespaces[p.names[4].ns].name], 'ddt.manager');
@@ -59,17 +63,17 @@ function inspect(bytes) {
   } else for (const id of IDS) assert.equal(p.strings.indexOf(id), -1);
   const originalCode = patched ? cat(target.code.subarray(0, -1 - extra.length), target.code.subarray(-1)) : target.code;
   assert.equal(sha(originalCode), INIT_CODE);
-  return { p, target, patched, originalCode, extra };
+  return { p, target, patched, battleMusic, originalCode, extra };
 }
 
 function patchAbc(bytes) {
   const before = inspect(bytes);
-  if (before.patched) return { out: bytes, changed: false, unchangedMethods: before.p.bodies.length - 1 };
+  if (before.patched) return { out: bytes, changed: false, battleMusic: before.battleMusic, unchangedMethods: before.p.bodies.length - 1 };
   const { p, target, extra } = before;
   const code = cat(target.code.subarray(0, -1), extra, target.code.subarray(-1));
   const pool = cat(u(452), bytes.subarray(p.stringDataOffset, p.stringPoolEnd), ...IDS.map(id => cat(u(3), Buffer.from(id))));
   const out = replace(bytes, [{ start: p.stringCountOffset, end: p.stringPoolEnd, data: pool }, { start: target.start, end: target.end, data: methodBody(bytes, target, code) }]);
-  assert.equal(sha(out), PATCHED, 'unexpected weapon audio registration output');
+  assert.equal(sha(out), before.battleMusic ? PATCHED_MUSIC : PATCHED, 'unexpected weapon audio registration output');
   const checked = inspect(out); assert.equal(checked.patched, true);
   assert.equal(checked.p.bodies.length, p.bodies.length);
   for (const body of p.bodies.filter(b => b.method !== 11)) {
@@ -81,13 +85,13 @@ function patchAbc(bytes) {
     { start: checked.target.start, end: checked.target.end, data: methodBody(out, checked.target, checked.originalCode) },
   ]);
   assert.deepEqual(restored, bytes, 'weapon audio registration changed bytes outside init and appended strings');
-  return { out, changed: true, unchangedMethods: p.bodies.length - 1 };
+  return { out, changed: true, battleMusic: before.battleMusic, unchangedMethods: p.bodies.length - 1 };
 }
 
 export function patchWeaponAudioRegistration(bytes) {
   const swf = decompressSwf(bytes); assert.equal(swf.error, null);
   assert.equal(bytes.readUInt32LE(4), swf.body.length + 8, 'invalid weapon audio SWF declared length');
-  const parsed = parseTags(swf.body); let found = 0, changed = false, unchangedMethods;
+  const parsed = parseTags(swf.body); let found = 0, changed = false, unchangedMethods, battleMusic;
   const tags = parsed.tags.map(tag => {
     assert.ok(tag.bodyEnd <= swf.body.length, 'truncated weapon audio SWF tag');
     if (tag.code !== 82) return tag.raw;
@@ -95,7 +99,7 @@ export function patchWeaponAudioRegistration(bytes) {
     reader.u32(); const name = reader.cstring();
     if (name !== TAG) return tag.raw;
     found++; const result = patchAbc(payload.subarray(reader.pos));
-    changed = result.changed; unchangedMethods = result.unchangedMethods;
+    changed = result.changed; unchangedMethods = result.unchangedMethods; battleMusic = result.battleMusic;
     return changed ? buildTag(82, cat(payload.subarray(0, reader.pos), result.out)) : tag.raw;
   });
   assert.equal(found, 1, 'expected one SoundManager DoABC tag');
@@ -105,6 +109,6 @@ export function patchWeaponAudioRegistration(bytes) {
   assert.equal(checked.tags.length, parsed.tags.length);
   for (let i = 0; i < tags.length; i++) assert.deepEqual(checked.tags[i].raw, tags[i]);
   return { out, changed, proof: { tagName: TAG, methodIndex: 11, publicInitSoundQName: 75, soundIds: [...IDS], addedCodeBytes: 42,
-    originalAbcSha256: ORIGINAL, outputAbcSha256: PATCHED, unchangedMethods, onlyInitBodyAndAppendedStringsChanged: true,
+    originalAbcSha256: battleMusic ? ORIGINAL_MUSIC : ORIGINAL, outputAbcSha256: battleMusic ? PATCHED_MUSIC : PATCHED, unchangedMethods, onlyInitBodyAndAppendedStringsChanged: true,
     allOtherSwfTagsByteIdentical: true, runtimeAccepted: false } };
 }
