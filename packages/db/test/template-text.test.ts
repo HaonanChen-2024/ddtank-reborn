@@ -6,7 +6,7 @@ const config = (entries: unknown = [entry]) => ({ schemaVersion: 1, entries });
 
 describe("explicit item and quest display text", () => {
   it("addresses duplicate suit IDs by their full equipment list and permits only the existing zero league level", () => {
-    const parts = [
+    const parts: { table: string; rowId: string; text: Record<string, string> }[] = [
       { table: "Suit_TemplateID", rowId: "1:7050,70501", text: { PartName: "武士套装" } },
       { table: "Suit_TemplateID", rowId: "1:7051,70511", text: { PartName: "蚂蚁套装" } },
       { table: "DailyLeagueLevel", rowId: "0", text: { Name: "大元帅" } },
@@ -50,7 +50,7 @@ describe("explicit item and quest display text", () => {
   });
 
   it("admits only explicit display columns for the remaining template tables and the five virtual rewards", () => {
-    const entries = [
+    const entries: { table: string; rowId: string; text: Record<string, string> }[] = [
       { table: "Game_Map", rowId: "1001", text: { Name: "蚂蚁之巢", Description: "挑战蚁后" } },
       { table: "Pet_Skill_Info", rowId: "1", text: { Name: "强击", Description: "伤害提高10%" } },
       { table: "Pet_Skill_Element_Info", rowId: "1", text: { Description: "持续{0}回合<br/>" } },

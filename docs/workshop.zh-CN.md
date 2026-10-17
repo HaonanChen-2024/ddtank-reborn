@@ -431,3 +431,11 @@ node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
 可选私有配置 `WORKSHOP_WEAPON_VISUAL_UPGRADE` 指向固定部署清单；全局 `FIGHT_WEAPON_EXTENSION` 仍保留旧包。启动器在自身DB ready和恢复证明检查后、API/game之前运行一次升级：逐SHA核对old/new包、原日志、两版FIGHT及实际上传目录的六个SWF，再核本次runId、正PID、真实数据库/目录/端口/UTC。成功或已新态均在本次进程环境中显式选择新FIGHT，避免上次DB已提交而缓存未激活的情况。子进程必须返回成功消息且退出0才继续开放大厅，失败自动停止本次自有进程；LAN监听保持。此部署清单只拥有原ddtank库，恢复副本不满足绑定时在连接/写入及API/game之前拒绝，需另行提供一致性验证，不能静默猜选FIGHT。
 
 原素材与私有配置不随源码发布。当前音频覆盖已安装；泡泡茶资源及启动升级清单已准备，生产数据库尚未激活。奶油熊14301/14302原粒子定义仍缺，保留兼容尾迹，不能宣称原特效全部齐全。隔离音频/动画组件结果、数据库回归与完整游戏验收分别记录，组件通过不代替实战验证。
+
+### 试玩反馈中的补充显示文字
+
+`TEMPLATE_TEXT_SUPPLEMENT_FILE` 可选地指向 `research/i18n/zh-CN-feedback-text.json`，沿用 `schemaVersion:1` 的精确地址覆盖格式，在主 `TEMPLATE_TEXT_OVERRIDES_FILE` 后合并。仅新增 60 个成就奖励称号和 311 个经核对的道具附加文字；`Shop_Goods.Data` 只允许已核对的固定 ID，569 条非空机器参数保持原样。成就称号按 `AchievementID:RewardType:RewardValueId` 三列定位且仅接受 `RewardType=1`；游戏保存与查重仍使用原名称，中文只用于奖励列表、发奖提示和称号包的显示名称。
+
+卡牌11套名称/说明来自静态压缩快照 `apps/api/assets/request/cardinfolist.xml`，复用同 ID 的既有中文翻译。词典生成器为三处已确认的原始断行错误增加源哈希绑定修复：客户端恢复 `store.view.transfer.EmptyItem` 独立键；服务端恢复家园过关与操作成功两条独立键，保留格式参数。shipped 原件保持不变。
+
+2026-10-17 用户试玩期间未启停服务。客户端词典 HTTP 已返回修复版本；卡牌静态快照、API/Game 模板及服务端词典由当前进程缓存，相关修改须在以后获准的正常重启后加载。主翻译文件未改，补充路径只加入下一次启动配置，避免运行中旧解析器误读新增字段。隔离数据库与结构校验不代表已完成游戏原窗验收。

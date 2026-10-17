@@ -7,7 +7,7 @@
  * request) never duplicate rewards. The original trusted the client for most of these (see notes per handler).
  */
 import { and, eq, sql } from "drizzle-orm";
-import { game, player, type Database } from "@ddt/db";
+import { applyTranslations, game, loadTranslations, player, type Database } from "@ddt/db";
 import { ItemInfo, templateBagType, type ItemTemplate } from "./item.js";
 import type { GamePlayer } from "./player.js";
 import type { RecordRow } from "../db/social.js";
@@ -28,12 +28,13 @@ export class EventData {
   achievements = new Map<number, AchievementRow>();
   achConds = new Map<number, AchievementCondRow[]>();
   achGoods = new Map<number, AchievementGoodsRow[]>();
+  private achievementTitleNames = new Map<string, string>();
   eventGoods: EventRewardGoodsRow[] = [];
   eventInfo: EventRewardInfoRow[] = [];
   loginAward: LoginAwardRow[] = [];
 
   async load(db: Database): Promise<this> {
-    const [da, ub, ach, ac, ag, eg, ei, la, online] = await Promise.all([
+    const [da, ub, ach, ac, ag, eg, ei, la, online, titleText] = await Promise.all([
       db.select().from(game.Daily_Award),
       db.select().from(game.LoadUserBox),
       db.select().from(game.Achievement),
@@ -43,6 +44,7 @@ export class EventData {
       db.select().from(game.Event_Reward_Info),
       db.select().from(game.Login_Award_Item_Template),
       db.select().from(game.User_Box).where(eq(game.User_Box.Type, 0)),
+      loadTranslations(db, "Achievement_Goods", "pt-BR"),
     ]);
     this.dailyAward = da;
     // Online boxes share the original User_Box source with LoadUserBox.xml; level/VIP keep their existing source.
@@ -50,10 +52,19 @@ export class EventData {
     this.achievements = new Map(ach.map((a) => [a.ID, a]));
     this.achConds = group(ac, (c) => c.AchievementID);
     this.achGoods = group(ag, (g) => g.AchievementID);
+    // RewardPara remains the persisted title identity; translate only outgoing display names.
+    this.achievementTitleNames = new Map(ag.filter(g => g.RewardType === 1).map(g => [
+      g.RewardPara,
+      applyTranslations(g, ["AchievementID", "RewardType", "RewardValueId"], titleText).RewardPara,
+    ]));
     this.eventGoods = eg;
     this.eventInfo = ei;
     this.loginAward = la;
     return this;
+  }
+
+  achievementTitleName(name: string): string {
+    return this.achievementTitleNames.get(name) ?? name;
   }
 
   /** FirstRechargeGetAwardHandler.cs:22-23,51-61 needs the matching info and real goods; Condition is not a charge threshold. */

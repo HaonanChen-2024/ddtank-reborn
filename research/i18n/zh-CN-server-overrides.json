@@ -1248,6 +1248,8 @@
   "BeadHandle.Msg9": "宝箱已满，无法继续开启！",
   "LotteryOpenBoxHandler.Msg2": "宝箱已满，无法继续开启！",
   "CBugleHandler.Msg": "此操作每30秒只能进行一次！",
+  "GameServer.HomeFight.NextLevel": "你已成功击败{0}名守卫，请准备进入下一关！",
+  "homebar.drink.success.msg": "操作成功！",
   "homebar.pour.success.msg": "操作成功，获得30点能量。",
   "homebar.clearcd.success.msg": "操作成功",
   "GameServer.GamePlay.MaxLevelConvert": "由于已达最高等级，获得的经验已转换为{0}功勋。",

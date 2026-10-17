@@ -9,6 +9,15 @@ import test from "node:test";
 
 const script = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "workshop-language.mjs"));
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const formatRepairsFile = "research/i18n/zh-CN-dictionary-format-repairs.json";
+const formatRepairsText = readFileSync(join(repoRoot, formatRepairsFile), "utf8");
+function repairedSource(source, kind) {
+  for (const repair of JSON.parse(formatRepairsText)[kind].entries) {
+    assert.equal(source.split(repair.source).length, 2);
+    source = source.replace(repair.source, repair.replacement);
+  }
+  return source;
+}
 test("PvE additions use a distinct stable namespace and reject malformed keys without changing a deployment", t => {
   const f = fixture(t);
   f.put("research/i18n/zh-CN-server-additions.json", JSON.stringify({ "Workshop.Pve.Dialogue.Example": "中文台词 {0}" }));
@@ -62,8 +71,9 @@ test("the online-box Chinese keys install over the real server dictionary withou
   const rowText = existsSync(rowFile) ? readFileSync(rowFile, "utf8") : null;
   const rowEntries = rowText === null ? {} : JSON.parse(rowText).entries;
   if (rowText !== null) f.put("research/i18n/zh-CN-server-row-overrides.json", rowText);
+  f.put(formatRepairsFile, formatRepairsText);
   f.ok("verify", "--server"); f.ok("install", "--server");
-  let expected = source.split("\r\n").map(line => {
+  let expected = repairedSource(source, "server").split("\r\n").map(line => {
     const colon = line.indexOf(":"), key = line.slice(0, colon).replace(/^\uFEFF/, "");
     if (colon >= 0 && Object.hasOwn(rowEntries, key)) return line.slice(0, colon + 1) + rowEntries[key].find(row => row.source === line.slice(colon + 1)).translation;
     return colon >= 0 && Object.hasOwn(overrides, key) ? line.slice(0, colon + 1) + overrides[key] : line;
@@ -181,6 +191,43 @@ function scrollFixture(t) {
   f.put("research/i18n/zh-CN-moving-notifications.json", JSON.stringify(config));
   return { ...f, config, noticeSource: source, target: join(f.runtime, "client-overlay/ui/vietnam/movingnotification.txt"), journal: join(f.runtime, "client-overlay-notifications.json") };
 }
+
+test("reported client and home dictionary records become independently addressable without changing shipped files", async t => {
+  const f = fixture(t);
+  for (const path of ["apps/api/assets/flash/ui/vietnam/language.txt", "data/i18n/pt-BR/server-language.txt",
+    "research/i18n/zh-CN-overrides.json", "research/i18n/zh-CN-server-overrides.json",
+    "research/i18n/zh-CN-server-additions.json", "research/i18n/zh-CN-server-row-overrides.json", formatRepairsFile]) {
+    f.put(path, readFileSync(join(repoRoot, path), "utf8").replace(/\r?\n/g, "\r\n"));
+  }
+  const originals = ["apps/api/assets/flash/ui/vietnam/language.txt", "data/i18n/pt-BR/server-language.txt"].map(path => [path, readFileSync(join(f.repo, path))]);
+  f.ok("install"); f.ok("install", "--server");
+  const client = readFileSync(join(f.runtime, "client-overlay/ui/vietnam/language.txt"), "utf8");
+  assert.ok(client.includes("</FONT>\r\nstore.view.transfer.EmptyItem:请再选择一件武器或装备！\r\n"));
+  assert.equal(client.split("\r\n").filter(line => line.startsWith("store.view.transfer.EmptyItem:")).length, 1);
+  assert.doesNotMatch(client, /<\/FONT>store\.view\.transfer\.EmptyItem:/);
+  const server = readFileSync(join(f.runtime, "server-language.txt"), "utf8");
+  assert.ok(server.includes("GameServer.HomeFight.NextLevel:你已成功击败{0}名守卫，请准备进入下一关！\r\n"));
+  assert.ok(server.includes("homebar.drink.success.msg:操作成功！\r\n"));
+  assert.doesNotMatch(server, /Você superou com sucesso|^:Ação realizada com sucesso!/m);
+  const { LanguageMgr } = await import("../apps/game/src/util/lang.ts");
+  const lang = new LanguageMgr(); lang.load(server);
+  assert.equal(lang.t("GameServer.HomeFight.NextLevel", 3), "你已成功击败3名守卫，请准备进入下一关！");
+  assert.equal(lang.t("homebar.drink.success.msg"), "操作成功！");
+  for (const [path, bytes] of originals) assert.deepEqual(readFileSync(join(f.repo, path)), bytes);
+});
+
+test("format repairs reject source drift and changes beyond CRLF without deployment writes", t => {
+  const f = fixture(t), source = readFileSync(join(f.repo, "apps/api/assets/flash/ui/vietnam/language.txt"));
+  const repair = { source: "Client.Line:Old {0}", replacement: "Client.Line:Old {0}\r\n" };
+  for (const config of [
+    { sourceSha256: "0".repeat(64), entries: [repair] },
+    { sourceSha256: createHash("sha256").update(source).digest("hex"), entries: [{ ...repair, replacement: "Client.Line:Changed {0}\r\n" }] },
+    { sourceSha256: createHash("sha256").update(source).digest("hex"), entries: [{ source: "Missing.Key:Old", replacement: "Missing.Key:\r\nOld" }] },
+  ]) {
+    f.put(formatRepairsFile, JSON.stringify({ client: config }));
+    assert.notEqual(f.run("install").status, 0); assert.equal(existsSync(f.runtime), false);
+  }
+});
 
 function rowFixture(t) {
   const f = fixture(t), source = "\uFEFF## source\r\nNPC.Variant:Old {0}\r\nNPC.Variant:Other {1:N0}<br/>\r\nNPC.Variant:Old {0}\r\n";
@@ -339,7 +386,7 @@ test("the 69 bag, card, pet and totem captions preserve real client formatting a
       "releaseCannotTxt", "releaseTransformTxt", "releaseDirectTxt", "hungerFull", "releasPetsDiscrp", "releaseCanTransTipTxt"].map(key => `ddt.pets.${key}`),
     ...["totemPointTip.possibleValueTxt", "totemChapterTip.titleTxt", "rightViewTotemSignTxt", "rightViewTotemSignTipMsg"].map(key => `ddt.totem.${key}`)];
   assert.equal(keys.length, 69); assert.equal(new Set(keys).size, 69);
-  const rows = source.split("\r\n"), parts = line => { const colon = line.indexOf(":"); return [colon, line.slice(0, colon).replace(/^\uFEFF/, ""), line.slice(colon + 1)]; };
+  const rows = repairedSource(source, "client").split("\r\n"), parts = line => { const colon = line.indexOf(":"); return [colon, line.slice(0, colon).replace(/^\uFEFF/, ""), line.slice(colon + 1)]; };
   const placeholders = value => [...value.matchAll(/\{\d+(?::[^}]*)?\}/g)].map(match => match[0]).sort();
   const tags = value => value.match(/<[^>]*>/g) ?? [], lineEscapes = value => value.match(/\\+n/g) ?? [];
   for (const key of keys) {
@@ -357,6 +404,7 @@ test("the 69 bag, card, pet and totem captions preserve real client formatting a
   assert.match(overrides["tank.hall.ChooseHallView.labyrinth"], /30/);
   assert.equal(overrides["ddt.pets.fight"], "出战"); assert.equal(overrides["ddt.pets.unfight"], "召回");
   f.put("apps/api/assets/flash/ui/vietnam/language.txt", source); f.put("research/i18n/zh-CN-overrides.json", overridesText);
+  f.put(formatRepairsFile, formatRepairsText);
   assert.equal(JSON.parse(f.ok("verify")).installed, false); assert.equal(existsSync(f.runtime), false);
   const result = JSON.parse(f.ok("install")), target = join(f.runtime, "client-overlay/ui/vietnam/language.txt"), output = readFileSync(target);
   const expected = rows.map(line => { const [colon, key] = parts(line); return colon > 0 && !line.startsWith("##") && Object.hasOwn(overrides, key) ? line.slice(0, colon + 1) + overrides[key] : line; }).join("\r\n");
@@ -387,12 +435,12 @@ test("the complete server dictionary preserves prior translations and has Chines
   const additionsKeys = ["Workshop.Events.AccumulativeLogin.Success","Workshop.Events.AccumulativeLogin.Title","Workshop.Events.Egg.Success","Workshop.Events.Egg.Title","Workshop.Events.FirstRecharge.Success","Workshop.Events.FirstRecharge.Title","Workshop.Events.FirstRecharge.Unavailable","Workshop.Events.LevelBox.Title","Workshop.Events.SignAward.AlreadyReceived","Workshop.Events.SignAward.InvalidTier","Workshop.Events.SignAward.NoRewards","Workshop.Events.SignAward.NotReached","Workshop.Events.SignAward.Success","Workshop.Events.SignAward.Title","Workshop.Events.Vip.Required","Workshop.Events.Vip.Title"];
   assert.equal(createHash("sha256").update(JSON.stringify(additionsKeys.map(key => [key, priorValue(key, additions[key])]))).digest("hex"), "dd95b856d51351a3fe14370f26e2733048036e379e9f26f64614fd507f137906", "14 earlier additions remain exact; only the two approved VIP display words change");
   for (const [key, value] of Object.entries(additions)) assert.doesNotMatch(value.replace(/\{[^}]*\}/g, ""), /[a-z]/i, key + " visible Chinese additions");
-  const source = readFileSync(join(repoRoot, "data/i18n/pt-BR/server-language.txt"), "utf8"), effective = new Map();
+  const source = repairedSource(readFileSync(join(repoRoot, "data/i18n/pt-BR/server-language.txt"), "utf8").replace(/\r?\n/g, "\r\n"), "server"), effective = new Map();
   for (const line of source.split(/\r?\n/)) {
     const colon = line.indexOf(":");
     if (colon > 0 && !line.startsWith("##")) effective.set(line.slice(0, colon).replace(/^\uFEFF/, ""), line.slice(colon + 1));
   }
-  assert.equal(effective.size, 3568);
+  assert.equal(effective.size, 3570);
   assert.deepEqual([...Object.keys(overrides), ...Object.keys(rows.entries)].sort(), [...effective.keys()].sort());
   assert.equal(Object.keys(rows.entries).length, 6); assert.equal(Object.values(rows.entries).flat().length, 13);
   for (const [key, original] of effective) {
