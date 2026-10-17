@@ -56,14 +56,9 @@ function useStageScale(availRef: React.RefObject<HTMLElement | null>): number {
 }
 
 function LogoSlot() {
-  const [broken, setBroken] = useState(false);
   return (
     <div className="play-logo-slot">
-      {!broken ? (
-        <img src="/play/logo.webp" alt="DDReborn" onError={() => setBroken(true)} />
-      ) : (
-        <span className="play-logo-fallback">DDReborn</span>
-      )}
+      <span className="play-logo-fallback">弹弹堂</span>
     </div>
   );
 }
