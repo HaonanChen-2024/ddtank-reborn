@@ -7,6 +7,7 @@ import { dirname, resolve } from "node:path";
 import { game, type DbHandle } from "../packages/db/src/index.js";
 import { q } from "../apps/api/src/lib/db.js";
 import { planWeaponInstall } from "./workshop-weapon.js";
+import { smithEnabledWeapon } from "./workshop-weapon-smith.js";
 import type { StarterBinding } from "./workshop-starter-activity.js";
 
 const { sql } = createRequire(new URL("../packages/db/package.json", import.meta.url))("drizzle-orm") as typeof import("../packages/db/node_modules/drizzle-orm/index.js");
@@ -84,7 +85,11 @@ export async function runWeaponVisualUpgrade(h: DbHandle, options: {
         "Special" IN (${sql.join(newIds.map(id => sql`${id}`), sql`,`)}) ORDER BY "TemplateID"`),
     });
     const checkPreserved = (state: Awaited<ReturnType<typeof readState>>) => {
-      assert.equal(canonical(state.items), canonical([before.Shop_Goods]), "owned Shop_Goods missing or changed; preserved");
+      // A completed visual deployment can subsequently enable the two owned weapons' smith capabilities.
+      // Accept exactly that upgrade; all official stats and every other field still have to match.
+      const smithUpgraded = upgradeBytes && canonical(state.configs) === canonical([after.BallConfig]) &&
+        canonical(state.items) === canonical([smithEnabledWeapon(before.Shop_Goods)]);
+      assert.ok(canonical(state.items) === canonical([before.Shop_Goods]) || smithUpgraded, "owned Shop_Goods missing or changed; preserved");
       assert.equal(canonical(state.oldBalls), canonical(before.BallReferences), "old shared BallReferences missing or changed; preserved");
     };
     const state = await readState(); checkPreserved(state);
