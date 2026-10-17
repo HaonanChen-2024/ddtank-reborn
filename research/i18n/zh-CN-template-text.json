@@ -3,6 +3,14 @@
   "entries": [
     {
       "table": "Shop_Goods",
+      "rowId": "9107258",
+      "text": {
+        "Description": "满杯茶香，颗颗珍珠蓄势待发。让甜蜜的泡泡为战场增添一份惊喜。",
+        "Remark": "茶香四溢，甜蜜出击。"
+      }
+    },
+    {
+      "table": "Shop_Goods",
       "rowId": "11028",
       "text": {
         "Name": "幸运符100%",
