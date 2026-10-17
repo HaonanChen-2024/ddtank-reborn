@@ -26,6 +26,7 @@ const TRANSLATED_PK: Record<string, string | readonly string[]> = {
   Mission_Info: "Id",
   Mission_Info_Backup: "Id",
   Achievement: "ID",
+  Achievement_Goods: ["AchievementID", "RewardType", "RewardValueId"],
   Quest: "ID",
   Quest_Condiction: ["QuestID", "CondictionID"],
   Shop_Goods: "TemplateID",
@@ -303,7 +304,7 @@ export const TEMPLATES: TemplateDef[] = [
         const [a, c, g] = await Promise.all([
           translateRows(h, "Achievement", await all(h, "game", "Achievement")),
           all(h, "game", "AchievementCondition"),
-          all(h, "game", "Achievement_Goods"),
+          translateRows(h, "Achievement_Goods", await all(h, "game", "Achievement_Goods")),
         ]);
         return a.map((x) => {
           const e = item("Item", S.achievement, x);

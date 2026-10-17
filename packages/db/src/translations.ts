@@ -17,6 +17,7 @@ import { readFile } from "node:fs/promises";
 import { and, eq } from "drizzle-orm";
 import type { Database } from "./client.js";
 import { Translations } from "./schema/app.js";
+import { ITEM_DISPLAY_DATA_IDS } from "./template-display-data.js";
 
 export type TranslationOverlay = Map<string, Record<string, string>>;
 
@@ -28,12 +29,13 @@ const PVE_TEXT_COLUMNS: Record<string, readonly string[]> = {
 type PveTextOverride = { table: string; id: number; text: Record<string, string> };
 
 const TEMPLATE_TEXT_COLUMNS: Record<string, readonly string[]> = {
-  Shop_Goods: ["Name", "Description", "Remark"],
+  Shop_Goods: ["Name", "Description", "Remark", "Data"],
   Quest: ["Title", "Detail", "Objective"],
   Quest_Condiction: ["CondictionTitle"],
   Game_Map: ["Name", "Description", "Remark"],
   Mission_Info_Backup: ["Name", "Title", "Description", "Success", "Failure"],
   Achievement: ["Title", "Detail"],
+  Achievement_Goods: ["RewardPara"],
   Pet_Template_Info: ["Name", "Description"],
   Pet_Skill_Info: ["Name", "Description"],
   Pet_Skill_Element_Info: ["Name", "Description"],
@@ -81,7 +83,9 @@ export function parseTemplateTextOverrides(text: string): TemplateTextOverride[]
     const validSuitAddress = suitPart && /^[1-9]\d*:[1-9]\d*(?:,[1-9]\d*)*$/.test(entry.rowId) &&
       entry.rowId.split(/[:,]/).every(id => Number(id) <= 2147483647);
     const zeroLeague = entry.table === "DailyLeagueLevel" && entry.rowId === "0";
-    if (suitPart ? !validSuitAddress : ids.length !== (entry.table === "Quest_Condiction" ? 2 : 1) ||
+    const titleReward = entry.table === "Achievement_Goods";
+    if (suitPart ? !validSuitAddress : ids.length !== (titleReward ? 3 : entry.table === "Quest_Condiction" ? 2 : 1) ||
+        (titleReward && ids[1] !== "1") ||
         (!virtualReward && !zeroLeague && ids.some(id => !/^[1-9]\d*$/.test(id) || Number(id) > 2147483647))) {
       throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE rowId: ${entry.table}:${entry.rowId}`);
     }
@@ -91,6 +95,9 @@ export function parseTemplateTextOverrides(text: string): TemplateTextOverride[]
     for (const [column, displayText] of Object.entries(entry.text)) {
       if (!TEMPLATE_TEXT_COLUMNS[entry.table]!.includes(column) || typeof displayText !== "string" || !displayText.trim()) {
         throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE display column: ${key}.${column}`);
+      }
+      if (entry.table === "Shop_Goods" && column === "Data" && !ITEM_DISPLAY_DATA_IDS.has(Number(entry.rowId))) {
+        throw new Error(`Invalid TEMPLATE_TEXT_OVERRIDES_FILE machine Data column: ${key}`);
       }
     }
   }
@@ -168,8 +175,10 @@ export async function loadTranslations(db: Database, table: string, lang: string
       }
     }
   }
-  const templateFile = Object.hasOwn(TEMPLATE_TEXT_COLUMNS, table) ? process.env.TEMPLATE_TEXT_OVERRIDES_FILE : undefined;
-  if (templateFile) {
+  // A separate optional supplement lets an existing process retain its original file until the next normal startup.
+  const templateFiles = Object.hasOwn(TEMPLATE_TEXT_COLUMNS, table)
+    ? [process.env.TEMPLATE_TEXT_OVERRIDES_FILE, process.env.TEMPLATE_TEXT_SUPPLEMENT_FILE].filter((file): file is string => Boolean(file)) : [];
+  for (const templateFile of templateFiles) {
     for (const entry of parseTemplateTextOverrides(await readFile(templateFile, "utf8"))) {
       if (entry.table === table) overlay.set(entry.rowId, { ...overlay.get(entry.rowId), ...entry.text });
     }

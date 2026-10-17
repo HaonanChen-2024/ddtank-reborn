@@ -539,7 +539,8 @@ async function grantTitle(ctx: ServerContext, p: GamePlayer, name: string): Prom
   if (row) await db.update(P.Sys_User_Rank).set({ IsExit: true, BeginDate: now, EndDate: now, Validate: 0 }).where(eq(P.Sys_User_Rank.ID, row.ID));
   else await db.insert(P.Sys_User_Rank).values({ UserID: p.id, Name: name, NewTitleID: 0, BeginDate: now, EndDate: now, Validate: 0, IsExit: true });
   const ranks = await db.select().from(P.Sys_User_Rank).where(and(eq(P.Sys_User_Rank.UserID, p.id), eq(P.Sys_User_Rank.IsExit, true)));
-  p.send(Out.userRanks(p.id, ranks));
+  const data = eventsRuntime(ctx).data;
+  p.send(Out.userRanks(p.id, ranks.map(rank => ({ ...rank, Name: rank.Name == null ? rank.Name : data.achievementTitleName(rank.Name) }))));
 }
 
 /** 230 ACHIEVEMENT_FINISH: the original granted any id the client sent; the port checks CanCompleted against records. */
@@ -557,7 +558,7 @@ export async function achievementFinish(ctx: ServerContext, p: GamePlayer, id: n
   out.writeInt(id); out.writeInt(now.getUTCFullYear()); out.writeInt(now.getUTCMonth() + 1); out.writeInt(now.getUTCDate());
   p.send(out);
   for (const name of titles) await grantTitle(ctx, p, name);
-  if (titles.length) p.sendMessage(0, `获得称号：${titles.join("、")}`);
+  if (titles.length) p.sendMessage(0, `获得称号：${titles.map(name => rt.data.achievementTitleName(name)).join("、")}`);
   return true;
 }
 

@@ -1,0 +1,24 @@
+{
+  "client": {
+    "sourceSha256": "ed7bebda3cb6cabcdc8ada6bc98b334d2fe873886b0ee9dc57cd155c30e49fe9",
+    "entries": [
+      {
+        "source": "store.view.transfer.HoleLabel:<FONT SIZE='12' FACE='Arial' KERNING='2' COLOR='#FF0000'> Atenção: após a transferência, o equipamento ficará bloqueado.</FONT>store.view.transfer.EmptyItem:Escolha mais uma arma ou equipamento! ",
+        "replacement": "store.view.transfer.HoleLabel:<FONT SIZE='12' FACE='Arial' KERNING='2' COLOR='#FF0000'> Atenção: após a transferência, o equipamento ficará bloqueado.</FONT>\r\nstore.view.transfer.EmptyItem:Escolha mais uma arma ou equipamento! "
+      }
+    ]
+  },
+  "server": {
+    "sourceSha256": "3860e5acad82637e21555bc53298065fa582268d9c4bf35e35e005acdbc956e7",
+    "entries": [
+      {
+        "source": "GameServer.HomeFight.NextLevel\r\n:Você superou com sucesso {0} guarda(s), prepare-se para a próxima fase!",
+        "replacement": "GameServer.HomeFight.NextLevel:Você superou com sucesso {0} guarda(s), prepare-se para a próxima fase!"
+      },
+      {
+        "source": "homebar.drink.success.msg\r\n:Ação realizada com sucesso!",
+        "replacement": "homebar.drink.success.msg:Ação realizada com sucesso!"
+      }
+    ]
+  }
+}

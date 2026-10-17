@@ -46,9 +46,23 @@ if (command === "rollback") {
 } else {
   const source = readFileSync(join(repo, server ? "data/i18n/pt-BR/server-language.txt" : notifications ? "apps/api/assets/flash/ui/vietnam/movingnotification.txt" : "apps/api/assets/flash/ui/vietnam/language.txt"));
   if (notifications) assert.ok(source.subarray(0, 2).equals(Buffer.from([0xff, 0xfe])), "original scroll notices require UTF-16LE BOM");
-  const text = source.toString(notifications ? "utf16le" : "utf8");
+  let text = source.toString(notifications ? "utf16le" : "utf8");
   const overrides = JSON.parse(readFileSync(join(repo, server ? "research/i18n/zh-CN-server-overrides.json" : notifications ? "research/i18n/zh-CN-moving-notifications.json" : "research/i18n/zh-CN-overrides.json"), "utf8"));
   assert.ok(text.includes("\r\n") && !/(?<!\r)\n/.test(text), "original AS3 parser requires CRLF");
+  // Repair the three known malformed source records only in the deployment copy.
+  const repairsFile = join(repo, "research/i18n/zh-CN-dictionary-format-repairs.json");
+  if (!notifications && existsSync(repairsFile)) {
+    const repairs = JSON.parse(readFileSync(repairsFile, "utf8"))[server ? "server" : "client"];
+    assert.equal(repairs.sourceSha256, hash(source), "dictionary format repair source changed; preserved");
+    for (const repair of repairs.entries) {
+      assert.equal(typeof repair.source, "string"); assert.ok(repair.source.length > 0);
+      assert.equal(typeof repair.replacement, "string");
+      assert.equal(text.split(repair.source).length, 2, "dictionary format repair needs exactly one source record");
+      assert.equal(repair.source.replace(/[\r\n]/g, ""), repair.replacement.replace(/[\r\n]/g, ""), "format repair may only change line boundaries");
+      assert.ok(!/(?<!\r)\n|\r(?!\n)/.test(repair.replacement), "dictionary format repair requires CRLF");
+      text = text.replace(repair.source, repair.replacement);
+    }
+  }
   if (notifications) {
     assert.equal(hash(source), overrides.sourceSha256, "shipped scroll notices changed; preserved");
     assert.ok(Array.isArray(overrides.lines) && overrides.lines.length > 0, "scroll notices need nonempty lines");
