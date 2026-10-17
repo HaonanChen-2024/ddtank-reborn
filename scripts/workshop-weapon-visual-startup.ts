@@ -69,6 +69,7 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
       assert.deepEqual(basicResources.filter(row => row.kind === kind).map(row => resolve(row.path)).sort(),
         [15601, 15602].map(id => resolve(root, "image/bomb/crater", String(id), filename!)).sort(), "official crater resources must be selected from the upload paths");
     }
+    officialEvidence = readOfficialWeaponEvidence(pinned(effects.officialBallList).toString("utf8"), pinned(effects.officialBombConfig).toString("utf8"));
     const particles = effects.resources.filter(row => row.kind.startsWith("particle-"));
     if (effects.particleMode === "retained") { assert.equal(particles.length, 0); assert.equal(effects.particleVerification, undefined); }
     else {
@@ -76,7 +77,14 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
       assert.ok(particles.some(row => row.kind === "particle-textures"), "official emitters require their display resources");
       assert.ok(effects.particleVerification, "official emitters require a verified dependency closure");
       const proof = JSON.parse(pinned(effects.particleVerification).toString("utf8"));
+      assert.equal(proof.schemaVersion, 1); assert.equal(proof.particleMode, "official");
       assert.equal(proof.allDependenciesPresent, true); assert.equal(proof.officialDefinitionsMatch, true); assert.equal(proof.officialTexturesMatch, true);
+      assert.ok(Array.isArray(proof.rows), "official particle proof must identify its emitters");
+      assert.deepEqual(proof.rows.map((row: { emitterId: number }) => row.emitterId).sort((a: number,b: number) => a-b),
+        [...new Set(officialEvidence.Ball.map(row => Number(row.FlyingPartical)))].sort((a,b) => a-b), "official particle proof does not cover the selected emitters exactly");
+      for (const row of proof.rows) {
+        assert.equal(row.allDependenciesPresent, true); assert.equal(row.officialDefinitionsMatch, true); assert.equal(row.officialTexturesMatch, true);
+      }
       const asPin = (row: Pin) => ({ path: resolve(row.path), sha256: row.sha256 });
       assert.deepEqual(asPin(proof.selectedDefinition), asPin(particles.find(row => row.kind === "particle-definition")!));
       assert.deepEqual(proof.selectedTextures.map(asPin).sort((a: Pin,b: Pin) => a.path.localeCompare(b.path)),
@@ -88,7 +96,6 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
     assert.equal(audio.rows?.length, 6);
     assert.equal(resolve(audio.localAudio.path), resolve(selectedAudio.path));
     assert.equal(audio.localAudio.sha256, selectedAudio.sha256);
-    officialEvidence = readOfficialWeaponEvidence(pinned(effects.officialBallList).toString("utf8"), pinned(effects.officialBombConfig).toString("utf8"));
     const beforeFight = JSON.parse(pinned(effects.previousFightExtension).toString("utf8"));
     const afterFight = JSON.parse(pinned(config.fightExtension).toString("utf8"));
     const adjusted = weaponEffectsPackage(newConfig, officialEvidence, effects.particleMode), ids = adjusted.Ball.map(row => Number(row.ID));

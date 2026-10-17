@@ -164,14 +164,20 @@ test("missing official audio identity refuses startup even when local sounds exi
 
 test("verified official emitters select captured IDs only with the matching dependency proof", t => {
   const f=effectsFixture(t), definition=f.put('partical.json',{fixture:'same official emitters'}),textures=f.put('shape.json',{fixture:'same official display closure'});
-  const proof=f.put('particle-proof.json',{allDependenciesPresent:true,officialDefinitionsMatch:true,officialTexturesMatch:true,selectedDefinition:definition,selectedTextures:[textures]});
+  const rows=[518,498].map(emitterId=>({emitterId,allDependenciesPresent:true,officialDefinitionsMatch:true,officialTexturesMatch:true}));
+  const proof=f.put('particle-proof.json',{schemaVersion:1,particleMode:'official',rows,allDependenciesPresent:true,officialDefinitionsMatch:true,officialTexturesMatch:true,selectedDefinition:definition,selectedTextures:[textures]});
   f.changeEffects(value=>{value.particleMode='official';value.resources.push({...definition,kind:'particle-definition'},{...textures,kind:'particle-textures'});Object.assign(value,{particleVerification:proof});});
   for(const row of f.after.balls)row.flyingPartical=row.id===156013?'498':'518';
   f.manifest.fightExtension=f.put('effects-after-fight.json',f.after);f.save();
   f.readDeployment().check();
-  const proofData=JSON.parse(readFileSync(proof.path,'utf8'));proofData.officialTexturesMatch=false;
-  f.changeEffects(value=>{Object.assign(value,{particleVerification:f.put('particle-proof.json',proofData)});});
-  assert.throws(f.readDeployment);
+  const proofData=JSON.parse(readFileSync(proof.path,'utf8'));
+  for(const invalid of [{officialTexturesMatch:false},{schemaVersion:2},{particleMode:'retained'},
+    {rows:undefined},{rows:[]},{rows:[rows[0]]},{rows:[rows[0],rows[0]]},
+    {rows:[rows[0],{...rows[1],emitterId:499}]},
+    ...['allDependenciesPresent','officialDefinitionsMatch','officialTexturesMatch'].map(key=>({rows:[rows[0],{...rows[1],[key]:false}]}))]) {
+    f.changeEffects(value=>{Object.assign(value,{particleVerification:f.put('particle-proof.json',{...proofData,...invalid})});});
+    assert.throws(f.readDeployment);
+  }
   assert.equal(createDbMock.mock.calls.length,0);
 });
 
