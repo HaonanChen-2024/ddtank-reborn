@@ -922,7 +922,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/feedback-forge-20261017/original/ddtstore.swf",
@@ -1094,7 +1094,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/feedback-room-20261017/room.before.swf",
@@ -1143,7 +1143,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/feedback-room-20261017/roomlist.before.swf",
@@ -1291,7 +1291,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/feedback-forge-20261017/original/store.swf",
@@ -1311,7 +1311,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/feedback-forge-20261017/original/storefinebringup.swf",
@@ -1350,7 +1350,7 @@
       "exception": {
         "code": "GENERATED_PRODUCT_ARCHIVED_ONLY",
         "reasons": [
-          "repo 当前同字节文件是已生成成品；不把复制成品计为生成。需要旧原件、定稿图/文字补丁及纯构建适配。"
+          "初始盘点的同字节仓库副本是历史生成成品，不能当作生成来源；当前仓库已按原版基底规则处理（精彩活动暂留中文镜像）。尚需把原件、定稿图/文字补丁接成纯构建入口。"
         ],
         "identifiedPaths": [
           "runtime/remaining-image-surfaces-20261017/current-extraction.json",

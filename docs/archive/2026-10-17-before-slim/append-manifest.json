@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-17T10:57:24.280Z",
+  "sourceProjectPath": "docs/执行记录.md",
+  "originalSnapshotManifest": {
+    "file": "snapshot-manifest.json",
+    "sha256": "5fc0490e40580769e1eeaf80ebb9158040f0799456b4467afafa81dfe0639c5c"
+  },
+  "base": {
+    "file": "执行记录.md",
+    "bytes": 152783,
+    "sha256": "dbb5dd982d99f207f46fefb1adffe170e547983f7e93683008a64152f3cc2489"
+  },
+  "append": {
+    "file": "工程整理追加记录.md",
+    "startByteInFullSource": 152783,
+    "endByteExclusiveInFullSource": 154183,
+    "bytes": 1400,
+    "sha256": "32eb9325f4a66dbbed5d34ed6a21ba28b1d0329a42abd83512ae38506377e23d"
+  },
+  "reconstructed": {
+    "bytes": 154183,
+    "sha256": "975c77d4e78bcbb9a95050bf59a49f798ed178597fe871fa973f09b7ce310b6f",
+    "currentSourceSha256": "975c77d4e78bcbb9a95050bf59a49f798ed178597fe871fa973f09b7ce310b6f",
+    "byteExact": true
+  },
+  "restoreOrder": [
+    "执行记录.md",
+    "工程整理追加记录.md"
+  ],
+  "restoreRule": "Concatenate the two files as raw bytes in restoreOrder; do not decode, insert a separator or normalize line endings. Verify reconstructed.sha256.",
+  "originalArchivesUnchanged": true,
+  "formalWritesPerformed": 0,
+  "gitWrites": 0
+}

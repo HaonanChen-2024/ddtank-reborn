@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-17T10:16:40.276Z",
+  "sourceProject": "C:\\Users\\11322\\Desktop\\新方向\\DDTank-Workshop",
+  "documents": [
+    {
+      "originalProjectPath": "执行计划.md",
+      "archiveRepoPath": "docs/archive/2026-10-17-before-slim/执行计划.md",
+      "stagingPath": "repo-candidate/docs/archive/2026-10-17-before-slim/执行计划.md",
+      "bytes": 393840,
+      "sha256": "0b92dbd4a163345e1aba24202482aa583702ee5baf17c50ada118b6c9c6418be",
+      "utf8Bom": false,
+      "lineCount": 1427,
+      "originalUnchanged": true,
+      "allBytesRecoverableFromSections": true
+    },
+    {
+      "originalProjectPath": "docs/执行记录.md",
+      "archiveRepoPath": "docs/archive/2026-10-17-before-slim/执行记录.md",
+      "stagingPath": "repo-candidate/docs/archive/2026-10-17-before-slim/执行记录.md",
+      "bytes": 152783,
+      "sha256": "dbb5dd982d99f207f46fefb1adffe170e547983f7e93683008a64152f3cc2489",
+      "utf8Bom": false,
+      "lineCount": 587,
+      "originalUnchanged": true,
+      "allBytesRecoverableFromSections": true
+    }
+  ],
+  "credentialScanFindings": 0,
+  "formalFilesModified": false,
+  "rootMustReviewBeforeCommit": true
+}

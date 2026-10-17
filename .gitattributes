@@ -19,3 +19,9 @@ config/workshop/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,c
 # Overlay source pins include their original CRLF bytes.
 apps/api/assets/flash/ui/vietnam/language.txt -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 research/i18n/zh-CN-overrides.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# History archives retain exact original bytes, including CRLF and old whitespace.
+docs/archive/** -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+docs/archive/2026-10-17-before-slim/执行计划.md -diff
+docs/archive/2026-10-17-before-slim/执行记录.md -diff
+docs/archive/2026-10-17-before-slim/工程整理追加记录.md -diff
