@@ -47,7 +47,7 @@ const snapshot = async () => ({
   npcs: await h.db.select().from(game.NPC_Info),
 });
 
-it("shares the seven PvE display rows with API and Game while preserving every other field, row and stored record", async () => {
+it("shares PvE display rows with API and Game while preserving every other field, row and stored record", async () => {
   const before = await snapshot(), oldGame = await new Templates().load(h.db, 1);
   const definitions = ["/LoadPVEItems.ashx", "/NPCInfoList.ashx"].map(endpoint => TEMPLATES.find(d => d.endpoint === endpoint)!);
   const oldXml = await Promise.all(definitions.map(d => d.build(h)));
@@ -56,7 +56,7 @@ it("shares the seven PvE display rows with API and Game while preserving every o
   expect(oldGame.pveInfos.get(3)!.Name).toBe("Uncovered dungeon");
   vi.stubEnv("PVE_TEXT_OVERRIDES_FILE", pveFile);
   const currentGame = await new Templates().load(h.db, 1), currentXml = await Promise.all(definitions.map(d => d.build(h)));
-  expect(pveEntries.map(e => `${e.table}:${e.id}`)).toEqual([
+  expect(pveEntries.slice(0, 7).map(e => `${e.table}:${e.id}`)).toEqual([
     "Pve_Info:2", "Mission_Info:2001", "Mission_Info:2002", "NPC_Info:2001", "NPC_Info:2002", "NPC_Info:2003", "NPC_Info:2004",
   ]);
   const groups = [
@@ -105,7 +105,7 @@ it("shares the seven PvE display rows with API and Game while preserving every o
 });
 const rows = (xml: XEl) => new Map(xml.children[0]!.children.map((row) => [Number(new Map(row.attrs).get("TemplateID")), row.attrs]));
 
-it("uses the same 21 names in API plain/zlib templates and Game without changing other fields or historical data", async () => {
+it("uses the same 23 names in API plain/zlib templates and Game without changing other fields or historical data", async () => {
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", "");
   const before = await snapshot(), oldGame = await new Templates().load(h.db, 1), oldXml = await definition.build(h);
   const oldRows = rows(oldXml);
@@ -113,10 +113,10 @@ it("uses the same 21 names in API plain/zlib templates and Game without changing
   vi.stubEnv("ITEM_NAME_OVERRIDES_FILE", file);
   const currentGame = await new Templates().load(h.db, 1), currentXml = await definition.build(h);
   const currentRows = rows(currentXml);
-  expect(Object.keys(names)).toHaveLength(21);
-  const signNames = { 11023: "强化石4级", 11035: "开孔钻头1级", 11041: "初级SUPER·古枪碎片", 11024: "强化石5级",
+  expect(Object.keys(names)).toHaveLength(23);
+  const signNames = { 11023: "强化石4级", 11035: "开孔钻头1级", 11041: "初级真·远古竹枪碎片", 11024: "强化石5级",
     11029: "幸运符50%", 13689: "龙骑士套装", 11560: "攻击祝福宝珠" };
-  expect(names).toMatchObject(signNames);
+  expect(names).toMatchObject({ ...signNames, 11019: "强化石1级", 11021: "强化石2级" });
   for (const [id, name] of Object.entries(signNames)) expect(currentGame.findItem(Number(id))?.Name).toBe(name);
   expect(currentRows.size).toBe(oldRows.size);
   for (const [id, oldItem] of oldGame.items) {

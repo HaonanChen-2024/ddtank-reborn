@@ -77,24 +77,62 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
     }
     case 4: {
       // FeedPet: int itemPlace, int bagType, int petPlace. Fixed: the original always consumed from the StoreBag.
-      const itemPlace = pkt.readInt();
-      const inv = p.getInventory(pkt.readInt());
-      const pet = bag.getPetAt(pkt.readInt());
-      const it = inv?.getItemAt(itemPlace) ?? null;
-      if (!inv || !it) return p.sendMessage(0, t("PetHandler.Msg9"));
-      if (!pet) return;
-      const r = feedPet(T, pet, {
-        TemplateID: it.TemplateID, Count: it.Count, Property1: it.template.Property1, Property2: it.template.Property2,
-        DefendCompose: it.DefendCompose, holes: [it.Hole1, it.Hole2, it.Hole3, it.Hole4, it.Hole5], Blood: (it as unknown as { Blood?: number }).Blood ?? 0,
-      }, petMaxLevelByGrade(ctx, p), p.info.VIPLevel);
-      if (r.consume > 0) {
-        if (it.TemplateID === 334100) inv.removeItem(it);
-        else inv.removeCountFromStack(it, Math.min(r.consume, it.Count));
-      }
-      if (r.ok) bag.changed.add(pet.Place);
-      petsChanged(p, r.ok);
-      if (r.msg) p.sendMessage(0, t(...r.msg));
-      return;
+      if (pkt.length - pkt.offset !== 12) return p.sendMessage(0, t("PetHandler.Msg9"));
+      const itemPlace = pkt.readInt(), bagType = pkt.readInt(), petPlace = pkt.readInt();
+      // Same packet/room-start and persistence barriers as the card owner below.
+      return p.withWorldBossAward(async () => {
+        const release = await p.currentRoom?.game?.holdWorldBossSettlement?.();
+        try {
+          await p.withPersistenceLock(async () => {
+            const permitted = () => ctx.world.get(p.id) === p && p.isActive && !p.quitting && !p.currentRoom?.IsPlaying &&
+              !(p.info.HasBagPassword && p.info.IsLocked) && p.info.Grade >= cfgNum(T, "LimitGrade", 25);
+            if (!permitted()) return;
+            let message: [string, ...unknown[]] | undefined, notificationError: unknown;
+            try {
+              await commitPlayerMutation(ctx, p, async (_db, staged, now) => {
+                if (!permitted()) return null;
+                const inv = staged.getInventory(bagType), pet = staged.petBag.getPetAt(petPlace), it = inv?.getItemAt(itemPlace);
+                const integer = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= 2_147_483_647;
+                if (!inv?.saveToDb || !it || it.cellLocked || !it.IsExist || it.UserID !== p.id || it.Place !== itemPlace || it.BagType !== bagType ||
+                    !Number.isFinite(now.getTime()) || !it.isValidItem(now) || ctx.templates.findItem(it.TemplateID) !== it.template ||
+                    it.template.CategoryID !== 34 || !it.template.CanUse || !integer(it.Count) || it.Count < 1 ||
+                    !integer(it.template.MaxCount) || it.Count > it.template.MaxCount || staged.info.Grade < it.template.NeedLevel ||
+                    !integer(it.template.Property1) || !integer(it.template.Property2) ||
+                    (it.TemplateID !== 334100 && (it.template.Property1 < 1 || it.template.Property2 < 1)) ||
+                    !pet || !integer(pet.ID) || pet.ID < 1 || pet.UserID !== p.id || pet.Place !== petPlace || !pet.IsExit || !T.templates.has(pet.TemplateID)) {
+                  message = ["PetHandler.Msg9"]; return null;
+                }
+                const cap = petMaxLevelByGrade(ctx, staged);
+                if (!integer(cap) || cap < 1 || !T.levelGp.has(cap)) { message = ["PetHandler.Msg9"]; return null; }
+                const r = feedPet(T, pet, {
+                  TemplateID: it.TemplateID, Count: it.Count, Property1: it.template.Property1, Property2: it.template.Property2,
+                  DefendCompose: it.DefendCompose, holes: [it.Hole1, it.Hole2, it.Hole3, it.Hole4, it.Hole5], Blood: (it as unknown as { Blood?: number }).Blood ?? 0,
+                }, cap, staged.info.VIPLevel);
+                message = r.msg;
+                if (!r.ok) return null;
+                if (!integer(r.consume) || r.consume > it.Count ||
+                    (r.consume > 0 && !(it.TemplateID === 334100 ? inv.removeItem(it) : inv.removeCountFromStack(it, r.consume)))) {
+                  message = ["PetHandler.Msg9"]; return null;
+                }
+                staged.petBag.changed.add(pet.Place);
+                staged.pet = staged.petBag.equipped();
+                staged.updatePlayerProperties();
+                return { value: true };
+              }, { petUpdates: true });
+            } catch (error) {
+              if (error instanceof PlayerMutationCommittedError) notificationError = error;
+              else {
+                ctx.log.error("Pet feeding transaction failed", error);
+                p.sendMessage(0, "宠物喂养保存失败，食物和宠物未改变，请稍后重试。"); return;
+              }
+            }
+            if (message) {
+              try { p.sendMessage(0, t(...message)); } catch (error) { notificationError ??= error; }
+            }
+            if (notificationError) throw notificationError;
+          });
+        } finally { release?.(); }
+      });
     }
     case 7: {
       // EquipSkillPet: int place, int skillId, int slot (slot 4 needs VIP 7)
@@ -169,16 +207,16 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       // AdoptPet.cs: int place in the current adopt offer -> moved into the first empty pet slot.
       const place = pkt.readInt();
       const slot = bag.findFirstEmptySlot();
-      if (slot === -1) { p.sendMessage(0, "O número de pets atingiu o limite!"); return; }
-      if (place < 0 || place >= bag.adopt.length) { p.sendMessage(0, "Pet não encontrado!"); return; }
+      if (slot === -1) { p.sendMessage(0, "宠物数量已达上限！"); return; }
+      if (place < 0 || place >= bag.adopt.length) { p.sendMessage(0, "未找到宠物！"); return; }
       const picked = bag.adopt[place];
       if (!picked) return;
       if (bag.addPetTo(picked, slot)) {
         const info = T.templates.get(picked.TemplateID);
         if (info && (info.StarLevel > 3 || info.KindID >= 5)) {
-          const msg = `[${p.zoneName}] O jogador [${p.info.NickName}] teve sorte e capturou ${info.Name} de ${info.StarLevel} estrela(s).`;
+          const msg = `[${p.zoneName}]玩家[${p.info.NickName}]幸运地捕获了${info.StarLevel}星宠物${info.Name}。`;
           for (const o of ctx.world.all()) o.sendMessage(0, msg);
-        } else p.sendMessage(0, "Captura bem-sucedida.");
+        } else p.sendMessage(0, "捕获成功。");
       }
       bag.adopt = [];
       p.flushPets();
@@ -239,14 +277,14 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const inv = p.getInventory(bagType);
       const item = inv?.getItemAt(slot);
       const pet = bag.getPetAt(place);
-      if (!item || !pet || ![50, 51, 52].includes(item.template.CategoryID)) return p.sendMessage(0, "AddPetEquip.WrongItem");
-      if (pet.Level < item.template.Property2) return p.sendMessage(0, "AddPetEquip.WrongLevel");
+      if (!item || !pet || ![50, 51, 52].includes(item.template.CategoryID)) return p.sendMessage(0, t("AddPetEquip.WrongItem"));
+      if (pet.Level < item.template.Property2) return p.sendMessage(0, t("AddPetEquip.WrongLevel"));
       const eqType = item.template.CategoryID === 51 ? 1 : item.template.CategoryID === 52 ? 2 : 0;
       if (!bag.addEqPet(place, eqType, item.TemplateID, item.ValidDate, item.IsUsed ? item.BeginDate : ctx.now())) return;
       inv!.takeOutItem(item);
       bag.changed.add(place);
       petsChanged(p, true);
-      p.sendMessage(0, "Item de PET equipado com sucesso!");
+      p.sendMessage(0, "宠物装备穿戴成功！");
       return;
     }
     case 21: {
@@ -271,11 +309,11 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const count = pkt.readInt();
       const petPlace = pkt.readInt();
       const pet = bag.getPetAt(petPlace);
-      if (!pet) return p.sendMessage(0, "PetRisingStar.PetNotFound");
+      if (!pet) return p.sendMessage(0, t("PetRisingStar.PetNotFound"));
       const found = p.propBag.getItemByTemplateID(0, templateId);
-      if (!found || found.TemplateID !== 11162) { p.sendMessage(0, "PetRisingStar.ItemNotFound"); p.send(Out.petRisingStarReply(false)); return; }
+      if (!found || found.TemplateID !== 11162) { p.sendMessage(0, t("PetRisingStar.ItemNotFound")); p.send(Out.petRisingStarReply(false)); return; }
       const r = petRisingStar(T, pet, found.template.Property2, Math.min(count, found.Count), petMaxLevelByGrade(ctx, p), p.info.VIPLevel);
-      if (!r) { p.sendMessage(0, "PetRisingStar.UnSupport"); p.send(Out.petRisingStarReply(false)); return; }
+      if (!r) { p.sendMessage(0, t("PetRisingStar.UnSupport")); p.send(Out.petRisingStarReply(false)); return; }
       if (r.consumed > 0) p.propBag.removeCountFromStack(found, r.consumed);
       bag.changed.add(petPlace);
       petsChanged(p, pet.IsEquip);
@@ -313,9 +351,9 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
       const type = pkt.readInt();
       const eat = bag.eat;
       const blocked = hungBuCacCho(eat.weaponLevel, eat.clothesLevel, eat.hatLevel);
-      const names = ["Roupa ou Chapéu", "Vũ khí và Nón", "Vũ khí và Áo"] as const;
+      const names = ["衣服或帽子", "武器和帽子", "武器和衣服"] as const;
       if (([eat.weaponLevel, eat.clothesLevel, eat.hatLevel][amor]) === blocked) {
-        return p.sendMessage(0, `Evolua ${names[amor]} primeiro!`);
+        return p.sendMessage(0, `请先升级${names[amor]}！`);
       }
       if (type === 1) {
         const count = pkt.readInt();
@@ -334,12 +372,12 @@ export async function petCommand(ctx: ServerContext, p: GamePlayer, pkt: GSPacke
         const count = pkt.readInt();
         const eatItemId = 201567;
         const info2 = p.propBag.getItemByTemplateID(0, eatItemId);
-        if (!info2) return p.sendMessage(0, "Pedras de fortalecimento insuficientes!");
+        if (!info2) return p.sendMessage(0, "强化石不足！");
         let totalPoint = count * info2.template.Property2;
         const need = moeNeedExp(T, [eat.weaponExp, eat.clothesExp, eat.hatExp][amor]!, [eat.weaponLevel, eat.clothesLevel, eat.hatLevel][amor]!);
         let realCount = count;
         if (totalPoint > need && info2.template.Property2 > 0) { realCount = Math.ceil(need / info2.template.Property2); totalPoint = info2.template.Property2; }
-        if (!p.propBag.removeCountFromStack(info2, realCount)) return p.sendMessage(0, "Pedras de fortalecimento insuficientes!");
+        if (!p.propBag.removeCountFromStack(info2, realCount)) return p.sendMessage(0, "强化石不足！");
         eatPetsUpgrade(T, eat, amor, totalPoint);
       }
       bag.eatDirty = true;

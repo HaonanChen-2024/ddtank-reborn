@@ -7,14 +7,14 @@ import { useI18n } from "@/i18n";
 
 export function Logo() {
   return (
-    <Link to="/" className="group flex items-center gap-2" aria-label="DDTank">
+    <Link to="/" className="group flex items-center gap-2" aria-label="弹弹堂">
       <svg viewBox="0 0 64 64" className="size-9" aria-hidden>
         <rect width="64" height="64" rx="16" className="fill-panel-2" />
         <path d="M8 52 Q 32 4 56 44" className="stroke-sun" strokeWidth="4" strokeLinecap="round" strokeDasharray="1 8" fill="none" />
         <circle cx="54" cy="46" r="7" className="fill-coral transition-transform group-hover:-translate-y-1" />
         <rect x="6" y="46" width="16" height="10" rx="3" className="fill-mint" />
       </svg>
-      <span className="title-plate text-2xl text-ink">DDTank</span>
+      <span className="title-plate text-2xl text-ink">弹弹堂</span>
     </Link>
   );
 }

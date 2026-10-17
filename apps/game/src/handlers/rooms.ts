@@ -12,8 +12,7 @@ import { SubRouter, type HandlerRegistry } from "./registry.js";
 import { parseWorldBossSetup } from "./world-boss-setup.js";
 import { christmasSnowfieldOwner } from "../game/activity-christmas-snowfield.js";
 import { labyrinthCombatOwner } from "../game/labyrinth-combat.js";
-
-const NO_WEAPON = "Sem arma equipada, não é possível participar.";
+import { buyRoomProp, sellRoomProp } from "./room-props.js";
 
 /**
  * Registra rotas de sala (`94 GAME_ROOM`) — o que faz no jogo: criar/entrar/sair de sala, trocar time, dar ready, iniciar partida.
@@ -49,7 +48,7 @@ export function roomRouter(): SubRouter {
       const name = pkt.readString();
       const pwd = pkt.readString();
       if (roomType === 40) return p.sendMessage(0, "请通过本地雪场的已确认准入进入。");
-      if (!p.hasMainWeapon) return p.sendMessage(1, NO_WEAPON);
+      if (!p.hasMainWeapon) return p.sendMessage(1, ctx.lang.t("Game.Server.SceneGames.NoEquip"));
       ctx.rooms.createRoom(p, name, pwd, roomType, timeType);
     })
     // Login.cs: bool isInvite, int hallType, int roomSel; if roomSel == -1: int roomId, str password.
@@ -113,7 +112,7 @@ export function roomRouter(): SubRouter {
       if (!room || room.host !== p) return;
       for (const m of room.getPlayers()) {
         if (!m.hasMainWeapon) {
-          p.sendMessage(3, "Há membros ou espectadores sem arma, não é possível começar!");
+          p.sendMessage(3, ctx.lang.t("Game.Server.SceneGames.NoEquip"));
           room.IsPlaying = false;
           room.sendCancelPickUp();
           return;
@@ -185,6 +184,8 @@ export function roomRouter(): SubRouter {
  * - `flag`: permissão para iniciar missão (`bool`). Vem do pacote `82`; quando `true` chama `missionStart`.
  */
 export function registerRooms(r: HandlerRegistry): SubRouter {
+  r.player(54, "PROP_BUY", buyRoomProp);
+  r.player(55, "PROP_SELL", sellRoomProp);
   const rr = roomRouter();
   r.player(94, "GAME_ROOM", rr.handler);
   // 91 GAME_CMD (GameDataHandler): forwarded to the fight module; with no game and sub 98 -> fake reply.

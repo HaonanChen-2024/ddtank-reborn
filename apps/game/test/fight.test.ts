@@ -1,11 +1,14 @@
 /** End-to-end battles over the real protocol with the @ddt/fight engine (manual clock so a game takes ms, not minutes). */
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { solveAim } from "@ddt/fight";
-import { GameServer, payTakeCard } from "../src/server.js";
+import { GameServer, payTakeCard, takeCardDrop } from "../src/server.js";
 import { testConfig } from "../src/config.js";
 import { DdtFightEngine } from "../src/fight/ddt.js";
 import { type BotProvider, VirtualPlayer } from "../src/bots/bot.js";
-import { type FakeClient, loggedIn, sharedDb, testKey } from "./helpers.js";
+import { quitPlayer } from "../src/session/login.js";
+import { FakeClient, createCharacter, loggedIn, sharedDb, testKey } from "./helpers.js";
 
 let server: GameServer;
 let engine: DdtFightEngine;
@@ -134,6 +137,110 @@ describe("@ddt/fight adapter", () => {
     expect(card.pkt.readBoolean()).toBe(true); // isAuto
     expect(card.pkt.readByte()).toBe(0); // first free card
     a.c.close();
+  }, 60000);
+
+  it.each([-100, 11036])("manual free card %i survives the AI result, lobby return, disconnect and real login", async (rewardId) => {
+    const templates = server.ctx.templates;
+    const roomOptions = (server.ctx.rooms as unknown as { o: { botFallbackSec: number } }).o;
+    const previous = { clock, fallback: roomOptions.botFallbackSec, takeCard: engine.o.takeCard, conditions: templates.dropConditions, items: templates.dropItems };
+    let a: Awaited<ReturnType<typeof lobby>> | undefined;
+    let next: FakeClient | undefined;
+    let drop: ReturnType<typeof vi.spyOn> | undefined;
+    try {
+      // Use the committed original drop rows; the shared harness does not seed these two tables.
+      templates.dropConditions = JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Drop_Condiction.json.gz", import.meta.url))).toString("utf8"));
+      const rows = JSON.parse(gunzipSync(readFileSync(new URL("../../../packages/db/seed/game/Drop_Item.json.gz", import.meta.url))).toString("utf8")) as NonNullable<ReturnType<typeof templates.dropItems.get>>;
+      templates.dropItems = new Map();
+      for (const row of rows) templates.dropItems.set(row.DropId, [...(templates.dropItems.get(row.DropId) ?? []), row]);
+      const pool = templates.dropItems.get(templates.findDropCondition(1, "0", "0"))!;
+      const selected = pool.findIndex(row => row.ItemId === rewardId);
+      expect(selected).toBeGreaterThanOrEqual(0);
+      expect(templates.findItem(rewardId)).toBeDefined();
+      const selectDrop = templates.dropOne.bind(templates);
+      // Only control the RNG input; the production selector, grant and packet routing still run.
+      drop = vi.spyOn(templates, "dropOne").mockImplementation(id => {
+        const draws = [0, (selected + 0.5) / pool.length, 0];
+        return selectDrop(id, () => draws.shift() ?? 0);
+      });
+      const grant = vi.fn<NonNullable<typeof engine.o.takeCard>>((m, type) => takeCardDrop(templates, m, type));
+      engine.o.takeCard = grant;
+      roomOptions.botFallbackSec = 0;
+      const ch = await createCharacter(await sharedDb(), { grade: 20 });
+      const client = FakeClient.memory(server);
+      a = { ch, c: client, player: () => server.ctx.world.get(ch.userId)! };
+      client.login(ch.user, ch.pass);
+      const login = await client.waitFor(r => r.code === 95 || r.code === 2);
+      expect(login.code, login.code === 2 ? login.pkt.readString() : "login complete").toBe(95);
+      client.out(16, pkt => pkt.writeInt(1));
+      await client.code(94, 9);
+      roomCmd(client, 0, pkt => { pkt.writeByte(0); pkt.writeByte(2); pkt.writeUTF("settlement"); pkt.writeUTF(""); });
+      await client.code(94, 0);
+      const p = a.player();
+      const gp0 = p.info.GP, total0 = p.info.Total;
+      const count0 = p.propBag.getItemCount(rewardId);
+      roomCmd(a.c, 7);
+      await Promise.all(await playToEnd([a]));
+      const fires = a.c.received.filter(r => r.code === 91 && r.sub === 2);
+      expect(new Set(fires.map(r => r.p1)).size).toBe(2);
+      expect(p.info.GP).toBeGreaterThan(gp0);
+      expect(p.info.Total).toBe(total0 + 1);
+      const settled = { GP: p.info.GP, Grade: p.info.Grade, Gold: p.info.Gold, Money: p.info.Money, MoneyLock: p.info.MoneyLock, GiftToken: p.info.GiftToken, Offer: p.info.Offer, Win: p.info.Win, Total: p.info.Total };
+      const mark = a.c.mark();
+      gameCmd(a.c, 98, pkt => pkt.writeByte(3));
+      const card = await a.c.code(91, 98, mark);
+      expect(card.pkt.readByte()).toBe(98);
+      expect(card.pkt.readBoolean()).toBe(false); // manual free pick, never 114 paid or 130 countdown
+      expect(card.pkt.readByte()).toBe(3);
+      expect(card.pkt.readInt()).toBe(rewardId);
+      const count = card.pkt.readInt();
+      expect(count).toBeGreaterThan(0);
+      expect(card.pkt.readBoolean()).toBe(false);
+      const expected = { ...settled, Gold: settled.Gold + (rewardId === -100 ? count : 0) };
+      const expectedCount = count0 + (rewardId > 0 ? count : 0);
+      expect(p.info).toMatchObject(expected);
+      expect(p.propBag.getItemCount(rewardId)).toBe(expectedCount);
+      expect(p.tempBag.getItemCount(rewardId)).toBe(0);
+      // A following echo is a FIFO barrier: both duplicate requests have been handled before checking.
+      gameCmd(a.c, 98, pkt => pkt.writeByte(3));
+      gameCmd(a.c, 98, pkt => pkt.writeByte(4));
+      a.c.out(225);
+      await a.c.code(225, undefined, mark);
+      expect(a.c.received.slice(mark).filter(r => r.code === 91 && r.sub === 98)).toHaveLength(1);
+      expect(grant).toHaveBeenCalledOnce();
+      expect(p.info).toMatchObject(expected);
+      expect(p.propBag.getItemCount(rewardId)).toBe(expectedCount);
+      for (let i = 0; i < 200 && engine.games.size; i++) engine.tick((clock += 200));
+      expect(engine.games.size).toBe(0);
+      expect(p.currentRoom?.IsPlaying).toBe(false);
+      const leaving = a.c.mark();
+      roomCmd(a.c, 5);
+      await a.c.code(94, 5, leaving);
+      expect(p.currentRoom).toBeNull();
+      const hall = a.c.mark();
+      a.c.out(16, pkt => pkt.writeInt(1));
+      await a.c.code(94, 9, hall);
+      expect(grant).toHaveBeenCalledOnce(); // game stop cannot award a second automatic card
+      a.c.close();
+      await vi.waitFor(() => expect(server.ctx.world.get(p.id)).toBeUndefined(), { timeout: 10000 });
+      next = FakeClient.memory(server);
+      next.login(a.ch.user, a.ch.pass);
+      await next.code(95);
+      const reloaded = server.ctx.world.get(p.id)!;
+      expect(reloaded).not.toBe(p);
+      expect(reloaded.info).toMatchObject(expected);
+      expect(reloaded.propBag.getItemCount(rewardId)).toBe(expectedCount);
+      expect(reloaded.tempBag.getItemCount(rewardId)).toBe(0);
+      expect(reloaded.currentRoom).toBeNull();
+    } finally {
+      a?.c.close(); next?.close();
+      const remaining = a && server.ctx.world.get(a.ch.userId);
+      if (remaining) await quitPlayer(server.ctx, remaining);
+      drop?.mockRestore();
+      engine.o.takeCard = previous.takeCard;
+      templates.dropConditions = previous.conditions; templates.dropItems = previous.items;
+      roomOptions.botFallbackSec = previous.fallback;
+      clock = previous.clock;
+    }
   }, 60000);
 
   it("GAME_CMD 114 PAYMENT_TAKE_CARD charges Money and grants one extra pick", async () => {

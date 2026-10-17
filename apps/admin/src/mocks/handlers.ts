@@ -15,7 +15,7 @@ const authed = (req: Request) => {
   const name = (req.headers.get("Authorization") ?? "").replace(/^Bearer mock-/, "");
   return accounts[name]?.user ?? null;
 };
-const unauthorized = () => HttpResponse.json({ message: "Não autenticado" }, { status: 401 });
+const unauthorized = () => HttpResponse.json({ message: "请先登录" }, { status: 401 });
 
 let serverConfig: Row = {
   publicHost: "jogo.exemplo.com",
@@ -33,7 +33,7 @@ let serverConfig: Row = {
   maxPlayers: 1000,
   maintenance: false,
   maintenanceMessage: "",
-  motd: "Fim de semana com EXP em dobro!",
+  motd: "周末双倍经验！",
 };
 
 const assets: Asset[] = [];
@@ -78,7 +78,7 @@ export const handlers = [
     await delay(250);
     const { username, password } = (await request.json()) as { username: string; password: string };
     const acc = accounts[username];
-    if (!acc || acc.password !== password) return HttpResponse.json({ message: "Credenciais inválidas" }, { status: 401 });
+    if (!acc || acc.password !== password) return HttpResponse.json({ message: "用户名或密码错误" }, { status: 401 });
     return HttpResponse.json({ token: `mock-${username}`, user: acc.user });
   }),
   http.get("/api/auth/me", ({ request }) => {
@@ -117,7 +117,7 @@ export const handlers = [
     if (!authed(request)) return unauthorized();
     const fd = await request.formData();
     const file = fd.get("file");
-    if (!(file instanceof File)) return HttpResponse.json({ message: "Arquivo ausente" }, { status: 400 });
+    if (!(file instanceof File)) return HttpResponse.json({ message: "请选择文件" }, { status: 400 });
     const folder = String(fd.get("folder") ?? "uploads");
     const url = await fileToDataUrl(file);
     const key = `${folder}/${Date.now()}-${file.name}`;
@@ -134,7 +134,7 @@ export const handlers = [
     if (!authed(request)) return unauthorized();
     const fd = await request.formData();
     const file = fd.get("file");
-    if (!(file instanceof File)) return HttpResponse.json({ message: "Arquivo ausente" }, { status: 400 });
+    if (!(file instanceof File)) return HttpResponse.json({ message: "请选择文件" }, { status: 400 });
     const folder = String(fd.get("folder") ?? "uploads");
     const asset: Asset = {
       key: `${folder}/${file.name}`,
@@ -179,7 +179,7 @@ export const handlers = [
   http.post("/api/admin/players/:id/:action", async ({ request, params }) => {
     if (!authed(request)) return unauthorized();
     const p = tables.get("players")!.find((r) => String(r.UserID) === params.id);
-    if (!p) return HttpResponse.json({ message: "Jogador não encontrado" }, { status: 404 });
+    if (!p) return HttpResponse.json({ message: "未找到该玩家" }, { status: 404 });
     if (params.action === "ban") {
       const { reason, hours } = (await request.json()) as { reason: string; hours: number | null };
       p.ForbidDate = new Date(Date.now() + (hours ? hours * 3600_000 : 100 * 365 * 86400_000)).toISOString();
@@ -188,7 +188,7 @@ export const handlers = [
       p.ForbidDate = null;
       p.ForbidReason = "";
     }
-    else if (params.action !== "give-item") return HttpResponse.json({ message: "Ação desconhecida" }, { status: 404 });
+    else if (params.action !== "give-item") return HttpResponse.json({ message: "未知操作" }, { status: 404 });
     return HttpResponse.json({ ok: true });
   }),
 
@@ -196,7 +196,7 @@ export const handlers = [
   http.get("/api/admin/:resource", async ({ request, params }) => {
     if (!authed(request)) return unauthorized();
     const def = resourceByName.get(String(params.resource));
-    if (!def) return HttpResponse.json({ message: "Recurso desconhecido" }, { status: 404 });
+    if (!def) return HttpResponse.json({ message: "未知资源" }, { status: 404 });
     await delay(150);
     const sp = new URL(request.url).searchParams;
     const q = sp.get("q") ?? "";
@@ -222,20 +222,20 @@ export const handlers = [
     if (!authed(request)) return unauthorized();
     const def = resourceByName.get(String(params.resource));
     const row = def && tables.get(def.name)?.find((r) => rowId(def, r) === params.id);
-    if (!row) return HttpResponse.json({ message: "Não encontrado" }, { status: 404 });
+    if (!row) return HttpResponse.json({ message: "未找到记录" }, { status: 404 });
     return HttpResponse.json(row);
   }),
 
   http.post("/api/admin/:resource", async ({ request, params }) => {
     if (!authed(request)) return unauthorized();
     const def = resourceByName.get(String(params.resource));
-    if (!def) return HttpResponse.json({ message: "Recurso desconhecido" }, { status: 404 });
+    if (!def) return HttpResponse.json({ message: "未知资源" }, { status: 404 });
     const rows = tables.get(def.name)!;
     const body = (await request.json()) as Row;
     const keys = idFields(def);
     if (keys.length === 1 && (body[keys[0]!] === undefined || body[keys[0]!] === null)) body[keys[0]!] = nextId(rows, def.idField);
     if (rows.some((r) => rowId(def, r) === rowId(def, body)))
-      return HttpResponse.json({ message: `${keys.join(" + ")} já existe` }, { status: 409 });
+      return HttpResponse.json({ message: `${keys.join(" + ")} 已存在` }, { status: 409 });
     rows.unshift(body);
     return HttpResponse.json(body, { status: 201 });
   }),
@@ -244,7 +244,7 @@ export const handlers = [
     if (!authed(request)) return unauthorized();
     const def = resourceByName.get(String(params.resource));
     const row = def && tables.get(def.name)?.find((r) => rowId(def, r) === params.id);
-    if (!row) return HttpResponse.json({ message: "Não encontrado" }, { status: 404 });
+    if (!row) return HttpResponse.json({ message: "未找到记录" }, { status: 404 });
     Object.assign(row, (await request.json()) as Row);
     return HttpResponse.json(row);
   }),
@@ -253,7 +253,7 @@ export const handlers = [
     if (!authed(request)) return unauthorized();
     const def = resourceByName.get(String(params.resource));
     const rows = def && tables.get(def.name);
-    if (!rows) return HttpResponse.json({ message: "Não encontrado" }, { status: 404 });
+    if (!rows) return HttpResponse.json({ message: "未找到记录" }, { status: 404 });
     const i = rows.findIndex((r) => rowId(def!, r) === params.id);
     if (i >= 0) rows.splice(i, 1);
     return new HttpResponse(null, { status: 204 });

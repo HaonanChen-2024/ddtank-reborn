@@ -56,14 +56,9 @@ function useStageScale(availRef: React.RefObject<HTMLElement | null>): number {
 }
 
 function LogoSlot() {
-  const [broken, setBroken] = useState(false);
   return (
     <div className="play-logo-slot">
-      {!broken ? (
-        <img src="/play/logo.webp" alt="DDReborn" onError={() => setBroken(true)} />
-      ) : (
-        <span className="play-logo-fallback">DDReborn</span>
-      )}
+      <span className="play-logo-fallback">弹弹堂</span>
     </div>
   );
 }
@@ -131,6 +126,7 @@ export function PlayPage() {
         </Button>
         <span className="hidden min-w-0 truncate font-display text-muted sm:block">{data?.serverName}</span>
         <Button size="sm" className="shrink-0" onClick={() => openActivities()}>活动中心</Button>
+        <Button variant="ghost" size="sm" className="shrink-0 px-2 sm:px-3" title="领取活动积分或恢复未确认操作" onClick={() => setActivitiesOpen(true)}>活动任务</Button>
         {activityNotice && <span role="alert" className="min-w-0 truncate text-xs text-coral" title={activityNotice}>{activityNotice}</span>}
         <details className="ml-auto shrink-0">
           <summary className="cursor-pointer rounded-lg px-2 py-1 font-display text-sm text-ink hover:bg-panel-2 focus-visible:outline-2 focus-visible:outline-sun">
@@ -142,7 +138,7 @@ export function PlayPage() {
               <li>{t("play.soloHelp.arena")}</li>
               <li>{t("play.soloHelp.quickJoin")}</li>
             </ol>
-            <button type="button" className="mt-3 text-xs text-muted underline" onClick={() => setActivitiesOpen(true)}>恢复未确认操作（维护工具）</button>
+            <button type="button" className="mt-3 text-xs text-muted underline" onClick={() => setActivitiesOpen(true)}>恢复未确认操作（活动任务）</button>
           </div>
         </details>
         <Button

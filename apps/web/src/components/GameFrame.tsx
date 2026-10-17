@@ -1404,7 +1404,8 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
       detachDevil();
       detachCaveLoot();
       detachChristmas();
-        setError(err.message);
+        console.error("客户端加载失败：", err);
+        setError("请检查游戏资源与服务连接，然后重试。");
         setPhase("error");
         onError?.(err);
       }
@@ -1485,7 +1486,7 @@ export function GameFrame({ rufflePath, swfUrl, flashvars, socketProxy, base, cl
             </div>
           ) : (
             <div className="flex w-full max-w-sm flex-col items-center gap-5">
-              <p className="title-plate text-4xl text-sun">DDTank</p>
+              <p className="title-plate text-4xl text-sun">弹弹堂</p>
               <PowerGauge
                 value={progress}
                 size="lg"

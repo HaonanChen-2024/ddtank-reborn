@@ -137,7 +137,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   // ---- specific endpoints (registered before the generic :resource routes) ----
   f.post("/api/admin/items/wardrobe-check", { preHandler: guard }, async (req, reply) => {
     try { return checkWardrobe(ctx.resources, req.body, ctx.cfg.PUBLIC_URL); }
-    catch (error) { return reply.code(400).send({ message: error instanceof Error ? error.message : "Invalid wardrobe draft" }); }
+    catch (error) { ctx.log.error(error as object, "wardrobe validation failed"); return reply.code(400).send({ message: "衣橱数据无效，请检查类别、资源目录、性别和图层。" }); }
   });
 
   f.get("/api/admin/stats", { preHandler: guard }, async () => {
@@ -193,12 +193,12 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   };
   f.post("/api/admin/uploads", { preHandler: guard }, async (req, reply) => {
     const a = await upload(req);
-    if (!a) return reply.code(400).send({ message: "Arquivo ausente" });
+    if (!a) return reply.code(400).send({ message: "未选择文件" });
     return reply.code(201).send({ url: a.url, key: a.key });
   });
   f.post("/api/admin/assets", { preHandler: guard }, async (req, reply) => {
     const a = await upload(req);
-    if (!a) return reply.code(400).send({ message: "Arquivo ausente" });
+    if (!a) return reply.code(400).send({ message: "未选择文件" });
     return reply.code(201).send(a);
   });
   f.get<{ Querystring: { prefix?: string } }>("/api/admin/assets", { preHandler: guard }, async (req) => ctx.storage.list(req.query.prefix ?? ""));
@@ -214,23 +214,23 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   });
 
   // ---- events / scheduler (apps/game internal channel) ----
-  f.get("/api/admin/events/status", { preHandler: guard }, async (_req, reply) => (await gameInternal(ctx, "/events")) ?? reply.code(503).send({ message: "Servidor de jogo indisponível" }));
+  f.get("/api/admin/events/status", { preHandler: guard }, async (_req, reply) => (await gameInternal(ctx, "/events")) ?? reply.code(503).send({ message: "游戏服务器暂时不可用" }));
   f.post("/api/admin/events/start", { preHandler: guard }, async (req, reply) => {
     const b = (req.body ?? {}) as Row;
     const r = await gameInternalPost(ctx, "/events/start", { kind: String(b.kind ?? ""), minutes: Number(b.minutes ?? 30) });
     await audit(ctx, actor(req), "events", `start ${b.kind} ${b.minutes ?? 30} min`);
-    return r ?? reply.code(503).send({ message: "Servidor de jogo indisponível" });
+    return r ?? reply.code(503).send({ message: "游戏服务器暂时不可用" });
   });
   f.post("/api/admin/events/stop", { preHandler: guard }, async (req, reply) => {
     const b = (req.body ?? {}) as Row;
     const r = await gameInternalPost(ctx, "/events/stop", { kind: String(b.kind ?? "") });
     await audit(ctx, actor(req), "events", `stop ${b.kind}`);
-    return r ?? reply.code(503).send({ message: "Servidor de jogo indisponível" });
+    return r ?? reply.code(503).send({ message: "游戏服务器暂时不可用" });
   });
   f.post("/api/admin/events/reload", { preHandler: guard }, async (req, reply) => {
     const r = await gameInternalPost(ctx, "/reload-templates");
     await audit(ctx, actor(req), "events", "reload");
-    return r ?? reply.code(503).send({ message: "Servidor de jogo indisponível" });
+    return r ?? reply.code(503).send({ message: "游戏服务器暂时不可用" });
   });
   /** Activation codes for an Active with HasKey 1/4 (player."Active_Number"), like the GameAdmin code generator. */
   f.post<{ Params: { id: string } }>("/api/admin/events/:id/codes", { preHandler: guard }, async (req) => {
@@ -264,7 +264,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   const nickIn = (names: string[]) => (names.length ? sql`"NickName" IN (${sql.join(names.map((n) => sql`${n}`), sql`, `)})` : sql`false`);
   f.post("/api/admin/mail/broadcast", { preHandler: guard }, async (req, reply) => {
     const b = (req.body ?? {}) as Row;
-    if (!b.subject || !b.body) return reply.code(400).send({ message: "Assunto e mensagem são obrigatórios" });
+    if (!b.subject || !b.body) return reply.code(400).send({ message: "请填写邮件主题和正文" });
     const target = String(b.target ?? "all");
     const where =
       target === "online"
@@ -287,7 +287,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
     const id = Number(req.params.id);
     const b = (req.body ?? {}) as Row;
     const [u] = await q(ctx.h, sql`SELECT "UserID","NickName" FROM player."Sys_Users_Detail" WHERE "UserID" = ${id}`);
-    if (!u) return reply.code(404).send({ message: "Jogador não encontrado" });
+    if (!u) return reply.code(404).send({ message: "未找到该角色" });
     if (req.params.action === "ban") {
       const hours = Number(b.hours ?? 0);
       const until = new Date(wallNow().getTime() + (hours > 0 ? hours * 3600_000 : 100 * 365 * 86400_000));
@@ -295,8 +295,8 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
     } else if (req.params.action === "unban") {
       await ctx.h.db.execute(sql`UPDATE player."Sys_Users_Detail" SET "ForbidDate" = ${new Date(Date.UTC(2000, 0, 1))}, "ForbidReason" = '', "IsExist" = true WHERE "UserID" = ${id}`);
     } else if (req.params.action === "give-item") {
-      await sendMail(ctx, id, String(u.NickName), "GM", "Item", { items: [{ templateId: b.templateId, count: b.count, validDays: b.validDays }] });
-    } else return reply.code(404).send({ message: "Ação desconhecida" });
+      await sendMail(ctx, id, String(u.NickName), "管理员邮件", "道具奖励", { items: [{ templateId: b.templateId, count: b.count, validDays: b.validDays }] });
+    } else return reply.code(404).send({ message: "未知操作" });
     await audit(ctx, actor(req), "players", `${req.params.action} ${u.NickName} (${id})`, b);
     return { ok: true };
   });
@@ -319,8 +319,8 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   });
   f.post("/api/admin/admin-users", { preHandler: guard }, async (req, reply) => {
     const b = (req.body ?? {}) as Row;
-    if (!b.username || !b.password) return reply.code(400).send({ message: "Usuário e senha são obrigatórios" });
-    if (await findAccount(ctx.h, String(b.username))) return reply.code(409).send({ message: "username já existe" });
+    if (!b.username || !b.password) return reply.code(400).send({ message: "请输入用户名和密码" });
+    if (await findAccount(ctx.h, String(b.username))) return reply.code(409).send({ message: "该用户名已被使用" });
     const role = String(b.role ?? "admin");
     const [a] = await ctx.h.db.insert(Accounts).values({ UserName: String(b.username), Email: (b.email as string) ?? null, PasswordHash: await hashPassword(String(b.password)), IsAdmin: role === "admin" }).returning();
     await ctx.h.db.insert(R).values({ AccountID: a!.ID, role, active: b.active !== false });
@@ -331,7 +331,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
     const id = Number(req.params.id);
     const b = (req.body ?? {}) as Row;
     const [a] = await ctx.h.db.select().from(Accounts).where(eq(Accounts.ID, id));
-    if (!a) return reply.code(404).send({ message: "Não encontrado" });
+    if (!a) return reply.code(404).send({ message: "未找到相关记录" });
     const [cur] = await ctx.h.db.select().from(R).where(eq(R.AccountID, id));
     const role = String(b.role ?? cur?.role ?? (a.IsAdmin ? "admin" : "gm"));
     const active = b.active === undefined ? (cur?.active ?? true) : !!b.active;
@@ -345,11 +345,11 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   });
   f.get<{ Params: { id: string } }>("/api/admin/admin-users/:id", { preHandler: guard }, async (req, reply) => {
     const [r] = await ctx.h.db.select().from(Accounts).leftJoin(R, eq(R.AccountID, Accounts.ID)).where(eq(Accounts.ID, Number(req.params.id)));
-    return r ? adminRow(r.Accounts, r.AccountRoles ?? undefined) : reply.code(404).send({ message: "Não encontrado" });
+    return r ? adminRow(r.Accounts, r.AccountRoles ?? undefined) : reply.code(404).send({ message: "未找到相关记录" });
   });
   f.delete<{ Params: { id: string } }>("/api/admin/admin-users/:id", { preHandler: guard }, async (req, reply) => {
     const id = Number(req.params.id);
-    if (id === userOf(req).sub) return reply.code(400).send({ message: "Você não pode remover a si mesmo" });
+    if (id === userOf(req).sub) return reply.code(400).send({ message: "不能移除当前登录的管理员" });
     await ctx.h.db.update(Accounts).set({ IsAdmin: false }).where(eq(Accounts.ID, id));
     await ctx.h.db.delete(R).where(eq(R.AccountID, id));
     await audit(ctx, actor(req), "admin-users", `revoke ${id}`);
@@ -364,7 +364,7 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
     { preHandler: guard },
     async (req, reply) => {
       const def = resolve(req.params.resource);
-      if (!def) return reply.code(404).send({ message: "Recurso desconhecido" });
+      if (!def) return reply.code(404).send({ message: "未知资源类型" });
       const c = cols(def.table);
       const page = Math.max(1, Number(req.query.page) || 1);
       const pageSize = Math.min(500, Math.max(1, Number(req.query.pageSize) || 20));
@@ -396,9 +396,9 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
   f.get<{ Params: { resource: string; id: string } }>("/api/admin/:resource/:id", { preHandler: guard }, async (req, reply) => {
     const def = resolve(req.params.resource);
     const w = def && pkWhere(def, req.params.id);
-    if (!def || !w) return reply.code(404).send({ message: "Não encontrado" });
+    if (!def || !w) return reply.code(404).send({ message: "未找到相关记录" });
     const [row] = await ctx.h.db.select().from(def.table).where(w).limit(1);
-    return row ? strip(def, row as Row) : reply.code(404).send({ message: "Não encontrado" });
+    return row ? strip(def, row as Row) : reply.code(404).send({ message: "未找到相关记录" });
   });
 
   const afterWrite = async (req: FastifyRequest, def: ResourceDef, what: string, data?: unknown) => {
@@ -411,45 +411,47 @@ export async function adminRoutes(f: FastifyInstance, ctx: AppCtx) {
 
   f.post<{ Params: { resource: string } }>("/api/admin/:resource", { preHandler: guard }, async (req, reply) => {
     const def = resolve(req.params.resource);
-    if (!def) return reply.code(404).send({ message: "Recurso desconhecido" });
-    if (def.readOnly || def.noCreate) return reply.code(405).send({ message: "Criação não permitida" });
+    if (!def) return reply.code(404).send({ message: "未知资源类型" });
+    if (def.readOnly || def.noCreate) return reply.code(405).send({ message: "不允许创建此类记录" });
     const values = pick(def, req.body as Row, { allowPk: true });
     const w = def.pk.every((k) => values[k] !== undefined && values[k] !== null) ? pkWhere(def, def.pk.map((k) => String(values[k])).join(ID_SEP)) : undefined;
     if (w) {
       const [dup] = await ctx.h.db.select().from(def.table).where(w).limit(1);
-      if (dup) return reply.code(409).send({ message: `${def.pk.join(" + ")} já existe` });
+      if (dup) return reply.code(409).send({ message: `${def.pk.join(" + ")}对应的记录已存在` });
     }
     try {
       const [row] = (await ctx.h.db.insert(def.table).values(values as never).returning()) as Row[];
       await afterWrite(req, def, "create", values);
       return reply.code(201).send(strip(def, row ?? values));
     } catch (e) {
-      return reply.code(400).send({ message: (e as Error).message.split("\n")[0] });
+      ctx.log.error(e as object, "admin resource creation failed");
+      return reply.code(400).send({ message: "创建失败，请检查填写的数据。" });
     }
   });
 
   f.patch<{ Params: { resource: string; id: string } }>("/api/admin/:resource/:id", { preHandler: guard }, async (req, reply) => {
     const def = resolve(req.params.resource);
     const w = def && pkWhere(def, req.params.id);
-    if (!def || !w) return reply.code(404).send({ message: "Não encontrado" });
-    if (def.readOnly) return reply.code(405).send({ message: "Somente leitura" });
+    if (!def || !w) return reply.code(404).send({ message: "未找到相关记录" });
+    if (def.readOnly) return reply.code(405).send({ message: "此记录仅可查看" });
     const values = pick(def, req.body as Row, { allowPk: false });
-    if (!Object.keys(values).length) return reply.code(400).send({ message: "Nada para atualizar" });
+    if (!Object.keys(values).length) return reply.code(400).send({ message: "没有可更新的内容" });
     try {
       const rows = (await ctx.h.db.update(def.table).set(values as never).where(w).returning()) as Row[];
-      if (!rows.length) return reply.code(404).send({ message: "Não encontrado" });
+      if (!rows.length) return reply.code(404).send({ message: "未找到相关记录" });
       await afterWrite(req, def, `update ${req.params.id}`, values);
       return strip(def, rows[0]!);
     } catch (e) {
-      return reply.code(400).send({ message: (e as Error).message.split("\n")[0] });
+      ctx.log.error(e as object, "admin resource update failed");
+      return reply.code(400).send({ message: "更新失败，请检查填写的数据。" });
     }
   });
 
   f.delete<{ Params: { resource: string; id: string } }>("/api/admin/:resource/:id", { preHandler: guard }, async (req, reply) => {
     const def = resolve(req.params.resource);
     const w = def && pkWhere(def, req.params.id);
-    if (!def || !w) return reply.code(404).send({ message: "Não encontrado" });
-    if (def.readOnly || def.noDelete) return reply.code(405).send({ message: "Exclusão não permitida" });
+    if (!def || !w) return reply.code(404).send({ message: "未找到相关记录" });
+    if (def.readOnly || def.noDelete) return reply.code(405).send({ message: "不允许删除此类记录" });
     await ctx.h.db.delete(def.table).where(w);
     await afterWrite(req, def, `delete ${req.params.id}`);
     return reply.code(204).send();

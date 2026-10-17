@@ -8,7 +8,7 @@ function uptime(sec: number) {
   const d = Math.floor(sec / 86400);
   const h = Math.floor((sec % 86400) / 3600);
   const m = Math.floor((sec % 3600) / 60);
-  return d ? `${d}d ${h}h` : `${h}h ${m}m`;
+  return d ? `${d}天 ${h}小时` : `${h}小时 ${m}分钟`;
 }
 
 function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {

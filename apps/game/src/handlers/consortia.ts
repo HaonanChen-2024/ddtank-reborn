@@ -211,9 +211,9 @@ export function consortiaRouter(): SubRouter {
     const money = pkt.readInt();
     if (p.info.HasBagPassword && p.info.IsLocked) return p.sendMessage(0, ctx.lang.t("Bag.Locked"));
     const d = donationRiches(money, p.info.Money);
-    if (!d.ok) return p.sendMessage(0, d.err === "NoMoney" ? ctx.lang.t("ConsortiaRichesOfferHandler.NoMoney") : ctx.lang.t("ConsortiaRichesOfferHandler.RichIsNotFound", 2));
+    if (!d.ok) return p.sendMessage(0, d.err === "NoMoney" ? ctx.lang.t("ConsortiaRichesOfferHandler.NoMoney") : "捐献数量无效。");
     const cid = p.info.ConsortiaID;
-    const res = await Db.addRiches(ctx.db.db, cid, d.riches, 5, p.info.NickName ?? "", (n, v) => m.t("SP_Consortia_Riches_Add.Msg1", " O membro {0} doou {1} pontos de riqueza!", n, v));
+    const res = await Db.addRiches(ctx.db.db, cid, d.riches, 5, p.info.NickName ?? "", (n, v) => m.t("SP_Consortia_Riches_Add.Msg1", " 成员{0}捐献了{1}公会财富！", n, v));
     if (res.ok) {
       p.beginChanges();
       p.info.RichesOffer += d.riches;
@@ -490,7 +490,7 @@ export function consortiaRouter(): SubRouter {
         const c = await Db.getConsortia(ctx.db.db, cid);
         if (!c) return;
         const cost = m.missionCost(c.Level);
-        if (c.Riches < cost || (await Db.spendRiches(ctx.db.db, cid, p.id, cost)) !== 0) return p.sendMessage(GM_NOTICE, m.t("ConsortiaBussiness.Riches.Msg3", "Riqueza do Clã insuficiente."));
+        if (c.Riches < cost || (await Db.spendRiches(ctx.db.db, cid, p.id, cost)) !== 0) return p.sendMessage(GM_NOTICE, m.t("ConsortiaBussiness.Riches.Msg3", "公会财富不足。"));
         await m.refreshRiches(cid);
         m.tasks.delete(cid); // expired one
         const t = m.createTask(cid, level <= 0 ? 1 : level, now);
@@ -499,7 +499,7 @@ export function consortiaRouter(): SubRouter {
       }
       case 1: {
         // ResetTask.cs
-        if (p.info.Money < TASK_RESET_MONEY) return p.sendMessage(GM_NOTICE, "Cupons insuficientes para atualizar a missão.");
+        if (p.info.Money < TASK_RESET_MONEY) return p.sendMessage(GM_NOTICE, "点券不足，无法刷新任务。");
         p.removeMoney(TASK_RESET_MONEY);
         const t = m.resetTask(cid, now);
         return p.send(m.taskInfoPacket(t));
@@ -604,7 +604,7 @@ export function consortiaRouter(): SubRouter {
     const c = await Db.getConsortia(ctx.db.db, cid);
     if (!c) return;
     const chk = checkBadge(c.Riches, badge.Cost, p.info.Right);
-    if (chk === "riches") return p.sendMessage(0, m.t("ConsortiaBussiness.Riches.Msg3", "Riqueza do Clã insuficiente."));
+    if (chk === "riches") return p.sendMessage(0, m.t("ConsortiaBussiness.Riches.Msg3", "公会财富不足。"));
     const now = ctx.now();
     const buyTime = now.toISOString().slice(0, 19).replace("T", " ");
     const validDate = 30;
@@ -634,14 +634,14 @@ export function consortiaRouter(): SubRouter {
     const cid = p.info.ConsortiaID;
     const c = await Db.getConsortia(ctx.db.db, cid);
     if (!c) return;
-    if (c.Riches < MAIL_RICHES) return p.sendMessage(0, m.t("ConsortiaBussiness.Riches.Msg3", "Riqueza do Clã insuficiente."));
+    if (c.Riches < MAIL_RICHES) return p.sendMessage(0, m.t("ConsortiaBussiness.Riches.Msg3", "公会财富不足。"));
     // charge first (SP_ConsortiaRiches_Update needs the Enounce right); the C# mailed first and charged after
     let ok = hasRight(p.info.Right, Right.Enounce) && (await Db.spendRiches(ctx.db.db, cid, p.id, MAIL_RICHES)) === 0;
     if (ok) {
       ok = false;
       for (const mem of await Db.listMembers(ctx.db.db, cid)) {
         if (mem.UserID === p.id) continue;
-        await sendMail(ctx.db.db, { SenderID: p.id, Sender: `Clã ${c.ConsortiaName}`, ReceiverID: mem.UserID, Receiver: mem.UserName, Title: title, Content: content, Type: 59, Gold: 0, Money: 0 });
+        await sendMail(ctx.db.db, { SenderID: p.id, Sender: `公会 ${c.ConsortiaName}`, ReceiverID: mem.UserID, Receiver: mem.UserName, Title: title, Content: content, Type: 59, Gold: 0, Money: 0 });
         ok = true;
         ctx.world.get(mem.UserID)?.send(Out.mailResponse(mem.UserID, 1));
       }

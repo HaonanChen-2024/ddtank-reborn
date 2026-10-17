@@ -177,8 +177,9 @@ async function loadPlayer(ctx: ServerContext, client: GameClient, userId: number
   p.send(Out.bufferList(p.id, p.buffs));
   p.send(Out.achievementData(p.id, p.achievements));
   // first-recharge gift is a free claim here (no real payments): FIRST_RECHARGE_FREE=false restores the original check
-  p.send(Out.firstRecharge(!!info.IsRecharged || process.env.FIRST_RECHARGE_FREE !== "false", !!info.IsGetAward));
   const ev = eventsRuntime(ctx);
+  const firstRechargeAvailable = !!ev.data.firstRechargeGoods(ctx.templates.findItem);
+  p.send(Out.firstRecharge(firstRechargeAvailable && (!!info.IsRecharged || process.env.FIRST_RECHARGE_FREE !== "false"), !!info.IsGetAward));
   p.send(ev.boss.window ? worldBossOpen(ev, p) : Out.openWorldBoss());
   if (!ev.leagueOpen) p.send(Out.leagueNotice(p.id, match.restCount, 0, 2));
   p.send(Out.guildMemberWeek(p.id));

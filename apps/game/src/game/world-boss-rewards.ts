@@ -36,7 +36,7 @@ export async function grantClaimRewards(ctx: ServerContext, p: GamePlayer, rewar
 }
 
 async function online(ctx: ServerContext, p: GamePlayer, key: string, rewards: Reward[]): Promise<string | null> {
-  return grantClaimRewards(ctx, p, rewards, "Boss mundial", (db) => claimOnce(db, p.id, "worldboss", key));
+  return grantClaimRewards(ctx, p, rewards, "世界首领奖励", (db) => claimOnce(db, p.id, "worldboss", key));
 }
 
 async function offline(ctx: ServerContext, id: number, key: string, rewards: Reward[]): Promise<void> {
@@ -55,7 +55,7 @@ async function offline(ctx: ServerContext, id: number, key: string, rewards: Rew
     const detached = new GamePlayer({ send: () => {}, disconnect: () => {}, remoteAddress: "world-boss-offline" }, info, defaultMatch(id), 1, "");
     for (const bag of detached.allBags()) bag.capacity = 0;
     const grant = grantRewards(detached, rewards.filter((r) => r.templateId > 0), ctx.templates.findItem, ctx.now());
-    if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, detached, grant.overflow, "Boss mundial", 12);
+    if (grant.overflow.length) await mailItems({ ...ctx, db: { ...ctx.db, db } }, detached, grant.overflow, "世界首领奖励", 12);
   });
 }
 
@@ -82,7 +82,7 @@ export async function awardWorldBoss(ctx: ServerContext, id: number, key: string
           try {
             if (!admitted || ctx.world.get(id) !== p) return false;
             const summary = await online(ctx, p, key, rewards);
-            if (summary !== null) p.sendMessage(0, `${description} Prêmio: ${summary}.`);
+            if (summary !== null) p.sendMessage(0, `${description}奖励：${summary}。`);
             return true;
           } finally { release?.(); }
         }).finally(() => release?.());

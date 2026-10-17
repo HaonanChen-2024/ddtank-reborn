@@ -7,7 +7,7 @@
  * request) never duplicate rewards. The original trusted the client for most of these (see notes per handler).
  */
 import { and, eq, sql } from "drizzle-orm";
-import { game, player, type Database } from "@ddt/db";
+import { applyTranslations, game, loadTranslations, player, type Database } from "@ddt/db";
 import { ItemInfo, templateBagType, type ItemTemplate } from "./item.js";
 import type { GamePlayer } from "./player.js";
 import type { RecordRow } from "../db/social.js";
@@ -18,6 +18,7 @@ export type AchievementRow = typeof game.Achievement.$inferSelect;
 export type AchievementCondRow = typeof game.AchievementCondition.$inferSelect;
 export type AchievementGoodsRow = typeof game.Achievement_Goods.$inferSelect;
 export type EventRewardGoodsRow = typeof game.Event_Reward_Goods.$inferSelect;
+export type EventRewardInfoRow = typeof game.Event_Reward_Info.$inferSelect;
 export type LoginAwardRow = typeof game.Login_Award_Item_Template.$inferSelect;
 
 /** Template caches of the event systems (AwardMgr, UserBoxMgr, AchievementMgr, EventRewardMgr). Reloaded by /reload-templates. */
@@ -27,19 +28,23 @@ export class EventData {
   achievements = new Map<number, AchievementRow>();
   achConds = new Map<number, AchievementCondRow[]>();
   achGoods = new Map<number, AchievementGoodsRow[]>();
+  private achievementTitleNames = new Map<string, string>();
   eventGoods: EventRewardGoodsRow[] = [];
+  eventInfo: EventRewardInfoRow[] = [];
   loginAward: LoginAwardRow[] = [];
 
   async load(db: Database): Promise<this> {
-    const [da, ub, ach, ac, ag, eg, la, online] = await Promise.all([
+    const [da, ub, ach, ac, ag, eg, ei, la, online, titleText] = await Promise.all([
       db.select().from(game.Daily_Award),
       db.select().from(game.LoadUserBox),
       db.select().from(game.Achievement),
       db.select().from(game.AchievementCondition),
       db.select().from(game.Achievement_Goods),
       db.select().from(game.Event_Reward_Goods),
+      db.select().from(game.Event_Reward_Info),
       db.select().from(game.Login_Award_Item_Template),
       db.select().from(game.User_Box).where(eq(game.User_Box.Type, 0)),
+      loadTranslations(db, "Achievement_Goods", "pt-BR"),
     ]);
     this.dailyAward = da;
     // Online boxes share the original User_Box source with LoadUserBox.xml; level/VIP keep their existing source.
@@ -47,9 +52,30 @@ export class EventData {
     this.achievements = new Map(ach.map((a) => [a.ID, a]));
     this.achConds = group(ac, (c) => c.AchievementID);
     this.achGoods = group(ag, (g) => g.AchievementID);
+    // RewardPara remains the persisted title identity; translate only outgoing display names.
+    this.achievementTitleNames = new Map(ag.filter(g => g.RewardType === 1).map(g => [
+      g.RewardPara,
+      applyTranslations(g, ["AchievementID", "RewardType", "RewardValueId"], titleText).RewardPara,
+    ]));
     this.eventGoods = eg;
+    this.eventInfo = ei;
     this.loginAward = la;
     return this;
+  }
+
+  achievementTitleName(name: string): string {
+    return this.achievementTitleNames.get(name) ?? name;
+  }
+
+  /** FirstRechargeGetAwardHandler.cs:22-23,51-61 needs the matching info and real goods; Condition is not a charge threshold. */
+  firstRechargeGoods(find: (id: number) => ItemTemplate | undefined): EventRewardGoodsRow[] | undefined {
+    if (!this.eventInfo.some(r => r.ActivityType === 7 && r.SubActivityType === 1)) return undefined;
+    const goods = this.eventGoods.filter(r => r.ActivityType === 7 && r.SubActivityType === 1);
+    // Match grantRewards: scalar rewards need no item; AddMedal resolves actual item 11408.
+    if (!goods.length || goods.some(r => !Number.isSafeInteger(r.TemplateId)
+      || (![-100, -200, -800, -1100, 11107].includes(r.TemplateId) && !find(r.TemplateId === -300 ? 11408 : r.TemplateId))
+      || r.Count == null || !Number.isSafeInteger(r.Count) || r.Count <= 0)) return undefined;
+    return goods;
   }
 
   /** Sign-in reward tiers (Type 1 items + Type 7 gift tokens by AwardDays > 0), i.e. what SignAwardFrame lists. */

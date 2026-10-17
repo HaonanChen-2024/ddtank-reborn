@@ -22,6 +22,7 @@ import * as Out from "../packets/out.js";
 import { GSPacket } from "@ddt/protocol";
 import type { HandlerRegistry } from "./registry.js";
 import type { ServerContext } from "../session/context.js";
+import { buyGiftBag, presentGoodsUnavailable, quickBuyGoldBox } from "./shop-shortcuts.js";
 
 export interface PriceTotals {
   gold: number; money: number; offer: number; gifttoken: number; petScore: number; score: number; dmgScore: number;
@@ -210,7 +211,10 @@ export async function buyGoods(ctx: ServerContext, p: GamePlayer, pkt: GSPacket)
     const skin = pkt.readString();
     const place = pkt.readInt();
     const shop = tpl.shop.get(goodsId);
-    if (!shop || !tpl.isOnShop(shop.ID)) continue;
+    if (!shop || !tpl.isOnShop(shop.ID)) {
+      ctx.log.warn("purchase rejected", { code: 44, playerId: p.id, goodsId, reason: "not_on_sale" });
+      return p.sendMessage(1, "该商品已下架或配置已变更，未扣除点券，请重新打开商城。");
+    }
     let guildOk = false;
     if (shop.ShopID >= 11 && shop.ShopID <= 15 && p.info.ConsortiaID) {
       const th = await getEquipControl(ctx.db.db, p.info.ConsortiaID, shop.ShopID - 10, 1);
@@ -219,7 +223,10 @@ export async function buyGoods(ctx: ServerContext, p: GamePlayer, pkt: GSPacket)
     const can = canBuyShop(shop.ShopID, guildOk);
     if (shop.ShopID === 2 || !can.ok) return p.sendMessage(1, ctx.lang.t("UserBuyItemHandler.FailByPermission"));
     const t = tpl.findItem(shop.TemplateID);
-    if (!t) continue;
+    if (!t) {
+      ctx.log.warn("purchase rejected", { code: 44, playerId: p.id, goodsId, reason: "missing_template" });
+      return p.sendMessage(1, "该商品配置暂不可用，未扣除点券，请稍后重试。");
+    }
     if (shop.ShopID === 20) {
       // Limited free daily goods (WorldMgr.UpdateShopFreeCount): one per day.
       const last = p.info.ShopFinallyGottenTime;
@@ -442,6 +449,9 @@ export function registerItems(r: HandlerRegistry): void {
   });
 
   r.player(44, "BUY_GOODS", (ctx, p, pkt) => buyGoods(ctx, p, pkt));
+  r.player(46, "BUY_GIFTBAG", (ctx, p, pkt) => buyGiftBag(ctx, p, pkt));
+  r.player(57, "GOODS_PRESENT", (ctx, p) => presentGoodsUnavailable(ctx, p), "partial");
+  r.player(126, "BUY_QUICK_GOLDBOX", (ctx, p, pkt) => quickBuyGoldBox(ctx, p, pkt));
 
   r.player(221, "USER_SEND_GIFTS", (ctx, p, pkt) => sendGift(ctx, p, pkt));
 

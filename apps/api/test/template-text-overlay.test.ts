@@ -64,10 +64,17 @@ const questRows = (xml: XEl) => new Map(xml.children.map(row => [String(attribut
 it("serves exact screenshot names, descriptions, tasks, conditions and reward references through real HTTP XML and Game without any stored changes", async () => {
   const before = await snapshot(), priorGame = await new Templates().load(h.db, 1);
   const priorXml = await Promise.all(definitions.map(d => d.build(h)));
-  expect(entries.map(e => `${e.table}:${e.rowId}`)).toEqual([
+  expect(entries.slice(0, 38).map(e => `${e.table}:${e.rowId}`)).toEqual([
     "Shop_Goods:11028", "Shop_Goods:10008", "Shop_Goods:11001", "Shop_Goods:11005", "Shop_Goods:11009", "Shop_Goods:11013",
     "Shop_Goods:11904", "Shop_Goods:40002", "Shop_Goods:10018",
     "Quest:318", "Quest_Condiction:318:1", "Quest:341", "Quest_Condiction:341:1", "Quest:346", "Quest_Condiction:346:1", "Quest:347", "Quest_Condiction:347:1",
+    "Shop_Goods:10016",
+    "Shop_Goods:10002",
+    "Shop_Goods:10001", "Shop_Goods:10003", "Shop_Goods:10004", "Shop_Goods:10005", "Shop_Goods:10006", "Shop_Goods:10007",
+    "Shop_Goods:11901", "Shop_Goods:11902", "Shop_Goods:11903", "Shop_Goods:11905", "Shop_Goods:11906",
+    "Shop_Goods:40001", "Shop_Goods:40003",
+    "Shop_Goods:11002", "Shop_Goods:11019", "Shop_Goods:11021",
+    "Shop_Goods:11023", "Shop_Goods:11024", "Shop_Goods:11029",
   ]);
   expect(before.goods.find(g => g.TemplateID === 11028)!.Name).toBe("Bùa may mắn 100%");
   expect([318, 341, 346, 347].map(id => before.quests.find(q => q.ID === id)!.Title)).toEqual([
@@ -101,8 +108,29 @@ it("serves exact screenshot names, descriptions, tasks, conditions and reward re
   expect(currentGame.items.get(11028)).toMatchObject({ Name: "幸运符100%", Description: "合成、强化装备时，成功率提高100%。", Property1: 3, Property2: 100 });
   expect(currentGame.items.get(11028)!.Remark).toBe("Existing remark");
   expect(currentGame.items.get(11904)).toMatchObject({ Name: "4级经验药水", Description: "使用后增加10000点人物经验。", CategoryID: 11, Property1: 21, Property2: 10000, MaxCount: 1 });
-  expect(currentGame.items.get(40002)).toMatchObject({ Name: "修炼药水2级", Description: "在背包的修炼界面选择属性使用，增加300点修炼经验。每日使用次数受角色等级和VIP等级限制。", CategoryID: 20, Property1: 0, Property2: 300 });
+  expect(currentGame.items.get(40002)).toMatchObject({ Name: "修炼药水2级", Description: "在背包的修炼界面选择属性使用，增加300点修炼经验。每日使用次数受角色等级和贵宾等级限制。", CategoryID: 20, Property1: 0, Property2: 300 });
   expect(currentGame.items.get(10018)).toMatchObject({ Name: "激怒", Description: "使用后增加100点怒气（怒气上限的50%），最多补至怒气上限。", CategoryID: 10, Property1: 11, Property2: 100 });
+  expect(currentGame.items.get(10016)).toMatchObject({ Name: "传送", Description: "不受武器限制，将自己传送到本回合攻击的落点。" });
+  expect(currentGame.items.get(10002)).toMatchObject({ Name: "攻击+1", Description: "增加1次攻击，伤害降低10%。" });
+  expect(currentGame.items.get(10001)).toMatchObject({ Name: "攻击+2", Description: "增加2次攻击，伤害降低40%。" });
+  expect(currentGame.items.get(10003)).toMatchObject({ Name: "三叉戟导弹", Description: "一次发射3发炮弹，伤害降低50%；与必杀技同时使用时无效。" });
+  expect(currentGame.items.get(10004)).toMatchObject({ Name: "伤害+50%", Description: "伤害提高50%。" });
+  expect(currentGame.items.get(10005)).toMatchObject({ Name: "伤害+40%", Description: "伤害提高40%。" });
+  expect(currentGame.items.get(10006)).toMatchObject({ Name: "伤害+30%", Description: "伤害提高30%。" });
+  expect(currentGame.items.get(10007)).toMatchObject({ Name: "伤害+20%", Description: "伤害提高20%。" });
+  expect(currentGame.items.get(11901)).toMatchObject({ Name: "1级经验药水", Description: "使用后增加1000点人物经验。", CategoryID: 11, Property1: 21, Property2: 1000, MaxCount: 1 });
+  expect(currentGame.items.get(11902)).toMatchObject({ Name: "2级经验药水", Description: "使用后增加2000点人物经验。", CategoryID: 11, Property1: 21, Property2: 2000, MaxCount: 1 });
+  expect(currentGame.items.get(11903)).toMatchObject({ Name: "3级经验药水", Description: "使用后增加5000点人物经验。", CategoryID: 11, Property1: 21, Property2: 5000, MaxCount: 1 });
+  expect(currentGame.items.get(11905)).toMatchObject({ Name: "5级经验药水", Description: "使用后增加20000点人物经验。", CategoryID: 11, Property1: 21, Property2: 20000, MaxCount: 1 });
+  expect(currentGame.items.get(11906)).toMatchObject({ Name: "超级经验药水", Description: "使用后增加100000点人物经验。", CategoryID: 11, Property1: 21, Property2: 100000, MaxCount: 9999 });
+  expect(currentGame.items.get(40001)).toMatchObject({ Name: "修炼药水1级", Description: "在背包的修炼界面选择属性使用，增加30点修炼经验。每日使用次数受角色等级和贵宾等级限制。", CategoryID: 20, Property1: 0, Property2: 30 });
+  expect(currentGame.items.get(40003)).toMatchObject({ Name: "修炼药水3级", Description: "在背包的修炼界面选择属性使用，增加900点修炼经验。每日使用次数受角色等级和贵宾等级限制。", CategoryID: 20, Property1: 0, Property2: 900 });
+  expect(currentGame.items.get(11002)).toMatchObject({ Name: "朱雀石2级", Description: "用于铁匠铺合成。成功后装备的合成攻击加成为20点，失败不会损失装备。", CategoryID: 11, Property1: 1, Property3: 1, Property4: 20 });
+  expect(currentGame.items.get(11019)).toMatchObject({ Name: "强化石1级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 1 });
+  expect(currentGame.items.get(11021)).toMatchObject({ Name: "强化石2级", Description: "用于铁匠铺强化装备，提供的强化概率加成高于1级强化石。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 2 });
+  expect(currentGame.items.get(11023)).toMatchObject({ Name: "强化石4级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 4 });
+  expect(currentGame.items.get(11024)).toMatchObject({ Name: "强化石5级", Description: "用于铁匠铺强化装备。失败可能降低强化等级或损失装备。", CategoryID: 11, Property1: 2, Level: 5 });
+  expect(currentGame.items.get(11029)).toMatchObject({ Name: "幸运符50%", Description: "可用于铁匠铺合成、强化装备，作为辅助材料参与成功率计算。每次操作消耗1张。", CategoryID: 11, Property1: 3, Property2: 50 });
   expect(currentGame.quests.get(341)!.conds[0]).toMatchObject({ CondictionType: 6, Para1: 0, Para2: 4 });
   expect(currentGame.quests.get(347)!.conds[0]).toMatchObject({ CondictionType: 10, Para1: -4, Para2: 1 });
   for (const id of [318, 341, 346, 347]) for (const reward of currentGame.quests.get(id)!.goods) {

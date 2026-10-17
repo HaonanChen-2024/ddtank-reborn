@@ -38,7 +38,9 @@ export async function createCharacter(h: DbHandle, o: { gold?: number; money?: n
   const nick = `Nick${n}_${Date.now() % 100000}`;
   const [row] = await h.db
     .insert(player.Sys_Users_Detail)
-    .values({ UserName: user, NickName: nick, IsFirst: 1, Sex: true, Grade: o.grade ?? 10, Gold: o.gold ?? 100000, Money: o.money ?? 10000, Password: "x" })
+    // timestamp-without-time-zone defaultNow follows PGlite's host zone; Drizzle
+    // decodes it as UTC. Start fixtures explicitly unbanned in every test zone.
+    .values({ UserName: user, NickName: nick, IsFirst: 1, Sex: true, Grade: o.grade ?? 10, Gold: o.gold ?? 100000, Money: o.money ?? 10000, Password: "x", ForbidDate: new Date("2000-01-01T00:00:00Z") })
     .returning({ UserID: player.Sys_Users_Detail.UserID });
   const userId = row!.UserID;
   if (o.weapon !== null) {

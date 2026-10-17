@@ -85,7 +85,7 @@ export function payTakeCard(m: RoomMember): boolean {
   if (m.isBot) return false;
   const p = m as GamePlayer;
   const cost = (p.info.typeVIP ?? 0) > 0 ? 437 : 486;
-  if (p.info.Money + p.info.MoneyLock < cost) { p.sendMessage?.(1, "Cupons insuficientes."); return false; }
+  if (p.info.Money + p.info.MoneyLock < cost) { p.sendMessage?.(1, p.lang("UserBuyItemHandler.NoMoney")); return false; }
   p.removeMoney(cost);
   return true;
 }
@@ -121,7 +121,7 @@ export function applyFightLabWin(templates: Templates, p: GamePlayer, pveId: num
     if (items.length) {
       giveDropItems(templates, p, items);
       const names = items.map((d) => t("Game.Server.Quests.FinishQuest.RewardProp", templates.findItem(d.templateId)?.Name ?? String(d.templateId), d.count)).join(" ");
-      p.sendMessage?.(0, `${t("Recompensa da sala de treino")}: ${names}`);
+      p.sendMessage?.(0, `训练场奖励：${names}`);
     }
   }
   p.updateProperties?.();

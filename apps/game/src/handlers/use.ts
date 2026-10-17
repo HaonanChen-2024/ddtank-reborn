@@ -165,6 +165,11 @@ export function addItemBuff(p: GamePlayer, t: { Property1: number; Property2: nu
   return b;
 }
 
+function purchaseFailure(ctx: ServerContext, p: GamePlayer, code: number, reason: string, message: string): void {
+  ctx.log.warn("purchase rejected", { code, playerId: p.id, reason });
+  p.sendMessage(0, message);
+}
+
 /** CardUseHandler.cs (183): int bag, int place (-1 = quick buy), int n, n×int shopIds, int, bool ignoreBagLock. */
 export function cardUse(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void {
   const bagType = pkt.readInt();
@@ -183,8 +188,13 @@ export function cardUse(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void 
     if (place === -1) {
       const s = tpl.shop.get(shopId);
       const t = s ? tpl.findItem(s.TemplateID) : undefined;
-      if (!s || !t || !tpl.isOnShop(shopId)) { p.sendMessage(0, "Não é possível comprar este item."); continue; }
-      if (!(s.APrice1 === -1 && s.AValue1 > 0) || s.AValue1 > p.info.Money + p.info.MoneyLock) continue;
+      if (!s || !t || !tpl.isOnShop(shopId)) { purchaseFailure(ctx, p, 183, "unavailable_item", "无法购买该道具。"); continue; }
+      if (s.APrice1 !== -1 || !Number.isSafeInteger(s.AValue1) || s.AValue1 <= 0 || s.AValue1 > 2_147_483_647) {
+        purchaseFailure(ctx, p, 183, "unsupported_price", "该道具暂不支持快捷购买，请前往商城查看。"); continue;
+      }
+      if (s.AValue1 > p.info.Money + p.info.MoneyLock) {
+        purchaseFailure(ctx, p, 183, "insufficient_money", `购买需要${s.AValue1}点券，当前点券不足。`); continue;
+      }
       p.removeMoney(s.AValue1);
       item = ItemInfo.createFromTemplate(t, 1, 102, ctx.now());
       item.ValidDate = s.AUnit;
@@ -208,7 +218,7 @@ export function cardUse(ctx: ServerContext, p: GamePlayer, pkt: GSPacket): void 
       if (bag && t.CanDelete) bag.removeCountFromStack(item, 1);
       p.send(Out.openVip(p.info));
       p.updateProperties();
-      p.sendMessage(0, opened ? `Parabéns, você recebeu ${days} dia(s) de privilégios VIP!` : `Você recebeu mais ${days} dia(s) de privilégios VIP!`);
+      p.sendMessage(0, opened ? `恭喜你获得${days}天贵宾特权！` : `你的贵宾特权已延长${days}天！`);
       continue;
     }
     if (bag && !bag.removeCountFromStack(item, 1)) continue;
@@ -284,11 +294,15 @@ export async function texp(ctx: ServerContext, p: GamePlayer, selectIndex: numbe
 export function openVip(ctx: ServerContext, p: GamePlayer, nick: string, days: number): void {
   const card = [...ctx.templates.shop.values()].find((s) => s.TemplateID === 11992);
   const money = vipPrice(card, days);
-  if (days <= 0 || money < 0) return;
+  if (!Number.isSafeInteger(days) || days <= 0 || days > 2_147_483_647)
+    return purchaseFailure(ctx, p, 92, "invalid_duration", "请选择正确的贵宾开通天数。");
+  if (!Number.isSafeInteger(money) || money < 0 || money > 2_147_483_647)
+    return purchaseFailure(ctx, p, 92, "invalid_quote", "贵宾价格配置暂不可用，未扣除点券，请稍后重试。");
   const target = nick === p.info.NickName ? p : ctx.world.all().find((o) => o.info.NickName === nick);
-  if (!target) return p.sendMessage(0, `O jogador ${nick} não existe ou está ausente!`);
-  if (target === p && p.info.VIPLevel === 9) return p.sendMessage(0, "Você já atingiu o nível VIP máximo!"); // checked before charging (original charged first)
-  if (p.info.Money + p.info.MoneyLock < money) return p.sendMessage(0, ctx.lang.t("UserBuyItemHandler.Money"));
+  if (!target) return p.sendMessage(0, `玩家${nick}不存在或不在线！`);
+  if (target === p && p.info.VIPLevel === 9) return p.sendMessage(0, "你的贵宾等级已达上限！"); // checked before charging (original charged first)
+  if (p.info.Money + p.info.MoneyLock < money)
+    return purchaseFailure(ctx, p, 92, "insufficient_money", `开通或续费需要${money}点券，当前点券不足。`);
   p.removeMoney(money);
   const table = vipExpTable(ctx.templates.serverConfig.get("VIPExpForEachLv"));
   const { opened } = applyVipDays(target.info, days, ctx.now());
@@ -296,8 +310,8 @@ export function openVip(ctx: ServerContext, p: GamePlayer, nick: string, days: n
   if (target.info.typeVIP > 0) target.info.VIPNextLevelDaysNeeded = vipNextLevelDays(target.info, table, card);
   target.send(Out.openVip(target.info));
   target.updateProperties();
-  if (target !== p) target.sendMessage(0, `${p.info.NickName} ${opened ? "renovou" : "estendeu"} seu VIP com sucesso!`);
-  p.sendMessage(0, target === p ? (opened ? "VIP ativado com sucesso!" : "VIP renovado com sucesso!") : `VIP ${opened ? "ativado" : "renovado"} para ${nick} com sucesso!`);
+  if (target !== p) target.sendMessage(0, `${p.info.NickName}已成功为你${opened ? "开通" : "延长"}贵宾特权！`);
+  p.sendMessage(0, target === p ? (opened ? "贵宾开通成功！" : "贵宾续费成功！") : `已成功为${nick}${opened ? "开通" : "续费"}贵宾特权！`);
 }
 
 /** ArrangeBagHandler.cs (124): compact the bag (and stack when `merge`). Only if `count` matches the item count. */

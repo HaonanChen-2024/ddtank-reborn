@@ -14,6 +14,7 @@ import { registerForge, strengthen } from "../src/handlers/forge.js";
 import { HandlerRegistry } from "../src/handlers/registry.js";
 import type { GameClient } from "../src/session/client.js";
 import type { ServerContext } from "../src/session/context.js";
+import { smithEnabledWeapon } from "../../../scripts/workshop-weapon-smith.js";
 
 // Exact complete rows selected from the committed gzip seeds; hashes/independent
 // deep-equality audit are in runtime/treasure-forge-materials-20261016. This fixture
@@ -30,6 +31,12 @@ afterAll(async () => { await h?.close(); });
 async function fixture(id = 7006, level = 0, stoneId = 11019, count = 3) {
   const templates = new Templates();
   templates.items = new Map(data.goods.map(t => [t.TemplateID, t]));
+  if ([9107243, 9107258].includes(id)) {
+    const stats = id === 9107243 ? { Attack: 78, Defence: 208, Agility: 195, Luck: 39, Property7: 247 }
+      : { Attack: 57, Defence: 200, Agility: 100, Luck: 81, Property7: 235 };
+    templates.items.set(id, smithEnabledWeapon({ ...templates.findItem(7006)!, ...stats, TemplateID: id,
+      Level: 1, CanStrengthen: false, CanCompose: false, CanTransfer: 0, Description: "暂不开放强化、合成与转移。" }));
+  }
   templates.strengthen = new Map(data.strengthen.map(r => [r.StrengthenLevel, r]));
   templates.strengthenGoods = [...data.strengthenGoods];
   templates.stats.goldEquip = id => data.goldEquip.find(r => r.OldTemplateId === id);
@@ -55,6 +62,16 @@ async function fixture(id = 7006, level = 0, stoneId = 11019, count = 3) {
 }
 
 describe("59 actual workbench strengthening and durable consumption", () => {
+  it.each([9107243, 9107258])("imported weapon %i strengthens, persists, and survives a failed Level 3 roll", async id => {
+    const f = await fixture(id); const base = { ...f.item.template };
+    await f.use(0);
+    expect(f.reply()).toEqual([0, true]);
+    expect((await f.reload()).get(12)!.find(it => it.Place === 5)).toMatchObject({ TemplateID: id, StrengthenLevel: 1 });
+    f.item.StrengthenLevel = 8; f.p.storeBag.updateItem(f.item); await f.save(); await f.use(0.9999);
+    expect(f.reply()).toEqual([1, false]);
+    expect((await f.reload()).get(12)!.find(it => it.Place === 5)).toMatchObject({ TemplateID: id, StrengthenLevel: 7, IsExist: true });
+    expect(f.item.template).toEqual(base);
+  });
   it("commits the actual registry result and material before acknowledging success, without autosave", async () => {
     const f = await fixture(); vi.spyOn(Math, "random").mockReturnValue(0);
     const registry = new HandlerRegistry(); registerForge(registry);

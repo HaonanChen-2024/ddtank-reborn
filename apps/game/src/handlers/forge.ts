@@ -200,7 +200,7 @@ export async function clearStoreBag(ctx: ServerContext, p: GamePlayer): Promise<
   }
   if (left.length) {
     for (const it of left) store.takeOutItem(it);
-    await mailItems(ctx, p, left, ctx.lang.t("StoreClearItemHandler.Mail") === "StoreClearItemHandler.Mail" ? "Itens devolvidos pela Forja." : ctx.lang.t("StoreClearItemHandler.Mail"), 9);
+    await mailItems(ctx, p, left, "铁匠铺退还道具", 9);
   }
 }
 
@@ -506,7 +506,7 @@ export async function fusion(ctx: ServerContext, player: GamePlayer, pkt: GSPack
     const stone = workbench.getItemAt(slot);
     if (stone) placedStones.push(stone);
   }
-  if (placedStones.length >= 4 && placedStones.some((stone) => stone.TemplateID !== placedStones[0]!.TemplateID)) return player.sendMessage(1, ctx.lang.t("Há itens de tipos diferentes!"));
+  if (placedStones.length >= 4 && placedStones.some((stone) => stone.TemplateID !== placedStones[0]!.TemplateID)) return player.sendMessage(1, "放入的道具类型不一致！");
   if (placedStones.length !== 4) return player.sendMessage(0, ctx.lang.t("ItemFusionHandler.ItemNotEnough"));
   const sortedExpiries = placedStones.map((stone) => stone.ValidDate).sort((a, b) => a - b);
   // Validade do prêmio: menor das 4 (0 = permanente; se alguma é permanente, usa a 2ª menor).
@@ -682,7 +682,7 @@ export async function openFiveSixHole(ctx: ServerContext, p: GamePlayer, pkt: GS
   return p.withPersistenceLock(async () => {
     const now = ctx.now(), time = now.getTime();
     if (!Number.isFinite(time)) return reject();
-    if (p.lastOpenHole + 100 > time) return reject(ctx.lang.t("GameServer.OpenHole.TooQuickly"));
+    if (p.lastOpenHole + 100 > time) return reject("操作过于频繁，请稍后重试。");
     p.lastOpenHole = time;
     if (p.currentRoom?.IsPlaying) return reject("战斗中不能开孔。");
     if (bagLocked(ctx, p)) return;

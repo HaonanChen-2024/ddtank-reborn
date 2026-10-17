@@ -17,8 +17,8 @@ import type { DDPlayNativeEffect } from "./ddplay-native.js";
 import type { GypsyNativeEffect } from "./gypsy-native.js";
 import { readMoonlightState, type MoonlightNativeEffect, type MoonlightNativeRanking } from "./moonlight-native.js";
 import { prepareTreasureDraw, prepareTreasureTicketPurchase, type TreasureNativeEffect } from "./treasure-native.js";
-import { inspectTreasureCatalog, isKnownTreasurePoolVersion, TREASURE_ENTRIES, TREASURE_IDS,
-  type TreasureBoxReward, type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
+import { inspectTreasureCatalog, isKnownTreasurePoolVersion, matchesTreasureCardBox, TREASURE_ENTRIES, TREASURE_IDS,
+  TREASURE_CARD_BOX_IDS, TREASURE_CARD_IDS, type TreasureBoxReward, type TreasureCardConfig, type TreasureCatalog, type TreasureEntry, type TreasureTemplate } from "./treasure-catalog.js";
 import type { WheelNativeEffect } from "./wheel-native.js";
 import { carnivalNativePersonalDescription, readCarnivalNativeState, type CarnivalNativeEffect, type CarnivalNativeRanking } from "./carnival-native.js";
 import { advanceCarnivalGlobal, carnivalGlobalKey, readCarnivalGlobalState, viewCarnivalGlobal,
@@ -91,7 +91,11 @@ async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_
   // This configuration heap has no unique key: row locks cannot stop a second reward being inserted.
   // Take the table lock before item rows; ordinary GET remains an unlocked projection.
   if (locked && ids.includes(11917)) await q(app.h, sql`LOCK TABLE game."Shop_Goods_Box" IN SHARE MODE`);
-  const items = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","NeedLevel","MaxCount","CanEquip","CanUse","CanStrengthen","Property1","Property2","Property3","Property4","Property5","Property6","Property7","Property8","Level","Quality","Attack","Defence","Agility","Luck","SuitId"
+  const cardBoxes = ids.some(id => TREASURE_CARD_BOX_IDS.includes(id));
+  // Deck membership, buffs and max upgrade level depend on whole matching sets, including absence of extra rows.
+  // SHARE also prevents inserts that individual row locks cannot exclude; use the same order for every take/draw.
+  if (locked && cardBoxes) await q(app.h, sql`LOCK TABLE game."Card_Group",game."Card_Buff",game."CardUpdateCondition",game."CardUpdateInfo" IN SHARE MODE`);
+  const items = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","NeedLevel","MaxCount","CanEquip","CanUse","CanStrengthen","CanCompose","Property1","Property2","Property3","Property4","Property5","Property6","Property7","Property8","Level","Quality","Attack","Defence","Agility","Luck","SuitId"
     FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(ids.map(id => sql`${id}`), sql`,`)})
     ORDER BY "TemplateID" ${locked ? sql`FOR SHARE` : sql``}`);
   // This box's exact recipe is part of its verified use route; a matching item alone proves nothing.
@@ -99,6 +103,18 @@ async function treasureTemplates(app: AppCtx, ids: readonly number[] = TREASURE_
   if (honor) honor.boxRewards = await q<TreasureBoxReward>(app.h, sql`SELECT "TemplateId","IsSelect","IsBind","ItemValid","ItemCount",
     "StrengthenLevel","AttackCompose","DefendCompose","AgilityCompose","LuckCompose","Random"
     FROM game."Shop_Goods_Box" WHERE "ID"=11917 ORDER BY "TemplateId"`);
+  if (cardBoxes && items.some(matchesTreasureCardBox)) {
+    const cards = await q<TreasureTemplate>(app.h, sql`SELECT "TemplateID","CategoryID","Pic","NeedSex","NeedLevel","MaxCount","CanEquip","CanUse","CanStrengthen","CanCompose","Property1","Property2","Property3","Property4","Property5","Property6","Property7","Property8","Level","Quality","Attack","Defence","Agility","Luck","SuitId"
+      FROM game."Shop_Goods" WHERE "TemplateID" IN (${sql.join(TREASURE_CARD_IDS.map(id=>sql`${id}`),sql`,`)}) ORDER BY "TemplateID" ${locked?sql`FOR SHARE`:sql``}`);
+    const cardConfig: TreasureCardConfig = { cards,
+      groups: await q(app.h,sql`SELECT "ID","CardID","TemplateID" FROM game."Card_Group" WHERE "CardID" IN (5,9) ORDER BY "ID"`),
+      buffs: await q(app.h,sql`SELECT "ID","CardID","condition","PropertiesDscripID","value" FROM game."Card_Buff" WHERE "CardID" IN (5,9) ORDER BY "ID"`),
+      conditions: await q(app.h,sql`SELECT "Level","Exp","MinExp","MaxExp","UpdateCardCount","ResetCardCount","ResetMoney" FROM game."CardUpdateCondition" ORDER BY "Level"`),
+      updates: await q(app.h,sql`SELECT "Id","Level","Attack","Defend","Agility","Lucky","Guard","Damage" FROM game."CardUpdateInfo"
+        WHERE "Id" IN (${sql.join(TREASURE_CARD_IDS.map(id=>sql`${id}`),sql`,`)}) ORDER BY "Id","Level"`),
+    };
+    for (const item of items) if (TREASURE_CARD_BOX_IDS.includes(item.TemplateID)) item.cardConfig=cardConfig;
+  }
   return items;
 }
 async function treasureCatalog(app: AppCtx, locked = false): Promise<TreasureCatalog> {

@@ -26,6 +26,7 @@ const TRANSLATED_PK: Record<string, string | readonly string[]> = {
   Mission_Info: "Id",
   Mission_Info_Backup: "Id",
   Achievement: "ID",
+  Achievement_Goods: ["AchievementID", "RewardType", "RewardValueId"],
   Quest: "ID",
   Quest_Condiction: ["QuestID", "CondictionID"],
   Shop_Goods: "TemplateID",
@@ -37,6 +38,19 @@ const TRANSLATED_PK: Record<string, string | readonly string[]> = {
   Consortia_BuffTemp: "id",
   New_Title: "ID",
   SuitTemplateInfo: "SuitId",
+  Active: "ActiveID",
+  Event_Live: "EventID",
+  Card_Buff: "ID",
+  ClothPropertyTemplateInfo: "ID",
+  Consortia_Badge: "BadgeID",
+  DailyLeagueLevel: "Level",
+  Daily_Award: "ID",
+  Drop_Condiction: "DropID",
+  Edictum_List: "ID",
+  Fair_Battle_Reward_Temp: "Level",
+  League_Info: "ID",
+  Shop_Goods_Categorys: "ID",
+  Suit_TemplateID: ["ID", "ContainEquip"],
 };
 
 /** Applies the pt-BR overlay to `rows` in place when `table` is one of TRANSLATED_PK; a no-op otherwise. */
@@ -290,7 +304,7 @@ export const TEMPLATES: TemplateDef[] = [
         const [a, c, g] = await Promise.all([
           translateRows(h, "Achievement", await all(h, "game", "Achievement")),
           all(h, "game", "AchievementCondition"),
-          all(h, "game", "Achievement_Goods"),
+          translateRows(h, "Achievement_Goods", await all(h, "game", "Achievement_Goods")),
         ]);
         return a.map((x) => {
           const e = item("Item", S.achievement, x);
@@ -537,12 +551,13 @@ export const TEMPLATES: TemplateDef[] = [
       wrap(async () => {
         const rows = await q(
           h,
-          sql`SELECT g."BeginDate" AS "Date", d."GP", d."Grade", s."Name" AS "ItemName", d."NickName", d."Sex", g."StrengthenLevel" AS "Strengthenlevel", d."UserName"
+          sql`SELECT g."BeginDate" AS "Date", d."GP", d."Grade", s."TemplateID", s."Name" AS "ItemName", d."NickName", d."Sex", g."StrengthenLevel" AS "Strengthenlevel", d."UserName"
               FROM player."Sys_Users_Goods" g JOIN player."Sys_Users_Detail" d ON d."UserID" = g."UserID" JOIN game."Shop_Goods" s ON s."TemplateID" = g."TemplateID"
               WHERE g."IsExist" = true AND g."StrengthenLevel" >= 9 AND g."BagType" = 0 AND g."Place" < 31
               ORDER BY g."StrengthenLevel" DESC, d."GP" DESC LIMIT 20`,
         );
-        return rows.map((r) => item("Item", "Date:d GP Grade ItemName NickName Sex Strengthenlevel Type=UserName", r));
+        const names = await loadTranslations(h.db, "Shop_Goods", LANG);
+        return rows.map((r) => item("Item", "Date:d GP Grade ItemName NickName Sex Strengthenlevel Type=UserName", { ...r, ItemName: names.get(String(r.TemplateID))?.Name ?? r.ItemName }));
       }),
   },
 
@@ -573,7 +588,7 @@ export const TEMPLATES: TemplateDef[] = [
     deps: ["game.Card_Buff"],
     build: (h) =>
       wrap(async () => {
-        const rows = await all(h, "game", "Card_Buff", `"CardID", "ID"`);
+        const rows = await translateRows(h, "Card_Buff", await all(h, "game", "Card_Buff", `"CardID", "ID"`));
         return [...groupBy(rows, "CardID")].map(([id, rs]) =>
           el("Card", [["CardID", id]]).add(...rs.map((r) => item("Item", "condition PropertiesDscripID value Description", r))),
         );
