@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "gameRuns": [
+    {
+      "name": "step4-full-02",
+      "node": "v24.21.0",
+      "startedAt": "2026-10-17T10:34:37.983Z",
+      "endedAt": "2026-10-17T10:39:50.181Z",
+      "elapsedMs": 312195,
+      "exitCode": 0,
+      "summary": {
+        "numTotalTestSuites": 201,
+        "numPassedTestSuites": 201,
+        "numFailedTestSuites": 0,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 1214,
+        "numPassedTests": 1194,
+        "numFailedTests": 0,
+        "numPendingTests": 20
+      },
+      "inputDigest": "53537740b29ba453061a545294de688c5b6899259534eb579c56225e4ed83235",
+      "inputsChanged": []
+    },
+    {
+      "name": "step4-full-03",
+      "node": "v24.21.0",
+      "startedAt": "2026-10-17T10:40:39.433Z",
+      "endedAt": "2026-10-17T10:48:41.571Z",
+      "elapsedMs": 482137,
+      "exitCode": 0,
+      "summary": {
+        "numTotalTestSuites": 201,
+        "numPassedTestSuites": 201,
+        "numFailedTestSuites": 0,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 1214,
+        "numPassedTests": 1194,
+        "numFailedTests": 0,
+        "numPendingTests": 20
+      },
+      "inputDigest": "53537740b29ba453061a545294de688c5b6899259534eb579c56225e4ed83235",
+      "inputsChanged": []
+    }
+  ],
+  "fight": {
+    "passed": 338,
+    "failed": 0
+  },
+  "typecheck": {
+    "packages": 9,
+    "excluded": [
+      "launcher"
+    ],
+    "reason": "本机未安装Electron launcher依赖，工坊网页运行不需要该包"
+  },
+  "nativePostgresOptInExecuted": false,
+  "serviceOperations": 0
+}

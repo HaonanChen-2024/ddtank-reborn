@@ -176,12 +176,12 @@ it.each([false, true])("translates the real VIP box and duplicate without changi
   const f = await fixture(full), historic = await historicMail(f); f.p.info.VIPLevel = 1;
   await dailyAward(f.ctx, f.p, 3);
   const ids = [11011, 11003, 11007, 11015, 11101, 11997, 11998, 112109];
-  expect(notices(f)).toEqual([`VIP礼包领取成功。 ${ids.map(id => `${templates.findItem(id)!.Name} x1`).join(", ")}`]);
+  expect(notices(f)).toEqual([`贵宾礼包领取成功。 ${ids.map(id => `${templates.findItem(id)!.Name} x1`).join(", ")}`]);
   expect(f.p.info).toMatchObject({ CanTakeVipReward: false, LastVIPPackTime: f.ctx.now() });
-  await newMailTitles(f, historic, "每日VIP礼包", full);
+  await newMailTitles(f, historic, "每日贵宾礼包", full);
   const before = inventory(f), beforeMail = await mails(f); f.sent.length = 0;
   await dailyAward(f.ctx, f.p, 3);
-  expect(notices(f)).toEqual(["今日VIP礼包已领取。"]);
+  expect(notices(f)).toEqual(["今日贵宾礼包已领取。"]);
   expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
 });
 
@@ -189,7 +189,7 @@ it.each([0, 99])("uses a truthful unavailable message for VIP level %s and grant
   const f = await fixture(); f.p.info.VIPLevel = level;
   const before = inventory(f), beforeInfo = structuredClone(f.p.info);
   await dailyAward(f.ctx, f.p, 3);
-  expect(notices(f)).toEqual(["当前VIP礼包不可领取。"]); expect(f.sent).toHaveLength(1);
+  expect(notices(f)).toEqual(["当前贵宾礼包不可领取。"]); expect(f.sent).toHaveLength(1);
   expect(inventory(f)).toEqual(before); expect(f.p.info).toEqual(beforeInfo); expect(await mails(f)).toEqual([]);
 });
 
@@ -209,7 +209,7 @@ it.each([false, true])("reports the actually received level for the current seed
 
 it.each([
   { days: 3, summary: "强化石4级 x5, 开孔钻头1级 x3" },
-  { days: 6, summary: "初级SUPER·古枪碎片 x2, 强化石5级 x2" },
+  { days: 6, summary: "初级真·远古竹枪碎片 x2, 强化石5级 x2" },
   { days: 12, summary: "强化石5级 x5, 幸运符50% x1" },
   { days: 18, summary: "龙骑士套装 x1, 攻击祝福宝珠 x3" },
 ].flatMap(tier => [false, true].map(full => ({ ...tier, full }))))("translates $days-day cumulative-sign rewards while retaining the no-90-reply contract (full=$full)", async ({ days, summary, full }) => {
@@ -226,13 +226,13 @@ it.each([
   expect(inventory(f)).toEqual(before); expect(await mails(f)).toEqual(beforeMail);
 });
 
-it.each(["original", "missing"] as const)("retains usable %s-language fallbacks when the new overlay is absent", async locale => {
+it.each(["original", "missing"] as const)("retains existing dictionary text and Chinese fallbacks with the %s overlay", async locale => {
   const f = await fixture(true, locale); f.p.info.VIPLevel = 1; f.p.info.Grade = 100; await allowSign(f);
   const actions = [
-    { run: () => dailyAward(f.ctx, f.p, 2), title: "Ovo diário", prefix: "Ovo diário recebido:" },
+    { run: () => dailyAward(f.ctx, f.p, 2), title: "每日彩蛋", prefix: "每日彩蛋领取成功：" },
     { run: () => dailyAward(f.ctx, f.p, 3), title: "Caixa VIP", prefix: locale === "original" ? "Recebeu o pacote VIP" : "Caixa VIP:" },
-    { run: () => signAward(f.ctx, f.p, 3), title: "Prêmio de presença", prefix: "Presente de presença diária recebido com sucesso!" },
-    { run: () => levelRequest(f), title: "Caixa de tempo", prefix: locale === "original" ? "Presente de nível 100 recebido com sucesso" : "Pacote de nível 100 recebido." },
+    { run: () => signAward(f.ctx, f.p, 3), title: "签到奖励", prefix: "签到奖励领取成功！" },
+    { run: () => levelRequest(f), title: "Caixa de tempo", prefix: locale === "original" ? "Presente de nível 100 recebido com sucesso" : "100级礼包领取成功。" },
   ];
   for (const action of actions) {
     const before = (await mails(f)).length; f.sent.length = 0; await action.run();
@@ -246,10 +246,10 @@ it.each(["original", "missing"] as const)("retains usable %s-language fallbacks 
 
 it.each(["Chinese", "original", "missing"] as const)("uses precise %s cumulative-sign rejection messages without adding a 90 response", async locale => {
   for (const reason of [
-    { kind: "InvalidTier", chinese: "累计签到奖励档位不存在。", fallback: "Recompensa de presença indisponível." },
-    { kind: "NotReached", chinese: "本月累计签到天数尚未达到该档要求。", fallback: "Dias de presença insuficientes para esta recompensa." },
-    { kind: "AlreadyReceived", chinese: "本月该档累计签到奖励已领取。", fallback: "Você já recebeu esta recompensa de presença neste mês." },
-    { kind: "NoRewards", chinese: "此档暂无适用奖励。", fallback: "Nenhuma recompensa de presença disponível para este personagem." },
+    { kind: "InvalidTier", chinese: "累计签到奖励档位不存在。", fallback: "该档签到奖励暂不可用。" },
+    { kind: "NotReached", chinese: "本月累计签到天数尚未达到该档要求。", fallback: "签到天数不足，无法领取该奖励。" },
+    { kind: "AlreadyReceived", chinese: "本月该档累计签到奖励已领取。", fallback: "你本月已领取该档签到奖励。" },
+    { kind: "NoRewards", chinese: "此档暂无适用奖励。", fallback: "当前角色没有可领取的签到奖励。" },
   ]) {
     const f = await fixture(false, locale); f.p.info.Sex = true;
     await allowSign(f, reason.kind === "NotReached" ? 2 : 3);

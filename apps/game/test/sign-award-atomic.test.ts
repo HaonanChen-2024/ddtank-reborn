@@ -90,10 +90,10 @@ const notices = (f: Fixture) => f.sent.filter((pkt) => pkt.code === 3).map((pkt)
 
 describe("sign award rejection notices", () => {
   it.each([
-    { kind: "unknown tier", tier: 18, text: "Recompensa de presença indisponível." },
-    { kind: "unreached tier", tier: 3, text: "Dias de presença insuficientes para esta recompensa." },
-    { kind: "previous month", tier: 3, text: "Dias de presença insuficientes para esta recompensa." },
-    { kind: "already claimed", tier: 3, text: "Você já recebeu esta recompensa de presença neste mês." },
+    { kind: "unknown tier", tier: 18, text: "该档签到奖励暂不可用。" },
+    { kind: "unreached tier", tier: 3, text: "签到天数不足，无法领取该奖励。" },
+    { kind: "previous month", tier: 3, text: "签到天数不足，无法领取该奖励。" },
+    { kind: "already claimed", tier: 3, text: "你本月已领取该档签到奖励。" },
   ])("reports $kind without changing rewards, claims or the original packet 90 contract", async ({ kind, tier, text }) => {
     const f = await fixture();
     if (kind === "unreached tier") await h.db.update(player.DailyLogList).set({ DayLog: "True,True" }).where(eq(player.DailyLogList.UserID, f.p.id));
@@ -113,7 +113,7 @@ describe("sign award rejection notices", () => {
     const before = memory(f), beforeGoods = await goods(), beforeMail = await mails(), beforeDetail = await detail(f);
     const outcome = await signAward(f.ctx, f.p, 3);
     expect(await claim(f)).toBe(false); expect(outcome).toBe(false);
-    expect(notices(f)).toEqual(["Nenhuma recompensa de presença disponível para este personagem."]);
+    expect(notices(f)).toEqual(["当前角色没有可领取的签到奖励。"]);
     expect(f.sent.map((pkt) => pkt.code)).toEqual([3]); expect(memory(f)).toEqual(before);
     expect(await goods()).toEqual(beforeGoods); expect(await mails()).toEqual(beforeMail); expect(await detail(f)).toEqual(beforeDetail);
     f.data.dailyAward = originalAwards;
@@ -134,7 +134,7 @@ describe("sign award rejection notices", () => {
     expect(f.sent).toEqual([]); expect(await claim(f, 18)).toBe(false);
     if (quit) f.p.quitting = Promise.resolve();
     release.resolve(); expect(await request).toBe(false);
-    expect(notices(f)).toEqual(quit ? [] : ["Recompensa de presença indisponível."]);
+    expect(notices(f)).toEqual(quit ? [] : ["该档签到奖励暂不可用。"]);
   });
 
   it.each(["inactive", "quitting"])("keeps an %s session silent and unclaimed", async (state) => {
@@ -165,7 +165,7 @@ describe("sign award claim/rewards atomicity", () => {
     expect(f.p.info.Gold).toBe(before.info.Gold + 31); expect(f.p.info.Money).toBe(before.info.Money + 11); expect(f.p.info.GiftToken).toBe(before.info.GiftToken + 9);
     if (table === "mail") {
       const received = (await mails()).filter((m) => m.ReceiverID === f.p.id);
-      expect(received).toHaveLength(1); expect(received[0]).toMatchObject({ Type: 12, Title: "Prêmio de presença" });
+      expect(received).toHaveLength(1); expect(received[0]).toMatchObject({ Type: 12, Title: "签到奖励" });
       for (const annex of [received[0]!.Annex1, received[0]!.Annex2]) expect((await goods()).find((it) => it.ItemID === Number(annex))).toMatchObject({ UserID: 0, BagType: -1, Place: -1 });
       expect(f.sent.filter((pkt) => pkt.code === 117)).toHaveLength(1);
     }
@@ -187,7 +187,7 @@ describe("sign award claim/rewards atomicity", () => {
     const f = await fixture(), before = structuredClone(f.p.info);
     const outcomes = await Promise.all(Array.from({ length: 8 }, () => signAward(f.ctx, f.p, 3)));
     expect(outcomes.filter(Boolean)).toHaveLength(1); expect(await claim(f)).toBe(true);
-    expect(notices(f).filter((text) => text === "Você já recebeu esta recompensa de presença neste mês.")).toHaveLength(7);
+    expect(notices(f).filter((text) => text === "你本月已领取该档签到奖励。")).toHaveLength(7);
     expect(f.p.info.Gold).toBe(before.Gold + 31); expect(f.p.info.GiftToken).toBe(before.GiftToken + 9);
     expect(f.p.propBag.getItems().map((it) => ({ id: it.TemplateID, count: it.Count, bound: it.IsBinds, days: it.ValidDate }))).toEqual([
       { id: 11001, count: 2, bound: false, days: 7 }, { id: 11005, count: 1, bound: true, days: 7 },

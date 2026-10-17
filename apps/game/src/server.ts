@@ -21,7 +21,7 @@ import { GameClient, type Transport } from "./session/client.js";
 import { World, type ServerContext, type TicketValidator } from "./session/context.js";
 import { dbTicketValidator, quitPlayer } from "./session/login.js";
 import { consortiaGameOver } from "./handlers/consortia.js";
-import { consortiaMgr } from "./game/consortia-mgr.js";
+import { consortiaMgr, stopConsortiaMgr } from "./game/consortia-mgr.js";
 import { RoomMgr } from "./rooms/room-mgr.js";
 import { StubFightEngine } from "./fight/stub.js";
 import { DdtFightEngine } from "./fight/ddt.js";
@@ -428,6 +428,7 @@ export class GameServer {
     if (this.ctx) await christmasSnowfieldOwner(this.ctx).drain();
     if (this.ctx) await labyrinthCombatOwner(this.ctx).drain();
     if (this.ctx) await labyrinthCleanOutOwner(this.ctx).drain();
+    if (this.ctx) await stopConsortiaMgr(this.ctx);
     if (this.ownsDb) await this.ctx.db.close();
   }
 }

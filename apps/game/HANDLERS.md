@@ -4,6 +4,14 @@ Spec: `docs/spec/server/01-packet-handlers.md` (codes, reads, behaviour) and `02
 `src/handlers/index.ts` (`HandlerRegistry`, `SubRouter`). New handlers: add a `register*` function, cite the C# file
 you mirror, add a test in `test/` using `loggedIn()` / `FakeClient` from `test/helpers.ts`, update this table.
 
+Workshop consolidation (2026-10-17): codes 54/55 now have actual player routes in
+`registerRooms`, backed by `room-props.ts`; the earlier unregistered implementation claim is superseded.
+Codes 92/183 retain their existing prices and now report invalid/unaffordable quotes in Chinese.
+These entries describe the consolidated source and offline regression coverage; the already-running
+Workshop process needs an approved normal restart to load pending server changes. No live-player
+acceptance is inferred from the handler table. Native PostgreSQL opt-in tests remain separate from
+the default in-memory suite.
+
 Status: **implemented** = behaviour of the C# handler ported (bugs noted); **partial** = main path works, listed parts
 missing; **stub** = registered no-op (same as the original or not yet ported); **missing** = not registered (packet
 dropped, like an unknown code in the original).

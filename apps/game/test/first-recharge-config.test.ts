@@ -150,9 +150,9 @@ it("preserves free/recharged qualification while missing configuration rejects r
   f.p.info.IsRecharged = true; expect(await firstRecharge(f.ctx, f.p)).toBe(true);
 });
 
-it("uses the original-language fallback when the new unavailable key is missing", async () => {
+it("uses the Chinese fallback when the new unavailable key is missing", async () => {
   const f = await fixture(false, true); await configure(f, false, []);
-  await expectUnavailable(f, "Presente indisponível no momento.");
+  await expectUnavailable(f, "礼包暂不可用。");
 });
 
 it("preserves all existing currency and experience reward branches with nonzero once-only results", async () => {

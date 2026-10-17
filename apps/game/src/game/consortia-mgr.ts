@@ -58,6 +58,15 @@ export async function consortiaMgr(ctx: ServerContext): Promise<ConsortiaMgr> {
   return m;
 }
 
+/** Stop an already-created manager without loading one just for server shutdown. */
+export async function stopConsortiaMgr(ctx: ServerContext): Promise<void> {
+  const m = mgrs.get(ctx);
+  if (!m) return;
+  // Loading may still be in progress. A failed load has no scan timer, but must not block shutdown.
+  await m.ready.catch(() => {});
+  m.stop();
+}
+
 export class ConsortiaMgr {
   levels = new Map<number, LevelRow>();
   buffs = new Map<number, BuffTemp>();
@@ -107,6 +116,7 @@ export class ConsortiaMgr {
 
   stop(): void {
     if (this.timer) clearInterval(this.timer);
+    this.timer = null;
   }
 
   t(key: string, fallback: string, ...args: unknown[]): string {
