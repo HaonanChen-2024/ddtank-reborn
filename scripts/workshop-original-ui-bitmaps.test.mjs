@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { buildTag, compressSwf, decompressSwf, parseTags, encodeU30 } from '../tools/i18n/abc-strings/lib.mjs';
 import { parseActivityAbc } from '../tools/i18n/abc-strings/activity-response.mjs';
 import { hash } from './workshop-bag-art.mjs';
-import { decodeOriginalLossless2, transplantOriginalBitmaps } from './workshop-original-ui-bitmaps.mjs';
+import { decodeOriginalLossless, decodeOriginalLossless2, transplantOriginalBitmaps } from './workshop-original-ui-bitmaps.mjs';
 
 const deps = createRequire(join(process.env.WORKSHOP_NODE_DEPS ?? join(process.env.USERPROFILE, '.cache/codex-runtimes/codex-primary-runtime/dependencies/node'), 'package.json'));
 const { PNG } = deps('pngjs'), { createCanvas } = deps('@napi-rs/canvas');
@@ -94,6 +94,26 @@ const paletteTransfer = await transplantOriginalBitmaps(target, swf([palette, sy
 assert.deepEqual(parsed(paletteTransfer.out).body.subarray(parsed(paletteTransfer.out).tags[0].bodyStart + 2, parsed(paletteTransfer.out).tags[0].bodyEnd), paletteBody.subarray(2)); cases++;
 const badPalette = Buffer.concat([paletteBody.subarray(0, 8), deflateSync(Buffer.from([64, 32, 16, 128, 9, 8, 7, 0, 1, 2, 3, 255, 3, 1, 0, 0, 2, 0, 0, 0]))]);
 assert.throws(() => decodeOriginalLossless2(badPalette), /palette index outside/); cases++;
+
+// Lossless1 RGB palettes have no alpha and padded scan lines, even when padding resembles an invalid index.
+const opaqueBody = (id, format, width, height, raw, colors = 0) => Buffer.concat([u16(id), Buffer.from([format]), u16(width), u16(height), ...(format === 3 ? [Buffer.from([colors - 1])] : []), deflateSync(raw)]);
+const opaquePalette = opaqueBody(71, 3, 3, 2, Buffer.from([0, 0, 0, 10, 20, 30, 0, 1, 0, 255, 1, 0, 1, 255]), 2);
+assert.deepEqual(decodeOriginalLossless(opaquePalette).rgba, Buffer.from([0, 0, 0, 255, 10, 20, 30, 255, 0, 0, 0, 255, 10, 20, 30, 255, 0, 0, 0, 255, 10, 20, 30, 255]));
+const opaqueTag = buildTag(20, opaquePalette), opaqueOld = lossless(7, 100, 3, 2), opaqueTarget = swf([opaqueOld, abc, shape, symbolTag([[7, 'target.caption']])]);
+const opaqueTransfer = await transplantOriginalBitmaps(opaqueTarget, swf([opaqueTag, symbolTag([[71, 'source.caption']])]), [{ ...mapping, targetTagSha256: hash(opaqueOld), sourceTagSha256: hash(opaqueTag), width: 3 }]);
+const opaqueOut = parsed(opaqueTransfer.out);
+assert.equal(opaqueOut.tags[0].code, 20); assert.equal(opaqueOut.body.readUInt16LE(opaqueOut.tags[0].bodyStart), 7);
+assert.deepEqual(opaqueOut.body.subarray(opaqueOut.tags[0].bodyStart + 2, opaqueOut.tags[0].bodyEnd), opaquePalette.subarray(2));
+for (let i = 1; i < opaqueOut.tags.length; i++) assert.deepEqual(opaqueOut.tags[i].raw, parsed(opaqueTarget).tags[i].raw);
+assert.equal(opaqueTransfer.metadata.sourcePayloadsExceptIdByteIdentical, true); cases++;
+// RGB15 rows align to four bytes; XRGB reserved bytes must never become alpha.
+assert.deepEqual(decodeOriginalLossless(opaqueBody(71, 4, 1, 2, Buffer.from([0, 124, 255, 255, 224, 3, 255, 255]))).rgba, Buffer.from([255, 0, 0, 255, 0, 255, 0, 255])); cases++;
+assert.deepEqual(decodeOriginalLossless(opaqueBody(71, 5, 2, 1, Buffer.from([0, 1, 2, 3, 128, 4, 5, 6]))).rgba, Buffer.from([1, 2, 3, 255, 4, 5, 6, 255])); cases++;
+const opaqueTargetTag = buildTag(20, opaqueBody(7, 5, 2, 2, Buffer.alloc(16)));
+const fromOpaqueTarget = await transplantOriginalBitmaps(swf([opaqueTargetTag, symbolTag([[7, 'target.caption']])]), source, [{ ...mapping, targetTagSha256: hash(opaqueTargetTag) }]);
+assert.equal(parsed(fromOpaqueTarget.out).tags[0].code, 36); assert.equal(fromOpaqueTarget.metadata.mappings[0].targetTagCode, 20); cases++;
+assert.throws(() => decodeOriginalLossless(opaqueBody(71, 3, 1, 1, Buffer.from([0, 0, 0, 1, 0, 0, 0]), 1)), /palette index outside/); cases++;
+assert.throws(() => decodeOriginalLossless(opaqueBody(71, 4, 1, 1, Buffer.from([0, 0]))), /invalid lossless pixel count/); cases++;
 
 function wrappers(defaults, { code = 'd030d0d1d2490247', traits = false, param = 1, padding = 0 } = {}) {
   const u = encodeU30, cat = (...parts) => Buffer.concat(parts), byte = n => Buffer.from([n]);

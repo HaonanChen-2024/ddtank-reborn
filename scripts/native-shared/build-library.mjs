@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {isAbsolute, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {ByteReader, compressSwf, decompressSwf, parseTags} from '../../tools/i18n/abc-strings/lib.mjs';
+import {ByteReader, buildTag, compressSwf, decompressSwf, encodeU30, parseTags} from '../../tools/i18n/abc-strings/lib.mjs';
 import {parseActivityAbc} from '../../tools/i18n/abc-strings/activity-response.mjs';
 
 const SOURCE = 'runtime/reference-activities-completion-20261014/magicwardrobe-native-candidate/magicwardrobe-original-library.swf';
@@ -20,8 +20,8 @@ function scan(bytes) {
     const r = new ByteReader(swf.body.subarray(tag.bodyStart, tag.bodyEnd));
     const flags = r.u32(), end = r.buf.indexOf(0, r.pos);
     assert(end >= r.pos, 'terminated DoABC owner');
-    const owner = r.cstring(), abc = r.buf.subarray(r.pos);
-    return {owner, sourceIndex, flags, abc, raw: tag.raw, p: parseActivityAbc(abc)};
+    const owner = r.cstring(), prefix = r.buf.subarray(0, r.pos), abc = r.buf.subarray(r.pos);
+    return {owner, sourceIndex, flags, prefix, abc, raw: tag.raw, p: parseActivityAbc(abc)};
   });
   return {...swf, ...parsed, abcs};
 }
@@ -99,8 +99,52 @@ function classRecord(c) {
     publicName: c.namespaceKind === 0x16 ? (c.namespace ? c.qualifiedName : c.localName) : null};
 }
 
+// The original disposal calls a Sprite API absent from the actual HBox host.
+// Reuse its inherited Box helper; keep every original method body byte unchanged.
+export function adaptPageNavigaterDisposal(a) {
+  if (a.owner !== 'morn/core/ex/PageNavigaterEx') return {bytes: a.abc, changes: []};
+  assert.equal(sha(a.abc), 'e8aa1650241daef528675441ef8c182b70de7d69179a904af8459c35453d42da', 'pinned PageNavigaterEx ABC');
+  const p = a.p, target = 105, name = p.names[target];
+  assert.deepEqual(name, {kind: 7, name: 188, ns: 3});
+  assert.equal(p.namespaces[name.ns].kind, 22); assert.equal(p.strings[p.namespaces[name.ns].name], '');
+  assert.equal(p.strings[name.name], 'removeChildren'); assert.equal(p.strings.length, 289);
+  assert.equal(p.strings.indexOf('removeAllChild'), -1);
+  assert(p.methodTraits.some(t => t.method === 40 && p.strings[p.names[t.owner]?.name] === 'PageNavigaterEx' && p.strings[p.names[t.name]?.name] === 'dispose'));
+  const body = p.bodies.find(b => b.method === 40);
+  assert.equal(sha(body.code), 'e7d2696e543c7423589e4a4a313b4ef2b13d72ed9706635f28be97322ca3a921');
+  assert.deepEqual(body.code.subarray(156, 159), Buffer.from([0x46, target, 0]), 'pinned zero-argument disposal call');
+  const r = new ByteReader(a.abc); r.pos = p.nameDataOffset;
+  let start, end;
+  for (let i = 1; i <= target; i++) {
+    start = r.pos; const kind = r.bytes(1)[0];
+    if ([7, 13, 9, 14].includes(kind)) { r.u30(); r.u30(); }
+    else if ([15, 16, 27, 28].includes(kind)) r.u30();
+    else if (kind === 29) { r.u30(); for (let n = r.u30(); n; n--) r.u30(); }
+    else assert([17, 18].includes(kind));
+    end = r.pos;
+  }
+  const suffix = Buffer.from(a.abc.subarray(p.stringPoolEnd));
+  const replacement = Buffer.concat([Buffer.from([7]), encodeU30(name.ns), encodeU30(p.strings.length)]);
+  assert.equal(replacement.length, end - start); replacement.copy(suffix, start - p.stringPoolEnd);
+  const added = Buffer.from('removeAllChild');
+  const bytes = Buffer.concat([a.abc.subarray(0, p.stringCountOffset), encodeU30(p.strings.length + 1),
+    a.abc.subarray(p.stringDataOffset, p.stringPoolEnd), encodeU30(added.length), added, suffix]);
+  const checked = parseActivityAbc(bytes), restored = Buffer.from(bytes.subarray(checked.stringPoolEnd));
+  a.abc.subarray(start, end).copy(restored, start - p.stringPoolEnd);
+  assert.deepEqual(restored, a.abc.subarray(p.stringPoolEnd), 'all namespaces, other QNames, traits, metadata and method bodies unchanged');
+  assert.deepEqual(checked.strings, [...p.strings, 'removeAllChild']);
+  assert.deepEqual(checked.names, p.names.map((n, i) => i === target ? {...n, name: p.strings.length} : n));
+  for (const b of p.bodies) {
+    const after = checked.bodies.find(x => x.method === b.method);
+    assert.deepEqual(bytes.subarray(after.start, after.end), a.abc.subarray(b.start, b.end), 'complete original method body unchanged');
+  }
+  return {bytes, changes: [{owner: a.owner, method: 40, offset: 156, multinameIndex: target,
+    from: 'removeChildren', to: 'removeAllChild', argumentCount: 0,
+    originalAbcSha256: sha(a.abc), abcSha256: sha(bytes), allMethodBodiesUnchanged: true}]};
+}
+
 /**
- * Split the pinned, already adapted 92-ABC wardrobe library without modifying it.
+ * Split the pinned 92-ABC library, adapting only PageNavigaterEx's HBox cleanup QName.
  * projectRoot is DDTank-Workshop, not source/ddtank-reborn. outputDir must not
  * exist; its parent must exist. Returns the same JSON object saved as manifest.json.
  * This is an offline build only: it never loads SWFs, patches a client, or starts a service.
@@ -162,24 +206,37 @@ export function buildSharedLibraries({projectRoot, outputDir}) {
   assert.equal(sharedToWardrobe.length, 0, 'shared inheritance cannot depend on wardrobe');
 
   mkdirSync(out);
+  const adaptations = [];
   const files = [['native-shared-library.swf', shared], ['magicwardrobe-module-library.swf', wardrobe]].map(([file, entries]) => {
+    const emitted = entries.map(a => {
+      const adapted = adaptPageNavigaterDisposal(a);
+      const raw = adapted.changes.length ? buildTag(82, Buffer.concat([a.prefix, adapted.bytes])) : a.raw;
+      adaptations.push(...adapted.changes);
+      return {...a, bytes: adapted.bytes, emittedRaw: raw, changes: adapted.changes};
+    });
     const bytes = compressSwf('CWS', original.version, Buffer.concat([
-      original.headerPrefix, attributes, ...entries.map(a => a.raw), showFrame, end,
+      original.headerPrefix, attributes, ...emitted.map(a => a.emittedRaw), showFrame, end,
     ]));
     const checked = scan(bytes);
     assert.deepEqual(checked.abcs.map(a => a.owner), entries.map(a => a.owner), 'stable source order');
     for (let i = 0; i < entries.length; i++) {
-      assert.deepEqual(checked.abcs[i].abc, entries[i].abc, 'ABC bytes unchanged');
-      assert.deepEqual(checked.abcs[i].raw, entries[i].raw, 'complete DoABC tag unchanged');
+      assert.deepEqual(checked.abcs[i].abc, emitted[i].bytes, 'exact emitted ABC bytes');
+      assert.deepEqual(checked.abcs[i].raw, emitted[i].emittedRaw, 'exact complete emitted DoABC tag');
+      if (!emitted[i].changes.length) {
+        assert.deepEqual(checked.abcs[i].abc, entries[i].abc, 'unadapted ABC bytes unchanged');
+        assert.deepEqual(checked.abcs[i].raw, entries[i].raw, 'unadapted complete DoABC tag unchanged');
+      }
     }
     writeFileSync(resolve(out, file), bytes, {flag: 'wx'});
     assert.equal(sha(readFileSync(resolve(out, file))), sha(bytes), 'written SWF readback');
     return {file, bytes: bytes.length, sha256: sha(bytes), swfVersion: checked.version,
       abcCount: entries.length, classCount: entries.reduce((sum, a) => sum + a.classes.length, 0),
       classNames: entries.flatMap(a => a.classes.map(c => c.qualifiedName)),
-      owners: entries.map(a => ({owner: a.owner, sourceIndex: a.sourceIndex, abcSha256: sha(a.abc),
-        doAbcSha256: sha(a.raw), classes: a.classes.map(classRecord)}))};
+      owners: emitted.map(a => ({owner: a.owner, sourceIndex: a.sourceIndex, abcSha256: sha(a.bytes),
+        doAbcSha256: sha(a.emittedRaw), originalAbcSha256: sha(a.abc), originalDoAbcSha256: sha(a.raw),
+        changes: a.changes, classes: a.classes.map(classRecord)}))};
   });
+  assert.equal(adaptations.length, 1, 'exactly one HBox cleanup QName adaptation');
   const SharedClassNames = shared.flatMap(a => a.classes.map(classRecord).map(c => c.publicName).filter(Boolean));
   assert.equal(SharedClassNames.length, 82, 'public shared class probe count');
   assert.equal(new Set(SharedClassNames).size, 82);
@@ -187,7 +244,10 @@ export function buildSharedLibraries({projectRoot, outputDir}) {
   assert.equal(sha(readFileSync(sourcePath)), SOURCE_SHA256, 'source unchanged after build');
   const manifest = {version: 1, createdAt: new Date().toISOString(), source: {path: sourcePath, bytes: source.length, sha256: SOURCE_SHA256, abcCount: 92},
     outputDir: out, files, SharedClassNames,
-    verification: {allAbcBytesUnchanged: true, allDoAbcTagsUnchanged: true, stableSourceOrder: true,
+    adaptations,
+    verification: {allAbcBytesUnchanged: false, allDoAbcTagsUnchanged: false, unchangedAbcCount: 91,
+      allUnadaptedAbcBytesUnchanged: true, allUnadaptedDoAbcTagsUnchanged: true,
+      allOriginalMethodBodiesUnchanged: true, stableSourceOrder: true,
       uniqueOwnerCount: 92, uniqueClassCount: classOwners.size, sharedClassCount: sharedNames.length,
       wardrobeClassCount: wardrobeNames.length, classIntersection: intersection, sharedToWardrobeInheritance: sharedToWardrobe,
       namespaceSetInheritanceCount: inheritance.filter(edge => [9, 14].includes(edge.multinameKind)).length,

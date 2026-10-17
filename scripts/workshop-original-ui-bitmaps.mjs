@@ -7,9 +7,34 @@ import { parseActivityAbc } from '../tools/i18n/abc-strings/activity-response.mj
 import { decodeBitmap, hash, jpegBitmapData } from './workshop-bag-art.mjs';
 import { decodeJpeg3 } from './workshop-calendar-art.mjs';
 
-const bitmapCodes = new Set([21, 35, 36]);
+const bitmapCodes = new Set([20, 21, 35, 36]);
 const definitionCodes = new Set([2, 6, 7, 10, 11, 14, 20, 21, 22, 32, 33, 34, 35, 36, 37, 39, 46, 48, 60, 75, 83, 84, 87, 90, 91]);
 const pngSignature = Buffer.from('89504e470d0a1a0a', 'hex');
+
+// DefineBitsLossless has RGB palettes / RGB15 / XRGB pixels, all fully opaque.
+// Decoding is independent of JPEGTables; transplantation retains the compressed bytes.
+export function decodeOriginalLossless(body) {
+  assert.ok(body.length >= 7, 'truncated DefineBitsLossless');
+  const id = body.readUInt16LE(0), format = body[2], width = body.readUInt16LE(3), height = body.readUInt16LE(5);
+  assert.ok(width > 0 && height > 0, 'invalid lossless bitmap dimensions');
+  assert.ok([3, 4, 5].includes(format), 'unsupported DefineBitsLossless format');
+  if (format === 3) assert.ok(body.length >= 8, 'truncated lossless palette');
+  const colors = format === 3 ? body[7] + 1 : 0, stride = format === 3 ? (width + 3) & ~3 : format === 4 ? (width * 2 + 3) & ~3 : width * 4;
+  const raw = inflateSync(body.subarray(format === 3 ? 8 : 7));
+  assert.equal(raw.length, colors * 3 + stride * height, 'invalid lossless pixel count');
+  const rgba = Buffer.alloc(width * height * 4, 255);
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const p = (y * width + x) * 4, row = y * stride;
+    if (format === 3) {
+      const index = raw[colors * 3 + row + x]; assert.ok(index < colors, 'palette index outside color table');
+      raw.copy(rgba, p, index * 3, index * 3 + 3);
+    } else if (format === 4) {
+      const n = raw.readUInt16LE(row + x * 2);
+      rgba[p] = Math.round(((n >> 10) & 31) * 255 / 31); rgba[p + 1] = Math.round(((n >> 5) & 31) * 255 / 31); rgba[p + 2] = Math.round((n & 31) * 255 / 31);
+    } else raw.copy(rgba, p, row + x * 4 + 1, row + x * 4 + 4);
+  }
+  return { id, width, height, rgba };
+}
 
 // Decode only; transplanting always preserves the original compressed payload.
 export function decodeOriginalLossless2(body) {
@@ -66,6 +91,7 @@ function namedBitmap(swf, name, expectedHash, side) {
 
 async function decode(swf, bitmap) {
   const { tag, body } = bitmap;
+  if (tag.code === 20) return decodeOriginalLossless(body);
   if (tag.code === 36) return decodeOriginalLossless2(body);
   assert.ok(body.length >= (tag.code === 35 ? 6 : 2), 'truncated encoded bitmap');
   const size = tag.code === 35 ? body.readUInt32LE(2) : body.length - 2, start = tag.code === 35 ? 6 : 2;

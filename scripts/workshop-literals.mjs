@@ -10,6 +10,8 @@ import { patchActivityResponse } from "../tools/i18n/abc-strings/activity-respon
 import { patchActivityState } from "../tools/i18n/abc-strings/activity-state.mjs";
 import { patchExchangeState } from "../tools/i18n/abc-strings/exchange-state.mjs";
 import { patchCraterMask } from "../tools/i18n/abc-strings/crater-mask.mjs";
+import { patchBattleMusic } from "../tools/i18n/abc-strings/battle-music.mjs";
+import { patchSmithGiftPrice } from "../tools/i18n/abc-strings/smith-gift-price.mjs";
 import { patchWeaponAudioRegistration } from "../tools/i18n/abc-strings/weapon-audio.mjs";
 import { verifyWeaponAudioAssets } from "./workshop-weapon-audio-assets.mjs";
 import { buildActivityEntry } from "./workshop-activity-entry.mjs";
@@ -33,32 +35,38 @@ export function literalOptions(args) {
   const nativeWardrobeManifest = nativeArgs[0]?.slice(nativeArgs[0].indexOf("=") + 1);
   args = args.filter(arg => !nativeArgs.includes(arg));
   const commands = args.filter(arg => ["verify", "install", "rollback"].includes(arg));
-  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--weapon-audio", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--weapon-audio] [--reference-activities] [--native-activities=MANIFEST]");
+  assert.ok(commands.length <= 1 && args.every(arg => commands.includes(arg) || ["--activity-response", "--activity-state", "--exchange-state", "--crater-mask", "--weapon-audio", "--battle-music", "--smith-gift-price", "--reference-activities"].includes(arg)), "usage: workshop-literals.mjs verify|install|rollback [--activity-response] [--activity-state] [--exchange-state] [--crater-mask] [--weapon-audio] [--battle-music] [--smith-gift-price] [--reference-activities] [--native-activities=MANIFEST]");
   assert.ok(args.filter(arg => arg === "--activity-response").length <= 1, "duplicate activity-response option");
   const command = commands[0] ?? "verify", activityResponse = args.includes("--activity-response");
   const activityState = args.includes("--activity-state");
   const exchangeState = args.includes("--exchange-state");
   const craterMask = args.includes("--crater-mask");
   const weaponAudio = args.includes("--weapon-audio");
+  const battleMusic = args.includes("--battle-music");
+  const smithGiftPrice = args.includes("--smith-gift-price");
+  assert.ok(args.filter(arg => arg === "--smith-gift-price").length <= 1, "duplicate smith-gift-price option");
+  assert.ok(args.filter(arg => arg === "--battle-music").length <= 1, "duplicate battle-music option");
   assert.ok(args.filter(arg => arg === "--weapon-audio").length <= 1, "duplicate weapon-audio option");
   const referenceActivities = args.includes("--reference-activities");
   assert.ok(args.filter(arg => arg === "--reference-activities").length <= 1, "duplicate reference-activities option");
   assert.ok(args.filter(arg => arg === "--activity-state").length <= 1, "duplicate activity-state option");
   assert.ok(args.filter(arg => arg === "--exchange-state").length <= 1, "duplicate exchange-state option");
   assert.ok(args.filter(arg => arg === "--crater-mask").length <= 1, "duplicate crater-mask option");
-  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState || craterMask || weaponAudio || referenceActivities || nativeWardrobeManifest), "rollback restores the complete owned literal overlay");
-  return { command, activityResponse, ...(activityState ? { activityState } : {}), ...(exchangeState ? { exchangeState } : {}), ...(craterMask ? { craterMask } : {}), ...(weaponAudio ? { weaponAudio } : {}), ...(referenceActivities ? { referenceActivities } : {}), ...(nativeWardrobeManifest ? { nativeWardrobeManifest } : {}) };
+  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState || craterMask || weaponAudio || battleMusic || smithGiftPrice || referenceActivities || nativeWardrobeManifest), "rollback restores the complete owned literal overlay");
+  return { command, activityResponse, ...(activityState ? { activityState } : {}), ...(exchangeState ? { exchangeState } : {}), ...(craterMask ? { craterMask } : {}), ...(weaponAudio ? { weaponAudio } : {}), ...(battleMusic ? { battleMusic } : {}), ...(smithGiftPrice ? { smithGiftPrice } : {}), ...(referenceActivities ? { referenceActivities } : {}), ...(nativeWardrobeManifest ? { nativeWardrobeManifest } : {}) };
 }
 
-export function runLiteralOverlay({ command = "verify", activityResponse = false, activityState = false, exchangeState = false, craterMask = false, weaponAudio = false, referenceActivities = false, nativeWardrobeManifest, repoRoot = repo, runtimeRoot = resolve(repoRoot, "../../runtime") } = {}) {
+export function runLiteralOverlay({ command = "verify", activityResponse = false, activityState = false, exchangeState = false, craterMask = false, weaponAudio = false, battleMusic = false, smithGiftPrice = false, referenceActivities = false, nativeWardrobeManifest, repoRoot = repo, runtimeRoot = resolve(repoRoot, "../../runtime") } = {}) {
   assert.ok(["verify", "install", "rollback"].includes(command));
   assert.equal(typeof activityResponse, "boolean");
   assert.equal(typeof activityState, "boolean");
   assert.equal(typeof exchangeState, "boolean");
   assert.equal(typeof craterMask, "boolean");
   assert.equal(typeof weaponAudio, "boolean");
+  assert.equal(typeof battleMusic, "boolean");
+  assert.equal(typeof smithGiftPrice, "boolean");
   assert.equal(typeof referenceActivities, "boolean");
-  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState || craterMask || weaponAudio || referenceActivities || nativeWardrobeManifest));
+  assert.ok(command !== "rollback" || !(activityResponse || activityState || exchangeState || craterMask || weaponAudio || battleMusic || smithGiftPrice || referenceActivities || nativeWardrobeManifest));
   const overlay = join(runtimeRoot, "client-overlay"), ledger = join(runtimeRoot, "client-overlay-literals.json");
   const ledgerBytes = existsSync(ledger) ? readFileSync(ledger) : null;
   const previous = ledgerBytes ? JSON.parse(ledgerBytes.toString("utf8")) : null;
@@ -81,6 +89,10 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
   const oldCrater = previous?.craterMask ?? false, craterEnabled = oldCrater || craterMask;
   assert.ok(!previous || previous.weaponAudio === undefined || typeof previous.weaponAudio === "boolean", "unknown weapon-audio journal flag");
   const oldWeaponAudio = previous?.weaponAudio ?? false, weaponAudioEnabled = oldWeaponAudio || weaponAudio;
+  assert.ok(!previous || previous.battleMusic === undefined || typeof previous.battleMusic === "boolean", "unknown battle-music journal flag");
+  const oldBattleMusic = previous?.battleMusic ?? false, battleMusicEnabled = oldBattleMusic || battleMusic;
+  assert.ok(!previous || previous.smithGiftPrice === undefined || typeof previous.smithGiftPrice === "boolean", "unknown smith-gift-price journal flag");
+  const oldSmithGiftPrice = previous?.smithGiftPrice ?? false, smithGiftPriceEnabled = oldSmithGiftPrice || smithGiftPrice;
   if (weaponAudioEnabled && command !== "rollback") verifyWeaponAudioAssets(readFileSync(join(overlay, "audio.swf")));
   const oldEnabled = previous?.activityResponse ?? false;
   const oldExchange = previous?.exchangeState ?? false, exchangeEnabled = oldExchange || exchangeState;
@@ -177,8 +189,10 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     if (oldActivities && name === "2.png") oldOut = buildActivityEntry(oldOut, { nativeMenuVersion: priorNative?.nativeMenuVersion }).output;
     if (oldNative && name === "2.png") oldOut = buildNativeCore(oldOut, priorNative).output;
     if (oldWeaponAudio && name === "2.png") oldOut = patchWeaponAudioRegistration(oldOut).out;
+    if (oldBattleMusic && name === "2.png") oldOut = patchBattleMusic(oldOut).out;
+    if (oldSmithGiftPrice && name === "2.png") oldOut = patchSmithGiftPrice(oldOut).out;
     if (old) assert.equal(hash(oldOut), old.sha256, "recorded literal/consumer output changed; preserve the installed batch");
-    let out = displayOut, response, state, exchange, crater, activities, nativeEntry, christmasBattleReturn, weaponAudioProof;
+    let out = displayOut, response, state, exchange, crater, activities, nativeEntry, christmasBattleReturn, weaponAudioProof, battleMusicProof, smithGiftPriceProof;
     if (enabled && name === "2.png") {
       const patched = patchActivityResponse(displayOut); out = patched.out;
       const again = patchActivityResponse(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
@@ -211,11 +225,17 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       const again = patchWeaponAudioRegistration(out); assert.equal(again.changed, false); assert.deepEqual(again.out, out);
       const { out: ignored, ...proof } = patched; weaponAudioProof = proof;
     }
+    if (battleMusicEnabled && name === "2.png") {
+      const patched = patchBattleMusic(out); out = patched.out; battleMusicProof = patched.proof;
+    }
+    if (smithGiftPriceEnabled && name === "2.png") {
+      const patched = patchSmithGiftPrice(out); out = patched.out; smithGiftPriceProof = patched.proof;
+    }
     return { name, sourceSha256: hash(bytes), sha256: hash(out), changedStrings: totalChanged, bytes: out.length,
       hadOverlay: old?.hadOverlay ?? existsSync(target), backup: old?.backup,
-      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), ...(crater ? { craterMask: crater } : {}), ...(activities ? { referenceActivities: activities } : {}), ...(nativeEntry ? { nativeWardrobe: nativeEntry } : {}), ...(christmasBattleReturn ? { christmasBattleReturn } : {}), ...(weaponAudioProof ? { weaponAudio: weaponAudioProof } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
+      ...(response ? { activityResponse: response } : {}), ...(state ? { activityState: state } : {}), ...(exchange ? { exchangeState: exchange } : {}), ...(crater ? { craterMask: crater } : {}), ...(activities ? { referenceActivities: activities } : {}), ...(nativeEntry ? { nativeWardrobe: nativeEntry } : {}), ...(christmasBattleReturn ? { christmasBattleReturn } : {}), ...(weaponAudioProof ? { weaponAudio: weaponAudioProof } : {}), ...(battleMusicProof ? { battleMusic: battleMusicProof } : {}), ...(smithGiftPriceProof ? { smithGiftPrice: smithGiftPriceProof } : {}), out, sourceBytes: bytes, currentBytes: existsSync(target) ? readFileSync(target) : null };
   });
-  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange && craterEnabled === oldCrater && weaponAudioEnabled === oldWeaponAudio && activitiesEnabled === oldActivities && !nativeChanged;
+  const unchanged = Boolean(previous) && files.every(entry => entry.sha256 === previous.files.find(old => old.name === entry.name).sha256) && enabled === oldEnabled && stateEnabled === oldState && exchangeEnabled === oldExchange && craterEnabled === oldCrater && weaponAudioEnabled === oldWeaponAudio && battleMusicEnabled === oldBattleMusic && smithGiftPriceEnabled === oldSmithGiftPrice && activitiesEnabled === oldActivities && !nativeChanged;
   const journalFiles = () => files.map(({ out, sourceBytes, currentBytes, ...entry }) => entry);
   if (command === "install" && !unchanged) {
     if (!previous) {
@@ -223,7 +243,7 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
       for (const entry of files) { entry.backup = join(backupDir, entry.name); writeExclusive(entry.backup, entry.sourceBytes); }
     }
     const nextLedger = Buffer.from(JSON.stringify({ ...(previous ?? {}), installedAt: previous?.installedAt ?? new Date().toISOString(),
-      ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), ...(exchangeEnabled ? { exchangeState: true } : {}), ...(craterEnabled ? { craterMask: true } : {}), ...(weaponAudioEnabled ? { weaponAudio: true } : {}), ...(activitiesEnabled ? { referenceActivities: true } : {}), ...(native ? { nativeWardrobe: native.receipt } : {}), files: journalFiles() }, null, 2));
+      ...(previous ? { updatedAt: new Date().toISOString() } : {}), activityResponse: enabled, ...(stateEnabled ? { activityState: true } : {}), ...(exchangeEnabled ? { exchangeState: true } : {}), ...(craterEnabled ? { craterMask: true } : {}), ...(weaponAudioEnabled ? { weaponAudio: true } : {}), ...(battleMusicEnabled ? { battleMusic: true } : {}), ...(smithGiftPriceEnabled ? { smithGiftPrice: true } : {}), ...(activitiesEnabled ? { referenceActivities: true } : {}), ...(native ? { nativeWardrobe: native.receipt } : {}), files: journalFiles() }, null, 2));
     const checkLedger = () => ledgerBytes ? assert.deepEqual(readFileSync(ledger), ledgerBytes, "literal journal changed during preparation") : assert.equal(existsSync(ledger), false, "a literal journal appeared during preparation");
     checkLedger(); const installed = [], addedAssets = [], updatedAssets = [];
     try {
@@ -282,12 +302,14 @@ export function runLiteralOverlay({ command = "verify", activityResponse = false
     }
   }
   return { installed: command === "install" || Boolean(previous), restartRequired: true, unchanged,
+    battleMusic: battleMusicEnabled, battleMusicInstalled: battleMusicEnabled && (command === "install" || oldBattleMusic),
+    smithGiftPrice: smithGiftPriceEnabled, smithGiftPriceInstalled: smithGiftPriceEnabled && (command === "install" || oldSmithGiftPrice),
     weaponAudio: weaponAudioEnabled, weaponAudioInstalled: weaponAudioEnabled && (command === "install" || oldWeaponAudio),
     nativeWardrobe: native?.receipt ?? null, nativeWardrobeInstalled: Boolean(native) && (command === "install" || Boolean(oldNative) && !nativeChanged),
     referenceActivities: activitiesEnabled, referenceActivitiesInstalled: activitiesEnabled && (command === "install" || oldActivities),
     activityResponse: enabled, activityResponseInstalled: enabled && (command === "install" || oldEnabled), activityState: stateEnabled,
     activityStateInstalled: stateEnabled && (command === "install" || oldState), exchangeState: exchangeEnabled,
-    exchangeStateInstalled: exchangeEnabled && (command === "install" || oldExchange), craterMask: craterEnabled, craterMaskInstalled: craterEnabled && (command === "install" || oldCrater), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState || exchangeEnabled !== oldExchange || craterEnabled !== oldCrater || weaponAudioEnabled !== oldWeaponAudio || activitiesEnabled !== oldActivities || nativeChanged) && command !== "install", renderingAccepted: false,
+    exchangeStateInstalled: exchangeEnabled && (command === "install" || oldExchange), craterMask: craterEnabled, craterMaskInstalled: craterEnabled && (command === "install" || oldCrater), pendingTransition: (enabled !== oldEnabled || stateEnabled !== oldState || exchangeEnabled !== oldExchange || craterEnabled !== oldCrater || weaponAudioEnabled !== oldWeaponAudio || battleMusicEnabled !== oldBattleMusic || smithGiftPriceEnabled !== oldSmithGiftPrice || activitiesEnabled !== oldActivities || nativeChanged) && command !== "install", renderingAccepted: false,
     files: journalFiles().map(({ backup, ...entry }) => entry) };
 }
 

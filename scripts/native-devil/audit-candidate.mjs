@@ -12,6 +12,44 @@ const qops=new Set([4,5,0x45,0x46,0x4a,0x4c,0x4e,0x4f,0x5d,0x5e,0x5f,0x60,0x61,0
 function nameSets(a){const r=new ByteReader(a.abc),rows=new Map();r.pos=a.p.nameDataOffset;for(let i=1;i<a.p.names.length;i++){const k=r.bytes(1)[0];if([7,13].includes(k)){r.u30();r.u30();}else if([9,14].includes(k)){r.u30();rows.set(i,r.u30());}else if([15,16,27,28].includes(k))r.u30();else if(k===29){r.u30();for(let c=r.u30();c;c--)r.u30();}else assert([17,18].includes(k));}assert.equal(r.pos,a.p.namePoolEnd);return rows;}
 function names(a,i,sets){const n=a.p.names[i];if(!n)return[];if(n.ns)return[a.p.strings[a.p.namespaces[n.ns].name]+'::'+a.p.strings[n.name]];if([9,14].includes(n.kind))return a.p.namespaceSets[sets.get(i)].map(ns=>a.p.strings[a.p.namespaces[ns].name]+'::'+a.p.strings[n.name]);return[];}
 function body(a,name){const ts=a.p.methodTraits.filter(t=>a.p.strings[a.p.names[t.name]?.name]===name);assert.equal(ts.length,1,name);return a.p.bodies.find(b=>b.method===ts[0].method);}
+export function verifyLibraryLoadOrder(lib){
+ const definitions=[];
+ for(const [abcIndex,a]of lib.abcs.entries()){
+  const r=new ByteReader(a.abc);r.pos=a.p.namePoolEnd;
+  for(let n=r.u30();n;n--){
+   const count=r.u30();r.u30();for(let i=0;i<count;i++)r.u30();
+   r.u30();const flags=r.bytes(1)[0];
+   if(flags&8)for(let i=r.u30();i;i--){r.u30();r.bytes(1);}
+   if(flags&128)for(let i=0;i<count;i++)r.u30();
+  }
+  for(let n=r.u30();n;n--){r.u30();for(let i=r.u30()*2;i;i--)r.u30();}
+  const count=r.u30();
+  for(let i=0;i<count;i++){
+   const name=r.u30(),parent=r.u30(),flags=r.bytes(1)[0];
+   if(flags&8)r.u30();for(let n=r.u30();n;n--)r.u30();r.u30();
+   definitions.push({name:q(a.p,name),parent:q(a.p,parent),owner:a.name,abcIndex});
+   r.pos=a.p.traitBlocks[i].end;
+  }
+ }
+ const byName=new Map(definitions.map(d=>[d.name,d]));
+ assert.equal(byName.size,definitions.length,'duplicate library class');
+ const edges=[];
+ for(const child of definitions){
+  const parent=byName.get(child.parent);if(!parent)continue;
+  edges.push({child:child.name,parent:parent.name,childAbc:child.abcIndex,parentAbc:parent.abcIndex});
+  assert(parent.abcIndex<=child.abcIndex,`${child.name} must load after ${parent.name}: ABC ${child.abcIndex} before ${parent.abcIndex}`);
+ }
+ return{abcCount:lib.abcs.length,classCount:definitions.length,internalInheritanceEdges:edges};
+}
+export function verifyShopHostConstructor(host){
+ const a=host.flatMap(h=>h.swf.abcs).find(a=>a.name==='ddt/data/goods/ShopItemInfo');assert(a,'actual host ShopItemInfo');
+ const constructor=a.p.methods.findIndex(m=>a.p.strings[m.name]==='ddt.data.goods:ShopItemInfo/ShopItemInfo');assert(constructor>=0,'actual constructor');
+ const m=a.p.methods[constructor],parameters=m.params.map(type=>q(a.p,type));assert.deepEqual(parameters,['::int','::int']);assert.equal(m.flags&8,0,'actual constructor has no optional parameters');
+ const ops=decode(a.p.bodies.find(b=>b.method===constructor).code).filter(o=>![0xf0,0xf1,0xef].includes(o.op));
+ assert.deepEqual(ops.filter(o=>o.op===0x68).map(o=>q(a.p,o.args[0])),['::GoodsID','::TemplateID']);
+ assert.deepEqual(ops.slice(-7).map(o=>o.op),[0xd0,0xd1,0x68,0xd0,0xd2,0x68,0x47]);
+ return{owner:a.name,abcSha256:sha(a.abc),constructor:{method:constructor,parameters,optional:false,identityOrder:['GoodsID','TemplateID']}};
+}
 export function auditDevil({outputDir,projectRoot=resolve(dirname(fileURLToPath(import.meta.url)),'../../../..'),sharedPath,write=true}){
  const out=resolve(outputDir),m=JSON.parse(readFileSync(resolve(out,'manifest.json'),'utf8')),area=resolve(out,'flash/workshop-native/devil'),original=scan(readFileSync(m.library.source.path)),libBytes=readFileSync(resolve(area,m.library.file)),lib=scan(libBytes),resource=inspectDevilAssets({projectRoot}),art=resource.art,sharedFile=sharedPath??resolve(projectRoot,'runtime/reference-activities-completion-20261014/native-unified-exchange-candidate-20261015-b/flash/workshop-native/shared/native-shared-library.swf'),shared=scan(readFileSync(sharedFile)),bootBytes=readFileSync(resolve(area,m.bootstrap.file)),boot=scan(bootBytes),source=readFileSync(m.source.snapshotPath,'utf8');
  assert.equal(m.module,'workshop-native-devil');assert.equal(sha(readFileSync(m.library.source.path)),m.library.source.sha256);assert.equal(sha(libBytes),m.library.sha256);assert.equal(lib.abcs.length,43);assert.deepEqual(lib.abcs.filter(a=>devilOwners.includes(a.name)||devilSupport.includes(a.name)).map(a=>a.name).sort(),[...devilOwners,...devilSupport].sort());assert.equal(shared.abcs.length,82);assert.equal(boot.abcs.length,1);assert.equal(sha(bootBytes),m.bootstrap.sha256);assert.equal(sha(Buffer.from(source)),m.source.sha256);
@@ -21,6 +59,7 @@ export function auditDevil({outputDir,projectRoot=resolve(dirname(fileURLToPath(
  }
  assert.equal(dispatches.length,Object.values(devilSelected).flat().length);assert.deepEqual(forbidden,[]);const missingHostClasses=[...dependencies.values()].filter(d=>!d.presentInHost);assert.deepEqual(missingHostClasses,[]);const preserved=[];
  for(const [owner,list]of Object.entries({'devilTurn/control/DevilTurnControl':['init','turn','__onTimerComplete','_nextNode','_updateTurnType','startTurn','turnComplete','_startTimer','dispose'],'devilTurn/view/DevilTurnLotteryView':['init','dispose'],'devilTurn/view/DevilTurnDiceView':['__onPlayRightAction','__onAcitonComplate','updateIndex','updateBoxPhase','updateDiceRange'],'devilTurn/view/DevilTurnBoxConvertItem':['initialize','onBeadListRender','beadConverList','dispose'],'devilTurn/view/DevilTurnBoxConvertView':['preinitialize','initialize','onBeadListRender'],'devilTurn/view/DevilTurnMallItem':['initialize','info','dispose'],'devilTurn/view/DevilTurnShopBuyView':['initView','setBuyNum']})){const a=lib.abcs.find(a=>a.name===owner),old=original.abcs.find(a=>a.name===owner);for(const name of list){const b=body(a,name);assert.deepEqual(b.code,old.p.bodies.find(x=>x.method===b.method).code);preserved.push({owner,name,sha256:sha(b.code)});}}
+ const shopHost=verifyShopHostConstructor(host),shopOps=decode(body(boot.abcs[0],"syncModel").code),shopStart=shopOps.findIndex(o=>o.op===0x2c&&boot.abcs[0].p.strings[o.args[0]]==="ddt.data.goods.ShopItemInfo");assert(shopStart>=0,"compiled ShopItemInfo lookup");const shopConstruct=shopOps.slice(shopStart).find(o=>o.op===0x42);assert(shopConstruct);assert.equal(shopConstruct.args[0],2,"compiled ShopItemInfo requires both identities");
  const a=boot.abcs[0],allAvailable=new Set([...available,...hostClasses]),dynamicHost=[...new Set([...source.matchAll(/cls\("([^"]+)"\)/g)].map(m=>m[1]))];for(const name of dynamicHost){if(name.startsWith('__AS3__.vec::Vector.<'))continue;const n=name.includes('.')?name.replace(/\.([^.]+)$/,'::$1'):'::'+name;assert(allAvailable.has(n),'dynamic owner '+name);}
  for(const file of m.assets){const bytes=readFileSync(resolve(area,file.file));assert.equal(sha(bytes),file.sha256);assert.equal(bytes.length,file.bytes);}assert.equal(m.assets.length,2);for(const b of a.p.bodies){const ops=decode(b.code),starts=new Set([...ops.map(o=>o.offset),b.code.length]);for(const op of ops)if(op.op>=12&&op.op<=26)assert(starts.has(op.end+op.args[0]),'Bootstrap branch');}
  const calls=name=>decode(body(a,name).code).filter(op=>[0x46,0x4f,0x4a].includes(op.op)).map(op=>q(a.p,op.args[0]).split('::').at(-1));assert.equal(calls('startNative').filter(n=>n==='addCallback').length,5);for(const callback of m.bootstrap.callbacks)assert(a.p.strings.includes(callback));for(const n of ['clearConfirm','dispose','removeEventListener'])assert(calls('closeNative').includes(n));
@@ -28,6 +67,6 @@ export function auditDevil({outputDir,projectRoot=resolve(dirname(fileURLToPath(
  for(const snippet of ['SocketManager','Math.random(','setTimeout(','sendDevilTurn','_closeCall.call','_closeCall()'])assert(!source.includes(snippet),snippet);
  const skins=[];for(const skin of resource.skins){const tag=lib.tags.find(t=>t.code===skin.tag.code&&lib.body.readUInt16LE(t.bodyStart)===skin.id);assert(tag);assert.deepEqual(tag.raw,skin.tag.raw);assert(available.has(skin.alias.replace(/\.([^.]*)$/,'::$1')));skins.push({alias:skin.alias,original:skin.name,id:skin.id,sha256:sha(tag.raw),width:skin.width,height:skin.height});}assert.equal(skins.length,14);assert.equal(sha(readFileSync(resolve(area,'devilturn_v3_6_1_u1.swf'))),devilPins.art);assert.equal(sha(readFileSync(resolve(area,'devilturn.ui'))),devilPins.ui);
  const collision=[...available].filter(n=>(!n.includes(':')||n.split('::')[0].indexOf('/')<0)&&hostClasses.has(n));assert.deepEqual(collision,[]);
- const report={at:new Date().toISOString(),scope:'compiled offline original eight-cell control/two-dice timers/five beads/three boxes/nine draw gifts/four mark-shop; not AVM2/client or visual acceptance',ownerCount:40,supportOwnerCount:2,libraryAbcCount:43,dispatchCount:dispatches.length,dispatches,unchangedBodyCount:unchanged.length,preservedMethods:preserved,requiredHostClasses:[...dependencies.values()],missingHostClasses,forbiddenCalls:forbidden,dynamicHost,shared:{path:sharedFile,sha256:sha(readFileSync(sharedFile)),abcCount:82},host:host.map(({path,sha256})=>({path,sha256})),bootstrap:{sha256:m.bootstrap.sha256,abcCount:1,callbackCount:5},publicHostCollision:collision,skins,resources:resource.report,originalArtBytesUnchanged:true,originalUiBytesUnchanged:true,layouts:m.layouts,protocol:m.protocol,pending:['Actual AVM2 first-open/constructor/typed Vector/alias bitmap skins','Actual original Control complete and dice800ms2tick, all boxes/stages and exact server faces','Font/bounds/scroll/list/quantity/dialogue/user acceptance','Close pending/replay/reopen/role drift and permanent-mail cycle','Original global jackpot/rank/timed expiry/economy backend not transplanted'],installed:false,runtimeValidated:false};if(write)writeFileSync(resolve(out,'offline-audit.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});return report;
+ const report={at:new Date().toISOString(),loadOrder:verifyLibraryLoadOrder(lib),shopHost,shopConstructor:{method:"syncModel",offset:shopConstruct.offset,argumentCount:shopConstruct.args[0]},scope:'compiled offline original eight-cell control/two-dice timers/five beads/three boxes/nine draw gifts/four mark-shop; not AVM2/client or visual acceptance',ownerCount:40,supportOwnerCount:2,libraryAbcCount:43,dispatchCount:dispatches.length,dispatches,unchangedBodyCount:unchanged.length,preservedMethods:preserved,requiredHostClasses:[...dependencies.values()],missingHostClasses,forbiddenCalls:forbidden,dynamicHost,shared:{path:sharedFile,sha256:sha(readFileSync(sharedFile)),abcCount:82},host:host.map(({path,sha256})=>({path,sha256})),bootstrap:{sha256:m.bootstrap.sha256,abcCount:1,callbackCount:5},publicHostCollision:collision,skins,resources:resource.report,originalArtBytesUnchanged:true,originalUiBytesUnchanged:true,layouts:m.layouts,protocol:m.protocol,pending:['Actual AVM2 first-open/constructor/typed Vector/alias bitmap skins','Actual original Control complete and dice800ms2tick, all boxes/stages and exact server faces','Font/bounds/scroll/list/quantity/dialogue/user acceptance','Close pending/replay/reopen/role drift and permanent-mail cycle','Original global jackpot/rank/timed expiry/economy backend not transplanted'],installed:false,runtimeValidated:false};if(write)writeFileSync(resolve(out,'offline-audit.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});return report;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){const r=auditDevil({outputDir:process.argv[2]});console.log(JSON.stringify({ownerCount:r.ownerCount,supportOwnerCount:r.supportOwnerCount,dispatchCount:r.dispatchCount,unchangedBodies:r.unchangedBodyCount,preservedMethods:r.preservedMethods.length,missingHostClasses:r.missingHostClasses,compiled:true,runtimeValidated:false}));}

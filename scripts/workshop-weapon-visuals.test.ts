@@ -9,6 +9,7 @@ import { createDb, game, type DbHandle } from "../packages/db/src/index.js";
 import { q } from "../apps/api/src/lib/db.js";
 import { planWeaponInstall, type WeaponPackage } from "./workshop-weapon.js";
 import { runWeaponVisualUpgrade } from "./workshop-weapon-visuals.js";
+import { smithEnabledWeapon } from "./workshop-weapon-smith.js";
 
 const { sql, getTableColumns } = createRequire(new URL("../packages/db/package.json", import.meta.url))("drizzle-orm") as typeof import("../packages/db/node_modules/drizzle-orm/index.js");
 // Frozen exact copies of the previously owned package and the official visual candidate; no runtime fixture dependency.
@@ -83,6 +84,16 @@ test("exact owned package upgrades only four visual rows and branch bindings; re
   }
   assert.deepEqual(readFileSync(f.originalJournalPath), originalBytes); assert.deepEqual(readFileSync(f.upgradeJournalPath), savedBytes);
   assert.equal(statSync(f.upgradeJournalPath).mtimeMs, savedTime);
+});
+
+test("completed visuals accept the exact later smith upgrade without changing official stats", async t => {
+  const f = fixture(t); await f.run();
+  const upgraded = smithEnabledWeapon(oldPackage.Shop_Goods);
+  await h.db.execute(sql`UPDATE game."Shop_Goods" SET "Level"=3, "CanStrengthen"=true, "CanCompose"=true,
+    "CanTransfer"=1, "Description"=${upgraded.Description} WHERE "TemplateID"=9107258`);
+  const before = await rows(); assert.equal((await f.run()).status, "unchanged"); assert.deepEqual(await rows(), before);
+  await h.db.execute(sql`UPDATE game."Shop_Goods" SET "Attack"="Attack"+1 WHERE "TemplateID"=9107258`);
+  await assert.rejects(f.run(), /owned Shop_Goods/);
 });
 
 test("prepared intent precedes writes; failure rolls back and exact old-state retry succeeds", async t => {

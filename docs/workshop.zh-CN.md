@@ -62,7 +62,7 @@ A13任务凭证赠送在双钱包锁后仍需等待赠送者账户和收件角�
 
 ## 继续修改中文文字
 
-客户端字典仍由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理，当前覆盖2783键/2796行，包括装备类型、背包、商城、房间、副本、好友和邮件等提示。新增翻译必须对应原键，保持 `{0}` 等位置占位符、CRLF、BOM 和重复键；`verify` 只核验，`install` 保留上一次部署备份。图片里的文字需要单独处理，字典覆盖不代表全部按钮已中文化。
+客户端字典由 `research/i18n/zh-CN-overrides.json` 与 `scripts/workshop-language.mjs` 管理，当前覆盖3461键/3477物理行。3503个原键中的42个非正文值（字体、格式、空串、触发码等）保持；所有正文已有中文覆盖。新增翻译必须对应原键，保持占位符、CRLF、BOM和重复行；`verify` 只核验，`install` 保留上一次部署备份。图片文字单独处理，字典覆盖不代表原窗口全部按钮已验收。
 
 本次保留全部359个既有中文键，新增2415个经过精确同键、占位符、数值、HTML和控制标记检查的中文条目，另按本地语义补译9键。参考候选中的19处VIP权益、货币绑定、宠物等级、活动状态等含义差异已排除，其中10键仍需核对真实调用或服务端行为；未导入参考服装备属性或奖励配置。该批静态审阅重点对照839个候选，不代表每个词条或全部页面已通过语义、布局及功能验收。
 
@@ -193,27 +193,27 @@ node scripts/workshop-language.mjs rollback
 
 背包图片文字由 `research/i18n/bag-art/zh-CN.json` 和 `scripts/workshop-bag-art.mjs` 单独处理，覆盖41张位图、72处文字；“隐藏”标题来自 `coreii.swf` 的另一张图片，使用 `hidden-controls.zh-CN.json` 和独立账本。隐藏装备选项的布局由 `scripts/workshop-bag-layout.mjs` 处理。两个工具只写部署覆盖，保留原资源和备份；现有覆盖或备份摘要变化时拒绝覆盖。位图只修改审核过的文字矩形，保留尺寸、其他像素及非目标 SWF 标签；XML默认只修改 `bagAndInfo.xml` 的复选框布局，其他100个压缩条目原字节不变，原事件继续使用。
 
-服务器喊话和提示使用另一份词典。`node scripts/workshop-language.mjs verify --server` 核对 `research/i18n/zh-CN-server-overrides.json`；`install --server` 基于完整原服务器词典生成 `runtime/server-language.txt`，保留未覆盖的键及其原文，使用独立 `server-language.json` 账本和备份。覆盖包含世界BOSS及蚁后喊话、在线宝箱、背包/交易和领取提示。当前65个原键覆盖及7个内部附加键共72键/80行，覆盖文件已生成并保留旧版备份；源码仍须正常加载及原客户端验收，不代表所有服务器文字已中文化，也不改变怪物行为或数值。部署后将 `.env.workshop` 的 `LANGUAGE_FILE` 设为生成文件的绝对路径，在空闲时正常重启服务才生效；本命令不自动改启动配置或重启。`rollback --server` 仅回退该覆盖；如删除了初次安装的文件，下一次启动前也须移除或恢复 `LANGUAGE_FILE` 设置。客户端不加 `--server` 的安装及账本保持独立。实际喊话显示仍须原客户端验收。
+服务器喊话和提示使用独立词典。`node scripts/workshop-language.mjs verify --server` 校验完整原词典、平面覆盖和按原文件SHA绑定的重复键变体；六个重复键的13个不同原值分别保留占位符，不以最后一行替代其他变体。当前覆盖3622键/3836物理行，其中54个内部附加键含38个原词典缺失的副本对白键。附加键仅接受原 `Workshop.Events.*` 或规范的 `Workshop.Pve.*` 命名空间；不放宽碰撞、分隔符、格式与回退校验。`install --server` 写 `runtime/server-language.txt`，保留独立账本及备份历史；`.env.workshop` 的 `LANGUAGE_FILE` 指向该文件，正常重启后Game才加载。安装器不自动重启，不改怪物行为或数值，实际喊话仍须原窗口验收。
 
 仅 `--server` 模式可另外读取可选的 `research/i18n/zh-CN-server-additions.json`，格式为平面映射，如 `{"Workshop.Events.Example":"反馈 {0}"}`。它供没有准确原词典键的本地服务端显示文字使用：键必须位于 `Workshop.Events.` 命名空间，不能含冒号、换行或TAB，也不能与任一原键或override键重名；值必须为非空字符串，不含CR/LF/TAB。合法条目以CRLF追加到原覆盖结果之后，原词典文件不写入，原override未知键与占位符校验保持。未提供该文件时输出及元数据沿用旧行为；有新增条目时 `keys`、`translatedRows` 包含新增条目数，并另报 `addedKeys`。验证不写文件，安装仍沿原账本/哈希/备份与回退规则，客户端和滚动提示模式不读取此文件。附加词典只改变已有消息中的显示文本，不增加Game90回执或日历字段；新公开领奖契约仍须单独确认。源码和隔离安装器检查不等同于已部署或原客户端验收。
 
-道具显示名另有可选 `ITEM_NAME_OVERRIDES_FILE`，由 API 与 Game 共用模板翻译层读取。当前配置 `research/i18n/zh-CN-item-names.json` 保留四类1～3级石头、11233金币宝箱及11998双倍经验卡的原14个名称，新增7个累计签到奖励本地译名，共21个名称；11041使用“初级SUPER·古枪碎片”，保留原SUPER，不猜为“真/极”或补“竹”；13689使用“龙骑士套装”，两者均不冒称官方中文原名。格式严格为 `{"schemaVersion":1,"table":"Shop_Goods","names":{"模板ID":"显示名"}}`。仅覆盖内存中的 `Shop_Goods.Name`，优先于原语言的数据库Name翻译，其他字段和既有翻译保持；不写数据库，不修改历史邮件。未设置或设为空时完全沿用旧加载行为；文件缺失或结构错误会报错，不能当作已应用。
+可选 `ITEM_NAME_OVERRIDES_FILE` 继续由API和Game共用模板翻译层读取，严格格式为 `{"schemaVersion":1,"table":"Shop_Goods","names":{"模板ID":"显示名"}}`。现有23个名称保持，只有11041按已核对的碎片juniorpike/武器7026-pike资源改为“初级真·远古竹枪碎片”；13689保留本地译名“龙骑士套装”。全量道具名称和说明由下面的通用显示覆盖提供。此文件仅覆盖内存Name，不改模板、库存、历史邮件或属性；未知格式和缺失文件明确报错。
 
-名称覆盖已接入共同加载入口；配置须在实际API与Game中正常加载后验收。部署时须将上述JSON的绝对路径配置到 `.env.workshop` 的 `ITEM_NAME_OVERRIDES_FILE`，经已有Workshop启动器传给API与Game两个进程；配合服务器词典安装，在空闲时正常重启，使API模板缓存和Game模板同步加载，客户端正常重登后读取新模板。回退名称覆盖只需移除该配置或恢复先前文件，再正常重启；不应改写源模板或历史库存/邮件。在线宝箱新发溢出邮件使用独立标题与正文，其余未传正文的邮件调用保持原默认行为。每日彩蛋、VIP、累计签到和等级礼包的成功/拒绝及新溢出邮件标题已接入服务端词典；等级提示显示本次实际领取档位。本次补齐7个累计签到奖励本地译名后，四条链路仍有16个可达奖励模板的Name未覆盖中文；其余16项不属于本轮17活动的名称实施范围，仅保留提案。原PT源、Description、属性、协议和历史存档保持不变；21个名称须在API与Game正常加载后同步验收，不代表现役已加载，客户端文字和字体布局仍待验收。
+名称、描述和副本覆盖的绝对路径须同时传给API和Game，经原Workshop启动器正常重启后重建内存模板和缓存，客户端重登读取新模板。移除配置或恢复旧覆盖再正常重启即可回退，无需数据库翻译导入。每日彩蛋、贵宾、签到、等级礼包及世界首领的新提示和邮件标题使用中文；历史邮件、玩家姓名、公会名和自定义房间文本保留。
 
 ### 物品描述与任务文字
 
-可选 `TEMPLATE_TEXT_OVERRIDES_FILE` 在同一模板翻译层提供内存覆盖，不写数据库。配置严格为 `{"schemaVersion":1,"entries":[{"table":"Quest_Condiction","rowId":"341:1","text":{"CondictionTitle":"赢得4场战斗"}}]}`。仅允许 `Shop_Goods.Name/Description/Remark`、`Quest.Title/Detail/Objective` 和 `Quest_Condiction.CondictionTitle`；物品和任务以正整数 ID 字符串定位，条件必须使用完整的 `QuestID:CondictionID`，不能按全局条件编号定位。未知表/字段、玩法列、错误或重复地址、空白文字、缺失文件会明确报错。该覆盖优先于相同列的数据库语言翻译及旧物品名称覆盖；未覆盖列和原有两种文件覆盖保持。未设置或为空时，API/Game 保持原加载行为，尤其不会额外启用数据库里的任务条件翻译。
+可选 `TEMPLATE_TEXT_OVERRIDES_FILE` 在共同翻译层提供28张资料表的显示字段内存覆盖，不写数据库。严格格式仍为 `{"schemaVersion":1,"entries":[{"table":"Quest_Condiction","rowId":"341:1","text":{"CondictionTitle":"赢得4场战斗"}}]}`。允许字段以 `packages/db/src/translations.ts` 的白名单为准，仅包含名称、说明、任务/成就正文、活动宣传等显示文字；效果、奖励、条件参数、日期和阈值均不允许。普通地址使用正整数ID；任务条件使用完整 `QuestID:CondictionID`；套装部件使用完整 `ID:ContainEquip`（保留逗号列表），同ID的不同部件不会串译。仅DailyLeagueLevel允许既有Level0，仅Shop_Goods允许五个既有虚拟奖励负ID。未知表/字段、非法或重复地址、空白文字和缺失文件均报错。此覆盖优先于同列数据库翻译及旧物品名覆盖；未覆盖字段保留，空Objective等不填造。
 
-`research/i18n/zh-CN-template-text.json` 当前逐项核对种子后覆盖14行：幸运符100%（11028）及四个任务实际奖励引用的伤害+10%（10008）、四类1级合成石，共6件物品的名称/描述；任务318“夺回宝物”、341“勇士训练”、346“通关魔蚁之巢（简单）”、347“第一次购物”的标题/正文及4条复合条件。保留原 `<cr...cr>` 着色标记、空 Objective、等级限制、前后置任务、条件类型/参数、奖励 ID/数量与全部物品属性。“成功率提高100%”保留原文相对提高语义，不表示必定成功。任务346原正文提到8级，接受任务的既有 `NeedMinLevel=9` 仍保留；本批没有修改副本或任务门槛。
+`research/i18n/zh-CN-template-text.json` 当前15350条/25668格，另有独立副本覆盖1208条/1912格。道具seed共7640行，7638行非空名称及4261格非空说明均已覆盖，另两行原本为空，保持空值。范围还包含任务、成就、宠物/技能、卡片/套装、公会徽章、分类、军衔及活动详情。按当前seed语义翻译，原版资源只有在身份和关键字段匹配后才采用；不依相同ID搬用另一版本的奖励或效果。技术型号、快捷键、玩家署名、URL和格式标记有逐项例外；数字、占位符、HTML/着色标记及原换行保留。温泉只翻译已知默认房间文本，玩家自定义内容保留。
 
-部署时把此 JSON 的绝对路径写入 `.env.workshop` 的 `TEMPLATE_TEXT_OVERRIDES_FILE`，既有 `scripts/workshop.mjs` 会传给 API 和 Game；由主控在空闲时正常重启两端以重建内存模板/cache，客户端重新登录读取 `/Request/TemplateAlllist1.xml`、压缩 `/Request/TemplateAlllist.xml` 与 `/Request/QuestList.xml`。移除该变量或恢复旧配置后正常重启即可回退。无需运行数据库翻译导入；API 旧 `pt-BR` 查询和 Game 默认语言保持。源码、隔离 HTTP/模板回归与实际部署、客户端字体/位置验收分开记录；本文件覆盖范围不代表全部7640件物品或728个任务已中文化。
+部署时把此JSON的绝对路径配置为 `.env.workshop` 的 `TEMPLATE_TEXT_OVERRIDES_FILE`，原启动器会传给API和Game。空闲时正常重启，两端共同加载；客户端重登读取原普通及压缩XML。CLI校验、隔离API/Game加载、部署回执与原窗口字体/布局/交互验收分别记录。原件、旧覆盖和全部证据保留；这些翻译行数不代表新增游戏物品，也不代表原SWF、图片或全部游戏流程已完成验收。
 
 ### 普通副本显示文字
 
 可选 `PVE_TEXT_OVERRIDES_FILE` 复用 API 与 Game 的模板翻译层，默认关闭。格式为 `{"schemaVersion":1,"entries":[{"table":"NPC_Info","id":2001,"text":{"Name":"先锋蚁"}}]}`；仅允许 `Pve_Info.Name/Description`、`Mission_Info.Name/Title/Description/Success/Failure` 和 `NPC_Info.Name`。未知字段、表、显示列、非法 ID、重复行或错误文件会明确失败。配置只覆盖内存中指定的显示列，未覆盖行、既有数据库翻译和 `ITEM_NAME_OVERRIDES_FILE` 保持；不会改写玩法数值、模板、库存或邮件。API 的 `LoadPVEItems` 也按原翻译层处理 `Pve_Info`，与 Game 保持一致。
 
-`research/i18n/zh-CN-pve-overrides.json` 提供魔蚁之巢、两关标题和四类怪物共7行中文；任务标题保留原 ASCII 逗号，说明保留原换行及 HTML 结构。将其绝对路径同时提供给 API/Game，在空闲时经原 Workshop 启动器正常重启，才能同步加载；回退时移除配置或恢复旧文件后正常重启。`workshop-language.mjs install --server` 另含10条先锋蚁对白键。本批源码和窄测试完成，实际页面部署/验收仍单独记录；怪物名称间距、其它副本、蚁后剩余对白和全界面中文尚未由此完成。
+`research/i18n/zh-CN-pve-overrides.json` 当前提供1208条/1912格副本、关卡及怪物显示文字；使用当前版本名称及关卡语义，原玩法数值、ID、奖励和原模板保持。28个generated脚本中的84处缺失台词调用已改为38个稳定语言键，未改AI分支或时序；其中四个旧键没有可恢复原文，采用明确记录的新写中文场景对白，不冒称恢复原台词。三个显示覆盖和服务端词典须正常重启后同步加载；实际副本和怪物界面仍按原窗口证据验收。
 
 大厅使用 `hall.zh-CN.json` 和 `--asset=hall` 的独立账本。原14张fmt5位图（12个建筑标题、频道与签到）基础上，新增原存储窗口正文id7及实际确定按钮id10的19处文字，默认共16张图片，其余331个SWF标签保持。存储正文保留原许可选择语义，右侧“允许/拒绝”明确为示意，不代表浏览器已授权。原入口、事件和动画继续使用，字区外像素不变；农场、独立活动入口和其他工具栏图片仍待处理。
 
@@ -431,3 +431,11 @@ node scripts/workshop-backup.mjs verify '完整的.dump.json路径'
 可选私有配置 `WORKSHOP_WEAPON_VISUAL_UPGRADE` 指向固定部署清单；全局 `FIGHT_WEAPON_EXTENSION` 仍保留旧包。启动器在自身DB ready和恢复证明检查后、API/game之前运行一次升级：逐SHA核对old/new包、原日志、两版FIGHT及实际上传目录的六个SWF，再核本次runId、正PID、真实数据库/目录/端口/UTC。成功或已新态均在本次进程环境中显式选择新FIGHT，避免上次DB已提交而缓存未激活的情况。子进程必须返回成功消息且退出0才继续开放大厅，失败自动停止本次自有进程；LAN监听保持。此部署清单只拥有原ddtank库，恢复副本不满足绑定时在连接/写入及API/game之前拒绝，需另行提供一致性验证，不能静默猜选FIGHT。
 
 原素材与私有配置不随源码发布。当前音频覆盖已安装；泡泡茶资源及启动升级清单已准备，生产数据库尚未激活。奶油熊14301/14302原粒子定义仍缺，保留兼容尾迹，不能宣称原特效全部齐全。隔离音频/动画组件结果、数据库回归与完整游戏验收分别记录，组件通过不代替实战验证。
+
+### 试玩反馈中的补充显示文字
+
+`TEMPLATE_TEXT_SUPPLEMENT_FILE` 可选地指向 `research/i18n/zh-CN-feedback-text.json`，沿用 `schemaVersion:1` 的精确地址覆盖格式，在主 `TEMPLATE_TEXT_OVERRIDES_FILE` 后合并。仅新增 60 个成就奖励称号和 311 个经核对的道具附加文字；`Shop_Goods.Data` 只允许已核对的固定 ID，569 条非空机器参数保持原样。成就称号按 `AchievementID:RewardType:RewardValueId` 三列定位且仅接受 `RewardType=1`；游戏保存与查重仍使用原名称，中文只用于奖励列表、发奖提示和称号包的显示名称。
+
+卡牌11套名称/说明来自静态压缩快照 `apps/api/assets/request/cardinfolist.xml`，复用同 ID 的既有中文翻译。词典生成器为三处已确认的原始断行错误增加源哈希绑定修复：客户端恢复 `store.view.transfer.EmptyItem` 独立键；服务端恢复家园过关与操作成功两条独立键，保留格式参数。shipped 原件保持不变。
+
+2026-10-17 用户试玩期间未启停服务。客户端词典 HTTP 已返回修复版本；卡牌静态快照、API/Game 模板及服务端词典由当前进程缓存，相关修改须在以后获准的正常重启后加载。主翻译文件未改，补充路径只加入下一次启动配置，避免运行中旧解析器误读新增字段。隔离数据库与结构校验不代表已完成游戏原窗验收。
