@@ -5,6 +5,22 @@ const entry = { table: "Quest_Condiction", rowId: "341:1", text: { CondictionTit
 const config = (entries: unknown = [entry]) => ({ schemaVersion: 1, entries });
 
 describe("explicit item and quest display text", () => {
+  it("addresses duplicate suit IDs by their full equipment list and permits only the existing zero league level", () => {
+    const parts: { table: string; rowId: string; text: Record<string, string> }[] = [
+      { table: "Suit_TemplateID", rowId: "1:7050,70501", text: { PartName: "武士套装" } },
+      { table: "Suit_TemplateID", rowId: "1:7051,70511", text: { PartName: "蚂蚁套装" } },
+      { table: "DailyLeagueLevel", rowId: "0", text: { Name: "大元帅" } },
+    ];
+    expect(parseTemplateTextOverrides(JSON.stringify(config(parts)))).toEqual(parts);
+    const overlay = new Map(parts.map(e => [e.rowId, e.text]));
+    const row = { ID: 1, ContainEquip: "7051,70511", PartName: "Original", damage: 30 };
+    expect(applyTranslations(row, ["ID", "ContainEquip"], overlay)).toEqual({ ...row, PartName: "蚂蚁套装" });
+    expect(row.PartName).toBe("Original");
+    for (const rowId of ["1", "1:", "1:0", "1:7050,", "1:7050:7051", "1:2147483648", "1:7050;DROP"]) {
+      expect(() => parseTemplateTextOverrides(JSON.stringify(config([{ ...parts[0], rowId }])))).toThrow();
+    }
+    expect(() => parseTemplateTextOverrides(JSON.stringify(config([{ ...parts[2], table: "Shop_Goods" }])))).toThrow();
+  });
   it.each([
     null, [], {}, { ...config(), extra: true }, { ...config(), schemaVersion: 2 }, config(null), config({}), config([null]),
     config([{ ...entry, extra: true }]), config([{ ...entry, table: "__proto__" }]),
@@ -31,5 +47,25 @@ describe("explicit item and quest display text", () => {
     expect(applyTranslations({ ...source, QuestID: 345 }, ["QuestID", "CondictionID"], overlay)).toEqual({ ...source, QuestID: 345 });
     expect(source.CondictionTitle).toBe("Vietnamese");
     expect(applyTranslations(source, "QuestID", overlay)).toBe(source);
+  });
+
+  it("admits only explicit display columns for the remaining template tables and the five virtual rewards", () => {
+    const entries: { table: string; rowId: string; text: Record<string, string> }[] = [
+      { table: "Game_Map", rowId: "1001", text: { Name: "蚂蚁之巢", Description: "挑战蚁后" } },
+      { table: "Pet_Skill_Info", rowId: "1", text: { Name: "强击", Description: "伤害提高10%" } },
+      { table: "Pet_Skill_Element_Info", rowId: "1", text: { Description: "持续{0}回合<br/>" } },
+      { table: "New_Title", rowId: "1", text: { Name: "初露锋芒", Desc: "完成目标后获得" } },
+      ...["-900", "-800", "-300", "-200", "-100"].map(rowId => ({ table: "Shop_Goods", rowId, text: { Name: "虚拟奖励名称" } })),
+    ];
+    expect(parseTemplateTextOverrides(JSON.stringify(config(entries)))).toEqual(entries);
+    const source = { ID: 1, Name: "Old name", Description: "Old description", Damage: 123, Probability: 0.4 };
+    expect(applyTranslations(source, "ID", new Map([["1", entries[1]!.text]]))).toEqual({ ...source, ...entries[1]!.text });
+    expect(source.Name).toBe("Old name");
+    for (const entry of [
+      { table: "Pet_Skill_Info", rowId: "1", text: { Damage: "999" } },
+      { table: "Pet_Skill_Element_Info", rowId: "1", text: { Probability: "1" } },
+      { table: "Game_Map", rowId: "1001", text: { ForePic: "other" } },
+      { table: "Shop_Goods", rowId: "-301", text: { Name: "非法虚拟地址" } },
+    ]) expect(() => parseTemplateTextOverrides(JSON.stringify(config([entry])))).toThrow(/TEMPLATE_TEXT_OVERRIDES_FILE/);
   });
 });

@@ -1,0 +1,3370 @@
+{
+  "version": 1,
+  "kind": "original-chinese-bitmap-fit",
+  "asset": "ui/vietnam/swf/shop.swf",
+  "sourceAssetSha256": "6e6539f62717d5813a63a15765e3b1c6ca1dcab266a08f2d397b606babb752e8",
+  "expectedSwfSha256": "10f115ab32e952c75a54cb38e54fdc1e1e49b7da199758d5c32d23381e176b36",
+  "reference": {
+    "url": "http://yj.rzkj.top:521/Resource/flash/ui/zh_cn/swf/shop_v3_6_1_u1.swf",
+    "sha256": "7989fd2e7b2cb78eab9a1ee40993a5bf37f98d88e1345a1d34cb3a564eea8b0e",
+    "privateFile": "runtime/shop-pure-zh-20261016/shop-original.swf"
+  },
+  "preparedRoot": "runtime/shop-pure-zh-20261016",
+  "fontFamily": "Workshop CJK",
+  "fontFile": "msyhbd.ttc",
+  "note": "Offline candidate only. All target dimensions, SymbolClass, ABC and timelines remain byte-identical. Original Chinese named bitmap captions fit existing allocations; two wooden captions use existing renderer. Installation and original-client acceptance belong to controller.",
+  "bitmaps": [
+    {
+      "id": 1,
+      "className": "asset.shop.DressBtnDown",
+      "tagCode": 35,
+      "width": 86,
+      "height": 32,
+      "sourceTagSha256": "f397bfb37b97b26edcf725f05315bba4749b2e0b268aaf9fb8c4ffd34df7651d",
+      "sourcePixelsSha256": "0f9b35009b97182d3fd974d4a36c6d1233a59e9616a8f4af2d5f9145fe1460b2",
+      "text": "试衣间",
+      "reference": {
+        "id": 99,
+        "symbol": "asset.shop.DressBtnDown",
+        "width": 86,
+        "height": 32,
+        "tagSha256": "cd1bbb906573d54fb1e722cb5a467dd4be220296e8eccfc96aef25c1aff0cbef",
+        "pixelsSha256": "26f725bd6034ca8a1d71ddacce5fda76f7ef2ae4801364ef0383ea34ef1faff4"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        86,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/1.png",
+        "sha256": "1fd9df44b7040c172112bc05e84fff8348fbf3e8b3c80f4d443d5af660a6566c",
+        "rgbaSha256": "26f725bd6034ca8a1d71ddacce5fda76f7ef2ae4801364ef0383ea34ef1faff4"
+      },
+      "outputTagSha256": "a22d5580bb90b6edc8a1c8880dfeb1c7f7f7e60c060508e5c52206ef124ea504"
+    },
+    {
+      "id": 2,
+      "className": "asset.shop.DressBtnUp",
+      "tagCode": 35,
+      "width": 92,
+      "height": 42,
+      "sourceTagSha256": "24cb3f1e00434f994da9ea0f8d68ef9af193c3c9fceb3501a14e9592450ec927",
+      "sourcePixelsSha256": "8cde6638028947b99922b27ff962b56d8708e165ef2aa277fdfd4955e6dc180a",
+      "text": "试衣间",
+      "reference": {
+        "id": 98,
+        "symbol": "asset.shop.DressBtnUp",
+        "width": 92,
+        "height": 42,
+        "tagSha256": "5be5695c7007b0d0f74698a76ed0aae700de77b0494bc2d59ce1ef429b92e868",
+        "pixelsSha256": "b6812cd9ba861477b9aed11f09b4444eee6f6a799fdc4cf908b9e527d7640bca"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        92,
+        42
+      ],
+      "preparedImage": {
+        "path": "prepared/2.png",
+        "sha256": "c013150c839c6e6be63d14033997e588b390e633734f100e5cd8e2a12a9c27fd",
+        "rgbaSha256": "b6812cd9ba861477b9aed11f09b4444eee6f6a799fdc4cf908b9e527d7640bca"
+      },
+      "outputTagSha256": "c70f8cda287dcd9014fe4b0bb6ae63c961d6e4519b5b05bdb88dbf531e865f85"
+    },
+    {
+      "id": 4,
+      "className": "asset.shop.ShopExchangeGiftDown",
+      "tagCode": 36,
+      "width": 66,
+      "height": 18,
+      "sourceTagSha256": "8fb085987fdb2ee2920ad807a89658f5807b335e6c6631d7bc7e106a15f02ab4",
+      "sourcePixelsSha256": "368c6c4a8f8c71fc8d9e8d6b153f1060dc8dce46cbd64473f727da40a95da1b4",
+      "text": "礼金区",
+      "reference": {
+        "id": 96,
+        "symbol": "asset.shop.ShopExchangeGiftDown",
+        "width": 66,
+        "height": 18,
+        "tagSha256": "50cb097c52c1d0cb0be4ad229bc500352003a7961a42103030eaed8248f040d4",
+        "pixelsSha256": "8d9111600f6af1d43619ade406df63c0078ac706d703ffb6cb622c817d5f4f2f"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        18
+      ],
+      "preparedImage": {
+        "path": "prepared/4.png",
+        "sha256": "7ea7c3fd2f0d6665db25a14d2385758bcc83ff2f5af47f4f4d67e7bd2210ce71",
+        "rgbaSha256": "3d34b5c06f5c01dee7bcdcb0a134febf13114a373913302bdd4343d7ffdcfcd9"
+      },
+      "outputTagSha256": "d4e8d4cc5f7ad25ef440768de2644eb44636019390bb3b713f053c3ece13022b"
+    },
+    {
+      "id": 5,
+      "className": "asset.shop.ShopExchangeGiftUp",
+      "tagCode": 36,
+      "width": 66,
+      "height": 18,
+      "sourceTagSha256": "312c416a164fd7318b7db003b16cae15dc139cf6afe786784ace67ee9d9f9511",
+      "sourcePixelsSha256": "be57477572535f53f8626c6089f2846c13bad96b76b8b5d9550cfa4eecc4cf63",
+      "text": "礼金区",
+      "reference": {
+        "id": 95,
+        "symbol": "asset.shop.ShopExchangeGiftUp",
+        "width": 66,
+        "height": 18,
+        "tagSha256": "70ba3e4096fd5aa64da691a04b92dc7f7ed0d4009899d47935871b599f959eef",
+        "pixelsSha256": "f9c2dedbac460e5d3163190a1984bc39184a89b94d3dd47b30e1831b0e6d3f7e"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        18
+      ],
+      "preparedImage": {
+        "path": "prepared/5.png",
+        "sha256": "802cb5ec7f9966be631fe8be7eda163fd0a38ae46cad4e098a11ae1ce1746e84",
+        "rgbaSha256": "8a7db4e8af233a70811efdace56cbd10668587fc22d0e2ee03cf6a792af6046e"
+      },
+      "outputTagSha256": "c470a4d8f859aa7147b24e37ae55db7f68c69c50eff7a573142e57b32531bc90"
+    },
+    {
+      "id": 6,
+      "className": "asset.shop.ShopExchangeMedalDown",
+      "tagCode": 36,
+      "width": 68,
+      "height": 18,
+      "sourceTagSha256": "335d37000b80e93bfc1a8f83799e7ea87b08d89d665614a17ccc93e73828030a",
+      "sourcePixelsSha256": "2d6fb78db90c6cef2e7d3cb82978bcaac9b8f945af6d8412a611fb5daf8069e5",
+      "text": "勋章区",
+      "reference": {
+        "id": 94,
+        "symbol": "asset.shop.ShopExchangeMedalDown",
+        "width": 66,
+        "height": 18,
+        "tagSha256": "bcfbfa5242ffaafc5961db33b0db61380a36a1f5cd15346e2ab3445e62bbbf28",
+        "pixelsSha256": "d45b5648ed053c282e4f34984dc18f26c0062b25a87fe310251ff63d5384e954"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        66,
+        18
+      ],
+      "preparedImage": {
+        "path": "prepared/6.png",
+        "sha256": "16cfa49d5c2df860d417d00b6e0ed312502c9114d39b86b705829531fa0193fc",
+        "rgbaSha256": "ed39277cab5d29c7dadfef636b324e9ef6b10febfb11038a0413ffaf6c3b6537"
+      },
+      "outputTagSha256": "39d518a45277172fe11e99b8a68c45330082afd90f5ceeb2ce2a47a677c7f557"
+    },
+    {
+      "id": 7,
+      "className": "asset.shop.ShopExchangeMedalUp",
+      "tagCode": 36,
+      "width": 70,
+      "height": 18,
+      "sourceTagSha256": "4fbcb0d687bb7a723b5d76d5f04e2490eb93bb9203915c712875f649cb62f316",
+      "sourcePixelsSha256": "87850bb7d60fffd724fd89014a915e6413dc6cbd8e62246cda4c6db46e3ba8b1",
+      "text": "勋章区",
+      "reference": {
+        "id": 93,
+        "symbol": "asset.shop.ShopExchangeMedalUp",
+        "width": 66,
+        "height": 18,
+        "tagSha256": "66483ddc8fa2b006c2fdbc1493216b4188229d77a777ec33615d476d4ac193d2",
+        "pixelsSha256": "41841b8532f1f1101bcdeffc956ded0f56f93aec860392b3a13af7acf3c46f99"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        66,
+        18
+      ],
+      "preparedImage": {
+        "path": "prepared/7.png",
+        "sha256": "1d341d5d79a663ba72773b2c9c26a29955135ebbde98110cdae43fc179316502",
+        "rgbaSha256": "ee9850229f26caccba496e6a9cd1b8984fad6c6c82b6959e01c152becdf53560"
+      },
+      "outputTagSha256": "52289d0f98179299fe8d6721d78a65b7c6c245aaabe3a112a899b9d7f7700210"
+    },
+    {
+      "id": 8,
+      "className": "asset.shop.FemaleIconDown",
+      "tagCode": 35,
+      "width": 73,
+      "height": 34,
+      "sourceTagSha256": "474b6bce3da93a65cbfaba3c18f31d32216c8a92e3e61c4c6a24bbb8e3ab0579",
+      "sourcePixelsSha256": "125d95f6620f981518eb49749b26bfd9d28ef6c1aad074023274230931776a42",
+      "text": "女",
+      "reference": {
+        "id": 92,
+        "symbol": "asset.shop.FemaleIconDown",
+        "width": 73,
+        "height": 35,
+        "tagSha256": "6e93984f7f75cb583a2f3a5ee076d4487a6f56c1c5294fb7e3c418159e5fbcdb",
+        "pixelsSha256": "cdbc7cffcf8e81b31ff97a3b72f34641c3e6cd334a6a78935d24d665217c6cb2"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9714285714285714,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        70,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/8.png",
+        "sha256": "d1f3cacc64e7cea25a5ae81954f3ef0e11423aaf3f02f0c28e5c9f9e8e04d1a6",
+        "rgbaSha256": "bda382dbccf9c07ebc9d10408587374607045de1eec430c412409901fbc1f599"
+      },
+      "outputTagSha256": "18f5c548e26f0e877cb776e04ec395c11cfb7840c232ca19c4d664cec3d1f392"
+    },
+    {
+      "id": 9,
+      "className": "asset.shop.FemaleIconUp",
+      "tagCode": 35,
+      "width": 71,
+      "height": 32,
+      "sourceTagSha256": "e9588a2f388c70708d3a9a448d1aed5ffc36aeeb206a2264a212a3c49cd082f4",
+      "sourcePixelsSha256": "7cd077a4fb761e63fbf4a053f17d6666816a70ded2345dcfd08a68802739998f",
+      "text": "女",
+      "reference": {
+        "id": 91,
+        "symbol": "asset.shop.FemaleIconUp",
+        "width": 73,
+        "height": 35,
+        "tagSha256": "12def527402f42237f26d573c24ffa109a507914ecf0be56ac4b0247222a3346",
+        "pixelsSha256": "e20c14efe16041d2a55026719dd221f526b877cdd1ce6a44d37aa3a4feac406a"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9142857142857143,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/9.png",
+        "sha256": "a7225169c7044bfa0da6b16bc088322a89f64df4077741f82b1f7fc5e8211571",
+        "rgbaSha256": "5934ae0dbe8d9cfb8b772e30b78b13e06945b960ad9823fbfe5e980023a1f997"
+      },
+      "outputTagSha256": "23b2dcb61df265282d430c52379d1c44dc2b09207db58bc84b662780fe8ac420"
+    },
+    {
+      "id": 10,
+      "className": "asset.shop.ShopItemCellAddToCartBg",
+      "tagCode": 36,
+      "width": 80,
+      "height": 21,
+      "sourceTagSha256": "887579b95a3f8528216e6539ff4e33d70a18872e8fe477a2b93430e7ac1b1f23",
+      "sourcePixelsSha256": "ab882149b5ce6970e9c7661fba4ffa8ea462acf43a498ba98942e6ab9de66315",
+      "text": "加入购物车",
+      "reference": {
+        "id": 90,
+        "symbol": "asset.shop.ShopItemCellAddToCartBg",
+        "width": 80,
+        "height": 21,
+        "tagSha256": "c1841a21d8b94f4ec350b7bca13970c45bae85fc5fc69d93d4cccd736059d5c4",
+        "pixelsSha256": "63c747286f4da6e6fa61d9d2200f3474c604bba96c3c887a8fb8d60f64a9f679"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        80,
+        21
+      ],
+      "preparedImage": {
+        "path": "prepared/10.png",
+        "sha256": "573479490ab9055de6ca68e1edd27bc52445ace9641966a857c8907479f91d98",
+        "rgbaSha256": "ff5b4c219f25c8111528010f938870290cd2068ef2946f514502cf939ee44782"
+      },
+      "outputTagSha256": "e2874c628d38c08e1e94f158584a83866b7a1cfb122562ed6706b715367e6b0e"
+    },
+    {
+      "id": 11,
+      "className": "asset.shop.SubBtnGiftMedalBeautyupIconUp",
+      "tagCode": 36,
+      "width": 64,
+      "height": 22,
+      "sourceTagSha256": "019e495547362267f2f66d993e1ef138e60342bc2579371a3f2321b06dbb3d90",
+      "sourcePixelsSha256": "59c267a22dbb2d90feb64817923ffef538840741c060949e18d95ec15a52a1e6",
+      "text": "美容",
+      "reference": {
+        "id": 9,
+        "symbol": "asset.shop.SubBtnGiftMedalBeautyupIconUp",
+        "width": 58,
+        "height": 20,
+        "tagSha256": "3c1d5690e4b9bbfbca5fd8a6750e3d7414ee34ced5eba6786d23b4bf9a8a1c2e",
+        "pixelsSha256": "f251b8d1f845e871633412553e271e2b74e640dbb6810c56e230ed32130b5b3c"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        3,
+        1
+      ],
+      "rendered": [
+        58,
+        20
+      ],
+      "preparedImage": {
+        "path": "prepared/11.png",
+        "sha256": "0b3e003b2f05c5acc0ced54691b25cdf4e7ec69d00dbc1a0c1a6b5c80a745279",
+        "rgbaSha256": "d65a31204d232b9c627f9fce261af2924b8ae4aefb78447f77f52b12182bd372"
+      },
+      "outputTagSha256": "4978a64b0245a37718385ba4f241fc2a760cf0d499e21c951ca4bfc9c6bd6e42"
+    },
+    {
+      "id": 13,
+      "className": "asset.shop.ShopItemCellClickTryBg",
+      "tagCode": 36,
+      "width": 80,
+      "height": 22,
+      "sourceTagSha256": "5241f9905e49eb430c171c8684ac83ec36fb2bd2adcadd75c971bbbecac78c55",
+      "sourcePixelsSha256": "7b23aa3adfde51aa5452fab4147d6c614c0f15542936ab58919d15276980cdfe",
+      "text": "点击试穿",
+      "reference": {
+        "id": 88,
+        "symbol": "asset.shop.ShopItemCellClickTryBg",
+        "width": 80,
+        "height": 22,
+        "tagSha256": "4e4cd64fbb66c5858548866c283aeeba69ae8a1cecf5ac8cff58a93e483c0b97",
+        "pixelsSha256": "016334cb829cf2556a6913a3ca1398bd7ffbe666fb7cf068a0b8b3319e09791f"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        80,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/13.png",
+        "sha256": "4ac9219035fda8c00c396e212278df8ba6ee8e56340123e8420537c08219b69c",
+        "rgbaSha256": "afb64e9c404ed2d8db4ab37b60b2ffb07fc1a46701ab541385be4e05aa6c6aa4"
+      },
+      "outputTagSha256": "2dde0ddd4c42a101f37bd40612898d0d20d198b7d8c50d7a4b27b773bc2560d1"
+    },
+    {
+      "id": 16,
+      "className": "asset.shop.LeftMoneyPanel",
+      "tagCode": 35,
+      "width": 305,
+      "height": 145,
+      "sourceTagSha256": "9e014d1b34786b8c8b341a4263ed9cee286ef9219ca11ceb59b5a5a479c1522d",
+      "sourcePixelsSha256": "74f52b81eabab4cebd5c025ba55743b9b196010ba65042c9ffa883f16496763b",
+      "text": "您目前拥有 / 点券 / 礼金 / 勋章",
+      "reference": {
+        "id": 85,
+        "symbol": "asset.shop.LeftMoneyPanel",
+        "width": 305,
+        "height": 145,
+        "tagSha256": "fc8be29214a12476019af26d807508170c41301875f63ffdbe157a217b46fc08",
+        "pixelsSha256": "7484fab9cc960a7b4ad587989f6aee527ad59a7a82c524d08f6959af0ac4a03a"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        305,
+        145
+      ],
+      "preparedImage": {
+        "path": "prepared/16.png",
+        "sha256": "2eb33239bb5a4377413b1a187d6791ecc7e20b814e37a94f6fa0eac11688670e",
+        "rgbaSha256": "7484fab9cc960a7b4ad587989f6aee527ad59a7a82c524d08f6959af0ac4a03a"
+      },
+      "outputTagSha256": "5366eb8d771de7ab593ad252bab701915ad8aa7c4337b24008eaa60cdef09327"
+    },
+    {
+      "id": 17,
+      "className": "asset.shop.LeftMoneyPanelBuyBtn",
+      "tagCode": 35,
+      "width": 107,
+      "height": 85,
+      "sourceTagSha256": "ddbdf211cd7228128bfabaae8e7d3afd9dd2ecfb318d0f499790c39f5cdd2554",
+      "sourcePixelsSha256": "c7b748a31a7434f37e96f2d4b404fff96939ba0f41c2fa27002927cae1dc2422",
+      "text": "购物车",
+      "reference": {
+        "id": 84,
+        "symbol": "asset.shop.LeftMoneyPanelBuyBtn",
+        "width": 110,
+        "height": 89,
+        "tagSha256": "1613497f06de2167a1e7a1668746bad5e1ab976213e3a50a6f2e04cac6870723",
+        "pixelsSha256": "3ff7ec19baea25ad847138d01be70000d2e7313838a7e69fad07aa91f6db3002"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9550561797752809,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        105,
+        85
+      ],
+      "preparedImage": {
+        "path": "prepared/17.png",
+        "sha256": "5fa746e7817db103118a0e178dcf6bbaaa8f98912409edf655074eee76fdd922",
+        "rgbaSha256": "ef2ea700dae389d208ca04c0061a78817f3a6d1cd0a1259f24a98cdcee8aaf01"
+      },
+      "outputTagSha256": "96e31347def8cdf65be40fd042f116a4a533bbbf9d6aeb8bcc9243478856b75c"
+    },
+    {
+      "id": 18,
+      "className": "asset.shop.MaleIconUp",
+      "tagCode": 35,
+      "width": 71,
+      "height": 32,
+      "sourceTagSha256": "e6260d711ae3ee37a5129ec233b4ddc8b2f7568212745afdfd82e074001c89b4",
+      "sourcePixelsSha256": "8507a40a60dfc99478e7c71bf2a52ec17fb414eb48845009ac7bdc115a9fe4b0",
+      "text": "男",
+      "reference": {
+        "id": 83,
+        "symbol": "asset.shop.MaleIconUp",
+        "width": 73,
+        "height": 35,
+        "tagSha256": "0c4712dd8de427bad75921a5a02098e6668e88420c7628b8a281f255f5f068b6",
+        "pixelsSha256": "bedaeb05c799dd2707671df9d8ffa7fed8f1be0966b60165e9386d2b87bca9af"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9142857142857143,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/18.png",
+        "sha256": "6f503369635e36dd2e3e1b5134694a4a76b7940c8dabbbc52d01f6cf9f39f1df",
+        "rgbaSha256": "afef6345983cb2d29d531eb7ddc963792458db3d76719e0c674688ff1b377894"
+      },
+      "outputTagSha256": "bf64542a74e7aec2267c7794cde9e8c7076c08537c019d437c509e49198202a6"
+    },
+    {
+      "id": 19,
+      "className": "asset.shop.MaleIconDown",
+      "tagCode": 35,
+      "width": 73,
+      "height": 34,
+      "sourceTagSha256": "7baae10e66c29c7944c4b90c4da449f2bdf63b582cad38d217372f443e3842cd",
+      "sourcePixelsSha256": "9b82c43709111054fcddf9aa9755e9de1c3ef3566ed04ceed760f5f5cb8f9664",
+      "text": "男",
+      "reference": {
+        "id": 82,
+        "symbol": "asset.shop.MaleIconDown",
+        "width": 73,
+        "height": 35,
+        "tagSha256": "253290b30d5478a5ce0367467a4dd2a54d91502b9d4c1b03f8162c2521434df6",
+        "pixelsSha256": "3e9431e22506027917f9d1b5cdc2c8ae49d0ad61451a7092ea7c7a9f7c61c248"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9714285714285714,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        70,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/19.png",
+        "sha256": "5914f9f3664fc5b70a45beac413750a63e394e207d492d4071d15b3d280d0ea1",
+        "rgbaSha256": "4751132ed3eb819401ebec70e0fcfd26e36ecb1cf1e6d12853ce21d001c8726e"
+      },
+      "outputTagSha256": "c7754661e834d873be23bbc1c3c8a7e95ca65b61727f003563b56a22cb0f72bc"
+    },
+    {
+      "id": 20,
+      "className": "asset.shop.PayPaneBuyBtn",
+      "tagCode": 36,
+      "width": 78,
+      "height": 22,
+      "sourceTagSha256": "a971f2c9a806321de6bd361f1beed8b616468f6a8c8d8d88bdc972d000f4bd6d",
+      "sourcePixelsSha256": "ed7d452e18849b9150bc46011ba64b2475e2b936bb280df771ec1d01b05a9f3b",
+      "text": "购买",
+      "reference": {
+        "id": 81,
+        "symbol": "asset.shop.PayPaneBuyBtn",
+        "width": 78,
+        "height": 22,
+        "tagSha256": "8558e32a5049dd5dc31c7377aefb98c87429fdf688b81f0e7168705e91968de1",
+        "pixelsSha256": "49a0c7b05181f8b0b32f8f665f5b52b435edb1f827b0160720dde34653193ace"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        78,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/20.png",
+        "sha256": "b200346a91768024cec1739fd35f67e0974052a33271301eabf84702dd9badfe",
+        "rgbaSha256": "8b39a64941702263b79e4cfd0e3e52a8d0be8e73314bb3da5f122e4ef46c165c"
+      },
+      "outputTagSha256": "ade7881f1e066633e1c5489f3d1e60a6e8af92e0d67e8882e9a39dd627bc7b4b"
+    },
+    {
+      "id": 21,
+      "className": "asset.shop.PayPaneGetBtn",
+      "tagCode": 36,
+      "width": 78,
+      "height": 22,
+      "sourceTagSha256": "5910c1d0c2686646f7e49c16c335c9b9521bc8d300dff5a511f5e5554cf0660e",
+      "sourcePixelsSha256": "16f198c93e39e22e1989bad79d5de1d0d3f39285d823f510371dbabb83913a30",
+      "text": "领取",
+      "reference": {
+        "id": 80,
+        "symbol": "asset.shop.PayPaneGetBtn",
+        "width": 78,
+        "height": 22,
+        "tagSha256": "7537881d63eb03e6bff164d51b973627f3e111141b7ce82f3748db512c16c143",
+        "pixelsSha256": "02bd80012e4f51d0df7bb6c354406e3fb16892d9295378bd7f5eef967b3d984b"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        78,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/21.png",
+        "sha256": "445c5365ce5559d75a2c7cdbe34a636b29d5fafb00e341f1e7cd7e23319a12cf",
+        "rgbaSha256": "e5dffc9eb88437911fb3f61e59957102601b01c8afd4c08e56e4539be65907a0"
+      },
+      "outputTagSha256": "5890d8c0a57068088f5b6e40f8f4a47125ba956e29fdae7a90ddcbb7b7c218e0"
+    },
+    {
+      "id": 22,
+      "className": "asset.shop.SubBtnGiftMedalClothIconDown",
+      "tagCode": 36,
+      "width": 77,
+      "height": 23,
+      "sourceTagSha256": "f5b88fada84426a24c2585f3ed3986a8e19dd6d19fb604014d6adf762218524b",
+      "sourcePixelsSha256": "18984721a806a1aade600d2efc9b494d2c146bb2a9a5993a27f1df9f6162dd29",
+      "text": "服饰",
+      "reference": {
+        "id": 8,
+        "symbol": "asset.shop.SubBtnGiftMedalClothIconDown",
+        "width": 57,
+        "height": 19,
+        "tagSha256": "dc89c701b9abcab60518cf62729dd4ac6d70bd5455c24a571ab1b4b9534584bb",
+        "pixelsSha256": "5f1114f61bb17958ee32c889e14069ef819d94fd683473481267609d1346fcf2"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        10,
+        2
+      ],
+      "rendered": [
+        57,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/22.png",
+        "sha256": "b4066bf9e560e408fb97c12c81ac879f9356c9bb33365177629d34721e64aba1",
+        "rgbaSha256": "c5c72d227556f8a4cc689144eff19b3596bd79c1885b0bb43ce489972777c19e"
+      },
+      "outputTagSha256": "88ac7a86122ba799ae83fdcff6f7580a39473142052d2d17bd6ce62fe2f77d33"
+    },
+    {
+      "id": 23,
+      "className": "asset.shop.PayPaneGivingBtn",
+      "tagCode": 36,
+      "width": 61,
+      "height": 22,
+      "sourceTagSha256": "953ef60f9a6804a2db5ecd7ce90c210148815059b842a66d4d997b15c09b425b",
+      "sourcePixelsSha256": "dd1573b9109f705a3b3331f822a45aa85f33d1cd32642d1d39c27322585abc60",
+      "text": "赠送",
+      "reference": {
+        "id": 79,
+        "symbol": "asset.shop.PayPaneGivingBtn",
+        "width": 61,
+        "height": 22,
+        "tagSha256": "9add3cc8776ddb6fb4f0222d1d7554b196733254b02a74ca1a5788a4315beddf",
+        "pixelsSha256": "d646c80d2fa974f97679631222bbfa55bc03dac7dc780dbe20a747c6c7069525"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        61,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/23.png",
+        "sha256": "fca343cb60c0a0b8f69311581a29474b138e29400b2722fb9fc9d205f9d7954e",
+        "rgbaSha256": "fba5c900dace2dfea5134a2a68ce9c1febcf6aaea9bffcfd77c5401843f6be69"
+      },
+      "outputTagSha256": "0e3a34492ad5f6cd94ab620f22cad26fd87524d467c77574a2ee85b3d902e096"
+    },
+    {
+      "id": 24,
+      "className": "asset.shop.PayPanelCount",
+      "tagCode": 36,
+      "width": 50,
+      "height": 22,
+      "sourceTagSha256": "2dc1946233c965355e38ccd4d83e6502c334b09882cd385c462d7937232837f9",
+      "sourcePixelsSha256": "5da8e8625a99df1b43835e299ff8163bc93ebe551128727b5fec8a048c5eb228",
+      "text": "数量",
+      "reference": {
+        "id": 78,
+        "symbol": "asset.shop.PayPanelCount",
+        "width": 45,
+        "height": 22,
+        "tagSha256": "cf2edf43d4618b59f1af749bf9935a8d0afd53a5bbe4f6bf332e2963fc355251",
+        "pixelsSha256": "2ea213095791aac9116a4a30c40381939c7fc4971b6c9baeeffd9200c28de6d4"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        45,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/24.png",
+        "sha256": "2fcb7e7fa0038a65d8d2388a84fb10b482c009cebd972ff77139bc58e5fa05a1",
+        "rgbaSha256": "30a6c3bc833b4f35e730db151bff1ae96ca3da56a7e4339a3702fdd6ebfdff36"
+      },
+      "outputTagSha256": "1427ce82470d84846880ca2cc8692fdb4d8a045c2ce5f7b4329700508a4195e2"
+    },
+    {
+      "id": 26,
+      "className": "asset.shop.PayPanelGift",
+      "tagCode": 36,
+      "width": 31,
+      "height": 14,
+      "sourceTagSha256": "40880f5dabbdc7d971120a312bb7ceb13900412fee86feb12d41e04704cc0a3c",
+      "sourcePixelsSha256": "4d5b9ad1dbe4629ed44f84ed9836d402fb5790397a2786b744acee48114ab8fb",
+      "text": "礼金",
+      "reference": {
+        "id": 76,
+        "symbol": "asset.shop.PayPanelGift",
+        "width": 45,
+        "height": 22,
+        "tagSha256": "aa03624738c3b9c2508c185ecc25732fc849de0708930bc76c4d2da644a5f6e7",
+        "pixelsSha256": "7065f436901bdf5092691727fe06929f48707e46e2b4eacddb77f8375eaa1abc"
+      },
+      "method": "original named bitmap visible ink fitted after removing only transparent border; all glyph pixels retained",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        28,
+        14
+      ],
+      "preparedImage": {
+        "path": "prepared/26.png",
+        "sha256": "6fd92e4974ad5c1cb17b94f4be7286356883e988ce717190732e19b42873f739",
+        "rgbaSha256": "bb2aeb9cdc678ef13262905b1fbdd7b0f970ed91f0a201751fe296b6e0206bfb"
+      },
+      "outputTagSha256": "d184536d8e248a14f2a40a31c4635719a856bb4ec75ecfa6834fc88e01182f74"
+    },
+    {
+      "id": 29,
+      "className": "asset.shop.PayPanelMedal",
+      "tagCode": 36,
+      "width": 45,
+      "height": 22,
+      "sourceTagSha256": "0c89a51bf0677029f4de7ba1ae58c70073104171829ad8dab6b46fcb43d74f14",
+      "sourcePixelsSha256": "129b79ae6aaee3a6a74d744e674cb89cfaee6f6270089843cbbb7123ec8805d1",
+      "text": "勋章",
+      "reference": {
+        "id": 73,
+        "symbol": "asset.shop.PayPanelMedal",
+        "width": 45,
+        "height": 22,
+        "tagSha256": "d2080789ee548eeb26a8cee4f981c6dce74627493fde7a29e6da5826637af235",
+        "pixelsSha256": "49f184dda7cab2508b9425620f3ec7cde476fa991129bc4e2fa0088e83ee207e"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        45,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/29.png",
+        "sha256": "2f3ddcce4d17a92889032455c12eca5e46ae533215d6781472fa3d6ca95ffb33",
+        "rgbaSha256": "67d2fd488cf46a39ee45961b7165cb31f369f61f6cc2f8b52d50790dab178fe0"
+      },
+      "outputTagSha256": "f655abc2122f988f34d6561caee0a9912e7df9b1d4194065344ebb2f0aec6165"
+    },
+    {
+      "id": 31,
+      "className": "asset.shop.PayPanelMoney",
+      "tagCode": 36,
+      "width": 20,
+      "height": 15,
+      "sourceTagSha256": "863fc4052c8bee1e23a506df8523b15d73a6f475aab73d2a0da39e7f20a51aef",
+      "sourcePixelsSha256": "240f0d009445f688e27ca1a3e615e38ba7583fd06611063a16467f980a0fe4a9",
+      "text": "点券",
+      "reference": {
+        "id": 71,
+        "symbol": "asset.shop.PayPanelMoney",
+        "width": 45,
+        "height": 22,
+        "tagSha256": "745027b8ca8a84a93b8ac018462b6c90b5ad46eca5ad4cfe2fb561b5af2b0591",
+        "pixelsSha256": "9af9f9705d59b3b7f57f9fec0fe0302a705b01aea6ea97bbf780b6fea4957c71"
+      },
+      "method": "original named bitmap visible ink fitted after removing only transparent border; all glyph pixels retained",
+      "scale": 0.7142857142857143,
+      "offset": [
+        0,
+        2
+      ],
+      "rendered": [
+        20,
+        10
+      ],
+      "preparedImage": {
+        "path": "prepared/31.png",
+        "sha256": "b35a417eb702914fff0e5149e5f4f3a476c1f0f424e9a31809e3d0e620a895f8",
+        "rgbaSha256": "0bb112eea8a0888481e13580b2e26a2be4103536a1c471e799f1e9230e967754"
+      },
+      "outputTagSha256": "d0c83e1aecd67720d4f9808989a507f92ddf071e3257753ef3d82be9c58e03db"
+    },
+    {
+      "id": 33,
+      "className": "asset.shop.SubBtnGiftMedalClothIconUp",
+      "tagCode": 36,
+      "width": 77,
+      "height": 21,
+      "sourceTagSha256": "1f37ffb96a2b17287c126e651804b05b143889504a428f0eb1fb7cf7a4a34d1d",
+      "sourcePixelsSha256": "7e822c33ff5167786cc90d3107227cd441622959ff135fb8780f3524c80a1166",
+      "text": "服饰",
+      "reference": {
+        "id": 7,
+        "symbol": "asset.shop.SubBtnGiftMedalClothIconUp",
+        "width": 56,
+        "height": 19,
+        "tagSha256": "9e6980a37fd9b8e755e3b3a4c78ead36879be756d15cfb1c0f7c0c3266832c32",
+        "pixelsSha256": "bd09e5557458850f85cc23e2a1a0f0685b28e77d2f38f27570d65e23d8f09a42"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        10,
+        1
+      ],
+      "rendered": [
+        56,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/33.png",
+        "sha256": "cd36d593aafe295c6b781d2e915cd0b581b3e45626e742d5d0793e474f4684dd",
+        "rgbaSha256": "646377eb483c5f98f6e2cfcb7a1cdbf62fd6992fe93ebeadde3f5a8cb6db05c6"
+      },
+      "outputTagSha256": "efa93129a380b316591f1d87b0cf03bcd9985fc2f8395220494944b08ff2bf58"
+    },
+    {
+      "id": 36,
+      "className": "asset.shop.PayPanelTitlePresent",
+      "tagCode": 21,
+      "width": 244,
+      "height": 51,
+      "sourceTagSha256": "336e9a8a9763e60d6505efd64b0de9059b11aca2bc5a2e5804aaa6c8ab16ade6",
+      "sourcePixelsSha256": "486f3b993f16378e0252b1d75c371f2dd4d497c344d41950ab575cef74344214",
+      "text": "赠送",
+      "reference": null,
+      "method": "existing caption renderer; row-matched original wood replaces old glyphs only within [75,2,99,45], original frame and side ornaments preserved",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        244,
+        51
+      ],
+      "preparedImage": {
+        "path": "prepared/36.png",
+        "sha256": "94f329283920e55c23549efb22aafecfd1db57281088e5a3b28be7f0e2c47c32",
+        "rgbaSha256": "7de1c5f63acf39a5aa0f13b6d5d1dade5f8acee0029311e6e458f7b2023d5d34"
+      },
+      "outputTagSha256": "5fcc22214de17f87a2187b2d356d48f04920bf68c19500611dc72c324e1de274"
+    },
+    {
+      "id": 37,
+      "className": "asset.shop.PayPanelTitlePurchase",
+      "tagCode": 21,
+      "width": 244,
+      "height": 51,
+      "sourceTagSha256": "45e60c790a28303fdab337d1293eb284a726f69a905f5c86440efb33c8f96dfb",
+      "sourcePixelsSha256": "28fb27a44ed659c8382473531e520e57908b353ba5a45141bff50ebd53bddbb1",
+      "text": "购买",
+      "reference": null,
+      "method": "existing caption renderer; row-matched original wood replaces old glyphs only within [75,2,99,45], original frame and side ornaments preserved",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        244,
+        51
+      ],
+      "preparedImage": {
+        "path": "prepared/37.png",
+        "sha256": "b561e4d30ef0668045003084fd1c125aa64c611ee7e2e75788c4d5b1c7be2898",
+        "rgbaSha256": "486fee113f82ffb2a54ab65562185cd322029eb02406e3960507f15bae03cc1c"
+      },
+      "outputTagSha256": "03f21f04ff45c960cd30965dcd7c95a8dfacb86c535d1fd953ae457ac4d61ea9"
+    },
+    {
+      "id": 38,
+      "className": "asset.shop.PlayerRank",
+      "tagCode": 36,
+      "width": 43,
+      "height": 18,
+      "sourceTagSha256": "0d7d31115286f29f80fbacdcf162710313d1c61c6d53355cf7e8b96f827e0a2e",
+      "sourcePixelsSha256": "e9d8e5fb674ebf710a512d021380188e8fb4a9d92baa596cee7f0b4cc117fb3d",
+      "text": "排名",
+      "reference": {
+        "id": 65,
+        "symbol": "asset.shop.PlayerRank",
+        "width": 43,
+        "height": 18,
+        "tagSha256": "443c57141e03a17ec654b402f81b3b8a18dc9216c22a1c2f52906c2fc346541f",
+        "pixelsSha256": "c6d40f88370320ed131479fe2b2e677b1fa851ccf266386ad1df131e0d67dde8"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        43,
+        18
+      ],
+      "preparedImage": {
+        "path": "prepared/38.png",
+        "sha256": "c062d4a6b1f98b1c3a96d8f204bfddf0a228d03c65765423816da634b05ee814",
+        "rgbaSha256": "39d27a503ac802d7581bbd0917a36fa64df1c765f729b1d40723e3f797efb44a"
+      },
+      "outputTagSha256": "68b3f0e1fd608ee7fdc51917650c304558364eb68c4e2117f68ff9abeeacd83c"
+    },
+    {
+      "id": 39,
+      "className": "asset.shop.PresentBg",
+      "tagCode": 35,
+      "width": 372,
+      "height": 344,
+      "sourceTagSha256": "6f52489da2a6e8c2e2cb74f1917c9f38b95abe880ace938d27623dd8731c0b73",
+      "sourcePixelsSha256": "f372f2c350f2615c34ab2b941ecdaf42f724fde794487ff1e824316b212526b6",
+      "text": "赠送对象",
+      "reference": {
+        "id": 64,
+        "symbol": "asset.shop.PresentBg",
+        "width": 372,
+        "height": 344,
+        "tagSha256": "91d700cc6874f3ab918177a64cb3827b8508608ff8c7f98df3e52a747b8809f1",
+        "pixelsSha256": "c2fca177733408bf5ac59ea836dcca15ec238ac625b1ca6fd9ddfd6f207c7eee"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        372,
+        344
+      ],
+      "preparedImage": {
+        "path": "prepared/39.png",
+        "sha256": "6aa641edb226639b36cd86abebeda26355a9a7fb162a8cde7c914cfc9993a371",
+        "rgbaSha256": "c2fca177733408bf5ac59ea836dcca15ec238ac625b1ca6fd9ddfd6f207c7eee"
+      },
+      "outputTagSha256": "cd1c882b12074611f13630e5462605059f58f6978a96ec2c624a41dc81a9fc4a"
+    },
+    {
+      "id": 44,
+      "className": "asset.shop.SubBtnGiftMedalPropIconDown",
+      "tagCode": 36,
+      "width": 65,
+      "height": 22,
+      "sourceTagSha256": "10edb9acfa9200ea340d073dacfd64d0ff2c089828d0775a410b5982b3a164e6",
+      "sourcePixelsSha256": "88cf80964895b0ae3247e62510482fb35ee8576aae34083ed64e491910b93579",
+      "text": "道具",
+      "reference": {
+        "id": 6,
+        "symbol": "asset.shop.SubBtnGiftMedalPropIconDown",
+        "width": 56,
+        "height": 21,
+        "tagSha256": "2bba7b9a7294a8cd927a58d3118154a529739e9c961cbebd9364f2bda32ae7fe",
+        "pixelsSha256": "785ba942e4ed7e971ce1be85706b0864057befda9a0e1b8dfc5280373c291a63"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        4,
+        0
+      ],
+      "rendered": [
+        56,
+        21
+      ],
+      "preparedImage": {
+        "path": "prepared/44.png",
+        "sha256": "269b72a2764e61f854466f8ccd938222173b1865b551a250f63223d23c789567",
+        "rgbaSha256": "519547e01105331f95ce122ecc78c2a94ea152fa4295e67135f8c4fb50547b6a"
+      },
+      "outputTagSha256": "5d7f2a87a2c02894e050aa96b7e4c8574d04b59830fd652e24a25319e51483b1"
+    },
+    {
+      "id": 45,
+      "className": "asset.shop.ShopSearchBtn",
+      "tagCode": 36,
+      "width": 48,
+      "height": 24,
+      "sourceTagSha256": "9321cf4b3c8b7c28d41b1ed60e6533f5eff974fc346181fa204276433a280e69",
+      "sourcePixelsSha256": "f24f3880892f36830571f55d0082323e8d156922bbb864f5737aac1ad9c4d666",
+      "text": "搜索",
+      "reference": {
+        "id": 59,
+        "symbol": "asset.shop.ShopSearchBtn",
+        "width": 49,
+        "height": 25,
+        "tagSha256": "09f063071c210daa7c87877c1ff7126c54f73583722cda1e9c94d222ba820120",
+        "pixelsSha256": "9e978078f822e3fbcc2faa34429d0f0a2383242543c6f356c19a71e8a4782d6e"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.96,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        47,
+        24
+      ],
+      "preparedImage": {
+        "path": "prepared/45.png",
+        "sha256": "0e31fe426a9a24cb7d5cebef0289fcde6f93f4aa02e7802cebcfa94de918e4d8",
+        "rgbaSha256": "3a1607cdf6b73bd6b846014d3258653b3bbd51dc34f95cf0f0f8b250d767efd8"
+      },
+      "outputTagSha256": "b6f03f511d05b2dd59bcbf3c2022283e9fef88cbba7a595e6e3953ecc87d1f54"
+    },
+    {
+      "id": 48,
+      "className": "asset.shop.SubBtnClothIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "23e7386dc9458559532089338b904fa9fbea7dd361a968cfbcb7277046534b36",
+      "sourcePixelsSha256": "17772ff388f68bcd919f3298ffce004d0801471674c558046f0b0e4c5a18d4f2",
+      "text": "衣服",
+      "reference": {
+        "id": 56,
+        "symbol": "asset.shop.SubBtnClothIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "28605ad74fddf0af13350552a9d096ede7a40afdb3a1592a469d37f0aa6eedd8",
+        "pixelsSha256": "4ae5ac16bf726cdbad501ef382ac3c82aecd1fff779b23ed015b547bb9e417b5"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/48.png",
+        "sha256": "9d89407dee87fbc0c2a1efdd653a6a185c7d8f0acf5068ba899ec075ef250f68",
+        "rgbaSha256": "4db32cda1518a7f098f7ad4981945f0f96089ceac499991bb741e1120b40cbba"
+      },
+      "outputTagSha256": "5f7b911d514da833771a9fb2764332d05baa5b8f52c2bd8bfa5c7eee05f228f7"
+    },
+    {
+      "id": 49,
+      "className": "asset.shop.SubBtnClothIconUp",
+      "tagCode": 36,
+      "width": 69,
+      "height": 35,
+      "sourceTagSha256": "2e5dc527d4e0f9d7f855903295cedc672382145665eafc4d3898e71173630e1e",
+      "sourcePixelsSha256": "d9de1169b03d9f4455fa74a2b0994f84e02b238b61d19049213afd8e30b3bb6f",
+      "text": "衣服",
+      "reference": {
+        "id": 55,
+        "symbol": "asset.shop.SubBtnClothIconUp",
+        "width": 69,
+        "height": 35,
+        "tagSha256": "73219fae9e37f4f87f2fe22cbe13c1f140bc6d46d974b451f4dabf5944384fd3",
+        "pixelsSha256": "1b7a502dd844e00abd4501ce533038bfca3892fb3663a673ccf4bdb6746c44e2"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/49.png",
+        "sha256": "d654bb6d2ef9dd1b8a16fd613d13535eaa554205ced814496839c5a95124b281",
+        "rgbaSha256": "c63d8fa4aee2c911d8a73ba845af649782067c7e1cecc2d4e33df6e2e60a7a81"
+      },
+      "outputTagSha256": "698d977a2d2fa8b9b0b2993050043203ad2a28cd1a89e46fca3ab2c2adf8b6de"
+    },
+    {
+      "id": 50,
+      "className": "asset.shop.SubBtnDiscountIconDown",
+      "tagCode": 36,
+      "width": 62,
+      "height": 20,
+      "sourceTagSha256": "40c6ca1d1ad5d9d78d6066eeb9e11b4ca8f77351887cd869af7e169f46aa488e",
+      "sourcePixelsSha256": "4ba075d8c06a4a01d7dc994ff587420973ab1aa9810ded47196c1109de58ef88",
+      "text": "优惠",
+      "reference": {
+        "id": 54,
+        "symbol": "asset.shop.SubBtnDiscountIconDown",
+        "width": 52,
+        "height": 19,
+        "tagSha256": "48a39b024852515595d8964e65086aabace54e46ebb0914ba49214cebafc3386",
+        "pixelsSha256": "0994affb03a82bd8c859b0abda452006ad113076abb480eef52094fac1fc1d4b"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        5,
+        0
+      ],
+      "rendered": [
+        52,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/50.png",
+        "sha256": "ca51fd6ab507cb2eb1cf9f4b0fa4a612de94c5724fac9258e7d615fa28a4a7a9",
+        "rgbaSha256": "f3334f91413e375295184de7b07d7c96d32a41ff776eebab6d844ecbcc700478"
+      },
+      "outputTagSha256": "9056f04460da8fcc0ea410768783ef9c338e2940dbf01732f675c6e220ed881c"
+    },
+    {
+      "id": 51,
+      "className": "asset.shop.SubBtnDiscountIconUp",
+      "tagCode": 36,
+      "width": 57,
+      "height": 20,
+      "sourceTagSha256": "ef21767ac70b628d611a3c7aab11c6ae5d639d5789b7227cbd2abf7f440df22f",
+      "sourcePixelsSha256": "0845d8f8fa3d09e6d516a2aaf2def44fdcf970c6a04e4acde5bc4cf22bd264b9",
+      "text": "优惠",
+      "reference": {
+        "id": 53,
+        "symbol": "asset.shop.SubBtnDiscountIconUp",
+        "width": 53,
+        "height": 19,
+        "tagSha256": "17ad66a2f627dba25d847f66019908a20d1b0bbb84d857d349b37211adbd55f6",
+        "pixelsSha256": "b04b24c9d8790ca2426e78487beab74d9bc42bc8b6d47d3d31add1ed71a3e35a"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        53,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/51.png",
+        "sha256": "d498f3afa9350b0838580753b062299c75e7949b81bfc99f65663fa0d6e7ea47",
+        "rgbaSha256": "fa3ac907e6314962980bd80ef8f5354ddd92580d43fa0ec777ff1216d60031c9"
+      },
+      "outputTagSha256": "79a37264875c27857208061fa02640fb8722c1b04bc13ecc0f8e4ec49e06f4dd"
+    },
+    {
+      "id": 52,
+      "className": "asset.shop.SubBtnEyeIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "8b140ec368d9380e1dca93733572ae5eef823cce82299afdd0ba55a0c4b2b9c0",
+      "sourcePixelsSha256": "df74bd56a079cc836504ff814894ca02b5daa3e66487ba41ab91ba5da15fabdf",
+      "text": "眼睛",
+      "reference": {
+        "id": 52,
+        "symbol": "asset.shop.SubBtnEyeIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "deffe2e6f55cb638f60f90fb86e3ed91bfe40d4e57fdfda3bfa5ff5169526a25",
+        "pixelsSha256": "bd5d09b0dcb43f3724af6cae92dd4b3f5ff30f3da8f56ee3c619c4700f9d7119"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/52.png",
+        "sha256": "083c4e42296db2c79684858e8e2d75b2460c61b2ba088652635b28c8f504f4e4",
+        "rgbaSha256": "7e71579a3b48fb1e7fd8f1f62edcd9467db0f758b789ef602f5086fd8aa4606d"
+      },
+      "outputTagSha256": "e11fef653925b12725fd8cc8a18bc9366ec0dda5d35287c2ce3cc1ce9ad320e4"
+    },
+    {
+      "id": 53,
+      "className": "asset.shop.SubBtnEyeIconUp",
+      "tagCode": 36,
+      "width": 71,
+      "height": 35,
+      "sourceTagSha256": "cd0ab0b34366c46807509cf709a423c8e042af11a2e1790f0babb60a576a34db",
+      "sourcePixelsSha256": "668712e14e1a31f8bc55d4c90d4f45eb85f6d77c2e2285e412d419f13d6c185d",
+      "text": "眼睛",
+      "reference": {
+        "id": 51,
+        "symbol": "asset.shop.SubBtnEyeIconUp",
+        "width": 71,
+        "height": 35,
+        "tagSha256": "b937ed8d9793a6793815cd1b599cd7d105b05e5e773d749a1dced5c4448ef4c6",
+        "pixelsSha256": "c245b2f61d3d0f05f77606f57c2795df5044d429b787c1afdd070b79bdc0c443"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        71,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/53.png",
+        "sha256": "8417d6c9f3cf55d8d4263ae47be9d2799f0524437fbfdfd459e60798a291d45f",
+        "rgbaSha256": "6f5311e5df6ef2a8446b68526ffe6cdb0c2dfd3c419c27f17035c13231f581a3"
+      },
+      "outputTagSha256": "7f7693ed7c2c0031fcdb1d626cffb6edd1f8081e9573a3f8c6ed123fca8191e5"
+    },
+    {
+      "id": 54,
+      "className": "asset.shop.SubBtnFaceIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "6d82f318de266f801ebdd40c8e90c08fcbf30dd6720c0be55c37d1452cfad17c",
+      "sourcePixelsSha256": "7f5a86f5f16b955dab4f28814ef69f178f09072fff8004541b78811f014b49ee",
+      "text": "脸饰",
+      "reference": {
+        "id": 50,
+        "symbol": "asset.shop.SubBtnFaceIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "82d090c7afe9e4f43a2813e3f9cb64424070599b85a725efbf47c122f9605d88",
+        "pixelsSha256": "131eb80c5ba9397ca52c77fee0f3ccf4064cce7d81a7e1348bdef8fa7067a41e"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/54.png",
+        "sha256": "8a740a433c45b438a3fcd63f4eb52117960da55e77af02c22b69a1c8e5485e16",
+        "rgbaSha256": "ea6ec63c673edf13064b6c7fe791e42de59dadf550c17733bb5aaab1ef68598c"
+      },
+      "outputTagSha256": "72f279284798ea50c5eb3fe462da4bbee4d79603c96f52d848349c6f070768cd"
+    },
+    {
+      "id": 55,
+      "className": "asset.shop.SubBtnGiftMedalPropIconUp",
+      "tagCode": 36,
+      "width": 63,
+      "height": 22,
+      "sourceTagSha256": "14be2599b577a62f72989fee77e1404114ca21187ddb9c8755b1a02b95824bb0",
+      "sourcePixelsSha256": "9056e2629d5cdf9c33aa625ee16aef0b247ab924f284d1ce93cd52efccc78f10",
+      "text": "道具",
+      "reference": {
+        "id": 5,
+        "symbol": "asset.shop.SubBtnGiftMedalPropIconUp",
+        "width": 56,
+        "height": 21,
+        "tagSha256": "b418d73b50aab0e3c6145eda93b25a404d3c3d00e0fc26384a82d7b536af10d7",
+        "pixelsSha256": "f1f3ad133aba4c003123f07f15481954850b2b6a70be574ba1ae4d475a745d30"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        3,
+        0
+      ],
+      "rendered": [
+        56,
+        21
+      ],
+      "preparedImage": {
+        "path": "prepared/55.png",
+        "sha256": "44b68f7c8f85297fdb13dd2669fd939f062eeabbff092fb5fcdd85c3df1a124d",
+        "rgbaSha256": "d8e0ddc49fd98226001e72de8c5bad47cdf21919fe9711e407d4fc64f0dd7e87"
+      },
+      "outputTagSha256": "3280f40f9c4e28c385fab3fc8d5df7a48a9ea7670c2e714e52daafbc6726f50e"
+    },
+    {
+      "id": 56,
+      "className": "asset.shop.SubBtnFaceIconUp",
+      "tagCode": 36,
+      "width": 71,
+      "height": 35,
+      "sourceTagSha256": "23d73c1961baf307208af695192220bbdf82fadb009ecf98401b795e19ff6b04",
+      "sourcePixelsSha256": "da91489c1fe8c0dd61882e7b3d9325c06c73d78b892305c3ad10350f92a69dda",
+      "text": "脸饰",
+      "reference": {
+        "id": 49,
+        "symbol": "asset.shop.SubBtnFaceIconUp",
+        "width": 71,
+        "height": 35,
+        "tagSha256": "fbda119ec111b49952ff586848a0680bc910f652e341d01ca57ae82499aa6b95",
+        "pixelsSha256": "2ff856bda5715b49249410b87328bb685153f6f31f79892c69fca3ed20585822"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        71,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/56.png",
+        "sha256": "e85ce00ca94e7ca3db0d0c062e1a43cd440b61ba061362b126f4475eadb22abe",
+        "rgbaSha256": "087ef7a1088a326da1bdbc888c1560fd436a52fe69329010e33aefe080ff958a"
+      },
+      "outputTagSha256": "ec03f621524abef38718f56d664195402031130eb004ca3ee2836040ee93cc72"
+    },
+    {
+      "id": 57,
+      "className": "asset.shop.SubBtnFuncIconDown",
+      "tagCode": 36,
+      "width": 81,
+      "height": 31,
+      "sourceTagSha256": "76f9f226e7df0f77c2851aa9099336373123be4da68d8e594c87ea7107c92a04",
+      "sourcePixelsSha256": "acfec68949f1c4c4f771f3316ee564136aebabaa6589588c82fc295bc5e50630",
+      "text": "功能类",
+      "reference": {
+        "id": 48,
+        "symbol": "asset.shop.SubBtnFuncIconDown",
+        "width": 81,
+        "height": 31,
+        "tagSha256": "6ba41290ca09b838f12f1a243e9bafa48867c17eca0660ec463a0736a1d34af1",
+        "pixelsSha256": "538916f1cbaf099b5197c3a2ba6e4dd3cbebf7c7b11a44dcb7116a65096ca9bc"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        81,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/57.png",
+        "sha256": "c3b0d5d42dbfd43408e7ec32bc7fd51e6c507559aa633298205d14a9de1a3302",
+        "rgbaSha256": "538916f1cbaf099b5197c3a2ba6e4dd3cbebf7c7b11a44dcb7116a65096ca9bc"
+      },
+      "outputTagSha256": "8f83524c9b66db955cff598b84f59050b3069602f016cc1105810b63c04ebcd8"
+    },
+    {
+      "id": 58,
+      "className": "asset.shop.SubBtnFuncIconUp",
+      "tagCode": 36,
+      "width": 85,
+      "height": 35,
+      "sourceTagSha256": "a7570542f0ff4b81800b2040a6009e7e14af7f7555c3d38f5457562f165cb017",
+      "sourcePixelsSha256": "f3d7bfe051bbf53459de157277a53ab21aa550bc96aa56808142e1e53f93c2e0",
+      "text": "功能类",
+      "reference": {
+        "id": 47,
+        "symbol": "asset.shop.SubBtnFuncIconUp",
+        "width": 85,
+        "height": 35,
+        "tagSha256": "8fd5463e6661f16dac0673589eee6f938c819c2825763e34cb38a51fa45436e9",
+        "pixelsSha256": "99f1d54a512a593293674669445576c7eeda731725dbd0ebeb16e92a20c893c4"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        85,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/58.png",
+        "sha256": "46821614c97a5b1a48977f2886355f54fd4eb1801dd7f63df4a6266231f40d87",
+        "rgbaSha256": "b78e51419c9d6ea196f622b78ce7dd0ed05aab9a11a4384c655708dc1b7d71d3"
+      },
+      "outputTagSha256": "7c7ea52005b4a325f050e9798f0205289016d4dd352c8350f87f69bbe1d278a1"
+    },
+    {
+      "id": 59,
+      "className": "asset.shop.SubBtnGiftIconDown",
+      "tagCode": 36,
+      "width": 82,
+      "height": 33,
+      "sourceTagSha256": "ff2dc61e78e43946d0ef3fd2d3cf7122582c324d0e39615c47613707386fa9e8",
+      "sourcePixelsSha256": "1b1384a587f6096d6211785a4c722545e2b356bbae0c2830ead9f719e7c7d3ad",
+      "text": "礼金类",
+      "reference": {
+        "id": 46,
+        "symbol": "asset.shop.SubBtnGiftIconDown",
+        "width": 82,
+        "height": 33,
+        "tagSha256": "8a16bdb363c1d965a9422de10ad5739f6a80049a1141e3502770e5601aec0f97",
+        "pixelsSha256": "4fdf37de4858f0a77d7253a0733391c33c0590b16942d61385bf40ebbef79d41"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        82,
+        33
+      ],
+      "preparedImage": {
+        "path": "prepared/59.png",
+        "sha256": "e4b12ff95998bfcb09ed0aa9497f1be8dee0a7560ed137fc7857ec43fe3b3575",
+        "rgbaSha256": "b32c257c85c15819d7ab7f6939ae2f6cf3a74b695a40ee5286bb0a6f4cae8fd1"
+      },
+      "outputTagSha256": "f903cbd67a724e565ab2820c923cad9e6b541cbb5aac107db0aa35310fa02732"
+    },
+    {
+      "id": 60,
+      "className": "asset.shop.SubBtnGiftIconUp",
+      "tagCode": 36,
+      "width": 84,
+      "height": 35,
+      "sourceTagSha256": "e62016a796bd520615ada1d6a2c9529bbd084eb09e4d4b51062b8e4a2e46ca4f",
+      "sourcePixelsSha256": "55f2a4ba7ec48457d32b6e938ac7b7c97c80eada6799fe0303eb584fceee1f0d",
+      "text": "礼金类",
+      "reference": {
+        "id": 45,
+        "symbol": "asset.shop.SubBtnGiftIconUp",
+        "width": 84,
+        "height": 35,
+        "tagSha256": "a9ac4cb16e1c17d7fb55aeb2cad60b234146db4518a504777b6e6673e3df7683",
+        "pixelsSha256": "a98ce8ef7bcec6844203eebdd9fc1b13324a9597795f493cc4baa574ab5db111"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        84,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/60.png",
+        "sha256": "e99f50f61e32e346982f059babd6954144d513c4c2a62d797a87d68b418dff25",
+        "rgbaSha256": "0bd5b84cc809fddd8914987cd49ecefa88ea37a9ad5ef7e22b8becfc8363a92e"
+      },
+      "outputTagSha256": "63be9b82296b7384d0364cc132a5cea106d7f1b854a18eff1a5b5c9624d09fc4"
+    },
+    {
+      "id": 61,
+      "className": "asset.shop.SubBtnGlassesIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "7d6a924fe7ecf88f5d14d777e4161aec499f264b9efe166e623ee1707e8a2fdc",
+      "sourcePixelsSha256": "f00075624376a746ddabd47aea6f240fe6cb366166d67671faddf0d32d4af5a0",
+      "text": "眼镜",
+      "reference": {
+        "id": 44,
+        "symbol": "asset.shop.SubBtnGlassesIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "c8616c1c9846350747b950185aa003ff893f799405a82a64ae0f5c0ab60d655a",
+        "pixelsSha256": "1ebb8a682f59fa18172346dc8faf74ee87e81b61048054155555b237e8de31cc"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/61.png",
+        "sha256": "f89e33afc3e8c83b5500b47dca56033dfac0bcc4348d488240847f0f39af472f",
+        "rgbaSha256": "0130cee5d1ac311b9ba3fbff18b67b47ec44ef77098de36da2189318bfb41256"
+      },
+      "outputTagSha256": "b8167091e8300a7e5ab634ae63a63eb6fad7ea64d300f4b6b029452948764b04"
+    },
+    {
+      "id": 62,
+      "className": "asset.shop.SubBtnGlassesIconUp",
+      "tagCode": 36,
+      "width": 71,
+      "height": 35,
+      "sourceTagSha256": "a1bc48a0677ad0ffaecca301cd32b1ee173f1382d47184aa2b177752c359dd28",
+      "sourcePixelsSha256": "33cd1dfe4cb44be25207aa088090e4d8256c6ee2f8cba308145c4cbaf9e61880",
+      "text": "眼镜",
+      "reference": {
+        "id": 43,
+        "symbol": "asset.shop.SubBtnGlassesIconUp",
+        "width": 71,
+        "height": 35,
+        "tagSha256": "343dc0b88f3feb2face646e6100449e9c0b496fbc39c5f2380d675188e8930e5",
+        "pixelsSha256": "ece672291d17404f2b024e02e7d5085950c23790e920d35facde5291e870feeb"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        71,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/62.png",
+        "sha256": "0fa0d8819c7d1c3a9d2712e0e1f986175793f7dd2e77e55fd928d162e8d620dc",
+        "rgbaSha256": "2f6cd88d5260fced50118fe72148e1d8b216e89e26b64aa3d41478e70dfa3a34"
+      },
+      "outputTagSha256": "10012aead906f4f57d59dc5fa28976b34b6629218573ced38a3903ba51628bb8"
+    },
+    {
+      "id": 63,
+      "className": "asset.shop.SubBtnHairIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "2f1e54066d8dd521d71febfa56974c24045904c638b924d2cb1e5d3506d89df7",
+      "sourcePixelsSha256": "0de1bec935b3c52045895a72924a463f0fbecc519a37f8dbd0ca389216f23628",
+      "text": "头发",
+      "reference": {
+        "id": 42,
+        "symbol": "asset.shop.SubBtnHairIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "dd476dd0dfe41437a6545bf6003d4e6a9f90311b4767576e91796aa0c1fe86e2",
+        "pixelsSha256": "3966add18ae6b98f0109485bdf38b940342d888490df697177d4b1b2d7373bd7"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/63.png",
+        "sha256": "7a2411fb5a8e14687753f84b43a5d86d5dbe0002e686201038500f3562da6fd5",
+        "rgbaSha256": "127793345cdfe8dff7b87490fbc456a77995c8d06b989df2294118de1774fb8c"
+      },
+      "outputTagSha256": "ce1e26347d8cf21ebe79ca7ffe725cb56116e56a12bf191fa418d49a99618ecb"
+    },
+    {
+      "id": 64,
+      "className": "asset.shop.SubBtnHairIconUp",
+      "tagCode": 36,
+      "width": 69,
+      "height": 35,
+      "sourceTagSha256": "f3ba3fea2593fd22482a1fe7d0e0be4e84b3acfcb0fe48cb03dc13cc64827a80",
+      "sourcePixelsSha256": "59c2aefef8f8199a40fa7dea104ffb90cde95f87c07b32e2e5af92a67f5976d8",
+      "text": "头发",
+      "reference": {
+        "id": 41,
+        "symbol": "asset.shop.SubBtnHairIconUp",
+        "width": 69,
+        "height": 35,
+        "tagSha256": "cd6dae7ad4fff1520919e9a1de353672b8d71e5b8554069dd02b9b1862956a8f",
+        "pixelsSha256": "1f5386f4aded844719c93a2c5fab64e8f3427cb3ed2ba00880169850c9e9a726"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/64.png",
+        "sha256": "bb5e06a98b247d8e3e09816d7a25dbd5cb9a063cb2d5ab3822fd96c361e3872a",
+        "rgbaSha256": "63c0b2cdcb5ab53b0db8e2202ae726444d30a7b66b5c2b5a72cf6abff182a5a9"
+      },
+      "outputTagSha256": "53de52f8f5b15c4bda68adf1cd6f70467fe7a1faaa2c31e40170f48d4401ed44"
+    },
+    {
+      "id": 65,
+      "className": "asset.shop.SubBtnHatIconDown",
+      "tagCode": 36,
+      "width": 69,
+      "height": 31,
+      "sourceTagSha256": "0c0dc33906b32f21fe7fa7cf0664ebe25a0e092900910a3f7dfc523ef7238eb8",
+      "sourcePixelsSha256": "245e210bc01d5ab92030cb39336006f0ddabb5f2ca7378ce5988748efa78f285",
+      "text": "帽子",
+      "reference": {
+        "id": 40,
+        "symbol": "asset.shop.SubBtnHatIconDown",
+        "width": 69,
+        "height": 31,
+        "tagSha256": "7f7226c026da5ead468857f076b493452fc2693115dae6482349a22b960d8844",
+        "pixelsSha256": "2b82cbe06b2d2ceb25bff2534c90a11f96cd91f621a1cc960e562f98fd3a78e9"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/65.png",
+        "sha256": "86d4c93a48fa629b163ea8b8457ebe4b0cf68e7b4ea285b31afb2bb1bf2944cb",
+        "rgbaSha256": "aa7ab8068f11172c203af0bb5b83c41db2f81c1d44fdff9e22e173e70480f68d"
+      },
+      "outputTagSha256": "71f800b2a9fa2b62c4b9460cccb249ca6712827029036fde296b0e51581f2458"
+    },
+    {
+      "id": 66,
+      "className": "asset.shop.SubBtnGiftMedalWeaponIconDown",
+      "tagCode": 36,
+      "width": 62,
+      "height": 22,
+      "sourceTagSha256": "3295a84095c81940f400f36ea125d13332117ee85dfd34013a8c567b34e860f2",
+      "sourcePixelsSha256": "c3fdfb42314f56769025eb6f5a6be42e3d072399993f2e306c78926b86de65e7",
+      "text": "武器",
+      "reference": {
+        "id": 4,
+        "symbol": "asset.shop.SubBtnGiftMedalWeaponIconDown",
+        "width": 55,
+        "height": 19,
+        "tagSha256": "e4f6ef478686a7afbb02bd66589805e505ad5ebb5a402bcca95368d9f3222704",
+        "pixelsSha256": "26c515d99b857e990d5e2f22441bd61c0f8d280611e6b77c0f2326b3cb1cdadf"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        3,
+        1
+      ],
+      "rendered": [
+        55,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/66.png",
+        "sha256": "585e2fc7867a29448fc6432c0c0524c64d2a9169ccf02c421d5b1f5d7ee01e7c",
+        "rgbaSha256": "48cefbde53eee96ed59749222b31beff9e8e957157111246c79b9003ef704d10"
+      },
+      "outputTagSha256": "b983184cdbadd0a367f68bd5e3b72f493966f2f4db1fa600653793a92a1de120"
+    },
+    {
+      "id": 67,
+      "className": "asset.shop.SubBtnHatIconUp",
+      "tagCode": 36,
+      "width": 71,
+      "height": 35,
+      "sourceTagSha256": "7158b3889d2d8ad86b7ce78be2d0bfeef7c02b2e902c3c4bf143dd4be6588b96",
+      "sourcePixelsSha256": "bb66ee85ea5616477f7776bba765698b92d77d85899ce80e56cd3fc70b3fd458",
+      "text": "帽子",
+      "reference": {
+        "id": 39,
+        "symbol": "asset.shop.SubBtnHatIconUp",
+        "width": 71,
+        "height": 35,
+        "tagSha256": "c310da5572ffb687f203b4ef58613600d7d341bb558c0a77a79492bdde571818",
+        "pixelsSha256": "30b1438b29b595225a66d8b7dfeaed7fa9247b79391cad64aa66a5286685ad41"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        71,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/67.png",
+        "sha256": "aab56660e48d6cd78cfe84ffffab411b88e4d9620e42c1d2a87b81c979b5e0b4",
+        "rgbaSha256": "362d458c4de6d73b12d6ba7805e1525e69006842b1dda003e675e3e2b8b0ce62"
+      },
+      "outputTagSha256": "54f0066ca273e9ff85e96bfd906cb1d5e85b44ba6a767b2ff1187315d41535df"
+    },
+    {
+      "id": 68,
+      "className": "asset.shop.SubBtnMedalIconDown",
+      "tagCode": 36,
+      "width": 87,
+      "height": 31,
+      "sourceTagSha256": "21705794d30a95f3a910f059178c77ae6d0565d9ba2c4e4ea647c1d1101b190d",
+      "sourcePixelsSha256": "138748b4c70394de0fd8934e194b9fac347602c1aa27b933b677c7a902e3c923",
+      "text": "勋章类",
+      "reference": {
+        "id": 38,
+        "symbol": "asset.shop.SubBtnMedalIconDown",
+        "width": 81,
+        "height": 31,
+        "tagSha256": "65deb7aa217cd6100aab0244c8d729643daf42a97e3795339812d14872ae8963",
+        "pixelsSha256": "684ecb1c75c25124f35cb80504845ae7cab13c5e2adcbe9af0e46cdd3848f75c"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        3,
+        0
+      ],
+      "rendered": [
+        81,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/68.png",
+        "sha256": "398a7d4442c703fa6bffafd989e7f941a1ada1c0deca2dd1b501375739753ff1",
+        "rgbaSha256": "3ccb8436c88d00d47a3c5151bbd191b6e666f168683020053076a2bd87fb7ef6"
+      },
+      "outputTagSha256": "ddabf26eeba42568da42e4365ee944598725b9737f0158e2946da12eaaf8679c"
+    },
+    {
+      "id": 69,
+      "className": "asset.shop.SubBtnMedalIconUp",
+      "tagCode": 36,
+      "width": 87,
+      "height": 35,
+      "sourceTagSha256": "fe6b60c1b247d85784ba7b303333fc375759b81c08a868093ffc308211659b51",
+      "sourcePixelsSha256": "5d98ac63d25be94dd8dbf481ceaf603d92626f8c42170192e41223d8f4914f10",
+      "text": "勋章类",
+      "reference": {
+        "id": 37,
+        "symbol": "asset.shop.SubBtnMedalIconUp",
+        "width": 85,
+        "height": 35,
+        "tagSha256": "2315320e9043dd7eac7a7714452b74a3869925003761297c56d0082abd719346",
+        "pixelsSha256": "babb39d8583e8d795e533a302b15bc6296b88c9318bb6e08155e5e8382266177"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        85,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/69.png",
+        "sha256": "498478c5bb8c7c58d65f8e144399ba174a9324f8e18981ba0343e8d67ed98399",
+        "rgbaSha256": "83ca8aca82b13c34a4dfd90ffa5b72f6cbccfb0ab4f60d43d5c85f7c900909d8"
+      },
+      "outputTagSha256": "379ffc5c2a0188167ae1cbd2d9f9e234e6879a558178ddd303f94995bfb6289a"
+    },
+    {
+      "id": 70,
+      "className": "asset.shop.SubBtnRecommendIconDown",
+      "tagCode": 36,
+      "width": 63,
+      "height": 23,
+      "sourceTagSha256": "caad26a3d67865837fa5d2fd749cd0cfe0dd14d3f360bb346ff6b28967ea0e79",
+      "sourcePixelsSha256": "8649ec475a2396d96b68978c3e832c520aae09f2a4880b31a59789f1ed44dd8e",
+      "text": "新品",
+      "reference": {
+        "id": 36,
+        "symbol": "asset.shop.SubBtnRecommendIconDown",
+        "width": 58,
+        "height": 24,
+        "tagSha256": "4249e48961e6d0e6b12a5c3f7db6173a2d71d6c609a3d004fe1e49a72006d798",
+        "pixelsSha256": "c3225e6a41746b8fc31f6f7009e105dea5eecfbc76572049ee7e240b6ea723a6"
+      },
+      "method": "original named bitmap fully fitted without cropping; decorative English new changed to 新, original red-star alpha silhouette preserved",
+      "scale": 0.9583333333333334,
+      "offset": [
+        4,
+        0
+      ],
+      "rendered": [
+        55,
+        23
+      ],
+      "preparedImage": {
+        "path": "prepared/70.png",
+        "sha256": "2f969e24f01ac6e864892cecd0fa4a226ea14942e047157bfb5a0c33d93ce208",
+        "rgbaSha256": "78f3078fad550db068b71529e92cae3b200e88ff6c2aaa10e7d7cec006b12469"
+      },
+      "outputTagSha256": "cee2061155644dad977e8601db4d015f81a91e8b86014cf44b17c4ef973be426"
+    },
+    {
+      "id": 71,
+      "className": "asset.shop.SubBtnRecommendIconUp",
+      "tagCode": 36,
+      "width": 63,
+      "height": 24,
+      "sourceTagSha256": "5761e49b91881ccb4b93cd9c18751314b53ff9e7a378ca7893fe196923691a5b",
+      "sourcePixelsSha256": "c849ebd08d8f175e634c055b653cb7937daacc852b62dd1994f875120ec15e41",
+      "text": "新品",
+      "reference": {
+        "id": 35,
+        "symbol": "asset.shop.SubBtnRecommendIconUp",
+        "width": 59,
+        "height": 24,
+        "tagSha256": "e31478feb1c1dc76f42676567d04072622c78ff2e01fcd38a742d81dc045f9d1",
+        "pixelsSha256": "f9dc3fbd16175a1d8e33fe8e4d9338f19802bbbd743af5eb6accb4d918790bea"
+      },
+      "method": "original named bitmap pixels, transparent padding only; decorative English new changed to 新, original red-star alpha silhouette preserved",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        59,
+        24
+      ],
+      "preparedImage": {
+        "path": "prepared/71.png",
+        "sha256": "332ac11783e17f5be1c5bdcca9804a96aa8fea932c65bc163c5b23e5a7aae789",
+        "rgbaSha256": "28ddae5bd29bfcaa575e66eba42c6cc8433b9c533fcb96446309d70991f0bb22"
+      },
+      "outputTagSha256": "34f568f43843f4cb649566edb1f272bb0a36f226bbf9af5cfb209dd3e1ca0451"
+    },
+    {
+      "id": 72,
+      "className": "asset.shop.SubBtnRingIconDown",
+      "tagCode": 36,
+      "width": 67,
+      "height": 31,
+      "sourceTagSha256": "4cdbc922b128b72887a918ed2fd4faa6b03c6b5e00525cca28bc884833ba0842",
+      "sourcePixelsSha256": "29c0633589cc6f306b17f1b28315000f3b1fd10ba3d25d543a985b4abcab99fd",
+      "text": "饰品",
+      "reference": {
+        "id": 34,
+        "symbol": "asset.shop.SubBtnRingIconDown",
+        "width": 67,
+        "height": 31,
+        "tagSha256": "057fe6870c11e8339f978f47dfd000b75b6e771bff09d3488159d2757c9cf600",
+        "pixelsSha256": "304e11e21bf3bfa2ddb46802297ec9b4aa805efa80ffc54b9a9350e8f8d75d61"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        67,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/72.png",
+        "sha256": "2a8309801ef9b8e6cfefeee198263f3f7ddd20026ad83e1432e8648d5941e724",
+        "rgbaSha256": "c8d762696b90f50b1958bb95786cf9fad87f96204bdf2380e31acf920d6e8d9f"
+      },
+      "outputTagSha256": "2b6df48a9296a99d216cd401e1f459db5dd49cc3634e33bcf8cbb5bf423cdcfb"
+    },
+    {
+      "id": 73,
+      "className": "asset.shop.SubBtnRingIconUp",
+      "tagCode": 36,
+      "width": 69,
+      "height": 35,
+      "sourceTagSha256": "f84f3b1c6b1ec772dd04bec7fe8cb3a33a6822727eb039b7b1e89bfad6f208ce",
+      "sourcePixelsSha256": "1079a48bf6fcdf93b3e5bc46e17acaa82572c6d056457c9a5f86fa8e34eee75a",
+      "text": "饰品",
+      "reference": {
+        "id": 33,
+        "symbol": "asset.shop.SubBtnRingIconUp",
+        "width": 69,
+        "height": 35,
+        "tagSha256": "2fe6e5a8c0f08787f98a2e69e7c6819d060ae0b905e50e77e02377580f473885",
+        "pixelsSha256": "86632c08299a081f8c29c2b1839e71cb729f1a13f00b95db23ffe10ef9ebec51"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/73.png",
+        "sha256": "dd9b716eb4564a2516a2e364f35f4517850a8379f5d9fdf9f2a8d0971a5a8d7a",
+        "rgbaSha256": "d6bf58f6052783e24daa6013cf31ce0ac2a13cf6feadd06b2bc5579ae47da84d"
+      },
+      "outputTagSha256": "dacfc395c9dd8f9beceb337f3dccae1e1396e1b7085110f704ef8e79fd094ffa"
+    },
+    {
+      "id": 74,
+      "className": "asset.shop.SubBtnSpecialIconDown",
+      "tagCode": 36,
+      "width": 81,
+      "height": 32,
+      "sourceTagSha256": "13e0edc9868a9a2efb92e9ea81923fd1e536a54d214705d57e07da3a5dad7f5c",
+      "sourcePixelsSha256": "17b02820a04ef5d86f2845fd63432d79b17450768742b9ffb2492cfa733a2823",
+      "text": "特殊类",
+      "reference": {
+        "id": 32,
+        "symbol": "asset.shop.SubBtnSpecialIconDown",
+        "width": 81,
+        "height": 32,
+        "tagSha256": "e375a8f097025af23ac6467b049a6cea65896bbba501b1ce89f558fdf028e0e0",
+        "pixelsSha256": "e4ae57fc4d0fff3b3985fbfe52fcbf3d5bef85846273a03714f5f68f696e41ab"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        81,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/74.png",
+        "sha256": "eb3613c3d8121c44fd5495b7c1c7a19ec52cc70c65bce47141b51fd1721b7893",
+        "rgbaSha256": "bbf7951fcc8864602b4e3bb7e05c71efe3ef3400122151a5e22783d2c8a342c0"
+      },
+      "outputTagSha256": "718455f44192bcd964ce4b4fd16e513bafb3218e33fe732617fac208c615ff5e"
+    },
+    {
+      "id": 75,
+      "className": "asset.shop.SubBtnSpecialIconUp",
+      "tagCode": 36,
+      "width": 85,
+      "height": 35,
+      "sourceTagSha256": "54a854927eb243cb2601213cf1fdc67d0d9c31beb25c672af948e337ef2128a0",
+      "sourcePixelsSha256": "62d843c958eca4ce309b2760e4bed550691e0424a8bcc01040e0356726ed817a",
+      "text": "特殊类",
+      "reference": {
+        "id": 31,
+        "symbol": "asset.shop.SubBtnSpecialIconUp",
+        "width": 85,
+        "height": 35,
+        "tagSha256": "3688d3987777a1eeb9fcf0486fb8c50e32b806243202bc2322c01de21dae97c8",
+        "pixelsSha256": "6b5aa37af0855a0d63fff5e151385cc13c66dcc681a16d8bb31b47a9eee51b7f"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        85,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/75.png",
+        "sha256": "446edf06aa10f3b595f865a1e5017b805907468bc27410a38a87c9b7d2fa627c",
+        "rgbaSha256": "e45a841c91597cc4692e8a3569875b274a5f25116a9bd7855345343306ecdd8e"
+      },
+      "outputTagSha256": "8da1ea92de44da36a82a66e74c3520db17d058eeea36cb6e7e48704980f5b978"
+    },
+    {
+      "id": 76,
+      "className": "asset.shop.SubBtnSuitIconDown",
+      "tagCode": 36,
+      "width": 68,
+      "height": 31,
+      "sourceTagSha256": "3232e244b932bf991f2ce80d1d02648bb0eeb6cd732eb52015d98cc76433a8f4",
+      "sourcePixelsSha256": "3debd504f28880715cc4b9b37fd4981a01a8301ca1100e647adf26cb159cb913",
+      "text": "套装",
+      "reference": {
+        "id": 30,
+        "symbol": "asset.shop.SubBtnSuitIconDown",
+        "width": 68,
+        "height": 31,
+        "tagSha256": "c70660e08182b9ad7d264ef8857e08dd26b3a3d079c5fbc9650845001f66711b",
+        "pixelsSha256": "0b3740fbaf964cc5b3a2dfecba1ea1d4577c84ed40cde73c8afd798f6cac76f2"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        68,
+        31
+      ],
+      "preparedImage": {
+        "path": "prepared/76.png",
+        "sha256": "e45b7ee9f5af0d78feef984950a1a479d903d3d18404c3abd48d8592ac0717d7",
+        "rgbaSha256": "346c67b91ab382d5fab4763de28f0d5160304637252aa51f54d168fc820bd8a6"
+      },
+      "outputTagSha256": "6341907b60e5763600a27cb50b655f759d292126c647d55b9f241adb51a84c70"
+    },
+    {
+      "id": 77,
+      "className": "asset.shop.SubBtnGiftMedalWeaponIconUp",
+      "tagCode": 36,
+      "width": 64,
+      "height": 22,
+      "sourceTagSha256": "dd69470dabdb8d7d640ac3046dc58bf288b0defd7f71a64a84a15c10ccf8ec51",
+      "sourcePixelsSha256": "8e17e818edd6df0c96a7b35d87b1cfc6359900d0b238b777f0d4c736434f112f",
+      "text": "武器",
+      "reference": {
+        "id": 3,
+        "symbol": "asset.shop.SubBtnGiftMedalWeaponIconUp",
+        "width": 56,
+        "height": 19,
+        "tagSha256": "eefd8cc603f25a0e4166386d884b1620ae89724e388adf2b710e6d0f5457d3da",
+        "pixelsSha256": "382f04093eccf352594732ea71219fd5dc18fd41c8bcb600fb6c263feb230a88"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        4,
+        1
+      ],
+      "rendered": [
+        56,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/77.png",
+        "sha256": "2672adb706ed3f8a9cb18c31040194aca2ebe5f921f625365628e420da7ef920",
+        "rgbaSha256": "d204ef89603d922329b0e7e54e9aaf846dc3f05abcccafe03f8651659cf2e573"
+      },
+      "outputTagSha256": "85fdb47cb9b01331d0b9cd8c0ef76ca6de6376db61e44e38c6ca6a0bba49e865"
+    },
+    {
+      "id": 78,
+      "className": "asset.shop.SubBtnSuitIconUp",
+      "tagCode": 36,
+      "width": 69,
+      "height": 35,
+      "sourceTagSha256": "cdcf63f2999b61d0a8012d563b73d764fbd97650bdd2b67189728f1973b18c63",
+      "sourcePixelsSha256": "f4fbb157714f73ebcdf8720b6b24185d02322fe2a0a69c55ab4b83f6d98ebb9c",
+      "text": "套装",
+      "reference": {
+        "id": 29,
+        "symbol": "asset.shop.SubBtnSuitIconUp",
+        "width": 69,
+        "height": 35,
+        "tagSha256": "5867c108adf50838cd83b3ffe8252e192e1303ce1e24a04710e963e61b9bd29d",
+        "pixelsSha256": "d2ba81fe579a759d3323fe868a540df29adaf5e202a668ede60a219fd6e48150"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        69,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/78.png",
+        "sha256": "8ae95c8a591df15be6fc01cf3635c5a2592c6537fcf68aa20b69bbc4b0f7346b",
+        "rgbaSha256": "0effd3a496b442cd74860d4fc2e6463df6b9e18b2b1254e740c70851c5df4f24"
+      },
+      "outputTagSha256": "32cf893376c7780066b2baa27844139197cd764ed03a9cd6d27b7c11b63e6798"
+    },
+    {
+      "id": 79,
+      "className": "asset.shop.SubBtnWingIconDown",
+      "tagCode": 36,
+      "width": 71,
+      "height": 33,
+      "sourceTagSha256": "4c218be875b1e179b403345046ea151da4f73b661cf7f6192bb8e128cb7afe17",
+      "sourcePixelsSha256": "9f9dd8e7baee3dbc3faec0fec85c74de1c78da4d1a629d11a769fc695c98e8f3",
+      "text": "装饰",
+      "reference": {
+        "id": 28,
+        "symbol": "asset.shop.SubBtnWingIconDown",
+        "width": 70,
+        "height": 32,
+        "tagSha256": "df0f6dc71299dd395030357642ffa22bd21aa8afba93006e49c37bc0f778f5f7",
+        "pixelsSha256": "8baca341e65885a151963cb5ade693d7d3f115677566037e393b3513fc721690"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        70,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/79.png",
+        "sha256": "2393009d58d9e0f0716e28c86efdcf152120eb4376b6c7f99c4f260032dc2c3b",
+        "rgbaSha256": "ad332b934f3cff41dd4aaffc2293053113f8ef98bf925efa1501bcdb3964d859"
+      },
+      "outputTagSha256": "a8c11b6be92bc7009d405bc6617eab44c5214680dc235a13c55eee85044aa8fe"
+    },
+    {
+      "id": 80,
+      "className": "asset.shop.SubBtnWingIconUp",
+      "tagCode": 36,
+      "width": 71,
+      "height": 35,
+      "sourceTagSha256": "971b025b155eec0bd2ea873ea30b6af6133eb457b48d269c53c9a692734a0457",
+      "sourcePixelsSha256": "4c9f7d64e262b6ef63fdbe1fb219914a47cd83eed3f516e36c52bcc285587a8f",
+      "text": "装饰",
+      "reference": {
+        "id": 27,
+        "symbol": "asset.shop.SubBtnWingIconUp",
+        "width": 70,
+        "height": 32,
+        "tagSha256": "5cc9d1c2a11508ea9049c1b39a6b7b4f26f843c4b76de9a94895448690bb2642",
+        "pixelsSha256": "6b5913938a408669a72c6d2079d1956a5c8c510785f3acefda77fd139f44fe18"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        1
+      ],
+      "rendered": [
+        70,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/80.png",
+        "sha256": "87448cc29474a8472ecee875a40a6cb94a7bade04fd0b480bfe3633a2ca274f6",
+        "rgbaSha256": "b44a4e97a3100025162074fda0738a7a135e5457590a2d7595c16b64039758e7"
+      },
+      "outputTagSha256": "8ca97cb309c02d4beec77ff8e50e3b8aed6f8e8cdc05151f15f3f6b7da8d0128"
+    },
+    {
+      "id": 81,
+      "className": "asset.shop.TopBtnBeautyupDown",
+      "tagCode": 35,
+      "width": 66,
+      "height": 34,
+      "sourceTagSha256": "6583cda79256d5c74f16f118ca261f8cf0311ff307f170b56a0cc454c5d9a95b",
+      "sourcePixelsSha256": "9609f560dba0b89aec4b6440de8ce41460952b79d45e7f459d94f6da061dceb0",
+      "text": "美容",
+      "reference": {
+        "id": 26,
+        "symbol": "asset.shop.TopBtnBeautyupDown",
+        "width": 66,
+        "height": 34,
+        "tagSha256": "e6380a720686bcbdcbe473cbe9fb7d449f970e0fa26cc1988ee084a6b5394570",
+        "pixelsSha256": "aaec4840338697e87f0c23964c13388a79088d29433bfb91a33a5c0673fd708d"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/81.png",
+        "sha256": "dbb4a2bbbbbe1200ed880cd3da0ba90c2569f85001f7fcbf73cc0c289eba74e8",
+        "rgbaSha256": "aaec4840338697e87f0c23964c13388a79088d29433bfb91a33a5c0673fd708d"
+      },
+      "outputTagSha256": "377b50ba10e2342dda2157ff9db20e270f08147c4b5bc4393e2b0972d070b4ae"
+    },
+    {
+      "id": 82,
+      "className": "asset.shop.TopBtnBeautyupUp",
+      "tagCode": 35,
+      "width": 66,
+      "height": 32,
+      "sourceTagSha256": "bd792dc01539d0c3d80ae6d5b7a5686665bf90d6f846355de94f5a6e519f71cf",
+      "sourcePixelsSha256": "7ab5eb5325aefbe5472cde7a7f5ccc8cc4d299f103eeeff4ad95e57c258e27ff",
+      "text": "美容",
+      "reference": {
+        "id": 25,
+        "symbol": "asset.shop.TopBtnBeautyupUp",
+        "width": 66,
+        "height": 32,
+        "tagSha256": "c2c8b97a8f5a800cef341426dbdaa93f5b8a46e82092951106ccac37bd7c9150",
+        "pixelsSha256": "e5cead016f4d897439b74273e2add00f0d3c4d7c2b3c722fdcf7fd28317615c7"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/82.png",
+        "sha256": "20a12f52ce104bc08f628072da5c2b6c982782fd722862fe6c8dd42a69d13ec1",
+        "rgbaSha256": "e5cead016f4d897439b74273e2add00f0d3c4d7c2b3c722fdcf7fd28317615c7"
+      },
+      "outputTagSha256": "b3b5bd93c3bc89fc352996cb418401142229d7d3200e01bc96a2e6f2cecf049a"
+    },
+    {
+      "id": 83,
+      "className": "asset.shop.TopBtnEquipmentDown",
+      "tagCode": 35,
+      "width": 66,
+      "height": 34,
+      "sourceTagSha256": "b77f0ccd6a404c8df733ec54115be03676114ddc4d7ac1173f633a1663403381",
+      "sourcePixelsSha256": "fde7ccc8dcce932dfe74e5cb7d25bc60fa13442a0dc8dad0e079c3bd268f3bd8",
+      "text": "装备",
+      "reference": {
+        "id": 24,
+        "symbol": "asset.shop.TopBtnEquipmentDown",
+        "width": 66,
+        "height": 34,
+        "tagSha256": "c2d50f60ad01b0446ba4cca01ab09938ff0dd38030a78a26630fd8ce13c7e19c",
+        "pixelsSha256": "362b6ceb567af4d5ea952c1b276748d87108bc23bdaeb158c1857bb27d9b835e"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/83.png",
+        "sha256": "3fa3e21916b8a3533001034b6030c98c01f03277d27c05d4ee6cd7216404b339",
+        "rgbaSha256": "362b6ceb567af4d5ea952c1b276748d87108bc23bdaeb158c1857bb27d9b835e"
+      },
+      "outputTagSha256": "dbab534b03919b94ed3a29311e2ac32165842d048e8c02cbff522d9b71c75c99"
+    },
+    {
+      "id": 84,
+      "className": "asset.shop.TopBtnEquipmentUp",
+      "tagCode": 35,
+      "width": 66,
+      "height": 32,
+      "sourceTagSha256": "3e9101bdf813ac9a0c2aaba0430ef4b4dc89d671d548fa128702dfbc2f63da56",
+      "sourcePixelsSha256": "4943d102ce9167d672510bf962aab63b6b02a19f28155265b1e6e88937c80c95",
+      "text": "装备",
+      "reference": {
+        "id": 23,
+        "symbol": "asset.shop.TopBtnEquipmentUp",
+        "width": 66,
+        "height": 32,
+        "tagSha256": "70e28fbe88d086f59b7ec826900d54ff42679a94acffc8e2fb399b63b7348b1a",
+        "pixelsSha256": "05c2262f353857dd060aa04c12d5ddc1540bb5c285b007a4172817eb9266e2c4"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/84.png",
+        "sha256": "6dcdf3730d3e82fdce9438ba896c43c57b044802fd281e72bb4b579169b0104f",
+        "rgbaSha256": "05c2262f353857dd060aa04c12d5ddc1540bb5c285b007a4172817eb9266e2c4"
+      },
+      "outputTagSha256": "ae8e0578db8d3371398ae519f639a41166a3be3b6af5ee92e37841100ca98f4f"
+    },
+    {
+      "id": 85,
+      "className": "asset.shop.TopBtnExchangeDown",
+      "tagCode": 35,
+      "width": 66,
+      "height": 34,
+      "sourceTagSha256": "c409241442287f5df917cc05e99fab167ce8eaa0e905500b7a2afb949d507fe0",
+      "sourcePixelsSha256": "f59769e130c8dd2a32e328635340928e0dfd1ce2e7d838ec61a1b65305306669",
+      "text": "兑换区",
+      "reference": {
+        "id": 22,
+        "symbol": "asset.shop.TopBtnExchangeDown",
+        "width": 66,
+        "height": 34,
+        "tagSha256": "51d0e4cdec57cb2fa1af999a3e88b22c2c1c33c175482753b2b31bf91e20f7ff",
+        "pixelsSha256": "7bfaf1b4ac765a7f8efcaba7d8e9eb18977ba22c2a01ae8136d92e0797a873d6"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/85.png",
+        "sha256": "a7faefbfed98bddbe9241f9da6d2a123d5a04ad951e0a89227b9988fea13288e",
+        "rgbaSha256": "7bfaf1b4ac765a7f8efcaba7d8e9eb18977ba22c2a01ae8136d92e0797a873d6"
+      },
+      "outputTagSha256": "e1616d8e3e16fc72d5f8567979f8e60e743bab068de5c3b5192486e53548470f"
+    },
+    {
+      "id": 86,
+      "className": "asset.shop.TopBtnExchangeUp",
+      "tagCode": 35,
+      "width": 66,
+      "height": 32,
+      "sourceTagSha256": "9c40946deb41f219379d6338808576b7c49469563017b052c024c2dcf0690ecc",
+      "sourcePixelsSha256": "00c560015d8e931129dbc5440e91b0e2d728fda022195255c1a843b07671e654",
+      "text": "兑换区",
+      "reference": {
+        "id": 21,
+        "symbol": "asset.shop.TopBtnExchangeUp",
+        "width": 66,
+        "height": 32,
+        "tagSha256": "536438483b1d8f09eb27b1af48f18d4f592a29f0aa0e66d65a720fe810f0537a",
+        "pixelsSha256": "88aa5c2ca96058d492cb628859d72648cc32b104500c73384730a8a575280be9"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/86.png",
+        "sha256": "a1a1241c68b2a123b29e1f915689182c777636cbdeecc1d102c944f50ff8d2e5",
+        "rgbaSha256": "88aa5c2ca96058d492cb628859d72648cc32b104500c73384730a8a575280be9"
+      },
+      "outputTagSha256": "8799ff564757e3f03afdd866784195847eb825db1d608e1db089be314b9c4f6a"
+    },
+    {
+      "id": 87,
+      "className": "asset.shop.TopBtnFreeDown",
+      "tagCode": 35,
+      "width": 90,
+      "height": 35,
+      "sourceTagSha256": "ce62d9f9d3d19b0610ce5889f70d511803fefc565ebab3fcde91b8de3495e467",
+      "sourcePixelsSha256": "382532d61e8581c5b2b5a8ec69c0980c1f5329646b06dec37a9ad38242cb3950",
+      "text": "免费领取",
+      "reference": {
+        "id": 20,
+        "symbol": "asset.shop.TopBtnFreeDown",
+        "width": 90,
+        "height": 35,
+        "tagSha256": "0169b712d53ab6dfd44129d009e058a4dd0f04a8cbc1762c43d0f06b65e1313f",
+        "pixelsSha256": "485b0becb18b247624e67d0b2a5da83b9c8775c497fafa26f86fff63a49a41c0"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        90,
+        35
+      ],
+      "preparedImage": {
+        "path": "prepared/87.png",
+        "sha256": "f99c07299de207d7f2766b2bfd0389625dee4a08c5c6a3a1c78e938ad3a705a6",
+        "rgbaSha256": "485b0becb18b247624e67d0b2a5da83b9c8775c497fafa26f86fff63a49a41c0"
+      },
+      "outputTagSha256": "a4c1bdc112eaf2e6c10a97e3d10be02b891e6aa34b169c8cb9a91ba054af361f"
+    },
+    {
+      "id": 88,
+      "className": "asset.shop.SubBtnHotSaleIconDown",
+      "tagCode": 36,
+      "width": 57,
+      "height": 22,
+      "sourceTagSha256": "c46f1915d93d7653cfa147d07cf229aecd13e334ea17b016e9165f2121e89d1a",
+      "sourcePixelsSha256": "a4cc666d309450235e8ed4e809e14bfd163c3e2ae14b7ee6c711695b62d63520",
+      "text": "热卖",
+      "reference": {
+        "id": 2,
+        "symbol": "asset.shop.SubBtnHotSaleIconDown",
+        "width": 53,
+        "height": 23,
+        "tagSha256": "c591b105a9a71b20c4f5b37ecc6a11ac1d5edf6dd1c5dafd3e27a88fe9d6cf6c",
+        "pixelsSha256": "b318d490b1bbd9ca7fb5eb5b41ad987a0855b4caf58b90aac11b72820723f44c"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9565217391304348,
+      "offset": [
+        3,
+        0
+      ],
+      "rendered": [
+        50,
+        22
+      ],
+      "preparedImage": {
+        "path": "prepared/88.png",
+        "sha256": "c3f91b2994c8821f2ca8edafa2bf29384fb683d744c090350374d8e4bf907c57",
+        "rgbaSha256": "8e6eea3d2509483d07fb650178750f1b38af39a0128f80acf0bedc000e6c167b"
+      },
+      "outputTagSha256": "36557683950e17bb3e02a560690ce60cc0406593740f0ecc1795a782311293ff"
+    },
+    {
+      "id": 89,
+      "className": "asset.shop.TopBtnFreeUp",
+      "tagCode": 36,
+      "width": 88,
+      "height": 32,
+      "sourceTagSha256": "31023b429449dfbfc7b8685232dc0ab219c666459cc24e657e9639038a073d33",
+      "sourcePixelsSha256": "782cdc4b87fbfa4c462128d8cbc88ee5e2f92b91195fd7aa27781db96657f774",
+      "text": "免费领取",
+      "reference": {
+        "id": 19,
+        "symbol": "asset.shop.TopBtnFreeUp",
+        "width": 88,
+        "height": 32,
+        "tagSha256": "5db946313edc9813e449587197d4239082db6fe54352681d38deb08e24590388",
+        "pixelsSha256": "7b361b82ac63dbed71d57bf503833c4ff5610b88c9f21aaae33d5d631159d1eb"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        88,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/89.png",
+        "sha256": "716af6351a02df1404d703f92728758353a5d3d1f7b3c45963c740bc9bbeadd4",
+        "rgbaSha256": "7b361b82ac63dbed71d57bf503833c4ff5610b88c9f21aaae33d5d631159d1eb"
+      },
+      "outputTagSha256": "ce9ae808e9dfe83578e453eb5c918ef5b6738b2f15f4e4f4a76a0de88a7a0a1b"
+    },
+    {
+      "id": 90,
+      "className": "asset.shop.TopBtnPropDown",
+      "tagCode": 35,
+      "width": 66,
+      "height": 34,
+      "sourceTagSha256": "133ae0df7b0aae16d2041490e8fe18990541fd469e609c9f2ef01a9abedede7d",
+      "sourcePixelsSha256": "8e236f8a8618d63670f4cff99d81891e7626ede7a3bd1d6b693ce7f9889f499b",
+      "text": "道具",
+      "reference": {
+        "id": 18,
+        "symbol": "asset.shop.TopBtnPropDown",
+        "width": 66,
+        "height": 34,
+        "tagSha256": "4667b55a76fd67fe80657abc70569670837110a76fa766a37a52154c5e50db9d",
+        "pixelsSha256": "36e25bf072597c6b90e17b8676100bb467a816a0f8b1c1fdb224baa70bb4aaeb"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/90.png",
+        "sha256": "8921b51c39336c440d2fed74c27af4247b6cd3fc75ea8d4ee8c92239d0bc31c9",
+        "rgbaSha256": "36e25bf072597c6b90e17b8676100bb467a816a0f8b1c1fdb224baa70bb4aaeb"
+      },
+      "outputTagSha256": "f507e9fcbafddd3318b4e9c9a9dc174707ce2fdcd35fb6519b56b453e71c4565"
+    },
+    {
+      "id": 91,
+      "className": "asset.shop.TopBtnPropUp",
+      "tagCode": 35,
+      "width": 66,
+      "height": 32,
+      "sourceTagSha256": "bcf30607ef9dc4a2d2094a7cdf3cdd61ebf5a128fcadeb26050e8bd3a7590f67",
+      "sourcePixelsSha256": "deb596809861da77fa166ceca0755ebc0e26a9940b800144faf2afb86972a517",
+      "text": "道具",
+      "reference": {
+        "id": 17,
+        "symbol": "asset.shop.TopBtnPropUp",
+        "width": 66,
+        "height": 32,
+        "tagSha256": "4104a60d058fdc8e97e7b2724b14b77b1f3159f6f085e943b8937c57eb84c882",
+        "pixelsSha256": "782401bf6ce5f645f8b887e8cee5d4c14869bce079058f7b2997c426c2ad7270"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/91.png",
+        "sha256": "ca35fb4cbad1e39f30f4271a8c71b43536be73f0a11fddb813dfbe498b8c56a2",
+        "rgbaSha256": "782401bf6ce5f645f8b887e8cee5d4c14869bce079058f7b2997c426c2ad7270"
+      },
+      "outputTagSha256": "c96c25d637192d965a9a8aa4dc12a47ff36fa1dc2203a9853fd4bab265ec68f5"
+    },
+    {
+      "id": 92,
+      "className": "asset.shop.TopBtnRecommendDown",
+      "tagCode": 35,
+      "width": 66,
+      "height": 34,
+      "sourceTagSha256": "aa4ad713022cba8cbc531b5eb9deb3bb13040b7034bd682e9c28b2678805252e",
+      "sourcePixelsSha256": "18b27b069b019271049a424e3b83619612e7899710322bce39af44d745474a0a",
+      "text": "推荐",
+      "reference": {
+        "id": 16,
+        "symbol": "asset.shop.TopBtnRecommendDown",
+        "width": 66,
+        "height": 34,
+        "tagSha256": "bc954a1eb6b832b574ad510b5aa615fde70a58062cc994765eb0d2461287fe0d",
+        "pixelsSha256": "0a9db8363069319520e7e689ffe128a07904332704fbe89821bd8c93353fefa9"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/92.png",
+        "sha256": "669c6553a6c527c9e416f81b73127678daf34a03600e71d2984f353182703e23",
+        "rgbaSha256": "0a9db8363069319520e7e689ffe128a07904332704fbe89821bd8c93353fefa9"
+      },
+      "outputTagSha256": "411f4e0d7aab08566e3beb13f6e1a10b7a14acc00a255ca915ea37f743ece807"
+    },
+    {
+      "id": 93,
+      "className": "asset.shop.TopBtnRecommendUp",
+      "tagCode": 35,
+      "width": 66,
+      "height": 32,
+      "sourceTagSha256": "4c69356a739956817318c4d3a9f7d130d64c9055a1b324db23aa72af6d34c614",
+      "sourcePixelsSha256": "39a4b0711f80da09ac93da2737c07fb092117815d218b1cc0abcce5124be8722",
+      "text": "推荐",
+      "reference": {
+        "id": 15,
+        "symbol": "asset.shop.TopBtnRecommendUp",
+        "width": 66,
+        "height": 32,
+        "tagSha256": "29d1cbe1dfff71a63c03413c77b9239f5b5ee7595c54ceb0403d518ba3514b6f",
+        "pixelsSha256": "7bdc2ad42c49c7f6901475c15ba152d5c65c5ba965f0a76f011c1f6c61f31be7"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        66,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/93.png",
+        "sha256": "d20c959af9a55992f5cb0ac2550e99ad7ef2a5933418124168676377afd2b911",
+        "rgbaSha256": "7bdc2ad42c49c7f6901475c15ba152d5c65c5ba965f0a76f011c1f6c61f31be7"
+      },
+      "outputTagSha256": "82f12d72cc6016f85dc7f1dc96769978a94c84f8cc348455ab5fb7cb50313e0b"
+    },
+    {
+      "id": 94,
+      "className": "asset.shop.SubBtnFreeNycIconDown",
+      "tagCode": 36,
+      "width": 99,
+      "height": 38,
+      "sourceTagSha256": "a2aeb72b83c517b5b069f6a34bf763ba8faf338dc5c7fd0a722bb360b3b1a1c4",
+      "sourcePixelsSha256": "93083f257e4aadde9ee384e9b8d903e0dc3ccbf73d91fc4d8435088cf807bc15",
+      "text": "免费领取",
+      "reference": {
+        "id": 14,
+        "symbol": "asset.shop.SubBtnFreeNycIconDown",
+        "width": 94,
+        "height": 28,
+        "tagSha256": "3fb5788183632547fd62eda026f3203fcb18f8a6316c6c4665e8a5218827bb75",
+        "pixelsSha256": "cb3eea5e9bdf3afbb296b29d914884ea0e2ff3cfc7f004f8336b5985ef093e93"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        5
+      ],
+      "rendered": [
+        94,
+        28
+      ],
+      "preparedImage": {
+        "path": "prepared/94.png",
+        "sha256": "6a6cf4279bd23e6f0e89ead92f944a8c14a229b4ba1bbd8573b832cf14a85c8f",
+        "rgbaSha256": "69c864bb5d390e6b14b243b31620f38b745afbdf209497764245d85d0523d8dd"
+      },
+      "outputTagSha256": "6c0776db4ff174369cd0f6c0dc7b7256983f13429200dcdc3cf234a471103c2b"
+    },
+    {
+      "id": 95,
+      "className": "asset.shop.SubBtnFreeNycIconUp",
+      "tagCode": 36,
+      "width": 96,
+      "height": 34,
+      "sourceTagSha256": "dee25b37ab2c4df5d70900d7f0db80a5186dfbe78bfabdcdd534f4f0b6046dd7",
+      "sourcePixelsSha256": "85174f0106425904d9d0b1341aaf05eb68e70ba8c23ac74641a4231c90760a96",
+      "text": "免费领取",
+      "reference": {
+        "id": 13,
+        "symbol": "asset.shop.SubBtnFreeNycIconUp",
+        "width": 94,
+        "height": 28,
+        "tagSha256": "d26a99066a12e9d7f24af5aca1fb1710ad9bf56cfcb461119a675e9196e530ed",
+        "pixelsSha256": "e5545f52e457dca411df41f96cdd9980d37e4275b81daa14c3e4002ab728ad20"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        3
+      ],
+      "rendered": [
+        94,
+        28
+      ],
+      "preparedImage": {
+        "path": "prepared/95.png",
+        "sha256": "6154583b66bcacdce82ba5188510c623e906deacc202dd565b6750dbc5e8ce3e",
+        "rgbaSha256": "6b9780f04857ee8646035b5684931f0df0944f5339442e964af88a6017663392"
+      },
+      "outputTagSha256": "b8e9145cb5fa6be6a8246d5153b481a6d8a0161589d9fe95481886b77d6d1be3"
+    },
+    {
+      "id": 99,
+      "className": "asset.shop.ContinueToBuy",
+      "tagCode": 35,
+      "width": 169,
+      "height": 50,
+      "sourceTagSha256": "0d1ec3835abbfa76abd1557e2262ca759f3c9fc25c3911d07705ae19d9bb51f9",
+      "sourcePixelsSha256": "74d2730f22de26aa0d41749c017763408e4c2a0dc5805d202481c0ae4bb06c98",
+      "text": "继续购物",
+      "reference": {
+        "id": 126,
+        "symbol": "asset.shop.ContinueToBuy",
+        "width": 170,
+        "height": 51,
+        "tagSha256": "5256be2f078c39a0715aba095f8aa01a5c253ae8338d63f3ebd2c53b150720e4",
+        "pixelsSha256": "25dbba2ab0c7c108a5184e6128c6a6271664ee5a6e5a9c14a49bf2ff9fb1bdb9"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9803921568627451,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        166,
+        50
+      ],
+      "preparedImage": {
+        "path": "prepared/99.png",
+        "sha256": "784bd892a1237f1b0391327afe666953744b60878ee02fc450df0b720a015e47",
+        "rgbaSha256": "72ad920742b3f05bac145a75b2a5a2e874dbe8fed4113593d9bcd6aedaacdbd1"
+      },
+      "outputTagSha256": "a9d58f56bb5b8c8c357db28441b558756edee270d722b6d454ce85fb9edf4eef"
+    },
+    {
+      "id": 100,
+      "className": "asset.shop. fittingRoomText",
+      "tagCode": 36,
+      "width": 73,
+      "height": 25,
+      "sourceTagSha256": "4fb00d8c9401b372ba9810731af9196a10a520912b031dc04f84d017408081e5",
+      "sourcePixelsSha256": "c52bdf866324ecd8677610401ecd1cf464733579af0e08f062eb1fc1d81ac2cd",
+      "text": "试衣间",
+      "reference": {
+        "id": 125,
+        "symbol": "asset.shop. fittingRoomText",
+        "width": 72,
+        "height": 23,
+        "tagSha256": "5b9f444c55e80d18ad6464fd2671ad333482c019fa7392a9adab15c80d9d5994",
+        "pixelsSha256": "c419513a64440ee603bd134196c59c0f38cc464feb48ef3cf4778b41938fdaac"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        1
+      ],
+      "rendered": [
+        72,
+        23
+      ],
+      "preparedImage": {
+        "path": "prepared/100.png",
+        "sha256": "0a6ab06b6c0e7544bd52d138ce241df3c95eafc52b41a293576cab934d01eea4",
+        "rgbaSha256": "5550838af737b6f068bfa91bdfd6e45fdfd4b80b75adaa4c4e338c5eb08e3f12"
+      },
+      "outputTagSha256": "b2b465fbb44eed2966d3ea2c83999863e8aa29ca34366e45a69d2c7734106a19"
+    },
+    {
+      "id": 101,
+      "className": "asset.shop.PraiseRankingBtn2",
+      "tagCode": 36,
+      "width": 72,
+      "height": 27,
+      "sourceTagSha256": "e8e0dbb6a5daf163c924afb906a264c8cd1c5cfa3c99f7a8fb6719892accf94a",
+      "sourcePixelsSha256": "ea83f6c2394f2dad5112dd1c89d8e5b5c90fca163aebfc99cff7d7fc78d8a242",
+      "text": "好评排行",
+      "reference": {
+        "id": 124,
+        "symbol": "asset.shop.PraiseRankingBtn2",
+        "width": 72,
+        "height": 27,
+        "tagSha256": "5fa6a937e86aa29c14ea2999c173d178fcb5cdd15343bd41a3f5323b0fa788ce",
+        "pixelsSha256": "9f571d56e3c77c0eb4b6c87e06ee9524ec034d66e4d88ffe48c50b86c0b71cb8"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        72,
+        27
+      ],
+      "preparedImage": {
+        "path": "prepared/101.png",
+        "sha256": "0752a30ab6d03504bc3a84adf8e277d6e719d18550e69ca68ac6307622b8f7c0",
+        "rgbaSha256": "e5a206c23e44545588c3880440e407dddb07f38720ed864ad56be2ed0c41adbc"
+      },
+      "outputTagSha256": "97f871869db67176ee40d32c4bfe4cfcb7f3365fabcb3ea7c7a87c409dabc042"
+    },
+    {
+      "id": 102,
+      "className": "asset.shop.PraiseRankingBtn1",
+      "tagCode": 35,
+      "width": 72,
+      "height": 34,
+      "sourceTagSha256": "864ed55f426dd70ec99de378f8009f1e7088d66795e2dd13de1250d00c7bde04",
+      "sourcePixelsSha256": "c35f0c225ea19ed93584325577278d6907df4867345fe2fccc0106818f837e7b",
+      "text": "好评排行",
+      "reference": {
+        "id": 123,
+        "symbol": "asset.shop.PraiseRankingBtn1",
+        "width": 72,
+        "height": 34,
+        "tagSha256": "78bf4e6b3a71b865ff773300104bd7bb48a07798dec145905a09ce7cf35cc7db",
+        "pixelsSha256": "6f511ec7cb9ce4b1fe3f52abd1f24f0635ce9b2988b2ae49baa3ec7d65e1e66d"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        72,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/102.png",
+        "sha256": "040c85e60f8ed678449de60b53e15af0486068a068a8f974465186f948348faf",
+        "rgbaSha256": "6f511ec7cb9ce4b1fe3f52abd1f24f0635ce9b2988b2ae49baa3ec7d65e1e66d"
+      },
+      "outputTagSha256": "063dd1e3bb5c8e60e4b4426508e91765142c2b67b6e824b0e63445ee8fb8e077"
+    },
+    {
+      "id": 104,
+      "className": "asset.shop.PopularityRankingBtn2",
+      "tagCode": 36,
+      "width": 72,
+      "height": 27,
+      "sourceTagSha256": "40dced93b2d054f2fbb57025ae306534a570940c2049db5a3dc5009d39c2f415",
+      "sourcePixelsSha256": "314ffc2d58776938e36db6a2f304c825ca7bc7263f25c43ad51cecf8b35fa06a",
+      "text": "人气排行",
+      "reference": {
+        "id": 121,
+        "symbol": "asset.shop.PopularityRankingBtn2",
+        "width": 72,
+        "height": 27,
+        "tagSha256": "94d621d1476e6951cb8e3eda8d85ead583f2ad4a9dec9e9a7b51658bc3ab43ca",
+        "pixelsSha256": "98f898b28ef752f5f663e1023b64fd02de79539cebfadf55b0db8a2339a23086"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        72,
+        27
+      ],
+      "preparedImage": {
+        "path": "prepared/104.png",
+        "sha256": "86b4ce1f9b7a3bcb749493c676c59cd16ea7c74762a7b01c32e7ab2bd74a145e",
+        "rgbaSha256": "e3e116c8d55067f4791cd07ac709d3ed63e32341466e0adc08490333ac51603c"
+      },
+      "outputTagSha256": "d5f567d760fc1d2e344272aa05c328ca2d1921516454cd0f2178889a2a6ab60d"
+    },
+    {
+      "id": 105,
+      "className": "asset.shop.SubBtnGiftMedalAllIconDown",
+      "tagCode": 36,
+      "width": 60,
+      "height": 19,
+      "sourceTagSha256": "bd0cd68dd74aa0e76dc7c0357520ada8887c3b7926047a0d7670601d57319fa0",
+      "sourcePixelsSha256": "bb4908b65b2aabc353ef4860a4382d29d0d8773a8427ca1d6ee94637b0d8c358",
+      "text": "全部",
+      "reference": {
+        "id": 12,
+        "symbol": "asset.shop.SubBtnGiftMedalAllIconDown",
+        "width": 56,
+        "height": 19,
+        "tagSha256": "3d3260f7502ce7e528eb9fd85874171d892672fc299bc0eff775a2d1222c460c",
+        "pixelsSha256": "c2a700b102da4d8fe7f622de6d5eb69b29448be639a60ac9c123fe225612af1c"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        56,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/105.png",
+        "sha256": "7f6cb61f2d5483456a4d60f0236985354f94df0e65ca0bc5a79c1239af540b36",
+        "rgbaSha256": "c3c9e041608127c8db5c7288591215c5f17fb23ea6d668bc0e2ea6e439299007"
+      },
+      "outputTagSha256": "375d7242268ecf92066d1180e2af01a84dc6e0876e7520f6ee1a89509ae64725"
+    },
+    {
+      "id": 106,
+      "className": "asset.shop.PopularityRankingBtn1",
+      "tagCode": 35,
+      "width": 72,
+      "height": 34,
+      "sourceTagSha256": "a0940addd9bfb126b37999a9510165dd1c3652659225d18115bdc7ef8be2da81",
+      "sourcePixelsSha256": "14acc94618864a13e5cc286fb06651c2a35dde66804e01ff816eb52a75525747",
+      "text": "人气排行",
+      "reference": {
+        "id": 120,
+        "symbol": "asset.shop.PopularityRankingBtn1",
+        "width": 72,
+        "height": 34,
+        "tagSha256": "0f67d33bb07aa5d96972fa295dc37dfea9d109705aa13242e7984ab5c867f448",
+        "pixelsSha256": "f0d0865776023371fbbcda4c1aab00c1d2f1f8ff39271900774456ae9c47db04"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        72,
+        34
+      ],
+      "preparedImage": {
+        "path": "prepared/106.png",
+        "sha256": "e90128fdb4b0ecb94f70e7eb75df9f98342bab47ea6eea34b53d6affb52f8fce",
+        "rgbaSha256": "f0d0865776023371fbbcda4c1aab00c1d2f1f8ff39271900774456ae9c47db04"
+      },
+      "outputTagSha256": "dee3900b23e7a70e2ad9fa0902f6967040ef287455960b0d0d3b93cd5730e053"
+    },
+    {
+      "id": 109,
+      "className": "asset.shop.SaveImageBtn",
+      "tagCode": 35,
+      "width": 169,
+      "height": 50,
+      "sourceTagSha256": "73c2f4343000a2d2ab0ed75f7402c21c7536d168a9e8293a081e1afd5a9e57c6",
+      "sourcePixelsSha256": "5dfdd9ee7e2d79d8614058cdc4893fca3d2653a2a8ac4da70af220825c9d9d0d",
+      "text": "保存形象",
+      "reference": {
+        "id": 116,
+        "symbol": "asset.shop.SaveImageBtn",
+        "width": 170,
+        "height": 51,
+        "tagSha256": "69f7c537d2573a99601807919d3cb4622823fafc8e6337e6f1219870efaa7a76",
+        "pixelsSha256": "cc493392598296d0b7af0c49e089443abf9d1690d816e856ce85902d749b2d2d"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9803921568627451,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        166,
+        50
+      ],
+      "preparedImage": {
+        "path": "prepared/109.png",
+        "sha256": "270fba7a752d95fe808b84065f077d1f7fa5ba5c898fdfff5c26dd63cccd4254",
+        "rgbaSha256": "0112404f7cee434a65c6cfe044adcfb7cda87cc1ca0c871b41f1fc3e72adcf9c"
+      },
+      "outputTagSha256": "70d4ecf47722f50959672882728ce1a0d3a775fc82a9e951a5f239a83607a785"
+    },
+    {
+      "id": 110,
+      "className": "asset.shop.ShopSearchEndBtn",
+      "tagCode": 35,
+      "width": 106,
+      "height": 37,
+      "sourceTagSha256": "0fd75b031ee2bd8baeb938f8f65c5436875ba5ee05b25885af9bfb6b5cbd3680",
+      "sourcePixelsSha256": "f683225a635b9b632a7cd9a2e27bc1863ad9e24d8e9d801c86a0a24be0f8fdea",
+      "text": "搜索结果",
+      "reference": {
+        "id": 115,
+        "symbol": "asset.shop.ShopSearchEndBtn",
+        "width": 108,
+        "height": 33,
+        "tagSha256": "9c7b04daa5c08f7b35193079caeb1e9fc4002cb89af04e2c68a2e0c4e07277c6",
+        "pixelsSha256": "565c1a8fc9d255e0f990928ef29ab1d8e23b65c4933be29655c8c9d8e7b329dc"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.9814814814814815,
+      "offset": [
+        0,
+        2
+      ],
+      "rendered": [
+        106,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/110.png",
+        "sha256": "021a0ba10e8aa8348440489ac7d471e6e177505db3ab11903d130f89ead0b53c",
+        "rgbaSha256": "c2bcaf607db4bb69f9fda4b99aa95cd1e9f201394ba872dd7ae5022d45217612"
+      },
+      "outputTagSha256": "4dd31636f93b261c2d7e0277f7161e585adfdf0cbd269df4f6d1bfa1feb2c942"
+    },
+    {
+      "id": 111,
+      "className": "asset.shop.BgTitle",
+      "tagCode": 35,
+      "width": 328,
+      "height": 49,
+      "sourceTagSha256": "ae757882b408efc2f9e9c6fff5acf156803e1336bad9a68f90cfdcdc53a00d48",
+      "sourcePixelsSha256": "c8971ade0aec573950a7dd12d74731bac8a68b5460aac8382e0085397b1dbc9d",
+      "text": "商城",
+      "reference": {
+        "id": 114,
+        "symbol": "asset.shop.BgTitle",
+        "width": 325,
+        "height": 47,
+        "tagSha256": "afd4d435738a765f9a737a624f5e46940520a0a88fde6856372765e3e2bd6c73",
+        "pixelsSha256": "a2fdd53e6114cdf3b7b26db10d984356c42501b6750820d0756791d1c7049f37"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        1
+      ],
+      "rendered": [
+        325,
+        47
+      ],
+      "preparedImage": {
+        "path": "prepared/111.png",
+        "sha256": "63fae3d970f589fb439fec123729748b1eb7863b113517fece9d89a16a8585f2",
+        "rgbaSha256": "226e83cda242a82489a863fb14e6a0c1c9941425bcfac32ffac9fe7a9639c957"
+      },
+      "outputTagSha256": "5f445924a2bc749ae9fe446529966ccb8f7d4d79bedcd958a0e23d1c3f7674ff"
+    },
+    {
+      "id": 112,
+      "className": "asset.shop.BodyInfoBg",
+      "tagCode": 35,
+      "width": 305,
+      "height": 284,
+      "sourceTagSha256": "34f67700d6c78aa8455ba3da9614ab0e25479d959270716c6e6975da3f3eeb98",
+      "sourcePixelsSha256": "d1ea6f0e559afde6d7d58c1fa26e3498ed6a673a6c18f40ecb4a5ec068ed8671",
+      "text": "帽子 / 头发 / 衣服 / 套装 / 眼镜 / 脸饰 / 眼睛 / 装饰",
+      "reference": {
+        "id": 113,
+        "symbol": "asset.shop.BodyInfoBg",
+        "width": 303,
+        "height": 284,
+        "tagSha256": "fd9db17af3218ccc4c47a839061070206eb6e5c9cf8064faa1e516c738dc318a",
+        "pixelsSha256": "e2910e152d1f673602663037b21539bcc1ff7a77d05d8bee1b72a8681d9bf721"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        303,
+        284
+      ],
+      "preparedImage": {
+        "path": "prepared/112.png",
+        "sha256": "efe236fcc058072461a9b6f58257bf89201079e9c3efbd981f89a5507fb2f7c9",
+        "rgbaSha256": "36b3fa6e52baba0c9f58b9a2d06f5fdce6357d53714fcd151df6a88cede48fe0"
+      },
+      "outputTagSha256": "56d032474a2f98f4c822e16a9e4720a4a869395bf91afe95704b235936167823"
+    },
+    {
+      "id": 115,
+      "className": "asset.shop.BtnColorPanel",
+      "tagCode": 36,
+      "width": 94,
+      "height": 27,
+      "sourceTagSha256": "e3850879304e81808827ceb78ef153ec5c74474c6db21b63da24cc2894ff4d87",
+      "sourcePixelsSha256": "daa131b27af9b7797775887b7bf982a12295790df5e3e0a245626eb6dac3bded",
+      "text": "调色板",
+      "reference": {
+        "id": 110,
+        "symbol": "asset.shop.BtnColorPanel",
+        "width": 94,
+        "height": 33,
+        "tagSha256": "c2562d2fd4b4e6b5d04d2ad5092b818a62a9451bd9288ca24db14689d5c81244",
+        "pixelsSha256": "377bbca7358f2ed428dd1cb1b1dea77b583c09a345204c4a6fd714f17968d244"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.8181818181818182,
+      "offset": [
+        9,
+        0
+      ],
+      "rendered": [
+        76,
+        27
+      ],
+      "preparedImage": {
+        "path": "prepared/115.png",
+        "sha256": "e57c89a149f57be8199a5a832e5e3cf954fb4c2583a8a974aca6a2ba3495f941",
+        "rgbaSha256": "5ce289b6c7d1cd1735673c419c9f5ea84f87c5314502c51bbd7d07611af5d796"
+      },
+      "outputTagSha256": "bd34a9c5e14aa0417a8698a66de4700eadbaca04c11cb4c8908fcdfd4b340ee8"
+    },
+    {
+      "id": 116,
+      "className": "asset.shop.SubBtnGiftMedalAllIconUp",
+      "tagCode": 36,
+      "width": 60,
+      "height": 19,
+      "sourceTagSha256": "71911b5d5fc5503ac8d40095b9cd5488d48045e8353d4cabdbbef774844aaa4e",
+      "sourcePixelsSha256": "b4d78ca59805eaaaf601e978859322f35d22b1bf9a33be6a2bc11e30a96329ec",
+      "text": "全部",
+      "reference": {
+        "id": 11,
+        "symbol": "asset.shop.SubBtnGiftMedalAllIconUp",
+        "width": 58,
+        "height": 19,
+        "tagSha256": "92df3aa2b88a4ed94d1e024273b20ffb5212e77b5934472b0cff57376d5fd0ef",
+        "pixelsSha256": "f7b1e8dbf0b5ba0bcb9ebc6ca075d391d23687807599047e35b6b87a08171a1c"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        58,
+        19
+      ],
+      "preparedImage": {
+        "path": "prepared/116.png",
+        "sha256": "452e5375ecbd5e87cba4b0d66d14bea311b5cd1f3b26a42759b948378ed8a2c1",
+        "rgbaSha256": "206b0ad8127823546f678e6fb9982fe81f0a297a87a63cfe6b63cf04a48c70f2"
+      },
+      "outputTagSha256": "f54ad181dc971fe3e910dbafbb8d5808aa6e76769ed29c8878dd92375d79e2e5"
+    },
+    {
+      "id": 120,
+      "className": "asset.shop.BtnPresent",
+      "tagCode": 35,
+      "width": 152,
+      "height": 60,
+      "sourceTagSha256": "f1cadf1396014271c4f49709d88677e465a73fbfc8d1342d94082af3611343d6",
+      "sourcePixelsSha256": "ecea810961699fb29973c8914d9ac5b6d0d73d0c78764b67e14d38b2abcef885",
+      "text": "赠送",
+      "reference": {
+        "id": 106,
+        "symbol": "asset.shop.BtnPresent",
+        "width": 171,
+        "height": 59,
+        "tagSha256": "c3adb8f757524fe0fc4f4db67f08154d3c449205964892ddf566b89f2bfa736f",
+        "pixelsSha256": "174bdcc547689a634335edd33174d9db2c8bbb263626aeb3eee93168b84f9ec0"
+      },
+      "method": "original named bitmap fully fitted without cropping",
+      "scale": 0.8888888888888888,
+      "offset": [
+        0,
+        4
+      ],
+      "rendered": [
+        152,
+        52
+      ],
+      "preparedImage": {
+        "path": "prepared/120.png",
+        "sha256": "9453232ac88971e6ea6b4ddd041cdf15c8cc513a1252566f3076fc7276b224da",
+        "rgbaSha256": "1f467a76928836f983507e9c86d00e2e36a006d1b5f5a5a47c98e8915cf76884"
+      },
+      "outputTagSha256": "43627235d78a9557d1b50e3dcf17be3d5699f542dca078dd070a01ecf1cb43c1"
+    },
+    {
+      "id": 121,
+      "className": "asset.shop.BtnPurchase",
+      "tagCode": 35,
+      "width": 184,
+      "height": 59,
+      "sourceTagSha256": "62e8d49e3540607d84ee524aeccb2b54671a1e70f74bfd3f98640944e9987382",
+      "sourcePixelsSha256": "f769eebc6716b87860076955bb9e26b71a9ec98152b9fce64718f56fd0d7898c",
+      "text": "购买",
+      "reference": {
+        "id": 105,
+        "symbol": "asset.shop.BtnPurchase",
+        "width": 181,
+        "height": 59,
+        "tagSha256": "99e98f7ade257b41f9f95483e8d01e3c112549e1bf1110ae93a7eef5673d8d2e",
+        "pixelsSha256": "40bef2ca55a0708ae612fe9e37fc7b087547b6b6bd79b6b083d3c10b21773ce0"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        1,
+        0
+      ],
+      "rendered": [
+        181,
+        59
+      ],
+      "preparedImage": {
+        "path": "prepared/121.png",
+        "sha256": "5a0f9c2395cfe04b167164e58435f6450db801924a96254fc65531e758453955",
+        "rgbaSha256": "1279ee26b173cfe4104bf258f281357f23c342e7eea5f48a79aeda0a2089008d"
+      },
+      "outputTagSha256": "9c695c59ca3537effc4e83abbe0c8c58595cd35ecbbc178a582a760a259535d5"
+    },
+    {
+      "id": 122,
+      "className": "asset.shop.BtnSaveFigure",
+      "tagCode": 35,
+      "width": 103,
+      "height": 46,
+      "sourceTagSha256": "5b0299c778686e9422d897693a24a6cbade2629c28d9e46b00ac28242c01b783",
+      "sourcePixelsSha256": "4692485bdd130310a6a97ff6176be2ff03c05df1a22a7f721feacc4a3ac8bddd",
+      "text": "保存形象",
+      "reference": {
+        "id": 104,
+        "symbol": "asset.shop.BtnSaveFigure",
+        "width": 102,
+        "height": 46,
+        "tagSha256": "af29382820e257653dd6687a82bf588693528bc5bc8e77710f1171820f5e75af",
+        "pixelsSha256": "fc7f6b9ac094bb9ccdcfa2a2065abbb4282d003c2cf6da5b5ae828caeff19c70"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        102,
+        46
+      ],
+      "preparedImage": {
+        "path": "prepared/122.png",
+        "sha256": "fbda8311613cec2be04a005882cbfa18392b4bd9b32ee2de8991ecb3d34a95c1",
+        "rgbaSha256": "d49eab3e08b2ab57cd8f6cb9615391dd83334caf3cb0fe6db535f81f417685fa"
+      },
+      "outputTagSha256": "56d6757b613aee5c456e2e35238515f15a1e66b53ca67fc676f061369d93f6ca"
+    },
+    {
+      "id": 123,
+      "className": "asset.shop.BtnShopCart",
+      "tagCode": 36,
+      "width": 99,
+      "height": 30,
+      "sourceTagSha256": "344d5d54754e5407affdf630ef329016e08d2b80b78e781989c73b2e328170da",
+      "sourcePixelsSha256": "e7ed09e614d64198d994ba2fca3be68669522d12b22720755a5017dcd3fa3597",
+      "text": "我的钱包",
+      "reference": {
+        "id": 103,
+        "symbol": "asset.shop.BtnShopCart",
+        "width": 92,
+        "height": 23,
+        "tagSha256": "6a952b0a94e4f811da08b0d1c9557dfcdaecdf57fc70e4ef35ebfbbe20cfe867",
+        "pixelsSha256": "5ea9c5a294430945942dc2de96ee833011d58ee5c4df93e49ce485bf81311d6b"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        3,
+        3
+      ],
+      "rendered": [
+        92,
+        23
+      ],
+      "preparedImage": {
+        "path": "prepared/123.png",
+        "sha256": "f500cb67c4ad9a670985a28c0e92a1efd3f3adc556cd0dbb8e0702e4b5bd60e2",
+        "rgbaSha256": "79c68fb9f3c692dd1650451fd12946cb9804d55b8c6517aad341a910bce5798f"
+      },
+      "outputTagSha256": "10b375d1680b6547422eb8b38a18415d431c121554292cfc23b0e319ed8bfdf5"
+    },
+    {
+      "id": 124,
+      "className": "asset.shop.CartBtnDown",
+      "tagCode": 35,
+      "width": 86,
+      "height": 32,
+      "sourceTagSha256": "52bbe1b2aed2d795b6c535e518d9a5b18d333feb247856e34be19afc0faef1bf",
+      "sourcePixelsSha256": "e07d3b8b491b00f91af6fed0d2e8783197ddf218d727962c94920e188a82dd70",
+      "text": "购物车",
+      "reference": {
+        "id": 102,
+        "symbol": "asset.shop.CartBtnDown",
+        "width": 86,
+        "height": 32,
+        "tagSha256": "35135a33ad117fbdd9187df43a640ce9da12e081c86d2e167e85237a3133b476",
+        "pixelsSha256": "8f4cc3188fc332fea9e6d579599a81096fc6839aac909b211c2ee36a2bc43a3e"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        86,
+        32
+      ],
+      "preparedImage": {
+        "path": "prepared/124.png",
+        "sha256": "d1038909242798dc76ea6a1214bc20c8a7f848ec04a00797b4251967d94862d3",
+        "rgbaSha256": "8f4cc3188fc332fea9e6d579599a81096fc6839aac909b211c2ee36a2bc43a3e"
+      },
+      "outputTagSha256": "146182a0bf449aaf12175f5d0f7c6f9c3eedc090579f4d325bc5285b751d6b12"
+    },
+    {
+      "id": 125,
+      "className": "asset.shop.CartBtnUp",
+      "tagCode": 35,
+      "width": 92,
+      "height": 42,
+      "sourceTagSha256": "1aea379dcc0a0cc65e9160747421972c4c700ec0a3121a7dd4881743e54a03ed",
+      "sourcePixelsSha256": "5f87a37b4aa618c8bd8323af0615f8205450a9ef65b5f822b04dd7b435aab280",
+      "text": "购物车",
+      "reference": {
+        "id": 101,
+        "symbol": "asset.shop.CartBtnUp",
+        "width": 92,
+        "height": 42,
+        "tagSha256": "d2020f78e41e017701089ef9cc6f1ad456c01b152fb821001d9722f8646a66f9",
+        "pixelsSha256": "d99913f9928f407e7eb1fcfd09e7a81912712e419a220ea23813021f9ed5a7ab"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ],
+      "rendered": [
+        92,
+        42
+      ],
+      "preparedImage": {
+        "path": "prepared/125.png",
+        "sha256": "560765c16d7444910e5e3e8a2b46ea29ca16bf25f56d212a952a0e03b6fbf1e6",
+        "rgbaSha256": "d99913f9928f407e7eb1fcfd09e7a81912712e419a220ea23813021f9ed5a7ab"
+      },
+      "outputTagSha256": "8b9285c0a44a9b122afb03be75e9fd8e9b4e73df5828635b701e384a81b0ca51"
+    },
+    {
+      "id": 127,
+      "className": "asset.shop.SubBtnGiftMedalBeautyupIconDown",
+      "tagCode": 36,
+      "width": 67,
+      "height": 21,
+      "sourceTagSha256": "c6363af9d0c33f8a7284da4268ef6c69bdcc9f8f39dc9df2511b816cb7035b0b",
+      "sourcePixelsSha256": "8ea7a63b0d42185931b4f05e3b10deec64f2d97ba2872d87ed46ac32f395a82d",
+      "text": "美容",
+      "reference": {
+        "id": 10,
+        "symbol": "asset.shop.SubBtnGiftMedalBeautyupIconDown",
+        "width": 59,
+        "height": 20,
+        "tagSha256": "9216e10ba66380b7ea81eebad9dc177b0b1aff0f79495938e57f3361dcec6d0c",
+        "pixelsSha256": "a7bfa63527b852d62a3e9ca03d962d0dc8d8dfaac3f3606cd5fc7f3f4f7fdd4a"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        4,
+        0
+      ],
+      "rendered": [
+        59,
+        20
+      ],
+      "preparedImage": {
+        "path": "prepared/127.png",
+        "sha256": "2cdbff698a3ed88bff769566f99bcad364642aa69d2146a288bccb4c04c87704",
+        "rgbaSha256": "25297466c605d8fda24a7afbc6a09e0fc319dbf83f9a02bb089f344cf3c5979a"
+      },
+      "outputTagSha256": "b99dbe77c881f8a38f679be4459748e6c809fb3ef8995d5527ce3a4a54cb0f91"
+    },
+    {
+      "id": 128,
+      "className": "asset.shop.SubBtnHotSaleIconUp",
+      "tagCode": 36,
+      "width": 57,
+      "height": 23,
+      "sourceTagSha256": "bfab2f74b377c38b944ce1e5a7eb12b12b36d1bb43d8f1f420bafba34a75b28a",
+      "sourcePixelsSha256": "b3286acb3f9d725099e2368ddb258fa7e5df37dc917501f6315d1c9d32c529c2",
+      "text": "热卖",
+      "reference": {
+        "id": 1,
+        "symbol": "asset.shop.SubBtnHotSaleIconUp",
+        "width": 53,
+        "height": 23,
+        "tagSha256": "8aa7951923aa9f271107c2924c40271037d513d96defc5263e47a6c9c87f51cf",
+        "pixelsSha256": "d474cb05b14db2a3c8150faafeccfc328fb7ef5be18d96fb589d643ef1068052"
+      },
+      "method": "original named bitmap pixels, transparent padding only",
+      "scale": 1,
+      "offset": [
+        2,
+        0
+      ],
+      "rendered": [
+        53,
+        23
+      ],
+      "preparedImage": {
+        "path": "prepared/128.png",
+        "sha256": "069157f1a3827381afbbe56781f245389f32671d1b7054bcad6eca5f4b1bc401",
+        "rgbaSha256": "d0a231842d5cdde856b2a754f5066b5d0d19e2819ac8f58811a2cfe2b1dd002a"
+      },
+      "outputTagSha256": "ef523e85b27ccd5e903465353bf79a7df82d61b07e9b49fcc89e66a6ebc7923d"
+    }
+  ]
+}

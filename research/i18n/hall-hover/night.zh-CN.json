@@ -1,0 +1,338 @@
+{
+  "version": 1,
+  "asset": "ui/vietnam/swf/hall.swf",
+  "donorSha256": "ff947a6002a598cb82ae07d6e030d1094cfcce97eefc9b33e011c211c14f315a",
+  "background": {
+    "targetId": 12,
+    "tagCode": 21,
+    "sha256": "2205c04d6e15d9d26d612b8b6f5760e3d7ba854bef3645df1bc7d3305295713a"
+  },
+  "mainSprite": {
+    "targetId": 245,
+    "tagCode": 39,
+    "sha256": "d4aa219bb8421fb93e97d84094d5ad4b497614e90ca0d8db520d7c6e372885eb"
+  },
+  "entries": [
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 16,
+      "donorId": 54,
+      "tagCode": 21,
+      "sourceTagSha256": "fefc705a736dbbf94e641fd362b10daa05d2e85864a6999f17d7d1c25c2e1c89",
+      "donorTagSha256": "e54f877184ceffadb05e6ed4ffc9f14ebc2303178ae1bc67a1acd89f16b88dfc",
+      "installedTagSha256": "ba904f4e561c8673733810eac10a37679fc67a63505dd50f148473fa0e6e5e8b",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 198,
+      "donorId": 297,
+      "tagCode": 35,
+      "sourceTagSha256": "ee62f14ef2b897fb1f831053b0c3fe6dec4cb297bf18764b4cc49b4184da8467",
+      "donorTagSha256": "ccc85152e7023aa9af7b1b4463df7624d73b11eca145eb4c3b8382e04cad804f",
+      "installedTagSha256": "0e21f9a24822a6b7f4585ce10ade51b97d8103531cd788bf715fee1088817002",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 203,
+      "donorId": 302,
+      "tagCode": 21,
+      "sourceTagSha256": "63e231757120b0601846f94b3a0731761e414a2101a6bce43b7550455ab5fba1",
+      "donorTagSha256": "10f1dc1056bb55f98025122538e6c94490919e111d02801c6ab579769b6d962a",
+      "installedTagSha256": "ff4bcfbd71933824555dec7515889f1ba0076d781b888b84749fc2bad21168c2",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 207,
+      "donorId": 306,
+      "tagCode": 35,
+      "sourceTagSha256": "38d5560f8e8b3be9e2b83d2d1cb6c81dc53da85196685eb50c28222f585df900",
+      "donorTagSha256": "d775e778f13acf34e3dd7101aa2e506c43f958a9bad8d0a0fad3d5bd9a80d0bd",
+      "installedTagSha256": "0c64837ad910bb79d0e476fb28c043a18c2fa23b28db18275d459b68b567befe",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 212,
+      "donorId": 311,
+      "tagCode": 21,
+      "sourceTagSha256": "2816f362ccde86715e5797aca6d560314727adc484017c1e7ff957fa112051cc",
+      "donorTagSha256": "5aa10bd35827bddda708942b342e671ab108a9e18d9d88ed706477c638f2c09d",
+      "installedTagSha256": "a30fe4d7a6e0a9a1c1ef6e3ddb78dae6358b3231dca95833295bed5abc010ce4",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 216,
+      "donorId": 315,
+      "tagCode": 35,
+      "sourceTagSha256": "4432d2dfea554344fe567d2c477a297ee13fca29c40d89b4e4a5e7d6140f3094",
+      "donorTagSha256": "2bdb62ab9866de563ed5504e6ff839abb0c649e5ea20044b87e3c008c49975f9",
+      "installedTagSha256": "a28cb0f4d89bb3692216f9b308cec10c376d1994c7ed68d6918209bf519e4c2b",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 220,
+      "donorId": 319,
+      "tagCode": 21,
+      "sourceTagSha256": "203484eb7a33d4c60ad33ac09964798d633eeccbd66d96d913094a85c583d822",
+      "donorTagSha256": "1b5a2f0714c6ae8c62813c1bd10c87c00ff70dbf1e7988a27d0ad7ca9e32b3c5",
+      "installedTagSha256": "6fc66828fc2fc5021dbd6b1f3c0ab9101635c3c36ffc16a44ae42497c273fe88",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 224,
+      "donorId": 323,
+      "tagCode": 35,
+      "sourceTagSha256": "23193adb8433880bbdaefff29c63641fcfc5aa714c993e08be900b5146e775b2",
+      "donorTagSha256": "fbdbe72ff636f7e597e301fdf99a2fd391032626e3fd4c98b908ffe2fd193e54",
+      "installedTagSha256": "ffbb473e284fd4376d86bb1e435fa3ae2ce1e089e7f60c19620a8f09a9c590eb",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 229,
+      "donorId": 328,
+      "tagCode": 21,
+      "sourceTagSha256": "6a669376f8cc01d068aae6cfbecd994e944c022a3a3e8468cc7a7420bae97601",
+      "donorTagSha256": "a3b789f3197f5aa57ebd7d3293157cd1b1486239dd77f1a16bb8f05edb2f5e50",
+      "installedTagSha256": "8190b6355bfe45f412ff65ea981b5a9f377470e31834f00cf76ee2c777014f2a",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 233,
+      "donorId": 332,
+      "tagCode": 21,
+      "sourceTagSha256": "4674804d7cb6effeb176be6489f42d223abc5b09e30778b32b151f260e084b0c",
+      "donorTagSha256": "b609db63e7389397c37252935b33a78d8c794a01ce1ab8a7229f08ca2da3d851",
+      "installedTagSha256": "41126af5ec519f14476a35f53ae99e08c238d4a9edde103168c47bbb402291cc",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 237,
+      "donorId": 336,
+      "tagCode": 21,
+      "sourceTagSha256": "c66c6a68f70e583efc59947eb3f90128480cb7b004b0ab57a82422149c322a23",
+      "donorTagSha256": "2ff7120fe2621203597041f554139e72fe850005bbb9ebb47f847c1a9ee8ee3d",
+      "installedTagSha256": "4930173785aa8c394624f3ed3667c833ffdcca9e62a3ca4132add0c2fb99b4f6",
+      "references": []
+    },
+    {
+      "kind": "night-hover-bitmap",
+      "targetId": 241,
+      "donorId": 340,
+      "tagCode": 21,
+      "sourceTagSha256": "478a8f51f19428d447fe2afab0395ec89d5a4e47887e840ff1e3332cfa0c057b",
+      "donorTagSha256": "8c6ca244091fec1af03767a16fff8c0951fed8fe4d825648a3a3ec9df6142b76",
+      "installedTagSha256": "a8c6b449ae99e0233160465e1a942b2440109c8107ad6d5c4e86b8de297411ea",
+      "references": []
+    },
+    {
+      "kind": "church-chinese-tooltip",
+      "targetId": 176,
+      "donorId": 275,
+      "tagCode": 36,
+      "sourceTagSha256": "69809c43c9cd0de771bf2e07092ef39f9cc32c0f2138e3d42b5c5f50bb1c7312",
+      "donorTagSha256": "78c3401fd864d9060de5d569bfde045934089e0ad5e7e43ba70a195c0a138693",
+      "installedTagSha256": "9050d7283ff7a260a211b96f4eb4088fbda28249f91d519c368c015da87e880c",
+      "references": []
+    },
+    {
+      "kind": "church-tooltip-layout",
+      "targetId": 178,
+      "donorId": 277,
+      "tagCode": 22,
+      "sourceTagSha256": "6653ae87456862b5841262f7dfd67d8942bd96fa7c4efdb5041901bba4533876",
+      "donorTagSha256": "1c5d8752d3fa3288700f17189cf73d4db0f02a4f4e4a260dd222b797316d3a14",
+      "installedTagSha256": "e34d1c0f80f955f01f4854256561d35ebf8284228f7ddd49143b7976d8263061",
+      "references": [
+        {
+          "offset": 16,
+          "donorId": 276,
+          "targetId": 177
+        },
+        {
+          "offset": 55,
+          "donorId": 275,
+          "targetId": 176
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "frame": 1,
+      "label": "婚礼礼堂",
+      "shapeId": 17,
+      "donorShapeId": 55,
+      "targetBitmapId": 16,
+      "donorBitmapId": 54,
+      "bounds": [
+        151.85,
+        402.85,
+        205,
+        454
+      ]
+    },
+    {
+      "frame": 2,
+      "label": "商城",
+      "shapeId": 199,
+      "donorShapeId": 298,
+      "targetBitmapId": 198,
+      "donorBitmapId": 297,
+      "bounds": [
+        446.3,
+        712.3,
+        328.35,
+        600.35
+      ]
+    },
+    {
+      "frame": 3,
+      "label": "副本远征",
+      "shapeId": 204,
+      "donorShapeId": 303,
+      "targetBitmapId": 203,
+      "donorBitmapId": 302,
+      "bounds": [
+        708.95,
+        999.95,
+        330,
+        600
+      ]
+    },
+    {
+      "frame": 4,
+      "label": "游戏大厅",
+      "shapeId": 208,
+      "donorShapeId": 307,
+      "targetBitmapId": 207,
+      "donorBitmapId": 306,
+      "bounds": [
+        354.8,
+        613.8,
+        102.85,
+        388.85
+      ]
+    },
+    {
+      "frame": 5,
+      "label": "拍卖行",
+      "shapeId": 213,
+      "donorShapeId": 312,
+      "targetBitmapId": 212,
+      "donorBitmapId": 311,
+      "bounds": [
+        608.95,
+        815.95,
+        190,
+        424
+      ]
+    },
+    {
+      "frame": 6,
+      "label": "师徒系统",
+      "shapeId": 217,
+      "donorShapeId": 316,
+      "targetBitmapId": 216,
+      "donorBitmapId": 315,
+      "bounds": [
+        760.8,
+        989.8,
+        147.85,
+        374.85
+      ]
+    },
+    {
+      "frame": 7,
+      "label": "交友中心",
+      "shapeId": 221,
+      "donorShapeId": 320,
+      "targetBitmapId": 220,
+      "donorBitmapId": 319,
+      "bounds": [
+        686.8,
+        865.8,
+        13.85,
+        236.85
+      ]
+    },
+    {
+      "frame": 8,
+      "label": "铁匠铺",
+      "shapeId": 225,
+      "donorShapeId": 324,
+      "targetBitmapId": 224,
+      "donorBitmapId": 323,
+      "bounds": [
+        553.95,
+        733.95,
+        -16,
+        173
+      ]
+    },
+    {
+      "frame": 9,
+      "label": "训练馆",
+      "shapeId": 230,
+      "donorShapeId": 329,
+      "targetBitmapId": 229,
+      "donorBitmapId": 328,
+      "bounds": [
+        328.8,
+        606.8,
+        0,
+        169
+      ]
+    },
+    {
+      "frame": 10,
+      "label": "排行榜",
+      "shapeId": 234,
+      "donorShapeId": 333,
+      "targetBitmapId": 233,
+      "donorBitmapId": 332,
+      "bounds": [
+        196,
+        403,
+        14,
+        224
+      ]
+    },
+    {
+      "frame": 11,
+      "label": "温泉",
+      "shapeId": 238,
+      "donorShapeId": 337,
+      "targetBitmapId": 237,
+      "donorBitmapId": 336,
+      "bounds": [
+        18,
+        231,
+        29.85,
+        237.85
+      ]
+    },
+    {
+      "frame": 12,
+      "label": "公会",
+      "shapeId": 242,
+      "donorShapeId": 341,
+      "targetBitmapId": 241,
+      "donorBitmapId": 340,
+      "bounds": [
+        0.35,
+        214.35,
+        174.35,
+        370.35
+      ]
+    }
+  ]
+}

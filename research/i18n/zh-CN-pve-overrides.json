@@ -31,9 +31,9135 @@
         "Failure": "被敌人击败<br>回合数耗尽"
       }
     },
-    { "table": "NPC_Info", "id": 2001, "text": { "Name": "先锋蚁" } },
-    { "table": "NPC_Info", "id": 2002, "text": { "Name": "侦察蚁" } },
-    { "table": "NPC_Info", "id": 2003, "text": { "Name": "蚁后" } },
-    { "table": "NPC_Info", "id": 2004, "text": { "Name": "卫兵蚁" } }
+    {
+      "table": "NPC_Info",
+      "id": 2001,
+      "text": {
+        "Name": "先锋蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2002,
+      "text": {
+        "Name": "侦察蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2003,
+      "text": {
+        "Name": "蚁后"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2004,
+      "text": {
+        "Name": "卫兵蚁"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1,
+      "text": {
+        "Name": "啵咕王城",
+        "Description": "啵咕王城　 玩家人数：2-4 \r\n\r\n　　在名为波尔蒂的富饶岛屿上，生活着温顺的啵咕。3年前，一个好战的帝国入侵这里，发动了前所未有的残酷战争。啵咕王国的国王率领……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 3,
+      "text": {
+        "Name": "邪神部落",
+        "Description": "邪神部落   玩家人数：2-4    \r\n港口管理员喜爱古董，尤其是造型、纹样独特的古陶器。一次地震中，一个陶罐摔碎了。清理碎片时，他在罐中发现了……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 4,
+      "text": {
+        "Name": "黑暗堡垒",
+        "Description": "黑暗堡垒   玩家人数：2-4    全新的冒险现在开始！"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 5,
+      "text": {
+        "Name": "龙巢之战",
+        "Description": "龙巢之战　 建议人数：2 - 4名玩家\r\n    击败恶魔守卫后，大家急忙修好船只，准备离开这座岛。但勇士们并不能如此轻易地离去。他们看见岛中央有一座高耸而可怕的山……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 6,
+      "text": {
+        "Name": "啵咕运动会",
+        "Description": "啵咕运动会     建议玩家人数：3-4\r\n    为庆祝胜利与王国恢复和平，啵咕国王举办了首届运动会。国王的表亲葛兰也出席并参与了这场啵咕运动会。这是……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 7,
+      "text": {
+        "Name": "小鸡快跑",
+        "Description": "小鸡快跑     建议玩家人数：2-4    \r\n宁静的农场里，生活着一群与人类和睦相处的善良小鸡。突然，一只又丑又笨的鸡出现了，打破了农场的安宁。自从它到来……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 8,
+      "text": {
+        "Name": "加马逊丛林",
+        "Description": "师徒试炼 -1　 玩家人数：2  -  4\r\n\r\n    自远征关卡开放后，越来越多勇士离开大陆去探索。为保障他们的安全，伯爵决定训练他们。伯爵给每名勇士1……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 9,
+      "text": {
+        "Name": "夏塔拉沙漠",
+        "Description": "师徒试炼 -2　 玩家人数：2  -  4\r\n\r\n     自远征关卡开放后，越来越多勇士离开大陆去探索。为保障他们的安全，伯爵决定训练他们。伯爵给每名勇士1……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 10,
+      "text": {
+        "Name": "德古拉城堡",
+        "Description": "师徒试炼 -3　 玩家人数：2  -  4\r\n 自远征关卡开放后，越来越多勇士离开大陆去探索。为保障他们的安全，伯爵决定训练他们。伯爵给每名勇士1……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 11,
+      "text": {
+        "Name": "卡里加海湾",
+        "Description": "师徒试炼 - 4　 玩家人数：2  -  4\r\n\r\n     自远征关卡开放后，越来越多勇士离开大陆去探索。为保障他们的安全，伯爵决定训练他们。伯爵给每名勇士……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 12,
+      "text": {
+        "Name": "时空漩涡",
+        "Description": "时空漩涡　 建议玩家人数：2-4\r\n\r\n小鸡的变异，是残忍的鹦鹉博士里格理造成的。为阻止这个疯狂科学家的计划，让啵咕王国重归和平，勇士们团结起来吧！但旅途绝不简单：里格理不断酝酿难以预料的邪恶计划。小心！"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 13,
+      "text": {
+        "Name": "勇士竞技场",
+        "Description": "竞技赛　 要求：2-4名玩家&#xA;&#xA;      在梅恩兰德大陆上有一座古老的竞技场。传说无数勇士曾用鲜血，在这片神圣的土地上谱写激昂的乐章。荒废已久的竞技场突然被邪气笼罩，黑暗中传来令人毛骨悚然的叫喊。为查明真相，勇士们踏上了新的征程……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 14,
+      "text": {
+        "Name": "海盗船",
+        "Description": "海盗船上藏着许多宝藏，只有勇士才能拥有。（门票可通过游戏活动获得）"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12016,
+      "text": {
+        "Name": "海盗船",
+        "Failure": "超过回合限制",
+        "Title": "TURN, 击败海盗船长",
+        "Description": "击败海盗船长",
+        "Success": "击败海盗船长"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 38,
+      "text": {
+        "Name": "魔蚁之巢·噩梦"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 39,
+      "text": {
+        "Name": "小鸡快跑·噩梦"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 101,
+      "text": {
+        "Name": "新手教程",
+        "Description": "战斗训练2"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 105,
+      "text": {
+        "Name": "中级非玩家角色",
+        "Description": "中级非玩家角色"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 111,
+      "text": {
+        "Name": "新手夺宝第6-1关",
+        "Description": "管理关卡的理查德伯爵喜爱古董；他最珍爱的，是一个造型、纹样十分奇特的古老陶罐。某天地震，陶罐从高处摔落，碎成了几片。伯爵……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 112,
+      "text": {
+        "Name": "新手夺宝第6-2关"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 113,
+      "text": {
+        "Name": "新手夺宝第6-3关",
+        "Description": "几天后，伯爵的船停靠在那座奇异的岛屿旁。整座岛被茂密森林覆盖；伯爵与部下搭起帐篷，来自各地的勇士按捺不住好奇，分成小队，开始……"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 114,
+      "text": {
+        "Name": "新手夺宝第6-4关"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 115,
+      "text": {
+        "Name": "新手夺宝第6-5关"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 116,
+      "text": {
+        "Name": "新手夺宝第6-6关"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1000,
+      "text": {
+        "Name": "测量屏距",
+        "Description": "测量屏距入门"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1001,
+      "text": {
+        "Name": "20度射击",
+        "Description": "20度射击入门"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1002,
+      "text": {
+        "Name": "65度射击",
+        "Description": "65度射击入门"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1003,
+      "text": {
+        "Name": "高抛射击",
+        "Description": "高抛射击入门"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1004,
+      "text": {
+        "Name": "高低差射击",
+        "Description": "高低差入门"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 1243,
+      "text": {
+        "Name": "巨龙首领",
+        "Description": "巨龙首领大作战"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1243,
+      "text": {
+        "Name": "巨龙首领",
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "消灭巨龙首领"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 30001,
+      "text": {
+        "Name": "吸血鬼伯爵"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 30002,
+      "text": {
+        "Name": "吸血鬼伯爵"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 30001,
+      "text": {
+        "Name": "吸血鬼伯爵",
+        "Failure": "超过回合限制",
+        "Title": "TURN,击败吸血鬼伯爵。",
+        "Description": "击败吸血鬼伯爵。",
+        "Success": "击败吸血鬼伯爵。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 30002,
+      "text": {
+        "Name": "吸血鬼伯爵",
+        "Failure": "超过回合限制",
+        "Title": "TURN,击败吸血鬼伯爵。",
+        "Description": "击败吸血鬼伯爵。",
+        "Success": "击败吸血鬼伯爵。"
+      }
+    },
+    {
+      "table": "Pve_Info",
+      "id": 30004,
+      "text": {
+        "Name": "队长"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 30004,
+      "text": {
+        "Name": "队长",
+        "Failure": "超过回合限制",
+        "Title": "TURN,击败队长。",
+        "Description": "击败队长。",
+        "Success": "击败队长。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 101,
+      "text": {
+        "Name": "测量屏距·简单",
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 102,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "20度角·简单"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 103,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "65度角·简单"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 104,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高抛·简单"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 105,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高低差·简单"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 111,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "测量屏距·普通"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 112,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "20度角·普通"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 113,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "65度角·普通"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 114,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高抛·普通"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 115,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高低差·普通"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 121,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "测量屏距·困难"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 122,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "20度角·困难"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 123,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "65度角·困难"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 124,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高抛·困难"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 125,
+      "text": {
+        "Title": "TURN,击倒靶子",
+        "Description": "击倒靶子",
+        "Success": "击倒靶子",
+        "Failure": "超过回合限制。",
+        "Name": "高低差·困难"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 600,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Name": "卡里加海湾第1关",
+        "Title": "TURN,击败怪物",
+        "Description": "击败怪物",
+        "Success": "击败怪物"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 601,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Title": "TURN,击败怪物",
+        "Description": "击败怪物",
+        "Success": "击败怪物",
+        "Name": "卡里加海湾第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1086,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Name": "取回三叉弹和必杀道具",
+        "Description": "取回三叉弹和必杀道具",
+        "Title": "TURN,迷之啵咕",
+        "Success": "击败迷之啵咕"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1087,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Title": "TURN,击败臭蛋笨笨",
+        "Success": "击败所有小鸡。",
+        "Name": "取回飞机道具",
+        "Description": "取回飞机道具"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1088,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Name": "取回+2道具和20%道具",
+        "Description": "取回+2道具和20%道具",
+        "Title": "TURN,击败队长",
+        "Success": "击败尖角队长。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1089,
+      "text": {
+        "Failure": "超过回合限制。",
+        "Name": "取回30%、40%、50%战斗道具",
+        "Description": "取回30%、40%、50%战斗道具",
+        "Title": "TURN,击败失控机器人",
+        "Success": "击败失控机器人 "
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 700,
+      "text": {
+        "Title": "TURN,击败怪物",
+        "Description": "击败怪物",
+        "Success": "击败怪物",
+        "Name": "德古拉城堡第1关",
+        "Failure": "超过回合限制"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 701,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "德古拉城堡第2关",
+        "Title": "TURN,击败弗兰肯",
+        "Description": "击败弗兰肯",
+        "Success": "击败弗兰肯"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 800,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "加马逊丛林第1关",
+        "Title": "TURN,炸弹人",
+        "Description": "炸弹人",
+        "Success": "炸弹人"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 801,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "加马逊丛林第2关",
+        "Title": "TURN,邪神战士",
+        "Description": "邪神战士",
+        "Success": "邪神战士"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 900,
+      "text": {
+        "Failure": "超过回合限制",
+        "Title": "TURN,炸弹人",
+        "Description": "炸弹人",
+        "Success": "炸弹人",
+        "Name": "夏塔拉沙漠第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 901,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "夏塔拉沙漠第2关",
+        "Title": "TURN,击败蝎子王",
+        "Description": "击败蝎子王",
+        "Success": "击败蝎子王"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1085,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "击败臭蛋笨笨并取回10%道具",
+        "Description": "击败臭蛋笨笨并取回10%道具",
+        "Title": "TURN,击败臭蛋笨笨",
+        "Success": "击败所有小鸡。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 71059,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "魔法城堡·困难第1关",
+        "Title": "TURN,击败所有敌人。",
+        "Description": "击败所有敌人。",
+        "Success": "击败所有敌人。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 71060,
+      "text": {
+        "Failure": "超过回合限制",
+        "Name": "魔法城堡·困难第2关",
+        "Title": "TURN,击败魔法守护兽。",
+        "Description": "击败魔法守护兽。",
+        "Success": "击败魔法守护兽。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1071,
+      "text": {
+        "Name": "啵咕王城·简单第1关",
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "击败精英啵咕和粉红啵咕。",
+        "Failure": "被对手击败<br>回合耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1072,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "啵咕王城·简单第2关",
+        "Success": "击败巴罗夫。 "
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1271,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "击败精英啵咕和粉红啵咕。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "啵咕王城·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1272,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败巴罗夫。 ",
+        "Name": "啵咕王城·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1273,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败啵咕国王。 ",
+        "Name": "啵咕王城·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1274,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "啵咕王城·困难第4关",
+        "Success": "消灭马迪亚斯。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2101,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "魔蚁之巢·普通第1关",
+        "Success": "击败蚂蚁。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2102,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "魔蚁之巢·普通第2关",
+        "Success": "击败蚁后。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2401,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚂蚁。",
+        "Name": "魔蚁之巢·噩梦·简单第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2402,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚁后。",
+        "Name": "魔蚁之巢·噩梦·简单第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2501,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚂蚁。",
+        "Name": "魔蚁之巢·噩梦·普通第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2502,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚁后。",
+        "Name": "魔蚁之巢·噩梦·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2601,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚂蚁。",
+        "Name": "魔蚁之巢·噩梦·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2602,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚁后。",
+        "Name": "魔蚁之巢·噩梦·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2701,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚂蚁。",
+        "Name": "魔蚁之巢·噩梦·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 2702,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败蚁后。",
+        "Name": "魔蚁之巢·噩梦·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3101,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "邪神部落·普通第1关",
+        "Success": "击败部落勇士。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3102,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "邪神部落·普通第2关",
+        "Success": "复活魔豌豆"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3103,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "邪神部落·普通第3关",
+        "Success": "击败布兰巴拉兄弟。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3106,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "邪神部落·普通第4关",
+        "Success": "击败丛林之王。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3201,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败部落勇士。",
+        "Name": "邪神部落·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3202,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "复活魔豌豆",
+        "Name": "邪神部落·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3203,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败布兰巴拉兄弟。",
+        "Name": "邪神部落·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3206,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "邪神部落·困难第4关",
+        "Success": "击败丛林之王。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3301,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败部落勇士。",
+        "Name": "邪神部落·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3302,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "复活魔豌豆",
+        "Name": "邪神部落·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3303,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败布兰巴拉兄弟。",
+        "Name": "邪神部落·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3306,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败丛林之王。",
+        "Name": "邪神部落·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4102,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "黑暗堡垒·普通第2关",
+        "Success": "击败狼怪与鹰卫"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4103,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "黑暗堡垒·普通第3关",
+        "Description": "击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4201,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁城门",
+        "Success": "摧毁城门",
+        "Name": "黑暗堡垒·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4202,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败狼怪与鹰卫",
+        "Name": "黑暗堡垒·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4203,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败米诺陶诺斯。",
+        "Name": "黑暗堡垒·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4301,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁城门",
+        "Success": "摧毁城门",
+        "Name": "黑暗堡垒·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4302,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败狼怪与鹰卫",
+        "Name": "黑暗堡垒·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4303,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯。",
+        "Name": "黑暗堡垒·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6102,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Name": "啵咕运动会·普通第2关",
+        "Success": "红队率先到达终点",
+        "Failure": "蓝队率先到达终点<br>回合耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6201,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "达到99分",
+        "Failure": "回合耗尽",
+        "Name": "啵咕运动会·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6202,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "红队率先到达终点",
+        "Failure": "蓝队率先到达终点<br>回合耗尽",
+        "Name": "啵咕运动会·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6203,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败歪仔",
+        "Name": "啵咕运动会·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6204,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败黑哨王",
+        "Name": "啵咕运动会·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6301,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "达到99分",
+        "Name": "啵咕运动会·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6302,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "红队率先到达终点",
+        "Failure": "蓝队率先到达终点<br>回合耗尽",
+        "Name": "啵咕运动会·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6303,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败歪仔",
+        "Name": "啵咕运动会·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6304,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败黑哨王",
+        "Name": "啵咕运动会·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7001,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "小鸡快跑第1关",
+        "Success": "击败中毒的小鸡。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7002,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "小鸡快跑第2关",
+        "Success": "击败母鸡。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7004,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "小鸡快跑第3关",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7101,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·普通第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7102,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7103,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "小鸡快跑·普通第3关",
+        "Success": "摧毁鸡舍"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7104,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·普通第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7201,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7202,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7203,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "摧毁鸡舍",
+        "Name": "小鸡快跑·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7204,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7401,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·噩梦·简单第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7402,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·噩梦·简单第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7403,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "摧毁鸡舍",
+        "Name": "小鸡快跑·噩梦·简单第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7404,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·噩梦·简单第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7501,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·噩梦·普通第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7502,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·噩梦·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7503,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "摧毁鸡舍",
+        "Name": "小鸡快跑·噩梦·普通第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7504,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·噩梦·普通第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7601,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·噩梦·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7602,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·噩梦·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7603,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "摧毁鸡舍",
+        "Name": "小鸡快跑·噩梦·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7604,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·噩梦·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7701,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败中毒的小鸡。",
+        "Name": "小鸡快跑·噩梦·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7702,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "击败母鸡。",
+        "Name": "小鸡快跑·噩梦·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7703,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Success": "摧毁鸡舍",
+        "Name": "小鸡快跑·噩梦·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 7704,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "摧毁鸡笼",
+        "Success": "摧毁鸡笼",
+        "Name": "小鸡快跑·噩梦·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13001,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Name": "勇士竞技场·简单第1关",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13101,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·普通第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13201,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13301,
+      "text": {
+        "Title": "TURN,击败敌人。",
+        "Description": "击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1171,
+      "text": {
+        "Description": "击败敌人",
+        "Success": "击败精英啵咕和粉红啵咕。",
+        "Name": "啵咕王城·普通第1关",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1172,
+      "text": {
+        "Description": "击败敌人",
+        "Success": "击败巴罗夫。 ",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "啵咕王城·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1173,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "啵咕王城·普通第3关",
+        "Success": "击败啵咕国王。 "
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1371,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "啵咕王城·英雄第1关",
+        "Success": "击败精英啵咕和粉红啵咕"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1372,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "啵咕王城·英雄第2关",
+        "Success": "击败巴罗夫。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1374,
+      "text": {
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Title": "TURN,击败敌人",
+        "Success": "击败啵咕国王。 ",
+        "Name": "啵咕王城·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1375,
+      "text": {
+        "Description": "击败敌人",
+        "Failure": "被对手击败<br>回合耗尽",
+        "Title": "TURN,击败敌人",
+        "Name": "啵咕王城·英雄第5关",
+        "Success": "消灭马迪亚斯之影。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13004,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·简单第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13104,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·普通第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13204,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13304,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Success": "敌方被击败",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 15002,
+      "text": {
+        "Description": "击败敌人",
+        "Title": "TURN,击败敌人",
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "夫妻首领",
+        "Success": "击败对手"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 3001,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "魔蚁之巢",
+        "Title": "TURN,击败丹妮莉丝",
+        "Description": "一场激战后，蚂蚁军团开始溃散。勇士们乘胜追击，沿着蚂蚁逃跑的路线来到一座巨大洞穴，发现了木箱碎片。商人被抢走的货物似乎就藏在里面，这里应该是蚂蚁的大本营。冰冷的洞穴令人不寒而栗；勇士们深吸一口气，向洞穴深处走去……",
+        "Success": "击败蚁后"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4001,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "魔蚁之巢",
+        "Title": "TURN,击败丹妮莉丝",
+        "Description": "一场激战后，蚂蚁军团开始溃散。勇士们乘胜追击，沿着蚂蚁逃跑的路线来到一座巨大洞穴，发现了木箱碎片。商人被抢走的货物似乎就藏在里面，这里应该是蚂蚁的大本营。冰冷的洞穴令人不寒而栗；勇士们深吸一口气，向洞穴深处走去……",
+        "Success": "击败蚁后"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4002,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "小鸡关卡1",
+        "Title": "TURN,击败小鸡",
+        "Description": "nnn",
+        "Success": "击败16只小鸡"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4003,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Description": "nnn",
+        "Name": "小鸡关卡2",
+        "Title": "TURN,击败母鸡",
+        "Success": "击败3只母鸡"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 4101,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "黑暗堡垒·普通第1关",
+        "Title": "TURN,摧毁城门",
+        "Description": "摧毁城门",
+        "Success": "摧毁城门"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6103,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "啵咕运动会·普通第3关",
+        "Title": "TURN,击败歪仔",
+        "Description": "击败歪仔",
+        "Success": "击败歪仔"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6104,
+      "text": {
+        "Failure": "被对手击败<br>回合耗尽",
+        "Name": "啵咕运动会·普通第4关",
+        "Title": "TURN,击败黑哨王",
+        "Description": "击败黑哨王",
+        "Success": "击败黑哨王"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5101,
+      "text": {
+        "Failure": "被对手击败<br>超过回合限制",
+        "Name": "龙巢之战·普通第1关",
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Success": "击败恶魔波奇"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 1373,
+      "text": {
+        "Name": "啵咕王城·英雄第3关",
+        "Title": "TURN,占领",
+        "Description": "收集魔法钥匙",
+        "Success": "捡起全部魔法钥匙，破除魔法阵",
+        "Failure": "未能破除魔法阵。"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13003,
+      "text": {
+        "Description": "击败米诺陶诺斯",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·简单第3关",
+        "Title": "TURN,击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13103,
+      "text": {
+        "Description": "击败米诺陶诺斯",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯",
+        "Name": "勇士竞技场·普通第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13203,
+      "text": {
+        "Description": "击败米诺陶诺斯",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯",
+        "Name": "勇士竞技场·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13303,
+      "text": {
+        "Description": "击败米诺陶诺斯",
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败米诺陶诺斯",
+        "Success": "击败米诺陶诺斯",
+        "Name": "勇士竞技场·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5102,
+      "text": {
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Name": "龙巢之战·普通第2关",
+        "Success": "击败恶魔波奇",
+        "Failure": "我方被击败<br>超过回合限制"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5201,
+      "text": {
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Failure": "我方被击败<br>超过回合限制",
+        "Name": "龙巢之战·困难第1关",
+        "Success": "击败恶魔波奇"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5202,
+      "text": {
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Success": "击败恶魔波奇",
+        "Failure": "我方被击败<br>超过回合限制",
+        "Name": "龙巢之战·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5301,
+      "text": {
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Failure": "我方被击败<br>超过回合限制",
+        "Success": "击败恶魔波奇",
+        "Name": "龙巢之战·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5302,
+      "text": {
+        "Title": "TURN,击败恶魔波奇",
+        "Description": "击败恶魔波奇",
+        "Failure": "我方被击败<br>超过回合限制",
+        "Success": "击败恶魔波奇",
+        "Name": "龙巢之战·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5103,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Name": "龙巢之战·普通第3关",
+        "Title": "TURN,击败粉巾恶魔狄奥",
+        "Description": "击败粉巾恶魔狄奥",
+        "Success": "击败粉巾恶魔狄奥"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5104,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Name": "龙巢之战·普通第4关",
+        "Title": "TURN,击败巨龙首领",
+        "Description": "击败巨龙首领",
+        "Success": "击败巨龙首领"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5203,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Title": "TURN,击败粉巾恶魔狄奥",
+        "Description": "击败粉巾恶魔狄奥",
+        "Success": "击败粉巾恶魔狄奥",
+        "Name": "龙巢之战·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5204,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Title": "TURN,击败巨龙首领",
+        "Description": "击败巨龙首领",
+        "Success": "击败巨龙首领",
+        "Name": "龙巢之战·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5303,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Title": "TURN,击败粉巾恶魔狄奥",
+        "Description": "击败粉巾恶魔狄奥",
+        "Success": "击败粉巾恶魔狄奥",
+        "Name": "龙巢之战·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 5304,
+      "text": {
+        "Failure": "我方被击败<br>超过回合限制",
+        "Title": "TURN,击败巨龙首领",
+        "Description": "击败巨龙首领",
+        "Success": "击败巨龙首领",
+        "Name": "龙巢之战·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 6101,
+      "text": {
+        "Name": "啵咕运动会·普通第1关",
+        "Title": "TURN,达到目标分数。",
+        "Description": "达到目标分数",
+        "Success": "达到99分",
+        "Failure": "回合耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12001,
+      "text": {
+        "Name": "时空漩涡第1关",
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Success": "击败所有敌人。",
+        "Failure": "我方全部被击败<br>回合耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12002,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Name": "时空漩涡第2关",
+        "Success": "击败鳄鱼船长"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12004,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Name": "时空漩涡第4关",
+        "Success": "击败鹦鹉博士里格理"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12101,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Success": "击败所有敌人。",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Name": "时空漩涡·普通第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12102,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鳄鱼船长",
+        "Name": "时空漩涡·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12104,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鹦鹉博士里格理",
+        "Name": "时空漩涡·普通第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12201,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Success": "击败所有敌人。",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Name": "时空漩涡·困难第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12202,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鳄鱼船长",
+        "Name": "时空漩涡·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12204,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鹦鹉博士里格理",
+        "Name": "时空漩涡·困难第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12301,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Success": "击败所有敌人。",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Name": "时空漩涡·英雄第1关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12302,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鳄鱼船长",
+        "Name": "时空漩涡·英雄第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12304,
+      "text": {
+        "Title": "TURN,击败敌人",
+        "Description": "击败怪物",
+        "Failure": "我方全部被击败<br>回合耗尽",
+        "Success": "击败鹦鹉博士里格理",
+        "Name": "时空漩涡·英雄第4关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12003,
+      "text": {
+        "Name": "时空漩涡第3关",
+        "Title": "TURN, 死亡,救援",
+        "Description": "死亡,救援",
+        "Success": "救治小鸡",
+        "Failure": "因中毒而死亡的小鸡数量<br>回合耗尽"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12103,
+      "text": {
+        "Title": "TURN, 死亡,救援",
+        "Description": "死亡,救援",
+        "Success": "救治小鸡",
+        "Failure": "因中毒而死亡的小鸡数量<br>回合耗尽",
+        "Name": "时空漩涡·普通第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12203,
+      "text": {
+        "Title": "TURN, 死亡,救援",
+        "Description": "死亡,救援",
+        "Success": "救治小鸡",
+        "Failure": "因中毒而死亡的小鸡数量<br>回合耗尽",
+        "Name": "时空漩涡·困难第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 12303,
+      "text": {
+        "Title": "TURN, 死亡,救援",
+        "Description": "死亡,救援",
+        "Success": "救治小鸡",
+        "Failure": "因中毒而死亡的小鸡数量<br>回合耗尽",
+        "Name": "时空漩涡·英雄第3关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13002,
+      "text": {
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Name": "勇士竞技场·简单第2关",
+        "Title": "TURN,击败索兰恩",
+        "Description": "击败索兰恩",
+        "Success": "击败索兰恩"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13102,
+      "text": {
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败索兰恩",
+        "Description": "击败索兰恩",
+        "Success": "击败索兰恩",
+        "Name": "勇士竞技场·普通第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13202,
+      "text": {
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败索兰恩",
+        "Description": "击败索兰恩",
+        "Success": "击败索兰恩",
+        "Name": "勇士竞技场·困难第2关"
+      }
+    },
+    {
+      "table": "Mission_Info",
+      "id": 13302,
+      "text": {
+        "Failure": "我方全部被消灭<br>超过回合限制",
+        "Title": "TURN,击败索兰恩",
+        "Description": "击败索兰恩",
+        "Success": "击败索兰恩",
+        "Name": "勇士竞技场·英雄第2关"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7422,
+      "text": {
+        "Name": "细脖公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7022,
+      "text": {
+        "Name": "细脖公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7122,
+      "text": {
+        "Name": "细脖公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7222,
+      "text": {
+        "Name": "细脖公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7423,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7023,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7123,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7223,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7431,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7231,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7432,
+      "text": {
+        "Name": "鸡笼子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7032,
+      "text": {
+        "Name": "鸡笼子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7132,
+      "text": {
+        "Name": "鸡笼子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7232,
+      "text": {
+        "Name": "鸡笼子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7433,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7033,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7133,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7233,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8001,
+      "text": {
+        "Name": "炸弹宝宝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8002,
+      "text": {
+        "Name": "愤怒炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8101,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8102,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3014,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3114,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3214,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3314,
+      "text": {
+        "Name": "邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8103,
+      "text": {
+        "Name": "小卡西"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8104,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5104,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5133,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5204,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5233,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5304,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5333,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5404,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5433,
+      "text": {
+        "Name": "探险家托尼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 8105,
+      "text": {
+        "Name": "图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9001,
+      "text": {
+        "Name": "小炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9002,
+      "text": {
+        "Name": "凶猛炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9101,
+      "text": {
+        "Name": "远古巨蚊"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9102,
+      "text": {
+        "Name": "菲斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9103,
+      "text": {
+        "Name": "机关"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 9104,
+      "text": {
+        "Name": "武器堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10001,
+      "text": {
+        "Name": "石魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10002,
+      "text": {
+        "Name": "野猪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10005,
+      "text": {
+        "Name": "足球框1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10006,
+      "text": {
+        "Name": "足球框2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10007,
+      "text": {
+        "Name": "球门3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10008,
+      "text": {
+        "Name": "球门4"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10009,
+      "text": {
+        "Name": "球门5"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10011,
+      "text": {
+        "Name": "大嘴鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10012,
+      "text": {
+        "Name": "顽皮雪人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10013,
+      "text": {
+        "Name": "萌萌鹿"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10014,
+      "text": {
+        "Name": "派对小伙伴"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10015,
+      "text": {
+        "Name": "稀有蝴蝶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10016,
+      "text": {
+        "Name": "探险之翼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10101,
+      "text": {
+        "Name": "弗兰肯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 10102,
+      "text": {
+        "Name": "蝙蝠仆从"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11001,
+      "text": {
+        "Name": "大恶鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11002,
+      "text": {
+        "Name": "大野猪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11101,
+      "text": {
+        "Name": "妮娜"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11102,
+      "text": {
+        "Name": "章鱼仆从"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11103,
+      "text": {
+        "Name": "水母"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11104,
+      "text": {
+        "Name": "大章鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 11105,
+      "text": {
+        "Name": "水牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12001,
+      "text": {
+        "Name": "狼怪士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12101,
+      "text": {
+        "Name": "狼怪士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12201,
+      "text": {
+        "Name": "狼怪士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12301,
+      "text": {
+        "Name": "狼怪士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12002,
+      "text": {
+        "Name": "巨斧狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12102,
+      "text": {
+        "Name": "巨斧狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12202,
+      "text": {
+        "Name": "巨斧狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12302,
+      "text": {
+        "Name": "巨斧狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12003,
+      "text": {
+        "Name": "突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12103,
+      "text": {
+        "Name": "突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12303,
+      "text": {
+        "Name": "突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12203,
+      "text": {
+        "Name": "突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12004,
+      "text": {
+        "Name": "小鸡护卫队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12104,
+      "text": {
+        "Name": "小鸡护卫队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12304,
+      "text": {
+        "Name": "小鸡护卫队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12204,
+      "text": {
+        "Name": "小鸡护卫队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12005,
+      "text": {
+        "Name": "里格理"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12006,
+      "text": {
+        "Name": "小鸡炮团"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12106,
+      "text": {
+        "Name": "小鸡炮团"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12306,
+      "text": {
+        "Name": "小鸡炮团"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12206,
+      "text": {
+        "Name": "小鸡炮团"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12007,
+      "text": {
+        "Name": "邪恶的炮弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12107,
+      "text": {
+        "Name": "邪恶的炮弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12307,
+      "text": {
+        "Name": "邪恶的炮弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12207,
+      "text": {
+        "Name": "邪恶的炮弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12008,
+      "text": {
+        "Name": "黑胡子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12108,
+      "text": {
+        "Name": "黑胡子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12308,
+      "text": {
+        "Name": "黑胡子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12208,
+      "text": {
+        "Name": "黑胡子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12009,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12011,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12012,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12109,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12111,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12112,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12309,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12311,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12312,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12209,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12211,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12212,
+      "text": {
+        "Name": "小鸡士兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12010,
+      "text": {
+        "Name": "道拉夫上校"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12110,
+      "text": {
+        "Name": "道拉夫上校"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12310,
+      "text": {
+        "Name": "道拉夫上校"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12210,
+      "text": {
+        "Name": "道拉夫上校"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12013,
+      "text": {
+        "Name": "小鸡飞碟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12113,
+      "text": {
+        "Name": "小鸡飞碟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12313,
+      "text": {
+        "Name": "小鸡飞碟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12213,
+      "text": {
+        "Name": "小鸡飞碟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12014,
+      "text": {
+        "Name": "古伦维尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12114,
+      "text": {
+        "Name": "古伦维尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12314,
+      "text": {
+        "Name": "古伦维尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12214,
+      "text": {
+        "Name": "古伦维尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12015,
+      "text": {
+        "Name": "古伦维尔特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12115,
+      "text": {
+        "Name": "古伦维尔特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12315,
+      "text": {
+        "Name": "古伦维尔特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12215,
+      "text": {
+        "Name": "古伦维尔特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12016,
+      "text": {
+        "Name": "里格理"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12116,
+      "text": {
+        "Name": "里格理"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12316,
+      "text": {
+        "Name": "里格理"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12216,
+      "text": {
+        "Name": "里格理"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12017,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12018,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12117,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12118,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12317,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12318,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40043,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40044,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40047,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40048,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12217,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12218,
+      "text": {
+        "Name": "合金弹头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12019,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12119,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12319,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40045,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40049,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12219,
+      "text": {
+        "Name": "浮游炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12020,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12320,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40046,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40050,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12120,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12220,
+      "text": {
+        "Name": "合金弹头加强版"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12105,
+      "text": {
+        "Name": "未知非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12305,
+      "text": {
+        "Name": "未知非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 12205,
+      "text": {
+        "Name": "未知非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 30002,
+      "text": {
+        "Name": "暗夜伯爵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 30003,
+      "text": {
+        "Name": "暗夜伯爵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 30001,
+      "text": {
+        "Name": "吸血蝙蝠"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 30004,
+      "text": {
+        "Name": "足球队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13001,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13201,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13301,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13401,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2103,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13002,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13102,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13202,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13302,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13402,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13003,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13103,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13203,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13303,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13403,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13004,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13104,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13204,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13304,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13404,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13005,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13105,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13205,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13305,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13405,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3016,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3116,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3117,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3216,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3217,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13006,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13106,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13206,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13306,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13406,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5121,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5221,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5321,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5421,
+      "text": {
+        "Name": "狄奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13007,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13107,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13207,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13307,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13407,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4108,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4109,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4208,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4209,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4308,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4309,
+      "text": {
+        "Name": "米诺陶诺斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13008,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13108,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13208,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13308,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13408,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13009,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13109,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13209,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13309,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13409,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13010,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13110,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13210,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13310,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13410,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5423,
+      "text": {
+        "Name": "刑具盒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13012,
+      "text": {
+        "Name": "复仇者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13112,
+      "text": {
+        "Name": "复仇者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13212,
+      "text": {
+        "Name": "复仇者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13312,
+      "text": {
+        "Name": "复仇者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13412,
+      "text": {
+        "Name": "复仇者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13013,
+      "text": {
+        "Name": "夺魂者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13113,
+      "text": {
+        "Name": "夺魂者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13213,
+      "text": {
+        "Name": "夺魂者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13313,
+      "text": {
+        "Name": "夺魂者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13413,
+      "text": {
+        "Name": "夺魂者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13014,
+      "text": {
+        "Name": "征服者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13114,
+      "text": {
+        "Name": "征服者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13214,
+      "text": {
+        "Name": "征服者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13314,
+      "text": {
+        "Name": "征服者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13414,
+      "text": {
+        "Name": "征服者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 13101,
+      "text": {
+        "Name": "普通丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14001,
+      "text": {
+        "Name": "球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14101,
+      "text": {
+        "Name": "球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14201,
+      "text": {
+        "Name": "球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14002,
+      "text": {
+        "Name": "托马斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14102,
+      "text": {
+        "Name": "托马斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14202,
+      "text": {
+        "Name": "托马斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14003,
+      "text": {
+        "Name": "疯狂球迷"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14103,
+      "text": {
+        "Name": "疯狂球迷"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14203,
+      "text": {
+        "Name": "疯狂球迷"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14004,
+      "text": {
+        "Name": "卡洛斯射手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14104,
+      "text": {
+        "Name": "卡洛斯射手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14204,
+      "text": {
+        "Name": "卡洛斯射手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14005,
+      "text": {
+        "Name": "里卡尔多"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14105,
+      "text": {
+        "Name": "里卡尔多"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14205,
+      "text": {
+        "Name": "里卡尔多"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14006,
+      "text": {
+        "Name": "球门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14106,
+      "text": {
+        "Name": "球门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14206,
+      "text": {
+        "Name": "球门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14007,
+      "text": {
+        "Name": "黑哨王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14107,
+      "text": {
+        "Name": "黑哨王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14207,
+      "text": {
+        "Name": "黑哨王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14008,
+      "text": {
+        "Name": "调皮鹦鹉"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14108,
+      "text": {
+        "Name": "调皮鹦鹉"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14208,
+      "text": {
+        "Name": "调皮鹦鹉"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14009,
+      "text": {
+        "Name": "雅辛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14109,
+      "text": {
+        "Name": "雅辛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 14209,
+      "text": {
+        "Name": "雅辛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 15001,
+      "text": {
+        "Name": "咕噜咕噜"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 15002,
+      "text": {
+        "Name": "夫妻首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 16001,
+      "text": {
+        "Name": "瓦卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 20001,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 23001,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 93000,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1001,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1101,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1201,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1301,
+      "text": {
+        "Name": "粉红啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 21001,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 23002,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 94000,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 202,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1002,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1102,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1202,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1302,
+      "text": {
+        "Name": "精英啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 21002,
+      "text": {
+        "Name": "啵咕队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 23003,
+      "text": {
+        "Name": "啵咕队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 22001,
+      "text": {
+        "Name": "迷之啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 24001,
+      "text": {
+        "Name": "啵咕朵朵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 24002,
+      "text": {
+        "Name": "尖角队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 25001,
+      "text": {
+        "Name": "机器人小A"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 25002,
+      "text": {
+        "Name": "失控的罗伯特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40001,
+      "text": {
+        "Name": "（别来惹我）秘境兵蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40002,
+      "text": {
+        "Name": "秘境蚁后"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40003,
+      "text": {
+        "Name": "秘境啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40005,
+      "text": {
+        "Name": "秘境啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40004,
+      "text": {
+        "Name": "秘境队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40006,
+      "text": {
+        "Name": "秘境果果"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40007,
+      "text": {
+        "Name": "秘境果果"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40008,
+      "text": {
+        "Name": "秘境喽啰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40009,
+      "text": {
+        "Name": "秘境炸弹王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40010,
+      "text": {
+        "Name": "秘境战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40011,
+      "text": {
+        "Name": "秘境勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40012,
+      "text": {
+        "Name": "秘境领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40013,
+      "text": {
+        "Name": "秘境领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40014,
+      "text": {
+        "Name": "秘境奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40017,
+      "text": {
+        "Name": "秘境奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40074,
+      "text": {
+        "Name": "秘境奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40015,
+      "text": {
+        "Name": "秘境血鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40016,
+      "text": {
+        "Name": "秘境血狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40018,
+      "text": {
+        "Name": "秘境战神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40019,
+      "text": {
+        "Name": "秘境战神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40020,
+      "text": {
+        "Name": "秘境幽火"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40021,
+      "text": {
+        "Name": "秘境雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40023,
+      "text": {
+        "Name": "秘境雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40025,
+      "text": {
+        "Name": "秘境雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40029,
+      "text": {
+        "Name": "秘境雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40022,
+      "text": {
+        "Name": "秘境恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40024,
+      "text": {
+        "Name": "秘境飞行官"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40026,
+      "text": {
+        "Name": "秘境炮手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40027,
+      "text": {
+        "Name": "秘境炮手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40028,
+      "text": {
+        "Name": "秘境指挥官"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40030,
+      "text": {
+        "Name": "秘境魔龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40031,
+      "text": {
+        "Name": "秘境狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40070,
+      "text": {
+        "Name": "秘境狼怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40032,
+      "text": {
+        "Name": "秘境副官"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40036,
+      "text": {
+        "Name": "秘境副官"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40033,
+      "text": {
+        "Name": "秘境恶狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40034,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40038,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40039,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40040,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40041,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40042,
+      "text": {
+        "Name": "秘境统帅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40035,
+      "text": {
+        "Name": "秘境突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40037,
+      "text": {
+        "Name": "秘境突击队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40051,
+      "text": {
+        "Name": "秘境雪狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40052,
+      "text": {
+        "Name": "秘境米兹迪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40053,
+      "text": {
+        "Name": "秘境鬼魅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40054,
+      "text": {
+        "Name": "秘境鹘鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40055,
+      "text": {
+        "Name": "秘境米奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40056,
+      "text": {
+        "Name": "秘境红蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40057,
+      "text": {
+        "Name": "秘境之螺"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40058,
+      "text": {
+        "Name": "秘境剑鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40059,
+      "text": {
+        "Name": "秘境章鱼王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40060,
+      "text": {
+        "Name": "秘境之翼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40061,
+      "text": {
+        "Name": "秘境护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40062,
+      "text": {
+        "Name": "秘境守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40063,
+      "text": {
+        "Name": "秘境蜘蛛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40064,
+      "text": {
+        "Name": "秘境蝴蝶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40065,
+      "text": {
+        "Name": "秘境之王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40066,
+      "text": {
+        "Name": "秘境王灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40067,
+      "text": {
+        "Name": "秘境章鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40068,
+      "text": {
+        "Name": "秘境邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40069,
+      "text": {
+        "Name": "秘境邪神战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40071,
+      "text": {
+        "Name": "秘境骑士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40072,
+      "text": {
+        "Name": "秘境毒蚊"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40073,
+      "text": {
+        "Name": "秘境球王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40076,
+      "text": {
+        "Name": "秘境雅辛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40077,
+      "text": {
+        "Name": "秘境大嘴鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40078,
+      "text": {
+        "Name": "秘境野猪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40079,
+      "text": {
+        "Name": "财神首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40080,
+      "text": {
+        "Name": "秘境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 40081,
+      "text": {
+        "Name": "秘境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44401,
+      "text": {
+        "Name": "魔穴小兵1号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44402,
+      "text": {
+        "Name": "魔穴小兵2号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44403,
+      "text": {
+        "Name": "魔穴指挥官"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44404,
+      "text": {
+        "Name": "魔穴小兵3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44405,
+      "text": {
+        "Name": "魔穴小兵4"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44406,
+      "text": {
+        "Name": "魔穴战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44407,
+      "text": {
+        "Name": "魔穴将军"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44408,
+      "text": {
+        "Name": "魔穴小兵5"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44409,
+      "text": {
+        "Name": "魔穴斗士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44410,
+      "text": {
+        "Name": "魔穴霸主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44411,
+      "text": {
+        "Name": "魔穴潜伏者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44412,
+      "text": {
+        "Name": "魔穴守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44413,
+      "text": {
+        "Name": "魔穴守卫队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44414,
+      "text": {
+        "Name": "魔穴咕哩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44415,
+      "text": {
+        "Name": "魔穴毁灭者1号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44416,
+      "text": {
+        "Name": "魔穴毁灭者2号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44417,
+      "text": {
+        "Name": "魔穴毁灭者3号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44418,
+      "text": {
+        "Name": "魔穴魅影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44419,
+      "text": {
+        "Name": "魔穴终极者1号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44420,
+      "text": {
+        "Name": "魔穴终极者2号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44421,
+      "text": {
+        "Name": "魔穴终极者3号"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 44422,
+      "text": {
+        "Name": "最后的战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50001,
+      "text": {
+        "Name": "守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50002,
+      "text": {
+        "Name": "守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50003,
+      "text": {
+        "Name": "守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50004,
+      "text": {
+        "Name": "守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50005,
+      "text": {
+        "Name": "守护者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50006,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50007,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50008,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50009,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50010,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50011,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50012,
+      "text": {
+        "Name": "神力巨蟹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50101,
+      "text": {
+        "Name": "1级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50102,
+      "text": {
+        "Name": "2级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50103,
+      "text": {
+        "Name": "3级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50104,
+      "text": {
+        "Name": "4级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50105,
+      "text": {
+        "Name": "5级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50106,
+      "text": {
+        "Name": "6级蝶妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50201,
+      "text": {
+        "Name": "深渊水妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50202,
+      "text": {
+        "Name": "深渊水妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50203,
+      "text": {
+        "Name": "深渊水妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50204,
+      "text": {
+        "Name": "深渊水妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50205,
+      "text": {
+        "Name": "深渊水妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50206,
+      "text": {
+        "Name": "顽皮恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50207,
+      "text": {
+        "Name": "顽皮恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50208,
+      "text": {
+        "Name": "顽皮恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50209,
+      "text": {
+        "Name": "顽皮恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50210,
+      "text": {
+        "Name": "顽皮恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50211,
+      "text": {
+        "Name": "绝命沙虫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50212,
+      "text": {
+        "Name": "绝命沙虫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50213,
+      "text": {
+        "Name": "绝命沙虫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50214,
+      "text": {
+        "Name": "绝命沙虫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50215,
+      "text": {
+        "Name": "绝命沙虫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50216,
+      "text": {
+        "Name": "独角兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50217,
+      "text": {
+        "Name": "独角兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50218,
+      "text": {
+        "Name": "独角兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50219,
+      "text": {
+        "Name": "独角兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50220,
+      "text": {
+        "Name": "独角兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50221,
+      "text": {
+        "Name": "变异蛮牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50222,
+      "text": {
+        "Name": "变异蛮牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50223,
+      "text": {
+        "Name": "变异蛮牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50224,
+      "text": {
+        "Name": "变异蛮牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50225,
+      "text": {
+        "Name": "变异蛮牛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50226,
+      "text": {
+        "Name": "幽暗统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50227,
+      "text": {
+        "Name": "幽暗统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50228,
+      "text": {
+        "Name": "幽暗统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50229,
+      "text": {
+        "Name": "幽暗统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50230,
+      "text": {
+        "Name": "幽暗统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50301,
+      "text": {
+        "Name": "贪吃的蚂蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50302,
+      "text": {
+        "Name": "贪吃的啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50303,
+      "text": {
+        "Name": "贪吃的战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50304,
+      "text": {
+        "Name": "贪吃的蝙蝠"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 50305,
+      "text": {
+        "Name": "贪吃的幼龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 51000,
+      "text": {
+        "Name": "警告标志"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60001,
+      "text": {
+        "Name": "小泰莱"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60002,
+      "text": {
+        "Name": "大泰莱"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60003,
+      "text": {
+        "Name": "幽冥卡帕尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60004,
+      "text": {
+        "Name": "幽冥统领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60005,
+      "text": {
+        "Name": "红幽冥萨斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60006,
+      "text": {
+        "Name": "红恶灵卡尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60007,
+      "text": {
+        "Name": "哥布林矿工"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60008,
+      "text": {
+        "Name": "咕噜大王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60009,
+      "text": {
+        "Name": "泰莱萨法特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60010,
+      "text": {
+        "Name": "邪灵凯特"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60011,
+      "text": {
+        "Name": "野人射手"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60012,
+      "text": {
+        "Name": "山野狂徒"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60013,
+      "text": {
+        "Name": "哥布林死士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60014,
+      "text": {
+        "Name": "沙之影魅"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60015,
+      "text": {
+        "Name": "米诺陶诺斯的盔甲"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60016,
+      "text": {
+        "Name": "恶魔首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71130,
+      "text": {
+        "Name": "恶魔首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71131,
+      "text": {
+        "Name": "恶魔首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71132,
+      "text": {
+        "Name": "恶魔首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71133,
+      "text": {
+        "Name": "恶魔首领"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60017,
+      "text": {
+        "Name": "森林兵蜂"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60018,
+      "text": {
+        "Name": "木林骑士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60019,
+      "text": {
+        "Name": "哲约将军"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80003,
+      "text": {
+        "Name": "哲约将军"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80008,
+      "text": {
+        "Name": "哲约将军"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80013,
+      "text": {
+        "Name": "哲约将军"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 60020,
+      "text": {
+        "Name": "死亡之角"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70001,
+      "text": {
+        "Name": "七夕萌毒树妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70002,
+      "text": {
+        "Name": "七夕噩梦树妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70003,
+      "text": {
+        "Name": "七夕魅惑树妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70004,
+      "text": {
+        "Name": "天兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70005,
+      "text": {
+        "Name": "王母"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70006,
+      "text": {
+        "Name": "七夕蓝魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70007,
+      "text": {
+        "Name": "七夕红魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70008,
+      "text": {
+        "Name": "鬼王咔咔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70009,
+      "text": {
+        "Name": "牧师艾丽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70010,
+      "text": {
+        "Name": "时间操控者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70011,
+      "text": {
+        "Name": "恶灵操控者"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70012,
+      "text": {
+        "Name": "蝎子王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70099,
+      "text": {
+        "Name": "探险家"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70103,
+      "text": {
+        "Name": "迷你魅惑树妖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70104,
+      "text": {
+        "Name": "牛郎"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70111,
+      "text": {
+        "Name": "恶魔之帽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 70204,
+      "text": {
+        "Name": "织女"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71000,
+      "text": {
+        "Name": "西王母"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71001,
+      "text": {
+        "Name": "德莱文"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71002,
+      "text": {
+        "Name": "德莱文"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71003,
+      "text": {
+        "Name": "黄鼠狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71004,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71013,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71016,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71005,
+      "text": {
+        "Name": "绳子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71006,
+      "text": {
+        "Name": "蜻蜓"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71007,
+      "text": {
+        "Name": "知了"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71008,
+      "text": {
+        "Name": "蝴蝶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71009,
+      "text": {
+        "Name": "独角仙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71010,
+      "text": {
+        "Name": "开炮机关"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71011,
+      "text": {
+        "Name": "石头"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71012,
+      "text": {
+        "Name": "木桶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71015,
+      "text": {
+        "Name": "病魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71024,
+      "text": {
+        "Name": "秘境刀卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71025,
+      "text": {
+        "Name": "秘境枪匪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71026,
+      "text": {
+        "Name": "秘境剑士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71027,
+      "text": {
+        "Name": "秘境黑胡子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71028,
+      "text": {
+        "Name": "秘境魔灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71029,
+      "text": {
+        "Name": "女巫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71030,
+      "text": {
+        "Name": "秘境小鲨怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71031,
+      "text": {
+        "Name": "秘境小鲨怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71032,
+      "text": {
+        "Name": "秘境猎人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71033,
+      "text": {
+        "Name": "秘境红蝎"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71034,
+      "text": {
+        "Name": "秘境蝎王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71035,
+      "text": {
+        "Name": "蓝蝎"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71036,
+      "text": {
+        "Name": "秘境火娃"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71039,
+      "text": {
+        "Name": "邪神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71040,
+      "text": {
+        "Name": "邪神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71041,
+      "text": {
+        "Name": "邪神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71042,
+      "text": {
+        "Name": "邪神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71043,
+      "text": {
+        "Name": "章鱼王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71044,
+      "text": {
+        "Name": "章鱼王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71045,
+      "text": {
+        "Name": "章鱼王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71046,
+      "text": {
+        "Name": "章鱼王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71047,
+      "text": {
+        "Name": "蝎王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71048,
+      "text": {
+        "Name": "蝎王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71049,
+      "text": {
+        "Name": "蝎王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71050,
+      "text": {
+        "Name": "蝎王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71051,
+      "text": {
+        "Name": "小喷火怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71052,
+      "text": {
+        "Name": "小喷火怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71053,
+      "text": {
+        "Name": "小喷火怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71054,
+      "text": {
+        "Name": "小喷火怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71055,
+      "text": {
+        "Name": "魔法鹰卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71061,
+      "text": {
+        "Name": "魔法鹰卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71073,
+      "text": {
+        "Name": "魔法鹰卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71067,
+      "text": {
+        "Name": "魔法鹰卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71056,
+      "text": {
+        "Name": "狼牙卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71062,
+      "text": {
+        "Name": "狼牙卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71074,
+      "text": {
+        "Name": "狼牙卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71068,
+      "text": {
+        "Name": "狼牙卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71057,
+      "text": {
+        "Name": "三色法球1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71063,
+      "text": {
+        "Name": "三色法球1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71075,
+      "text": {
+        "Name": "三色法球1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71069,
+      "text": {
+        "Name": "三色法球1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71058,
+      "text": {
+        "Name": "三色法球2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71064,
+      "text": {
+        "Name": "三色法球2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71070,
+      "text": {
+        "Name": "三色法球2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71076,
+      "text": {
+        "Name": "三色法球2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71059,
+      "text": {
+        "Name": "三色法球3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71065,
+      "text": {
+        "Name": "三色法球3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71071,
+      "text": {
+        "Name": "三色法球3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71077,
+      "text": {
+        "Name": "三色法球3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71060,
+      "text": {
+        "Name": "魔法守护兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71066,
+      "text": {
+        "Name": "魔法守护兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71072,
+      "text": {
+        "Name": "魔法守护兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71078,
+      "text": {
+        "Name": "魔法守护兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2501,
+      "text": {
+        "Name": "兵蚁前锋"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2601,
+      "text": {
+        "Name": "兵蚁前锋"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2701,
+      "text": {
+        "Name": "兵蚁前锋"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2502,
+      "text": {
+        "Name": "兵蚁斥候"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2602,
+      "text": {
+        "Name": "兵蚁斥候"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2702,
+      "text": {
+        "Name": "兵蚁斥候"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2503,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2603,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2703,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71079,
+      "text": {
+        "Name": "机械狼蛛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71083,
+      "text": {
+        "Name": "机械狼蛛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71087,
+      "text": {
+        "Name": "机械狼蛛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71091,
+      "text": {
+        "Name": "机械狼蛛"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71080,
+      "text": {
+        "Name": "机械蝶卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71084,
+      "text": {
+        "Name": "机械蝶卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71088,
+      "text": {
+        "Name": "机械蝶卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71092,
+      "text": {
+        "Name": "机械蝶卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71081,
+      "text": {
+        "Name": "时空铁卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71085,
+      "text": {
+        "Name": "时空铁卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71089,
+      "text": {
+        "Name": "时空铁卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71093,
+      "text": {
+        "Name": "时空铁卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71082,
+      "text": {
+        "Name": "时空领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71086,
+      "text": {
+        "Name": "时空领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71090,
+      "text": {
+        "Name": "时空领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71094,
+      "text": {
+        "Name": "时空领主"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71095,
+      "text": {
+        "Name": "雪域狼兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71097,
+      "text": {
+        "Name": "雪域狼兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71099,
+      "text": {
+        "Name": "雪域狼兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71101,
+      "text": {
+        "Name": "雪域狼兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71096,
+      "text": {
+        "Name": "冰龙奎雷姆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71098,
+      "text": {
+        "Name": "冰龙奎雷姆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71100,
+      "text": {
+        "Name": "冰龙奎雷姆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71102,
+      "text": {
+        "Name": "冰龙奎雷姆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71103,
+      "text": {
+        "Name": "机器人A"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71107,
+      "text": {
+        "Name": "机器人A"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71111,
+      "text": {
+        "Name": "机器人A"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71115,
+      "text": {
+        "Name": "机器人A"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71104,
+      "text": {
+        "Name": "机器人B"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71108,
+      "text": {
+        "Name": "机器人B"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71112,
+      "text": {
+        "Name": "机器人B"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71116,
+      "text": {
+        "Name": "机器人B"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71105,
+      "text": {
+        "Name": "猎户飞船"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71109,
+      "text": {
+        "Name": "猎户飞船"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71113,
+      "text": {
+        "Name": "猎户飞船"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71117,
+      "text": {
+        "Name": "猎户飞船"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71118,
+      "text": {
+        "Name": "邪神王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71119,
+      "text": {
+        "Name": "邪神王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71120,
+      "text": {
+        "Name": "邪神王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71121,
+      "text": {
+        "Name": "邪神王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71122,
+      "text": {
+        "Name": "喽啰剑鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71123,
+      "text": {
+        "Name": "喽啰剑鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71124,
+      "text": {
+        "Name": "喽啰剑鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71125,
+      "text": {
+        "Name": "喽啰剑鱼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71126,
+      "text": {
+        "Name": "啵咕祭司"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71127,
+      "text": {
+        "Name": "啵咕祭司"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71128,
+      "text": {
+        "Name": "啵咕祭司"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71129,
+      "text": {
+        "Name": "啵咕祭司"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71134,
+      "text": {
+        "Name": "塔卡力士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71137,
+      "text": {
+        "Name": "塔卡力士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71140,
+      "text": {
+        "Name": "塔卡力士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71143,
+      "text": {
+        "Name": "塔卡力士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71135,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71138,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71141,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71144,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71136,
+      "text": {
+        "Name": "化骨长老"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71139,
+      "text": {
+        "Name": "化骨长老"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71142,
+      "text": {
+        "Name": "化骨长老"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71145,
+      "text": {
+        "Name": "化骨长老"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71146,
+      "text": {
+        "Name": "沙丘怪鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71150,
+      "text": {
+        "Name": "沙丘怪鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71154,
+      "text": {
+        "Name": "沙丘怪鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71158,
+      "text": {
+        "Name": "沙丘怪鸟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71147,
+      "text": {
+        "Name": "亡灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71151,
+      "text": {
+        "Name": "亡灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71155,
+      "text": {
+        "Name": "亡灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71159,
+      "text": {
+        "Name": "亡灵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71148,
+      "text": {
+        "Name": "幻境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71152,
+      "text": {
+        "Name": "幻境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71156,
+      "text": {
+        "Name": "幻境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71160,
+      "text": {
+        "Name": "幻境猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71149,
+      "text": {
+        "Name": "狂暴猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71153,
+      "text": {
+        "Name": "狂暴猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71157,
+      "text": {
+        "Name": "狂暴猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 71161,
+      "text": {
+        "Name": "狂暴猴王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 72000,
+      "text": {
+        "Name": "海盗舰长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 73000,
+      "text": {
+        "Name": "年兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80001,
+      "text": {
+        "Name": "啵咕战神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80006,
+      "text": {
+        "Name": "啵咕战神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80011,
+      "text": {
+        "Name": "啵咕战神"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80002,
+      "text": {
+        "Name": "混沌之戒律"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80007,
+      "text": {
+        "Name": "混沌之戒律"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80012,
+      "text": {
+        "Name": "混沌之戒律"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80004,
+      "text": {
+        "Name": "深渊女王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80009,
+      "text": {
+        "Name": "深渊女王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80014,
+      "text": {
+        "Name": "深渊女王"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80005,
+      "text": {
+        "Name": "酋长歌斯毕斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80010,
+      "text": {
+        "Name": "酋长歌斯毕斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80015,
+      "text": {
+        "Name": "酋长歌斯毕斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80016,
+      "text": {
+        "Name": "战锤哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80017,
+      "text": {
+        "Name": "战锤哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80018,
+      "text": {
+        "Name": "战锤哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80019,
+      "text": {
+        "Name": "蚂蚁小弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80020,
+      "text": {
+        "Name": "蚂蚁小弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 80021,
+      "text": {
+        "Name": "蚂蚁小弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 91000,
+      "text": {
+        "Name": "兵蚁前锋"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2101,
+      "text": {
+        "Name": "兵蚁前锋"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 92000,
+      "text": {
+        "Name": "兵蚁斥候"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2102,
+      "text": {
+        "Name": "兵蚁斥候"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 95000,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 96000,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2504,
+      "text": {
+        "Name": "兵蚁护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2604,
+      "text": {
+        "Name": "兵蚁护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2704,
+      "text": {
+        "Name": "兵蚁护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7501,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7601,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7701,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7502,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7602,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7702,
+      "text": {
+        "Name": "小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7503,
+      "text": {
+        "Name": "强化鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7603,
+      "text": {
+        "Name": "强化鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7703,
+      "text": {
+        "Name": "强化鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7511,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7521,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7611,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7621,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7711,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7721,
+      "text": {
+        "Name": "母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7522,
+      "text": {
+        "Name": "公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7622,
+      "text": {
+        "Name": "公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7722,
+      "text": {
+        "Name": "公鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7523,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7623,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7723,
+      "text": {
+        "Name": "鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7531,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7631,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7731,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7532,
+      "text": {
+        "Name": "鸡笼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7632,
+      "text": {
+        "Name": "鸡笼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7732,
+      "text": {
+        "Name": "鸡笼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7533,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7633,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7733,
+      "text": {
+        "Name": "臭蛋堆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1,
+      "text": {
+        "Name": "训练小怪1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2,
+      "text": {
+        "Name": "训练小怪2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3,
+      "text": {
+        "Name": "训练小怪2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4,
+      "text": {
+        "Name": "靶子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5,
+      "text": {
+        "Name": "靶子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6,
+      "text": {
+        "Name": "飞行靶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 101,
+      "text": {
+        "Name": "幽灵1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 102,
+      "text": {
+        "Name": "幽灵2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 103,
+      "text": {
+        "Name": "幽灵3"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 104,
+      "text": {
+        "Name": "幽灵4"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 105,
+      "text": {
+        "Name": "幽灵5"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 106,
+      "text": {
+        "Name": "幽灵6"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 107,
+      "text": {
+        "Name": "幽灵7"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 108,
+      "text": {
+        "Name": "幽灵8"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 109,
+      "text": {
+        "Name": "幽灵9"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 116,
+      "text": {
+        "Name": "幽灵16"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 201,
+      "text": {
+        "Name": "啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1003,
+      "text": {
+        "Name": "巴罗夫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1103,
+      "text": {
+        "Name": "巴罗夫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1203,
+      "text": {
+        "Name": "巴罗夫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1303,
+      "text": {
+        "Name": "巴罗夫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1004,
+      "text": {
+        "Name": "小炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1104,
+      "text": {
+        "Name": "小炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1204,
+      "text": {
+        "Name": "小炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1304,
+      "text": {
+        "Name": "小炸弹人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1005,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1006,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1205,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1206,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1305,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1306,
+      "text": {
+        "Name": "尼尔鲁奥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1007,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1107,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1207,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1307,
+      "text": {
+        "Name": "马迪亚斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1008,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1108,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1208,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1308,
+      "text": {
+        "Name": "马迪亚斯之影"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1009,
+      "text": {
+        "Name": "啵咕护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1109,
+      "text": {
+        "Name": "啵咕护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1209,
+      "text": {
+        "Name": "啵咕护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1309,
+      "text": {
+        "Name": "啵咕护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1010,
+      "text": {
+        "Name": "喽啰啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1110,
+      "text": {
+        "Name": "喽啰啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1210,
+      "text": {
+        "Name": "喽啰啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1310,
+      "text": {
+        "Name": "喽啰啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1011,
+      "text": {
+        "Name": "喽啰炸弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1111,
+      "text": {
+        "Name": "喽啰炸弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1211,
+      "text": {
+        "Name": "喽啰炸弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1311,
+      "text": {
+        "Name": "喽啰炸弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1105,
+      "text": {
+        "Name": "尼尔鲁奥（幻境）"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1106,
+      "text": {
+        "Name": "尼尔鲁奥（（幻境））"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 1243,
+      "text": {
+        "Name": "远古巨龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2104,
+      "text": {
+        "Name": "兵蚁护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2404,
+      "text": {
+        "Name": "兵蚁护卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2401,
+      "text": {
+        "Name": "元素蚂蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2402,
+      "text": {
+        "Name": "魔攻蚂蚁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 2403,
+      "text": {
+        "Name": "丹妮莉丝"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3000,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3001,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3002,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3003,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3101,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3201,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3301,
+      "text": {
+        "Name": "部落战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3004,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3005,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3006,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3104,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3204,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3304,
+      "text": {
+        "Name": "部落勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3007,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3018,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3107,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3118,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3207,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3218,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3307,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3318,
+      "text": {
+        "Name": "魔豌豆"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3008,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3019,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3108,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3119,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3208,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3219,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3319,
+      "text": {
+        "Name": "布兰巴拉哥哥"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3009,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3109,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3209,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3309,
+      "text": {
+        "Name": "布兰巴拉弟弟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3010,
+      "text": {
+        "Name": "疲劳图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3110,
+      "text": {
+        "Name": "疲劳图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3210,
+      "text": {
+        "Name": "疲劳图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3310,
+      "text": {
+        "Name": "疲劳图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3011,
+      "text": {
+        "Name": "枷锁图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3111,
+      "text": {
+        "Name": "枷锁图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3211,
+      "text": {
+        "Name": "枷锁图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3311,
+      "text": {
+        "Name": "枷锁图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3012,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3112,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3212,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3312,
+      "text": {
+        "Name": "爆炸图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3013,
+      "text": {
+        "Name": "生命图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3113,
+      "text": {
+        "Name": "生命图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3213,
+      "text": {
+        "Name": "生命图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3313,
+      "text": {
+        "Name": "生命图腾"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3015,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3115,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3215,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3315,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4002,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3017,
+      "text": {
+        "Name": "索兰恩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3102,
+      "text": {
+        "Name": "竹枪战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3202,
+      "text": {
+        "Name": "竹枪战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3302,
+      "text": {
+        "Name": "竹枪战士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3103,
+      "text": {
+        "Name": "酋长近卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3203,
+      "text": {
+        "Name": "酋长近卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3303,
+      "text": {
+        "Name": "酋长近卫"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3105,
+      "text": {
+        "Name": "掷矛勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3205,
+      "text": {
+        "Name": "掷矛勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3305,
+      "text": {
+        "Name": "掷矛勇士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3106,
+      "text": {
+        "Name": "萨满卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3206,
+      "text": {
+        "Name": "萨满卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3306,
+      "text": {
+        "Name": "萨满卫士"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3308,
+      "text": {
+        "Name": "布兰巴拉哥哥（英雄）"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3316,
+      "text": {
+        "Name": "索兰恩（英雄）"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 3317,
+      "text": {
+        "Name": "索兰恩（英雄）"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4001,
+      "text": {
+        "Name": "核弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4003,
+      "text": {
+        "Name": "地精敢死队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4004,
+      "text": {
+        "Name": "大炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4005,
+      "text": {
+        "Name": "沙漠神鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4006,
+      "text": {
+        "Name": "沙漠血狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4007,
+      "text": {
+        "Name": "幽冥火焰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4008,
+      "text": {
+        "Name": "米诺陶诺斯1"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4009,
+      "text": {
+        "Name": "米诺陶诺斯2"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4101,
+      "text": {
+        "Name": "核弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4201,
+      "text": {
+        "Name": "核弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4301,
+      "text": {
+        "Name": "核弹"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4102,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4202,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4302,
+      "text": {
+        "Name": "封印门"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4103,
+      "text": {
+        "Name": "敢死兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4203,
+      "text": {
+        "Name": "敢死兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4303,
+      "text": {
+        "Name": "敢死兵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4104,
+      "text": {
+        "Name": "大炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4204,
+      "text": {
+        "Name": "大炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4304,
+      "text": {
+        "Name": "大炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4105,
+      "text": {
+        "Name": "神鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4205,
+      "text": {
+        "Name": "神鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4305,
+      "text": {
+        "Name": "神鹰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4106,
+      "text": {
+        "Name": "沙漠狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4206,
+      "text": {
+        "Name": "沙漠狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4306,
+      "text": {
+        "Name": "沙漠狼"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4107,
+      "text": {
+        "Name": "幽冥火焰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4207,
+      "text": {
+        "Name": "幽冥火焰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4307,
+      "text": {
+        "Name": "幽冥火焰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4110,
+      "text": {
+        "Name": "地狱之火"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4210,
+      "text": {
+        "Name": "地狱之火"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 4310,
+      "text": {
+        "Name": "地狱之火"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5001,
+      "text": {
+        "Name": "拳击啵咕"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5002,
+      "text": {
+        "Name": "机器人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5003,
+      "text": {
+        "Name": "恶魔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5004,
+      "text": {
+        "Name": "石头怪"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5005,
+      "text": {
+        "Name": "校园恶霸"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5006,
+      "text": {
+        "Name": "短耳兔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5007,
+      "text": {
+        "Name": "花朵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5008,
+      "text": {
+        "Name": "龙舟"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5009,
+      "text": {
+        "Name": "蘑菇崽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5010,
+      "text": {
+        "Name": "棒棒糖"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5011,
+      "text": {
+        "Name": "感恩萌物"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5012,
+      "text": {
+        "Name": "伯爵"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5013,
+      "text": {
+        "Name": "落跑新娘"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5014,
+      "text": {
+        "Name": "圣诞老人"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5015,
+      "text": {
+        "Name": "小年兽"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5101,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5114,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5201,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5214,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5301,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5314,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5401,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5414,
+      "text": {
+        "Name": "波奇"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5102,
+      "text": {
+        "Name": "技工奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5202,
+      "text": {
+        "Name": "技工奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5302,
+      "text": {
+        "Name": "技工奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5103,
+      "text": {
+        "Name": "齿轮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5203,
+      "text": {
+        "Name": "齿轮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5303,
+      "text": {
+        "Name": "齿轮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5403,
+      "text": {
+        "Name": "齿轮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5111,
+      "text": {
+        "Name": "工兵哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5211,
+      "text": {
+        "Name": "工兵哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5311,
+      "text": {
+        "Name": "工兵哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5112,
+      "text": {
+        "Name": "凶蛮哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5212,
+      "text": {
+        "Name": "凶蛮哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5312,
+      "text": {
+        "Name": "凶蛮哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5113,
+      "text": {
+        "Name": "狡诈哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5213,
+      "text": {
+        "Name": "狡诈哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5313,
+      "text": {
+        "Name": "狡诈哥布林"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5116,
+      "text": {
+        "Name": "龙击炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5216,
+      "text": {
+        "Name": "龙击炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5316,
+      "text": {
+        "Name": "龙击炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5416,
+      "text": {
+        "Name": "龙击炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5117,
+      "text": {
+        "Name": "碎裂炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5217,
+      "text": {
+        "Name": "碎裂炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5317,
+      "text": {
+        "Name": "碎裂炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5122,
+      "text": {
+        "Name": "幸运烙铁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5222,
+      "text": {
+        "Name": "幸运烙铁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5322,
+      "text": {
+        "Name": "幸运烙铁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5123,
+      "text": {
+        "Name": "古怪箱子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5223,
+      "text": {
+        "Name": "古怪箱子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5323,
+      "text": {
+        "Name": "古怪箱子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5124,
+      "text": {
+        "Name": "高台"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5224,
+      "text": {
+        "Name": "高台"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5324,
+      "text": {
+        "Name": "高台"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5131,
+      "text": {
+        "Name": "霸鲁巴托斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5231,
+      "text": {
+        "Name": "霸鲁巴托斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5331,
+      "text": {
+        "Name": "霸鲁巴托斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5431,
+      "text": {
+        "Name": "霸鲁巴托斯"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5132,
+      "text": {
+        "Name": "邪焰雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5232,
+      "text": {
+        "Name": "邪焰雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5332,
+      "text": {
+        "Name": "邪焰雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5134,
+      "text": {
+        "Name": "冰晶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5234,
+      "text": {
+        "Name": "冰晶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5334,
+      "text": {
+        "Name": "冰晶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5135,
+      "text": {
+        "Name": "障碍非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5235,
+      "text": {
+        "Name": "障碍非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5335,
+      "text": {
+        "Name": "障碍非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5402,
+      "text": {
+        "Name": "技工奴隶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5411,
+      "text": {
+        "Name": "工兵哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5412,
+      "text": {
+        "Name": "凶蛮哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5413,
+      "text": {
+        "Name": "狡诈哥布尔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5417,
+      "text": {
+        "Name": "碎裂炮"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5422,
+      "text": {
+        "Name": "幸运烙铁"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5424,
+      "text": {
+        "Name": "法庭"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5432,
+      "text": {
+        "Name": "邪焰雏龙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5434,
+      "text": {
+        "Name": "冰晶"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 5435,
+      "text": {
+        "Name": "屏障非玩家角色"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6112,
+      "text": {
+        "Name": "分数球底板"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6212,
+      "text": {
+        "Name": "分数球底板"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6312,
+      "text": {
+        "Name": "分数球底板"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6113,
+      "text": {
+        "Name": "分数球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6213,
+      "text": {
+        "Name": "分数球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6313,
+      "text": {
+        "Name": "分数球"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6114,
+      "text": {
+        "Name": "红队队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6214,
+      "text": {
+        "Name": "红队队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6314,
+      "text": {
+        "Name": "红队队长"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6121,
+      "text": {
+        "Name": "红队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6221,
+      "text": {
+        "Name": "红队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6321,
+      "text": {
+        "Name": "红队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6122,
+      "text": {
+        "Name": "蓝队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6222,
+      "text": {
+        "Name": "蓝队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6322,
+      "text": {
+        "Name": "蓝队"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6123,
+      "text": {
+        "Name": "大财主葛兰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6223,
+      "text": {
+        "Name": "大财主葛兰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6323,
+      "text": {
+        "Name": "大财主葛兰"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6124,
+      "text": {
+        "Name": "墙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6224,
+      "text": {
+        "Name": "墙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6324,
+      "text": {
+        "Name": "墙"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6131,
+      "text": {
+        "Name": "歪仔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6231,
+      "text": {
+        "Name": "歪仔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6331,
+      "text": {
+        "Name": "歪仔"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6132,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6141,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6232,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6241,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6332,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6341,
+      "text": {
+        "Name": "黑哨梅卡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6134,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6143,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6234,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6243,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6334,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6343,
+      "text": {
+        "Name": "粉丝团(右)"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6135,
+      "text": {
+        "Name": "流氓群众"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6235,
+      "text": {
+        "Name": "流氓群众"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6335,
+      "text": {
+        "Name": "流氓群众"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6144,
+      "text": {
+        "Name": "防护罩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6244,
+      "text": {
+        "Name": "防护罩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6344,
+      "text": {
+        "Name": "防护罩"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6145,
+      "text": {
+        "Name": "裁判台子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6245,
+      "text": {
+        "Name": "裁判台子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 6345,
+      "text": {
+        "Name": "裁判台子"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7001,
+      "text": {
+        "Name": "蛋壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7101,
+      "text": {
+        "Name": "蛋壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7201,
+      "text": {
+        "Name": "蛋壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7401,
+      "text": {
+        "Name": "蛋壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7002,
+      "text": {
+        "Name": "无壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7102,
+      "text": {
+        "Name": "无壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7202,
+      "text": {
+        "Name": "无壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7402,
+      "text": {
+        "Name": "无壳小鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7003,
+      "text": {
+        "Name": "不动的鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7103,
+      "text": {
+        "Name": "不动的鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7203,
+      "text": {
+        "Name": "不动的鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7403,
+      "text": {
+        "Name": "不动的鸡舍"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7011,
+      "text": {
+        "Name": "胖胖母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7111,
+      "text": {
+        "Name": "胖胖母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7211,
+      "text": {
+        "Name": "胖胖母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7021,
+      "text": {
+        "Name": "凶暴母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7121,
+      "text": {
+        "Name": "凶暴母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7221,
+      "text": {
+        "Name": "凶暴母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7421,
+      "text": {
+        "Name": "凶暴母鸡"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7031,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7131,
+      "text": {
+        "Name": "臭蛋笨笨"
+      }
+    },
+    {
+      "table": "NPC_Info",
+      "id": 7411,
+      "text": {
+        "Name": "胖胖母鸡（魔）"
+      }
+    }
   ]
 }

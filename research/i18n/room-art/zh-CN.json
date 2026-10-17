@@ -2,7 +2,6 @@
   "version": 1,
   "asset": "ui/vietnam/swf/room.swf",
   "sourceAssetSha256": "a4a33f05dfd77cad4fa237d97a0594e9dc64f32c1266815540603beb8da53aed",
-  "expectedSwfSha256": "ecfa5ddb0dbc1ae949b18ada1e6c2bed20fb62d6193c920c1fa6f7a9c5fe4503",
   "fontFamily": "Workshop RoomList CJK",
   "fontFile": "msyhbd.ttc",
   "bitmaps": [
@@ -133,7 +132,800 @@
         "path": "64.png",
         "sha256": "8a667c1b07047919874fb44944c754eaae3d31dfa09e622a33dae33e8bd5e178"
       }
+    },
+    {
+      "id": 71,
+      "className": "asset.room.view.RoomRightPropViewBGAsset",
+      "tagCode": 36,
+      "width": 244,
+      "height": 414,
+      "sourceTagSha256": "61974ff767acf0bb79f11b3fab5beb0156fdf749cb1557d7d05b1d66f4352c49",
+      "sourcePixelsSha256": "cea704ee6579f88e925fd3d5e3b1d4724f79095fc8aeebaee09d8cb22556d745",
+      "originalText": "Phòng / Đạo cụ theo người / Rương đạo cụ chiến đấu / Quan chiến",
+      "regions": [
+        {
+          "box": [
+            7,
+            0,
+            96,
+            31
+          ],
+          "text": "房间",
+          "fontSize": 24,
+          "fill": "#fff3cf",
+          "stroke": "#4b2d16",
+          "strokeWidth": 1.4,
+          "transparent": true,
+          "preserveAlpha": false
+        },
+        {
+          "box": [
+            25,
+            70,
+            194,
+            22
+          ],
+          "text": "随身道具",
+          "fontSize": 16,
+          "fill": "#fff3cf",
+          "stroke": "#4b2d16",
+          "strokeWidth": 1.4,
+          "transparent": false,
+          "preserveAlpha": false,
+          "sample": [
+            220,
+            70,
+            1,
+            22
+          ]
+        },
+        {
+          "box": [
+            25,
+            161,
+            194,
+            24
+          ],
+          "text": "战斗道具",
+          "fontSize": 16,
+          "fill": "#fff3cf",
+          "stroke": "#4b2d16",
+          "strokeWidth": 1.4,
+          "transparent": false,
+          "preserveAlpha": false,
+          "sample": [
+            220,
+            161,
+            1,
+            24
+          ]
+        },
+        {
+          "box": [
+            25,
+            322,
+            105,
+            24
+          ],
+          "text": "观战",
+          "fontSize": 16,
+          "fill": "#fff3cf",
+          "stroke": "#4b2d16",
+          "strokeWidth": 1.4,
+          "transparent": false,
+          "preserveAlpha": false,
+          "sample": [
+            220,
+            322,
+            1,
+            24
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "71.png",
+        "sha256": "91dc2440fcba7b46f8150940d3c92e03bdca08359e91f558a72229180e95d2e9"
+      }
+    },
+    {
+      "id": 77,
+      "className": "asset.room.view.smallMapInfoPanel.roomSmallMapPanelBgAsset",
+      "tagCode": 36,
+      "width": 244,
+      "height": 119,
+      "sourceTagSha256": "67605a3778d935737cba5f3ad82bde7cd4700b3556e1447853287e342f11fa56",
+      "sourcePixelsSha256": "225e98cf1c5021799246e059e7f718b0509e1dead21dacc6ab59d3372fc6dbbc",
+      "originalText": "Thông tin phòng",
+      "regions": [
+        {
+          "box": [
+            6,
+            0,
+            158,
+            17
+          ],
+          "text": "房间信息",
+          "fontSize": 13,
+          "fill": "#fff3cf",
+          "stroke": "#4b2d16",
+          "strokeWidth": 1.4,
+          "transparent": false,
+          "preserveAlpha": false,
+          "sample": [
+            177,
+            0,
+            1,
+            17
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "77.png",
+        "sha256": "492250663ab4a2575f0f29a7a30546dfa6a695f51dc071d09b6c93c8b51b9e33"
+      }
+    },
+    {
+      "id": 80,
+      "className": "asset.room.roomTypeAsset",
+      "tagCode": 36,
+      "width": 93,
+      "height": 24,
+      "sourceTagSha256": "d37c2bdedc7423fb2b8473c179bba9e70cfbebf34a48c0427a25651cd27c5aee",
+      "sourcePixelsSha256": "b582c77900dfb449756b10dfe6bc3b457f245a30225dd48fc359733a145493bd",
+      "originalText": "Loại phòng",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            93,
+            24
+          ],
+          "text": "房间类型",
+          "fontSize": 16,
+          "fill": "#b0df47",
+          "stroke": "#193c00",
+          "strokeWidth": 1.1,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "80.png",
+        "sha256": "5cec3d7dca9db1e405911ac4395b8ecfad5d49661a2c3063dbc97fa8221ed9d5"
+      }
+    },
+    {
+      "id": 96,
+      "className": "asset.room.view.smallMapInfoPanel.10secondsAsset",
+      "tagCode": 36,
+      "width": 52,
+      "height": 22,
+      "sourceTagSha256": "bae8c10037abb3e7cd2976bceba74bddd8ae1a9f8603bb6270fd763502df2512",
+      "sourcePixelsSha256": "73327d5e2c760bcf7a102974ea5ef20f827b597db874481e71c06ae98544d269",
+      "originalText": "10 giây/seg",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            52,
+            22
+          ],
+          "text": "10秒",
+          "fontSize": 13,
+          "fill": "#ffb832",
+          "stroke": "#38200a",
+          "strokeWidth": 1.4,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "96.png",
+        "sha256": "2de76302be07bfdd7e4f620ea7fd06db0786f378fa41deef74fbfc6cfe4abf2b"
+      }
+    },
+    {
+      "id": 99,
+      "className": "asset.room.view.smallMapInfoPanel.15secondsAsset",
+      "tagCode": 36,
+      "width": 52,
+      "height": 22,
+      "sourceTagSha256": "9b41128350c226c352a4ebec7f63c0f2a26f5e41a514d789e617cfc5b7d07d49",
+      "sourcePixelsSha256": "a689c723d692c5aafe6285bbab40d5396c1d708cc3423818cb4efacbf7ae5ccb",
+      "originalText": "15 giây/seg",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            52,
+            22
+          ],
+          "text": "15秒",
+          "fontSize": 13,
+          "fill": "#ffb832",
+          "stroke": "#38200a",
+          "strokeWidth": 1.4,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "99.png",
+        "sha256": "f98cd3ee9faf4790aa3493d4f4ba62ab0186b3b43b2b7b90d62e7526e4fb547d"
+      }
+    },
+    {
+      "id": 103,
+      "className": "asset.room.view.smallMapInfoPanel.5secondsAsset",
+      "tagCode": 36,
+      "width": 45,
+      "height": 22,
+      "sourceTagSha256": "b76e517180215915033f926249b6480990015a2349b1cd634f11ef7c5e4cf8f6",
+      "sourcePixelsSha256": "a0b425bab7846fdb7f314a6441b2eae301a2c48eb5991ae656701272b922b8cf",
+      "originalText": "5 giây/seg",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            45,
+            22
+          ],
+          "text": "5秒",
+          "fontSize": 13,
+          "fill": "#ffb832",
+          "stroke": "#38200a",
+          "strokeWidth": 1.4,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "103.png",
+        "sha256": "fbbe7f20089d39be8ada8202be6dc89147828d0915480fb3f4ae80332b483ae4"
+      }
+    },
+    {
+      "id": 105,
+      "className": "asset.room.view.smallMapInfoPanel.7secondsAsset",
+      "tagCode": 36,
+      "width": 45,
+      "height": 22,
+      "sourceTagSha256": "23f324b0079421bfcd8f1338e38185c269e0604a7b359d4168a425348aedef66",
+      "sourcePixelsSha256": "162ff44e17b2ebad2dd39046b1f102b19dd83b9fa8c82b3d208f2d45152697b0",
+      "originalText": "7 giây/seg",
+      "regions": [
+        {
+          "box": [
+            0,
+            0,
+            45,
+            22
+          ],
+          "text": "7秒",
+          "fontSize": 13,
+          "fill": "#ffb832",
+          "stroke": "#38200a",
+          "strokeWidth": 1.4,
+          "transparent": true,
+          "preserveAlpha": false
+        }
+      ],
+      "preparedImage": {
+        "path": "105.png",
+        "sha256": "892bdaae6d6cce8f1d79e8509755b824bfcde766b5187c8b63b944ec660b5ab2"
+      }
+    },
+    {
+      "id": 10,
+      "className": "asset.room.view.bigMapInfoPanel.guildModeBtnAsset",
+      "tagCode": 36,
+      "width": 161,
+      "height": 110,
+      "sourceTagSha256": "22998abb008cd500ad601ccc32d156c3d7fb4749beab683c7b481d68688e893f",
+      "sourcePixelsSha256": "18eb817934938aad134bdd81f0e15da5033da4f501a11ca2a57e1edabe76d3cd",
+      "originalText": "Guerra de Clã / 1. Mínimo 2 pessoas. / 2. Mesmo Clã.",
+      "regions": [
+        {
+          "box": [
+            8,
+            6,
+            88,
+            22
+          ],
+          "text": "公会战",
+          "fontSize": 16,
+          "fill": "#fff1a7",
+          "stroke": "#122b00",
+          "strokeWidth": 1,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            75,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            8,
+            30,
+            140,
+            20
+          ],
+          "text": "1. 至少2人",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#123c67",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            75,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            8,
+            49,
+            140,
+            28
+          ],
+          "text": "2. 同一公会",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#123c67",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            75,
+            140,
+            1
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "10.png",
+        "sha256": "893342c7c9ec74a18a138773f281bd601f10d4f28a64b91841c161b5cc5adc71"
+      }
+    },
+    {
+      "id": 12,
+      "className": "asset.room.view.bigMapInfoPanel.guildModeBtnOverAsset",
+      "tagCode": 36,
+      "width": 169,
+      "height": 120,
+      "sourceTagSha256": "5a75ddb71fd193542edd1b051f175e0567ac7dea24c783a9d5ac0e0e4bbea85b",
+      "sourcePixelsSha256": "ab55deaf9736c22bfa6f5b13f9ae0ddc9e528baf20a038a6d70361e48809c661",
+      "originalText": "Guerra de Clã / 1. Mínimo 2 pessoas. / 2. Mesmo Clã.",
+      "regions": [
+        {
+          "box": [
+            13,
+            11,
+            88,
+            22
+          ],
+          "text": "公会战",
+          "fontSize": 16,
+          "fill": "#fff1a7",
+          "stroke": "#122b00",
+          "strokeWidth": 1,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            80,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            13,
+            35,
+            140,
+            20
+          ],
+          "text": "1. 至少2人",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#123c67",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            80,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            13,
+            54,
+            140,
+            28
+          ],
+          "text": "2. 同一公会",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#123c67",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            80,
+            140,
+            1
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "12.png",
+        "sha256": "fc9546f5e499c23e75d51ef0475144dd3b0adc2de478a0fdd5bbbee10f47b250"
+      }
+    },
+    {
+      "id": 140,
+      "className": "asset.room.view.bigMapInfoPanel.freeModeBtnAsset",
+      "tagCode": 36,
+      "width": 161,
+      "height": 110,
+      "sourceTagSha256": "fe8a1446cba51e6ddbed5671cb363179c21e7478db906878132df3b13eadf4da",
+      "sourcePixelsSha256": "7640b955af85067db7cd05e5518f0f9c35632ba6814d3d537aca2414da10f95d",
+      "originalText": "Livre / 1. Sem limites. / 2. Arena automatica. / 3. Prioriza o nivel.",
+      "regions": [
+        {
+          "box": [
+            11,
+            6,
+            50,
+            22
+          ],
+          "text": "自由竞技",
+          "fontSize": 12,
+          "fill": "#fff1a7",
+          "stroke": "#122b00",
+          "strokeWidth": 1,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            74,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            8,
+            30,
+            140,
+            20
+          ],
+          "text": "1. 无限制",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            74,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            8,
+            49,
+            140,
+            28
+          ],
+          "text": "2. 自动竞技场",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            74,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            8,
+            77,
+            140,
+            20
+          ],
+          "text": "3. 等级优先",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            8,
+            74,
+            140,
+            1
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "140.png",
+        "sha256": "3e93858cc3461c8834d9e783a307eaa78d325c3b01ea1e985e7bab27197d57ca"
+      }
+    },
+    {
+      "id": 141,
+      "className": "asset.room.view.bigMapInfoPanel.freeModeBtnOverAsset",
+      "tagCode": 36,
+      "width": 169,
+      "height": 119,
+      "sourceTagSha256": "1bc298b7b3aecb59fc2c1e597b559cc01971bb8b59abd4dd9fd84ed6f41fae7c",
+      "sourcePixelsSha256": "c50fd3d90a4e61b8f5643a51fd8589bb2d3936268f849ea08119f565f1d64cb5",
+      "originalText": "Livre / 1. Sem limites. / 2. Arena automatica. / 3. Prioriza o nivel.",
+      "regions": [
+        {
+          "box": [
+            16,
+            11,
+            50,
+            22
+          ],
+          "text": "自由竞技",
+          "fontSize": 12,
+          "fill": "#fff1a7",
+          "stroke": "#122b00",
+          "strokeWidth": 1,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            79,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            13,
+            35,
+            140,
+            20
+          ],
+          "text": "1. 无限制",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            79,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            13,
+            54,
+            140,
+            28
+          ],
+          "text": "2. 自动竞技场",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            79,
+            140,
+            1
+          ]
+        },
+        {
+          "box": [
+            13,
+            82,
+            140,
+            20
+          ],
+          "text": "3. 等级优先",
+          "fontSize": 12,
+          "fill": "#f5ffff",
+          "stroke": "#1b4812",
+          "strokeWidth": 0.5,
+          "transparent": false,
+          "preserveAlpha": true,
+          "sample": [
+            13,
+            79,
+            140,
+            1
+          ]
+        }
+      ],
+      "preparedImage": {
+        "path": "141.png",
+        "sha256": "cde5a7855cc2e6271e101387330e9ace2482971e76a77a91e089f3439678c263"
+      }
+    },
+    {
+      "id": 171,
+      "ownerSymbolClass": {
+        "id": 175,
+        "name": "room.view.roomView.prepBtnAsset"
+      },
+      "tagCode": 36,
+      "width": 130,
+      "height": 148,
+      "sourceTagSha256": "4c24db97597dba821008b0752cbfab85d7261275364082517e30445af219b3bc",
+      "sourcePixelsSha256": "8339ec01ce52e61fbeb27d374758eb05bd1070db663376d02043214348028bbd",
+      "originalText": "Chuẩn bị",
+      "regions": [
+        {
+          "box": [
+            0,
+            94,
+            130,
+            44
+          ],
+          "text": "准备战斗",
+          "fontSize": 23,
+          "fill": "#b2ec18",
+          "stroke": "#111111",
+          "strokeWidth": 1.2,
+          "transparent": true,
+          "preserveAlpha": false,
+          "textOffsetY": 2.5,
+          "outerStroke": "#fffdf2",
+          "outerStrokeWidth": 1.8
+        }
+      ],
+      "preparedImage": {
+        "path": "171.png",
+        "sha256": "0a752efb8dbfe3a604efe060099f947047acad8543bb80a6c77f41b835be99ae"
+      }
+    },
+    {
+      "id": 173,
+      "ownerSymbolClass": {
+        "id": 175,
+        "name": "room.view.roomView.prepBtnAsset"
+      },
+      "tagCode": 36,
+      "width": 130,
+      "height": 148,
+      "sourceTagSha256": "0f59e2d039631866c35ce2ee579597fa7abc2d8139588ac4e994db0b57bd0a53",
+      "sourcePixelsSha256": "5291cad84a805e70062e6ed2cce106f32d6e3dd4f37d46a0b677c7eaf9e87f30",
+      "originalText": "Chuẩn bị",
+      "regions": [
+        {
+          "box": [
+            0,
+            94,
+            130,
+            44
+          ],
+          "text": "准备战斗",
+          "fontSize": 23,
+          "fill": "#b2ec18",
+          "stroke": "#111111",
+          "strokeWidth": 1.2,
+          "transparent": true,
+          "preserveAlpha": false,
+          "textOffsetY": 2.5,
+          "outerStroke": "#fffdf2",
+          "outerStrokeWidth": 1.8
+        }
+      ],
+      "preparedImage": {
+        "path": "173.png",
+        "sha256": "0b6b5164a5d9e90137c13882f2bdc2fe9cd7675b0e97f6d02f4681142ef448b7"
+      }
+    },
+    {
+      "id": 176,
+      "ownerSymbolClass": {
+        "id": 180,
+        "name": "room.view.roomView.startBtnAsset"
+      },
+      "tagCode": 36,
+      "width": 130,
+      "height": 148,
+      "sourceTagSha256": "dd58f3a6d3b76ac90a24a3a97b6b88aacf7c14687361147c195fddcf683fc78e",
+      "sourcePixelsSha256": "d08b02e8fe7acd4a711c6594d3b02c1f9a94e589bb780f93ad835a841cd35e76",
+      "originalText": "Bắt đầu",
+      "regions": [
+        {
+          "box": [
+            0,
+            94,
+            130,
+            44
+          ],
+          "text": "开始游戏",
+          "fontSize": 23,
+          "fill": "#ffc21d",
+          "stroke": "#111111",
+          "strokeWidth": 1.2,
+          "transparent": true,
+          "preserveAlpha": false,
+          "textOffsetY": 2.5,
+          "outerStroke": "#fffdf2",
+          "outerStrokeWidth": 1.8
+        }
+      ],
+      "preparedImage": {
+        "path": "176.png",
+        "sha256": "590ff72f226f746e475d71d6498afcce2ee5db37833dcedb41adedc41e419061"
+      }
+    },
+    {
+      "id": 178,
+      "ownerSymbolClass": {
+        "id": 180,
+        "name": "room.view.roomView.startBtnAsset"
+      },
+      "tagCode": 36,
+      "width": 130,
+      "height": 148,
+      "sourceTagSha256": "168ea10fc16578a2d2ce84f42e0d559966a8c2c604eb3d328daffa9ec89b6d0d",
+      "sourcePixelsSha256": "78a2002717e83dc8459ff62803fc1a87a25d0cd35cb0e579c10aad549b3f98fc",
+      "originalText": "Bắt đầu",
+      "regions": [
+        {
+          "box": [
+            0,
+            94,
+            130,
+            44
+          ],
+          "text": "开始游戏",
+          "fontSize": 23,
+          "fill": "#ffc21d",
+          "stroke": "#111111",
+          "strokeWidth": 1.2,
+          "transparent": true,
+          "preserveAlpha": false,
+          "textOffsetY": 2.5,
+          "outerStroke": "#fffdf2",
+          "outerStrokeWidth": 1.8
+        }
+      ],
+      "preparedImage": {
+        "path": "178.png",
+        "sha256": "e555c11a13ab3eed5eba88e6fb4ad50b5b5b6b42dd48e67a2833f33ab0935930"
+      }
     }
   ],
-  "note": "Four reviewed original seat/guild/host captions only. Seat alpha is unchanged; host/guild glyph alpha may change only inside reviewed ROIs. No positions, frames, hitArea or game logic changed. Offline candidate; original full-page/runtime acceptance pending."
+  "note": "Reviewed seat/guild/host captions retained byte-for-byte. Added room titles, prop/watch headings, room type/timer captions, free/guild mode descriptions, and normal/hover ready/start captions. Only reviewed bitmap regions change; no positions, frames, hitArea, symbols, ABC or game rules change. Caption backgrounds use local texture reconstruction, not recovered hidden original art. Ready/start captions use a rounded black badge with white outline inside the old caption area to cover flattened letters that overlap character hands; figure pixels above y=100 are retained except the reviewed lime caption accent on ready images. Offline candidate; original full-page/runtime acceptance pending. Default random-map caption lives outside room.swf and is not changed here.",
+  "expectedSwfSha256": "265a86ca0f956b23f82ed90c44490b983b3c8b7d8e4e16608fffeb8fdcf6748f"
 }

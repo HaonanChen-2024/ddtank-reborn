@@ -1,0 +1,2602 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5091:1:58",
+      "text": {
+        "RewardPara": "天下无双"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5086:1:57",
+      "text": {
+        "RewardPara": "功勋之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5081:1:46",
+      "text": {
+        "RewardPara": "武器霸主"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5075:1:44",
+      "text": {
+        "RewardPara": "雷霆之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5055:1:40",
+      "text": {
+        "RewardPara": "板砖之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5050:1:39",
+      "text": {
+        "RewardPara": "轰天之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5045:1:38",
+      "text": {
+        "RewardPara": "手里剑之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5040:1:37",
+      "text": {
+        "RewardPara": "手雷之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5035:1:35",
+      "text": {
+        "RewardPara": "微笑"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5030:1:34",
+      "text": {
+        "RewardPara": "顽强斗士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5027:1:33",
+      "text": {
+        "RewardPara": "久经沙场"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5025:1:54",
+      "text": {
+        "RewardPara": "梁山好汉"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5015:1:17",
+      "text": {
+        "RewardPara": "公会精英"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5013:1:32",
+      "text": {
+        "RewardPara": "公会勇士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5010:1:16",
+      "text": {
+        "RewardPara": "终极战士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5007:1:31",
+      "text": {
+        "RewardPara": "超级战士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5005:1:15",
+      "text": {
+        "RewardPara": "万夫莫敌"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "5003:1:30",
+      "text": {
+        "RewardPara": "英雄本色"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4076:1:69",
+      "text": {
+        "RewardPara": "勇士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4071:1:68",
+      "text": {
+        "RewardPara": "屠龙者"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4066:1:67",
+      "text": {
+        "RewardPara": "冠军"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4061:1:66",
+      "text": {
+        "RewardPara": "拳王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4056:1:65",
+      "text": {
+        "RewardPara": "小鸡救星"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4051:1:64",
+      "text": {
+        "RewardPara": "救命恩人"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4040:1:56",
+      "text": {
+        "RewardPara": "扫荡勇士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4035:1:36",
+      "text": {
+        "RewardPara": "闯关勇士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4030:1:52",
+      "text": {
+        "RewardPara": "统治者"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4025:1:18",
+      "text": {
+        "RewardPara": "邪神之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4020:1:51",
+      "text": {
+        "RewardPara": "闯关之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4015:1:50",
+      "text": {
+        "RewardPara": "横扫千军"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4010:1:14",
+      "text": {
+        "RewardPara": "鸡王克星"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "4005:1:13",
+      "text": {
+        "RewardPara": "传说女王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "3018:1:55",
+      "text": {
+        "RewardPara": "任务之王"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "3013:1:29",
+      "text": {
+        "RewardPara": "爱神"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "3007:1:70",
+      "text": {
+        "RewardPara": "全能战士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2043:1:63",
+      "text": {
+        "RewardPara": "钻石贵宾"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2042:1:62",
+      "text": {
+        "RewardPara": "白金贵宾"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2041:1:61",
+      "text": {
+        "RewardPara": "黄金贵宾"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2040:1:60",
+      "text": {
+        "RewardPara": "白银贵宾"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2039:1:59",
+      "text": {
+        "RewardPara": "贵宾"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2035:1:49",
+      "text": {
+        "RewardPara": "英才"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2030:1:28",
+      "text": {
+        "RewardPara": "弹弹元帅"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2029:1:27",
+      "text": {
+        "RewardPara": "弹弹上校"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2028:1:26",
+      "text": {
+        "RewardPara": "弹弹中尉"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2027:1:25",
+      "text": {
+        "RewardPara": "弹弹下士"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2026:1:24",
+      "text": {
+        "RewardPara": "弹弹新兵"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2025:1:11",
+      "text": {
+        "RewardPara": "孙悟空"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2020:1:10",
+      "text": {
+        "RewardPara": "致命一击"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2015:1:9",
+      "text": {
+        "RewardPara": "迅雷无双"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2010:1:8",
+      "text": {
+        "RewardPara": "金刚不坏"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "2005:1:7",
+      "text": {
+        "RewardPara": "力敌千军"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1041:1:47",
+      "text": {
+        "RewardPara": "强化英才"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1036:1:4",
+      "text": {
+        "RewardPara": "财神"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1031:1:3",
+      "text": {
+        "RewardPara": "名传一方"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1026:1:2",
+      "text": {
+        "RewardPara": "英名远扬"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1015:1:23",
+      "text": {
+        "RewardPara": "鸡国荣耀"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1011:1:22",
+      "text": {
+        "RewardPara": "天地荣耀"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1010:1:21",
+      "text": {
+        "RewardPara": "礼金财神"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1005:1:20",
+      "text": {
+        "RewardPara": "富甲天下"
+      }
+    },
+    {
+      "table": "Achievement_Goods",
+      "rowId": "1001:1:19",
+      "text": {
+        "RewardPara": "腰缠万贯"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11995",
+      "text": {
+        "Data": "激活此功能需要15点券,激活后1天内可无限使用追加攻击2次、追加攻击1次、三叉弹3发、伤害增加50%、伤害增加40%、伤害增加30%、伤害增加20%、伤害增加10%."
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11996",
+      "text": {
+        "Data": "激活此功能需要650点券,激活后30天内不会被踢出房间."
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11997",
+      "text": {
+        "Data": "激活此功能需要400点券,激活后1天内可获得2倍功勋"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "11998",
+      "text": {
+        "Data": "激活此功能需要200点券，激活后1天内可获得双倍经验."
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "201316",
+      "text": {
+        "Data": "用于激活小鸡密码系统"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311101",
+      "text": {
+        "Data": "<攻>强击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311102",
+      "text": {
+        "Data": "<攻>迅捷1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311103",
+      "text": {
+        "Data": "<攻>赐福1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311104",
+      "text": {
+        "Data": "<攻>重伤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311105",
+      "text": {
+        "Data": "<攻>引导1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311106",
+      "text": {
+        "Data": "<攻>寒冰1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311107",
+      "text": {
+        "Data": "<攻>核爆1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311108",
+      "text": {
+        "Data": "<攻>穿甲1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311109",
+      "text": {
+        "Data": "<攻>暴击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311110",
+      "text": {
+        "Data": "<攻>吸血1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311111",
+      "text": {
+        "Data": "<攻>封印1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311112",
+      "text": {
+        "Data": "<攻>豹速1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311113",
+      "text": {
+        "Data": "<攻>疲劳1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311114",
+      "text": {
+        "Data": "<攻>灼烧1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311115",
+      "text": {
+        "Data": "<攻>枷锁1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311116",
+      "text": {
+        "Data": "<攻>连击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311117",
+      "text": {
+        "Data": "<攻>弱化1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311118",
+      "text": {
+        "Data": "<攻>S强击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311119",
+      "text": {
+        "Data": "<攻>S迅捷1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311120",
+      "text": {
+        "Data": "<攻>S赐福1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311121",
+      "text": {
+        "Data": "<攻>S重伤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311122",
+      "text": {
+        "Data": "<攻>S引导1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311123",
+      "text": {
+        "Data": "<攻>S寒冰1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311124",
+      "text": {
+        "Data": "<攻>S核爆1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311125",
+      "text": {
+        "Data": "<攻>S穿甲1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311126",
+      "text": {
+        "Data": "<攻>S暴击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311127",
+      "text": {
+        "Data": "<攻>S吸血1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311128",
+      "text": {
+        "Data": "<攻>S封印1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311129",
+      "text": {
+        "Data": "<攻>S豹速1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311130",
+      "text": {
+        "Data": "<攻>S疲劳1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311131",
+      "text": {
+        "Data": "<攻>S灼烧1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311132",
+      "text": {
+        "Data": "<攻>S枷锁1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311133",
+      "text": {
+        "Data": "<攻>S连击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311134",
+      "text": {
+        "Data": "<攻>S弱化1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311201",
+      "text": {
+        "Data": "<攻>强击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311202",
+      "text": {
+        "Data": "<攻>迅捷2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311203",
+      "text": {
+        "Data": "<攻>赐福2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311204",
+      "text": {
+        "Data": "<攻>重伤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311205",
+      "text": {
+        "Data": "<攻>引导2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311206",
+      "text": {
+        "Data": "<攻>寒冰2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311207",
+      "text": {
+        "Data": "<攻>核爆2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311208",
+      "text": {
+        "Data": "<攻>穿甲2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311209",
+      "text": {
+        "Data": "<攻>暴击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311210",
+      "text": {
+        "Data": "<攻>吸血2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311211",
+      "text": {
+        "Data": "<攻>封印2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311212",
+      "text": {
+        "Data": "<攻>豹速2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311213",
+      "text": {
+        "Data": "<攻>疲劳2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311214",
+      "text": {
+        "Data": "<攻>灼烧2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311215",
+      "text": {
+        "Data": "<攻>枷锁2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311216",
+      "text": {
+        "Data": "<攻>连击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311217",
+      "text": {
+        "Data": "<攻>弱化2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311218",
+      "text": {
+        "Data": "<攻>S强击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311219",
+      "text": {
+        "Data": "<攻>S迅捷2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311220",
+      "text": {
+        "Data": "<攻>S赐福2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311221",
+      "text": {
+        "Data": "<攻>S重伤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311222",
+      "text": {
+        "Data": "<攻>S引导2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311223",
+      "text": {
+        "Data": "<攻>S寒冰2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311224",
+      "text": {
+        "Data": "<攻>S核爆2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311225",
+      "text": {
+        "Data": "<攻>S穿甲2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311226",
+      "text": {
+        "Data": "<攻>S暴击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311227",
+      "text": {
+        "Data": "<攻>S吸血2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311228",
+      "text": {
+        "Data": "<攻>S封印2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311229",
+      "text": {
+        "Data": "<攻>S豹速2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311230",
+      "text": {
+        "Data": "<攻>S疲劳2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311231",
+      "text": {
+        "Data": "<攻>S灼烧2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311232",
+      "text": {
+        "Data": "<攻>S枷锁2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311233",
+      "text": {
+        "Data": "<攻>S连击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311234",
+      "text": {
+        "Data": "<攻>S弱化2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311301",
+      "text": {
+        "Data": "<攻>强击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311302",
+      "text": {
+        "Data": "<攻>迅捷3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311303",
+      "text": {
+        "Data": "<攻>赐福3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311304",
+      "text": {
+        "Data": "<攻>重伤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311305",
+      "text": {
+        "Data": "<攻>引导3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311306",
+      "text": {
+        "Data": "<攻>寒冰3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311307",
+      "text": {
+        "Data": "<攻>核爆3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311308",
+      "text": {
+        "Data": "<攻>穿甲3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311309",
+      "text": {
+        "Data": "<攻>暴击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311310",
+      "text": {
+        "Data": "<攻>吸血3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311311",
+      "text": {
+        "Data": "<攻>封印3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311312",
+      "text": {
+        "Data": "<攻>豹速3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311313",
+      "text": {
+        "Data": "<攻>疲劳3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311314",
+      "text": {
+        "Data": "<攻>灼烧3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311315",
+      "text": {
+        "Data": "<攻>枷锁3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311316",
+      "text": {
+        "Data": "<攻>连击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311317",
+      "text": {
+        "Data": "<攻>弱化3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311318",
+      "text": {
+        "Data": "<攻>S强击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311319",
+      "text": {
+        "Data": "<攻>S迅捷3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311320",
+      "text": {
+        "Data": "<攻>S赐福3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311321",
+      "text": {
+        "Data": "<攻>S重伤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311322",
+      "text": {
+        "Data": "<攻>S引导3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311323",
+      "text": {
+        "Data": "<攻>S寒冰3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311324",
+      "text": {
+        "Data": "<攻>S核爆3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311325",
+      "text": {
+        "Data": "<攻>S穿甲3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311326",
+      "text": {
+        "Data": "<攻>S暴击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311327",
+      "text": {
+        "Data": "<攻>S吸血3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311328",
+      "text": {
+        "Data": "<攻>S封印3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311329",
+      "text": {
+        "Data": "<攻>S豹速3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311330",
+      "text": {
+        "Data": "<攻>S疲劳3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311331",
+      "text": {
+        "Data": "<攻>S灼烧3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311332",
+      "text": {
+        "Data": "<攻>S枷锁3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311333",
+      "text": {
+        "Data": "<攻>S连击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311334",
+      "text": {
+        "Data": "<攻>S弱化3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311401",
+      "text": {
+        "Data": "<攻>强击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311402",
+      "text": {
+        "Data": "<攻>迅捷4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311403",
+      "text": {
+        "Data": "<攻>赐福4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311404",
+      "text": {
+        "Data": "<攻>重伤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311405",
+      "text": {
+        "Data": "<攻>引导4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311406",
+      "text": {
+        "Data": "<攻>寒冰4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311407",
+      "text": {
+        "Data": "<攻>核爆4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311408",
+      "text": {
+        "Data": "<攻>穿甲4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311409",
+      "text": {
+        "Data": "<攻>暴击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311410",
+      "text": {
+        "Data": "<攻>吸血4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311411",
+      "text": {
+        "Data": "<攻>封印4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311412",
+      "text": {
+        "Data": "<攻>豹速4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311413",
+      "text": {
+        "Data": "<攻>疲劳4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311414",
+      "text": {
+        "Data": "<攻>灼烧4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311415",
+      "text": {
+        "Data": "<攻>枷锁4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311416",
+      "text": {
+        "Data": "<攻>连击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311417",
+      "text": {
+        "Data": "<攻>弱化4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311418",
+      "text": {
+        "Data": "<攻>S强击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311419",
+      "text": {
+        "Data": "<攻>S迅捷4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311420",
+      "text": {
+        "Data": "<攻>S赐福4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311421",
+      "text": {
+        "Data": "<攻>S重伤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311422",
+      "text": {
+        "Data": "<攻>S引导4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311423",
+      "text": {
+        "Data": "<攻>S寒冰4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311424",
+      "text": {
+        "Data": "<攻>S核爆4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311425",
+      "text": {
+        "Data": "<攻>S穿甲4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311426",
+      "text": {
+        "Data": "<攻>S暴击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311427",
+      "text": {
+        "Data": "<攻>S吸血4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311428",
+      "text": {
+        "Data": "<攻>S封印4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311429",
+      "text": {
+        "Data": "<攻>S豹速4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311430",
+      "text": {
+        "Data": "<攻>S疲劳4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311431",
+      "text": {
+        "Data": "<攻>S灼烧4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311432",
+      "text": {
+        "Data": "<攻>S枷锁4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311433",
+      "text": {
+        "Data": "<攻>S连击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311434",
+      "text": {
+        "Data": "<攻>S弱化4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311501",
+      "text": {
+        "Data": "<攻>强击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311503",
+      "text": {
+        "Data": "<攻>赐福5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311504",
+      "text": {
+        "Data": "<攻>重伤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311505",
+      "text": {
+        "Data": "<攻>引导5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311506",
+      "text": {
+        "Data": "<攻>寒冰5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311507",
+      "text": {
+        "Data": "<攻>核爆5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311508",
+      "text": {
+        "Data": "<攻>穿甲5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311509",
+      "text": {
+        "Data": "<攻>暴击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311510",
+      "text": {
+        "Data": "<攻>吸血5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311511",
+      "text": {
+        "Data": "<攻>封印5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311512",
+      "text": {
+        "Data": "<攻>豹速5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311513",
+      "text": {
+        "Data": "<攻>疲劳5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311514",
+      "text": {
+        "Data": "<攻>灼烧5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311515",
+      "text": {
+        "Data": "<攻>枷锁5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311516",
+      "text": {
+        "Data": "<攻>连击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311517",
+      "text": {
+        "Data": "<攻>弱化5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311518",
+      "text": {
+        "Data": "<攻>S强击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311520",
+      "text": {
+        "Data": "<攻>S赐福5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311521",
+      "text": {
+        "Data": "<攻>S重伤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311522",
+      "text": {
+        "Data": "<攻>S引导5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311523",
+      "text": {
+        "Data": "<攻>S寒冰5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311524",
+      "text": {
+        "Data": "<攻>S核爆5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311525",
+      "text": {
+        "Data": "<攻>S穿甲5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311526",
+      "text": {
+        "Data": "<攻>S暴击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311527",
+      "text": {
+        "Data": "<攻>S吸血5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311528",
+      "text": {
+        "Data": "<攻>S封印5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311529",
+      "text": {
+        "Data": "<攻>S豹速5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311530",
+      "text": {
+        "Data": "<攻>S疲劳5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311531",
+      "text": {
+        "Data": "<攻>S灼烧5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311532",
+      "text": {
+        "Data": "<攻>S枷锁5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311533",
+      "text": {
+        "Data": "<攻>S连击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "311534",
+      "text": {
+        "Data": "<攻>S弱化5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312101",
+      "text": {
+        "Data": "<防>石肤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312102",
+      "text": {
+        "Data": "<防>坚固1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312103",
+      "text": {
+        "Data": "<防>恢复1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312104",
+      "text": {
+        "Data": "<防>免坑1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312105",
+      "text": {
+        "Data": "<防>减伤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312106",
+      "text": {
+        "Data": "<防>吸收1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312107",
+      "text": {
+        "Data": "<防>怒气1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312108",
+      "text": {
+        "Data": "<防>反射1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312109",
+      "text": {
+        "Data": "<防>S石肤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312110",
+      "text": {
+        "Data": "<防>S坚固1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312111",
+      "text": {
+        "Data": "<防>S恢复1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312112",
+      "text": {
+        "Data": "<防>S免坑1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312113",
+      "text": {
+        "Data": "<防>S减伤1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312114",
+      "text": {
+        "Data": "<防>S吸收1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312115",
+      "text": {
+        "Data": "<防>S怒气1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312116",
+      "text": {
+        "Data": "<防>S反射1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312201",
+      "text": {
+        "Data": "<防>石肤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312202",
+      "text": {
+        "Data": "<防>坚固2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312203",
+      "text": {
+        "Data": "<防>恢复2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312204",
+      "text": {
+        "Data": "<防>免坑2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312205",
+      "text": {
+        "Data": "<防>减伤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312206",
+      "text": {
+        "Data": "<防>吸收2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312207",
+      "text": {
+        "Data": "<防>怒气2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312208",
+      "text": {
+        "Data": "<防>反射2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312209",
+      "text": {
+        "Data": "<防>S石肤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312210",
+      "text": {
+        "Data": "<防>S坚固2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312211",
+      "text": {
+        "Data": "<防>S恢复2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312212",
+      "text": {
+        "Data": "<防>S免坑2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312213",
+      "text": {
+        "Data": "<防>S减伤2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312214",
+      "text": {
+        "Data": "<防>S吸收2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312215",
+      "text": {
+        "Data": "<防>S怒气2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312216",
+      "text": {
+        "Data": "<防>S反射2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312301",
+      "text": {
+        "Data": "<防>石肤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312302",
+      "text": {
+        "Data": "<防>坚固3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312303",
+      "text": {
+        "Data": "<防>恢复3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312304",
+      "text": {
+        "Data": "<防>免坑3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312305",
+      "text": {
+        "Data": "<防>减伤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312306",
+      "text": {
+        "Data": "<防>吸收3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312307",
+      "text": {
+        "Data": "<防>怒气3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312308",
+      "text": {
+        "Data": "<防>反射3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312309",
+      "text": {
+        "Data": "<防>S石肤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312310",
+      "text": {
+        "Data": "<防>S坚固3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312311",
+      "text": {
+        "Data": "<防>S恢复3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312312",
+      "text": {
+        "Data": "<防>S免坑3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312313",
+      "text": {
+        "Data": "<防>S减伤3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312314",
+      "text": {
+        "Data": "<防>S吸收3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312315",
+      "text": {
+        "Data": "<防>S怒气3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312316",
+      "text": {
+        "Data": "<防>S反射3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312401",
+      "text": {
+        "Data": "<防>石肤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312402",
+      "text": {
+        "Data": "<防>坚固4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312403",
+      "text": {
+        "Data": "<防>恢复4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312404",
+      "text": {
+        "Data": "<防>免坑4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312405",
+      "text": {
+        "Data": "<防>减伤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312406",
+      "text": {
+        "Data": "<防>吸收4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312407",
+      "text": {
+        "Data": "<防>怒气4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312408",
+      "text": {
+        "Data": "<防>反射4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312409",
+      "text": {
+        "Data": "<防>S石肤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312410",
+      "text": {
+        "Data": "<防>S坚固4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312411",
+      "text": {
+        "Data": "<防>S恢复4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312412",
+      "text": {
+        "Data": "<防>S免坑4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312413",
+      "text": {
+        "Data": "<防>S减伤4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312414",
+      "text": {
+        "Data": "<防>S吸收4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312415",
+      "text": {
+        "Data": "<防>S怒气4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312416",
+      "text": {
+        "Data": "<防>S反射4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312501",
+      "text": {
+        "Data": "<防>石肤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312502",
+      "text": {
+        "Data": "<防>坚固5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312503",
+      "text": {
+        "Data": "<防>恢复5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312504",
+      "text": {
+        "Data": "<防>免坑5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312505",
+      "text": {
+        "Data": "<防>减伤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312506",
+      "text": {
+        "Data": "<防>吸收5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312507",
+      "text": {
+        "Data": "<防>怒气5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312509",
+      "text": {
+        "Data": "<防>S石肤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312510",
+      "text": {
+        "Data": "<防>S坚固5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312511",
+      "text": {
+        "Data": "<防>S恢复5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312512",
+      "text": {
+        "Data": "<防>S免坑5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312513",
+      "text": {
+        "Data": "<防>S减伤5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312514",
+      "text": {
+        "Data": "<防>S吸收5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "312515",
+      "text": {
+        "Data": "<防>S怒气5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313101",
+      "text": {
+        "Data": "<属性>攻击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313102",
+      "text": {
+        "Data": "<属性>防御1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313103",
+      "text": {
+        "Data": "<属性>敏捷1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313104",
+      "text": {
+        "Data": "<属性>幸运1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313105",
+      "text": {
+        "Data": "<属性>伤害1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313106",
+      "text": {
+        "Data": "<属性>护甲1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313107",
+      "text": {
+        "Data": "<属性>S攻击1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313108",
+      "text": {
+        "Data": "<属性>S防御1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313109",
+      "text": {
+        "Data": "<属性>S敏捷1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313110",
+      "text": {
+        "Data": "<属性>S幸运1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313111",
+      "text": {
+        "Data": "<属性>S伤害1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313112",
+      "text": {
+        "Data": "<属性>S护甲1级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313201",
+      "text": {
+        "Data": "<属性>攻击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313202",
+      "text": {
+        "Data": "<属性>防御2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313203",
+      "text": {
+        "Data": "<属性>敏捷2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313204",
+      "text": {
+        "Data": "<属性>幸运2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313205",
+      "text": {
+        "Data": "<属性>伤害2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313206",
+      "text": {
+        "Data": "<属性>护甲2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313207",
+      "text": {
+        "Data": "<属性>S攻击2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313208",
+      "text": {
+        "Data": "<属性>S防御2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313209",
+      "text": {
+        "Data": "<属性>S敏捷2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313210",
+      "text": {
+        "Data": "<属性>S幸运2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313211",
+      "text": {
+        "Data": "<属性>S伤害2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313212",
+      "text": {
+        "Data": "<属性>S护甲2级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313301",
+      "text": {
+        "Data": "<属性>攻击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313302",
+      "text": {
+        "Data": "<属性>防御3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313303",
+      "text": {
+        "Data": "<属性>敏捷3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313304",
+      "text": {
+        "Data": "<属性>幸运3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313305",
+      "text": {
+        "Data": "<属性>伤害3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313306",
+      "text": {
+        "Data": "<属性>护甲3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313307",
+      "text": {
+        "Data": "<属性>S攻击3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313308",
+      "text": {
+        "Data": "<属性>S防御3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313309",
+      "text": {
+        "Data": "<属性>S敏捷3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313310",
+      "text": {
+        "Data": "<属性>S幸运3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313311",
+      "text": {
+        "Data": "<属性>S伤害3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313312",
+      "text": {
+        "Data": "<属性>S护甲3级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313401",
+      "text": {
+        "Data": "<属性>攻击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313402",
+      "text": {
+        "Data": "<属性>防御4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313403",
+      "text": {
+        "Data": "<属性>敏捷4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313404",
+      "text": {
+        "Data": "<属性>幸运4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313405",
+      "text": {
+        "Data": "<属性>伤害4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313406",
+      "text": {
+        "Data": "<属性>护甲4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313407",
+      "text": {
+        "Data": "<属性>S攻击4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313408",
+      "text": {
+        "Data": "<属性>S防御4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313409",
+      "text": {
+        "Data": "<属性>S敏捷4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313410",
+      "text": {
+        "Data": "<属性>S幸运4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313411",
+      "text": {
+        "Data": "<属性>S伤害4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313412",
+      "text": {
+        "Data": "<属性>S护甲4级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313501",
+      "text": {
+        "Data": "<属性>攻击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313502",
+      "text": {
+        "Data": "<属性>防御5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313503",
+      "text": {
+        "Data": "<属性>敏捷5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313504",
+      "text": {
+        "Data": "<属性>幸运5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313505",
+      "text": {
+        "Data": "<属性>伤害5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313506",
+      "text": {
+        "Data": "<属性>护甲5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313507",
+      "text": {
+        "Data": "<属性>S攻击5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313508",
+      "text": {
+        "Data": "<属性>S防御5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313509",
+      "text": {
+        "Data": "<属性>S敏捷5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313510",
+      "text": {
+        "Data": "<属性>S幸运5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313511",
+      "text": {
+        "Data": "<属性>S伤害5级"
+      }
+    },
+    {
+      "table": "Shop_Goods",
+      "rowId": "313512",
+      "text": {
+        "Data": "<属性>S护甲5级"
+      }
+    }
+  ]
+}

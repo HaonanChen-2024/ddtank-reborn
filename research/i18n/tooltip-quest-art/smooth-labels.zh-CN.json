@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "fontFile": "msyhbd.ttc",
+  "fontFamily": "Workshop Smooth Tooltip Labels",
+  "source": "Previously installed reference Chinese UI; redraw only the four requested label glyphs, preserving the original value underline and canvas size.",
+  "style": { "fontSize": 11.5, "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 0.7, "labelWidth": 28, "textOffsetY": -0.75 },
+  "assets": [
+    {
+      "name": "coreiconandtip",
+      "sourceSha256": "f426f48f0e6ed1422c667cee335517928a52adc5a4411ac749850408081e130c",
+      "bitmaps": [
+        { "id": 27, "text": "品质", "symbol": "asset.core.tip.GoodsTipQuality", "width": 82, "height": 16, "tagSha256": "5fefda2589cd92209e4910aa141bc48b0af58fb79ecc4d43bd81699db26b14a5" },
+        { "id": 28, "text": "类型", "symbol": "asset.core.tip.GoodsType", "width": 82, "height": 16, "tagSha256": "0b5abc3631b182f14abcab111e391afabf4db480e6b664cc314608c3829d7d80" },
+        { "id": 21, "text": "伤害", "symbol": "asset.core.tip.GoodsTipItemHert", "width": 80, "height": 15, "tagSha256": "413a4040227410e0967adac7224b29951bba7e7e10e286fe3de0e0cf59b63b40" },
+        { "id": 19, "text": "角度", "symbol": "asset.core.tip.GoodsTipItemArmAngle", "width": 88, "height": 15, "tagSha256": "b6e99e25c984a8cacd3231c0d70c83759ca46de37eac3382f9f37953a466c2d8" }
+      ]
+    },
+    {
+      "name": "coreiconandtip1",
+      "sourceSha256": "1c477068f131e765d2cbc1becf93ca04c0aedd9f9ee38ba975b44d3b3744ee40",
+      "bitmaps": [
+        { "id": 75, "text": "品质", "symbol": "asset.core.tip.GoodsTipQuality", "width": 82, "height": 16, "tagSha256": "779f9fa05feaec1f15aff27be767547fd7047318358693636613e846df84767f" },
+        { "id": 74, "text": "类型", "symbol": "asset.core.tip.GoodsType", "width": 82, "height": 16, "tagSha256": "486695c6d4c6c9be9d7ad22589d34d8e9afb3ac1f80eb436ffb0c66f54d6c0c7" },
+        { "id": 80, "text": "伤害", "symbol": "asset.core.tip.GoodsTipItemHert", "width": 80, "height": 15, "tagSha256": "c094e337e4620ddad67d4bd9ad55b0360d41bc9295fde8aa6932925cd96a739e" },
+        { "id": 82, "text": "角度", "symbol": "asset.core.tip.GoodsTipItemArmAngle", "width": 88, "height": 15, "tagSha256": "03730165237a0104dd97775bac3f5b80dbf34fefb1293f3f98b5afd213716fbe" }
+      ]
+    }
+  ]
+}

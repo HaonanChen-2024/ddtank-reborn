@@ -5,7 +5,7 @@ export function Spinner({ className }: { className?: string }) {
   return (
     <span
       role="status"
-      aria-label="Carregando"
+      aria-label="加载中"
       className={cn("inline-block size-5 animate-spin rounded-full border-[3px] border-line border-t-sun", className)}
     />
   );

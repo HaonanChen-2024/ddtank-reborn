@@ -1,0 +1,4141 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "scope": "User-reported room, room list and forge display localization",
+  "assets": [
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/room.swf",
+      "baselineSha256": "265a86ca0f956b23f82ed90c44490b983b3c8b7d8e4e16608fffeb8fdcf6748f",
+      "resultSha256": "0e8d78020b3be6ba7313f340557020295b60eb55e9ca4743c0dae8a7a16c62e2",
+      "changedBitmaps": 62,
+      "staticTexts": 1,
+      "bitmapChanges": [
+        {
+          "id": 1,
+          "symbols": [
+            "asset.room.view.bigMapInfoPanel.freeModeIconAsset"
+          ],
+          "width": 62,
+          "height": 61,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "2f6e62195fca7fe4df7d244a7e86f7ed839d176ee794260dd954c5376d720e18",
+          "resultTagSha256": "968fe3c540c79bf887e08af5ef0dd92a6cba80913e40a22714d198fceb79aa2f",
+          "donorName": "zh_cn-room",
+          "donorId": 17
+        },
+        {
+          "id": 2,
+          "symbols": [
+            "asset.room.view.item.gainReduce"
+          ],
+          "width": 73,
+          "height": 46,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "ba6a2deefa820f5e659d57adf2c6e0890645005c11d6a625e622eab2e6ccf9a6",
+          "resultTagSha256": "b8f2e2f8f30a15635d4083dbd1a02df55ae06d1b34cf12d697671da7aa118a67",
+          "donorName": "zh_cn-room",
+          "donorId": 109
+        },
+        {
+          "id": 3,
+          "symbols": [
+            "asset.roomLoading.GameMode_0"
+          ],
+          "width": 398,
+          "height": 188,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "9900dbb60e12a9df9c5d67eb25adabe06326d548e0e222bb9eeafe18a0166baa",
+          "resultTagSha256": "40788f982b8404febe5db19d5560645dcefe82d861d375e5e7e066c130a21012",
+          "donorName": "zh_cn-room",
+          "donorId": 139
+        },
+        {
+          "id": 4,
+          "symbols": [
+            "asset.roomLoading.GameMode_1"
+          ],
+          "width": 398,
+          "height": 150,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "0b0d713a6753f3a64d3bb73a5f8501f4372f3d2a9c3745d0e88ab6a016cb6791",
+          "resultTagSha256": "518be1f355500638f4849145c41e9388fad237e7a911cfca622af4c5f96affc7",
+          "donorName": "zh_cn-room",
+          "donorId": 113
+        },
+        {
+          "id": 5,
+          "symbols": [
+            "asset.roomLoading.GameMode_12"
+          ],
+          "width": 398,
+          "height": 188,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "a399e7730b643ac6d0e802d5a1d32b24aa2a9d04bbb1ab6ee61f580460fea7e5",
+          "resultTagSha256": "46862ce6db3e63dcdb4ec9271e2810e66dd78e165a1dca8fa9f6175e80c9634b",
+          "donorName": "zh_cn-room",
+          "donorId": 100
+        },
+        {
+          "id": 6,
+          "symbols": [
+            "asset.roomLoading.GameMode_14"
+          ],
+          "width": 389,
+          "height": 158,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "29d92c84a69a6786ebeb60fbda56724747f0687b94244df4cecc67ef46f6e40a",
+          "resultTagSha256": "408ed76cbedb9752ee092019220b721d190708c5e26d6a5e953cf1241d9ab5aa",
+          "donorName": "zh_cn-room",
+          "donorId": 45
+        },
+        {
+          "id": 7,
+          "symbols": [
+            "asset.roomLoading.GameMode_2"
+          ],
+          "width": 398,
+          "height": 188,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "f9daa99790af1985a5c8c4c3e452574ad8a5c86a5482acdf82d4c96dd9f8304a",
+          "resultTagSha256": "b8e7e5639d4f80c5f7d91c1c25f5cdec744a571f3b7680c512912ea2608764c6",
+          "donorName": "zh_cn-room",
+          "donorId": 34
+        },
+        {
+          "id": 8,
+          "symbols": [
+            "asset.roomLoading.GameMode_7"
+          ],
+          "width": 389,
+          "height": 146,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "7180b6555f857aca50fb83e0753b9919faac54feb2a9fe04966474f944ee42c6",
+          "resultTagSha256": "87635db238b0a2bc7a06bf3829a04ec62d20bd0cc460d005102214c82e68d909",
+          "donorName": "zh_cn-room",
+          "donorId": 23
+        },
+        {
+          "id": 9,
+          "symbols": [
+            "asset.roomLoading.GameMode_8"
+          ],
+          "width": 398,
+          "height": 188,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "2bb2851f3b6c8d09cbdd21c954d1038353c80f3c5b51d04c94e69a53cc96e4eb",
+          "resultTagSha256": "fd30a2f56bce66c0343290d70ddf2356d0d13d6bb8c02ff938508128b14f5d57",
+          "donorName": "zh_cn-room",
+          "donorId": 12
+        },
+        {
+          "id": 11,
+          "symbols": [
+            "asset.room.TypeBtn_B_02"
+          ],
+          "width": 140,
+          "height": 37,
+          "kind": "image_gen",
+          "sourceTagSha256": "7356a6fb2c71b2841f3a322235dcbabcae7e3d8d5ac83369ab67c122aea99547",
+          "resultTagSha256": "109d9d09a4cddd1f0f06975cb1c8dfe276baf4f2db79ddcb103e3a67154d14e0",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 13,
+          "symbols": [
+            "asset.room.view.bigMapInfoPanel.guildModeIconAsset"
+          ],
+          "width": 85,
+          "height": 67,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "196847c004c75af4190ffb74a2b774498675935320fd2ab2a8718b410116e672",
+          "resultTagSha256": "52e34fa74b637b85ef9a2f303d1304baee8b555dbde002ccf5bd1d640b521bf2",
+          "donorName": "zh_cn-room",
+          "donorId": 97
+        },
+        {
+          "id": 14,
+          "symbols": [
+            "asset.room.hardTxtAsset"
+          ],
+          "width": 36,
+          "height": 21,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "df5d13b9dce4625e4f326d6e75676ae2ee4662991d470e982b3da1dffd428e04",
+          "resultTagSha256": "84b760f2176efcf15876247283960020f74028da7aa9421715a2baa14821a138",
+          "donorName": "zh_cn-room",
+          "donorId": 94
+        },
+        {
+          "id": 15,
+          "symbols": [
+            "asset.room.heroBtnAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "077cf31746f3996930a3ff804e2cdc0add574028003f47af78bc27bef3c1e0f9",
+          "resultTagSha256": "55fbb7c9fec85035588b7c40bbb244a23657041391794dbcbad8319d4305113f",
+          "donorName": "zh_cn-room",
+          "donorId": 92
+        },
+        {
+          "id": 16,
+          "symbols": [
+            "asset.room.heroBtnSelectedAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "48f0bfdd640a2cb600452414380c7975632778fcbbd370e997a844bfa8cc6aab",
+          "resultTagSha256": "f1e536343741ef48dcc03edd5ae583eafeaf2f7da5034092779ec8a0f5fee6f6",
+          "donorName": "zh_cn-room",
+          "donorId": 91
+        },
+        {
+          "id": 17,
+          "symbols": [
+            "asset.room.heroTxtAsset"
+          ],
+          "width": 62,
+          "height": 21,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "13a69f1a48aa1c24d65e07530220debec48de14363bf703ac8957648809d0e36",
+          "resultTagSha256": "8cdba55638c1c4bc27446f48fae7c23b587303d41f3a837b991713627ebdd7bc",
+          "donorName": "zh_cn-room",
+          "donorId": 90
+        },
+        {
+          "id": 22,
+          "symbols": [
+            "asset.room.TypeBtn_C_01"
+          ],
+          "width": 140,
+          "height": 32,
+          "kind": "image_gen",
+          "sourceTagSha256": "b6301850b7ccaebdcf9025797b611dd8ff9901721316461ff0407389a0260117",
+          "resultTagSha256": "6ecc822e1337f5aa0a5cda7014bb656d286dcd14010945554a7ea55def3b491a",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 28,
+          "symbols": [
+            "asset.room.levelAsset"
+          ],
+          "width": 49,
+          "height": 19,
+          "kind": "image_gen",
+          "sourceTagSha256": "61da95e8a088aa8730f44e8e4c31d91a7d3da09ceac917269e538c5ef989c215",
+          "resultTagSha256": "dbd90426f0d9b6cf0282283350c136e266360567e3b8d57974d6bcececf67102",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 30,
+          "symbols": [
+            "asset.room.levelRangeAsset"
+          ],
+          "width": 20,
+          "height": 16,
+          "kind": "image_gen",
+          "sourceTagSha256": "08cf7305073e0eeacfbe2f88f8dbab0e5cef6df732fa628d5c35d66da23e96a2",
+          "resultTagSha256": "a289c201717fe28145364af745ba806a2fc8afe68c611292080078814b5fa6eb",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 31,
+          "symbols": [
+            "asset.room.localZoneBtnAsset"
+          ],
+          "width": 66,
+          "height": 78,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "97ba42050dc3eb1f0c399a592258ece64b02cda58a4b24a147196be66570045d",
+          "resultTagSha256": "9162ca705dc94eabbb13e7210607aa3d98c8d62de0aa02b238403f1c605cca48",
+          "donorName": "zh_cn-room",
+          "donorId": 71
+        },
+        {
+          "id": 33,
+          "symbols": [
+            "asset.room.TypeBtn_C_02"
+          ],
+          "width": 140,
+          "height": 35,
+          "kind": "image_gen",
+          "sourceTagSha256": "528afe42f02c2ebd49f4bcba354e23ba4cdc2be4d76d25525e288cd8360c91b8",
+          "resultTagSha256": "7dfd13384a84da391a9b103ce384121e8b2b63645eb750156f56671418a77963",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 35,
+          "symbols": [
+            "asset.room.view.bigMapInfoPanel.matchingTxtAsset"
+          ],
+          "width": 190,
+          "height": 24,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "9664654dd39e784e1aa6453405b36dbe102a93888b01efa10d31193fc7a35384",
+          "resultTagSha256": "0f64e1fcacf46278fb6353cc03f373a0d85584150e4f00abc9d886d7a2298475",
+          "donorName": "zh_cn-room",
+          "donorId": 66
+        },
+        {
+          "id": 37,
+          "symbols": [
+            "asset.room.modeAsset"
+          ],
+          "width": 55,
+          "height": 19,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "17762ac61a59555923a7ed33981abae04b3bce8f8bf2c50ffbb0ba92ef0336b3",
+          "resultTagSha256": "e668a8acd82fe5241f396ec9bd6b727a0f3d2912ca4581fc8689ff53aa17b2d0",
+          "donorName": "zh_cn-room",
+          "donorId": 63
+        },
+        {
+          "id": 38,
+          "symbols": [
+            "asset.rrom.normalBtnAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "cf0a374d437b543e0d22704875a17926408a59cd9fbc468cb01b93da80af3397",
+          "resultTagSha256": "86586bf604ec20584183d8f4754b5a48e0bc3e435a3d32f3e16a77816a08f9b9",
+          "donorName": "zh_cn-room",
+          "donorId": 61
+        },
+        {
+          "id": 39,
+          "symbols": [
+            "asset.room.normalBtnSelectedAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "11f13e627f46b8ea9bd8256d52758e7f501df12a896d27a678f1c0c810900761",
+          "resultTagSha256": "408b9288cddb13ec46f2a8da3c3818c22dfe55cbb7cd715a54e096e4d1430e20",
+          "donorName": "zh_cn-room",
+          "donorId": 60
+        },
+        {
+          "id": 40,
+          "symbols": [
+            "asset.room.normalTxtAsset"
+          ],
+          "width": 59,
+          "height": 21,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "0e4c3b862f819a0c70b67e9295234f7d7fd8e649729bc67924a96d72378feeba",
+          "resultTagSha256": "bc3c5f962132bec16602645f3569c5db66cbae615f60e3d791244385f1dc0480",
+          "donorName": "zh_cn-room",
+          "donorId": 59
+        },
+        {
+          "id": 41,
+          "symbols": [
+            "asset.roomLoading.LoadingOK"
+          ],
+          "width": 72,
+          "height": 40,
+          "kind": "image_gen",
+          "sourceTagSha256": "2f7ca393b6c3728940d4e3c55bd6ce049aea79b7d24b7a99ed7ebe2baf08cca0",
+          "resultTagSha256": "14a029cd8e4a13020f8893b5ef721299ac9be4699b167e6e2497425016afda05",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 44,
+          "symbols": [
+            "asset.roomLoading.ViewerItemBg"
+          ],
+          "width": 207,
+          "height": 163,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "8e6e0153c8e466447264e30cc6a3e43bc13fcb8a72a23f46836c223c1d1c29cb",
+          "resultTagSha256": "89968587082f2b55f6a09077aee8283a1b48213dd093513161c3a0f989f8625a",
+          "donorName": "zh_cn-room",
+          "donorId": 67
+        },
+        {
+          "id": 55,
+          "symbols": [
+            "asset.warriorsArena.buyButton.Text"
+          ],
+          "width": 93,
+          "height": 39,
+          "kind": "image_gen",
+          "sourceTagSha256": "5d126b3df4f5d2f14748916486b84dbe7778785543048281552626f60f097179",
+          "resultTagSha256": "a942c984e8e3e261abe5d5a685d656fc7cadfc9d239950dfa2021efe6b7b4333",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 56,
+          "symbols": [
+            "asset.room.cancelBtnAsset"
+          ],
+          "width": 126,
+          "height": 148,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "698c2368303ca1fbcb78371823f2f03f89feb3efc28a45f2b956594f1c3273c1",
+          "resultTagSha256": "cc82da4e7da03a5d6bfbd3b0bd8b39adbdd4331c51f853aaf03793bdf67c6022",
+          "donorName": "zh_cn-room",
+          "donorId": 39
+        },
+        {
+          "id": 57,
+          "symbols": [
+            "asset.room.roomHardLevelAsset"
+          ],
+          "width": 120,
+          "height": 25,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "56046ed34ac7d3a1227d39b9124ffbe3a6c3422b8cb7eb6c260df1ce94e9a2ed",
+          "resultTagSha256": "f1511e456e967c641859ea6304c2e73421be2f0af87f850433975a87d2617c1c",
+          "donorName": "zh_cn-room",
+          "donorId": 37
+        },
+        {
+          "id": 58,
+          "symbols": [
+            "asset.room.inviteBtnAsset"
+          ],
+          "width": 53,
+          "height": 72,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "377441f250f65b9bd9824deb1726ccc0fc9d76383d681d8fd4ee05d8ace812df",
+          "resultTagSha256": "1476184f91e232db2b7ba4dae9b8f835fbe11476ad376a72d86b545614515ab8",
+          "donorName": "zh_cn-room",
+          "donorId": 36
+        },
+        {
+          "id": 60,
+          "symbols": [
+            "asset.roomLoading.TipsItemBg"
+          ],
+          "width": 207,
+          "height": 163,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "ec1c08f53f7453830d5258db1b8e376159637cf0198ecd3db3cd8b01a006463e",
+          "resultTagSha256": "99d8d1526090d9cd9d8446d0fdb993c1f5b468db6342c6caf7842e7df31b7f6c",
+          "donorName": "zh_cn-room",
+          "donorId": 32
+        },
+        {
+          "id": 63,
+          "symbols": [
+            "asset.ddtroom.dungeonChoose.boss"
+          ],
+          "width": 143,
+          "height": 36,
+          "kind": "image_gen",
+          "sourceTagSha256": "e5765b76d73d77ca59dbe00dd1e7106792ceda9597bba47059aa4e0f7c31ae86",
+          "resultTagSha256": "f2ce162ad63750bf7fde66f5dd9a63d86bcc93e177191711a54e32a3ca5834b3",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 66,
+          "symbols": [
+            "asset.room.view.roomPlayerItemReadyIconAsset"
+          ],
+          "width": 105,
+          "height": 105,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "bf940b02f2d4c12be6f3ed4f4a31b538e9a5f693fae5b3a2c9e6d5a4decb7ff1",
+          "resultTagSha256": "f81c3ced0b9962b425b623f0237a60b04e1f3949ff2f80c5be5b426421dce8a8",
+          "donorName": "zh_cn-room",
+          "donorId": 25
+        },
+        {
+          "id": 78,
+          "symbols": [
+            "asset.warriorsArena.giftButton.Text1"
+          ],
+          "width": 93,
+          "height": 39,
+          "kind": "image_gen",
+          "sourceTagSha256": "09b9e01311ebf1d000652219ce1ecd8ca9609cd0c67c6436bade8b571e6cd748",
+          "resultTagSha256": "e0a94957c59f929900ef2b535336a83b309a0452cd57978f7972bc54c98f7461",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 79,
+          "symbols": [
+            "asset.room.RoomSwitchTeamBtn"
+          ],
+          "width": 63,
+          "height": 74,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "5e4eca8b422cba4632c4cd1cd39a7e0632446eb2e9984c0356539da23bf16706",
+          "resultTagSha256": "1188b7c25cc5a143abdaf6e61a90c1ef37aafbe2ad0da3179034c943b642b50f",
+          "donorName": "zh_cn-room",
+          "donorId": 9
+        },
+        {
+          "id": 86,
+          "symbols": [
+            "asset.room.ViewerWaiting"
+          ],
+          "width": 86,
+          "height": 25,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "bbde45ff28e9bf9a0f4446a12e972c8fe4cdd4cd1c06c830ad1a898cea37ae68",
+          "resultTagSha256": "73ce34701a474f333c87f303e5d447953f7457333a2390725f4ca40e92266427",
+          "donorName": "zh_cn-room",
+          "donorId": 74
+        },
+        {
+          "id": 88,
+          "symbols": [
+            "asset.room.selectDungeonAsset"
+          ],
+          "width": 294,
+          "height": 265,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "30907367a34697052f142788b44484e8d45466f99c754aa4ba4a493b4e7988b7",
+          "resultTagSha256": "1a2a0953d5efd2e9ee9204648ffb4d5fda9092d415eb892eb118a01cfaa2b933",
+          "donorName": "zh_cn-room",
+          "donorId": 137
+        },
+        {
+          "id": 89,
+          "symbols": [
+            "asset.warriorsArena.giftButton.Text"
+          ],
+          "width": 93,
+          "height": 39,
+          "kind": "image_gen",
+          "sourceTagSha256": "6bbf9c2e958e8bf9070852d9fe266a6b18a1f70c8b844a02b189892459f47e7d",
+          "resultTagSha256": "8e93887341dea4ed1793e7b0e95f25e8120fbf7cbe51f8402f34af875620ef5f",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 97,
+          "symbols": [
+            "asset.room.11_15Asset"
+          ],
+          "width": 61,
+          "height": 22,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "5bd6b4508190c38bdb1b1b9877cd83c6f0e713a8640a15373ac29537bf521a3d",
+          "resultTagSha256": "ca3118d8ad1c1ed5dfbb454ab355b4b6f2b8aaf7ea649f47d47819cc9769c3e3",
+          "donorName": "zh_cn-room",
+          "donorId": 26
+        },
+        {
+          "id": 100,
+          "symbols": [
+            "asset.room.16_20Asset"
+          ],
+          "width": 61,
+          "height": 22,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "d8b93fa39d8948e7ca57fb830c461e9b7d256f98d03be3b97ee0ba781166eb97",
+          "resultTagSha256": "a33c0c7c7d021e22dc9ee5e78dae883e780d231452bde3652db01a9893c5f421",
+          "donorName": "zh_cn-room",
+          "donorId": 95
+        },
+        {
+          "id": 101,
+          "symbols": [
+            "asset.room.21_25Asset"
+          ],
+          "width": 61,
+          "height": 22,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "cd654a91d9f489ea2c6aea6150c5c5a032e8aea21aed72629f2b258eec0bafa6",
+          "resultTagSha256": "a8fb2d62a19f4ff4e80407485fde29d4cfb97f7f086195a7364fa3055d19bb22",
+          "donorName": "zh_cn-room",
+          "donorId": 138
+        },
+        {
+          "id": 102,
+          "symbols": [
+            "asset.room.26_30Asset"
+          ],
+          "width": 62,
+          "height": 22,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "f4f5b05e077924ed932abacbcc96d49513c3c38c98572cb243d11fe2a01812ae",
+          "resultTagSha256": "d2490d1bfa78287297011199af6f5fd1e1e9da0117fe24b8d55d0fb6f94b23a3",
+          "donorName": "zh_cn-room",
+          "donorId": 136
+        },
+        {
+          "id": 104,
+          "symbols": [
+            "asset.room.6_10Asset"
+          ],
+          "width": 56,
+          "height": 22,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "8619bd88f42d4f4e224ef3cbe81b7b9c7ac780332636b0547cc05c3cc5822da0",
+          "resultTagSha256": "ccfb44f056333b340481ff4f7d77cef4e2ba56e65032f794966490440a1de9e5",
+          "donorName": "zh_cn-room",
+          "donorId": 134
+        },
+        {
+          "id": 106,
+          "symbols": [
+            "asset.roomLoading.BattleFieldBg"
+          ],
+          "width": 316,
+          "height": 163,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "98fe2ea9ebbb436423166924dc280063939ea6ac8388d1457030e6adcde731ef",
+          "resultTagSha256": "ebea65c87815287aca99b57b59d2bf8f01b26fdef4e67698ff0eff77538c9958",
+          "donorName": "zh_cn-room",
+          "donorId": 131
+        },
+        {
+          "id": 110,
+          "symbols": [
+            "asset.room.boosModeAsset"
+          ],
+          "width": 138,
+          "height": 61,
+          "kind": "image_gen",
+          "sourceTagSha256": "ea9d61c2d310e4b2df68781f722980b48412757aef88c3df3c32a849032e29b8",
+          "resultTagSha256": "5d3c42db881dc729822088d14393de15e28ae9fd950cb6e7a6b04697be606415",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 119,
+          "symbols": [
+            "asset.room.chooseDungeonAsset"
+          ],
+          "width": 117,
+          "height": 24,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "240787875c924236ce4261bd3475cd90c3265f8d5197cce0159770beb5c8887e",
+          "resultTagSha256": "6035e1269809065036d9613e545e64ed3f9d488201f3ce84aaea8db33935fc5a",
+          "donorName": "zh_cn-room",
+          "donorId": 114
+        },
+        {
+          "id": 120,
+          "symbols": [
+            "asset.room.TypeBtn_A_01"
+          ],
+          "width": 140,
+          "height": 32,
+          "kind": "image_gen",
+          "sourceTagSha256": "c6764e9992f7956cb20fc74582c61a8414c6d27f2772033dd183c5e77e26673e",
+          "resultTagSha256": "cd57d605d1dd99276eaa974a049d787bf1188a78e6181425e2bb9eb6f98210f4",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 121,
+          "symbols": [
+            "asset.room.crossZoneBtnAsset"
+          ],
+          "width": 66,
+          "height": 78,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "a90175289d0b1e8948047668f6bea1378e4042a4c7b25bf568ceaaca0ffbad14",
+          "resultTagSha256": "e66257e06953ded42038e5cf393fe8477addc53b70cdec317a2f9344467aeaa2",
+          "donorName": "zh_cn-room",
+          "donorId": 112
+        },
+        {
+          "id": 123,
+          "symbols": [
+            "asset.room.diffBtnAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "ee30d00b53ff80f51a736356cbf4e69e84499db3336a83df798e7545e6abeca4",
+          "resultTagSha256": "03d5c680ebfa9a2c0f3b10d9a614ea2db8089145422593c8ab2636fa74963b04",
+          "donorName": "zh_cn-room",
+          "donorId": 110
+        },
+        {
+          "id": 124,
+          "symbols": [
+            "asset.room.diffBtnSelectedAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "bac7f72ff8df09b0785283f241236cf684e24d8bf262337c95afd8a78d121166",
+          "resultTagSha256": "23deee34a3bc289e7cf8c61e1d6660e976247e03fab7760a8c0d085b74906b39",
+          "donorName": "zh_cn-room",
+          "donorId": 106
+        },
+        {
+          "id": 129,
+          "symbols": [
+            "asset.room.dropListBgTopAsset"
+          ],
+          "width": 311,
+          "height": 56,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "5bed5e9614eb47d2f6fdf0942be01c5fad750941a976857d506512fa97c3b218",
+          "resultTagSha256": "4b718fd5aac8ef34b1a374fa24d5e9c7b401664bed22bd906951bc8e134c33af",
+          "donorName": "zh_cn-room",
+          "donorId": 101
+        },
+        {
+          "id": 131,
+          "symbols": [
+            "asset.room.TypeBtn_A_02"
+          ],
+          "width": 140,
+          "height": 37,
+          "kind": "image_gen",
+          "sourceTagSha256": "470359a02c029f2172c362697240192cdc2c15fd2392285c10459eb23959efae",
+          "resultTagSha256": "21f9f028d45d2a0dc92f553c959fb20094e8e16c7034f32f7bef28aeb61a89c4",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 132,
+          "symbols": [
+            "asset.room.dungeonModeAsset"
+          ],
+          "width": 138,
+          "height": 63,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "852a53f023eeffe6cf1a6076473874cc60df09d7183afbe7b062f6b147c2a744",
+          "resultTagSha256": "d0f2079717a846bc0bfbdbc783847ea96eea6570400bff3e8b9c8a1f18a5acd4",
+          "donorName": "zh_cn-room",
+          "donorId": 98
+        },
+        {
+          "id": 133,
+          "symbols": [
+            "asset.room.dungeonModeSelectedAsset"
+          ],
+          "width": 148,
+          "height": 73,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "226ada023133ef6697a8847b33bdad9f0978a1d3207d6c408ced36fbc0264508",
+          "resultTagSha256": "cb63c109eea6a821852d1abaa94cbffe2f53297a1efa6beb63974b90a36c05ee",
+          "donorName": "zh_cn-room",
+          "donorId": 142
+        },
+        {
+          "id": 134,
+          "symbols": [
+            "asset.room.dungeonTxtAsset"
+          ],
+          "width": 52,
+          "height": 21,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "2483d43dc7228fb9b16d72567043163355f5d55e6b971bfd35b8130d954f3c07",
+          "resultTagSha256": "a33c4b417859054d369a00b08906bb4a288a4280c975806a889c093416a9d27a",
+          "donorName": "zh_cn-room",
+          "donorId": 89
+        },
+        {
+          "id": 135,
+          "symbols": [
+            "asset.room.easyBtnAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "6475b3b28b6947425916263be936677e9adaf9bd0d701a8862e0efc045e7c178",
+          "resultTagSha256": "ba91aade0b2547f54747f4d99028b3644cd2e1fe064937d5c1d621f226710b14",
+          "donorName": "zh_cn-room",
+          "donorId": 2
+        },
+        {
+          "id": 136,
+          "symbols": [
+            "asset.room.easyBtnSelectedAsset"
+          ],
+          "width": 128,
+          "height": 47,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "f16c6a7af936d51bd35968c29e55f07577a2f065edb2862bff1ad282e66e86b2",
+          "resultTagSha256": "50c3d14685bb76f7c64bf3903273dd356266e683cb05f2c4700fb3c53e7424a5",
+          "donorName": "zh_cn-room",
+          "donorId": 108
+        },
+        {
+          "id": 137,
+          "symbols": [
+            "asset.room.easyTxtAsset"
+          ],
+          "width": 29,
+          "height": 21,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "cb044ec4599ca1e59b27cbdbe6b4395fd3a5c6e33a53f3fccc0b3aeb9ac6f440",
+          "resultTagSha256": "952f00466419e096bf8de603e639ec8ac5510bae60071b43cabc3414ea2805b8",
+          "donorName": "zh_cn-room",
+          "donorId": 83
+        },
+        {
+          "id": 138,
+          "symbols": [
+            "asset.room.view.bigMapInfoPanel.eliteGameBtnAsset"
+          ],
+          "width": 310,
+          "height": 111,
+          "kind": "image_gen",
+          "sourceTagSha256": "09abf17a103615746787d5dc90d407a0cf08de6e621e89ffbbdd461f960edf73",
+          "resultTagSha256": "4fc92dd81abea627325d58f345ba26c7a90be35367ef97fc891a781bd636c8f1",
+          "donorName": "zh_cn-room"
+        },
+        {
+          "id": 139,
+          "symbols": [
+            "asset.room.view.bigMapInfoPanel.eliteGameIconAsset"
+          ],
+          "width": 62,
+          "height": 61,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "b74dbf678a33d23e8eba19e66ad125a7df369ae2d1958a5400718947b7a58687",
+          "resultTagSha256": "967e0b85bef78fb638d4c8189580f8068f7636c28bd6852e5f56b23c2e1a1c54",
+          "donorName": "zh_cn-room",
+          "donorId": 57
+        },
+        {
+          "id": 142,
+          "symbols": [
+            "asset.room.TypeBtn_B_01"
+          ],
+          "width": 140,
+          "height": 32,
+          "kind": "image_gen",
+          "sourceTagSha256": "bb35953df49dbcba34b06c24aba45ccb9d973ea2b09837aa5d579bb45deaa59e",
+          "resultTagSha256": "87eb340fd8211b65d796e3cf5449623cb8e51f686fc7fcddccc108af2ad8abc1",
+          "donorName": "zh_cn-room"
+        }
+      ],
+      "staticTextTranslations": {
+        "163": [
+          "加载中"
+        ]
+      }
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/roomlist.swf",
+      "baselineSha256": "bb6b4b0b156eaff06413ae6e97eb0bacf1113858a519914454fc130e579f7829",
+      "resultSha256": "347482c36b1c10b65dc4676a4415faa0b564c66fe759e36c4e898b7c76d1ebf6",
+      "changedBitmaps": 36,
+      "staticTexts": 0,
+      "bitmapChanges": [
+        {
+          "id": 14,
+          "symbols": [
+            "asset.roomList.roomName"
+          ],
+          "width": 258,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "c646d1380e8f6304adaef1bedd120638382a6ba622d7be07633bab5c3e1d3006",
+          "resultTagSha256": "13a6cadee6e471690a7034c6a2dc53f467cfff11f92641fd13ca820664f055a4",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 14
+        },
+        {
+          "id": 15,
+          "symbols": [
+            "asset.roomList.roomModelText"
+          ],
+          "width": 102,
+          "height": 24,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "77819460e245f29c06d231aabe46c2d5c7a8a5f5e0f16a859a6e424e26183eec",
+          "resultTagSha256": "c1c6aea2d96d60c1dd1c8a84f154fd5f4d9d24bfbb6f931d44d32edc0e22d38d",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 15
+        },
+        {
+          "id": 16,
+          "symbols": [
+            "asset.roomList.roomMode"
+          ],
+          "width": 132,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "d429bdbc1c1de0839de7cf9ced58a6f4ad3aebb36f47082336a7f6edf19a8930",
+          "resultTagSha256": "eed9920e5c9ce72f01f7251849701891aa3baecf76244fb359814025fb297d5b",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 16
+        },
+        {
+          "id": 21,
+          "symbols": [
+            "asset.DungeonList.boss"
+          ],
+          "width": 138,
+          "height": 62,
+          "kind": "image_gen",
+          "sourceTagSha256": "eacb44c0f9666c7647a3c15624a90525489b2575ee3e7751557f6b265e7026dc",
+          "resultTagSha256": "25e0725a3b147556b55be82f453d65f325e7b9ac1f4f88788e7cb0b5543f7cfd",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 22,
+          "symbols": [
+            "asset.roomList.pre"
+          ],
+          "width": 107,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "a28e267e29a9cc8c4f3bd8bb03bc3860b0c7a71b356355a891ce9c7912e4c506",
+          "resultTagSha256": "6fd0040d133c95f9d31641e863355f2fe94b8062d9a13d0af76ba75c6924f393",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 21
+        },
+        {
+          "id": 24,
+          "symbols": [
+            "asset.roomList.playerListBg_01"
+          ],
+          "width": 232,
+          "height": 549,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "b35cdf02bcdd2f635ac33dc5bd5c179b7159d7f3503c8611e44beaf117719bc6",
+          "resultTagSha256": "8d4a73d030bc7ad3821a52b371d065fa2aa2a6dfe9725cee92749dcfd1b70fa3",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 23
+        },
+        {
+          "id": 25,
+          "symbols": [
+            "asset.roomList.titleBg_02"
+          ],
+          "width": 142,
+          "height": 25,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "6a08b9f57aa5e92b9552ad4f3aed06e0182f0565e4664f95aa23c93b962ca941",
+          "resultTagSha256": "e32be9cd03099b4f97baae1ea18837e5440628e263dbc425d0134076b9836fd6",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 7
+        },
+        {
+          "id": 28,
+          "symbols": [
+            "asset.roomList.placeCount"
+          ],
+          "width": 136,
+          "height": 26,
+          "kind": "image_gen",
+          "sourceTagSha256": "7a515fd1b75a8b576d0ad9a40f2db81f7607443ae2716134f688ea5c5c952d45",
+          "resultTagSha256": "dd2589bbf4280cfc70ab3f9237cf8aacce8ce2b34b3c2cae5c6244cb187e69bc",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 29,
+          "symbols": [
+            "asset.roomList.passText"
+          ],
+          "width": 52,
+          "height": 18,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "60094cfecb96b4bf5fdee2974cfc8a38109ce82d9634e5e5f7fedd678e210e68",
+          "resultTagSha256": "6be5a8cd868bfce71686bc04f8a124a3a56be3fcbccd5e2dccf3bfcdadc08c7d",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 27
+        },
+        {
+          "id": 30,
+          "symbols": [
+            "asset.roomList.Pass"
+          ],
+          "width": 41,
+          "height": 20,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "d19c68fb58b9e9281a3d4097ecf11655a6ed5fde56746cc2a694bdaecd4d20d3",
+          "resultTagSha256": "a00f5fefb44ba3fde223720be6949e7711102b851b5891cd6b57427b6344c43f",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 28
+        },
+        {
+          "id": 33,
+          "symbols": [
+            "asset.roomList.next"
+          ],
+          "width": 107,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "e32c173ca03b830b3286446655e9cac863210ad15a1b1a53b06f84ae63869987",
+          "resultTagSha256": "8c10743b66235b30ee21721322eb53a44391dd73ee5a693ec668585768580c5f",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 30
+        },
+        {
+          "id": 34,
+          "symbols": [
+            "asset.roomList.NAN"
+          ],
+          "width": 96,
+          "height": 43,
+          "kind": "image_gen",
+          "sourceTagSha256": "f249c7e1fceb378be5389a5499075eaf0ca3ddaaf49bed80f5d523943bb8be95",
+          "resultTagSha256": "529e4c0f199ddfb5630e84559fbf81cfe445bf1a9a7da8f5d31743e106a0affa",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 37,
+          "symbols": [
+            "asset.roomList.titleBg_01"
+          ],
+          "width": 245,
+          "height": 50,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "722bbfb483e6ef59b8135bd71973241d48f56b632233f9949ac02c86267b0f50",
+          "resultTagSha256": "eb4ec63997d6eb8d0a70faff94670ce6756f3565b7083a86e9bfd303797ec5cc",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 8
+        },
+        {
+          "id": 38,
+          "symbols": [
+            "asset.roomList.mode_04"
+          ],
+          "width": 89,
+          "height": 32,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "e929b275c535d012b2c4f3aebc28bad1430a4bcb76eb0324e003cc93add79c09",
+          "resultTagSha256": "b12956b7f7fbf9e5546fe3f8b86f4d68fba32afd1bd6d5ed945564d43b996dda",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 34
+        },
+        {
+          "id": 39,
+          "symbols": [
+            "asset.roomList.mode_03"
+          ],
+          "width": 90,
+          "height": 32,
+          "kind": "image_gen",
+          "sourceTagSha256": "89cdafc0648dd2043e1dad3fa6eb6ed10918b69cbd3b95c4bf6cf22b4d7cfce6",
+          "resultTagSha256": "f9d3323f0629bc03f44774020f0bcb61adca4b481a1dc174b46fbc11038a5980",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 40,
+          "symbols": [
+            "asset.roomList.mode_02"
+          ],
+          "width": 89,
+          "height": 32,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "80296b15a51d6f81ecd7ee90d307ffdf7a6b0523ae80dbaab1a820d712a7f034",
+          "resultTagSha256": "a334be8015db12aabf942a69e30efe284fa5ac618da2ae7e796979b74d3e8a7c",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 36
+        },
+        {
+          "id": 41,
+          "symbols": [
+            "asset.roomList.mode_01"
+          ],
+          "width": 91,
+          "height": 32,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "6f6ac1376fe375bc10f945ebe75c7ac27275840d206969aabe16cff16b4884b2",
+          "resultTagSha256": "b8e0f6dc8dd35a0160d393702d06bccfe0973efe52679b01cee6dff7b7553efd",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 37
+        },
+        {
+          "id": 42,
+          "symbols": [
+            "asset.roomList.mode_0"
+          ],
+          "width": 71,
+          "height": 32,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "d893e2ab84914002ddca58d6c11bc93bc8ab4d6b671065fd7ca5e6924aa9c4c3",
+          "resultTagSha256": "6382cb21c8866b02effd43fa851e715d2e52b94d6a1729e01db2e1b5cb671075",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 38
+        },
+        {
+          "id": 43,
+          "symbols": [
+            "asset.roomList.athletics"
+          ],
+          "width": 138,
+          "height": 62,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "32ee589f17893ada5c3f6815ec61e0c3adf2d61b87c2cc574fa226859d3c7899",
+          "resultTagSha256": "7e75a1aa21c814795a2563518e0533268da8f61723f8582766233a463bb2d8c0",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 71
+        },
+        {
+          "id": 49,
+          "symbols": [
+            "asset.roomList.txtImage"
+          ],
+          "width": 79,
+          "height": 53,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "592a1a837be41215ab82e55d7d439ce259f0192c0aa59b89d6570ef6c0301593",
+          "resultTagSha256": "0532694f38fbbeba6f5ad6e4c91f886715a1c1987153cae2899457733ca5c69c",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 6
+        },
+        {
+          "id": 50,
+          "symbols": [
+            "asset.roomList.inputPass"
+          ],
+          "width": 44,
+          "height": 20,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "ffa7927effd9bd5eebdd52f30c09fb0a8e4728e20432bcd137ed041c6d8b1b15",
+          "resultTagSha256": "4c4097de2bda2222adf7d29a4a853052b9a0ce5c5db894a32ba28ab7225c7b32",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 28
+        },
+        {
+          "id": 52,
+          "symbols": [
+            "asset.roomList.inputID"
+          ],
+          "width": 106,
+          "height": 20,
+          "kind": "image_gen",
+          "sourceTagSha256": "d3dd1e572fbd17d33ae43aa61211bb56679c890e03923cf5f223d2dddd8292d0",
+          "resultTagSha256": "507a3ed27182a7f5158e704fb9bcbe941223f821b1f3ccc627e613b644936898",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 53,
+          "symbols": [
+            "asset.DungeonList.ID_PVE"
+          ],
+          "width": 58,
+          "height": 29,
+          "kind": "image_gen",
+          "sourceTagSha256": "c851ac724bf7c25753b44c44b3490d545f677b99994917af52477beec080b9d6",
+          "resultTagSha256": "e7306b83774653425e1179b85e6407ad18658f4ee45ea3e959ce437a75685fec",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 55,
+          "symbols": [
+            "asset.roomList.ID"
+          ],
+          "width": 58,
+          "height": 26,
+          "kind": "image_gen",
+          "sourceTagSha256": "bc15fb576f69793178f78d90068a494aa798b0a8bab2c714bab3d1f6aa9e0422",
+          "resultTagSha256": "cadaeb6c8da1f1b173c7acb27d41d0e5ffab74e846b2bd3eb0a3e2136af1994d",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 59,
+          "symbols": [
+            "asset.roomList.hardLevel_04"
+          ],
+          "width": 86,
+          "height": 33,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "2ec851ab0996fa92d18dc78a0c63bbc2dc8c694ce8fe84ce47c770bc5bd9c1a1",
+          "resultTagSha256": "a4c94d454b40c7cac90486597dc8d7c775cb3d811451801fb1cde3ea2cd41b59",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 54
+        },
+        {
+          "id": 60,
+          "symbols": [
+            "asset.roomList.hardLevel_03"
+          ],
+          "width": 86,
+          "height": 33,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "ccfe7968948e0b40ccb727bfe0ec6c49a5c3ff17e5739cb995043bc9fc376bdc",
+          "resultTagSha256": "4560d28713488324cb93b22090bd307e3a30ffd0ab4491235a528cd0000edac4",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 55
+        },
+        {
+          "id": 61,
+          "symbols": [
+            "asset.roomList.hardLevel_02"
+          ],
+          "width": 86,
+          "height": 33,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "02d42346824c7767fa60f0008927971a2913121485906ba9af36c933024b29ab",
+          "resultTagSha256": "14eb3efca5b5ccaa4df4eba3a420e50733041c4500ef057d0c2033135d895f25",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 56
+        },
+        {
+          "id": 63,
+          "symbols": [
+            "asset.roomList.hardLevel_01"
+          ],
+          "width": 86,
+          "height": 33,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "c6b2ab007733bf45f19eaec28cb966e972837e1d7fc4155a3848a9d2580125e0",
+          "resultTagSha256": "e1442e91b740f108dbea93564725816d39c015a8b6cc1d3db30e6e11c7cb947f",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 57
+        },
+        {
+          "id": 64,
+          "symbols": [
+            "asset.roomList.hardLevel_0"
+          ],
+          "width": 102,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "20e2731584d81ca254930ff60d1d62a99998e0ca4ff98343e2e204525381a6fc",
+          "resultTagSha256": "927ead22b6d26180aadb627950066d92a91bf5322b1c890edcc8a5c04118f7b5",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 58
+        },
+        {
+          "id": 66,
+          "symbols": [
+            "asset.roomList.hardLevel"
+          ],
+          "width": 142,
+          "height": 26,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "f76cb0534c42f3694f85d6fb42badc4304d88049610b88fb30593038c9a050c4",
+          "resultTagSha256": "6084a1756f7f740fbcaa9a3444a85e7a6569f08e6408079df0a7f19bfebbdc2e",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 59
+        },
+        {
+          "id": 68,
+          "symbols": [
+            "asset.roomList.explore"
+          ],
+          "width": 138,
+          "height": 63,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "9f95bcac7420eefe9344667edaa1a97a18e7f2741367f313a375d79b5482cf50",
+          "resultTagSha256": "8e014803e91995fc0b0f7d31cb796b17a6cc1ffc59d1a91bb9dcd7d6ca1b6be1",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 62
+        },
+        {
+          "id": 69,
+          "symbols": [
+            "asset.roomList.explainText_2"
+          ],
+          "width": 254,
+          "height": 49,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "647b9c3107220a9298493ccff6386901b57f8c09bcda25a0dc0b4a55af30103d",
+          "resultTagSha256": "f3e79bad1bce863c38944e300885ee95b2280731dea077ec78dac995e6b08849",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 63
+        },
+        {
+          "id": 70,
+          "symbols": [
+            "asset.roomList.explainText_1"
+          ],
+          "width": 254,
+          "height": 34,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "b851ff14b343da875334b98949545915f9a44d91d64791cc92e089a08e152257",
+          "resultTagSha256": "ad3e14bad2175ce6f1998acff033a1d1a3be76293a3e5b87b2c8f17b9b7b7b65",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 64
+        },
+        {
+          "id": 71,
+          "symbols": [
+            "asset.DungeonList.explainText_1"
+          ],
+          "width": 240,
+          "height": 64,
+          "kind": "image_gen",
+          "sourceTagSha256": "9e8d7b6e38f58a26ba1a4d633c47ecdf9a5cd7fdd1df3d1f8a8665b22ea1fa2a",
+          "resultTagSha256": "d44dc7b07355dfc70553333441c14a64ca097fe29418b6f6eb52260e85cbfb31",
+          "donorName": "zh_cn-roomlist"
+        },
+        {
+          "id": 73,
+          "symbols": [
+            "asset.DungeonList.dungeon"
+          ],
+          "width": 138,
+          "height": 63,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "46b09d6ab1d3d02592f057f43e7d1cde8c55e3b5d279793ffff012c3d0bcdb1b",
+          "resultTagSha256": "704982c1f7aa79d10da140d581c186a022b2b49404334700d094130f2160345d",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 98
+        },
+        {
+          "id": 75,
+          "symbols": [
+            "asset.roomList.CreateRoomText"
+          ],
+          "width": 100,
+          "height": 24,
+          "kind": "zh_cn-donor",
+          "sourceTagSha256": "5636ec51515fe937e08e94c0eefeccc2f4102a00879f6e381b91df576db7e3bf",
+          "resultTagSha256": "ea956544f9270a0b43cc1e72ef4e63340a61b97825d20fa4b5d2fe984965454c",
+          "donorName": "zh_cn-roomlist",
+          "donorId": 66
+        }
+      ],
+      "staticTextTranslations": {}
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/store.swf",
+      "baselineSha256": "b428b9657731f879454d1008a395c3f9f770a3778db6f479130a0b48d6e9ce17",
+      "resultSha256": "87c5fb2c186d54a588be2f2f05aface5e22265c98fca34c0a98507a154112b3c",
+      "changedBitmaps": 93,
+      "staticTexts": 28,
+      "bitmapChanges": [
+        {
+          "id": 1,
+          "symbols": [
+            "asset.store.fineBringUpBtn"
+          ],
+          "width": 45,
+          "height": 86,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "344a6e19316ba6593b216cff870c23a27f025c5e2d41bdcf1e38465e8926536e",
+          "resultTagSha256": "2480349f3bf9c03e23f5061e782030708d0dbcdeb7b6154d766644d8b04cf4ab"
+        },
+        {
+          "id": 2,
+          "symbols": [
+            "asset.store.unFineBringUpBtn"
+          ],
+          "width": 72,
+          "height": 86,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "732a851590e103042695c753372fb250ad9899db63c6cb4390bc94a72871f030",
+          "resultTagSha256": "5c461e2465ff6de7da112692755c6424ac2c8472f4e0b05b022ad066b4adb813"
+        },
+        {
+          "id": 3,
+          "symbols": [
+            "asset.store.transfStartBtn"
+          ],
+          "width": 160,
+          "height": 46,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b4d4f206081ad0a563c96472969a80e66806fff0be993364e2b9b37633639463",
+          "resultTagSha256": "c7683c588e3c61769e9af45853b1a5e58dc27d7ed6a23511adfa9a8f0028acf7",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 101,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 4,
+          "symbols": [
+            "asset.store.transfNodeBtn"
+          ],
+          "width": 86,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "8132685afc60f5db20d855224637739d54d90c6a3107b080c32f9b4673fd3599",
+          "resultTagSha256": "3279b49836d6a9be5d8afe1f72c5b98b304e97960103c1b4ce18aa0c0a0c0c59",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 100,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 5,
+          "symbols": [
+            "asset.store.transfNextBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "636ba419eb4e87998bb312646b220c79fbaba0b3867d7f9415e0817717e0b05a",
+          "resultTagSha256": "fe9c4c9194414922e65f9bdc3d7963d8b7bb015901e92c2e601c262e80d9fea0",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 99,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 6,
+          "symbols": [
+            "asset.store.transfPrevBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "71772d39fc37c2260b624498076527f9a103eac04133f09e5105ad8d5dd057c8",
+          "resultTagSha256": "b9652ae588c22c4e7f546c9453b74e86ef329fd7e63c6d3623ad73115c20420a",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 98,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 7,
+          "symbols": [
+            "asset.store.transfArrowBG"
+          ],
+          "width": 118,
+          "height": 104,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "1cb2bb60e05eacb2846850b8995f1d9a3e0bdfb107d990c4602cc80c172f0733",
+          "resultTagSha256": "ce15886b6efececc91a8fbd8fb9c504fa3834b5a77a4cfc98e9338f457d5d84b",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 97,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 8,
+          "symbols": [
+            "asset.newStore.tabForge.unSelectedBtn"
+          ],
+          "width": 116,
+          "height": 35,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "a29029a63e1a4304a5907fe982443267f0e15d287cdd0d2fdffeaa394fd312e0",
+          "resultTagSha256": "c94d7b28d417c5a5cd7242dbdf929f8d53693ac549334fdaeaaf9a4db39a7f7f",
+          "donorName": "ddtstore",
+          "donorId": 83,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 9,
+          "symbols": [
+            "asset.store.shortCutPayTip"
+          ],
+          "width": 145,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "27dbe182f1da665812083d02b7a4226614e18c4515ec543f9c85c6107fd296af",
+          "resultTagSha256": "a5d40bc8b71afb871290bbba68856b0ec125a4d67bcae6df99a48aaebeb49d26",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 116,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 13,
+          "symbols": [
+            "asset.store.FusionStartTip"
+          ],
+          "width": 326,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c1c1869ffb3f2772ac8ae6fe478d32cb019717179538a6e9c2859f76d9d6b3c7",
+          "resultTagSha256": "cbc0fc38a5924e4ca9a75974f9b8480cf162510d9beb221ae0ec61f15092626a",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 50,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 14,
+          "symbols": [
+            "asset.store.transfBG"
+          ],
+          "width": 710,
+          "height": 402,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bce673b972d1d503f0ff7bcd76278bd61477762127b1f69753648e8907be3612",
+          "resultTagSha256": "18ca1a2948759fa252e12e01272261dcdfa03f77d1f20c02a071e172d25fab05",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 66,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 15,
+          "symbols": [
+            "asset.store.bagTransf"
+          ],
+          "width": 211,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6c4b1375768c1410e5b0db417e2d84b985063f2df00e1880513d83ab85c57e9f",
+          "resultTagSha256": "59faaff50dfb147bc8cb6d91ec0529b6963b2ee70dbb8d9276aa96bf65e379a5",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 44,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 16,
+          "symbols": [
+            "asset.store.transfBtn"
+          ],
+          "width": 48,
+          "height": 84,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "f4541a2a3b2af0e80f6f41252ec0e562562c5cf276a0eb961cc6047f27a25054",
+          "resultTagSha256": "b2f877a9ef525dfd9ba883013562dd352858e4ab9789f615899985dc294f558c",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 55,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 18,
+          "symbols": [
+            "asset.store.Title"
+          ],
+          "width": 411,
+          "height": 45,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c78cc974dd86120308f525f9ff1ccd45ff1ee610bddce4dd17e9565582e5f1fc",
+          "resultTagSha256": "f3017f54d663dd58e3d1358cca97383658ed96383c5523b38fca75c51240d576",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 33,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 19,
+          "symbols": [
+            "store.StoreIISuccessBitAsset"
+          ],
+          "width": 505,
+          "height": 72,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "7e26dd8dc56d5f564ddf7780999b9c1f858afd4e1b0920cfeaf3c301dc930bfe",
+          "resultTagSha256": "ec98a2ffd7a1800eb64fe2da9c0d88fafb6d90516d56caf4dc479b4576c979b4",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 22,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 20,
+          "symbols": [
+            "asset.store.StartStrengthTip"
+          ],
+          "width": 326,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "8f75b26dd1b14b7ef77b44069eeb57f17c390135baa920282fa56d95c0acbb53",
+          "resultTagSha256": "6a42b5b42b9fdb318f0148322a11ee5512fa2be2e165fb19de51b6174645e48f",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 11,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 21,
+          "symbols": [
+            "asset.store.strengthBtn"
+          ],
+          "width": 48,
+          "height": 84,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "036f0278f83043a956fb1a405a9a61893b59177bb8ed4d24c3cc6ce3c6a98201",
+          "resultTagSha256": "a2ecc2b9f301491e5bd3ac0cd839594c0bb83ada3cf45ac507750b5c8b03228e",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 115,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 24,
+          "symbols": [
+            "asset.store.fusionBtn"
+          ],
+          "width": 48,
+          "height": 84,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c80fc3bab2e8b7a1f8dd3cb6196b0e5069f5c16761ca38a2d9724a6c81fb75c3",
+          "resultTagSha256": "d263310075d5bca25edfda6f1c2234aae0aee89587d389a55ee83c0d4e116855",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 49,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 25,
+          "symbols": [
+            "asset.newStore.tabStore.selectedBtn"
+          ],
+          "width": 118,
+          "height": 38,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "99163a5f8b71dfc31e815afcd95fd595e8916aad55a0137459e87e8e4201a6dd",
+          "resultTagSha256": "b3e692f4ea810f8c89b55cc209ef95ea63ed45e561bd7dfd108abe970c99a763",
+          "donorName": "ddtstore",
+          "donorId": 19,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 35,
+          "symbols": [
+            "asset.store.FusionSuccessRates"
+          ],
+          "width": 45,
+          "height": 34,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "90542eef15a63a74e7ee25f2df1cb5fb337c03fdc31ff8ded6218259f647936f",
+          "resultTagSha256": "4492ed58bc188d9582018830e104ce9b484771a2dab06faa9a27534f5d74b000",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 48,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 39,
+          "symbols": [
+            "asset.newStore.tabStore.unSelectedBtn"
+          ],
+          "width": 116,
+          "height": 35,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "2e73587b1012d0228dc67ff6f9c88a18db84be7701851c8b5f8db05f483cb357",
+          "resultTagSha256": "7b1e014a546ce1b15478844b1d00d8dc44573b14abf446d2ab3acae51814a2de",
+          "donorName": "ddtstore",
+          "donorId": 24,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 44,
+          "symbols": [
+            "asset.store.StrengthBtn"
+          ],
+          "width": 160,
+          "height": 46,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "20e5db9a73f7ddc0a792acb9e0a8f646340dd3e666a28694070cfa1d139b3ef7",
+          "resultTagSha256": "605f09a838b64a6b8968d08c377db86001818bd88a16d9e79a909bc2e23bb29f",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 104,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 45,
+          "symbols": [
+            "asset.store.bagStrengthII"
+          ],
+          "width": 227,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "15c8cf56707f0eda8e42abff5fc75d1d1878420d19ee7fd8db6bc0d6e2c0e0ab",
+          "resultTagSha256": "9e8c83013b6dd95e92713a7c04e9defff527c919127e5fbaa06d7f6b34b4bd89",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 96,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 46,
+          "symbols": [
+            "asset.store.FusionCellBGII"
+          ],
+          "width": 111,
+          "height": 108,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "fd444de08db22036e3312fe6f32f5e7489b1c2866848ed5b005b1a15241dc18d",
+          "resultTagSha256": "79d5665501041add91761c9b4b1970d68426c69d0f1df6f051595aa58992493f",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 47,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 47,
+          "symbols": [
+            "asset.store.bagStrengthI"
+          ],
+          "width": 238,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bc7fa99cd4a8c0c47363ba300e48394678bf9f8c07f58ae16c9a233ef47c15c0",
+          "resultTagSha256": "d46c0077e61221d8613b1ff493682ecaa7a7e1fc14f6accf8e767a6a799f5889",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 95,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 48,
+          "symbols": [
+            "asset.store.strengthBG"
+          ],
+          "width": 710,
+          "height": 402,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bd111bcda35fac730cffcedbd1e8919d4eddafd6d6b6cdf7d5735172b382021a",
+          "resultTagSha256": "b7e86e56c83585c5f752520e06c43e5c369a0d088a6f1476cdfa653c16415e45",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 94,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 53,
+          "symbols": [
+            "asset.store.transfStartTip"
+          ],
+          "width": 326,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "47c7a0604bfb6e8b7f2fae383665cb167dc1904723b76ba4bdc0fe7376a5d008",
+          "resultTagSha256": "a4b192b581d215044009d068e8f7a5008a95c526fb36e4418ac34c9beeea395a",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 91,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 55,
+          "symbols": [
+            "asset.store.showSuccessVipBg"
+          ],
+          "width": 314,
+          "height": 40,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "879740d0d0f519783a59ae803e3d40f5900ad59e6c14608d112eee51c490df7c",
+          "resultTagSha256": "c86329a4a48967ab4fa9b158d53f5e8c174aef34879d9fb07924e50a68552712"
+        },
+        {
+          "id": 56,
+          "symbols": [
+            "asset.store.showSuccessBg"
+          ],
+          "width": 312,
+          "height": 40,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6fd5b7a9a6f07ce20a5d53ef4df6469c66ce250a46261f5db2a8cd1a25c73c9e",
+          "resultTagSha256": "2edb25f33e0f9c8f3f2c400116fc246b630bb3c580092fe893fab7f085529d9b",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 89,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 57,
+          "symbols": [
+            "asset.store.FusionCellBG"
+          ],
+          "width": 60,
+          "height": 60,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "69b4b8285c9124d48f2574ea9bcb37d894da04a2b820c42df5a1295c13e6f067",
+          "resultTagSha256": "47e09e322a634b6f0627cd86d5a80f20af2b2f599010894760cd22f0962384bc",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 46,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 58,
+          "symbols": [
+            "asset.store.SellLeftAlerBg"
+          ],
+          "width": 225,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c4b856c48ffceb45f195c769e31592a3c9065128bfba80abaef84486d2af0ec9",
+          "resultTagSha256": "8f82f96ede7424492db49d8ee99b2241c6220c00dbeda74186ff088cc196d00e",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 87,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 63,
+          "symbols": [
+            "asset.ddtstore.exalt.continuousText"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "dcc1ade53297d5051ab587081be26b1c55880ec4218ae26b3f4d00d712f58b76",
+          "resultTagSha256": "db537f5f2680cb093fafd977ea26d339daaa8bc3723018f82699b820bb8eaad1",
+          "donorName": "ddtstore",
+          "donorId": 48,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 68,
+          "symbols": [
+            "asset.store.fusionBG"
+          ],
+          "width": 710,
+          "height": 402,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c57b36563b17c0c787b3ab12ae06ad6155d3daf8a96164712a8e02fcbbb6eb74",
+          "resultTagSha256": "a538c430972914ab0010e4e4601e4829c87efeb08e522de407ace5720f0544f6",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 45,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 70,
+          "symbols": [
+            "asset.store.bagProp"
+          ],
+          "width": 57,
+          "height": 19,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "993d61f26b4af01e34ceb43a7137fa6b1d2007ddcea0ab5c3562e22f3e14e4f9",
+          "resultTagSha256": "309a4864c68a1611e3dd9a2dda9b8d3596d085f0b0ea6720c450267a886e20c6",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 78,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 72,
+          "symbols": [
+            "asset.store.SelectMoneyTip"
+          ],
+          "width": 90,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "22fc84960473cffbede31b66cb048f519867e34392a4487da3cb8ca60e16d7f9",
+          "resultTagSha256": "b7cb5ec9a7c6f68ed95cfa69f7ab83c0f7a97b9164179a299504e4b2eb67d987",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 75,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 73,
+          "symbols": [
+            "asset.store.NeedMoneyBG"
+          ],
+          "width": 175,
+          "height": 22,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "1ca4f33a7a93dc62fdf8d69c8c4a6963ac33e2914a3c7455b0857008f302718b",
+          "resultTagSha256": "3682d87681fb5a2d1e97c52d427351f23d35528dee544da95d337b39f16f3762",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 74,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 74,
+          "symbols": [
+            "asset.store.CheckBtnMoneyBG"
+          ],
+          "width": 62,
+          "height": 34,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "8cce82be33a47b549a1b5bc3d00c11700b544e1913ed4bed26681937c48e74e0",
+          "resultTagSha256": "7f972836140df4d01f00398ca6097f8f7d2a55841aa60c59b0ec66049224d0c8",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 73,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 75,
+          "symbols": [
+            "asset.ddtstore.exalt.TitleText"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "65c87b390ca4591d0131aac098261b8afd6a8d30fb20b43d1d280d923f1b87f5",
+          "resultTagSha256": "c3026e30be102b06b89508921cd6c1592afdeba4b5f2d054f48b734b1c2f473b",
+          "donorName": "ddtstore",
+          "donorId": 53,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 77,
+          "symbols": [
+            "asset.store.AutoOpen"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b74cf8966da32d5d7f171936beab0e6b30bdcc72248acd974e1b64402718e5c0",
+          "resultTagSha256": "daa2ef5d049481cb963b2226bfd9d698c7b9d0c2526ad81b7b154e28d4700c25",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 71,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 79,
+          "symbols": [
+            "asset.store.bagFusionI"
+          ],
+          "width": 227,
+          "height": 23,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "32e1ab386ec4acbe77c73bc498450086e5000ea41c96b71bec2bd94a6d8c225c",
+          "resultTagSha256": "44b38ee1a88f0abbac9f601c1bfaf09785814267bf6c8de694fdeac273e444ee",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 43,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 82,
+          "symbols": [
+            "asset.store.embedOpenHoleBtn"
+          ],
+          "width": 62,
+          "height": 27,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "fce8986e01c878a94f16ed1e1302691eda100c980c3c6c6b44103b6ef8ae4e99",
+          "resultTagSha256": "5e0e8c8ef41a9be8c9fea6100e68ac710c0e3c098185c1d158234c83c35b6206",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 67,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 88,
+          "symbols": [
+            "asset.store.transfer.Hole"
+          ],
+          "width": 105,
+          "height": 28,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "ddf5e590f4f457975bbce7155c689dde0a1cbfa19b86d8cab358c46314e2932b",
+          "resultTagSha256": "db26b9e1ea9264aec11600034b3c6598e1be1bba5fc3ddddd03a92a0bceb6493",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 61,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 89,
+          "symbols": [
+            "asset.store.NoteBtnBG"
+          ],
+          "width": 84,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "f1884ab4dc458beffa506cadda77514e1ddb640f0933ee1ebd251b5840d29410",
+          "resultTagSha256": "dd75246335ae160f868f671b8d9d2f370f9f2cbbe2b5a4cff1ee484f691b2698",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 60,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 90,
+          "symbols": [
+            "store.StoreIIFiveFailBitAsset"
+          ],
+          "width": 616,
+          "height": 31,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "9b45f9d6b8d8f35b0c0be641b33325e60c45900773c6fab24a6fe5b6c8ebd32a",
+          "resultTagSha256": "4d5c61c6fdc822b2b6d89e7dbdaa1ebfe61c848aca3969bfa38b6175a6c0b386"
+        },
+        {
+          "id": 93,
+          "symbols": [
+            "asset.store.embedTipOne"
+          ],
+          "width": 133,
+          "height": 150,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "a5f8f424667b61e643e2831d632aed383aea98e028e519efb8cdce6590a71291",
+          "resultTagSha256": "a086d0937814826400e750218d24edf6077f6462f653cb650fa03252967cd22f"
+        },
+        {
+          "id": 96,
+          "symbols": [
+            "asset.ddtstore.exaltRockNum"
+          ],
+          "width": 100,
+          "height": 21,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6a61cdbd615da3bee766744203a1d3886f149e67ed5abeffe8a3c69d0b03dc6e",
+          "resultTagSha256": "534dbfebed1986ddfa0f496653fa6685b37765aa78d3c109323834a3c0f1f25c",
+          "donorName": "ddtstore",
+          "donorId": 56,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 97,
+          "symbols": [
+            "asset.store.transfer.EquipHole"
+          ],
+          "width": 214,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "10a1a35cbc287168c913128b2038f2317e522efe1b73fd1fa4e4d497e3ab2a3d",
+          "resultTagSha256": "4d0b7b54ae790eba17240434b15c671a794a381a085e9f8b32cf981486db90c5",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 40,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 100,
+          "symbols": [
+            "asset.store.bagEquip"
+          ],
+          "width": 62,
+          "height": 19,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "d805ecebfc314870e671669904ffa1ae86891a44c0eaeec41fffe60f54943ec9",
+          "resultTagSha256": "f62dd3deee00d276cf085a24ec2a47d01fb91b3dca8e6be818c3acfc4af98a69",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 38,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 101,
+          "symbols": [
+            "asset.store.EmbedNodeBtn"
+          ],
+          "width": 86,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "955a1b4694084780ddc8ac84f857998c1e0994c0379d8f984325b85d0280053f",
+          "resultTagSha256": "f96598cefd34fdfa806c73391aed7d1369885f8a11b804f11e0fe29fc15009e1",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 37,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 103,
+          "symbols": [
+            "asset.store.embedBG"
+          ],
+          "width": 710,
+          "height": 402,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "0675e1679b112f9ab2f09800112fdd3fccc941f82e8978f106b7dae9a8ce4956",
+          "resultTagSha256": "1e2337fa17b63401c352421a63fcb5b01b0ac6ed9a4b066364d5d673d920ab2d",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 35,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 104,
+          "symbols": [
+            "asset.store.embedBackoutAlert"
+          ],
+          "width": 348,
+          "height": 24,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "da2c9df00976c4115f03f556ec58618395e3f6b101d629e3d3cd6c4171f182e6",
+          "resultTagSha256": "c6615bf1855f70fcf4898f5a4818cedeb39274ca2a2ce3089f6455e25487af51"
+        },
+        {
+          "id": 105,
+          "symbols": [
+            "asset.store.embedAlert2"
+          ],
+          "width": 359,
+          "height": 65,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "6e5b2609a38259d8fe3d0f2da923d8989405d98168d750971925922ea38f39e7",
+          "resultTagSha256": "d046f90610e49db5f136b2cd7c662f2a70f279b229c153b91852faa5bb56084d"
+        },
+        {
+          "id": 106,
+          "symbols": [
+            "asset.store.CheckBtnGiftBG"
+          ],
+          "width": 62,
+          "height": 34,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "ee371eaea392a2e5b7ba938f6146dcf286565c369561073597085fc5d22906e5",
+          "resultTagSha256": "565299ab893dcdb703eb5df76481010dbc20c7fca2349852ebdb79f76315c84f",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 56,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 107,
+          "symbols": [
+            "asset.store.bagEmbII"
+          ],
+          "width": 228,
+          "height": 26,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "b2307d44673235ca818b274ef092c73851b19db331e663389e5f5b1d152de51e",
+          "resultTagSha256": "433534a1f384f9c40ad1a7b59fd472e4b186a94aa59b7f104eeae042eef50533"
+        },
+        {
+          "id": 108,
+          "symbols": [
+            "asset.ddtstore.exalt.BuyRock"
+          ],
+          "width": 89,
+          "height": 32,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "4b8bddac9911669e4731b2c343b3ff6cfeeb2fc22da93dba21f870816e962cfc",
+          "resultTagSha256": "1a49a0ab69693ed03a294587c5e65b297b05100bb6c787126bb52950895df586",
+          "donorName": "ddtstore",
+          "donorId": 57,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 109,
+          "symbols": [
+            "asset.store.bagEmbI"
+          ],
+          "width": 260,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "66cc4190c2da82506aed0b2002b2d78a12b15bef191bb48f02c7267e3d32303a",
+          "resultTagSha256": "babb6993ce4c7e314a025c4ce4075a86312d503c2461cd5c1f1b52c2e52f05c8",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 30,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 110,
+          "symbols": [
+            "asset.store.embedBtn"
+          ],
+          "width": 48,
+          "height": 84,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c0d6093cfaa0aacff981fd43bf31e62ecc0f1b882d342cd60f7ec3fbae558c5a",
+          "resultTagSha256": "93c9ad194d647b014ddb6fe8a66208ef865fe26e0184fe27d8703a8b8fe3c1b2",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 29,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 112,
+          "symbols": [
+            "asset.store.consortiaBG"
+          ],
+          "width": 91,
+          "height": 23,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bd5ed8491a642d0afc1098b415ba85eec453b1bed6eaa25a28c5cd71410fcddf",
+          "resultTagSha256": "1a39911ce7d9fed77e0dc5f853197344d3e8a526b527f6afc0b2c401634450cd",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 28,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 113,
+          "symbols": [
+            "asset.store.StartComposeTip"
+          ],
+          "width": 326,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b921ba143fef9bd4f2b9929495d4c05192797057d5aff8b8ca280659acd4e6ad",
+          "resultTagSha256": "af00f0f2c54a573ea2d6214b042b0d7b07bca9b5b59a583897785425ec144680",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 27,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 114,
+          "symbols": [
+            "asset.store.composeBtn"
+          ],
+          "width": 48,
+          "height": 84,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bd6a541ae6368cfbedf597123ff2da5a1f2239536a801e88483c5169c4ca75c8",
+          "resultTagSha256": "197ca41807b8e8b40d7fe38ccf42a1e1b13a751ee92ac435aba109f67a158dd8",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 26,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 115,
+          "symbols": [
+            "asset.store.composeBG"
+          ],
+          "width": 710,
+          "height": 402,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "9cceebbefde2ca43e9c298531e96989f487f57aca254c4b2091ea9d9728f8983",
+          "resultTagSha256": "7148630b2f5d114eb285e5f7f33cc2880ff8c568fd37ef0ff385e5d0cc733bb1",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 25,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 116,
+          "symbols": [
+            "asset.store.bagComposeI"
+          ],
+          "width": 260,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "895898505be2057758c251ea05e7e38b7d925f46a5e78309e51542d7113cd13d",
+          "resultTagSha256": "282f87d342062af658cfc8744debb34e23c402bc7881cd866765e000475f1f50",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 24,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 118,
+          "symbols": [
+            "asset.store.ComposeBtn"
+          ],
+          "width": 160,
+          "height": 46,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b70ba01b4bf69e164b90dab5ff810347436e6bbb6ab50f0b9c4bd78bc14704dd",
+          "resultTagSha256": "4aeb6af297ef5c1b79467862a24d104fec4e5e3392e68f5005abcfe31371abfc",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 23,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 120,
+          "symbols": [
+            "asset.ddtstore.exalt.exalt"
+          ],
+          "width": 160,
+          "height": 46,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "fd4d2ece9ea82114fb1ff412aa8f0a92dd94ed68c98a42c7d10cab7479cb7a3b",
+          "resultTagSha256": "e4307340eb408525319be18d5ad7bdd62006637cbaa747086285b562a8808f65"
+        },
+        {
+          "id": 121,
+          "symbols": [
+            "asset.store.embedBackoutDownItem"
+          ],
+          "width": 63,
+          "height": 27,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "5e839c799ea6bd12d705a047215d65bb4ecfcc82b6998fa84aa1ec4b55bbbc3f",
+          "resultTagSha256": "34e00c5e9aa5bf36c445f405e0eb0e438fdfa75c74522bf35339afa643d56586",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 20,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 122,
+          "symbols": [
+            "asset.store.embedBackoutBtn"
+          ],
+          "width": 104,
+          "height": 40,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c8df4729d589b0d6e2cde29422764b250e6e544a825dd18a994e0fbbd88849fd",
+          "resultTagSha256": "ace70b92522f90c7cb9844818180ce382b9caf2203755ed930871ea243845131",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 19,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 128,
+          "symbols": [
+            "asset.store.FusionGongshiBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "dec7b6bcb77cbc860afae2f1980e1235bd6df6e4fd86aaaff584df8b0097c769",
+          "resultTagSha256": "5e2e9a1efe3c29faf36aa7f02ff9179cef0210d5c43a6a5a1dd9c89a9be75671",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 53,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 130,
+          "symbols": [
+            "asset.store.BuyStrengthStoneBG"
+          ],
+          "width": 61,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "a316e356ac3d98ff8f06a16a9637cc1937ce11a3ed68b7d704feec46b7a4340d",
+          "resultTagSha256": "232b5cc2a9f5cf2e4e7396c52a6bd78e2d60545793514d81fb350c9b81a8805f",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 12,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 131,
+          "symbols": [
+            "asset.store.BuyComposeStoneBG"
+          ],
+          "width": 61,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "5763537b6dbba98578149cfb9eb1c25cf98cf9f79183fd961270e61c08fdbee8",
+          "resultTagSha256": "d04c6156f1decf8ed8c35518a246227eeee85b8ab654b0d8a94897a8231ec5fe",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 10,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 133,
+          "symbols": [
+            "asset.store.BuyLuckyBG"
+          ],
+          "width": 61,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "a10f947b7557cf8297c42ce9906f84867b1762e437642e6c35c6b5df9a508bab",
+          "resultTagSha256": "57ef87d5b82f7551f41bb45877ee537e9752199975b7814a871aa948c9ec6daf",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 9,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 134,
+          "symbols": [
+            "asset.store.BuyGodBG"
+          ],
+          "width": 62,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "71297a9a1c2c85745bd0add02eced1033485e33725da6caf09c38e656eedbc17",
+          "resultTagSha256": "16df71a822de1831b8ccd77fe8a4ffa8b423370c7189e5223a8bf542a30dec8a",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 8,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 135,
+          "symbols": [
+            "asset.store.BuyGiftBagBG"
+          ],
+          "width": 104,
+          "height": 51,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "7f96e1dc78f470b6de0c848e81c012f2fefb8f127e24e2b5a936da3dd9723f64",
+          "resultTagSha256": "e278535dfd4e8dc4f2a9dc4c5f4ddbc48369437b2d369a67e70b9cc0845afd8b",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 7,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 136,
+          "symbols": [
+            "asset.store.FusionBuyGongshi"
+          ],
+          "width": 64,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "649ecb18de0131ed849f8a31ac64622c59c8e886fa6867a572c737e735bbc7c1",
+          "resultTagSha256": "43e95900f3a07f6a1817e59f488669e760907da4a96c4fea85cd7713d7814866",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 6,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 140,
+          "symbols": [
+            "asset.store.FusionNodeBtn"
+          ],
+          "width": 91,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6965bba92a6e5d69585cd02d5bb3a31c58067c93f4bdf8171ccb90ea8357c574",
+          "resultTagSha256": "2042817374216498c230543bf3920b824c07c19dd69d02cfa34086c3ec6a4a61",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 4,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 141,
+          "symbols": [
+            "asset.store.ComposeNodeBtn"
+          ],
+          "width": 88,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "7653edfe1af350e637da58721a2f49a6530365fceef410930c39f1cc20d113b1",
+          "resultTagSha256": "74b43adb192aea0a6b3ce353ed64e7f6c9951838a82ef9d080c96aae623112f0",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 3,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 142,
+          "symbols": [
+            "asset.store.ComposeStoneBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "fb900d713813461f07dd0a04246f6dbb05057cc1aa18d649e66102943d3e41e4",
+          "resultTagSha256": "6d6400b87aaf3aa10ee809d898abdac21bc4dac201896012707aff260fb072c4",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 2,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 143,
+          "symbols": [
+            "asset.store.PreviewBtn"
+          ],
+          "width": 112,
+          "height": 46,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "815308c8a4769494f5ef9f237afb686d82c445514782c54cbb871e6d3377c4f0",
+          "resultTagSha256": "345465ddd9e39b8689c71ca82756b8fc4e5e976366297fd4c0733bd48c9ea162",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 1,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 145,
+          "symbols": [
+            "asset.store.EquipBG"
+          ],
+          "width": 82,
+          "height": 82,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "226753d8cd27a1a5e18c940ec85d79eb8c6d9d02b03f9c0b26eb8e23b326a12d",
+          "resultTagSha256": "6b541460606aaab0af13d28ca875ad58570f26bd4f3e3b3ce6073550ffc7528d",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 114,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 146,
+          "symbols": [
+            "asset.store.SuccessRates"
+          ],
+          "width": 39,
+          "height": 23,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "e75bb4b187759f860737f51975810ad831fe397855d448d425065567e25021d5",
+          "resultTagSha256": "f336b24d9604b8ad2ca1643c41f414d8aaee22b9f1d612fdbbaddb949737c6f9",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 113,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 147,
+          "symbols": [
+            "asset.store.StrengthNodeBtn"
+          ],
+          "width": 92,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "e9a9c6e21d13424d70ae3c8f097518dd3e140dc8b10d7d040133481d4b9503a8",
+          "resultTagSha256": "2acdc1685f80e5b5b2cef656926f7f061d99ca39944e3bda4db53752860a8a12",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 112,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 148,
+          "symbols": [
+            "asset.store.StrengthStoneBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "d31955ef98f6d47918de5f9c57e9e580aca6e5ae5c35fa2f6d61654d789a8feb",
+          "resultTagSha256": "d49ed90719cb50d65af16ee7cfc4f54e03fe65cd54196ab1518b94ac220f64fe",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 111,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 149,
+          "symbols": [
+            "asset.store.LuckyBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6f73dd774aeb26ad48f0b8832da80d3a409f75fee2414248ff504249d7db7b76",
+          "resultTagSha256": "5a0470acc9098ada73636ea0499fa6bf251074556c85c959ac8fcad9a99c447d",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 110,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 151,
+          "symbols": [
+            "asset.store.GodBG"
+          ],
+          "width": 80,
+          "height": 80,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "bfb0496819310074bf1c806480c0e96378cea5bdae10de398f0bb9527990d52a",
+          "resultTagSha256": "68f2994c4122f6a564f0a63dd2db0470375b56a018b868264622bfd99d8327dc",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 109,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 156,
+          "symbols": [
+            "asset.newStore.tabForge.selectedBtn"
+          ],
+          "width": 118,
+          "height": 38,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "7ca5c6132d6633a91f88cd11214bb5261ac3ff693f9681317dad410c283d30bb",
+          "resultTagSha256": "36d8a1545ac9879deac33304a77f32e1d344a0a707d4d5d4968e53b985837b9b",
+          "donorName": "ddtstore",
+          "donorId": 79,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 158,
+          "symbols": [
+            "asset.store.SellLeftAutoSplitTxt"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "5781818635cafea639a1c920ee7c838145b0250c648ba7ddcd118f4588d435c4",
+          "resultTagSha256": "b71e487a34b3525c8df010e74020a9d6cd67aa29c2c2a23544df69708dba57c3",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 103,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 159,
+          "symbols": [
+            "asset.store.consortiaManager"
+          ],
+          "width": 73,
+          "height": 20,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b2220bf9378f429df50b850263517bc25b700542c0075f097f5aa3893e45c82a",
+          "resultTagSha256": "8437e07bcd135931b93f9959b0cbe46ef30a3ba66f4753e16965515944ef402b",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 102,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 161,
+          "symbols": [
+            "asset.store.FusionStartBtn"
+          ],
+          "width": 160,
+          "height": 46,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "3ccc77c9071526f1c8e5aaf4b529d3d4dfe26c7d3eac83413910ba59fd94ee1e",
+          "resultTagSha256": "553bef085decc61387792baf88eeb2a13c013acc1acc9cb13898f034d86514fa",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 51,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 162,
+          "symbols": [
+            "store.StoreIIFailBitAsset"
+          ],
+          "width": 505,
+          "height": 125,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "60692277f16925a01e277ddc25df4a1e477ca3f395fb2180576c8ca8efcc6377",
+          "resultTagSha256": "bbd905f331ffb5162a6e2b0b35c6de780c712479817a2ac3cd113488d69ea83a",
+          "donorName": "store_v3_6_1_u5",
+          "donorId": 41,
+          "donorSha256": "284c232a0246657830abd68642045eb2a685a8467c4b9f0e44c4350ddd350e3c"
+        },
+        {
+          "id": 163,
+          "symbols": [
+            "asset.newStore.tabFine.unSelectedBtn"
+          ],
+          "width": 116,
+          "height": 35,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "476888d437c1b3caf18bdad397607b65104ef47df9ee285036322c23eacd7498",
+          "resultTagSha256": "1dd507b7a5155a28b98efc57bc15dfa6b05e65aed9d337d8890045c963fd93dc",
+          "donorName": "ddtstore",
+          "donorId": 50,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 164,
+          "symbols": [
+            "asset.newStore.tabFine.selectedBtn"
+          ],
+          "width": 118,
+          "height": 38,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "f4980e74de9c5f8c13f3da09b67816d808494062d520e6f55dcba7f4f78be51f",
+          "resultTagSha256": "10ec82a4096ce4f99ee334e43987d7508a42112ee866ab8e9f29284cae9b8732",
+          "donorName": "ddtstore",
+          "donorId": 49,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 241,
+          "symbols": [],
+          "width": 387,
+          "height": 400,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "cfe15b98e9e1935ad7d528287779a032b7f5e5ec2157a0e8713c6930a1b6143a",
+          "resultTagSha256": "b9b3a29ad7f52319b3a0bf7ff86fcc7433bab4ad7639a3221d8f92b44e5ff987"
+        },
+        {
+          "id": 354,
+          "symbols": [],
+          "width": 271,
+          "height": 64,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "7a949be7a9357433c776640e9117d509a11cf1b0853c8530404b98cd92f387b2",
+          "resultTagSha256": "23ee8e03bee77525686cecfc4b3dba8041a0f58889d01b6c8bd2346e23d04aea",
+          "donorName": "ddtstore",
+          "donorId": 513,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 358,
+          "symbols": [],
+          "width": 313,
+          "height": 52,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "16807e2cbbfadda5a7538bd5088df3aafb7d30f5b52881a0e0403f2b53647918",
+          "resultTagSha256": "ad0d209152a7f379225282c71c25f2a154d58dd375813c58ead93fc5fc424465",
+          "donorName": "ddtstore",
+          "donorId": 517,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        }
+      ],
+      "staticTextTranslations": {
+        "286": [
+          "1. 属性转移的成功率为100%。"
+        ],
+        "287": [
+          "2. 两件装备都必须在有效期内，",
+          "才能互相转移属性。"
+        ],
+        "288": [
+          "3. 两件装备必须属于同一类型，",
+          "例如手镯与手镯、戒指与戒指。"
+        ],
+        "289": [
+          "4. 可自行选择是否转移已镶嵌的宝珠。"
+        ],
+        "290": [
+          "5. 转移后，强化、精炼及封印孔属性互换，",
+          "两件装备都会变为绑定状态。"
+        ],
+        "291": [
+          "属性转移可交换2件同类型装备的",
+          "强化、精炼和封印孔属性，",
+          "以及已镶嵌的宝珠。",
+          "注意事项："
+        ],
+        "293": [
+          "强化可以提升武器伤害和装备护甲。",
+          "强化时，请注意以下事项："
+        ],
+        "294": [
+          "1.",
+          "武器、副手、衣服和帽子均可强化。"
+        ],
+        "295": [
+          "2.",
+          "强化可以提升装备属性。",
+          "强化达到一定等级后，",
+          "可通过镀金进一步提升属性，",
+          "或开启更多镶嵌孔。"
+        ],
+        "298": [
+          "武器、衣服和帽子强化至+12后，",
+          "可以在铁匠铺进行镀金，",
+          "提升武器伤害或衣服、帽子的护甲。",
+          "注意事项："
+        ],
+        "299": [
+          "武器镀金需要攻击祝福宝珠。",
+          "衣服镀金需要防御祝福宝珠。",
+          "帽子镀金需要属性祝福宝珠。",
+          "祝福宝珠可从玛利亚、阿波罗、迈达斯宝袋获得。",
+          "武器镀金后会改变外观。"
+        ],
+        "301": [
+          "需要4件名称、等级完全相同的物品，",
+          "才能熔炼成更高等级的物品。"
+        ],
+        "302": [
+          "可熔炼的物品包括：朱雀石、玄武石、青龙石、",
+          "白虎石、强化石、宝珠、戒指、手镯，",
+          "以及装备碎片。"
+        ],
+        "303": [
+          "4件相同类型的石头、戒指、手镯或宝珠，",
+          "配合正确的熔炼配方，",
+          "可以获得对应的高等级物品。"
+        ],
+        "304": [
+          "熔炼系统可以帮助玩家",
+          "将物品提升到更高等级。",
+          "注意事项："
+        ],
+        "305": [
+          "戒指和手镯最高可以熔炼至+5。"
+        ],
+        "306": [
+          "圣兽石和强化石",
+          "最高可以熔炼至+5。"
+        ],
+        "313": [
+          "镶嵌系统可为武器和装备镶嵌宝珠，",
+          "从而提升角色实力。",
+          "注意事项："
+        ],
+        "314": [
+          "不同的武器和装备，",
+          "拥有不同的镶嵌孔。"
+        ],
+        "315": [
+          "需要消耗开孔钻头开启封闭的镶嵌孔。"
+        ],
+        "316": [
+          "宝珠只能镶嵌在武器或装备上，",
+          "且必须放入形状对应的镶嵌孔。"
+        ],
+        "317": [
+          "可以拆除已镶嵌的宝珠，",
+          "再镶嵌更高等级的宝珠。"
+        ],
+        "318": [
+          "拆除一颗已镶嵌的宝珠需消耗200点券。"
+        ],
+        "320": [
+          "合成系统可以将圣兽石的属性",
+          "附加到武器和装备上。",
+          "注意事项："
+        ],
+        "321": [
+          "朱雀石增加攻击。",
+          "玄武石增加防御。",
+          "白虎石增加幸运。",
+          "青龙石增加敏捷。"
+        ],
+        "322": [
+          "圣兽石等级越高，",
+          "合成成功率越低。"
+        ],
+        "323": [
+          "装备的每项属性",
+          "只能附加1颗圣兽石的效果。"
+        ],
+        "324": [
+          "低等级圣兽石的属性，",
+          "不能覆盖高等级圣兽石的属性。"
+        ]
+      }
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/ddtstore.swf",
+      "baselineSha256": "3020e3a5e47bad3f11d2182375f86bc40810c1738df6e28739f146d0080072bc",
+      "resultSha256": "ea2163c9868fb021da1e8810380312f8aae779f48f6ec7affedd236e9d10c836",
+      "changedBitmaps": 85,
+      "staticTexts": 40,
+      "bitmapChanges": [
+        {
+          "id": 4,
+          "symbols": [
+            "asset.store.autoevolution"
+          ],
+          "width": 145,
+          "height": 50,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "fc52d9f6971dd620bfdce711cb07e4d351e2404b8a4c15bdf4fec208dc9c9e59",
+          "resultTagSha256": "5bf4cb58997a12cc2c0e509ed007c99bd3f0cdb6c24c74644bbfd6c4c809ff5c"
+        },
+        {
+          "id": 7,
+          "symbols": [
+            "asset.newStore.emblem.selectedBtn"
+          ],
+          "width": 141,
+          "height": 51,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "c999f0e079d6d33df5a8acbc0daf436c3c138636459ba4eff5e38b302d1c718e",
+          "resultTagSha256": "3a167dbcc1a3892db96d6c712084e7c744e1a67252703924049072008a8270e9",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 123,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        },
+        {
+          "id": 8,
+          "symbols": [
+            "asset.newStore.emblem.unSelectedBtn"
+          ],
+          "width": 113,
+          "height": 41,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "a91325d3323c8e958e54c2914a68afd9a1fdbbf0644bdf5346a3fc93a25eb330",
+          "resultTagSha256": "ed6220d3929018ed63e1d6d2619c66180a7f4f359c1c202fa44cd0c17696ccc3",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 125,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        },
+        {
+          "id": 9,
+          "symbols": [
+            "asset.newFusion.stopBtn"
+          ],
+          "width": 141,
+          "height": 50,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "96f9e2151d8249f661e3d59a244698e84a3c6086cee28c88171d79eac7424858",
+          "resultTagSha256": "1bd1139c85b20ee1c358d54b354bd46faa44040ac5c4a6d8d53ae202ecbe607a",
+          "donorName": "ddtstore",
+          "donorId": 18,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 10,
+          "symbols": [
+            "asset.newStore.tabStore.selectedBtn"
+          ],
+          "width": 145,
+          "height": 50,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "f50881b584e5dbd7473ff211f3f768a914da9112606d828173559bf2d7754d03",
+          "resultTagSha256": "9611fef506ec9b53ffbf23e6362db49ad54228cfdb3d9035bdc37e07e01241c3",
+          "donorName": "ddtstore",
+          "donorId": 19,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 12,
+          "symbols": [
+            "asset.newStore.tabStore.unSelectedBtn"
+          ],
+          "width": 113,
+          "height": 41,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "38ca48de7a4b1ce3007f5061dc53a75a2500890db7f8cebd32b62a15ffcbba39",
+          "resultTagSha256": "43b65b55cec6230ec7158812396481912962df92f3ac65c5d9c3364cdc1bc787",
+          "donorName": "ddtstore",
+          "donorId": 24,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 13,
+          "symbols": [
+            "asset.store.evolutionLock"
+          ],
+          "width": 108,
+          "height": 35,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "a3bbf1585748f11c6d917dab1d913117586d562786759cafc5cb2ea5f29d0cb9",
+          "resultTagSha256": "89803d73d392b22d6b034fa3b9754a726796008b2f44afb21f279937bfe50b52"
+        },
+        {
+          "id": 22,
+          "symbols": [
+            "asset.ddtstore.ghostSelect"
+          ],
+          "width": 76,
+          "height": 102,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "1ee7264362db75b1cb1f907d5d4183c4e6500063dd507a04f9874656d5691c50",
+          "resultTagSha256": "25e9b7f22349b0791e550586f1bdd2c8fffcccb758a4057d9d3269b69a2d686d"
+        },
+        {
+          "id": 23,
+          "symbols": [
+            "asset.ddtstore.ghostUnselect"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "c36d2d78876be804f1e9465a8ed4bf778c6c6ac565bf34656d28d750ab975748",
+          "resultTagSha256": "aebc1b994cdfb0c040fa4300006f5b68915eb2dfe61c11db9e1908647f09b8be"
+        },
+        {
+          "id": 24,
+          "symbols": [
+            "asset.store.unFineBringUpBtn"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "a5f38b324e3926a545cced6a96c9ada83d98d25d670e656d790856aa48cb7111",
+          "resultTagSha256": "8937b2b7a9cdb8398e7421f9dd1d3cdc61dcadf778fd57f92bc98b36711d8779"
+        },
+        {
+          "id": 25,
+          "symbols": [
+            "asset.store.fineBringUpBtn"
+          ],
+          "width": 76,
+          "height": 102,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "6a4ad175520840bc9029d1dcb0c0bc6366eb94bfa597749b944b4bcf29df1cc3",
+          "resultTagSha256": "769e921ebfda1e3e54ccf282f095886f1afaa2d99ca398afe485de067d311977"
+        },
+        {
+          "id": 26,
+          "symbols": [
+            "asset.ddtstore.exalt.continuousText"
+          ],
+          "width": 138,
+          "height": 29,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6709cf91bf3e4eb89f2701802c64de1f89a67f87c0d709b459a5c173d57ecb6d",
+          "resultTagSha256": "bf7e69ed86f146f7bf3d0f451d865ea172135f02a577e83ed6a3b08c42cd0cda",
+          "donorName": "ddtstore",
+          "donorId": 48,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 27,
+          "symbols": [
+            "asset.newStore.tabFine.selectedBtn"
+          ],
+          "width": 145,
+          "height": 50,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "57fa2f35c5aa4467de8fff8897274c5b0c6896abe35868c4a2dbd4b4f42e99f0",
+          "resultTagSha256": "dce898d01bc28bfc49a66d8aef124e6e956db0471f47900f664e30f740992321",
+          "donorName": "ddtstore",
+          "donorId": 49,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 28,
+          "symbols": [
+            "asset.newStore.tabFine.unSelectedBtn"
+          ],
+          "width": 113,
+          "height": 41,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "d089d84815b0d18765c2330a672a378907c24873bf5eb437d2044f8b69abb0f4",
+          "resultTagSha256": "6a3c1e388337e5b9eed53b7eaab2a9fda446b6579d2012bf48e983d694927e87",
+          "donorName": "ddtstore",
+          "donorId": 50,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 29,
+          "symbols": [
+            "asset.ddtstore.exalt.TitleText"
+          ],
+          "width": 181,
+          "height": 36,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "54a9cf2174e3f5ff8c54eb5c7af9fbc5b86d5f4f6158834083230320cef72443",
+          "resultTagSha256": "cfa0ab3e8c1f863f46d630d50be42e7b263062b56b3f0de1713d50066be40720",
+          "donorName": "ddtstore",
+          "donorId": 53,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 30,
+          "symbols": [
+            "asset.ddtstore.exaltTabBtnSelected"
+          ],
+          "width": 79,
+          "height": 98,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "66ff03ba0365d2df2028deda8d4cbd9f87bea675a9b75b61fef01d61deeed050",
+          "resultTagSha256": "8437dfeba45c61c2597f608f02e35582a4c8766f969862cb1a8e3cd55a5c04f6",
+          "donorName": "ddtstore",
+          "donorId": 54,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 31,
+          "symbols": [
+            "asset.ddtstore.exaltTabBtnUnSelected"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "00dfe2427e4bd5f6b61172f23d95bca8eec0eafab9ce6ee99fbd67ed1bf338b9",
+          "resultTagSha256": "9a5ce8ea900d53c0c0bf95d588f5980563469409ef93ea7e994b93070f73cb2d",
+          "donorName": "ddtstore",
+          "donorId": 55,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 32,
+          "symbols": [
+            "asset.ddtstore.exaltRockNum"
+          ],
+          "width": 121,
+          "height": 25,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "4ea1bf91b815ef65ac0c3a022580f2745d6fb2e372df2b0df44c06d2a0295210",
+          "resultTagSha256": "970f8e4df63be69aad494a91f342bbd1f88c0c6ae49badd51ff49e1a9e4e8f61",
+          "donorName": "ddtstore",
+          "donorId": 56,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 33,
+          "symbols": [
+            "asset.ddtstore.exalt.BuyRock"
+          ],
+          "width": 78,
+          "height": 34,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "0726a55fe530b3d47388cf2fc2ced4a73e79e61888f30422e2526e50be2102ef",
+          "resultTagSha256": "99e88dfcb92f59260db54f08480c60463a0dfa68d26d1162f565a7a911d691ea",
+          "donorName": "ddtstore",
+          "donorId": 57,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 34,
+          "symbols": [
+            "asset.ddtstore.exalt.exalt"
+          ],
+          "width": 87,
+          "height": 34,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "cf4c052938e51dc833dbedcc646e8f2e51b5eb12950be923a94454f094be908a",
+          "resultTagSha256": "42cbba2bc11d92451d360a391d7c38560cbeb1f53c56344953afa216f120738e",
+          "donorName": "ddtstore",
+          "donorId": 59,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 35,
+          "symbols": [
+            "asset.store.evolutionSelect"
+          ],
+          "width": 76,
+          "height": 102,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "ccb4f2f0197c40d5bf24b13d6796e61edad66f1c5a84b31a48609f20a57d70d5",
+          "resultTagSha256": "0765ea57f820393834ea664727031be512a0b63d947d71c42a02a4b194ee8e12"
+        },
+        {
+          "id": 36,
+          "symbols": [
+            "asset.store.evolutionUnSelect"
+          ],
+          "width": 47,
+          "height": 77,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "acd2e30af7d64bb5a09698fca800d3f9ef812c63040f2df0a64a349008cdb97b",
+          "resultTagSha256": "319cb575a1744df63ef2887fdaeb529736127481147c7b4ab23a8f1b5fbead68"
+        },
+        {
+          "id": 37,
+          "symbols": [
+            "asset.store.evolutionBtn"
+          ],
+          "width": 119,
+          "height": 50,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "ac15f9fc16e4ad6c82d9a81a78fb459949b8d62d7ff815666cb8e106c33341aa",
+          "resultTagSha256": "1229dbf86f235d70808bf2457cca47e56cb3c3a318010f3b34e918b91c3a56eb"
+        },
+        {
+          "id": 40,
+          "symbols": [
+            "asset.store.sealSelect"
+          ],
+          "width": 76,
+          "height": 102,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "c5acb60fb5cfa50bca8683a576dd2902399f05c2afa588a37c46b0197d6935de",
+          "resultTagSha256": "51e53649e9cbe5df6dfc32954b2fb4148ccd9ce44a123f5de437e53c01a4e785"
+        },
+        {
+          "id": 41,
+          "symbols": [
+            "asset.store.sealUnSelect"
+          ],
+          "width": 47,
+          "height": 77,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "714a99c1dccc309881e91a0f56808ce9f929386bb098d833a7799ed6aeffda44",
+          "resultTagSha256": "e860613948eae3627dbeba9fe671fb489528aed734eb0cad0e20ea8405492e67"
+        },
+        {
+          "id": 42,
+          "symbols": [
+            "asset.newStore.tabForge.selectedBtn"
+          ],
+          "width": 145,
+          "height": 50,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "3a206cad8553b7131f9800a937c29b2bc36fe94ec47242396ea5d4feeddc629e",
+          "resultTagSha256": "cbabfef67861d3ddecd8903931a7e0a9a19cf9d3ab494a4deb5da8849f0a0501",
+          "donorName": "ddtstore",
+          "donorId": 79,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 43,
+          "symbols": [
+            "asset.newStore.tabForge.unSelectedBtn"
+          ],
+          "width": 113,
+          "height": 41,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "57f5f64bab4908137df19976b7c022ea0e4c5d06de4301652795e063728bf6dc",
+          "resultTagSha256": "8f27a87de1911099be6f6c4e4b2d8d2743ce546fda391b3b21b7afffa442a5ab",
+          "donorName": "ddtstore",
+          "donorId": 83,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 44,
+          "symbols": [
+            "asset.store.fineForgeBtn"
+          ],
+          "width": 76,
+          "height": 108,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "fbeb4bd2ecd9b495b6051ebf9164e3fe7e4f7530b489d18ace916be4a266eca1",
+          "resultTagSha256": "6a5c37fb15d95cff841457d1cce6438ff408f20b028b9918e2f70fa5f9ed9965"
+        },
+        {
+          "id": 45,
+          "symbols": [
+            "asset.store.unFineForgeBtn"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "b8d63bdf7f7f5b89f65b0750239549c18f4da884d07ebb1506a1a39ff241acc0",
+          "resultTagSha256": "35f3c89229456e3005df24590e555290dffe1c5efd04c626a6c2cbe0785cc3e4"
+        },
+        {
+          "id": 49,
+          "symbols": [
+            "asset.ddtstore.TransferTitleSmall"
+          ],
+          "width": 182,
+          "height": 32,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "b24ff8ca473cccac85e75c71116e445a337c30ae515c940679e98eff88719285",
+          "resultTagSha256": "d601c7f8c6d815a7dcddb5e288825c988cdf5712b98bdea69d250f403c05de96",
+          "donorName": "ddtstore",
+          "donorId": 90,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 50,
+          "symbols": [
+            "asset.ddtstore.TransferTitleLarge"
+          ],
+          "width": 208,
+          "height": 33,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "f242ae4c909ad4ddf0c5c7816c7a7f902b3484d172feecc13ec8bd534091e129",
+          "resultTagSha256": "c00300a048663b4326c6c7cb07e1ed0da1021c5deceb0987b34a7d172531e3d4",
+          "donorName": "ddtstore",
+          "donorId": 91,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 51,
+          "symbols": [
+            "asset.ddtstore.TransferBtn"
+          ],
+          "width": 94,
+          "height": 33,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "424928e28d6bb10a1ef52cf7e1a3cfa322465be23bb9a36f4489cd6022c9ffc1",
+          "resultTagSha256": "f8a5fa5bb2292e3ac3dc1245d4025fafb4e81f82af9c2ad54e2a3c1b4946235f",
+          "donorName": "ddtstore",
+          "donorId": 92,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 52,
+          "symbols": [
+            "asset.ddtstore.TransferTabBtnUnSelected"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "18e3f8173523b2d897b1a13b836fcdd5348baab5183b46317128138d35502b1e",
+          "resultTagSha256": "7262185820377a4efd25ed5d74ddc4dbcadbc846becc5e2523230f6441f9a417",
+          "donorName": "ddtstore",
+          "donorId": 93,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 53,
+          "symbols": [
+            "asset.ddtstore.TransferTabBtnSelected"
+          ],
+          "width": 76,
+          "height": 102,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "1dddb733cddb20c58f263f0cf09029301f25fb6effd1904a475e338d36063224",
+          "resultTagSha256": "665f6e24d4e18e4bc453f1a8855a9580936bd4e573fc5b47878117ae63e2ff0e",
+          "donorName": "ddtstore",
+          "donorId": 94,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 55,
+          "symbols": [
+            "asset.ddtstore.TotalSuccessRate"
+          ],
+          "width": 47,
+          "height": 21,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "06cdb9b5c315d38e6e1fe8418bfc4e37941e9864197df828bea304fb97193912",
+          "resultTagSha256": "f39472d6b198b221b7381a671f0b68726699bd52779206bc161e88ca8a44d87c",
+          "donorName": "ddtstore",
+          "donorId": 96,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 56,
+          "symbols": [
+            "asset.newFusion.fusionBtn"
+          ],
+          "width": 141,
+          "height": 50,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "8faa860f1d74e6a99903658f9eb3c1d88c018f0780f442f794993003bb255b0f",
+          "resultTagSha256": "027383f05bf25addc03eba8937c1d0948bd363f7e974a68eaabee46736a15c6e",
+          "donorName": "ddtstore",
+          "donorId": 97,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 57,
+          "symbols": [
+            "asset.newFusion.canFusion"
+          ],
+          "width": 49,
+          "height": 21,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c9f7fe13192e36300fd45292ef0acf2ca4e7d8183491a00ce73581c5b231a45c",
+          "resultTagSha256": "20fb9bd1e1ead4c76c7f22be2314e68f8952509bb70ccd5ae41e3de6ea47677c",
+          "donorName": "ddtstore",
+          "donorId": 98,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 61,
+          "symbols": [
+            "asset.ddtstore.StoreIISuccessBitAsset"
+          ],
+          "width": 505,
+          "height": 69,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "a0b051cc2ff0eb2e121e05e4096d0107e0742342429dbda19543d6da84d0f70b",
+          "resultTagSha256": "66f0ef0f8b6e8c864fe598d3cc6a5ef00fdfdd2e4ec6c71fb082f0cfeff5fc0c",
+          "donorName": "ddtstore",
+          "donorId": 102,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 62,
+          "symbols": [
+            "asset.ddtstore.strengthNumTxt"
+          ],
+          "width": 112,
+          "height": 16,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "ffb27032207435383742ac7ac13dfd341e933264af608df4fd40487e21c97e95",
+          "resultTagSha256": "70e511c52cbfcb75c6b90e7919392f89728dd2dcc7c3713f699599b4cdc18e89",
+          "donorName": "ddtstore",
+          "donorId": 103,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 64,
+          "symbols": [
+            "asset.ddtstore.StrengthenTabBtnUnSelected"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "ccc191f89e517d9b2ca9e78925562e982f816593ba82ed27f0c73cb591622d29",
+          "resultTagSha256": "379d4cb041c6650970c7f6a47bd4381e5e5480757f0f3a38b30eae1dd0d0ba5a",
+          "donorName": "ddtstore",
+          "donorId": 104,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 65,
+          "symbols": [
+            "asset.ddtstore.StrengthenTabBtnSelected"
+          ],
+          "width": 76,
+          "height": 108,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "c3af0fcd2313f336b79709a020ea349b001f61c95f810804043a7016470295af",
+          "resultTagSha256": "b3230964694c9fb9a1cab0be6a2832a94f306c8085e77269e87ddc4d18bc26ff",
+          "donorName": "ddtstore",
+          "donorId": 105,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 75,
+          "symbols": [
+            "asset.ddtstore.StrengthenHole"
+          ],
+          "width": 194,
+          "height": 25,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "375db5d1663a8bea99601ecd629c04163a6dc2d785de6220961d5fe79f846ff0",
+          "resultTagSha256": "13036f58e1df70318aaadd772a1952574fe2a978914bedb0b582fdda8ac479e4",
+          "donorName": "ddtstore",
+          "donorId": 115,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 76,
+          "symbols": [
+            "asset.ddtstore.strengthenEquipmentTxt"
+          ],
+          "width": 195,
+          "height": 31,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "8b5214a529948803d2c135b2fe659623443e5dc4c574c520b6af549ebe00ffd7",
+          "resultTagSha256": "fda5187cd586271dd89f913e00271227a06c050e4441b87723d4a004a1a29bd2",
+          "donorName": "ddtstore",
+          "donorId": 116,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 78,
+          "symbols": [
+            "asset.ddtstore.StrengthenBtn"
+          ],
+          "width": 125,
+          "height": 35,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "5f28e9ac2d0fc1722e7befbfdee04dd638db6aad3d248d394031a2d7a0755649",
+          "resultTagSha256": "ac04534b2fadf3b2281fff4ab2befeab4224d9921f149ebf9d37144dd0aabfff",
+          "donorName": "ddtstore",
+          "donorId": 118,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 79,
+          "symbols": [
+            "asset.ddtstore.StoreTitle"
+          ],
+          "width": 374,
+          "height": 58,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "1a0c1754b0adb894f850c9b557a0942d454d1bc750f232f373f61b94ef016ed4",
+          "resultTagSha256": "8b19b6828302e79b425b89afae96762e7749cb397e9cf20ee9fba776d4adca15",
+          "donorName": "ddtstore",
+          "donorId": 119,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 83,
+          "symbols": [
+            "asset.ddtstore.FusionSpiltTextrBg"
+          ],
+          "width": 82,
+          "height": 41,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "0cf531317982a5f4c9d7647bd01f093a74d760fed3c0fcc96748f3f7eb0678c6",
+          "resultTagSha256": "b032d19a3e3f736c90059c6bb91366caf021a46bbd8a9b7e52fb197135cf48b3",
+          "donorName": "ddtstore",
+          "donorId": 122,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 86,
+          "symbols": [
+            "asset.store.SelectMoneyTip"
+          ],
+          "width": 90,
+          "height": 26,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "7e1f065a79f933d9edc72935cf159221fcdfb4e8eb0d45a9731b35c348ffed15",
+          "resultTagSha256": "860d4f87f9ba7209cadbceb526c353ab787684cb2cb6f78b2497c5d393b41adf",
+          "donorName": "ddtstore",
+          "donorId": 125,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 87,
+          "symbols": [
+            "asset.newFusion.maxBtn"
+          ],
+          "width": 54,
+          "height": 26,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "784e5dec28acbf5d46838594b794b10455ba186754fa5e53cc2693c8ecdb9f11",
+          "resultTagSha256": "6720af9a6bf5e8ab16e06365355526988a8b756ab3d50ddd029d044c946ad5b5"
+        },
+        {
+          "id": 92,
+          "symbols": [
+            "asset.ddtstore.FusionTitle"
+          ],
+          "width": 211,
+          "height": 35,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "248f231ac9bc8e3f6220e4f3ab403b2b41596f7637121f3cb84396297242d0c0",
+          "resultTagSha256": "7578fc83514266465bd596de54e351224c7b32d7b1454267b4d811e3956f481c",
+          "donorName": "ddtstore",
+          "donorId": 130,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 93,
+          "symbols": [
+            "asset.ddtstore.FusionTabBtnUnSelected"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "3c88b2425f24d11bf50d10f1a9d2ce43aa3c5ac278f98415c88f48f7888aa12f",
+          "resultTagSha256": "e707bd50185cc9d72f463cdc6221cf5fb7c81452a97728e7916962c22c1cfa9d",
+          "donorName": "ddtstore",
+          "donorId": 131,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 94,
+          "symbols": [
+            "asset.ddtstore.FusionTabBtnSelected"
+          ],
+          "width": 76,
+          "height": 108,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "6113a7e0e77872201bacf733dca7aa5cf6ed26f007580985fa8525f2091279d2",
+          "resultTagSha256": "4ae8457b2aec3362b98f59d1cbc8304cd97cb1a112e6684c35e64b6ef936c85e",
+          "donorName": "ddtstore",
+          "donorId": 132,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 96,
+          "symbols": [
+            "asset.ddtstore.FusionBtn"
+          ],
+          "width": 107,
+          "height": 35,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "066f9ebf90f4bf96fa7e8f3c463a1106b8b24dc2aa1f5001ea60b8d3916dc910",
+          "resultTagSha256": "4d6c90df2c12a2f25c3f005ddc96ca204ba4b3bc2136998d09817d94854178d8",
+          "donorName": "ddtstore",
+          "donorId": 134,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 99,
+          "symbols": [
+            "asset.ddtstore.StoreIIFiveFailBitAsset"
+          ],
+          "width": 472,
+          "height": 28,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "72aab4aaa6e473bac1f3474146264d4a5b6447106ddc05af1d6cb03c80c367e7",
+          "resultTagSha256": "179b08da89b76e845eecb64dcdc9a35e4ae526fa514e591dcc010cb1a2eaabc0"
+        },
+        {
+          "id": 100,
+          "symbols": [
+            "asset.ddtstore.StoreIIFailBitAsset"
+          ],
+          "width": 505,
+          "height": 65,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "da62072fe45a0279ba3e397b21dcdd3a8f8d575ee0e093b26c38e1342bae2883",
+          "resultTagSha256": "62a1146940f77e54135ae2a982ef06885f0a1239a2ac1d445d4e6acf0778de60",
+          "donorName": "ddtstore",
+          "donorId": 138,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 102,
+          "symbols": [
+            "asset.ddtstore.embedTxt"
+          ],
+          "width": 112,
+          "height": 57,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "26465b90002b60b1669e395729f847170547c6dbd4c307e95c9518ca31970467",
+          "resultTagSha256": "2ddd00d409947273222b6c06ac4edaa9a0cd2ebe8ed94c71fe3dd49f673641c5",
+          "donorName": "ddtstore",
+          "donorId": 140,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 103,
+          "symbols": [
+            "asset.ddtstore.EmbedTabBtnUnSelected"
+          ],
+          "width": 47,
+          "height": 78,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "89406131f24c2593da7a6fe96c7f36b8c3c91390c66e409f3799425fc740c09f",
+          "resultTagSha256": "b7bbaf6fdc8aa21da6a8c3737b03b4ad38ee0d7806819a652feadcd69f47a3f1",
+          "donorName": "ddtstore",
+          "donorId": 141,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 104,
+          "symbols": [
+            "asset.ddtstore.EmbedTabBtnSelected"
+          ],
+          "width": 79,
+          "height": 98,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "0590df8c63065c1f7999d499ff242c3679c7d627d18f7f22b986182c7596e733",
+          "resultTagSha256": "dbae783fc6b9b2588ba39133ee40ac1cefafbec881156e65e9177e10f2ae258d",
+          "donorName": "ddtstore",
+          "donorId": 142,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 120,
+          "symbols": [
+            "asset.ddtstore.ContinuousFusionBtn"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "c3c48caedbb152fb1de1e177726241c8095e64bf9983960913d48ed33dec30ec",
+          "resultTagSha256": "1bba2f83cbc0377f4b47cf277929ee75e8bd673f56b998d3c5353b84b6b5b43a",
+          "donorName": "ddtstore",
+          "donorId": 154,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 121,
+          "symbols": [
+            "asset.ddtstore.ComposeTitle"
+          ],
+          "width": 108,
+          "height": 31,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "9dd5c7653ee00af54d4b10d9896c0542abc81633d0f731c2981022aa21ff96ee",
+          "resultTagSha256": "0a4358e37b9d11575adfbb4a3146c04a732b17a1471c3aaf1db9340677b78207",
+          "donorName": "ddtstore",
+          "donorId": 155,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 122,
+          "symbols": [
+            "asset.ddtstore.ComposeTabBtnUnSelected"
+          ],
+          "width": 45,
+          "height": 75,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "7e6fdc49a981f4358e96ca3767d49889fc9d337d8a1f6822c58e413c69ee5a7e",
+          "resultTagSha256": "59870a9a677a7cc697fd64125a254d498dab8c6dd433d256bb0ef76c47431dcf",
+          "donorName": "ddtstore",
+          "donorId": 156,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 123,
+          "symbols": [
+            "asset.ddtstore.ComposeTabBtnSelected"
+          ],
+          "width": 77,
+          "height": 102,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "eea6e94605db29d796ffacd3b0f97563d46caf4acc8cb504ae4b23f83b583708",
+          "resultTagSha256": "5a642552f128854de9d1a6fdc9afb58f92ecfd1e9e40a8ea60df9b4480624290",
+          "donorName": "ddtstore",
+          "donorId": 157,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 125,
+          "symbols": [
+            "asset.ddtstore.ComposeBtn"
+          ],
+          "width": 108,
+          "height": 32,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "950a72a64f22fb5c3975db85d23bdb0610c1606adac142304855a8b4d1de8838",
+          "resultTagSha256": "1857efd142b0b676dd2fddb8c8539b6f22e2c2eda80772047534d85651efbb38",
+          "donorName": "ddtstore",
+          "donorId": 159,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 126,
+          "symbols": [
+            "asset.ddtstore.CloseHole"
+          ],
+          "width": 169,
+          "height": 21,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "304ef22d928a82f5cc825074b7bb1bc0bec1ba4301dbe96b2ad0105203546ef5",
+          "resultTagSha256": "2298dc5dde11e19a20eed278a7cf61abce40a199c19fab1788caa6f8f21ad363",
+          "donorName": "ddtstore",
+          "donorId": 160,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 129,
+          "symbols": [
+            "asset.ddtstore.AutoSplit"
+          ],
+          "width": 78,
+          "height": 24,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "1af99e4e8cea229c461f28a9c28f53f3a661fcecff24503dbbde4ad41069a3fc",
+          "resultTagSha256": "c47c98f70e6e2795fbf64ffe23a68b1aa0c3c046171ef3987a1b6c158ab54954",
+          "donorName": "ddtstore",
+          "donorId": 164,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 130,
+          "symbols": [
+            "asset.ddtstore.StrengthenAllInject"
+          ],
+          "width": 71,
+          "height": 21,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "a50baf3c76a7ade7f3fa1ea4546edeac4f935d50e6665a4d480a269b97e22592",
+          "resultTagSha256": "685c1022dec2d318aac1de1f2ed73834102e459bd5be01feb8211f5967fd745d",
+          "donorName": "ddtstore",
+          "donorId": 165,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 131,
+          "symbols": [],
+          "width": 365,
+          "height": 44,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "4d552ef3b44857f8a2a7c2fee9576485171a41eeac7f4faf6573083b923f5d55",
+          "resultTagSha256": "afac198192686ef190216ff8cd0e9f57f07587310ad85e1debe42c4b32d4280d",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 96,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        },
+        {
+          "id": 165,
+          "symbols": [],
+          "width": 365,
+          "height": 44,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "29778f4c9e0adc24db24932cd985f995e158ff87495ddb0c1eda08a0e9a60889",
+          "resultTagSha256": "9527cb9bf6e3b96953c386d7f3a9cc38d85887cb47238a7ea6fd2cb7926854b2",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 14,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        },
+        {
+          "id": 231,
+          "symbols": [],
+          "width": 92,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "298220e65aeab4a0e0c7b2b567e3bbd324b709f19940bb98772950118d1425e6",
+          "resultTagSha256": "fb8b2874d8ec971bd824a867b5106f8d0e54f453502f229479f4f034d2f66324",
+          "donorName": "ddtstore",
+          "donorId": 364,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 236,
+          "symbols": [],
+          "width": 90,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "8c6ed35b48d11651be185a1e39e7a9cf4037c80a002b95f47f4f794cb93598c7",
+          "resultTagSha256": "a14de7038a52fd110c740e412beed58f9b703d34a341875a005f91e0cb025157",
+          "donorName": "ddtstore",
+          "donorId": 369,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 249,
+          "symbols": [],
+          "width": 75,
+          "height": 26,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "03c93bfc2103976fe0b5d75d0694a6b96e58cfdd1ddaf73072cfc84885dbe5e5",
+          "resultTagSha256": "a731220754746c6e37904542264bcd2baeb49130ed6a6d7a0a5fefd2e8c99245"
+        },
+        {
+          "id": 253,
+          "symbols": [],
+          "width": 74,
+          "height": 26,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "4672bb5aed11d3ecfc0d4c5ece9a785af0fde3500c614fa9efc7d594ed15005f",
+          "resultTagSha256": "24bcd30ced9e2c9d4f494f4bfaaab36c1faaaa381bfebe24106914d992c0525a"
+        },
+        {
+          "id": 257,
+          "symbols": [],
+          "width": 92,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "47de1eaa117593abedf49237e1231060a993d2954b9bfb865ed73588afd08b1d",
+          "resultTagSha256": "25df3ee078262b7c10c6d6a75375ef0d2d34a559bfeac5b5ad298a2ed0b3158d",
+          "donorName": "ddtstore",
+          "donorId": 374,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 260,
+          "symbols": [],
+          "width": 93,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "1086290132b2115f9c9d99bce35e0050b4b12881bfd4746574efe7ac0c20c155",
+          "resultTagSha256": "19622a05306ad389b53e99f051a7d4c85a99f6a522affcb6811e683a03d59b3c",
+          "donorName": "ddtstore",
+          "donorId": 377,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 263,
+          "symbols": [],
+          "width": 92,
+          "height": 27,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "f5f7e6be1b278146447d9eece881ed16e23991b3d805a195f42508b29caa01cd",
+          "resultTagSha256": "37b5a065499471fc53d424f4bf1d57c0e5ddb899dc4aaa62427bb3366891562a"
+        },
+        {
+          "id": 267,
+          "symbols": [],
+          "width": 93,
+          "height": 27,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "c31cab98a9a54632883f2630c89f838a003adb7646b47f0393655a52dc4058d3",
+          "resultTagSha256": "7f169b21506c043b28290f2cfa6d59d848e58518f9ae4f48cc59030dfc39c00b"
+        },
+        {
+          "id": 271,
+          "symbols": [],
+          "width": 92,
+          "height": 28,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "13abe253c2a0dc33ba82618a569e4ca8fd0e913d52eeb3753c89c54b7862e81c",
+          "resultTagSha256": "6f9db931686bd857eb90a84ac49597245122b7c336f8747be1eacc52b9c3b8bf",
+          "donorName": "ddtstore",
+          "donorId": 388,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 274,
+          "symbols": [],
+          "width": 93,
+          "height": 28,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "6c3f174cc716d217c0e3405a1d549ecf962c161692fe4fa87bb9a80c7b8ecc7a",
+          "resultTagSha256": "cd359df21baef404af4cedceeceecc5bbcbe1cdc871d2a6a621686560450b8b5",
+          "donorName": "ddtstore",
+          "donorId": 391,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 277,
+          "symbols": [],
+          "width": 48,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "f1ac0d85d66656a0a88366f507385bd7e7cc9fc27f5eb0d3ae1f756293898796",
+          "resultTagSha256": "7705bb84cafbd2052df5ddcec3648ec714ff3fb935e62dce0ce70c0ed8b4637c",
+          "donorName": "ddtstore",
+          "donorId": 394,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 281,
+          "symbols": [],
+          "width": 48,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "dcf92f1e2972a69a30b15f4c4135e49990d28b2e6f70784fbc78fe29d2ccbdc7",
+          "resultTagSha256": "7cdc6716f955109302a7574111aba3c2ae015189bae0f6d13b51a55cc5b034eb",
+          "donorName": "ddtstore",
+          "donorId": 398,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 291,
+          "symbols": [],
+          "width": 93,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "fb7791fbcc1b82a8a07a68a939053fa32ae8605ccf70f8ac8d5841f9eecd0120",
+          "resultTagSha256": "355fa3bf74fe8abd83783f9d1f7e06f47799d56cf762065f99c623cc2025b167",
+          "donorName": "ddtstore",
+          "donorId": 401,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 295,
+          "symbols": [],
+          "width": 91,
+          "height": 26,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "362953b98a22dd46b9f886670b38e180dd1a2c7bc5aea71be0b18e192924ab41",
+          "resultTagSha256": "43e33e7078bd742f5a031dc588db54ab20c66050343ca3f32adc28f207820a0d",
+          "donorName": "ddtstore",
+          "donorId": 405,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 313,
+          "symbols": [],
+          "width": 366,
+          "height": 44,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "a4fff830a687a7cda39bbd60754633771d9a189eafd72b3d8f2cce16c2a24fe2",
+          "resultTagSha256": "4212b5e1a7ba39276ae91fbcad97b8f97a517c12ab342788b529d5de45cc0063",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 53,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        },
+        {
+          "id": 406,
+          "symbols": [],
+          "width": 271,
+          "height": 64,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "4a7b2993212b9b27dfb3d71316069050af44145005168bfa214ef3709b69a0ea",
+          "resultTagSha256": "b439eae8714e49eb7e6fe772b6c52bb055bea38231264d476cb5c85190e3a4f8",
+          "donorName": "ddtstore",
+          "donorId": 513,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 410,
+          "symbols": [],
+          "width": 313,
+          "height": 52,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "3566632acd948cc839336ad3e818cedba6a86c785f0ed6a979b71113915ef35b",
+          "resultTagSha256": "3cf5e6edd087e0e9503233c90e1987c372223199f1753e1cc0a6f7e2551b0b26",
+          "donorName": "ddtstore",
+          "donorId": 517,
+          "donorSha256": "57daec3853e756f810a6af65af7f38bbc96559f634e39f29191a11c1e2e13094"
+        },
+        {
+          "id": 432,
+          "symbols": [],
+          "width": 365,
+          "height": 44,
+          "kind": "reviewed-chinese-donor",
+          "sourceTagSha256": "24789c4c39dd31ddeac6f862c96ed029552c64d40bdd51fcf9ab3a9d30d45e4c",
+          "resultTagSha256": "801bd842036dd1932a0b98c9ac6ecd88c98b4154e249af3010a6663ecc5b7a9b",
+          "donorName": "store_v3_6_1_u1",
+          "donorId": 30,
+          "donorSha256": "f96df9af29713c72da5939265ed92eddc9dc030b9efd90f5b03634722a5c8730"
+        }
+      ],
+      "staticTextTranslations": {
+        "187": [
+          "属性转移可交换2件同类型装备的",
+          "强化、精炼、封印孔和宝珠属性。",
+          "转移时，请注意以下事项："
+        ],
+        "188": [
+          "3. 左右两件装备必须",
+          "属于同一类型。"
+        ],
+        "189": [
+          "1. 属性转移的成功率为100%。"
+        ],
+        "190": [
+          "4. 转移后，强化、精炼及封印孔属性互换，",
+          "两件装备都会变为绑定状态。"
+        ],
+        "191": [
+          "2. 只有有效期内、精良及以上品质的装备，",
+          "才能进行属性转移。"
+        ],
+        "192": [
+          "5. 可自行选择是否转移",
+          "装备上已镶嵌的宝珠。"
+        ],
+        "193": [
+          "6.转移：40000金币"
+        ],
+        "195": [
+          "强化可以提升武器伤害",
+          "和装备护甲。",
+          "强化时，请注意以下事项："
+        ],
+        "196": [
+          "1. 可强化的物品包括武器、帽子，",
+          "以及衣服。",
+          "2. 每提升一级，武器伤害增加10%，",
+          "帽子和衣服的护甲增加10%。",
+          "3. 强化等级越高，",
+          "消耗的强化石越多。开通贵宾，",
+          "或提升公会铁匠铺等级，",
+          "可增加强化石提供的经验。",
+          "4. 勾选“连续”后点击强化，",
+          "会持续消耗强化石，",
+          "直到强化石用完，",
+          "或装备提升一级。"
+        ],
+        "198": [
+          "3. 升星需要消耗升星宝石。",
+          "低等级宝石可以熔炼成高等级宝石。",
+          "升星宝石的等级越高，",
+          "升星成功率越高。"
+        ],
+        "199": [
+          "1. 升星效果取决于装备的套装。",
+          "武器的基础伤害越高，",
+          "升星效果越好！"
+        ],
+        "200": [
+          "4. 武器和装备升星至10级时，",
+          "会获得特殊效果。"
+        ],
+        "201": [
+          "2. 装备升星后可获得升星技能。",
+          "技能效果会随着",
+          "技能等级提升而增强。"
+        ],
+        "203": [
+          "熔炼可将低等级物品",
+          "变为高等级物品。",
+          "熔炼时，请注意以下事项："
+        ],
+        "204": [
+          "1. 熔炼物品的类型决定产物类型。",
+          "4个熔炼位置必须全部放入物品，",
+          "才可以进行熔炼。"
+        ],
+        "205": [
+          "产物的有效期取参与熔炼物品中",
+          "最短的有效期。",
+          "通过熔炼获得的装备，",
+          "有效期为3天。"
+        ],
+        "206": [
+          "2. 朱雀石、玄武石、青龙石、白虎石，",
+          "以及宝珠、戒指、手镯和碎片，",
+          "都可以通过熔炼",
+          "获得更高等级的物品。"
+        ],
+        "207": [
+          "3. 4件相同类型的合成石、戒指、手镯，",
+          "以及宝珠或碎片，可以熔炼成",
+          "对应的高等级物品。"
+        ],
+        "213": [
+          "宝珠必须类型和等级相同，",
+          "才可以进行熔炼。"
+        ],
+        "214": [
+          "戒指、手镯必须名称和等级相同才能熔炼。",
+          "熔炼所得戒指、手镯的",
+          "合成属性为0。"
+        ],
+        "215": [
+          "碎片必须名称和等级相同，",
+          "才可以进行熔炼。"
+        ],
+        "216": [
+          "戒指和手镯最高",
+          "可以熔炼至+5。"
+        ],
+        "218": [
+          "镶嵌系统可为装备镶嵌宝珠，",
+          "获得额外效果。",
+          "镶嵌时，请注意以下事项："
+        ],
+        "219": [
+          "1. 强化可开启武器、衣服和帽子的",
+          "强化孔。使用开孔钻头，",
+          "可以开启封印孔。"
+        ],
+        "220": [
+          "强化孔通过强化直接开启至最高等级，",
+          "可镶嵌任意等级的宝珠。",
+          "封印孔需要使用开孔钻头升级，",
+          "不能镶嵌高于当前孔等级的宝珠。"
+        ],
+        "221": [
+          "2. 镶嵌孔分为攻击、防御和属性三类。",
+          "每个镶嵌孔只能放入",
+          "对应类型的宝珠。"
+        ],
+        "222": [
+          "3. 攻击宝珠会在攻击时",
+          "附加特殊效果。防御宝珠",
+          "会在受到攻击时附加特殊效果。",
+          "属性宝珠可以提升",
+          "装备的各项属性。"
+        ],
+        "226": [
+          "拆除一颗已镶嵌的宝珠需消耗200点券。"
+        ],
+        "228": [
+          "合成系统可以将圣兽石的属性",
+          "附加到武器或装备上。",
+          "合成时，请注意以下事项："
+        ],
+        "229": [
+          "1. 所有装备都可附加圣兽石属性。",
+          "不同的圣兽石，",
+          "附加的属性也不同。",
+          "2. 圣兽石等级越高，",
+          "合成成功率越低。",
+          "3. 每件装备的每项属性，",
+          "只能附加1种圣兽石效果。",
+          "4. 低等级圣兽石不能覆盖",
+          "高等级圣兽石的效果。"
+        ],
+        "305": [
+          "1. 熔炼物品的类型决定产物类型，",
+          "满足熔炼条件后才可以进行熔炼。"
+        ],
+        "306": [
+          "3. 勾选“可熔炼”后，",
+          "只显示可以熔炼的物品。"
+        ],
+        "307": [
+          "2. 合成石、手镯、戒指和部分碎片，",
+          "可通过熔炼提升等级。"
+        ],
+        "308": [
+          "4. 产物的有效期取参与熔炼物品中",
+          "最短的有效期。",
+          "生成物品的有效期为3天。"
+        ],
+        "309": [
+          "5. 碎片必须名称和等级相同，",
+          "才可以进行熔炼。"
+        ],
+        "310": [
+          "6. 戒指和手镯必须名称、等级相同才能熔炼。",
+          "熔炼产物的",
+          "合成属性为0。"
+        ],
+        "311": [
+          "7. 戒指和手镯最高可以熔炼至+5。"
+        ],
+        "394": [
+          "1. 帽子、饰品、武器和副手武器",
+          "强化至12级后可以进阶，",
+          "进一步提升装备属性。"
+        ],
+        "395": [
+          "3. 幸运值在每天24:00清零，",
+          "请每天至少进行1次进阶。"
+        ],
+        "396": [
+          "2. 每次进阶失败都会增加幸运值；幸运值越高，成功率越高。"
+        ]
+      }
+    },
+    {
+      "path": "apps/api/assets/flash/ui/vietnam/swf/storefinebringup.swf",
+      "baselineSha256": "1e7b495c197261a4380b06272cce7269c4bc0f58ffe5d9ad313ce5939a507316",
+      "resultSha256": "3d9171dda890bf4d3d46c5d6216e4660fe2591cf3245e0d9d099a9452d965d34",
+      "changedBitmaps": 5,
+      "staticTexts": 5,
+      "bitmapChanges": [
+        {
+          "id": 1,
+          "symbols": [
+            "asset.store.bringup.eatAllBtn"
+          ],
+          "width": 141,
+          "height": 49,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "a7519f797781e6a2260cb70663e8bdfc4933593a05bfba34c9f3aa7a81f0f9dd",
+          "resultTagSha256": "bc2c151cf978b5604e4d77081d83bec8c8fc90d3df7f3ddb9a584a021b01011f",
+          "donorName": "storefinebringup",
+          "donorId": 1,
+          "donorSha256": "5891b2fb59e21f5d1f6102b3d1e114749dbc984067e0c314f72811c560932c7e"
+        },
+        {
+          "id": 3,
+          "symbols": [
+            "asset.store.bringup.lockBtn"
+          ],
+          "width": 82,
+          "height": 32,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "29d546448a31b7965f1148e5757ef49129e567f2c8f9db4ea03646ca403a372a",
+          "resultTagSha256": "3b2c92c6aa289fe06317a8b99fb7f5508473b4c233dc2309a76db1ea0848c1c9",
+          "donorName": "storefinebringup",
+          "donorId": 3,
+          "donorSha256": "5891b2fb59e21f5d1f6102b3d1e114749dbc984067e0c314f72811c560932c7e"
+        },
+        {
+          "id": 5,
+          "symbols": [
+            "asset.store.bringup.eatBtn"
+          ],
+          "width": 104,
+          "height": 49,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "3c77a8195e90bf904b7c619eb9071e3038bf0011a9b194410fb652d0315116c3",
+          "resultTagSha256": "9a51b395f7cccdf41e734e6d3e85d8acec9790d6e1b922f11ca637fd2bb9f04d",
+          "donorName": "storefinebringup",
+          "donorId": 5,
+          "donorSha256": "5891b2fb59e21f5d1f6102b3d1e114749dbc984067e0c314f72811c560932c7e"
+        },
+        {
+          "id": 7,
+          "symbols": [
+            "asset.store.bringup.buyBtn"
+          ],
+          "width": 74,
+          "height": 32,
+          "kind": "same-symbol-chinese-donor",
+          "sourceTagSha256": "6aa84e8596bb8c6836e0dfa966d6655c902abf35ebfb21cb72eb0b5fb5aa5423",
+          "resultTagSha256": "e9ee5a7d434effb925264f48649728599712501756c3b6cd4eb05765df5f784c",
+          "donorName": "storefinebringup",
+          "donorId": 7,
+          "donorSha256": "5891b2fb59e21f5d1f6102b3d1e114749dbc984067e0c314f72811c560932c7e"
+        },
+        {
+          "id": 9,
+          "symbols": [],
+          "width": 381,
+          "height": 47,
+          "kind": "imagegen-caption-edit",
+          "sourceTagSha256": "f35290c22f25cb88e3b980b1008abb22f2dd156101ba537c7ddf38515b47c6f9",
+          "resultTagSha256": "31e93e7ac55f756dcd10e26da3983e5d4be47a4853c4f451ff17dd6d2a2f9f1e"
+        }
+      ],
+      "staticTextTranslations": {
+        "26": [
+          "在这里可以培养饰品。将需要培养的饰品",
+          "放入培养位置，再点击快速培养。",
+          "目标饰品会吸收背包中所有未锁定的饰品，",
+          "从而获得培养经验。",
+          "使用快速培养时，请注意以下事项："
+        ],
+        "27": [
+          "1. 已装备的饰品会在本界面自动锁定。"
+        ],
+        "28": [
+          "2. 饰品培养分为3种品质。",
+          "只有将低品质饰品合入高品质饰品时，",
+          "才会损失较多经验。"
+        ],
+        "29": [
+          "4. 培养后饰品的有效期，",
+          "取被吸收饰品中最短的有效期。"
+        ],
+        "30": [
+          "3. 锁定的饰品不会被吸收，但可以作为培养对象。"
+        ]
+      }
+    }
+  ],
+  "referenceDonors": [
+    {
+      "name": "room",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/room_v3_6_1_u2.swf",
+      "sha256": "8c30059010fdbf6a04f907f94fcdd23d82734719cbf6d95695366d7d4cb4224c"
+    },
+    {
+      "name": "roomlist",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/roomlist_v3_6_1_u1.swf",
+      "sha256": "640bdb6504e6cc67e02e51d37e7d260f0027c795f969efa17fd32e8938d133bf"
+    },
+    {
+      "name": "store_v3_6_1_u1.swf",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/store_v3_6_1_u1.swf"
+    },
+    {
+      "name": "store_v3_6_1_u5.swf",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/store_v3_6_1_u5.swf"
+    },
+    {
+      "name": "ddtstore.swf",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/ddtstore.swf"
+    },
+    {
+      "name": "storefinebringup.swf",
+      "url": "http://yj.rzkj.top:521/resource/flash/ui/zh_cn/swf/storefinebringup.swf"
+    }
+  ],
+  "constraints": {
+    "existingClientLogicPreserved": true,
+    "abcSymbolClassAndTimelineBytesUnchanged": true,
+    "bitmapIdsAndDimensionsPreserved": true,
+    "unrelatedTagsPreserved": true,
+    "originalRuleValuesPreserved": true,
+    "wholeDonorSwfReplacement": false,
+    "allowedSymbols": [
+      "VS",
+      "G",
+      "D"
+    ],
+    "bubbleWeaponConfigurationChanged": false
+  },
+  "verification": {
+    "renderedAllChangedBitmapAndTextSurfaces": true,
+    "rawTagComparison": true,
+    "numericTokensPreserved": true,
+    "glyphBoundsChecked": true,
+    "browserOrGameConnection": false,
+    "gameAcceptance": "pending-user-playtest"
+  },
+  "notes": [
+    "Room localZoneBtnAsset is the reported current-server button.",
+    "Room bitmap 138 preserves current level 30, score loss on defeat and top 16 rules.",
+    "Already-Chinese room list personal information bitmap 23 remains unchanged.",
+    "Random-map thumbnail already serves Chinese and is not modified.",
+    "Forge source values, including 200 vouchers and 40000 gold, are retained.",
+    "Runtime service restart is not performed by this asset installation."
+  ]
+}
