@@ -8,6 +8,7 @@ import { gunzipSync } from "node:zlib";
 import { beforeEach, test, vi } from "vitest";
 import { planWeaponInstall, type WeaponPackage } from "./workshop-weapon.js";
 import { activateWeaponVisualStartup, readWeaponVisualDeployment, readWeaponVisualSession } from "./workshop-weapon-visual-startup.js";
+import { readOfficialWeaponEvidence, weaponEffectsPackage } from "./workshop-weapon-effects.js";
 
 const { createDbMock } = vi.hoisted(() => ({ createDbMock: vi.fn(() => { throw Error("unexpected database connection"); }) }));
 vi.mock("../packages/db/src/index.js", async importOriginal => ({
@@ -80,6 +81,98 @@ test("complete seed packages and six exact resource targets are accepted without
   assert.deepEqual(readFileSync(f.manifestPath), manifestBytes); assert.deepEqual(readFileSync(f.manifest.originalJournal.path), originalBytes);
   assert.equal(existsSync(f.manifest.upgradeJournalPath), false); assert.equal(existsSync(f.manifest.receiptPath), false);
   assert.equal(createDbMock.mock.calls.length, 0);
+});
+
+function effectsFixture(t: { onTestFinished: (fn: () => void) => void }) {
+  const f = fixture(t), put = (name: string, value: unknown) => {
+    const path = join(f.path, name); writeFileSync(path, JSON.stringify(value, null, 2) + "\n");
+    return { path, sha256: sha(readFileSync(path)) };
+  };
+  const visualJournal = put("upgrade.json", { fixture: "owned visual journal, validated by the transaction owner" });
+  const xml = '<Result value="true" message="Success!">' + [15601, 156011, 156012, 156013].map(ID => `<Item ID="${ID}" Power="${ID === 156013 ? '0.65' : '1.0'}" Radii="${ID === 156013 ? 65 : 60}" FlyingPartical="${ID === 156013 ? 498 : 518}" BombPartical="${ID === 156013 ? 15602 : 15601}" Crater="${ID === 156013 ? 15602 : 15601}" AttackResponse="0" IsSpin="false" SpinV="0" SpinVA="0.0" Amount="${ID === 156013 ? 3 : 1}" Wind="240" DragIndex="1" Weight="70" Shake="true" ShootSound="${ID === 15601 ? 254 : ID === 156011 ? 255 : ID === 156012 ? 256 : 257}" BombSound="${ID === 156013 ? 253 : 252}" ActionType="0" Mass="10" BombType="0"/>`).join('') + '</Result>';
+  const bombXml = '<Result value="true" message="Success!"><Item TemplateID="7258" Common="15601" CommonAddWound="156012" CommonMultiBall="156011" Special="156013"/></Result>';
+  const rawPin = (name: string, value: string) => { const path = join(f.path, name); writeFileSync(path,value); return {path,sha256:sha(readFileSync(path))}; };
+  const evidence = readOfficialWeaponEvidence(xml, bombXml);
+  for (const row of f.newConfig.Ball) {
+    const official = evidence.Ball.find(value => Number(value.ID) === row.ID)!;
+    for (const [key,value] of Object.entries(official)) if (key in row) row[key] = typeof row[key] === 'boolean' ? value === 'true' : typeof row[key] === 'number' ? Number(value) : value;
+    Object.assign(row,{Power:row.ID === 156013 ? 0.6 : 1,Radii:row.ID === 156013 ? 45 : 55,Crater:row.ID === 156013 ? '171' : '161',FlyingPartical:row.ID === 156013 ? '8' : row.ID === 156012 ? '118' : '7',ShootSound:row.ID === 156013 ? '083' : '025',BombSound:row.ID === 156013 ? '088' : '087'});
+  }
+  f.manifest.newPackage = put('new.json',f.newConfig);
+  const before = { schemaVersion: 1, source: "local-compat", items: [], ballConfigs: [], balls: f.newConfig.Ball.map(row => ({
+    id: row.ID, power: row.Power, radii: row.Radii, mass:row.Mass, weight:row.Weight, wind:row.Wind,dragIndex:row.DragIndex,amount:row.Amount,delay:row.Delay,hasTunnel:row.HasTunnel,flyingPartical: row.FlyingPartical, shapeSource: "local-compat", shapeId: row.ID === 156013 ? 171 : 161,
+  })) };
+  const adjusted = weaponEffectsPackage(f.newConfig,evidence,'retained');
+  const shapes = f.newConfig.Ball.map(row=>({ballId:row.ID,source:'official-image-derived-local-mask',fileBase64:Buffer.from([1,0,0,0,1,0,0,0,1]).toString('base64')}));
+  const after = { ...before, balls: before.balls.map(({shapeId:_id,shapeSource:_source,...row}) => ({ ...row, power:adjusted.Ball.find(ball=>ball.ID===row.id)!.Power,radii:adjusted.Ball.find(ball=>ball.ID===row.id)!.Radii })),shapes };
+  const resources = [{...put('audio.json',{fixture:'audio'}),kind:'audio'}];
+  for (const id of [15601,15602]) for(const [kind,name] of [['client-crater','crater.png'],['client-crater-brink','craterbrink.png']]) {
+    const path=join(f.uploadDir,'image/bomb/crater',String(id),name!);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,Buffer.from(`isolated-${id}-${name}`));resources.push({path,sha256:sha(readFileSync(path)),kind:kind!});
+  }
+  const effects = { schemaVersion: 1, selection: "official-capture-v17.1.1", visualJournal,
+    officialBallList:rawPin('BallList.xml',xml),officialBombConfig:rawPin('BombConfig.xml',bombXml),craterShapes:put('shapes.json',shapes),particleMode:'retained',
+    audioVerification:put('audio-verification.json',{allSixMatch:true,rows:Array.from({length:6},(_,i)=>({soundId:252+i})),localAudio:resources[0]}),
+    previousFightExtension: put("effects-before-fight.json", before), upgradeJournalPath: join(f.path, "effects-upgrade.json"), resources };
+  const effectsPin = put("effects.json", effects);
+  const manifest = { ...f.manifest, effects: effectsPin, fightExtension: put("effects-after-fight.json", after) };
+  const save = () => writeFileSync(f.manifestPath, JSON.stringify(manifest)); save();
+  const changeEffects = (fn: (value: typeof effects) => void) => { fn(effects); manifest.effects = put("effects.json", effects); save(); };
+  return { ...f, effects, manifest, before, after, save, put, changeEffects };
+}
+
+test("official capture accepts matching numeric/mask changes, retains fallback trails and pins all inputs", t => {
+  const f = effectsFixture(t), selected = f.readDeployment();
+  assert.equal(selected.effects?.selection, "official-capture-v17.1.1"); selected.check();
+  assert.equal(selected.effects?.particleMode, "retained");
+  assert.equal(createDbMock.mock.calls.length, 0);
+  for (const resource of [...f.effects.resources,f.effects.officialBallList,f.effects.officialBombConfig,f.effects.craterShapes,f.effects.audioVerification]) {
+    const bytes = readFileSync(resource.path); writeFileSync(resource.path, Buffer.concat([bytes, Buffer.from("changed")]));
+    assert.throws(selected.check, /input changed/); writeFileSync(resource.path, bytes);
+  }
+  const journalBytes = readFileSync(f.effects.visualJournal.path);
+  writeFileSync(f.effects.visualJournal.path, "changed"); assert.throws(selected.check, /input changed/);
+  writeFileSync(f.effects.visualJournal.path, journalBytes); selected.check();
+});
+
+test("official capture rejects unrelated fight physics, missing resources and journal aliasing before database access", t => {
+  const f = effectsFixture(t), correct = structuredClone(f.after);
+  f.after.balls[0].power = 999; f.manifest.fightExtension = f.put("effects-after-fight.json", f.after); f.save();
+  assert.throws(f.readDeployment, /differs from captured values/);
+  f.manifest.fightExtension = f.put("effects-after-fight.json", correct); f.save();
+  const resources = [...f.effects.resources]; f.changeEffects(value => { value.resources.pop(); });
+  assert.throws(f.readDeployment);
+  f.changeEffects(value => { value.resources = resources; value.upgradeJournalPath = value.visualJournal.path; });
+  assert.throws(f.readDeployment);
+  assert.equal(createDbMock.mock.calls.length, 0);
+});
+
+test("official emitter selection requires definitions and display resources before database access", t => {
+  const f = effectsFixture(t);
+  f.changeEffects(value => { value.particleMode = 'official'; });
+  assert.throws(f.readDeployment);
+  f.changeEffects(value => { value.particleMode = 'retained'; value.resources.push({...value.resources[0],kind:'particle-unknown'}); });
+  assert.throws(f.readDeployment,/unknown effects resource kind/);
+  assert.equal(createDbMock.mock.calls.length,0);
+});
+
+test("missing official audio identity refuses startup even when local sounds exist", t => {
+  const f=effectsFixture(t);
+  f.changeEffects(value=>{value.audioVerification=f.put('audio-unverified.json',{allSixMatch:false,rows:[],localAudio:value.resources[0]});});
+  assert.throws(f.readDeployment,/Sound252-257 identity is not verified/);
+  assert.equal(createDbMock.mock.calls.length,0);
+});
+
+test("verified official emitters select captured IDs only with the matching dependency proof", t => {
+  const f=effectsFixture(t), definition=f.put('partical.json',{fixture:'same official emitters'}),textures=f.put('shape.json',{fixture:'same official display closure'});
+  const proof=f.put('particle-proof.json',{allDependenciesPresent:true,officialDefinitionsMatch:true,officialTexturesMatch:true,selectedDefinition:definition,selectedTextures:[textures]});
+  f.changeEffects(value=>{value.particleMode='official';value.resources.push({...definition,kind:'particle-definition'},{...textures,kind:'particle-textures'});Object.assign(value,{particleVerification:proof});});
+  for(const row of f.after.balls)row.flyingPartical=row.id===156013?'498':'518';
+  f.manifest.fightExtension=f.put('effects-after-fight.json',f.after);f.save();
+  f.readDeployment().check();
+  const proofData=JSON.parse(readFileSync(proof.path,'utf8'));proofData.officialTexturesMatch=false;
+  f.changeEffects(value=>{Object.assign(value,{particleVerification:f.put('particle-proof.json',proofData)});});
+  assert.throws(f.readDeployment);
+  assert.equal(createDbMock.mock.calls.length,0);
 });
 
 test("missing, duplicate or unexpected visual targets are rejected", t => {
