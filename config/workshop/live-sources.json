@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "purpose": "固定运行输入的来源；历史source只用于溯源，不是当前启动依赖。私有状态须从本机备份保留，不能从公共仓库虚构。",
+  "files": [
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/fight-baseline.json",
+      "source": "runtime/online-box-followup-20261013/weapon-next/fight-combined-candidate.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "475d9572b46734808a065b1fb3eb176ca430ed704a688750701161214a075c66",
+      "bytes": 9729,
+      "originalSha256": "475d9572b46734808a065b1fb3eb176ca430ed704a688750701161214a075c66",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/bubble-tea-old.json",
+      "source": "runtime/online-box-followup-20261013/weapon-next/database-v2-ready.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "d4b2dc89551d6eb620934c35a841004db99b02c462284c7cb74770002a52513e",
+      "bytes": 5248,
+      "originalSha256": "d4b2dc89551d6eb620934c35a841004db99b02c462284c7cb74770002a52513e",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/bubble-tea-visual.json",
+      "source": "runtime/weapon-original-effects-20261015/official-discovery/database-original-visual-ready.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "7a94cf9c6c20f9bbad862d09788e514e860ad531987691a27ab5ac81a3990693",
+      "bytes": 6991,
+      "originalSha256": "7a94cf9c6c20f9bbad862d09788e514e860ad531987691a27ab5ac81a3990693",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/fight-visual.json",
+      "source": "runtime/weapon-original-effects-20261015/official-discovery/fight-combined-original-visual-candidate.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "34e11456b7a052d0b57c285ed525b41ca4938cd7d264799eee46e59336449904",
+      "bytes": 11042,
+      "originalSha256": "34e11456b7a052d0b57c285ed525b41ca4938cd7d264799eee46e59336449904",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/fight-effective.json",
+      "source": "runtime/feedback-official-bubble-20261017/fight-official-effects-candidate.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "fac325cad8637ffd60ae92682e3ff34e2ccd925d854eee4770fe0ef3dc55054c",
+      "bytes": 16240,
+      "originalSha256": "fac325cad8637ffd60ae92682e3ff34e2ccd925d854eee4770fe0ef3dc55054c",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/bubble-tea-crater-shapes.json",
+      "source": "runtime/feedback-official-bubble-20261017/craters/shapes.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "7dec05a4b3ea714ff29003b4dd41032973226ca96e16cdd0f970a6655b5e7f51",
+      "bytes": 5390,
+      "originalSha256": "7dec05a4b3ea714ff29003b4dd41032973226ca96e16cdd0f970a6655b5e7f51",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/evidence/bubble-tea/BallList.xml",
+      "source": "runtime/official-capture-20261017/BallList.xml",
+      "sourceUrl": "http://quest3.ddt.1322game.com/BallList.xml?rnd=0.9117337390780449rnd=0%2E9117337390780449",
+      "mode": "byte-copy",
+      "sha256": "a982d81b05306fc31daf16bc574262a694cae8b4bb42148f78ebd901a7beb798",
+      "bytes": 592460,
+      "originalSha256": "a982d81b05306fc31daf16bc574262a694cae8b4bb42148f78ebd901a7beb798",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/evidence/bubble-tea/BombConfig.xml",
+      "source": "runtime/official-capture-20261017/BombConfig.xml",
+      "sourceUrl": "http://quest3.ddt.1322game.com/BombConfig.xml?rnd=0.9117337390780449rnd=0%2E9117337390780449",
+      "mode": "byte-copy",
+      "sha256": "9e54c1adc87b5e126345b58f75a2dfcd890e997df4ca669425eb09df3d7c322d",
+      "bytes": 81309,
+      "originalSha256": "9e54c1adc87b5e126345b58f75a2dfcd890e997df4ca669425eb09df3d7c322d",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/evidence/bubble-tea/audio-verification.json",
+      "source": "runtime/feedback-official-bubble-20261017/config-audio/audio-verification.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "129125fc6566e7294b5793e5d9cb0fceca1d260bed93f175e21c03f985d84191",
+      "bytes": 39142,
+      "originalSha256": "129125fc6566e7294b5793e5d9cb0fceca1d260bed93f175e21c03f985d84191",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/evidence/bubble-tea/official-particle-verification.json",
+      "source": "runtime/feedback-official-bubble-20261017/particles/new-official-material/official-particle-verification.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "4301b66b57f9cda232b7125a38f7049ee282328ade15022a5fab084137d87992",
+      "bytes": 22537,
+      "originalSha256": "4301b66b57f9cda232b7125a38f7049ee282328ade15022a5fab084137d87992",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/state/weapons/effects-upgrade-ddtank.json",
+      "source": "runtime/feedback-official-bubble-20261017/effects-upgrade-ddtank.json",
+      "sourceUrl": null,
+      "mode": "byte-copy",
+      "sha256": "d11cec14d8d831c64136b6fae7a94f6519841a0ce649a4e38a2d98d120e2c9cf",
+      "bytes": 18525,
+      "originalSha256": "d11cec14d8d831c64136b6fae7a94f6519841a0ce649a4e38a2d98d120e2c9cf",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/effects-deployment.json",
+      "source": "runtime/feedback-official-bubble-20261017/effects-deployment.json",
+      "sourceUrl": null,
+      "mode": "portable-manifest",
+      "sha256": "b00a9d2de64d1ff4b2c83999f54dff028cc891157253bd1b1e987293d41c6892",
+      "bytes": 2915,
+      "originalSha256": "fae9b1390a77c6e049415a48e5f41070373cdc847f2d2b0ea72dc803377e03d2",
+      "originalPreserved": true
+    },
+    {
+      "path": "source/ddtank-reborn/config/workshop/weapons/startup-deployment.json",
+      "source": "runtime/feedback-official-bubble-20261017/startup-deployment.json",
+      "sourceUrl": null,
+      "mode": "portable-manifest",
+      "sha256": "2c8b02bb25b0299efca05d4cf7c42c23db34b5973d216e77d9948dc166ed2bb6",
+      "bytes": 2299,
+      "originalSha256": "8439e149b4eb177886317286131aadb370093e5681a38398360a86c69917169a",
+      "originalPreserved": true
+    },
+    {
+      "path": "runtime/live/state/weapons/startup-activation.json",
+      "source": "runtime/feedback-official-bubble-20261017/startup-activation.json",
+      "sourceUrl": null,
+      "mode": "future-output-not-copied",
+      "sha256": null,
+      "bytes": null,
+      "originalSha256": "e5e923d167ae983b6347f5a4df76afc55d0ddacecf864776158484cd196a82df",
+      "originalPreserved": true
+    }
+  ],
+  "preflightManifest": "source/ddtank-reborn/config/workshop/live-inputs.json",
+  "credentialsIncluded": false
+}

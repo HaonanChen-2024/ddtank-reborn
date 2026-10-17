@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "pathBase": "repo",
+  "files": [
+    {
+      "path": "../../runtime/client-overlay/audio.swf",
+      "sha256": "eb07d14f76d9900abb9358ed064130ef5fb3bd60b3350d0f223682000fb7dc65",
+      "bytes": 1790828
+    },
+    {
+      "path": "../../runtime/live/evidence/bubble-tea/audio-verification.json",
+      "sha256": "129125fc6566e7294b5793e5d9cb0fceca1d260bed93f175e21c03f985d84191",
+      "bytes": 39142
+    },
+    {
+      "path": "../../runtime/live/evidence/bubble-tea/BallList.xml",
+      "sha256": "a982d81b05306fc31daf16bc574262a694cae8b4bb42148f78ebd901a7beb798",
+      "bytes": 592460
+    },
+    {
+      "path": "../../runtime/live/evidence/bubble-tea/BombConfig.xml",
+      "sha256": "9e54c1adc87b5e126345b58f75a2dfcd890e997df4ca669425eb09df3d7c322d",
+      "bytes": 81309
+    },
+    {
+      "path": "../../runtime/live/evidence/bubble-tea/official-particle-verification.json",
+      "sha256": "4301b66b57f9cda232b7125a38f7049ee282328ade15022a5fab084137d87992",
+      "bytes": 22537
+    },
+    {
+      "path": "../../runtime/live/state/weapons/effects-upgrade-ddtank.json",
+      "sha256": "d11cec14d8d831c64136b6fae7a94f6519841a0ce649a4e38a2d98d120e2c9cf",
+      "bytes": 18525
+    },
+    {
+      "path": "../../runtime/server-language.txt",
+      "sha256": "69cc280bf9bc324d7f990bef2cd2bcdcceca9c2f1e6b9b3461472eb17dbe3612",
+      "bytes": 284938
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/blastout/blastout15601.swf",
+      "sha256": "75a716e199932f791f28999968d02bce410c17d5f722029ab5482dae1cb2f1d4",
+      "bytes": 38434
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/blastout/blastout156011.swf",
+      "sha256": "3735c0282f4c2769191d2c77e8f4734b20da73ebf0c42421f79efe052c6ef136",
+      "bytes": 35553
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/blastout/blastout156012.swf",
+      "sha256": "01d87f2cb1c4ccb1df25e847fbd3add4ccfce45fe19d5ab55844c1c10424d4ef",
+      "bytes": 42494
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/blastout/blastout156013.swf",
+      "sha256": "52ed2b19ace76cd186ddd440167cc29f549de9c9f41ecb3bb1ccda874f1acf16",
+      "bytes": 45754
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/bullet/bullet15601.swf",
+      "sha256": "cf9b2f855e24fd14b28fc2d551640d41f40cff19ba10c519a1e977bbc142f194",
+      "bytes": 196508
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/bullet/bullet15602.swf",
+      "sha256": "c46ef479f9666931df70bf6ebebba003a145e29bbfcf4e99848976a0f3728a78",
+      "bytes": 627551
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/crater/15601/crater.png",
+      "sha256": "d68a2ccf7ccd85b26db907347ef69302a38530e4e339f1e49a3a4a7752834d35",
+      "bytes": 4509
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/crater/15601/craterbrink.png",
+      "sha256": "8fdf480d3dbcba637ea113ebe289fe4f03b9c8e9bfc92b4c76308a081c923152",
+      "bytes": 19186
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/crater/15602/crater.png",
+      "sha256": "f023c1e7223266926f500d8c16373d49a79f90fa000a9a4f5f91fbb9b0b6891d",
+      "bytes": 5586
+    },
+    {
+      "path": "../../runtime/uploads/image/bomb/crater/15602/craterbrink.png",
+      "sha256": "da6b21bf3f3a481c82b606bae541243880c555f7381da556eed3848ff2e5aa3b",
+      "bytes": 26545
+    },
+    {
+      "path": "../../runtime/weapons/bubble-tea-7258-ddtank.json",
+      "sha256": "ebe5d2bb46c83b5228f860cceba07ea76e92228a379167313eb9240b065de468",
+      "bytes": 5929
+    },
+    {
+      "path": "../../runtime/weapons/bubble-tea-7258-original-visuals-ddtank.json",
+      "sha256": "fbd87204780d351b2ec17ceff6c1e3202276c8c39a6ae2af08ccf9b4b36b7ab6",
+      "bytes": 13895
+    },
+    {
+      "path": "config/workshop/weapons/bubble-tea-crater-shapes.json",
+      "sha256": "7dec05a4b3ea714ff29003b4dd41032973226ca96e16cdd0f970a6655b5e7f51",
+      "bytes": 5390
+    },
+    {
+      "path": "config/workshop/weapons/bubble-tea-old.json",
+      "sha256": "d4b2dc89551d6eb620934c35a841004db99b02c462284c7cb74770002a52513e",
+      "bytes": 5248
+    },
+    {
+      "path": "config/workshop/weapons/bubble-tea-visual.json",
+      "sha256": "7a94cf9c6c20f9bbad862d09788e514e860ad531987691a27ab5ac81a3990693",
+      "bytes": 6991
+    },
+    {
+      "path": "config/workshop/weapons/effects-deployment.json",
+      "sha256": "b00a9d2de64d1ff4b2c83999f54dff028cc891157253bd1b1e987293d41c6892",
+      "bytes": 2915
+    },
+    {
+      "path": "config/workshop/weapons/fight-baseline.json",
+      "sha256": "475d9572b46734808a065b1fb3eb176ca430ed704a688750701161214a075c66",
+      "bytes": 9729
+    },
+    {
+      "path": "config/workshop/weapons/fight-effective.json",
+      "sha256": "fac325cad8637ffd60ae92682e3ff34e2ccd925d854eee4770fe0ef3dc55054c",
+      "bytes": 16240
+    },
+    {
+      "path": "config/workshop/weapons/fight-visual.json",
+      "sha256": "34e11456b7a052d0b57c285ed525b41ca4938cd7d264799eee46e59336449904",
+      "bytes": 11042
+    },
+    {
+      "path": "config/workshop/weapons/startup-deployment.json",
+      "sha256": "2c8b02bb25b0299efca05d4cf7c42c23db34b5973d216e77d9948dc166ed2bb6",
+      "bytes": 2299
+    },
+    {
+      "path": "research/i18n/zh-CN-feedback-text.json",
+      "sha256": "adf86bd3bf0b38c32547b40c9272cdc9fd4721b04d8592f63900a3e274c7d2d6",
+      "bytes": 47833
+    },
+    {
+      "path": "research/i18n/zh-CN-item-names.json",
+      "sha256": "e525909f3e8facb7b6c48208b1eff6c06ab6e819a7f4fce9c36522724a5d931c",
+      "bytes": 783
+    },
+    {
+      "path": "research/i18n/zh-CN-pve-overrides.json",
+      "sha256": "fb2f1911c185a055b2ea570b5436cd12f66a698e675756231fa1c1b933d0c2c2",
+      "bytes": 174522
+    },
+    {
+      "path": "research/i18n/zh-CN-template-text.json",
+      "sha256": "660e9e46c184787d1f7a30e18d3c7865d033431e58f2d5236814223112007829",
+      "bytes": 2891454
+    },
+    {
+      "path": "vendor/DDTank41/Source Flash/FlashSV1/partical.xml",
+      "sha256": "ddddb983ffe477780eb0cc6aba6294cafdc54a460e087c4166a81c29021807f5",
+      "bytes": 671170
+    },
+    {
+      "path": "vendor/DDTank41/Source Flash/FlashSV1/shape.swf",
+      "sha256": "c543197286b32fda01ff45057f699a649eac6724a157d2b11bc35646cd626afc",
+      "bytes": 1262152
+    }
+  ]
+}

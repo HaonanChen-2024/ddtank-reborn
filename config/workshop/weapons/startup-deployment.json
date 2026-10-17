@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "binding": {
+    "databaseName": "ddtank",
+    "dataDirectory": "../../runtime/data/postgres"
+  },
+  "oldPackage": {
+    "path": "config/workshop/weapons/bubble-tea-old.json",
+    "sha256": "d4b2dc89551d6eb620934c35a841004db99b02c462284c7cb74770002a52513e"
+  },
+  "newPackage": {
+    "path": "config/workshop/weapons/bubble-tea-visual.json",
+    "sha256": "7a94cf9c6c20f9bbad862d09788e514e860ad531987691a27ab5ac81a3990693"
+  },
+  "originalJournal": {
+    "path": "../../runtime/weapons/bubble-tea-7258-ddtank.json",
+    "sha256": "ebe5d2bb46c83b5228f860cceba07ea76e92228a379167313eb9240b065de468"
+  },
+  "previousFightExtension": {
+    "path": "config/workshop/weapons/fight-baseline.json",
+    "sha256": "475d9572b46734808a065b1fb3eb176ca430ed704a688750701161214a075c66"
+  },
+  "fightExtension": {
+    "path": "config/workshop/weapons/fight-effective.json",
+    "sha256": "fac325cad8637ffd60ae92682e3ff34e2ccd925d854eee4770fe0ef3dc55054c"
+  },
+  "upgradeJournalPath": "../../runtime/weapons/bubble-tea-7258-original-visuals-ddtank.json",
+  "receiptPath": "../../runtime/live/state/weapons/startup-activation.json",
+  "resources": [
+    {
+      "resourcePath": "image/bomb/blastout/blastout15601.swf",
+      "sha256": "75a716e199932f791f28999968d02bce410c17d5f722029ab5482dae1cb2f1d4"
+    },
+    {
+      "resourcePath": "image/bomb/blastout/blastout156012.swf",
+      "sha256": "01d87f2cb1c4ccb1df25e847fbd3add4ccfce45fe19d5ab55844c1c10424d4ef"
+    },
+    {
+      "resourcePath": "image/bomb/bullet/bullet15601.swf",
+      "sha256": "cf9b2f855e24fd14b28fc2d551640d41f40cff19ba10c519a1e977bbc142f194"
+    },
+    {
+      "resourcePath": "image/bomb/blastout/blastout156013.swf",
+      "sha256": "52ed2b19ace76cd186ddd440167cc29f549de9c9f41ecb3bb1ccda874f1acf16"
+    },
+    {
+      "resourcePath": "image/bomb/bullet/bullet15602.swf",
+      "sha256": "c46ef479f9666931df70bf6ebebba003a145e29bbfcf4e99848976a0f3728a78"
+    },
+    {
+      "resourcePath": "image/bomb/blastout/blastout156011.swf",
+      "sha256": "3735c0282f4c2769191d2c77e8f4734b20da73ebf0c42421f79efe052c6ef136"
+    }
+  ],
+  "effects": {
+    "path": "config/workshop/weapons/effects-deployment.json",
+    "sha256": "b00a9d2de64d1ff4b2c83999f54dff028cc891157253bd1b1e987293d41c6892"
+  },
+  "pathBase": "repo"
+}

@@ -8,15 +8,13 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 import { parseEnv } from "node:util";
+import { normalizeWorkshopPaths, verifyWorkshopLive } from "./workshop-live.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const project = resolve(repo, "..", "..");
 const runtime = join(project, "runtime");
 const envFile = join(repo, ".env.workshop");
-const settings = existsSync(envFile) ? parseEnv(readFileSync(envFile, "utf8")) : {};
-for (const key of ["FLASH_DIR", "FLASH_OVERLAY_DIR", "RESOURCE_DIR", "RUFFLE_DIR", "RSA_PRIVATE_KEY_FILE", "UPLOAD_DIR"]) {
-  if (settings[key]) settings[key] = resolve(repo, settings[key]);
-}
+const settings = normalizeWorkshopPaths(existsSync(envFile) ? parseEnv(readFileSync(envFile, "utf8")) : {}, repo);
 const ports = { db: 55432, api: 8080, game: 9200, ws: 9300, policy: 843, control: 9400, web: 5173, admin: 5174 };
 const lanArgument = process.argv.find(arg => arg === "--lan" || arg.startsWith("--lan="));
 let publicHost = "127.0.0.1";
@@ -171,6 +169,8 @@ async function stop() {
 
 async function start() {
   if (!existsSync(envFile)) throw new Error(`缺少本地配置：${envFile}`);
+  // Verify only fixed startup dependencies, before claiming a session or spawning Postgres.
+  if (settings.WORKSHOP_LIVE_PROFILE) verifyWorkshopLive(settings.WORKSHOP_LIVE_PROFILE, settings, repo);
   const data = join(runtime, "data", "postgres");
   restored = await selectRestoredBackup(process.argv.slice(3), data);
   databaseName = restored?.database ?? "ddtank";

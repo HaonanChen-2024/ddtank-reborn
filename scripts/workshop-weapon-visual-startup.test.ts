@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import { beforeEach, test, vi } from "vitest";
@@ -271,4 +271,37 @@ test("same-name database with another physical data directory also refuses befor
   f.manifest.binding.dataDirectory = realpathSync(otherData); f.saveManifest();
   await assert.rejects(f.activate(), /no ownership for this selected database/);
   assert.equal(createDbMock.mock.calls.length, 0); assert.equal(existsSync(f.manifest.upgradeJournalPath), false);
+});
+
+function portableFixture(t: { onTestFinished: (fn: () => void) => void }) {
+  const f = effectsFixture(t), local = (path: string) => relative(f.path, path).replaceAll("\\", "/");
+  const effects = { ...structuredClone(f.effects), schemaVersion: 2, pathBase: "repo" };
+  for (const pin of [effects.visualJournal, effects.previousFightExtension, effects.officialBallList, effects.officialBombConfig, effects.craterShapes, effects.audioVerification, ...effects.resources]) pin.path = local(pin.path);
+  effects.upgradeJournalPath = local(effects.upgradeJournalPath);
+  const manifest = { ...structuredClone(f.manifest), schemaVersion: 2, pathBase: "repo", effects: f.put("portable-effects.json", effects) };
+  for (const pin of [manifest.oldPackage, manifest.newPackage, manifest.originalJournal, manifest.previousFightExtension, manifest.fightExtension, manifest.effects]) pin.path = local(pin.path);
+  manifest.binding.dataDirectory = local(manifest.binding.dataDirectory);
+  manifest.upgradeJournalPath = local(manifest.upgradeJournalPath); manifest.receiptPath = local(manifest.receiptPath);
+  const save = () => writeFileSync(f.manifestPath, JSON.stringify(manifest)); save();
+  const read = () => readWeaponVisualDeployment(f.manifestPath, resolve(f.path, manifest.previousFightExtension.path), f.uploadDir, f.path);
+  return { ...f, manifest, portableEffects: effects, save, read };
+}
+
+test("schema v2 resolves the complete nested deployment from its repo root without rebasing ownership journals", t => {
+  const f = portableFixture(t), journalPath = resolve(f.path, f.manifest.upgradeJournalPath), journalBytes = readFileSync(journalPath);
+  const selected = f.read(); selected.check();
+  assert.equal(selected.config.schemaVersion, 2); assert.equal(selected.effects?.schemaVersion, 2);
+  assert.equal(selected.effects?.visualJournal.path, journalPath);
+  assert.equal(selected.effects?.upgradeJournalPath, resolve(f.path, f.portableEffects.upgradeJournalPath));
+  assert.deepEqual(readFileSync(journalPath), journalBytes); assert.equal(createDbMock.mock.calls.length, 0);
+});
+
+test("schema v2 refuses escaping/absolute paths, missing files and changed pins before database access", t => {
+  const f = portableFixture(t), original = f.manifest.oldPackage.path;
+  for (const path of ["../../../escape.json", resolve(f.path, original), "https://example.com/file"]) {
+    f.manifest.oldPackage.path = path; f.save(); assert.throws(f.read, /repository-relative|escapes/);
+  }
+  f.manifest.oldPackage.path = "missing.json"; f.save(); assert.throws(f.read, /ENOENT/);
+  f.manifest.oldPackage.path = original; f.manifest.oldPackage.sha256 = "0".repeat(64); f.save();
+  assert.throws(f.read, /input changed/); assert.equal(createDbMock.mock.calls.length, 0);
 });

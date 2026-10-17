@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { isAbsolute, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createDb } from "../packages/db/src/index.js";
 import { q1 } from "../apps/api/src/lib/db.js";
 import { planWeaponInstall } from "./workshop-weapon.js";
@@ -14,7 +15,8 @@ const { sql } = createRequire(new URL("../packages/db/package.json", import.meta
 const sha = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 type Pin = { path: string; sha256: string };
 interface Deployment {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
+  pathBase?: "repo";
   binding: { databaseName: string; dataDirectory: string };
   oldPackage: Pin; newPackage: Pin; originalJournal: Pin; previousFightExtension: Pin; fightExtension: Pin;
   upgradeJournalPath: string; receiptPath: string;
@@ -22,7 +24,7 @@ interface Deployment {
   effects?: Pin;
 }
 interface EffectsDeployment {
-  schemaVersion: 1; selection: "official-capture-v17.1.1"; visualJournal: Pin; previousFightExtension: Pin;
+  schemaVersion: 1 | 2; pathBase?: "repo"; selection: "official-capture-v17.1.1"; visualJournal: Pin; previousFightExtension: Pin;
   upgradeJournalPath: string;
   officialBallList: Pin; officialBombConfig: Pin; craterShapes: Pin; audioVerification: Pin;
   particleMode: "official" | "retained";
@@ -33,10 +35,25 @@ function pinned(pin: Pin) {
   assert.ok(pin && isAbsolute(pin.path) && /^[a-f0-9]{64}$/.test(pin.sha256), "invalid deployment pin");
   const bytes = readFileSync(pin.path); assert.equal(sha(bytes), pin.sha256, "weapon visual deployment input changed"); return bytes;
 }
-export function readWeaponVisualDeployment(manifestPath: string, previousFightPath: string, uploadDir: string) {
+const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
+/** v1 remains absolute; v2 explicitly resolves portable paths from the repository, never the caller's cwd. */
+function deploymentPath(value: string, version: number, repoRoot: string): string {
+  assert.equal(typeof value, "string"); assert.ok(value.length > 0, "empty deployment path");
+  if (version === 1) { assert.ok(isAbsolute(value), "legacy deployment paths must be absolute"); return value; }
+  assert.ok(!isAbsolute(value) && !/^[a-z][a-z0-9+.-]*:/i.test(value), "portable deployment paths must be repository-relative");
+  const target = resolve(repoRoot, value), roots = [resolve(repoRoot), resolve(repoRoot, "../../runtime")];
+  assert.ok(roots.some(root => { const rel = relative(root, target); return rel && rel !== ".." && !rel.startsWith(".." + (process.platform === "win32" ? "\\" : "/")) && !isAbsolute(rel); }), "deployment path escapes repository/runtime roots");
+  return target;
+}
+export function readWeaponVisualDeployment(manifestPath: string, previousFightPath: string, uploadDir: string, repoRoot = repositoryRoot) {
   const bytes = readFileSync(manifestPath), config = JSON.parse(bytes.toString("utf8")) as Deployment;
-  assert.deepEqual(Object.keys(config).sort(), ["schemaVersion", "binding", "oldPackage", "newPackage", "originalJournal", "previousFightExtension", "fightExtension", "upgradeJournalPath", "receiptPath", "resources", ...(config.effects ? ["effects"] : [])].sort());
-  assert.equal(config.schemaVersion, 1);
+  assert.deepEqual(Object.keys(config).sort(), ["schemaVersion", "binding", "oldPackage", "newPackage", "originalJournal", "previousFightExtension", "fightExtension", "upgradeJournalPath", "receiptPath", "resources", ...(config.effects ? ["effects"] : []), ...(config.schemaVersion === 2 ? ["pathBase"] : [])].sort());
+  assert.ok(config.schemaVersion === 1 || config.schemaVersion === 2, "unknown deployment schema");
+  if (config.schemaVersion === 2) assert.equal(config.pathBase, "repo");
+  const resolvePath = (value: string) => deploymentPath(value, config.schemaVersion, repoRoot);
+  for (const pin of [config.oldPackage, config.newPackage, config.originalJournal, config.previousFightExtension, config.fightExtension, ...(config.effects ? [config.effects] : [])]) pin.path = resolvePath(pin.path);
+  config.binding.dataDirectory = resolvePath(config.binding.dataDirectory);
+  config.upgradeJournalPath = resolvePath(config.upgradeJournalPath); config.receiptPath = resolvePath(config.receiptPath);
   assert.deepEqual(Object.keys(config.binding).sort(), ["databaseName", "dataDirectory"].sort());
   assert.equal(config.binding.databaseName, "ddtank", "visual deployment only owns the original local database");
   assert.ok(isAbsolute(config.binding.dataDirectory) && isAbsolute(config.upgradeJournalPath) && isAbsolute(config.receiptPath));
@@ -55,8 +72,12 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
   let officialEvidence: ReturnType<typeof readOfficialWeaponEvidence> | undefined;
   if (config.effects) {
     effects = JSON.parse(pinned(config.effects).toString("utf8")) as EffectsDeployment;
-    assert.deepEqual(Object.keys(effects).sort(), ["schemaVersion", "selection", "visualJournal", "previousFightExtension", "upgradeJournalPath", "resources", "officialBallList", "officialBombConfig", "craterShapes", "audioVerification", "particleMode", ...(effects.particleVerification ? ["particleVerification"] : [])].sort());
-    assert.equal(effects.schemaVersion, 1); assert.equal(effects.selection, "official-capture-v17.1.1");
+    assert.deepEqual(Object.keys(effects).sort(), ["schemaVersion", "selection", "visualJournal", "previousFightExtension", "upgradeJournalPath", "resources", "officialBallList", "officialBombConfig", "craterShapes", "audioVerification", "particleMode", ...(effects.particleVerification ? ["particleVerification"] : []), ...(effects.schemaVersion === 2 ? ["pathBase"] : [])].sort());
+    assert.ok(effects.schemaVersion === 1 || effects.schemaVersion === 2, "unknown effects deployment schema");
+    if (effects.schemaVersion === 2) assert.equal(effects.pathBase, "repo");
+    for (const pin of [effects.visualJournal, effects.previousFightExtension, effects.officialBallList, effects.officialBombConfig, effects.craterShapes, effects.audioVerification, ...(effects.particleVerification ? [effects.particleVerification] : []), ...effects.resources]) pin.path = deploymentPath(pin.path, effects.schemaVersion, repoRoot);
+    effects.upgradeJournalPath = deploymentPath(effects.upgradeJournalPath, effects.schemaVersion, repoRoot);
+    assert.equal(effects.selection, "official-capture-v17.1.1");
     assert.ok(effects.particleMode === "official" || effects.particleMode === "retained");
     assert.equal(resolve(effects.visualJournal.path), resolve(config.upgradeJournalPath), "effects must retain the original visual ownership journal");
     assert.ok(isAbsolute(effects.upgradeJournalPath));
@@ -85,7 +106,7 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
       for (const row of proof.rows) {
         assert.equal(row.allDependenciesPresent, true); assert.equal(row.officialDefinitionsMatch, true); assert.equal(row.officialTexturesMatch, true);
       }
-      const asPin = (row: Pin) => ({ path: resolve(row.path), sha256: row.sha256 });
+      const asPin = (row: Pin) => ({ path: resolve(repoRoot, row.path), sha256: row.sha256 });
       assert.deepEqual(asPin(proof.selectedDefinition), asPin(particles.find(row => row.kind === "particle-definition")!));
       assert.deepEqual(proof.selectedTextures.map(asPin).sort((a: Pin,b: Pin) => a.path.localeCompare(b.path)),
         particles.filter(row => row.kind === "particle-textures").map(asPin).sort((a,b) => a.path.localeCompare(b.path)));
@@ -94,7 +115,7 @@ export function readWeaponVisualDeployment(manifestPath: string, previousFightPa
     const audio = JSON.parse(pinned(effects.audioVerification).toString("utf8")), selectedAudio = basicResources.find(row => row.kind === "audio")!;
     assert.equal(audio.allSixMatch, true, "official Sound252-257 identity is not verified");
     assert.equal(audio.rows?.length, 6);
-    assert.equal(resolve(audio.localAudio.path), resolve(selectedAudio.path));
+    assert.equal(resolve(repoRoot, audio.localAudio.path), resolve(selectedAudio.path));
     assert.equal(audio.localAudio.sha256, selectedAudio.sha256);
     const beforeFight = JSON.parse(pinned(effects.previousFightExtension).toString("utf8"));
     const afterFight = JSON.parse(pinned(config.fightExtension).toString("utf8"));

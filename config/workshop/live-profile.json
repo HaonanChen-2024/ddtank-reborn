@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "pathBase": "repo",
+  "envPaths": {
+    "FLASH_DIR": "vendor/DDTank41/Source Flash/FlashSV1",
+    "FLASH_OVERLAY_DIR": "../../runtime/client-overlay",
+    "RESOURCE_DIR": "vendor/_assets/merged-mobile-preview-v3",
+    "RUFFLE_DIR": "apps/client-harness/public/ruffle",
+    "UPLOAD_DIR": "../../runtime/uploads",
+    "FIGHT_WEAPON_EXTENSION": "config/workshop/weapons/fight-baseline.json",
+    "LANGUAGE_FILE": "../../runtime/server-language.txt",
+    "ITEM_NAME_OVERRIDES_FILE": "research/i18n/zh-CN-item-names.json",
+    "PVE_TEXT_OVERRIDES_FILE": "research/i18n/zh-CN-pve-overrides.json",
+    "TEMPLATE_TEXT_OVERRIDES_FILE": "research/i18n/zh-CN-template-text.json",
+    "WORKSHOP_WEAPON_VISUAL_UPGRADE": "config/workshop/weapons/startup-deployment.json",
+    "TEMPLATE_TEXT_SUPPLEMENT_FILE": "research/i18n/zh-CN-feedback-text.json"
+  },
+  "inputs": {
+    "path": "config/workshop/live-inputs.json",
+    "sha256": "70c73829f14c78eedad31f15e2694e6e27df70e1a33a7bf558292085005ab593",
+    "bytes": 6232
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 2,
+  "selection": "official-capture-v17.1.1",
+  "visualJournal": {
+    "path": "../../runtime/weapons/bubble-tea-7258-original-visuals-ddtank.json",
+    "sha256": "fbd87204780d351b2ec17ceff6c1e3202276c8c39a6ae2af08ccf9b4b36b7ab6"
+  },
+  "previousFightExtension": {
+    "path": "config/workshop/weapons/fight-visual.json",
+    "sha256": "34e11456b7a052d0b57c285ed525b41ca4938cd7d264799eee46e59336449904"
+  },
+  "upgradeJournalPath": "../../runtime/live/state/weapons/effects-upgrade-ddtank.json",
+  "officialBallList": {
+    "path": "../../runtime/live/evidence/bubble-tea/BallList.xml",
+    "sha256": "a982d81b05306fc31daf16bc574262a694cae8b4bb42148f78ebd901a7beb798"
+  },
+  "officialBombConfig": {
+    "path": "../../runtime/live/evidence/bubble-tea/BombConfig.xml",
+    "sha256": "9e54c1adc87b5e126345b58f75a2dfcd890e997df4ca669425eb09df3d7c322d"
+  },
+  "craterShapes": {
+    "path": "config/workshop/weapons/bubble-tea-crater-shapes.json",
+    "sha256": "7dec05a4b3ea714ff29003b4dd41032973226ca96e16cdd0f970a6655b5e7f51"
+  },
+  "audioVerification": {
+    "path": "../../runtime/live/evidence/bubble-tea/audio-verification.json",
+    "sha256": "129125fc6566e7294b5793e5d9cb0fceca1d260bed93f175e21c03f985d84191"
+  },
+  "particleMode": "official",
+  "resources": [
+    {
+      "kind": "audio",
+      "path": "../../runtime/client-overlay/audio.swf",
+      "sha256": "eb07d14f76d9900abb9358ed064130ef5fb3bd60b3350d0f223682000fb7dc65"
+    },
+    {
+      "kind": "client-crater",
+      "path": "../../runtime/uploads/image/bomb/crater/15601/crater.png",
+      "sha256": "d68a2ccf7ccd85b26db907347ef69302a38530e4e339f1e49a3a4a7752834d35"
+    },
+    {
+      "kind": "client-crater-brink",
+      "path": "../../runtime/uploads/image/bomb/crater/15601/craterbrink.png",
+      "sha256": "8fdf480d3dbcba637ea113ebe289fe4f03b9c8e9bfc92b4c76308a081c923152"
+    },
+    {
+      "kind": "client-crater",
+      "path": "../../runtime/uploads/image/bomb/crater/15602/crater.png",
+      "sha256": "f023c1e7223266926f500d8c16373d49a79f90fa000a9a4f5f91fbb9b0b6891d"
+    },
+    {
+      "kind": "client-crater-brink",
+      "path": "../../runtime/uploads/image/bomb/crater/15602/craterbrink.png",
+      "sha256": "da6b21bf3f3a481c82b606bae541243880c555f7381da556eed3848ff2e5aa3b"
+    },
+    {
+      "kind": "particle-definition",
+      "path": "vendor/DDTank41/Source Flash/FlashSV1/partical.xml",
+      "sha256": "ddddb983ffe477780eb0cc6aba6294cafdc54a460e087c4166a81c29021807f5"
+    },
+    {
+      "kind": "particle-textures",
+      "path": "vendor/DDTank41/Source Flash/FlashSV1/shape.swf",
+      "sha256": "c543197286b32fda01ff45057f699a649eac6724a157d2b11bc35646cd626afc"
+    }
+  ],
+  "particleVerification": {
+    "path": "../../runtime/live/evidence/bubble-tea/official-particle-verification.json",
+    "sha256": "4301b66b57f9cda232b7125a38f7049ee282328ade15022a5fab084137d87992"
+  },
+  "pathBase": "repo"
+}
