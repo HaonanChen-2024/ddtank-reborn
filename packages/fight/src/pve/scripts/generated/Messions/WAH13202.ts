@@ -56,7 +56,7 @@ export class WAH13202 extends AMissionControl {
             this.front = this.Game.CreatePhysicalObj(1604, 1023, "font", "game.living.Living035", "", 1, 0);
             this.m_king = this.Game.CreateBoss(this.bossID, 1100, 1000, -1, 1, "");
             this.m_king.SetRelateDemagemRect(this.m_king.NpcInfo.X, this.m_king.NpcInfo.Y, this.m_king.NpcInfo.Width, this.m_king.NpcInfo.Height);
-            this.m_king.Say(LanguageMgr.GetTranslation("A fúria dos deuses vai destruir vocês!"), 0, 200, 0);
+            this.m_king.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.TribalWrath"), 0, 200, 0);
             this.m_moive.PlayMovie("in", 6000, 0);
             this.m_front.PlayMovie("in", 6100, 0);
             this.m_moive.PlayMovie("out", 10000, 1000);

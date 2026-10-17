@@ -57,7 +57,7 @@ export class KD1121 extends AMissionControl {
             this.m_front = this.Game.Createlayer(1131, 150, "font", "game.asset.living.AntQueenAsset", "out", 1, 1);
             this.boss = this.Game.CreateBoss(this.bossID, 1316, 444, -1, 1, "");
             this.boss.SetRelateDemagemRect(-42, -200, 84, 194);
-            this.boss.Say(LanguageMgr.GetTranslation("As caixas são minhas, tudo que eu vejo é meu!"), 0, 200, 0);
+            this.boss.Say(LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.BoxesAreMine"), 0, 200, 0);
 
             this.m_moive.PlayMovie("in", 6000, 0);
             this.m_front.PlayMovie("in", 6100, 0);

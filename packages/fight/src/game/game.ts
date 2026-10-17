@@ -649,6 +649,9 @@ export class BaseGame implements BombHost {
       if (!p.checkCanUseItem(templateId) || !p.canUseItem(item)) return false;
       if (templateId === 10001 || templateId === 10002 || templateId === 10003) p.canFly = false;
       if (!usePropItem() || !p.useItem(item)) return false;
+      // PropUseCommand.cs:93-110: two +2 / +50% props select CommonMultiBall / CommonAddWound.
+      // The port unifies free and bag consumption; count only a successfully applied prop.
+      if ((templateId === 10001 || templateId === 10004) && p.prop < templateId * 2) p.prop += templateId;
     } else {
       // a dead teammate (ghost) uses a prop for the current living: bag 2 = FightBag item, place −1 = paid with psychic
       if (bag === 2 && !usePropItem()) return false;

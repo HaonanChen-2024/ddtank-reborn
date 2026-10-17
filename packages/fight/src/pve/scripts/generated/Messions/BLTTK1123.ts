@@ -50,7 +50,7 @@ export class BLTTK1123 extends AMissionControl {
             this.m_king = this.Game.CreateBoss(this.bossId, 100, 444, 1, 0, "");
             this.m_king.FallFrom(this.m_king.X, this.m_king.Y, "", 0, 0, 2000);
             this.m_king.PlayMovie("castA", 500, 0);
-            this.m_king.Say(LanguageMgr.GetTranslation("GameServer.BLTTAH1123.Msg1"), 0, 300);
+            this.m_king.Say(LanguageMgr.GetTranslation("Workshop.Pve.Legacy.BltAh1123Start"), 0, 300);
             this.m_king.CallFuction((this.CreateStarGame.bind(this)), 2500);
         }
   CreateStarGame() {
@@ -67,7 +67,7 @@ export class BLTTK1123 extends AMissionControl {
 
             ((this.Game)).SendObjectFocus(this.boss, 1, 500, 3000);
 
-            this.boss.Say(LanguageMgr.GetTranslation("GameServer.BLTTAH1123.Msg2"), 0, 1500, 0);
+            this.boss.Say(LanguageMgr.GetTranslation("Workshop.Pve.Legacy.BltAh1123Help"), 0, 1500, 0);
         }
   CreateBoss() {
             this.m_boss = this.Game.CreateBoss(this.npcID2, 300, 444, 1, 0, "");

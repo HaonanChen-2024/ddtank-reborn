@@ -12,14 +12,14 @@ export class ThirteenTerrorAntBoss extends ABrain {
             LanguageMgr.GetTranslation("GameServerScript.AI.NPC.SimpleQueenAntAi.msg3")
         ]);
   static ShootChat = __arr([
-            LanguageMgr.GetTranslation("Comprima levemente minha flecha!"),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.MyArrowHard"),
 
-            LanguageMgr.GetTranslation("Tente comprimir esta flecha de gelo!")  
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.IceArrowHard")
         ]);
   static KillPlayerChat = __arr([
-            LanguageMgr.GetTranslation("Comprima suavemente minha flecha !"),
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.MyArrowTerror"),
 
-            LanguageMgr.GetTranslation("Pegue a flecha mágica!")
+            LanguageMgr.GetTranslation("Workshop.Pve.Dialogue.MagicArrowHard")
         ]);
   static CallChat = __arr([
             LanguageMgr.GetTranslation("GameServerScript.AI.NPC.SimpleQueenAntAi.msg8"),
