@@ -1,0 +1,1720 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-17T11:00:52.032Z",
+  "basis": "逻辑文件字节；硬链接按路径重复计数，junction/符号链接不跟随；不是物理占盘量。只读目录统计，未连接数据库。",
+  "directories": 190,
+  "deletable": 0,
+  "deleted": 0,
+  "rows": [
+    {
+      "path": "runtime/activities",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3,
+      "logicalBytes": 4428,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-build-recovery-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 519,
+      "logicalBytes": 27214067,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-carnival-completion-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 5905,
+      "logicalBytes": 343743601,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-carnival-live-refresh-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 1361,
+      "logicalBytes": 98496790,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-feedback-followup-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 55,
+      "logicalBytes": 1528120,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-followup-20261013",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3576,
+      "logicalBytes": 989679936,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-gameplay-followup-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 936,
+      "logicalBytes": 38222439,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-installation-layout-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 592,
+      "logicalBytes": 46406246,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-moonlight-shop-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 523,
+      "logicalBytes": 29376729,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-native-menu-original-art-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 482,
+      "logicalBytes": 4336587,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-next-function-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 82,
+      "logicalBytes": 2572480,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-playthrough-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 540,
+      "logicalBytes": 133905673,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-replay-projection-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 72,
+      "logicalBytes": 5558875,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-reward-feedback-completion-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 81,
+      "logicalBytes": 3987757,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-reward-item-names-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 64,
+      "logicalBytes": 3892248,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-snowfield-install-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 11,
+      "logicalBytes": 55381,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/activity-ui-real-icons-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 215,
+      "logicalBytes": 22294102,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/backups",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 115,
+      "logicalBytes": 46421285,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/battle-normal-complete-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 291,
+      "logicalBytes": 138788393,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/bootstrap-recovery-20261013",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1690,
+      "logicalBytes": 335626165,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/calendar-read-serialization-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3963,
+      "logicalBytes": 234576095,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/calendar-sign-recovery-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1990,
+      "logicalBytes": 117379388,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/chinese-only-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 2599,
+      "logicalBytes": 110453965,
+      "linksSkipped": 131,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/christmas-load-order-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 73,
+      "logicalBytes": 3331799,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-overlay",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 119,
+      "logicalBytes": 44927946,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-overlay-backups",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 17,
+      "logicalBytes": 13145384,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-render",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 8002,
+      "logicalBytes": 2283642074,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-research",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 92,
+      "logicalBytes": 2525425,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-shop-text-followup-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 60,
+      "logicalBytes": 671371,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-text-followup",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 5767,
+      "logicalBytes": 320689755,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/client-ui-text-followup-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 28,
+      "logicalBytes": 506653,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/consultation",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 8,
+      "logicalBytes": 243432,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/content-expansion-20261012",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2777,
+      "logicalBytes": 363887018,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/content-research",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 45005,
+      "logicalBytes": 13671203088,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-activity-load-order-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 30350,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-activity-material-tooltips-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 34,
+      "logicalBytes": 1575508,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-activity-next-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2,
+      "logicalBytes": 138224,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-activity-potions-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 29,
+      "logicalBytes": 1528482,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-activity-zh-layout-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 164,
+      "logicalBytes": 18047373,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-ai-settlement-persistence-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3,
+      "logicalBytes": 5179,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-battle-control-audit-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 11192,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-battle-messages-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 20,
+      "logicalBytes": 1419008,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-battle-prop-text-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 28,
+      "logicalBytes": 1501269,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-claim-feedback-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1543,
+      "logicalBytes": 16760002,
+      "linksSkipped": 21,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-extra-attack-tooltip-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 41,
+      "logicalBytes": 2931700,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-feedback-next-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 18472,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-flight-tooltip-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 20,
+      "logicalBytes": 1447521,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-login-battle-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 18,
+      "logicalBytes": 1400286,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-mail-use-feedback-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 37,
+      "logicalBytes": 2579832,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-next-audit-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2,
+      "logicalBytes": 65319,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-petfood-feedback-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 38,
+      "logicalBytes": 2618802,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-playability-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 17,
+      "logicalBytes": 1389304,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-sign-material-tooltips-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 34,
+      "logicalBytes": 1609971,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/core-translation-next-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 8677,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/coupon-purchase-feedback-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 40,
+      "logicalBytes": 4896196,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/crater-edge-fix-20261013",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1869,
+      "logicalBytes": 212924254,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/credentials",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 57,
+      "logicalBytes": 11775,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/current-templates",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 5,
+      "logicalBytes": 6770934,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/data",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 44490,
+      "logicalBytes": 1201092162,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/devil-load-order-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 78,
+      "logicalBytes": 2763840,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/devil-normal-play-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 344,
+      "logicalBytes": 72671578,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/devil-shop-close-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 155,
+      "logicalBytes": 27041504,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/devil-shop-host-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 73,
+      "logicalBytes": 2425998,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/email-remaining-zh-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 83,
+      "logicalBytes": 2828904,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/email-ui-zh-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 85,
+      "logicalBytes": 3886535,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/engineering-rebuild-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 845,
+      "logicalBytes": 231599309,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/exchange-ui-followup-20261013",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3553,
+      "logicalBytes": 1085840781,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/exchange-ui-geometry-20261013",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2108,
+      "logicalBytes": 605144056,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-bubble-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 33,
+      "logicalBytes": 679085,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-bubble-c-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 18,
+      "logicalBytes": 110213,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-dictionary-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 15,
+      "logicalBytes": 1131776,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-forge-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 1749,
+      "logicalBytes": 91205572,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-game-ui-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 177,
+      "logicalBytes": 9463244,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-official-bubble-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 185,
+      "logicalBytes": 12919183,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-remaining-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 13780,
+      "logicalBytes": 427925736,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-room-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 640,
+      "logicalBytes": 47891276,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-supplement-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 19,
+      "logicalBytes": 3199014,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-text-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 128,
+      "logicalBytes": 7564250,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/feedback-ui-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 39,
+      "logicalBytes": 12755612,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/first-recharge-config-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1529,
+      "logicalBytes": 16836276,
+      "linksSkipped": 21,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/firstrecharge-owner-wait-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2033,
+      "logicalBytes": 120657999,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/forthright-owner-wait-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 4003,
+      "logicalBytes": 238617426,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/game-hud-pure-zh-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 948,
+      "logicalBytes": 39803483,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/hall-hover-feedback-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 273,
+      "logicalBytes": 29643355,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/hall-tutorial-zh-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 50,
+      "logicalBytes": 46219389,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-awards-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 41,
+      "logicalBytes": 2811741,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-combat-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 57,
+      "logicalBytes": 792251,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-config-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 74,
+      "logicalBytes": 53631178,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-lifecycle-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 57,
+      "logicalBytes": 7456437,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-protocol-ui-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 33,
+      "logicalBytes": 527498,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-retry-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 7,
+      "logicalBytes": 628663,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-runtime-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 88,
+      "logicalBytes": 13725180,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-settlement-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 31,
+      "logicalBytes": 1080412,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/labyrinth-sweep-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 65,
+      "logicalBytes": 9765331,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/lfs-stage",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 96,
+      "logicalBytes": 89968138,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/literals-digest-recovery-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 7,
+      "logicalBytes": 68785,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/live",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 188,
+      "logicalBytes": 35697780,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/manual-play-handoff-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 37,
+      "logicalBytes": 4386321,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/material-exchange-20261013",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 7096,
+      "logicalBytes": 1814831871,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/material-inventory-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 12,
+      "logicalBytes": 2669048,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/mines-normal-play-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 322,
+      "logicalBytes": 106647466,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/moonlight-normal-play-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 516,
+      "logicalBytes": 126815466,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/moonlight-shop-followup-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2997,
+      "logicalBytes": 177535910,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/moonlight-shop-host-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 71,
+      "logicalBytes": 3155622,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-caveloot-shared-planning-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2,
+      "logicalBytes": 18513,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-analysis-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 38,
+      "logicalBytes": 9937518,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-module-20261015-a",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 11,
+      "logicalBytes": 7958,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-module-20261015-b",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 16,
+      "logicalBytes": 10783,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-module-20261015-c",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 11,
+      "logicalBytes": 13713,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-module-20261015-d",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 15,
+      "logicalBytes": 12677,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-navigation-module-20261015-e",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 19,
+      "logicalBytes": 23862,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-pve-analysis-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 59,
+      "logicalBytes": 241835,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/native-christmas-resource-closure-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 64,
+      "logicalBytes": 7972188,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/normal-client-play-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 105,
+      "logicalBytes": 55868040,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/notes-sync-backups",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 9,
+      "logicalBytes": 2060141,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/official-capture-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 84,
+      "logicalBytes": 47744123,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/official-diy",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 46,
+      "logicalBytes": 7138526,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/official-resource-reverse",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 58,
+      "logicalBytes": 9177799,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/online-box-followup-20261013",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 63724,
+      "logicalBytes": 14751242746,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/parallel-batch-20261012",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 6,
+      "logicalBytes": 35374,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/peer-render",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 12450,
+      "logicalBytes": 3844332862,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/play01-readonly-reference",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 24,
+      "logicalBytes": 565743,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/playability-research",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 6516,
+      "logicalBytes": 1951839210,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/playable-first-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 6,
+      "logicalBytes": 32955,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/publication",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 48,
+      "logicalBytes": 360408,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/pure-zh-client-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 11,
+      "logicalBytes": 6810943,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/pure-zh-gameover-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 393,
+      "logicalBytes": 10113472,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/pure-zh-inventory-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3,
+      "logicalBytes": 24815,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reference-activities-completion-20261014",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 15356,
+      "logicalBytes": 1706706571,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reference-original-bag-tip-ui-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1165,
+      "logicalBytes": 10835857,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reference-original-quest-ui-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 763,
+      "logicalBytes": 10701224,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reference-server-research",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 1475,
+      "logicalBytes": 377190755,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reference-ui-direct-port-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 801,
+      "logicalBytes": 78866448,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/remaining-chinese-ui-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 5,
+      "logicalBytes": 29668,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/remaining-core-donors-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 410,
+      "logicalBytes": 45386401,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/remaining-image-surfaces-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 27,
+      "logicalBytes": 3790847,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/remaining-social-donors-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 197,
+      "logicalBytes": 39646923,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/remaining-tutorial-donors-20261017",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 625,
+      "logicalBytes": 79978367,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/resource-research",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 384,
+      "logicalBytes": 130416131,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/restored-databases",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 467,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/reverse-analysis",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 20,
+      "logicalBytes": 265615,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/room-pure-zh-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 62,
+      "logicalBytes": 5155631,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/runtime-research",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 78,
+      "logicalBytes": 6919292,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/server-data-text-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 14,
+      "logicalBytes": 17597,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/server-language-backups",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 16,
+      "logicalBytes": 4938800,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/server-language-full-zh-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 7,
+      "logicalBytes": 403694,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/shop-pure-zh-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 388,
+      "logicalBytes": 11367274,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/sign-award-rejection-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 44,
+      "logicalBytes": 4189903,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/smith-bgm-feedback-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 19,
+      "logicalBytes": 5688047,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/snowfield-battle-return-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 71,
+      "logicalBytes": 50486532,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/snowfield-loading-correlation-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 46,
+      "logicalBytes": 51073239,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/snowfield-movement-correction-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 28,
+      "logicalBytes": 167529,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/snowfield-natural-return-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 155,
+      "logicalBytes": 66726856,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/test-supplies-chinese-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 16,
+      "logicalBytes": 53798,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/tools",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 2045,
+      "logicalBytes": 127160714,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/tooltip-label-feedback-20261017",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 57,
+      "logicalBytes": 1785931,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-card-effects-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 88,
+      "logicalBytes": 6070820,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-cardbox-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 67,
+      "logicalBytes": 1915479,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-catalog-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 9,
+      "logicalBytes": 1067248,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-catalog-owner-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 38,
+      "logicalBytes": 4749126,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-choice-box-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 2,
+      "logicalBytes": 3772,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-compose-honor-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 107,
+      "logicalBytes": 4962508,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-equip-effects-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 66,
+      "logicalBytes": 580797,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-followup-20261016",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 185,
+      "logicalBytes": 15305110,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-forge-materials-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 110,
+      "logicalBytes": 4893233,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-item-contracts-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3,
+      "logicalBytes": 146090,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-jewelry-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 69,
+      "logicalBytes": 1825588,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-mg-frames-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 84,
+      "logicalBytes": 274070,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-missing-icons-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 106,
+      "logicalBytes": 1184644,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-necklace-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 27,
+      "logicalBytes": 134152,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-next-use-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 89,
+      "logicalBytes": 3133192,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-official-missing-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 36,
+      "logicalBytes": 1880520,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-original-selection-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 4,
+      "logicalBytes": 83304,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-original-selection-implementation-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 176,
+      "logicalBytes": 6522571,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-petfood-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 43,
+      "logicalBytes": 1838209,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-petfood-admission-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 47,
+      "logicalBytes": 1914333,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-pool-functions-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 127,
+      "logicalBytes": 7692381,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-preflight-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 123,
+      "logicalBytes": 6486863,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-second-weapon-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 93,
+      "logicalBytes": 1974474,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-tickets-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 137,
+      "logicalBytes": 9085976,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-weapon-mapping-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 48,
+      "logicalBytes": 4057708,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/treasure-wishbead-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 96,
+      "logicalBytes": 1381688,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/uploads",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 2435,
+      "logicalBytes": 28902835,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/user-feedback",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1,
+      "logicalBytes": 935460,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/wardrobe-runtime-route-20261016",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 1414,
+      "logicalBytes": 254136823,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/weapon-activity-priority-20261012",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 3894,
+      "logicalBytes": 893948766,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/weapon-effects-collection-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 7737,
+      "logicalBytes": 214188846,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/weapon-original-effects-20261015",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 1412,
+      "logicalBytes": 216222305,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/weapon-test-account-20261015",
+      "classification": "证据留档",
+      "reason": "历史检查、候选、原件与日志；尚无充分依据删除",
+      "files": 20,
+      "logicalBytes": 27006,
+      "linksSkipped": 0,
+      "unreadable": 0
+    },
+    {
+      "path": "runtime/weapons",
+      "classification": "运行依赖",
+      "reason": "当前运行、重建输入或历史所有权链需要保留",
+      "files": 3,
+      "logicalBytes": 25477,
+      "linksSkipped": 0,
+      "unreadable": 0
+    }
+  ]
+}

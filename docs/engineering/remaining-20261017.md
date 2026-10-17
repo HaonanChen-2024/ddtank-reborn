@@ -18,3 +18,5 @@
 工程整理期间冻结的素材、源码、日志和旧失败记录均保留。现阶段未授权维护脚本自动执行后续重启、A06诊断、浏览器/角色登录、购买/发奖、现役数据库修改、删除存档/历史归档/凭据或对外发布；需要这些动作时由主控核对当时明确授权，不能从“修好候选”推断许可。
 
 证据：`runtime/engineering-rebuild-20261017/overlay/{inventory.json,http-verification.json}`、`tests/`；`runtime/remaining-chinese-ui-20261017/checkpoint.json`；`runtime/feedback-remaining-20261017/static-text/CHECKPOINT.md` 与 `cream-particles/cream-particle-verification.json`。短文档与来源映射进入repo；当前大证据不自动搬迁或清理。
+
+运行目录已盘点190项，逻辑体积48.18 GiB；没有批准删除。发布建议用新的远端 `codex/workshop-rebuild-20261017`，避免改变现有PR的base；最终提交与LFS估计见项目 `runtime/engineering-rebuild-20261017/publish-plan.md`，仍需用户批准。
